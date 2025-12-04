@@ -294,6 +294,16 @@ const CommunityPost = mongoose.model("CommunityPost", communityPostSchema);
 const CommunityComment = mongoose.model("CommunityComment", communityCommentSchema);
 const PostReport = mongoose.model("PostReport", postReportSchema);
 
+const globalSettingsSchema = new mongoose.Schema({
+  maintenanceMode: { type: Boolean, default: false },
+  registrationOpen: { type: Boolean, default: true },
+  doubleXP: { type: Boolean, default: false },
+  globalBanner: { type: String, default: "" },
+  accentColor: { type: String, default: "#0f62fe" }
+}, { timestamps: true });
+
+const GlobalSettings = mongoose.model("GlobalSettings", globalSettingsSchema);
+
 
 const app = express();
 const allowedOrigins = new Set([
@@ -458,6 +468,14 @@ app.post("/api/login", authLimiter, async (req, res) => {
   }
 
   try {
+    // Check Maintenance Mode for Students
+    if (safeRole === 'student') {
+      const settings = await GlobalSettings.findOne();
+      if (settings && settings.maintenanceMode) {
+        return res.status(503).json({ ok: false, message: "System is currently under maintenance. Please try again later." });
+      }
+    }
+
     const user = await User.findOne({ email: email.toLowerCase(), role: safeRole });
     if (!user) return res.status(401).json({ ok: false, message: "Invalid credentials" });
 
@@ -722,6 +740,43 @@ app.delete("/api/announcements/:id", authMiddleware, async (req, res) => {
     res.json({ ok: true, message: "Announcement deleted" });
   } catch (error) {
     console.error("Delete announcement error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// ============================================
+// Global Settings Endpoints
+// ============================================
+
+app.get("/api/settings", async (req, res) => {
+  try {
+    let settings = await GlobalSettings.findOne();
+    if (!settings) {
+      settings = await GlobalSettings.create({});
+    }
+    res.json({ ok: true, settings });
+  } catch (error) {
+    console.error("Get settings error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+app.put("/api/settings", authMiddleware, async (req, res) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ ok: false, message: "Only admins can update settings" });
+  }
+  try {
+    const updates = req.body;
+    let settings = await GlobalSettings.findOne();
+    if (!settings) {
+      settings = await GlobalSettings.create(updates);
+    } else {
+      Object.assign(settings, updates);
+      await settings.save();
+    }
+    res.json({ ok: true, settings });
+  } catch (error) {
+    console.error("Update settings error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });
