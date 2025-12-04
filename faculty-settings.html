@@ -168,7 +168,7 @@
                         <span>Boost all points earned by 2x.</span>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" id="doubleXPToggle" onchange="saveSetting('doubleXP', this.checked)">
+                        <input type="checkbox" id="doubleXPToggle">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -179,7 +179,7 @@
                         <span>Clear all student leaderboards.</span>
                     </div>
                 </div>
-                <button class="danger-btn" onclick="resetSeason()">⚠️ Reset All Progress</button>
+                <button class="danger-btn">⚠️ Reset All Progress</button>
             </div>
 
             <!-- 2. Visual Command Center -->
@@ -193,11 +193,11 @@
                     </div>
                 </div>
                 <div class="color-options" style="margin-bottom: 16px;">
-                    <div class="color-swatch" style="background: #0f62fe;" onclick="setAccent('#0f62fe', this)"></div>
-                    <div class="color-swatch" style="background: #8a3ffc;" onclick="setAccent('#8a3ffc', this)"></div>
-                    <div class="color-swatch" style="background: #34c759;" onclick="setAccent('#34c759', this)"></div>
-                    <div class="color-swatch" style="background: #ff9f0a;" onclick="setAccent('#ff9f0a', this)"></div>
-                    <div class="color-swatch" style="background: #ff3b30;" onclick="setAccent('#ff3b30', this)"></div>
+                    <div class="color-swatch" style="background: #0f62fe;"></div>
+                    <div class="color-swatch" style="background: #8a3ffc;"></div>
+                    <div class="color-swatch" style="background: #34c759;"></div>
+                    <div class="color-swatch" style="background: #ff9f0a;"></div>
+                    <div class="color-swatch" style="background: #ff3b30;"></div>
                 </div>
 
                 <div class="control-group">
@@ -221,8 +221,7 @@
                         <span>Lock students out of the platform.</span>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" id="maintenanceToggle"
-                            onchange="saveSetting('maintenanceMode', this.checked)">
+                        <input type="checkbox" id="maintenanceToggle">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -233,7 +232,7 @@
                         <span>Allow new student signups.</span>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" id="regToggle" onchange="saveSetting('registrationOpen', this.checked)">
+                        <input type="checkbox" id="regToggle">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -245,56 +244,7 @@
     <!-- We still include role-page.js for the header, but it won't find #panelGrid -->
     <script src="role-page.js"></script>
 
-    <script>
-        // Initialize Settings
-        document.addEventListener('DOMContentLoaded', () => {
-            // Load Toggles
-            document.getElementById('doubleXPToggle').checked = localStorage.getItem('doubleXP') === 'true';
-            document.getElementById('maintenanceToggle').checked = localStorage.getItem('maintenanceMode') === 'true';
-            document.getElementById('regToggle').checked = localStorage.getItem('registrationOpen') !== 'false'; // Default true
-            document.getElementById('bannerInput').value = localStorage.getItem('globalBanner') || '';
-
-            // Highlight active color
-            const currentAccent = localStorage.getItem('accentColor') || '#0f62fe';
-            document.querySelectorAll('.color-swatch').forEach(swatch => {
-                if (rgbToHex(swatch.style.backgroundColor) === currentAccent) {
-                    swatch.classList.add('active');
-                }
-            });
-        });
-
-        function saveSetting(key, value) {
-            localStorage.setItem(key, value);
-            // Dispatch event so other tabs/pages update immediately
-            window.dispatchEvent(new StorageEvent('storage', {
-                key: key,
-                newValue: value
-            }));
-        }
-
-        function setAccent(color, el) {
-            saveSetting('accentColor', color);
-            document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-            el.classList.add('active');
-        }
-
-        function resetSeason() {
-            if (confirm('Are you sure? This will wipe ALL student progress and cannot be undone.')) {
-                localStorage.setItem('student_activities', '[]');
-                alert('Season reset complete. All leaderboards are clean.');
-            }
-        }
-
-        // Helper to match colors
-        function rgbToHex(rgb) {
-            if (rgb.startsWith('#')) return rgb;
-            rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-            function hex(x) {
-                return ("0" + parseInt(x).toString(16)).slice(-2);
-            }
-            return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
-        }
-    </script>
+    <script src="faculty-settings.js"></script>
 </body>
 
 </html>
