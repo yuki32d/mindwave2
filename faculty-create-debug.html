@@ -195,7 +195,7 @@
                     <input type="number" id="totalPoints" value="100" min="10" max="500" step="10">
                 </div>
             </div>
-            <button class="secondary-btn" onclick="generatePreview()" style="width: 100%; margin-top: 12px;">🔍 Preview
+            <button class="secondary-btn" id="previewBtn" style="width: 100%; margin-top: 12px;">🔍 Preview
                 Buggy Code</button>
 
             <div id="previewContainer" style="display: none;" class="preview-section">
@@ -214,8 +214,8 @@
         </div>
 
         <div class="action-buttons">
-            <button class="secondary-btn" onclick="window.location.href='admin.html'">Cancel</button>
-            <button class="primary-btn" onclick="publishGame()">Publish Game</button>
+            <button class="secondary-btn" id="cancelBtn">Cancel</button>
+            <button class="primary-btn" id="publishBtn">Publish Game</button>
         </div>
     </div>
 

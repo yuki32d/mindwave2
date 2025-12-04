@@ -26,6 +26,13 @@ window.addEventListener('DOMContentLoaded', () => {
         perfectCodeEditor.setOption('mode', mode);
         buggyCodeEditor.setOption('mode', mode);
     });
+
+    // Add event listeners for buttons
+    document.getElementById('previewBtn').addEventListener('click', generatePreview);
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+        window.location.href = 'admin.html';
+    });
+    document.getElementById('publishBtn').addEventListener('click', publishGame);
 });
 
 function generatePreview() {
@@ -60,6 +67,17 @@ async function publishGame() {
 
     const bugCount = parseInt(document.getElementById('bugCount').value);
     const result = injectBugs(perfectCode, bugCount);
+
+    // CRITICAL: Verify that bugs were actually injected
+    if (result.buggyCode === perfectCode) {
+        alert('⚠️ Bug injection failed! The code is too simple or doesn\'t have enough lines to inject bugs. Please add more code or reduce the number of bugs.');
+        return;
+    }
+
+    if (result.bugs.length === 0) {
+        alert('⚠️ No bugs were injected! Please make sure your code has enough content for bug injection.');
+        return;
+    }
 
     const game = {
         type: 'bug-hunt',
