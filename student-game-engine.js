@@ -683,25 +683,93 @@ function playDebug(game, container) {
 
         const studentCode = studentEditor.getValue();
         const perfectCode = game.perfectCode || '';
+        const buggyCode = game.buggyCode || '';
 
-        // Calculate similarity
-        const similarity = calculateSimilarity(studentCode, perfectCode);
-        const score = Math.round((similarity / 100) * game.totalPoints);
+        // Debug logging
+        console.log('=== DEBUG GAME SCORING ===');
+        console.log('Student Code (first 200 chars):', studentCode.substring(0, 200));
+        console.log('Perfect Code (first 200 chars):', perfectCode.substring(0, 200));
+        console.log('Buggy Code (first 200 chars):', buggyCode.substring(0, 200));
+
+        // SAFETY CHECK: If perfect code equals buggy code, the game is broken
+        if (game.perfectCode === game.buggyCode) {
+            console.error('⚠️ BROKEN GAME: Perfect code and buggy code are identical!');
+            container.innerHTML = `
+                <div class="question-display" style="text-align: center;">
+                    <h2 style="font-size: 32px; margin-bottom: 24px; color: #ff3b30;">⚠️ Game Error</h2>
+                    <p style="color: #9ea4b6; margin-bottom: 24px;">This game was created incorrectly. The perfect code and buggy code are the same, making it impossible to score properly.</p>
+                    <p style="color: #9ea4b6; margin-bottom: 24px;">Please contact your instructor to recreate this game.</p>
+                    <button id="backToGamesBtn" class="primary-btn" style="width: 100%;">Back to Games</button>
+                </div>
+            `;
+            const backBtn = document.getElementById('backToGamesBtn');
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    window.location.href = 'student-game.html';
+                });
+            }
+            return;
+        }
+
+        // NEW SCORING: Count how many bugs were fixed
+        const bugs = game.bugs || [];
+        const totalBugs = bugs.length;
+        let bugsFixed = 0;
+
+        console.log('Total bugs in game:', totalBugs);
+        console.log('Bug details:', bugs);
+
+        // Check each bug to see if it was fixed
+        bugs.forEach((bug, index) => {
+            const buggedLine = bug.bugged || '';
+            const originalLine = bug.original || '';
+
+            // Get the corresponding line from student's code
+            const studentLines = studentCode.split('\n');
+            const lineIndex = bug.line - 1; // Convert to 0-indexed
+
+            if (lineIndex >= 0 && lineIndex < studentLines.length) {
+                const studentLine = studentLines[lineIndex].trim();
+                const buggedLineTrimmed = buggedLine.trim();
+                const originalLineTrimmed = originalLine.trim();
+
+                // Check if student fixed this bug (their line matches the original, not the bugged version)
+                const isFixed = studentLine === originalLineTrimmed && studentLine !== buggedLineTrimmed;
+
+                console.log(`Bug ${index + 1} on line ${bug.line}:`);
+                console.log('  Original:', originalLineTrimmed);
+                console.log('  Bugged:', buggedLineTrimmed);
+                console.log('  Student:', studentLine);
+                console.log('  Fixed?', isFixed);
+
+                if (isFixed) {
+                    bugsFixed++;
+                }
+            }
+        });
+
+        console.log(`Bugs fixed: ${bugsFixed}/${totalBugs}`);
+
+        // Calculate score based on bugs fixed
+        const percentage = totalBugs > 0 ? Math.round((bugsFixed / totalBugs) * 100) : 0;
+        const score = Math.round((percentage / 100) * game.totalPoints);
+
+        console.log('Final score:', score, '/', game.totalPoints, `(${percentage}%)`);
 
         saveResult(game, score, game.totalPoints, startTime);
 
         // Show result with explanation
         container.innerHTML = `
             <div class="question-display" style="text-align: center;">
-                <h2 style="font-size: 32px; margin-bottom: 24px;">${similarity >= 90 ? '🎉 Excellent!' : similarity >= 70 ? '👍 Good Job!' : '💡 Keep Learning'}</h2>
+                <h2 style="font-size: 32px; margin-bottom: 24px;">${percentage >= 90 ? '🎉 Excellent!' : percentage >= 70 ? '👍 Good Job!' : percentage >= 50 ? '💡 Keep Trying' : '❌ Try Again'}</h2>
                 <p style="font-size: 48px; font-weight: 700; background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 24px 0;">${score}/${game.totalPoints}</p>
-                <p style="color: #9ea4b6; margin-bottom: 24px;">Code Similarity: ${similarity}%</p>
+                <p style="color: #9ea4b6; margin-bottom: 24px;">Bugs Fixed: ${bugsFixed}/${totalBugs} (${percentage}%)</p>
                 
                 <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin: 24px 0; text-align: left;">
                     <h3 style="margin: 0 0 12px;">📝 Explanation</h3>
                     <p style="color: #9ea4b6; line-height: 1.6;">${game.explanation || 'No explanation provided.'}</p>
                     
-                    ${similarity < 100 ? `
+                    ${percentage < 100 ? `
                         <details style="margin-top: 16px;">
                             <summary style="cursor: pointer; color: #4da0ff;">View Perfect Solution</summary>
                             <pre style="background: #1e1e1e; padding: 16px; border-radius: 8px; margin-top: 12px; overflow-x: auto;"><code>${escapeHtml(perfectCode)}</code></pre>
