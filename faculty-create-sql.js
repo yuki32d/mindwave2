@@ -43,13 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const gameData = {
             type: 'sql-builder',
             title: formData.get('title'),
+            brief: formData.get('description'),
             description: formData.get('description'),
             duration: parseInt(formData.get('duration')),
             correctQuery: query,
             blocks: blocks,
             distractors: distractors,
             totalPoints: 20, // Fixed points for SQL
-            status: 'active'
+            published: true // Explicitly set published to true
         };
 
         try {
