@@ -209,10 +209,17 @@ async function publishGame(gameData = currentGameData) {
     }
 
     try {
+        // Add published flag to make game visible to students
+        const publishData = {
+            ...gameData,
+            published: true,
+            status: 'active'
+        };
+
         const response = await fetch(`${API_BASE}/api/games`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(gameData)
+            body: JSON.stringify(publishData)
         });
 
         if (response.ok) {
