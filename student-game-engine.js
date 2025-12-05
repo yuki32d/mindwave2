@@ -48,7 +48,7 @@ async function initGameLobby() {
         console.log('API Response:', data);
 
         if (data.ok) {
-            const games = (data.games || []).reverse(); // Show newest first
+            const games = data.games || []; // API already sorts newest first
             window.allGames = games;
             renderGameList(games);
         } else {
