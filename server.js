@@ -311,6 +311,9 @@ const GlobalSettings = mongoose.model("GlobalSettings", globalSettingsSchema);
 
 
 const app = express();
+
+// Trust proxy - required for Render deployment and rate limiting
+app.set('trust proxy', 1);
 const allowedOrigins = new Set([
   CLIENT_ORIGIN,
   'http://localhost:5500',
@@ -2427,6 +2430,269 @@ Keep responses short and helpful. Use emojis occasionally. If you don't know som
     });
   }
 
+});
+
+// ============================================
+// AI GAME BUILDER ENDPOINT
+// ============================================
+app.post("/api/ai-game-builder", async (req, res) => {
+  try {
+    const { message, context = {} } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ ok: false, error: 'Message is required' });
+    }
+
+    // Use admin-specific API key if available, otherwise fall back to regular key
+    const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_ADMIN_API_KEY || process.env.HUGGINGFACE_API_KEY;
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+
+    // System prompt for AI Game Builder
+    const GAME_BUILDER_PROMPT = `You are an AI Game Builder assistant for the MindWave educational platform. Your job is to help faculty create educational games through conversation.
+
+**Supported Game Types:**
+1. **quiz** - Multiple choice questions
+2. **sql-builder** - SQL query building with draggable blocks
+3. **code-unjumble** - Reorder shuffled code lines
+4. **syntax-fill** - Fill in missing code syntax
+5. **bug-hunt** - Find and fix bugs in code
+6. **tech-sorter** - Categorize technologies
+
+**Your Workflow:**
+1. Ask what type of game they want to create
+2. Ask for topic, difficulty, and details
+3. Generate the game data in JSON format
+4. Allow them to request modifications
+5. When they say "publish" or "create it", return the final JSON
+
+**Response Format:**
+When generating a game, respond with:
+{
+  "action": "preview",
+  "gameData": { /* game JSON */ },
+  "message": "Here's your game! Say 'publish' to create it, or ask for changes."
+}
+
+When they want to publish:
+{
+  "action": "publish",
+  "gameData": { /* game JSON */ },
+  "message": "Publishing your game now!"
+}
+
+**Game Data Formats:**
+
+QUIZ:
+{
+  "type": "quiz",
+  "title": "Quiz Title",
+  "description": "Brief description",
+  "duration": 10,
+  "questions": [
+    {
+      "text": "Question text?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctIndex": 0,
+      "points": 10
+    }
+  ],
+  "totalPoints": 50,
+  "published": true
+}
+
+SQL-BUILDER:
+{
+  "type": "sql-builder",
+  "title": "SQL Challenge",
+  "description": "Build the query",
+  "duration": 15,
+  "brief": "Short description",
+  "correctQuery": "SELECT * FROM users WHERE age > 18",
+  "blocks": ["SELECT *", "FROM users", "WHERE age > 18"],
+  "distractors": ["ORDER BY name", "GROUP BY id", "LIMIT 10"],
+  "totalPoints": 100,
+  "published": true
+}
+
+CODE-UNJUMBLE:
+{
+  "type": "code-unjumble",
+  "title": "Algorithm Challenge",
+  "description": "Reorder the code",
+  "duration": 10,
+  "brief": "Fix the algorithm",
+  "lines": ["line 1", "line 2", "line 3"],
+  "totalPoints": 50,
+  "published": true
+}
+
+SYNTAX-FILL:
+{
+  "type": "syntax-fill",
+  "title": "Complete the Code",
+  "description": "Fill in blanks",
+  "duration": 10,
+  "brief": "Complete syntax",
+  "content": "for (int i = 0; i < ___; i++) { ___ }",
+  "blanks": [
+    { "answer": "10", "position": 0 },
+    { "answer": "System.out.println(i)", "position": 1 }
+  ],
+  "totalPoints": 50,
+  "published": true
+}
+
+BUG-HUNT:
+{
+  "type": "bug-hunt",
+  "title": "Debug Challenge",
+  "description": "Find the bugs",
+  "duration": 15,
+  "brief": "Fix the code",
+  "buggyCode": "code with bugs",
+  "perfectCode": "correct code",
+  "bugCount": 3,
+  "bugs": [
+    { "line": 5, "type": "syntax", "fix": "Missing semicolon" }
+  ],
+  "language": "javascript",
+  "totalPoints": 100,
+  "published": true
+}
+
+TECH-SORTER:
+{
+  "type": "tech-sorter",
+  "title": "Sort Technologies",
+  "description": "Categorize items",
+  "duration": 10,
+  "brief": "Sort tech stack",
+  "items": ["React", "MongoDB", "Express", "Node.js"],
+  "categories": ["Frontend", "Backend", "Database"],
+  "totalPoints": 50,
+  "published": true
+}
+
+Be conversational, helpful, and generate high-quality educational content. Always validate that the JSON is properly formatted.`;
+
+    let reply = '';
+    let gameData = null;
+    let action = 'chat';
+
+    // Try Hugging Face first
+    if (HUGGINGFACE_API_KEY) {
+      try {
+        const hfResponse = await fetch(
+          'https://router.huggingface.co/v1/chat/completions',
+          {
+            headers: {
+              'Authorization': `Bearer ${HUGGINGFACE_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify({
+              model: "meta-llama/Meta-Llama-3-8B-Instruct",
+              messages: [
+                { role: "system", content: GAME_BUILDER_PROMPT },
+                ...(context.history || []).map(msg => ({
+                  role: msg.role === 'model' ? 'assistant' : msg.role,
+                  content: msg.parts ? msg.parts[0].text : msg.content
+                })),
+                { role: "user", content: message }
+              ],
+              max_tokens: 1500,
+              temperature: 0.7
+            })
+          }
+        );
+
+        if (hfResponse.ok) {
+          const data = await hfResponse.json();
+          reply = data.choices[0]?.message?.content || '';
+        } else {
+          throw new Error('Hugging Face failed');
+        }
+      } catch (hfError) {
+        console.log('HF failed, trying Gemini...');
+
+        if (!GEMINI_API_KEY) {
+          throw new Error('No AI API available');
+        }
+
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({
+          model: 'gemini-pro',
+          systemInstruction: GAME_BUILDER_PROMPT
+        });
+
+        const chat = model.startChat({
+          history: context.history || [],
+          generationConfig: {
+            maxOutputTokens: 1500,
+            temperature: 0.7,
+          },
+        });
+
+        const result = await chat.sendMessage(message);
+        reply = result.response.text();
+      }
+    } else if (GEMINI_API_KEY) {
+      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-pro',
+        systemInstruction: GAME_BUILDER_PROMPT
+      });
+
+      const chat = model.startChat({
+        history: context.history || [],
+        generationConfig: {
+          maxOutputTokens: 1500,
+          temperature: 0.7,
+        },
+      });
+
+      const result = await chat.sendMessage(message);
+      reply = result.response.text();
+    } else {
+      return res.status(500).json({
+        ok: false,
+        error: 'No AI API configured'
+      });
+    }
+
+    // Try to extract JSON from response
+    const jsonMatch = reply.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.action) {
+          action = parsed.action;
+          gameData = parsed.gameData;
+          reply = parsed.message || reply;
+        } else if (parsed.type) {
+          // Direct game data
+          gameData = parsed;
+          action = 'preview';
+        }
+      } catch (e) {
+        // Not valid JSON, treat as regular chat
+      }
+    }
+
+    res.json({
+      ok: true,
+      reply: reply,
+      gameData: gameData,
+      action: action
+    });
+
+  } catch (error) {
+    console.error('AI Game Builder Error:', error);
+    res.status(500).json({
+      ok: false,
+      error: error.message || 'Failed to generate game'
+    });
+  }
 });
 
 app.use(express.static(__dirname));
