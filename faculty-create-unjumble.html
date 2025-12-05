@@ -105,51 +105,7 @@ function binarySearch(arr, target) {
         </div>
     </div>
 
-    <script>
-        const gamesKey = 'games';
-
-        function loadData(key) {
-            try { return JSON.parse(localStorage.getItem(key) || '[]'); }
-            catch { return []; }
-        }
-
-        function saveData(key, data) {
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-
-        document.getElementById('unjumbleForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const rawCode = formData.get('code');
-
-            // Split code into lines, removing empty lines
-            const lines = rawCode.split('\n').filter(line => line.trim().length > 0);
-
-            if (lines.length < 2) {
-                alert('Please provide at least 2 lines of code.');
-                return;
-            }
-
-            const gameData = {
-                id: Date.now().toString(),
-                type: 'code-unjumble',
-                title: formData.get('title'),
-                description: formData.get('description'),
-                duration: parseInt(formData.get('duration')),
-                lines: lines, // This is the correct order
-                totalPoints: lines.length * 10,
-                createdAt: new Date().toISOString(),
-                status: 'active'
-            };
-
-            const games = loadData(gamesKey);
-            games.push(gameData);
-            saveData(gamesKey, games);
-
-            alert('Code Challenge published successfully!');
-            window.location.href = 'admin.html';
-        });
-    </script>
+    <script src="faculty-create-unjumble.js"></script>
 </body>
 
 </html>
