@@ -374,6 +374,13 @@ if (newGameBtn) {
     });
 }
 
+const aiGameBuilderBtn = document.getElementById('aiGameBuilderBtn');
+if (aiGameBuilderBtn) {
+    aiGameBuilderBtn.addEventListener('click', () => {
+        window.location.href = 'ai-game-builder.html';
+    });
+}
+
 const announceBtn = document.getElementById('announceBtn');
 if (announceBtn) {
     announceBtn.addEventListener('click', () => {
