@@ -8,7 +8,10 @@ function createQuestionHTML(id, index) {
             <label>Question Text</label>
             <input type="text" name="q-${id}-text" placeholder="Enter your question..." required>
             
-            <label>Options (Select the correct one)</label>
+            
+            <div style="margin-top: 20px;">
+                <label>Options (Select the correct one)</label>
+            </div>
             <div class="options-grid">
                 <div class="option-input">
                     <input type="radio" name="q-${id}-correct" value="0" required>
