@@ -689,6 +689,26 @@ app.delete("/api/games/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// DEBUG ENDPOINT - Remove after debugging
+app.get("/api/games/debug", async (req, res) => {
+  try {
+    const allGames = await Game.find({}).select('title type published createdAt').sort({ createdAt: -1 });
+    const sqlGames = allGames.filter(g => g.type === 'sql-builder' || g.type === 'sql');
+    res.json({
+      ok: true,
+      totalGames: allGames.length,
+      publishedGames: allGames.filter(g => g.published).length,
+      sqlGames: sqlGames.length,
+      allGames: allGames,
+      sqlGamesDetails: sqlGames
+    });
+  } catch (error) {
+    console.error("Debug games error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+
 // Announcement Endpoints
 app.post("/api/announcements", authMiddleware, async (req, res) => {
   if (req.user.role !== "admin") {

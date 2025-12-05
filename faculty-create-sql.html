@@ -98,7 +98,7 @@
                         <label>Add Distractor Blocks (Optional)</label>
                         <div style="display: flex; gap: 12px;">
                             <input type="text" id="distractorInput" placeholder="e.g. DELETE, DROP">
-                            <button type="button" class="secondary-btn" onclick="addDistractor()">Add</button>
+                            <button type="button" class="secondary-btn" id="addDistractorBtn">Add</button>
                         </div>
                         <div class="blocks-container" id="distractorPreview">
                             <!-- Distractors appear here -->
@@ -107,88 +107,14 @@
                 </section>
 
                 <div class="form-actions" style="margin-top: 32px;">
-                    <button type="button" class="secondary-btn"
-                        onclick="window.location.href='admin.html'">Cancel</button>
+                    <button type="button" class="secondary-btn" id="cancelBtn">Cancel</button>
                     <button type="submit" class="submit-btn">Publish Challenge</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script>
-        const gamesKey = 'games';
-        const queryInput = document.getElementById('correctQuery');
-        const blocksPreview = document.getElementById('blocksPreview');
-        let distractors = [];
-
-        function loadData(key) {
-            try { return JSON.parse(localStorage.getItem(key) || '[]'); }
-            catch { return []; }
-        }
-
-        function saveData(key, data) {
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-
-        function updateBlocks() {
-            const query = queryInput.value;
-            // Simple tokenizer: split by spaces, keeping quotes together if possible (simplified for now)
-            // For MVP, just split by space.
-            const blocks = query.split(/\s+/).filter(b => b.length > 0);
-
-            blocksPreview.innerHTML = blocks.map(b => `<div class="sql-block">${b}</div>`).join('');
-        }
-
-        function addDistractor() {
-            const input = document.getElementById('distractorInput');
-            const val = input.value.trim();
-            if (val && !distractors.includes(val)) {
-                distractors.push(val);
-                input.value = '';
-                renderDistractors();
-            }
-        }
-
-        function renderDistractors() {
-            const container = document.getElementById('distractorPreview');
-            container.innerHTML = distractors.map(d => `<div class="sql-block distractor-block">${d}</div>`).join('');
-        }
-
-        queryInput.addEventListener('input', updateBlocks);
-
-        document.getElementById('sqlForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const query = queryInput.value.trim();
-            if (!query) {
-                alert('Please enter a valid SQL query.');
-                return;
-            }
-
-            const blocks = query.split(/\s+/).filter(b => b.length > 0);
-
-            const formData = new FormData(e.target);
-            const gameData = {
-                id: Date.now().toString(),
-                type: 'sql-builder',
-                title: formData.get('title'),
-                description: formData.get('description'),
-                duration: parseInt(formData.get('duration')),
-                correctQuery: query,
-                blocks: blocks,
-                distractors: distractors,
-                totalPoints: 20, // Fixed points for SQL
-                createdAt: new Date().toISOString(),
-                status: 'active'
-            };
-
-            const games = loadData(gamesKey);
-            games.push(gameData);
-            saveData(gamesKey, games);
-
-            alert('SQL Challenge published successfully!');
-            window.location.href = 'admin.html';
-        });
-    </script>
+    <script src="faculty-create-sql.js"></script>
 </body>
 
 </html>
