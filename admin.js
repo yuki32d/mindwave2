@@ -217,10 +217,22 @@ function applyFilters() {
 if (filterType) filterType.addEventListener('change', applyFilters);
 if (filterDifficulty) filterDifficulty.addEventListener('change', applyFilters);
 
+// --- Engagement Metrics ---
+async function loadEngagement() {
+    const data = await fetchAPI('/api/engagement');
+    if (data && data.ok) {
+        const engagementEl = document.getElementById('engagementPulse');
+        if (engagementEl) {
+            engagementEl.textContent = `${data.engagementPercentage}%`;
+        }
+    }
+}
+
 // --- Initialization ---
 loadAnnouncements();
 loadUpdates();
 loadGames();
+loadEngagement();
 
 // --- Templates & Tools (Static/Local for now) ---
 function renderGameTemplates() {

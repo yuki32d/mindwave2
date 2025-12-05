@@ -774,6 +774,43 @@ app.delete("/api/announcements/:id", authMiddleware, async (req, res) => {
 });
 
 // ============================================
+// Engagement Metrics Endpoint
+// ============================================
+
+app.get("/api/engagement", authMiddleware, async (req, res) => {
+  try {
+    // Calculate engagement for last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // Get total students
+    const totalStudents = await User.countDocuments({ role: 'student' });
+
+    if (totalStudents === 0) {
+      return res.json({ ok: true, engagementPercentage: 0 });
+    }
+
+    // Get active students (those who submitted games in last 7 days)
+    const activeStudents = await GameSubmission.distinct('studentId', {
+      submittedAt: { $gte: sevenDaysAgo }
+    });
+
+    // Calculate engagement percentage
+    const engagementPercentage = Math.round((activeStudents.length / totalStudents) * 100);
+
+    res.json({
+      ok: true,
+      engagementPercentage,
+      activeStudents: activeStudents.length,
+      totalStudents
+    });
+  } catch (error) {
+    console.error("Get engagement error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// ============================================
 // Global Settings Endpoints
 // ============================================
 
