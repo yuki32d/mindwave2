@@ -24,6 +24,10 @@ document.getElementById('unjumbleForm').addEventListener('submit', async (e) => 
         published: true // Explicitly set published to true
     };
 
+    console.log('Creating unjumble game with data:', gameData);
+    console.log('Lines array:', lines);
+    console.log('Lines count:', lines.length);
+
     try {
         const response = await fetch('/api/games', {
             method: 'POST',
