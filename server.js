@@ -167,7 +167,8 @@ const gameSchema = new mongoose.Schema(
     language: { type: String }, // For Debug
     blocks: { type: Array, default: [] }, // For SQL
     distractors: { type: Array, default: [] }, // For SQL
-    correctQuery: { type: String } // For SQL
+    correctQuery: { type: String }, // For SQL
+    lines: { type: Array, default: [] } // For Unjumble
   },
   { timestamps: true }
 );
