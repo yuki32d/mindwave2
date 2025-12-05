@@ -78,7 +78,7 @@ async function renderGames() {
     try {
         const res = await fetch(`${API_BASE}/api/games/published`);
         const data = await res.json();
-        const games = data.ok ? (data.games || []).slice(-6).reverse() : [];
+        const games = data.ok ? (data.games || []).slice(-6) : [];
 
         if (games.length === 0) {
             container.innerHTML = '<div class="empty-state">Faculty games drop in this space. Nothing has gone live yet. 🎮</div>';
@@ -122,38 +122,8 @@ function getStudentName() {
 }
 
 function startGame(gameId, gameTitle, gameType) {
-    const studentEmail = getStudentEmail();
-    const studentName = getStudentName();
-
-    // Record game start
-    const activity = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-        gameId: gameId,
-        gameTitle: gameTitle,
-        gameType: gameType,
-        studentEmail: studentEmail,
-        studentName: studentName,
-        startedAt: new Date().toISOString(),
-        status: 'in-progress',
-        score: 0,
-        completedAt: null,
-        timeTaken: null
-    };
-
-    // Store activity
-    const activities = loadData(activityKey);
-    activities.push(activity);
-    localStorage.setItem(activityKey, JSON.stringify(activities));
-
-    // Simulate game completion (in real scenario, this would be in the actual game page)
-    // For demo purposes, we'll complete after 3-10 seconds with random score
-    const simulatedTime = Math.floor(Math.random() * 7000) + 3000;
-
-    setTimeout(() => {
-        completeGame(activity.id, Math.floor(Math.random() * 40) + 60, simulatedTime);
-    }, simulatedTime);
-
-    alert(`Starting ${gameTitle}! Complete the game to track your progress.`);
+    // Navigate to student-game.html with the game ID as a query parameter
+    window.location.href = `student-game.html?play=${gameId}`;
 }
 
 function completeGame(activityId, score, timeTaken) {

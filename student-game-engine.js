@@ -18,7 +18,7 @@ function saveData(key, data) {
 
 // Router logic
 const urlParams = new URLSearchParams(window.location.search);
-const gameId = urlParams.get('id');
+const gameId = urlParams.get('id') || urlParams.get('play');
 
 document.addEventListener('DOMContentLoaded', () => {
     if (gameId) {
