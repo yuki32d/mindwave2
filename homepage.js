@@ -78,7 +78,7 @@ async function renderGames() {
     try {
         const res = await fetch(`${API_BASE}/api/games/published`);
         const data = await res.json();
-        const games = data.ok ? (data.games || []).slice(-6) : [];
+        const games = data.ok ? (data.games || []).slice(0, 6) : [];
 
         if (games.length === 0) {
             container.innerHTML = '<div class="empty-state">Faculty games drop in this space. Nothing has gone live yet. 🎮</div>';
