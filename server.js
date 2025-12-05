@@ -15,6 +15,7 @@ import { google } from "googleapis";
 import fs from "fs";
 import multer from "multer";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import cron from "node-cron";
 
 dotenv.config();
 
@@ -38,7 +39,10 @@ const {
   // Zoom OAuth
   ZOOM_CLIENT_ID,
   ZOOM_CLIENT_SECRET,
-  ZOOM_REDIRECT_URI = "http://localhost:8081/auth/zoom/callback"
+  ZOOM_REDIRECT_URI = "http://localhost:8081/auth/zoom/callback",
+  // Auto-cleanup settings
+  AUTO_DELETE_DAYS = "20",
+  CLEANUP_ENABLED = "true"
 } = process.env;
 
 let mailer = null;
@@ -2383,6 +2387,44 @@ app.post("/api/chat", async (req, res) => {
 app.use(express.static(__dirname));
 
 // ============================================
+// ============================================
+// AUTO-CLEANUP OLD GAMES
+// ============================================
+
+async function cleanupOldGames() {
+  if (CLEANUP_ENABLED !== 'true') {
+    return; // Cleanup disabled
+  }
+
+  try {
+    const daysToKeep = parseInt(AUTO_DELETE_DAYS) || 20;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
+
+    const result = await Game.deleteMany({
+      createdAt: { $lt: cutoffDate }
+    });
+
+    if (result.deletedCount > 0) {
+      console.log(`🗑️  Auto-cleanup: Deleted ${result.deletedCount} game(s) older than ${daysToKeep} days`);
+    } else {
+      console.log(`✅ Auto-cleanup: No games older than ${daysToKeep} days found`);
+    }
+  } catch (error) {
+    console.error('❌ Auto-cleanup error:', error);
+  }
+}
+
+// Schedule cleanup to run daily at 2 AM
+if (CLEANUP_ENABLED === 'true') {
+  cron.schedule('0 2 * * *', () => {
+    console.log('⏰ Running scheduled game cleanup...');
+    cleanupOldGames();
+  });
+  console.log(`🔧 Auto-cleanup enabled: Games older than ${AUTO_DELETE_DAYS} days will be deleted daily at 2 AM`);
+}
+
+// ============================================
 // START SERVER
 // ============================================
 
@@ -2407,5 +2449,8 @@ function listenWithFallback(preferred) {
   }
   attempt();
 }
+
+// Run cleanup on server start
+cleanupOldGames();
 
 listenWithFallback(PORT);
