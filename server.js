@@ -335,8 +335,9 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "script-src": ["'self'", "https://cdnjs.cloudflare.com"],
-      "style-src": ["'self'", "https://cdnjs.cloudflare.com", "'unsafe-inline'"]
+      "script-src": ["'self'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com"],
+      "style-src": ["'self'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "'unsafe-inline'"],
+      "connect-src": ["'self'"]
     }
   }
 }));
