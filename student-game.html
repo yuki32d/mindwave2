@@ -176,15 +176,17 @@
         </div>
 
         <!-- Filters -->
-        <div class="filter-bar" <!DOCTYPE html>
-            <html lang="en">
-
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>MINDWAVE – Game Center</title>
-                <link rel="stylesheet" href="role-page.css">
-</div>
+        <div class="filter-bar" style="display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap;">
+            <button class="filter-btn" data-filter="all"
+                style="padding: 8px 16px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; border: none; cursor: pointer; transition: all 0.2s;">All
+                Games</button>
+            <button class="filter-btn" data-filter="quiz"
+                style="padding: 8px 16px; border-radius: 8px; background: transparent; color: #9ea4b6; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s;">Quiz</button>
+            <button class="filter-btn" data-filter="logic"
+                style="padding: 8px 16px; border-radius: 8px; background: transparent; color: #9ea4b6; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s;">Logic</button>
+            <button class="filter-btn" data-filter="builder"
+                style="padding: 8px 16px; border-radius: 8px; background: transparent; color: #9ea4b6; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s;">Builder</button>
+        </div>
 
         <!-- Game Grid Container -->
         <div id="appContainer" class="game-grid">
