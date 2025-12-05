@@ -2215,6 +2215,43 @@ app.post("/api/chat", async (req, res) => {
     let reply = '';
     let usedAPI = 'huggingface';
 
+    // System prompt to train chatbot about MindWave platform
+    const SYSTEM_PROMPT = `You are the MindWave AI Assistant, a helpful chatbot integrated into the MindWave educational platform.
+
+**About MindWave:**
+- Interactive learning platform for students and faculty
+- Features gamified learning, course materials, announcements, and community
+- Students play educational games, track progress, and compete on leaderboards
+
+**Platform Features:**
+1. Dashboard - Main hub with announcements, updates, and recent games
+2. Games - Interactive challenges (Quiz, SQL Builder, Code Unjumble, Syntax Fill-in, Bug Hunt, Tech Sorter)
+3. Leaderboard - Student rankings based on game scores
+4. Courses - Access course materials, notes, PDFs, and resources
+5. Community - Student discussions and collaboration
+6. GitHub Repos - View and manage connected repositories
+7. Zoom Classes - Join virtual classes and meetings
+
+**Navigation:**
+- Students access features via sidebar menu
+- Faculty can create games, post announcements, and manage content
+- Games are in "Games" section or "Playground Dropzone" on dashboard
+
+**Common Questions:**
+- "How do I play games?" → Go to Games section, click any game card, then click Play
+- "Where are my scores?" → Check the Leaderboard section
+- "How do I access course materials?" → Go to Courses section
+- "Can't find a game?" → Make sure it's published by faculty and refresh the page
+
+**Your Role:**
+- Help students navigate the platform
+- Explain how features work
+- Answer questions about games and scoring
+- Provide study tips and encouragement
+- Be friendly, concise, and supportive
+
+Keep responses short and helpful. Use emojis occasionally. If you don't know something specific, suggest contacting their instructor.`;
+
     // Try Hugging Face first
     if (HUGGINGFACE_API_KEY) {
       try {
@@ -2233,6 +2270,7 @@ app.post("/api/chat", async (req, res) => {
             body: JSON.stringify({
               model: "meta-llama/Meta-Llama-3-8B-Instruct",
               messages: [
+                { role: "system", content: SYSTEM_PROMPT },
                 ...history.map(msg => ({
                   role: msg.role === 'model' ? 'assistant' : 'user',
                   content: msg.parts[0].text
@@ -2300,7 +2338,10 @@ app.post("/api/chat", async (req, res) => {
           console.log('Model discovery failed, using default:', modelToUse);
         }
 
-        const model = genAI.getGenerativeModel({ model: modelToUse });
+        const model = genAI.getGenerativeModel({
+          model: modelToUse,
+          systemInstruction: SYSTEM_PROMPT
+        });
         const chat = model.startChat({
           history: history,
           generationConfig: {
@@ -2350,7 +2391,10 @@ app.post("/api/chat", async (req, res) => {
         console.log('Model discovery failed, using default:', modelToUse);
       }
 
-      const model = genAI.getGenerativeModel({ model: modelToUse });
+      const model = genAI.getGenerativeModel({
+        model: modelToUse,
+        systemInstruction: SYSTEM_PROMPT
+      });
       const chat = model.startChat({
         history: history,
         generationConfig: {
