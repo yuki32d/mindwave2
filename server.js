@@ -811,6 +811,208 @@ app.get("/api/engagement", authMiddleware, async (req, res) => {
 });
 
 // ============================================
+// Analytics Endpoints
+// ============================================
+
+// Analytics Overview
+app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
+  try {
+    // Get total students
+    const totalStudents = await User.countDocuments({ role: 'student' });
+
+    // Get total game submissions
+    const gamesPlayed = await GameSubmission.countDocuments();
+
+    // Get active students (those who submitted games)
+    const activeStudents = await GameSubmission.distinct('studentId');
+    const totalEngagement = totalStudents > 0 ? Math.round((activeStudents.length / totalStudents) * 100) : 0;
+
+    // Get top performer
+    const topPerformerData = await GameSubmission.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'studentId',
+          foreignField: '_id',
+          as: 'student'
+        }
+      },
+      { $unwind: '$student' },
+      {
+        $group: {
+          _id: '$studentId',
+          name: { $first: '$student.name' },
+          totalScore: { $sum: 1 } // Count submissions as score
+        }
+      },
+      { $sort: { totalScore: -1 } },
+      { $limit: 1 }
+    ]);
+
+    const topPerformer = topPerformerData[0] || null;
+
+    // Get consistent students (3+ games)
+    const consistentStudentsData = await GameSubmission.aggregate([
+      {
+        $group: {
+          _id: '$studentId',
+          count: { $sum: 1 }
+        }
+      },
+      { $match: { count: { $gte: 3 } } }
+    ]);
+
+    res.json({
+      ok: true,
+      gamesPlayed,
+      totalEngagement,
+      activeStudents: activeStudents.length,
+      totalStudents,
+      topPerformer: topPerformer ? {
+        name: topPerformer.name,
+        totalScore: topPerformer.totalScore
+      } : null,
+      consistentStudents: consistentStudentsData.length
+    });
+  } catch (error) {
+    console.error("Analytics overview error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Analytics Games Breakdown
+app.get("/api/analytics/games", authMiddleware, async (req, res) => {
+  try {
+    const gamesData = await GameSubmission.aggregate([
+      {
+        $lookup: {
+          from: 'games',
+          localField: 'gameId',
+          foreignField: '_id',
+          as: 'game'
+        }
+      },
+      { $unwind: '$game' },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'studentId',
+          foreignField: '_id',
+          as: 'student'
+        }
+      },
+      { $unwind: '$student' },
+      {
+        $group: {
+          _id: '$gameId',
+          title: { $first: '$game.title' },
+          type: { $first: '$game.type' },
+          completions: { $sum: 1 },
+          students: {
+            $push: {
+              name: '$student.name',
+              score: { $cond: [{ $eq: ['$isCorrect', true] }, 100, 0] }
+            }
+          }
+        }
+      },
+      { $sort: { completions: -1 } }
+    ]);
+
+    const games = gamesData.map(game => {
+      const scores = game.students.map(s => s.score);
+      const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+      const topScorer = game.students.sort((a, b) => b.score - a.score)[0];
+
+      return {
+        gameId: game._id,
+        title: game.title,
+        type: game.type,
+        completions: game.completions,
+        avgScore,
+        avgTime: 0, // Not tracking time in GameSubmission currently
+        topScorer: topScorer ? {
+          name: topScorer.name,
+          score: topScorer.score
+        } : null
+      };
+    });
+
+    res.json({ ok: true, games });
+  } catch (error) {
+    console.error("Analytics games error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Analytics Students Activity
+app.get("/api/analytics/students", authMiddleware, async (req, res) => {
+  try {
+    const { timeRange = 'all' } = req.query;
+
+    // Calculate date filter
+    let dateFilter = {};
+    if (timeRange !== 'all') {
+      const daysAgo = parseInt(timeRange);
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
+      dateFilter = { submittedAt: { $gte: cutoffDate } };
+    }
+
+    const studentsData = await GameSubmission.aggregate([
+      { $match: dateFilter },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'studentId',
+          foreignField: '_id',
+          as: 'student'
+        }
+      },
+      { $unwind: '$student' },
+      {
+        $group: {
+          _id: '$studentId',
+          name: { $first: '$student.name' },
+          email: { $first: '$student.email' },
+          gamesPlayed: { $sum: 1 },
+          gamesCompleted: {
+            $sum: { $cond: [{ $eq: ['$isCorrect', true] }, 1, 0] }
+          },
+          lastActive: { $max: '$submittedAt' }
+        }
+      },
+      { $sort: { lastActive: -1 } }
+    ]);
+
+    const students = studentsData.map(student => {
+      const completionRate = student.gamesPlayed > 0
+        ? Math.round((student.gamesCompleted / student.gamesPlayed) * 100)
+        : 0;
+      const avgScore = student.gamesCompleted > 0
+        ? Math.round((student.gamesCompleted / student.gamesPlayed) * 100)
+        : 0;
+
+      return {
+        name: student.name,
+        email: student.email,
+        gamesPlayed: student.gamesPlayed,
+        gamesCompleted: student.gamesCompleted,
+        avgScore,
+        totalTime: 0, // Not tracking time currently
+        lastActive: student.lastActive,
+        completionRate
+      };
+    });
+
+    res.json({ ok: true, students });
+  } catch (error) {
+    console.error("Analytics students error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// ============================================
 // Global Settings Endpoints
 // ============================================
 
