@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – Leaderboard</title>
+    <link rel="stylesheet" href="role-page.css">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme-init.js"></script>
+    <style>
+        .leaderboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Personal Stats Card */
+        .personal-stats {
+            background: linear-gradient(135deg, rgba(15, 98, 254, 0.2) 0%, rgba(138, 43, 226, 0.2) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 32px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #9ea4b6;
+            margin-top: 8px;
+        }
+
+        /* Filters */
+        .filters-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            color: #9ea4b6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .filter-btn.active {
+            background: #0f62fe;
+            color: white;
+        }
+
+        /* Podium */
+        .podium {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 48px;
+            align-items: end;
+        }
+
+        .podium-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .podium-card:nth-child(1) {
+            order: 2;
+            animation-delay: 0.2s;
+        }
+
+        .podium-card:nth-child(2) {
+            order: 1;
+            animation-delay: 0s;
+        }
+
+        .podium-card:nth-child(3) {
+            order: 3;
+            animation-delay: 0.4s;
+        }
+
+        .podium-card.gold {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.15) 100%);
+            border-color: rgba(255, 215, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        .podium-card.silver {
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.15) 0%, rgba(169, 169, 169, 0.15) 100%);
+            border-color: rgba(192, 192, 192, 0.3);
+        }
+
+        .podium-card.bronze {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.15) 0%, rgba(184, 115, 51, 0.15) 100%);
+            border-color: rgba(205, 127, 50, 0.3);
+        }
+
+        .podium-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .podium-card.gold:hover {
+            transform: translateY(-8px) scale(1.07);
+        }
+
+        .medal {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .podium-rank {
+            font-size: 14px;
+            color: #9ea4b6;
+            margin-bottom: 8px;
+        }
+
+        .podium-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .podium-points {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .podium-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        /* Leaderboard Table */
+        .leaderboard-table {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 80px 1fr 150px 120px 120px;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ea4b6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .leaderboard-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 150px 120px 120px;
+            padding: 20px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+            align-items: center;
+        }
+
+        .leaderboard-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .leaderboard-row.current-user {
+            background: rgba(15, 98, 254, 0.1);
+            border: 1px solid rgba(15, 98, 254, 0.3);
+            border-radius: 12px;
+            margin: 4px;
+            padding: 20px 20px;
+        }
+
+        .rank-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .rank-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 16px;
+        }
+
+        .rank-badge.top {
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            color: #000;
+        }
+
+        .trend-indicator {
+            font-size: 12px;
+            color: #34c759;
+        }
+
+        .trend-indicator.down {
+            color: #ff3b30;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .player-name {
+            font-weight: 500;
+        }
+
+        .points-cell {
+            font-size: 18px;
+            font-weight: 700;
+            color: #4da0ff;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4da0ff 0%, #a78bfa 100%);
+            border-radius: 999px;
+            transition: width 0.6s ease;
+        }
+
+        .games-count {
+            color: #9ea4b6;
+        }
+
+        .accuracy {
+            font-weight: 600;
+        }
+
+        .accuracy.high {
+            color: #34c759;
+        }
+
+        .accuracy.medium {
+            color: #ff9f0a;
+        }
+
+        .accuracy.low {
+            color: #ff3b30;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 64px 24px;
+            color: #9ea4b6;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .podium {
+                grid-template-columns: 1fr;
+            }
+
+            .podium-card:nth-child(1),
+            .podium-card:nth-child(2),
+            .podium-card:nth-child(3) {
+                order: initial;
+            }
+
+            .leaderboard-header,
+            .leaderboard-row {
+                grid-template-columns: 60px 1fr 100px;
+            }
+
+            .leaderboard-header> :nth-child(4),
+            .leaderboard-header> :nth-child(5),
+            .leaderboard-row> :nth-child(4),
+            .leaderboard-row> :nth-child(5) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="homepage.html">← Back to Dashboard</a>
+            <p class="eyebrow">Competition</p>
+            <h1>Leaderboard</h1>
+            <p class="lede">See how you rank against your peers</p>
+        </header>
+
+        <div class="leaderboard-container">
+            <!-- Personal Stats -->
+            <div class="personal-stats" id="personalStats">
+                <div class="stat-item">
+                    <div class="stat-value" id="yourRank">-</div>
+                    <div class="stat-label">Your Rank</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="yourPoints">0</div>
+                    <div class="stat-label">Total Points</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="yourGames">0</div>
+                    <div class="stat-label">Games Played</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="yourAccuracy">0%</div>
+                    <div class="stat-label">Avg Accuracy</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <button class="filter-btn active" data-time="all">All Time</button>
+                    <button class="filter-btn" data-time="month">This Month</button>
+                    <button class="filter-btn" data-time="week">This Week</button>
+                    <button class="filter-btn" data-time="today">Today</button>
+                </div>
+                <div class="filter-group">
+                    <button class="filter-btn active" data-game="all">All Games</button>
+                    <button class="filter-btn" data-game="quiz">Quiz</button>
+                    <button class="filter-btn" data-game="unjumble">Unjumble</button>
+                    <button class="filter-btn" data-game="sorter">Sorter</button>
+                    <button class="filter-btn" data-game="fillin">Fill-in</button>
+                    <button class="filter-btn" data-game="sql">SQL</button>
+                </div>
+            </div>
+
+            <!-- Podium (Top 3) -->
+            <div class="podium" id="podium"></div>
+
+            <!-- Leaderboard Table -->
+            <div class="leaderboard-table">
+                <div class="leaderboard-header">
+                    <div>Rank</div>
+                    <div>Player</div>
+                    <div>Points</div>
+                    <div>Games</div>
+                    <div>Accuracy</div>
+                </div>
+                <div id="leaderboardBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="student-leaderboard.js"></script>
+</body>
+
+</html>

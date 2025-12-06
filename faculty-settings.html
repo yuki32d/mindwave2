@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – Faculty Settings</title>
+    <link rel="stylesheet" href="role-page.css">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme-init.js"></script>
+    <style>
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .settings-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .settings-card h2 {
+            font-size: 18px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .control-group:last-child {
+            border-bottom: none;
+        }
+
+        .control-label strong {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .control-label span {
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #0f62fe;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Color Swatches */
+        .color-options {
+            display: flex;
+            gap: 12px;
+        }
+
+        .color-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-swatch.active {
+            border-color: white;
+        }
+
+        .danger-btn {
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .danger-btn:hover {
+            background: rgba(255, 59, 48, 0.2);
+        }
+    </style>
+</head>
+
+<body data-role="faculty" data-section="settings">
+    <div class="page-shell">
+        <header class="hero">
+            <p class="eyebrow" id="heroEyebrow">Faculty Space</p>
+            <h1 id="pageTitle">Mission Control</h1>
+            <p class="lede" id="pageSubtitle">Manage gamification, visuals, and platform security.</p>
+            <div class="hero-actions">
+                <a class="ghost-link" href="admin.html">← Back to Creator Hub</a>
+            </div>
+        </header>
+
+        <!-- Custom Container ID to avoid role-page.js overwrite -->
+        <div id="settingsContainer" class="settings-grid">
+
+            <!-- 1. Gamification Control -->
+            <div class="settings-card">
+                <h2>🎮 Gamification Control</h2>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <strong>Double XP Event</strong>
+                        <span>Boost all points earned by 2x.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="doubleXPToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <strong>Season Reset</strong>
+                        <span>Clear all student leaderboards.</span>
+                    </div>
+                </div>
+                <button class="danger-btn">⚠️ Reset All Progress</button>
+            </div>
+
+            <!-- 2. Visual Command Center -->
+            <div class="settings-card">
+                <h2>🎨 Visual Command</h2>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <strong>Theme Accent</strong>
+                        <span>Global platform highlight color.</span>
+                    </div>
+                </div>
+                <div class="color-options" style="margin-bottom: 16px;">
+                    <div class="color-swatch" style="background: #0f62fe;"></div>
+                    <div class="color-swatch" style="background: #8a3ffc;"></div>
+                    <div class="color-swatch" style="background: #34c759;"></div>
+                    <div class="color-swatch" style="background: #ff9f0a;"></div>
+                    <div class="color-swatch" style="background: #ff3b30;"></div>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <strong>Banner Message</strong>
+                        <span>Announcement for all students.</span>
+                    </div>
+                </div>
+                <input type="text" id="bannerInput" placeholder="e.g. Exam week starts Monday!"
+                    style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; color: white;"
+                    onchange="saveSetting('globalBanner', this.value)">
+            </div>
+
+            <!-- 3. Security & Access -->
+            <div class="settings-card">
+                <h2>🔒 Security & Access</h2>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <strong>Maintenance Mode</strong>
+                        <span>Lock students out of the platform.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="maintenanceToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <strong>Registration Gate</strong>
+                        <span>Allow new student signups.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="regToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 4. Game Management -->
+            <div class="settings-card">
+                <h2>🎮 Game Management</h2>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <strong>Delete All Games</strong>
+                        <span>Remove all games from student dashboard.</span>
+                    </div>
+                </div>
+                <button class="danger-btn" id="deleteAllGamesBtn">🗑️ Delete All Games</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- We still include role-page.js for the header, but it won't find #panelGrid -->
+    <script src="role-page.js"></script>
+
+    <script src="faculty-settings.js"></script>
+</body>
+
+</html>
