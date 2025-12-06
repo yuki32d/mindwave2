@@ -58,6 +58,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (resetBtn) {
         resetBtn.addEventListener('click', resetSeason);
     }
+
+    // Delete All Games Button
+    const deleteAllGamesBtn = document.getElementById('deleteAllGamesBtn');
+    if (deleteAllGamesBtn) {
+        deleteAllGamesBtn.addEventListener('click', deleteAllGames);
+    }
 });
 
 async function saveSetting(key, value) {
@@ -87,6 +93,57 @@ function resetSeason() {
         // This would ideally be an API call too, but for now we keep the local logic or add an endpoint later
         localStorage.setItem('student_activities', '[]');
         alert('Season reset complete. All leaderboards are clean.');
+    }
+}
+
+async function deleteAllGames() {
+    if (!confirm('⚠️ WARNING: This will permanently delete ALL games from the system!\n\nThis action cannot be undone. Are you absolutely sure?')) {
+        return;
+    }
+
+    try {
+        // Fetch all games
+        const response = await fetch('/api/games');
+        const data = await response.json();
+
+        if (!data.ok || !data.games) {
+            alert('Failed to fetch games');
+            return;
+        }
+
+        const games = data.games;
+        let deletedCount = 0;
+        let failedCount = 0;
+
+        // Delete each game
+        for (const game of games) {
+            try {
+                const deleteResponse = await fetch(`/api/games/${game._id}`, {
+                    method: 'DELETE'
+                });
+
+                if (deleteResponse.ok) {
+                    deletedCount++;
+                } else {
+                    failedCount++;
+                }
+            } catch (error) {
+                console.error(`Failed to delete game ${game._id}:`, error);
+                failedCount++;
+            }
+        }
+
+        if (failedCount === 0) {
+            alert(`✅ Success! Deleted all ${deletedCount} games.`);
+        } else {
+            alert(`⚠️ Deleted ${deletedCount} games, but ${failedCount} failed. Check console for details.`);
+        }
+
+        // Reload page to reflect changes
+        window.location.reload();
+    } catch (error) {
+        console.error('Delete all games error:', error);
+        alert('❌ Failed to delete games. Please try again.');
     }
 }
 
