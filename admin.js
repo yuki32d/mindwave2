@@ -214,6 +214,9 @@ function applyFilters() {
     renderGames(filtered);
 }
 
+if (filterType) filterType.addEventListener('change', applyFilters);
+if (filterDifficulty) filterDifficulty.addEventListener('change', applyFilters);
+
 loadUpdates();
 loadGames();
 loadEngagement();
