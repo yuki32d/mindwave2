@@ -183,6 +183,8 @@ const gameSubmissionSchema = new mongoose.Schema(
     gameId: { type: mongoose.Schema.Types.ObjectId, ref: 'Game', required: true },
     studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     isCorrect: { type: Boolean, required: true },
+    score: { type: Number, default: 0 }, // Percentage score (0-100)
+    studentAnswers: { type: Array, default: [] }, // Array of student's answers for review
     submittedAt: { type: Date, default: Date.now }
   },
   { timestamps: true }
@@ -501,6 +503,7 @@ app.post("/api/login", authLimiter, async (req, res) => {
       })
       .json({
         ok: true,
+        token: token,
         user: { name: user.name, email: user.email, role: user.role }
       });
   } catch (error) {
@@ -650,6 +653,22 @@ app.put("/api/games/:id/publish", authMiddleware, async (req, res) => {
     res.json({ ok: true, game });
   } catch (error) {
     console.error("Game publish error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// GET all games (admin only)
+app.get("/api/games", authMiddleware, async (req, res) => {
+  try {
+    // Only admins can see all games
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const games = await Game.find().populate('createdBy', 'name').sort({ createdAt: -1 });
+    res.json({ ok: true, games });
+  } catch (error) {
+    console.error("Get all games error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });
@@ -1008,6 +1027,140 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
     res.json({ ok: true, students });
   } catch (error) {
     console.error("Analytics students error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// ============================================
+// Game Leaderboard Endpoint
+// ============================================
+
+app.get("/api/games/:gameId/leaderboard", authMiddleware, async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const studentId = req.user.sub;
+
+    // Get game details
+    const game = await Game.findById(gameId);
+    if (!game) {
+      return res.status(404).json({ ok: false, message: "Game not found" });
+    }
+
+    // Get all submissions for this game
+    const submissions = await GameSubmission.find({ gameId })
+      .populate('studentId', 'name email')
+      .sort({ score: -1, submittedAt: 1 })
+      .lean();
+
+    const totalParticipants = submissions.length;
+
+    // Calculate rankings
+    const rankedSubmissions = submissions.map((sub, index) => ({
+      rank: index + 1,
+      studentName: sub.studentId.name,
+      studentEmail: sub.studentId.email,
+      score: sub.score || (sub.isCorrect ? 100 : 0),
+      submittedAt: sub.submittedAt,
+      isCurrentStudent: sub.studentId._id.toString() === studentId
+    }));
+
+    // Find current student's submission
+    const currentStudentSubmission = submissions.find(
+      sub => sub.studentId._id.toString() === studentId
+    );
+
+    let currentStudent = null;
+    let answerReview = null;
+
+    if (currentStudentSubmission) {
+      const currentRank = rankedSubmissions.findIndex(
+        s => s.studentEmail === currentStudentSubmission.studentId.email
+      ) + 1;
+
+      currentStudent = {
+        rank: currentRank,
+        score: currentStudentSubmission.score || (currentStudentSubmission.isCorrect ? 100 : 0),
+        isCorrect: currentStudentSubmission.isCorrect,
+        submittedAt: currentStudentSubmission.submittedAt
+      };
+
+      // Build answer review based on game type
+      if (currentStudentSubmission.studentAnswers && currentStudentSubmission.studentAnswers.length > 0) {
+        answerReview = {
+          questions: currentStudentSubmission.studentAnswers.map(answer => ({
+            questionText: answer.questionText || answer.question || 'Question',
+            studentAnswer: answer.studentAnswer || answer.answer,
+            correctAnswer: answer.correctAnswer || answer.correct,
+            isCorrect: answer.isCorrect || false,
+            options: answer.options || []
+          }))
+        };
+      } else if (game.type === 'quiz' && game.questions) {
+        // Fallback: build from game questions if studentAnswers not stored
+        answerReview = {
+          questions: game.questions.map(q => ({
+            questionText: q.question,
+            studentAnswer: 'Not recorded',
+            correctAnswer: q.correctAnswer || q.options?.find(o => o.isCorrect)?.text || 'N/A',
+            isCorrect: false,
+            options: q.options?.map(o => o.text) || []
+          }))
+        };
+      }
+    }
+
+    // Get top 10 for leaderboard
+    const leaderboard = rankedSubmissions.slice(0, 10);
+
+    // If current student is not in top 10, add them to the list
+    if (currentStudent && currentStudent.rank > 10) {
+      const currentStudentEntry = rankedSubmissions.find(s => s.isCurrentStudent);
+      if (currentStudentEntry) {
+        leaderboard.push(currentStudentEntry);
+      }
+    }
+
+    res.json({
+      ok: true,
+      gameTitle: game.title,
+      gameType: game.type,
+      totalParticipants,
+      currentStudent,
+      answerReview,
+      leaderboard
+    });
+  } catch (error) {
+    console.error("Leaderboard error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// ============================================
+// Game Submission Endpoint
+// ============================================
+
+app.post("/api/game-submissions", authMiddleware, async (req, res) => {
+  try {
+    const { gameId, score, isCorrect, studentAnswers } = req.body;
+    const studentId = req.user.sub;
+
+    if (!gameId) {
+      return res.status(400).json({ ok: false, message: "Game ID is required" });
+    }
+
+    // Create game submission
+    const submission = await GameSubmission.create({
+      gameId,
+      studentId,
+      score: score || 0,
+      isCorrect: isCorrect || false,
+      studentAnswers: studentAnswers || [],
+      submittedAt: new Date()
+    });
+
+    res.status(201).json({ ok: true, submission });
+  } catch (error) {
+    console.error("Game submission error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });
