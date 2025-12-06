@@ -798,33 +798,123 @@ app.delete("/api/announcements/:id", authMiddleware, async (req, res) => {
 
 app.get("/api/engagement", authMiddleware, async (req, res) => {
   try {
-    // Calculate engagement for last 7 days
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
     // Get total students
-    const totalStudents = await User.countDocuments({ role: 'student' });
+    const totalStudents = await User.countDocuments({ role: "student" });
 
     if (totalStudents === 0) {
-      return res.json({ ok: true, engagementPercentage: 0 });
+      return res.json({
+        ok: true,
+        summary: { engagementRate: 0, totalActive: 0 },
+        students: { active: 0, new: 0, returning: 0, inactive: 0, total: 0 },
+        games: { totalPlays: 0, avgCompletion: 0, avgScore: 0, topGames: [] },
+        timing: { peakHour: "N/A", trend: "0%", dailyActivity: Array(7).fill(0) }
+      });
     }
 
-    // Get active students (those who submitted games in last 7 days)
-    const activeStudents = await GameSubmission.distinct('studentId', {
-      submittedAt: { $gte: sevenDaysAgo }
+    // Get active students (submitted games in last 7 days)
+    const activeSubmissions = await GameSubmission.find({
+      createdAt: { $gte: sevenDaysAgo }
+    }).distinct("studentId");
+
+    const activeStudents = activeSubmissions.length;
+    const engagementRate = Math.round((activeStudents / totalStudents) * 100);
+
+    // Get detailed analytics
+    const submissions = await GameSubmission.find({
+      createdAt: { $gte: sevenDaysAgo }
+    }).populate('gameId', 'title type');
+
+    const previousWeekSubmissions = await GameSubmission.find({
+      createdAt: { $gte: fourteenDaysAgo, $lt: sevenDaysAgo }
     });
 
-    // Calculate engagement percentage
-    const engagementPercentage = Math.round((activeStudents.length / totalStudents) * 100);
+    // Student activity breakdown
+    const newStudents = await User.countDocuments({
+      role: "student",
+      createdAt: { $gte: sevenDaysAgo }
+    });
+
+    const returningStudents = activeStudents - newStudents;
+    const inactiveStudents = totalStudents - activeStudents;
+
+    // Game performance metrics
+    const totalPlays = submissions.length;
+    const completedGames = submissions.filter(s => s.isCorrect || s.score >= 50).length;
+    const avgCompletion = totalPlays > 0 ? Math.round((completedGames / totalPlays) * 100) : 0;
+    const avgScore = totalPlays > 0
+      ? Math.round(submissions.reduce((sum, s) => sum + (s.score || 0), 0) / totalPlays)
+      : 0;
+
+    // Top games
+    const gameCounts = {};
+    submissions.forEach(s => {
+      if (s.gameId && s.gameId.title) {
+        gameCounts[s.gameId.title] = (gameCounts[s.gameId.title] || 0) + 1;
+      }
+    });
+    const topGames = Object.entries(gameCounts)
+      .map(([name, plays]) => ({ name, plays }))
+      .sort((a, b) => b.plays - a.plays)
+      .slice(0, 5);
+
+    // Peak hours analysis
+    const hourCounts = Array(24).fill(0);
+    submissions.forEach(s => {
+      const hour = new Date(s.createdAt).getHours();
+      hourCounts[hour]++;
+    });
+    const peakHourIndex = hourCounts.indexOf(Math.max(...hourCounts));
+    const peakHour = peakHourIndex >= 0 ? `${peakHourIndex}:00-${peakHourIndex + 1}:00` : "N/A";
+
+    // Trend calculation
+    const previousWeekActive = previousWeekSubmissions.length;
+    const trend = previousWeekActive > 0
+      ? Math.round(((totalPlays - previousWeekActive) / previousWeekActive) * 100)
+      : (totalPlays > 0 ? 100 : 0);
+    const trendText = trend > 0 ? `+${trend}%` : `${trend}%`;
+
+    // Daily activity (last 7 days)
+    const dailyActivity = Array(7).fill(0);
+    submissions.forEach(s => {
+      const daysAgo = Math.floor((Date.now() - new Date(s.createdAt)) / (1000 * 60 * 60 * 24));
+      if (daysAgo >= 0 && daysAgo < 7) {
+        dailyActivity[6 - daysAgo]++;
+      }
+    });
 
     res.json({
       ok: true,
-      engagementPercentage,
-      activeStudents: activeStudents.length,
-      totalStudents
+      summary: {
+        engagementRate,
+        totalActive: activeStudents
+      },
+      students: {
+        active: activeStudents,
+        new: newStudents,
+        returning: returningStudents,
+        inactive: inactiveStudents,
+        total: totalStudents
+      },
+      games: {
+        totalPlays,
+        avgCompletion,
+        avgScore,
+        topGames
+      },
+      timing: {
+        peakHour,
+        trend: trendText,
+        dailyActivity
+      }
     });
   } catch (error) {
-    console.error("Get engagement error:", error);
+    console.error("Engagement error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });
