@@ -214,22 +214,6 @@ function applyFilters() {
     renderGames(filtered);
 }
 
-if (filterType) filterType.addEventListener('change', applyFilters);
-if (filterDifficulty) filterDifficulty.addEventListener('change', applyFilters);
-
-// --- Engagement Metrics ---
-async function loadEngagement() {
-    const data = await fetchAPI('/api/engagement');
-    if (data && data.ok) {
-        const engagementEl = document.getElementById('engagementPulse');
-        if (engagementEl) {
-            engagementEl.textContent = `${data.engagementPercentage}%`;
-        }
-    }
-}
-
-// --- Initialization ---
-loadAnnouncements();
 loadUpdates();
 loadGames();
 loadEngagement();
@@ -411,3 +395,85 @@ const systemStatusBtn = document.getElementById('systemStatusBtn');
 if (systemStatusBtn) {
     systemStatusBtn.addEventListener('click', showSystemStatus);
 }
+
+// --- Engagement Metrics ---
+async function loadEngagement() {
+    const data = await fetchAPI('/api/engagement');
+    if (data && data.ok && data.summary) {
+        document.getElementById('engagementPulse').textContent = `${data.summary.engagementRate}%`;
+
+        // Store full data for modal
+        window.engagementData = data;
+    }
+}
+
+// Show engagement analytics modal
+function showEngagementAnalytics() {
+    const data = window.engagementData;
+    if (!data) {
+        alert('Loading engagement data...');
+        return;
+    }
+
+    // Populate modal with data
+    document.getElementById('modalActiveStudents').textContent = data.students.active;
+    document.getElementById('modalNewStudents').textContent = data.students.new;
+    document.getElementById('modalReturningStudents').textContent = data.students.returning;
+    document.getElementById('modalInactiveStudents').textContent = data.students.inactive;
+
+    document.getElementById('modalTotalPlays').textContent = data.games.totalPlays;
+    document.getElementById('modalAvgCompletion').textContent = `${data.games.avgCompletion}%`;
+    document.getElementById('modalAvgScore').textContent = `${data.games.avgScore}%`;
+
+    // Top games list
+    const topGamesHtml = data.games.topGames.length > 0
+        ? data.games.topGames.map((game, i) => `${i + 1}. ${game.name} (${game.plays} plays)`).join('<br>')
+        : 'No games played yet';
+    document.getElementById('modalTopGames').innerHTML = topGamesHtml;
+
+    document.getElementById('modalPeakHour').textContent = data.timing.peakHour;
+
+    // Color code the trend
+    const trendEl = document.getElementById('modalTrend');
+    trendEl.textContent = data.timing.trend;
+    if (data.timing.trend.startsWith('+')) {
+        trendEl.style.color = '#34c759'; // Green for positive
+    } else if (data.timing.trend.startsWith('-')) {
+        trendEl.style.color = '#ff3b30'; // Red for negative
+    } else {
+        trendEl.style.color = '#ff9f0a'; // Orange for neutral
+    }
+
+    // Show modal
+    document.getElementById('engagementModal').style.display = 'flex';
+}
+
+// Add click handler for engagement pulse card
+document.addEventListener('DOMContentLoaded', () => {
+    const engagementCard = document.getElementById('engagementPulseCard');
+    if (engagementCard) {
+        engagementCard.addEventListener('click', showEngagementAnalytics);
+    }
+
+    // Add close button handler
+    const closeBtn = document.getElementById('closeEngagementModal');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            document.getElementById('engagementModal').style.display = 'none';
+        });
+    }
+
+    // Close modal when clicking outside
+    const modal = document.getElementById('engagementModal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+});
+
+// Initialize
+loadAnnouncements();
+loadEngagement();

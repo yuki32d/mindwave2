@@ -561,7 +561,7 @@
                         <strong id="campaignCount">0</strong>
                         <div class="tag green">Announcements</div>
                     </div>
-                    <div class="pill-stat">
+                    <div class="pill-stat" id="engagementPulseCard" style="cursor: pointer;">
                         <h3>Engagement Pulse</h3>
                         <strong id="engagementPulse">0%</strong>
                         <div class="tag orange">Last 7 days</div>
@@ -753,6 +753,87 @@
     </div>
 
     <script src="admin.js"></script>
+
+    <!-- Engagement Analytics Modal -->
+    <div id="engagementModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
+        <div
+            style="background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%); border-radius: 24px; padding: 32px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="margin: 0; font-size: 24px; color: white;">📊 Engagement Analytics</h2>
+                <button id="closeEngagementModal"
+                    style="background: rgba(255,255,255,0.1); border: none; color: white; font-size: 24px; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+
+            <div style="color: #9ea4b6; margin-bottom: 24px; font-size: 14px;">Last 7 days</div>
+
+            <!-- Student Activity -->
+            <div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 16px 0; font-size: 18px; color: white;">👥 Student Activity</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+                    <div>
+                        <div style="color: #9ea4b6; font-size: 12px;">Active Students</div>
+                        <div style="color: #34c759; font-size: 24px; font-weight: bold;" id="modalActiveStudents">0
+                        </div>
+                    </div>
+                    <div>
+                        <div style="color: #9ea4b6; font-size: 12px;">New This Week</div>
+                        <div style="color: #0f62fe; font-size: 24px; font-weight: bold;" id="modalNewStudents">0</div>
+                    </div>
+                    <div>
+                        <div style="color: #9ea4b6; font-size: 12px;">Returning</div>
+                        <div style="color: #8a3ffc; font-size: 24px; font-weight: bold;" id="modalReturningStudents">0
+                        </div>
+                    </div>
+                    <div>
+                        <div style="color: #9ea4b6; font-size: 12px;">Inactive</div>
+                        <div style="color: #ff9f0a; font-size: 24px; font-weight: bold;" id="modalInactiveStudents">0
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Performance -->
+            <div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 16px 0; font-size: 18px; color: white;">🎮 Game Performance</h3>
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                    <div>
+                        <div style="color: #9ea4b6; font-size: 12px;">Total Plays</div>
+                        <div style="color: white; font-size: 24px; font-weight: bold;" id="modalTotalPlays">0</div>
+                    </div>
+                    <div>
+                        <div style="color: #9ea4b6; font-size: 12px;">Avg Completion</div>
+                        <div style="color: white; font-size: 24px; font-weight: bold;" id="modalAvgCompletion">0%</div>
+                    </div>
+                    <div>
+                        <div style="color: #9ea4b6; font-size: 12px;">Avg Score</div>
+                        <div style="color: white; font-size: 24px; font-weight: bold;" id="modalAvgScore">0%</div>
+                    </div>
+                </div>
+                <div>
+                    <div style="color: #9ea4b6; font-size: 12px; margin-bottom: 8px;">Top Games</div>
+                    <div id="modalTopGames" style="color: white; font-size: 14px;">No data</div>
+                </div>
+            </div>
+
+            <!-- Timing & Trends -->
+            <div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 20px;">
+                <h3 style="margin: 0 0 16px 0; font-size: 18px; color: white;">⏰ Timing & Trends</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+                    <div>
+                        <div style="color: #9ea4b6; font-size: 12px;">Peak Hours</div>
+                        <div style="color: white; font-size: 18px; font-weight: bold;" id="modalPeakHour">N/A</div>
+                    </div>
+                    <div>
+                        <div style="color: #9ea4b6; font-size: 12px;">Trend vs Last Week</div>
+                        <div style="color: white; font-size: 18px; font-weight: bold;" id="modalTrend">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
