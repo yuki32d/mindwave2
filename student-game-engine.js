@@ -263,6 +263,7 @@ function playQuiz(game, container) {
     let startTime = Date.now();
     let selectedOptionIndex = null;
     const questions = game.questions || [];
+    const studentAnswers = []; // Track student answers for review
 
     function render() {
         if (currentQuestionIndex >= questions.length) {
@@ -308,8 +309,18 @@ function playQuiz(game, container) {
             submitBtn.addEventListener('click', () => {
                 if (selectedOptionIndex === null) return;
 
+                // Track student answer for review
+                const isCorrect = selectedOptionIndex === q.correctIndex;
+                studentAnswers.push({
+                    questionText: q.text,
+                    studentAnswer: q.options[selectedOptionIndex],
+                    correctAnswer: q.options[q.correctIndex],
+                    isCorrect: isCorrect,
+                    options: q.options
+                });
+
                 // Check if answer is correct and add points
-                if (selectedOptionIndex === q.correctIndex) {
+                if (isCorrect) {
                     score += (q.points || 10);
                 }
 
@@ -331,11 +342,11 @@ function playQuiz(game, container) {
         }
     }
 
-    function finish() {
+    async function finish() {
         // Calculate total possible points
         const totalPoints = questions.reduce((sum, q) => sum + (q.points || 10), 0);
-        saveResult(game, score, totalPoints, startTime);
-        showResult(container, score, totalPoints, startTime);
+        await saveResult(game, score, totalPoints, startTime, studentAnswers);
+        showResult(container, score, totalPoints, startTime, game._id || game.id);
     }
 
     startTimer(game.duration || 10, '#appContainer', finish);
@@ -392,15 +403,28 @@ function playUnjumble(game, container) {
         render();
     }
 
-    function checkUnjumble() {
+    async function checkUnjumble() {
         let correct = 0;
+        const studentAnswers = [];
+        const correctOrder = game.lines.map(l => l);
+        const studentOrder = shuffledLines.map(l => l.text);
+
         shuffledLines.forEach((line, idx) => {
-            if (line.originalIndex === idx) correct++;
+            const isCorrect = line.originalIndex === idx;
+            if (isCorrect) correct++;
+
+            studentAnswers.push({
+                questionText: `Line ${idx + 1}`,
+                studentAnswer: line.text,
+                correctAnswer: correctOrder[idx],
+                isCorrect: isCorrect
+            });
         });
+
         const accuracy = correct / (game.lines ? game.lines.length : 1);
         const score = Math.round(accuracy * game.totalPoints);
-        saveResult(game, score, game.totalPoints, startTime);
-        showResult(container, score, game.totalPoints, startTime);
+        await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
+        showResult(container, score, game.totalPoints, startTime, game._id || game.id);
     }
 
     startTimer(game.duration || 10, '#appContainer', checkUnjumble);
@@ -412,6 +436,7 @@ function playSorter(game, container) {
     let score = 0;
     let startTime = Date.now();
     let currentItem = remainingItems.pop();
+    const studentAnswers = []; // Track student choices
 
     function render() {
         if (!currentItem) return finish();
@@ -441,14 +466,24 @@ function playSorter(game, container) {
     }
 
     function sortItem(cat) {
-        if (cat === currentItem.category) score += 10;
+        const isCorrect = cat === currentItem.category;
+        if (isCorrect) score += 10;
+
+        // Track student answer
+        studentAnswers.push({
+            questionText: `Sort: ${currentItem.name}`,
+            studentAnswer: cat,
+            correctAnswer: currentItem.category,
+            isCorrect: isCorrect
+        });
+
         currentItem = remainingItems.pop();
         render();
     }
 
-    function finish() {
-        saveResult(game, score, game.totalPoints, startTime);
-        showResult(container, score, game.totalPoints, startTime);
+    async function finish() {
+        await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
+        showResult(container, score, game.totalPoints, startTime, game._id || game.id);
     }
 
     startTimer(game.duration || 10, '#appContainer', finish);
@@ -528,14 +563,25 @@ function playFillIn(game, container) {
         render();
     }
 
-    function checkFillIn() {
+    async function checkFillIn() {
         let correct = 0;
+        const studentAnswers = [];
+
         (game.blanks || []).forEach((ans, idx) => {
-            if (filledBlanks[idx] === ans) correct++;
+            const isCorrect = filledBlanks[idx] === ans;
+            if (isCorrect) correct++;
+
+            studentAnswers.push({
+                questionText: `Blank ${idx + 1}`,
+                studentAnswer: filledBlanks[idx] || 'Not filled',
+                correctAnswer: ans,
+                isCorrect: isCorrect
+            });
         });
+
         const score = Math.round((correct / (game.blanks ? game.blanks.length : 1)) * game.totalPoints);
-        saveResult(game, score, game.totalPoints, startTime);
-        showResult(container, score, game.totalPoints, startTime);
+        await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
+        showResult(container, score, game.totalPoints, startTime, game._id || game.id);
     }
 
     startTimer(game.duration || 10, '#appContainer', checkFillIn);
@@ -605,12 +651,21 @@ function playSQL(game, container) {
         render();
     }
 
-    function checkSQL() {
+    async function checkSQL() {
         const correctQuery = (game.blocks || []).join(' ');
         const userQuery = builtQuery.join(' ');
-        const score = correctQuery === userQuery ? game.totalPoints : Math.round((builtQuery.filter((b, i) => b === game.blocks[i]).length / game.blocks.length) * game.totalPoints);
-        saveResult(game, score, game.totalPoints, startTime);
-        showResult(container, score, game.totalPoints, startTime);
+        const isCorrect = correctQuery === userQuery;
+        const score = isCorrect ? game.totalPoints : Math.round((builtQuery.filter((b, i) => b === game.blocks[i]).length / game.blocks.length) * game.totalPoints);
+
+        const studentAnswers = [{
+            questionText: 'Build the SQL Query',
+            studentAnswer: userQuery || 'No query built',
+            correctAnswer: correctQuery,
+            isCorrect: isCorrect
+        }];
+
+        await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
+        showResult(container, score, game.totalPoints, startTime, game._id || game.id);
     }
 
     startTimer(game.duration || 10, '#appContainer', checkSQL);
@@ -675,7 +730,7 @@ function playDebug(game, container) {
         }, 100);
     }
 
-    function checkDebug() {
+    async function checkDebug() {
         if (!studentEditor) {
             alert('Editor not loaded yet, please wait...');
             return;
@@ -756,7 +811,15 @@ function playDebug(game, container) {
 
         console.log('Final score:', score, '/', game.totalPoints, `(${percentage}%)`);
 
-        saveResult(game, score, game.totalPoints, startTime);
+        // Track student answer
+        const studentAnswers = [{
+            questionText: 'Debug the Code',
+            studentAnswer: `Fixed ${bugsFixed}/${totalBugs} bugs`,
+            correctAnswer: `All ${totalBugs} bugs should be fixed`,
+            isCorrect: bugsFixed === totalBugs
+        }];
+
+        await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
 
         // Show result with explanation
         container.innerHTML = `
@@ -806,51 +869,83 @@ function escapeHtml(text) {
 
 // === HELPER FUNCTIONS ===
 
-function saveResult(game, score, totalPoints, startTime) {
+async function saveResult(game, score, totalPoints, startTime, studentAnswers = []) {
     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
     const percentage = Math.round((score / totalPoints) * 100);
 
-    const doubleXP = localStorage.getItem('doubleXP') === 'true';
-    const rawScore = doubleXP ? score * 2 : score;
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No auth token found');
+            return false;
+        }
 
-    const activity = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-        gameId: game._id || game.id,
-        gameTitle: game.title,
-        gameType: game.type,
-        studentEmail: currentUserEmail,
-        studentName: currentUserName,
-        score: percentage,
-        rawScore: rawScore,
-        timeTaken: timeTaken,
-        startedAt: new Date(startTime).toISOString(),
-        completedAt: new Date().toISOString(),
-        status: 'completed'
-    };
+        // Submit to backend API
+        const response = await fetch(`${window.location.origin}/api/game-submissions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                gameId: game._id || game.id,
+                score: percentage,
+                isCorrect: percentage >= 70,
+                studentAnswers: studentAnswers
+            })
+        });
 
-    const activities = loadData(activityKey);
-    activities.push(activity);
-    saveData(activityKey, activities);
+        if (!response.ok) {
+            throw new Error('Failed to submit game result');
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Save result error:', error);
+        // Fallback to localStorage
+        const doubleXP = localStorage.getItem('doubleXP') === 'true';
+        const rawScore = doubleXP ? score * 2 : score;
+
+        const activity = {
+            id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+            gameId: game._id || game.id,
+            gameTitle: game.title,
+            gameType: game.type,
+            studentEmail: currentUserEmail,
+            studentName: currentUserName,
+            score: percentage,
+            rawScore: rawScore,
+            timeTaken: timeTaken,
+            startedAt: new Date(startTime).toISOString(),
+            completedAt: new Date().toISOString(),
+            status: 'completed'
+        };
+
+        const activities = loadData(activityKey);
+        activities.push(activity);
+        saveData(activityKey, activities);
+        return false;
+    }
 }
 
-function showResult(container, score, totalPoints, startTime) {
+function showResult(container, score, totalPoints, startTime, gameId) {
     const percentage = Math.round((score / totalPoints) * 100);
     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
 
+    // Show loading message
     container.innerHTML = `
         <div class="question-display" style="text-align: center;">
-            <h2 style="font-size: 32px; margin-bottom: 24px;">${percentage >= 70 ? '🎉 Great Job!' : '💪 Keep Practicing'}</h2>
-            <p style="font-size: 48px; font-weight: 700; background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 24px 0;">${score}/${totalPoints}</p>
-            <p style="color: #9ea4b6; margin-bottom: 32px;">Completed in ${Math.floor(timeTaken / 60)}m ${timeTaken % 60}s</p>
-            <button id="backToGamesBtn" class="primary-btn" style="width: 100%;">Back to Games</button>
+            <h2 style="font-size: 32px; margin-bottom: 24px;">Loading scoreboard...</h2>
+            <p style="color: #9ea4b6;">Please wait</p>
         </div>
     `;
 
-    const backBtn = document.getElementById('backToGamesBtn');
-    if (backBtn) {
-        backBtn.addEventListener('click', () => {
-            window.location.href = 'student-game.html';
-        });
+    // Show scoreboard with leaderboard and answer review
+    if (gameId) {
+        showScoreboard(gameId, score, totalPoints);
+    } else {
+        // Fallback if no gameId
+        showSimpleResult(score, totalPoints);
     }
 
     if (percentage >= 70) {
@@ -906,4 +1001,135 @@ function fireConfetti() {
 
         setTimeout(() => c.remove(), 2000);
     }
+}
+
+// === SCOREBOARD FUNCTIONS ===
+
+async function showScoreboard(gameId, score, totalPoints) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No auth token found');
+            return;
+        }
+
+        // Fetch leaderboard data
+        const response = await fetch(`${window.location.origin}/api/games/${gameId}/leaderboard`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch leaderboard');
+        }
+
+        const data = await response.json();
+
+        if (data.ok) {
+            renderScoreboard(data, score, totalPoints);
+        }
+    } catch (error) {
+        console.error('Scoreboard error:', error);
+        // Fallback to simple result display
+        showSimpleResult(score, totalPoints);
+    }
+}
+
+function renderScoreboard(data, score, totalPoints) {
+    const modal = document.getElementById('scoreboardModal');
+    const scoreCard = document.getElementById('studentScoreCard');
+    const answerReviewSection = document.getElementById('answerReviewSection');
+    const answerReviewList = document.getElementById('answerReviewList');
+    const leaderboardBody = document.getElementById('leaderboardBody');
+
+    // Render score card
+    const percentage = Math.round((score / totalPoints) * 100);
+    const currentStudent = data.currentStudent || {};
+    const rank = currentStudent.rank || 'N/A';
+    const totalParticipants = data.totalParticipants || 0;
+
+    scoreCard.innerHTML = `
+        <div class="score-display">
+            <span class="score-label">Your Score:</span>
+            <span class="score-value">${score}/${totalPoints} (${percentage}%)</span>
+        </div>
+        <div class="rank-display">
+            <span class="rank-label">Your Rank:</span>
+            <span class="rank-value">#${rank} out of ${totalParticipants}</span>
+        </div>
+    `;
+
+    // Render answer review if available
+    if (data.answerReview && data.answerReview.questions && data.answerReview.questions.length > 0) {
+        answerReviewSection.style.display = 'block';
+        answerReviewList.innerHTML = data.answerReview.questions.map((q, index) => {
+            const isCorrect = q.isCorrect;
+            const itemClass = isCorrect ? 'correct' : 'incorrect';
+            const icon = isCorrect ? '✅' : '❌';
+
+            return `
+                <div class="answer-item ${itemClass}">
+                    <div class="question-text">Q${index + 1}: ${q.questionText}</div>
+                    <div class="student-answer ${isCorrect ? 'correct' : 'incorrect'}">
+                        <span class="answer-icon">${icon}</span>
+                        <span>Your answer: ${q.studentAnswer}</span>
+                    </div>
+                    ${!isCorrect ? `
+                        <div class="correct-answer">
+                            <span class="answer-icon">✅</span>
+                            <span>Correct answer: ${q.correctAnswer}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+    } else {
+        answerReviewSection.style.display = 'none';
+    }
+
+    // Render leaderboard
+    if (data.leaderboard && data.leaderboard.length > 0) {
+        leaderboardBody.innerHTML = data.leaderboard.map(entry => {
+            const rowClass = entry.isCurrentStudent ? 'current-student' : (entry.rank <= 3 ? 'top-3' : '');
+            return `
+                <tr class="${rowClass}">
+                    <td>${entry.rank}</td>
+                    <td>${entry.isCurrentStudent ? 'You' : entry.studentName}</td>
+                    <td>${entry.score}%</td>
+                </tr>
+            `;
+        }).join('');
+    } else {
+        leaderboardBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #9ea4b6;">No leaderboard data available</td></tr>';
+    }
+
+    // Show modal
+    modal.style.display = 'flex';
+
+    // Setup button handlers
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const backToGamesBtn = document.getElementById('backToGamesBtn');
+
+    playAgainBtn.onclick = () => {
+        modal.style.display = 'none';
+        window.location.reload();
+    };
+
+    backToGamesBtn.onclick = () => {
+        modal.style.display = 'none';
+        window.location.href = 'student-game.html';
+    };
+
+    // Fire confetti for good scores
+    if (percentage >= 70) {
+        fireConfetti();
+    }
+}
+
+function showSimpleResult(score, totalPoints) {
+    // Fallback if API fails
+    const percentage = Math.round((score / totalPoints) * 100);
+    alert(`Game Complete!\n\nYour Score: ${score}/${totalPoints} (${percentage}%)`);
+    window.location.href = 'student-game.html';
 }
