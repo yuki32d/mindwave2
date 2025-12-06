@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 localStorage.setItem('loggedIn', 'true');
                 localStorage.setItem('email', email);
                 localStorage.setItem('role', role);
+                localStorage.setItem('token', data.token); // Store JWT token for API calls
 
                 if (role === 'admin') {
                     window.location.href = 'admin.html';
