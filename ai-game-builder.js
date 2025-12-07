@@ -152,10 +152,18 @@ function renderPreview(gameData) {
 
     // Add publish button if not in edit mode
     if (!editMode) {
-        html += `<button class="publish-btn" onclick="publishGame()">📤 Publish Game</button>`;
+        html += '<button class="publish-btn" id="publishGameBtn">📤 Publish Game</button>';
     }
 
     previewContent.innerHTML = html;
+
+    // Add event listener for publish button
+    const publishBtn = document.getElementById('publishGameBtn');
+    if (publishBtn) {
+        publishBtn.addEventListener('click', function () {
+            publishGame();
+        });
+    }
 }
 
 // Render Quiz Preview with Edit Controls
@@ -169,8 +177,8 @@ function renderQuizPreview(questions) {
 
         if (editMode) {
             html += '<div class="question-actions">';
-            html += '<button class="edit-btn" onclick="editQuestion(' + i + ')">✏️ Edit</button>';
-            html += '<button class="delete-btn" onclick="deleteQuestion(' + i + ')">🗑️ Delete</button>';
+            html += '<button class="edit-btn" data-question-index="' + i + '">✏️ Edit</button>';
+            html += '<button class="delete-btn" data-question-index="' + i + '">🗑️ Delete</button>';
             html += '</div>';
         }
 
@@ -194,15 +202,58 @@ function renderQuizPreview(questions) {
     });
 
     if (editMode) {
-        html += '<button class="add-question-btn" onclick="addQuestion()">➕ Add New Question</button>';
+        html += '<button class="add-question-btn" id="addQuestionBtn">➕ Add New Question</button>';
         html += '<div class="save-cancel-controls">';
-        html += '<button class="save-btn" onclick="saveGameChanges()">💾 Save Changes</button>';
-        html += '<button class="cancel-btn" onclick="cancelEdit()">❌ Cancel</button>';
+        html += '<button class="save-btn" id="saveChangesBtn">💾 Save Changes</button>';
+        html += '<button class="cancel-btn" id="cancelEditBtn">❌ Cancel</button>';
         html += '</div>';
     }
 
     html += '</div>';
+
+    // Need to attach event listeners after rendering
+    setTimeout(function () {
+        attachQuestionEventListeners();
+    }, 0);
+
     return html;
+}
+
+// Attach event listeners to question buttons
+function attachQuestionEventListeners() {
+    // Edit buttons
+    document.querySelectorAll('.edit-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const index = parseInt(this.getAttribute('data-question-index'));
+            editQuestion(index);
+        });
+    });
+
+    // Delete buttons
+    document.querySelectorAll('.delete-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const index = parseInt(this.getAttribute('data-question-index'));
+            deleteQuestion(index);
+        });
+    });
+
+    // Add question button
+    const addBtn = document.getElementById('addQuestionBtn');
+    if (addBtn) {
+        addBtn.addEventListener('click', addQuestion);
+    }
+
+    // Save button
+    const saveBtn = document.getElementById('saveChangesBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveGameChanges);
+    }
+
+    // Cancel button
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', cancelEdit);
+    }
 }
 
 // Format Game Type
