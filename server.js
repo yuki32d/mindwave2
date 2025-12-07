@@ -431,9 +431,10 @@ async function createAdminNotification(message, meta = {}) {
 app.post("/api/signup", authLimiter, async (req, res) => {
   const { name, email, password, role } = req.body || {};
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ ok: false, message: "All fields are required" });
+  if (!email || !password) {
+    return res.status(400).json({ ok: false, message: "Email and password are required" });
   }
+
   const safeRole = sanitizeRole(role);
   if (!validateEmail(email, safeRole)) {
     return res.status(400).json({ ok: false, message: "Use your campus email" });
@@ -443,9 +444,15 @@ app.post("/api/signup", authLimiter, async (req, res) => {
   }
 
   try {
+    // Extract first name from email (e.g., "jeeban" from "jeeban.mca25@cmrit.ac.in")
+    const emailPrefix = email.split('@')[0]; // "jeeban.mca25"
+    const firstName = emailPrefix.split('.')[0]; // "jeeban"
+    const capitalizedName = firstName.charAt(0).toUpperCase() + firstName.slice(1); // "Jeeban"
+
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({
-      name,
+      name: capitalizedName, // Use extracted name
+      displayName: capitalizedName, // Set displayName to same value
       email: email.toLowerCase(),
       password: hashed,
       role: safeRole

@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('signup-form').addEventListener('submit', async function (event) {
         event.preventDefault();
-        const name = document.getElementById('name').value.trim();
         const email = document.getElementById('email').value.trim().toLowerCase();
         const password = document.getElementById('password').value.trim();
         const role = document.querySelector('input[name="role"]:checked').value;
@@ -47,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ name, email, password, role })
+                body: JSON.stringify({ email, password, role })
             });
             const data = await response.json();
 
