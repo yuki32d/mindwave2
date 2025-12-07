@@ -109,6 +109,10 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     displayName: { type: String }, // Custom display name for leaderboards/profiles
+    bio: { type: String }, // User bio/about me
+    phone: { type: String }, // Phone number
+    department: { type: String }, // Department/Program
+    yearSemester: { type: String }, // Year/Semester
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["student", "admin"], default: "student" },
@@ -1368,6 +1372,40 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
 
   } catch (error) {
     console.error("Leaderboard error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// ============================================
+// User Profile Update Endpoint
+// ============================================
+
+app.put("/api/user/update-profile", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const { displayName, bio, phone, department, yearSemester } = req.body;
+
+    // Update user profile
+    const updateFields = {};
+    if (displayName !== undefined) updateFields.displayName = displayName;
+    if (bio !== undefined) updateFields.bio = bio;
+    if (phone !== undefined) updateFields.phone = phone;
+    if (department !== undefined) updateFields.department = department;
+    if (yearSemester !== undefined) updateFields.yearSemester = yearSemester;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateFields },
+      { new: true, select: '-password' }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ ok: false, message: "User not found" });
+    }
+
+    res.json({ ok: true, user: updatedUser });
+  } catch (error) {
+    console.error("Profile update error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });

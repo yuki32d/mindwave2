@@ -34,7 +34,7 @@ function loadSettings() {
     }
 }
 
-function saveSettings() {
+async function saveSettings() {
     const displayName = document.getElementById('displayName').value;
     const bio = document.getElementById('bio').value;
     const phone = document.getElementById('phone').value;
@@ -70,31 +70,66 @@ function saveSettings() {
         console.log('Password would be updated in a real implementation');
     }
 
-    // Save settings
-    const settings = {
-        displayName,
-        bio,
-        phone,
-        department,
-        yearSemester,
-        studentId,
-        profilePhoto: document.getElementById('photoImage').src || null
-    };
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Please log in again');
+            window.location.href = 'login.html';
+            return;
+        }
 
-    localStorage.setItem('userSettings', JSON.stringify(settings));
-    localStorage.setItem('firstName', displayName);
+        // Save profile to database
+        const response = await fetch(`${window.location.origin}/api/user/update-profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                displayName,
+                bio,
+                phone,
+                department,
+                yearSemester
+            })
+        });
 
-    // Show success message
-    const successMsg = document.getElementById('successMessage');
-    successMsg.style.display = 'block';
-    setTimeout(() => {
-        successMsg.style.display = 'none';
-    }, 3000);
+        const data = await response.json();
 
-    // Clear password fields
-    document.getElementById('currentPassword').value = '';
-    document.getElementById('newPassword').value = '';
-    document.getElementById('confirmPassword').value = '';
+        if (!data.ok) {
+            throw new Error(data.message || 'Failed to save profile');
+        }
+
+        // Save settings to localStorage for offline access
+        const settings = {
+            displayName,
+            bio,
+            phone,
+            department,
+            yearSemester,
+            studentId,
+            profilePhoto: document.getElementById('photoImage').src || null
+        };
+
+        localStorage.setItem('userSettings', JSON.stringify(settings));
+        localStorage.setItem('firstName', displayName);
+
+        // Show success message
+        const successMsg = document.getElementById('successMessage');
+        successMsg.style.display = 'block';
+        setTimeout(() => {
+            successMsg.style.display = 'none';
+        }, 3000);
+
+        // Clear password fields
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        alert('Failed to save settings: ' + error.message);
+    }
 }
 
 function removePhoto() {
