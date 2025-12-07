@@ -223,6 +223,282 @@
             }
         }
 
+        /* Edit Mode Styles */
+        .edit-mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #0f62fe;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(24px);
+        }
+
+        .question-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .edit-btn {
+            background: rgba(15, 98, 254, 0.2);
+            color: #0f62fe;
+            border: 1px solid rgba(15, 98, 254, 0.3);
+        }
+
+        .edit-btn:hover {
+            background: rgba(15, 98, 254, 0.3);
+        }
+
+        .delete-btn {
+            background: rgba(220, 38, 38, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        .delete-btn:hover {
+            background: rgba(220, 38, 38, 0.3);
+        }
+
+        .add-question-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(52, 199, 89, 0.1);
+            border: 2px dashed rgba(52, 199, 89, 0.3);
+            border-radius: 12px;
+            color: #34c759;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+
+        .add-question-btn:hover {
+            background: rgba(52, 199, 89, 0.2);
+            border-color: rgba(52, 199, 89, 0.5);
+        }
+
+        .save-cancel-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .save-btn,
+        .cancel-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .save-btn {
+            background: #34c759;
+            color: white;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .cancel-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f5f7ff;
+        }
+
+        .cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: #1a1d2e;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #f5f7ff;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #9ea4b6;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: #f5f7ff;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #f5f7ff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0f62fe;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .option-input {
+            grid-column: 1;
+        }
+
+        .correct-radio {
+            grid-column: 2;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-actions .primary {
+            background: #0f62fe;
+            color: white;
+        }
+
+        .modal-actions .secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f5f7ff;
+        }
+
         @media (max-width: 1024px) {
             .builder-shell {
                 grid-template-columns: 1fr;
@@ -286,8 +562,16 @@
             <!-- Preview Panel -->
             <div class="preview-panel">
                 <div class="panel-header">
-                    <h2>👁️ Preview</h2>
-                    <p>Your game will appear here</p>
+                    <div>
+                        <h2>👁️ Preview</h2>
+                        <p>Your game will appear here</p>
+                    </div>
+                    <div class="edit-mode-toggle" id="editModeToggleContainer" style="display: none;">
+                        <span style="color: #9ea4b6; font-size: 14px;">Edit Mode</span>
+                        <div class="toggle-switch" id="editModeToggle">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="preview-content" id="previewContent">
@@ -299,6 +583,55 @@
                         <p>Start chatting to generate a game!</p>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Edit/Add Question Modal -->
+        <div id="questionModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Edit Question</h3>
+                    <button class="close-modal" id="closeModal">×</button>
+                </div>
+
+                <form id="questionForm">
+                    <div class="form-group">
+                        <label for="questionText">Question Text</label>
+                        <textarea id="questionText" required placeholder="Enter your question..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Options (select correct answer)</label>
+                        <div class="options-grid">
+                            <input type="text" id="optionA" class="option-input" placeholder="Option A" required>
+                            <input type="radio" name="correctAnswer" value="0" class="correct-radio" required>
+
+                            <input type="text" id="optionB" class="option-input" placeholder="Option B" required>
+                            <input type="radio" name="correctAnswer" value="1" class="correct-radio">
+
+                            <input type="text" id="optionC" class="option-input" placeholder="Option C" required>
+                            <input type="radio" name="correctAnswer" value="2" class="correct-radio">
+
+                            <input type="text" id="optionD" class="option-input" placeholder="Option D" required>
+                            <input type="radio" name="correctAnswer" value="3" class="correct-radio">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="questionPoints">Points</label>
+                        <input type="number" id="questionPoints" min="1" max="100" value="10" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="questionExplanation">Explanation (Optional)</label>
+                        <textarea id="questionExplanation" placeholder="Explain the correct answer..."></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="secondary" id="cancelModal">Cancel</button>
+                        <button type="submit" class="primary">Save Question</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

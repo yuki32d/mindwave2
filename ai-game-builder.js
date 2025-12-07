@@ -3,11 +3,21 @@ const API_BASE = window.location.origin;
 
 let chatHistory = [];
 let currentGameData = null;
+let editMode = false;
+let originalGameData = null; // For cancel functionality
+let editingQuestionIndex = null;
 
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 const sendBtn = document.getElementById('sendBtn');
 const previewContent = document.getElementById('previewContent');
+const editModeToggle = document.getElementById('editModeToggle');
+const editModeToggleContainer = document.getElementById('editModeToggleContainer');
+const questionModal = document.getElementById('questionModal');
+const questionForm = document.getElementById('questionForm');
+const closeModal = document.getElementById('closeModal');
+const cancelModal = document.getElementById('cancelModal');
+const modalTitle = document.getElementById('modalTitle');
 
 // Send Message
 async function sendMessage() {
@@ -48,6 +58,7 @@ async function sendMessage() {
             // Handle game data
             if (data.gameData) {
                 currentGameData = data.gameData;
+                originalGameData = JSON.parse(JSON.stringify(data.gameData)); // Deep copy
                 renderPreview(data.gameData);
             }
 
@@ -102,6 +113,9 @@ function removeMessage(id) {
 
 // Render Game Preview
 function renderPreview(gameData) {
+    // Show edit mode toggle
+    editModeToggleContainer.style.display = 'flex';
+
     let html = `
         <div class="game-preview">
             <h3>${gameData.title || 'Untitled Game'}</h3>
@@ -116,21 +130,7 @@ function renderPreview(gameData) {
 
     // Add game-specific details
     if (gameData.type === 'quiz' && gameData.questions) {
-        html += `<div class="game-preview">
-            <h3>Questions (${gameData.questions.length})</h3>`;
-        gameData.questions.forEach((q, i) => {
-            html += `
-                <p><strong>Q${i + 1}:</strong> ${q.text}</p>
-                <ul style="margin: 8px 0 16px 20px; color: #9ea4b6;">
-                    ${q.options.map((opt, idx) => `
-                        <li style="color: ${idx === q.correctIndex ? '#34c759' : '#9ea4b6'}">
-                            ${opt} ${idx === q.correctIndex ? '✓' : ''}
-                        </li>
-                    `).join('')}
-                </ul>
-            `;
-        });
-        html += `</div>`;
+        html += renderQuizPreview(gameData.questions);
     }
 
     if (gameData.type === 'sql-builder') {
@@ -150,48 +150,65 @@ function renderPreview(gameData) {
         </div>`;
     }
 
-    if (gameData.type === 'syntax-fill') {
-        html += `<div class="game-preview">
-            <h3>Code Template</h3>
-            <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto;">${gameData.content}</pre>
-            <p><strong>Blanks:</strong> ${gameData.blanks ? gameData.blanks.length : 0}</p>
-        </div>`;
+    // Add publish button if not in edit mode
+    if (!editMode) {
+        html += `<button class="publish-btn" onclick="publishGame()">📤 Publish Game</button>`;
     }
-
-    if (gameData.type === 'bug-hunt') {
-        html += `<div class="game-preview">
-            <h3>Buggy Code</h3>
-            <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto;">${gameData.buggyCode}</pre>
-            <p><strong>Bugs to find:</strong> ${gameData.bugCount || 0}</p>
-            <p><strong>Language:</strong> ${gameData.language || 'Not specified'}</p>
-        </div>`;
-    }
-
-    if (gameData.type === 'tech-sorter') {
-        html += `<div class="game-preview">
-            <h3>Items to Sort</h3>
-            <p><strong>Items:</strong> ${gameData.items ? gameData.items.join(', ') : 'None'}</p>
-            <p><strong>Categories:</strong> ${gameData.categories ? gameData.categories.join(', ') : 'None'}</p>
-        </div>`;
-    }
-
-    // Add publish button
-    // Add publish button (without inline onclick)
-    html += `<button class="publish-btn" id="publishGameBtn">✅ Publish Game</button>`;
 
     previewContent.innerHTML = html;
+}
 
-    // Add event listener to publish button
-    const publishBtn = document.getElementById('publishGameBtn');
-    if (publishBtn) {
-        publishBtn.addEventListener('click', () => publishGame());
+// Render Quiz Preview with Edit Controls
+function renderQuizPreview(questions) {
+    let html = '<div class="game-preview"><h3>Questions (' + questions.length + ')</h3>';
+
+    questions.forEach(function (q, i) {
+        html += '<div class="question-item">';
+        html += '<div class="question-header">';
+        html += '<strong>Q' + (i + 1) + ': ' + q.text + '</strong>';
+
+        if (editMode) {
+            html += '<div class="question-actions">';
+            html += '<button class="edit-btn" onclick="editQuestion(' + i + ')">✏️ Edit</button>';
+            html += '<button class="delete-btn" onclick="deleteQuestion(' + i + ')">🗑️ Delete</button>';
+            html += '</div>';
+        }
+
+        html += '</div>';
+        html += '<ul style="margin: 8px 0 16px 20px; color: #9ea4b6;">';
+
+        q.options.forEach(function (opt, idx) {
+            const isCorrect = idx === q.correctIndex;
+            html += '<li style="color: ' + (isCorrect ? '#34c759' : '#9ea4b6') + '">';
+            html += opt + (isCorrect ? ' ✓' : '');
+            html += '</li>';
+        });
+
+        html += '</ul>';
+
+        if (q.explanation) {
+            html += '<p style="font-size: 13px; color: #9ea4b6; font-style: italic;">💡 ' + q.explanation + '</p>';
+        }
+
+        html += '</div>';
+    });
+
+    if (editMode) {
+        html += '<button class="add-question-btn" onclick="addQuestion()">➕ Add New Question</button>';
+        html += '<div class="save-cancel-controls">';
+        html += '<button class="save-btn" onclick="saveGameChanges()">💾 Save Changes</button>';
+        html += '<button class="cancel-btn" onclick="cancelEdit()">❌ Cancel</button>';
+        html += '</div>';
     }
+
+    html += '</div>';
+    return html;
 }
 
 // Format Game Type
 function formatGameType(type) {
     const types = {
-        'quiz': 'Quiz',
+        'quiz': 'Quiz Game',
         'sql-builder': 'SQL Builder',
         'code-unjumble': 'Code Unjumble',
         'syntax-fill': 'Syntax Fill-in',
@@ -199,6 +216,157 @@ function formatGameType(type) {
         'tech-sorter': 'Tech Sorter'
     };
     return types[type] || type;
+}
+
+// Toggle Edit Mode
+editModeToggle.addEventListener('click', function () {
+    editMode = !editMode;
+    editModeToggle.classList.toggle('active');
+
+    if (editMode) {
+        // Save original for cancel
+        originalGameData = JSON.parse(JSON.stringify(currentGameData));
+    }
+
+    renderPreview(currentGameData);
+});
+
+// Edit Question
+function editQuestion(index) {
+    if (!currentGameData || !currentGameData.questions) return;
+
+    editingQuestionIndex = index;
+    const question = currentGameData.questions[index];
+
+    // Populate modal
+    modalTitle.textContent = 'Edit Question ' + (index + 1);
+    document.getElementById('questionText').value = question.text;
+    document.getElementById('optionA').value = question.options[0] || '';
+    document.getElementById('optionB').value = question.options[1] || '';
+    document.getElementById('optionC').value = question.options[2] || '';
+    document.getElementById('optionD').value = question.options[3] || '';
+    document.getElementById('questionPoints').value = question.points || 10;
+    document.getElementById('questionExplanation').value = question.explanation || '';
+
+    // Set correct answer radio
+    const radios = document.querySelectorAll('input[name="correctAnswer"]');
+    radios[question.correctIndex].checked = true;
+
+    // Show modal
+    questionModal.style.display = 'flex';
+}
+
+// Add Question
+function addQuestion() {
+    editingQuestionIndex = null;
+
+    // Clear modal
+    modalTitle.textContent = 'Add New Question';
+    questionForm.reset();
+
+    // Show modal
+    questionModal.style.display = 'flex';
+}
+
+// Delete Question
+function deleteQuestion(index) {
+    if (!confirm('Are you sure you want to delete this question?')) return;
+
+    currentGameData.questions.splice(index, 1);
+
+    // Recalculate total points
+    currentGameData.totalPoints = currentGameData.questions.reduce(function (sum, q) {
+        return sum + (q.points || 10);
+    }, 0);
+
+    renderPreview(currentGameData);
+}
+
+// Save Question from Modal
+questionForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const questionData = {
+        text: document.getElementById('questionText').value,
+        options: [
+            document.getElementById('optionA').value,
+            document.getElementById('optionB').value,
+            document.getElementById('optionC').value,
+            document.getElementById('optionD').value
+        ],
+        correctIndex: parseInt(document.querySelector('input[name="correctAnswer"]:checked').value),
+        points: parseInt(document.getElementById('questionPoints').value),
+        explanation: document.getElementById('questionExplanation').value
+    };
+
+    if (editingQuestionIndex !== null) {
+        // Update existing question
+        currentGameData.questions[editingQuestionIndex] = questionData;
+    } else {
+        // Add new question
+        currentGameData.questions.push(questionData);
+    }
+
+    // Recalculate total points
+    currentGameData.totalPoints = currentGameData.questions.reduce(function (sum, q) {
+        return sum + (q.points || 10);
+    }, 0);
+
+    // Close modal and refresh preview
+    questionModal.style.display = 'none';
+    renderPreview(currentGameData);
+});
+
+// Close Modal
+closeModal.addEventListener('click', function () {
+    questionModal.style.display = 'none';
+});
+
+cancelModal.addEventListener('click', function () {
+    questionModal.style.display = 'none';
+});
+
+// Close modal on outside click
+questionModal.addEventListener('click', function (e) {
+    if (e.target === questionModal) {
+        questionModal.style.display = 'none';
+    }
+});
+
+// Save Game Changes
+async function saveGameChanges() {
+    if (!currentGameData) return;
+
+    if (!confirm('Save all changes to this game?')) return;
+
+    try {
+        // Update the game data
+        originalGameData = JSON.parse(JSON.stringify(currentGameData));
+
+        alert('✅ Changes saved! You can now publish the game or continue editing.');
+
+        // Exit edit mode
+        editMode = false;
+        editModeToggle.classList.remove('active');
+        renderPreview(currentGameData);
+
+    } catch (error) {
+        console.error('Save error:', error);
+        alert('Failed to save changes. Please try again.');
+    }
+}
+
+// Cancel Edit
+function cancelEdit() {
+    if (!confirm('Discard all changes?')) return;
+
+    // Restore original data
+    currentGameData = JSON.parse(JSON.stringify(originalGameData));
+
+    // Exit edit mode
+    editMode = false;
+    editModeToggle.classList.remove('active');
+    renderPreview(currentGameData);
 }
 
 // Publish Game
@@ -229,6 +397,10 @@ async function publishGame(gameData = currentGameData) {
 
             // Clear preview
             currentGameData = null;
+            editMode = false;
+            editModeToggle.classList.remove('active');
+            editModeToggleContainer.style.display = 'none';
+
             previewContent.innerHTML = `
                 <div class="empty-preview">
                     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -249,7 +421,7 @@ async function publishGame(gameData = currentGameData) {
 
 // Event Listeners
 sendBtn.addEventListener('click', sendMessage);
-chatInput.addEventListener('keypress', (e) => {
+chatInput.addEventListener('keypress', function (e) {
     if (e.key === 'Enter') sendMessage();
 });
 
