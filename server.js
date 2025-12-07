@@ -1418,6 +1418,65 @@ app.put("/api/user/update-profile", authMiddleware, async (req, res) => {
 });
 
 // ============================================
+// Admin Student Management Endpoints
+// ============================================
+
+// Get all students (admin only)
+app.get("/api/admin/students", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const students = await User.find({ role: 'student' })
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+    res.json({ ok: true, students });
+  } catch (error) {
+    console.error("Get students error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Delete student (admin only)
+app.delete("/api/admin/students/:id", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const studentId = req.params.id;
+
+    // Delete student
+    const deletedStudent = await User.findByIdAndDelete(studentId);
+
+    if (!deletedStudent) {
+      return res.status(404).json({ ok: false, message: "Student not found" });
+    }
+
+    // Also delete their game submissions
+    await GameSubmission.deleteMany({ studentId: studentId });
+
+    res.json({
+      ok: true,
+      message: "Student deleted successfully",
+      student: {
+        name: deletedStudent.name,
+        email: deletedStudent.email
+      }
+    });
+  } catch (error) {
+    console.error("Delete student error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// ============================================
 // Global Settings Endpoints
 // ============================================
 

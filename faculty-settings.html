@@ -141,6 +141,45 @@
         .danger-btn:hover {
             background: rgba(255, 59, 48, 0.2);
         }
+
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .student-info strong {
+            display: block;
+            color: #f5f6fb;
+            margin-bottom: 4px;
+        }
+
+        .student-info span {
+            color: #9ea4b6;
+            font-size: 13px;
+        }
+
+        .delete-student-btn {
+            padding: 8px 16px;
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: #ef4444;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .delete-student-btn:hover {
+            background: rgba(220, 38, 38, 0.2);
+            border-color: rgba(220, 38, 38, 0.5);
+        }
     </style>
 </head>
 
@@ -238,7 +277,27 @@
                 </div>
             </div>
 
-            <!-- 4. Game Management -->
+            <!-- 4. Student Management -->
+            <div class="settings-card">
+                <h2>👥 Student Management</h2>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <strong>Manage Students</strong>
+                        <span>View and remove student accounts from the system.</span>
+                    </div>
+                </div>
+
+                <div id="studentList" style="max-height: 400px; overflow-y: auto;">
+                    <p style="color: #9ea4b6; text-align: center; padding: 20px;">Loading students...</p>
+                </div>
+
+                <button class="primary-btn" id="refreshStudentsBtn"
+                    style="background: linear-gradient(120deg, #0f62fe, #8a3ffc); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%;">🔄
+                    Refresh List</button>
+            </div>
+
+            <!-- 5. Game Management -->
             <div class="settings-card">
                 <h2>🎮 Game Management</h2>
 
@@ -258,6 +317,7 @@
     <script src="role-page.js"></script>
 
     <script src="faculty-settings.js"></script>
+    <script src="student-management.js"></script>
 </body>
 
 </html>
