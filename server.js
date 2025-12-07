@@ -1256,6 +1256,122 @@ app.post("/api/game-submissions", authMiddleware, async (req, res) => {
 });
 
 // ============================================
+// Leaderboard Endpoint
+// ============================================
+
+app.get("/api/leaderboard", authMiddleware, async (req, res) => {
+  try {
+    const { timeFilter, gameType } = req.query;
+    const currentUserId = req.user.sub;
+
+    // Build time filter
+    let dateFilter = {};
+    const now = new Date();
+
+    if (timeFilter === 'today') {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      dateFilter = { submittedAt: { $gte: today } };
+    } else if (timeFilter === 'week') {
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      dateFilter = { submittedAt: { $gte: weekAgo } };
+    } else if (timeFilter === 'month') {
+      const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+      dateFilter = { submittedAt: { $gte: monthAgo } };
+    }
+
+    // Build game type filter
+    let gameTypeFilter = {};
+    if (gameType && gameType !== 'all') {
+      // Map frontend filter to game types
+      const gameTypeMap = {
+        'quiz': ['quiz'],
+        'unjumble': ['unjumble', 'code-unjumble'],
+        'sorter': ['sorter', 'tech-sorter'],
+        'fillin': ['fillin', 'syntax-fill'],
+        'sql': ['sql', 'sql-builder']
+      };
+
+      if (gameTypeMap[gameType]) {
+        // Need to join with Game collection to filter by type
+        const gamesOfType = await Game.find({ type: { $in: gameTypeMap[gameType] } }).select('_id');
+        const gameIds = gamesOfType.map(g => g._id);
+        gameTypeFilter = { gameId: { $in: gameIds } };
+      }
+    }
+
+    // Aggregate leaderboard data
+    const leaderboardData = await GameSubmission.aggregate([
+      {
+        $match: { ...dateFilter, ...gameTypeFilter }
+      },
+      {
+        $group: {
+          _id: '$studentId',
+          totalPoints: { $sum: '$score' },
+          gamesPlayed: { $sum: 1 },
+          totalAccuracy: { $avg: '$score' },
+          lastActivity: { $max: '$submittedAt' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userInfo'
+        }
+      },
+      {
+        $unwind: '$userInfo'
+      },
+      {
+        $project: {
+          studentId: '$_id',
+          name: '$userInfo.name',
+          email: '$userInfo.email',
+          totalPoints: 1,
+          gamesPlayed: 1,
+          avgAccuracy: { $round: ['$totalAccuracy', 0] },
+          lastActivity: 1
+        }
+      },
+      {
+        $sort: { totalPoints: -1 }
+      }
+    ]);
+
+    // Find current user's stats
+    const currentUserStats = leaderboardData.find(
+      entry => entry.studentId.toString() === currentUserId
+    );
+
+    const currentUserRank = currentUserStats
+      ? leaderboardData.findIndex(entry => entry.studentId.toString() === currentUserId) + 1
+      : 0;
+
+    res.json({
+      ok: true,
+      leaderboard: leaderboardData,
+      currentUser: currentUserStats ? {
+        rank: currentUserRank,
+        totalPoints: currentUserStats.totalPoints,
+        gamesPlayed: currentUserStats.gamesPlayed,
+        avgAccuracy: currentUserStats.avgAccuracy
+      } : {
+        rank: 0,
+        totalPoints: 0,
+        gamesPlayed: 0,
+        avgAccuracy: 0
+      }
+    });
+
+  } catch (error) {
+    console.error("Leaderboard error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// ============================================
 // Global Settings Endpoints
 // ============================================
 

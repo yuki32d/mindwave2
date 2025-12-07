@@ -1,84 +1,43 @@
-const activityKey = 'student_activities';
 const currentUserEmail = localStorage.getItem('email') || 'student@example.com';
 let currentTimeFilter = 'all';
 let currentGameFilter = 'all';
 
-function loadActivities() {
+async function fetchLeaderboard() {
     try {
-        return JSON.parse(localStorage.getItem(activityKey) || '[]');
-    } catch {
-        return [];
-    }
-}
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No auth token found');
+            return { leaderboard: [], currentUser: null };
+        }
 
-function filterActivities(activities) {
-    let filtered = [...activities];
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (currentTimeFilter && currentTimeFilter !== 'all') {
+            params.append('timeFilter', currentTimeFilter);
+        }
+        if (currentGameFilter && currentGameFilter !== 'all') {
+            params.append('gameType', currentGameFilter);
+        }
 
-    // Time filter
-    const now = new Date();
-    if (currentTimeFilter === 'today') {
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        filtered = filtered.filter(a => new Date(a.completedAt) >= today);
-    } else if (currentTimeFilter === 'week') {
-        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        filtered = filtered.filter(a => new Date(a.completedAt) >= weekAgo);
-    } else if (currentTimeFilter === 'month') {
-        const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-        filtered = filtered.filter(a => new Date(a.completedAt) >= monthAgo);
-    }
+        const response = await fetch(`${window.location.origin}/api/leaderboard?${params}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
-    // Game type filter
-    if (currentGameFilter !== 'all') {
-        const gameTypeMap = {
-            'quiz': ['quiz'],
-            'unjumble': ['unjumble', 'code-unjumble'],
-            'sorter': ['sorter', 'tech-sorter'],
-            'fillin': ['fillin', 'syntax-fill'],
-            'sql': ['sql', 'sql-builder']
+        if (!response.ok) {
+            throw new Error('Failed to fetch leaderboard');
+        }
+
+        const data = await response.json();
+        return {
+            leaderboard: data.leaderboard || [],
+            currentUser: data.currentUser || null
         };
-        const validTypes = gameTypeMap[currentGameFilter] || [currentGameFilter];
-        filtered = filtered.filter(a => validTypes.includes(a.gameType));
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        return { leaderboard: [], currentUser: null };
     }
-
-    return filtered;
-}
-
-function aggregateLeaderboard() {
-    const activities = filterActivities(loadActivities());
-    const playerStats = {};
-
-    activities.forEach(activity => {
-        const email = activity.studentEmail;
-        if (!playerStats[email]) {
-            playerStats[email] = {
-                email: email,
-                name: activity.studentName || email.split('@')[0],
-                totalPoints: 0,
-                gamesPlayed: 0,
-                totalAccuracy: 0,
-                lastActivity: activity.completedAt
-            };
-        }
-
-        playerStats[email].totalPoints += activity.rawScore || 0;
-        playerStats[email].gamesPlayed += 1;
-        playerStats[email].totalAccuracy += activity.score || 0;
-
-        if (new Date(activity.completedAt) > new Date(playerStats[email].lastActivity)) {
-            playerStats[email].lastActivity = activity.completedAt;
-        }
-    });
-
-    // Calculate averages and convert to array
-    const leaderboard = Object.values(playerStats).map(player => ({
-        ...player,
-        avgAccuracy: player.gamesPlayed > 0 ? Math.round(player.totalAccuracy / player.gamesPlayed) : 0
-    }));
-
-    // Sort by total points
-    leaderboard.sort((a, b) => b.totalPoints - a.totalPoints);
-
-    return leaderboard;
 }
 
 function getInitials(name) {
@@ -166,15 +125,12 @@ function renderLeaderboard(leaderboard) {
     }).join('');
 }
 
-function updatePersonalStats(leaderboard) {
-    const currentPlayer = leaderboard.find(p => p.email === currentUserEmail);
-    const rank = leaderboard.findIndex(p => p.email === currentUserEmail) + 1;
-
-    if (currentPlayer) {
-        document.getElementById('yourRank').textContent = rank > 0 ? `#${rank}` : '-';
-        document.getElementById('yourPoints').textContent = currentPlayer.totalPoints.toLocaleString();
-        document.getElementById('yourGames').textContent = currentPlayer.gamesPlayed;
-        document.getElementById('yourAccuracy').textContent = `${currentPlayer.avgAccuracy}%`;
+function updatePersonalStats(currentUser) {
+    if (currentUser && currentUser.rank > 0) {
+        document.getElementById('yourRank').textContent = `#${currentUser.rank}`;
+        document.getElementById('yourPoints').textContent = currentUser.totalPoints.toLocaleString();
+        document.getElementById('yourGames').textContent = currentUser.gamesPlayed;
+        document.getElementById('yourAccuracy').textContent = `${currentUser.avgAccuracy}%`;
     } else {
         document.getElementById('yourRank').textContent = '-';
         document.getElementById('yourPoints').textContent = '0';
@@ -183,11 +139,11 @@ function updatePersonalStats(leaderboard) {
     }
 }
 
-function render() {
-    const leaderboard = aggregateLeaderboard();
+async function render() {
+    const { leaderboard, currentUser } = await fetchLeaderboard();
     renderPodium(leaderboard);
     renderLeaderboard(leaderboard);
-    updatePersonalStats(leaderboard);
+    updatePersonalStats(currentUser);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
