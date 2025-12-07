@@ -562,6 +562,96 @@
             }
         }
     </style>
+
+    <!-- Intro.js for Onboarding Tour -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/introjs.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/intro.min.js"></script>
+
+    <!-- Custom Professional Tour Styling -->
+    <style>
+        .introjs-tooltip {
+            background: linear-gradient(135deg, #1a1d2e 0%, #16213e 100%) !important;
+            border: 1px solid rgba(15, 98, 254, 0.3) !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+            border-radius: 16px !important;
+            padding: 24px !important;
+            min-width: 400px !important;
+        }
+
+        .introjs-tooltip-title {
+            color: #fff !important;
+            font-size: 20px !important;
+            font-weight: 600 !important;
+            background: linear-gradient(120deg, #0f62fe, #8a3ffc) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
+        }
+
+        .introjs-tooltiptext {
+            color: #d5d9ea !important;
+            font-size: 15px !important;
+            line-height: 1.6 !important;
+        }
+
+        .introjs-button {
+            background: linear-gradient(120deg, #0f62fe, #8a3ffc) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 999px !important;
+            padding: 10px 24px !important;
+            font-weight: 600 !important;
+            transition: transform 0.2s !important;
+            text-shadow: none !important;
+        }
+
+        .introjs-button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 20px rgba(15, 98, 254, 0.4) !important;
+        }
+
+        .introjs-prevbutton {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .introjs-skipbutton {
+            color: rgba(255, 255, 255, 0.9) !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            padding: 2px 10px !important;
+            font-weight: 500 !important;
+            font-size: 13px !important;
+            text-decoration: none !important;
+            border-radius: 3px !important;
+            transition: all 0.2s !important;
+            position: absolute !important;
+            top: -12px !important;
+            right: -12px !important;
+        }
+
+        .introjs-skipbutton:hover {
+            color: #fff !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+            transform: translateY(-3px) !important;
+        }
+
+        .introjs-progress {
+            background: rgba(255, 255, 255, 0.1) !important;
+            height: 4px !important;
+            border-radius: 999px !important;
+        }
+
+        .introjs-progressbar {
+            background: linear-gradient(90deg, #0f62fe, #8a3ffc) !important;
+        }
+
+        .introjs-helperLayer {
+            border: 2px solid rgba(15, 98, 254, 0.6) !important;
+            box-shadow: 0 0 0 5000px rgba(0, 0, 0, 0.7) !important;
+            border-radius: 8px !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -635,6 +725,74 @@
     </div>
     <script src="homepage.js"></script>
     <script src="chatbot.js"></script>
+
+    <!-- Onboarding Tour Script -->
+    <script>
+        // Student Onboarding Tour
+        function startStudentTour() {
+            introJs().setOptions({
+                steps: [
+                    {
+                        title: 'Welcome to Mindwave! 🎓',
+                        intro: 'Let\'s take a quick tour to help you get started with the platform.'
+                    },
+                    {
+                        element: document.querySelector('.menu a[href="student-game.html"]'),
+                        title: 'Play Games 🎮',
+                        intro: 'Click here to access educational games. Play games to earn points and learn!'
+                    },
+                    {
+                        element: document.querySelector('.menu a[href="student-leaderboard.html"]'),
+                        title: 'Leaderboard 🏆',
+                        intro: 'Check your ranking and compete with your classmates!'
+                    },
+                    {
+                        element: document.querySelector('#gameFeed'),
+                        title: 'Latest Games 📚',
+                        intro: 'See the newest games published by your instructors here.'
+                    },
+                    {
+                        element: document.querySelector('.chatbot-toggle'),
+                        title: 'AI Assistant 💬',
+                        intro: 'Need help? Click the chatbot button in the bottom right to get instant assistance!'
+                    },
+                    {
+                        element: document.querySelector('.profile-toggle'),
+                        title: 'Your Profile 👤',
+                        intro: 'Access your profile, settings, and logout from here.'
+                    },
+                    {
+                        title: 'You\'re All Set! 🚀',
+                        intro: 'Start playing games and learning. Have fun!'
+                    }
+                ],
+                showProgress: true,
+                showBullets: false,
+                exitOnOverlayClick: false,
+                doneLabel: 'Get Started!',
+                nextLabel: 'Next →',
+                prevLabel: '← Back',
+                skipLabel: 'Skip'
+            }).oncomplete(function () {
+                localStorage.setItem('mindwave_tour_student', 'completed');
+            }).onexit(function () {
+                localStorage.setItem('mindwave_tour_student', 'completed');
+            }).start();
+        }
+
+        // Auto-start tour on first visit
+        window.addEventListener('load', function () {
+            // Auto-start for new users
+            setTimeout(function () {
+                if (!localStorage.getItem('mindwave_tour_student')) {
+                    startStudentTour();
+                }
+            }, 1500);
+        });
+
+        // Expose function globally for manual tour restart
+        window.startStudentTour = startStudentTour;
+    </script>
 </body>
 
 </html>
