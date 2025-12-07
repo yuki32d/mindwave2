@@ -108,6 +108,7 @@ mongoose
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
+    displayName: { type: String }, // Custom display name for leaderboards/profiles
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["student", "admin"], default: "student" },
@@ -950,7 +951,7 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
       {
         $group: {
           _id: '$studentId',
-          name: { $first: '$student.name' },
+          name: { $first: { $ifNull: ['$student.displayName', '$student.name'] } },
           totalScore: { $sum: 1 } // Count submissions as score
         }
       },
@@ -1082,7 +1083,7 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
       {
         $group: {
           _id: '$studentId',
-          name: { $first: '$student.name' },
+          name: { $first: { $ifNull: ['$student.displayName', '$student.name'] } },
           email: { $first: '$student.email' },
           gamesPlayed: { $sum: 1 },
           gamesCompleted: {
@@ -1327,7 +1328,7 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
       {
         $project: {
           studentId: '$_id',
-          name: '$userInfo.name',
+          name: { $ifNull: ['$userInfo.displayName', '$userInfo.name'] },
           email: '$userInfo.email',
           totalPoints: 1,
           gamesPlayed: 1,
