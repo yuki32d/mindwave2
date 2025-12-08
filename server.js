@@ -123,7 +123,9 @@ const userSchema = new mongoose.Schema(
     githubUsername: { type: String },
     // Zoom Integration
     zoomAccessToken: { type: String },
-    zoomRefreshToken: { type: String }
+    zoomRefreshToken: { type: String },
+    // Activity Tracking
+    lastActive: { type: Date, default: Date.now }
   },
   { timestamps: true }
 );
@@ -1705,6 +1707,64 @@ app.post("/api/admin/reject-signup/:id", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Reject signup error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+
+// ============ USER ACTIVITY TRACKING ============
+
+// Heartbeat endpoint - Update user's last active timestamp
+app.put("/api/user/heartbeat", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+
+    await User.findByIdAndUpdate(userId, {
+      lastActive: new Date()
+    });
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Heartbeat error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Get active users (admin only)
+app.get("/api/admin/active-users", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    // Get all students
+    const allStudents = await User.find({ role: 'student' })
+      .select('-password')
+      .sort({ lastActive: -1 });
+
+    // Define active threshold (30 seconds - 3x heartbeat interval of 10s)
+    const activeThreshold = new Date(Date.now() - 30 * 1000);
+
+    // Separate online and offline users
+    const online = allStudents.filter(user =>
+      user.lastActive && new Date(user.lastActive) > activeThreshold
+    );
+
+    const offline = allStudents.filter(user =>
+      !user.lastActive || new Date(user.lastActive) <= activeThreshold
+    );
+
+    res.json({
+      ok: true,
+      online,
+      offline,
+      totalOnline: online.length,
+      totalOffline: offline.length
+    });
+  } catch (error) {
+    console.error("Get active users error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });

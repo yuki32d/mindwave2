@@ -328,9 +328,11 @@ async function showSystemStatus() {
 
     // Fetch real-time data
     try {
-        // Get users count
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        document.getElementById('statusTotalUsers').textContent = users.length;
+        // Get active users count from API
+        const activeUsersData = await fetchAPI('/api/admin/active-users');
+        if (activeUsersData && activeUsersData.ok) {
+            document.getElementById('statusTotalUsers').textContent = activeUsersData.totalOnline;
+        }
 
         // Get active games count
         const gamesData = await fetchAPI('/api/games/published');

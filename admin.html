@@ -675,17 +675,20 @@
             </div>
 
             <div style="display: grid; gap: 16px;">
-                <div
-                    style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 4px;">Total Users
+                <a href="active-users.html" style="text-decoration: none; color: inherit;">
+                    <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all 0.2s;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.transform='translateY(0)'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 4px;">Total Users
+                                </div>
+                                <div style="font-size: 24px; font-weight: 600;" id="statusTotalUsers">0</div>
                             </div>
-                            <div style="font-size: 24px; font-weight: 600;" id="statusTotalUsers">0</div>
+                            <div style="font-size: 32px;">👥</div>
                         </div>
-                        <div style="font-size: 32px;">👥</div>
                     </div>
-                </div>
+                </a>
 
                 <div
                     style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
