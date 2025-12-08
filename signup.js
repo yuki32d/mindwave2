@@ -55,6 +55,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            // Handle pending admin signup
+            if (data.pending) {
+                alert(data.message || 'Admin signup request submitted for approval. You\'ll be notified once approved.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Regular student signup
             alert('Sign up successful! You can log in now.');
             window.location.href = 'login.html';
         } catch (error) {

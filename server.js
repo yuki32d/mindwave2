@@ -225,6 +225,30 @@ const GameSubmission = mongoose.model("GameSubmission", gameSubmissionSchema);
 const TimeAttackSession = mongoose.model("TimeAttackSession", timeAttackSessionSchema);
 const TimeAttackLeaderboard = mongoose.model("TimeAttackLeaderboard", timeAttackLeaderboardSchema);
 
+// Pending Admin Signup Schema (for approval workflow)
+const pendingAdminSignupSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true }, // Hashed password
+    requestedAt: { type: Date, default: Date.now },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending'
+    },
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    approvedAt: { type: Date },
+    rejectedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    rejectedAt: { type: Date }
+  },
+  { timestamps: true }
+);
+
+const PendingAdminSignup = mongoose.model("PendingAdminSignup", pendingAdminSignupSchema);
+
+// CONFIGURABLE: Super Admin Email (can be changed for different HODs)
+const SUPER_ADMIN_EMAIL = "jeeban.mca@cmrit.ac.in"; // Change this to the HOD's email
+
 // Custom Course Management Schemas
 const subjectSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -447,15 +471,66 @@ app.post("/api/signup", authLimiter, async (req, res) => {
   }
 
   try {
-    // Extract first name from email (e.g., "jeeban" from "jeeban.mca25@cmrit.ac.in")
-    const emailPrefix = email.split('@')[0]; // "jeeban.mca25"
-    const firstName = emailPrefix.split('.')[0]; // "jeeban"
-    const capitalizedName = firstName.charAt(0).toUpperCase() + firstName.slice(1); // "Jeeban"
+    // Extract first name from email
+    const emailPrefix = email.split('@')[0];
+    const firstName = emailPrefix.split('.')[0];
+    const capitalizedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 
     const hashed = await bcrypt.hash(password, 10);
+
+    // ADMIN SIGNUP: Create pending request for approval
+    if (safeRole === 'admin') {
+      // Check if already has a pending request
+      const existingPending = await PendingAdminSignup.findOne({
+        email: email.toLowerCase(),
+        status: 'pending'
+      });
+
+      if (existingPending) {
+        return res.status(409).json({
+          ok: false,
+          message: "Admin signup request already pending approval"
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ email: email.toLowerCase() });
+      if (existingUser) {
+        return res.status(409).json({ ok: false, message: "Email already registered" });
+      }
+
+      // Create pending admin signup request
+      const pendingSignup = await PendingAdminSignup.create({
+        email: email.toLowerCase(),
+        password: hashed,
+        status: 'pending'
+      });
+
+      // Create notification for super admin
+      const superAdmin = await User.findOne({ email: SUPER_ADMIN_EMAIL });
+      if (superAdmin) {
+        await AdminNotification.create({
+          userId: superAdmin._id,
+          type: 'admin_signup_request',
+          message: `New admin signup request from ${email}`,
+          metadata: {
+            pendingSignupId: pendingSignup._id,
+            email: email
+          }
+        });
+      }
+
+      return res.status(202).json({
+        ok: true,
+        message: "Admin signup request submitted for approval. You'll be notified once approved.",
+        pending: true
+      });
+    }
+
+    // STUDENT SIGNUP: Create user immediately
     const user = await User.create({
-      name: capitalizedName, // Use extracted name
-      displayName: capitalizedName, // Set displayName to same value
+      name: capitalizedName,
+      displayName: capitalizedName,
       email: email.toLowerCase(),
       password: hashed,
       role: safeRole
@@ -1518,6 +1593,122 @@ app.delete("/api/admin/students/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });
+
+// ============ PENDING ADMIN SIGNUP MANAGEMENT ============
+
+// Get all pending admin signup requests (admin only)
+app.get("/api/admin/pending-signups", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const pendingSignups = await PendingAdminSignup.find({ status: 'pending' })
+      .select('-password')
+      .sort({ requestedAt: -1 });
+
+    res.json({ ok: true, pendingSignups });
+  } catch (error) {
+    console.error("Get pending signups error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Approve pending admin signup (admin only)
+app.post("/api/admin/approve-signup/:id", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const pendingSignup = await PendingAdminSignup.findById(req.params.id);
+
+    if (!pendingSignup) {
+      return res.status(404).json({ ok: false, message: "Pending signup not found" });
+    }
+
+    if (pendingSignup.status !== 'pending') {
+      return res.status(400).json({ ok: false, message: "Signup request already processed" });
+    }
+
+    // Extract name from email
+    const emailPrefix = pendingSignup.email.split('@')[0];
+    const firstName = emailPrefix.split('.')[0];
+    const capitalizedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+
+    // Create the admin user account
+    const newAdmin = await User.create({
+      name: capitalizedName,
+      displayName: capitalizedName,
+      email: pendingSignup.email,
+      password: pendingSignup.password, // Already hashed
+      role: 'admin'
+    });
+
+    // Update pending signup status
+    pendingSignup.status = 'approved';
+    pendingSignup.approvedBy = currentUser._id;
+    pendingSignup.approvedAt = new Date();
+    await pendingSignup.save();
+
+    // Create notification for the new admin
+    await AdminNotification.create({
+      userId: newAdmin._id,
+      type: 'signup_approved',
+      message: `Your admin account has been approved! You can now log in.`,
+      metadata: { approvedBy: currentUser.email }
+    });
+
+    res.json({
+      ok: true,
+      message: "Admin signup approved successfully",
+      user: { name: newAdmin.name, email: newAdmin.email }
+    });
+  } catch (error) {
+    console.error("Approve signup error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Reject pending admin signup (admin only)
+app.post("/api/admin/reject-signup/:id", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const pendingSignup = await PendingAdminSignup.findById(req.params.id);
+
+    if (!pendingSignup) {
+      return res.status(404).json({ ok: false, message: "Pending signup not found" });
+    }
+
+    if (pendingSignup.status !== 'pending') {
+      return res.status(400).json({ ok: false, message: "Signup request already processed" });
+    }
+
+    // Update pending signup status
+    pendingSignup.status = 'rejected';
+    pendingSignup.rejectedBy = currentUser._id;
+    pendingSignup.rejectedAt = new Date();
+    await pendingSignup.save();
+
+    res.json({
+      ok: true,
+      message: "Admin signup rejected successfully"
+    });
+  } catch (error) {
+    console.error("Reject signup error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 
 // ============================================
 // Global Settings Endpoints
