@@ -1927,6 +1927,32 @@ app.get("/api/projects/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// Delete a project (students can only delete their own)
+app.delete("/api/projects/:id", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const { id } = req.params;
+
+    const project = await ProjectSubmission.findById(id);
+
+    if (!project) {
+      return res.status(404).json({ ok: false, message: "Project not found" });
+    }
+
+    // Check if the user is the owner of the project
+    if (project.studentId.toString() !== userId) {
+      return res.status(403).json({ ok: false, message: "You can only delete your own projects" });
+    }
+
+    await ProjectSubmission.findByIdAndDelete(id);
+
+    res.json({ ok: true, message: "Project deleted successfully" });
+  } catch (error) {
+    console.error("Delete project error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 
 // ============================================
 // Global Settings Endpoints

@@ -50,9 +50,14 @@ function renderProjects(projects) {
                     <h3 style="margin: 0 0 8px; font-size: 20px;">${escapeHtml(project.projectName)}</h3>
                     <span class="status-badge status-${project.status}">${formatStatus(project.status)}</span>
                 </div>
-                ${project.grade !== null && project.grade !== undefined ? `
-                    <div class="grade-display">${project.grade}/100</div>
-                ` : ''}
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    ${project.grade !== null && project.grade !== undefined ? `
+                        <div class="grade-display">${project.grade}/100</div>
+                    ` : ''}
+                    <button class="delete-project-btn" data-project-id="${project._id}" data-project-name="${escapeHtml(project.projectName)}" style="background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.3); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s; font-weight: 600;" title="Delete project">
+                        🗑️ Delete
+                    </button>
+                </div>
             </div>
 
             <p style="color: var(--text-muted); margin-bottom: 16px;">${escapeHtml(project.description)}</p>
@@ -92,6 +97,15 @@ function renderProjects(projects) {
             const url = this.getAttribute('data-demo-url');
             const name = this.getAttribute('data-project-name');
             viewDemo(url, name);
+        });
+    });
+
+    // Add event listeners to delete buttons
+    document.querySelectorAll('.delete-project-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const projectId = this.getAttribute('data-project-id');
+            const projectName = this.getAttribute('data-project-name');
+            deleteProject(projectId, projectName);
         });
     });
 }
@@ -176,6 +190,34 @@ function viewDemo(url, projectName) {
             modal.remove();
         }
     });
+}
+
+// Delete a project
+async function deleteProject(projectId, projectName) {
+    const confirmed = confirm(`Are you sure you want to delete "${projectName}"?\n\nThis action cannot be undone.`);
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/projects/${projectId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+            alert('✅ Project deleted successfully!');
+            loadMyProjects(); // Reload the projects list
+        } else {
+            alert('❌ ' + (data.message || 'Failed to delete project'));
+        }
+    } catch (error) {
+        console.error('Delete project error:', error);
+        alert('❌ Network error. Please try again.');
+    }
 }
 
 // Helper functions
