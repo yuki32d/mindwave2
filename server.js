@@ -190,7 +190,10 @@ const gameSubmissionSchema = new mongoose.Schema(
     isCorrect: { type: Boolean, required: true },
     score: { type: Number, default: 0 }, // Percentage score (0-100)
     studentAnswers: { type: Array, default: [] }, // Array of student's answers for review
-    submittedAt: { type: Date, default: Date.now }
+    submittedAt: { type: Date, default: Date.now },
+    startedAt: { type: Date }, // When student started the game
+    completedAt: { type: Date }, // When student completed/submitted the game
+    durationSeconds: { type: Number } // Time taken in seconds
   },
   { timestamps: true }
 );
@@ -1100,7 +1103,8 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
           gamesCompleted: {
             $sum: { $cond: [{ $eq: ['$isCorrect', true] }, 1, 0] }
           },
-          lastActive: { $max: '$submittedAt' }
+          lastActive: { $max: '$submittedAt' },
+          totalTime: { $sum: '$durationSeconds' }
         }
       },
       { $sort: { lastActive: -1 } }
@@ -1115,12 +1119,13 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
         : 0;
 
       return {
+        _id: student._id,
         name: student.name,
         email: student.email,
         gamesPlayed: student.gamesPlayed,
         gamesCompleted: student.gamesCompleted,
         avgScore,
-        totalTime: 0, // Not tracking time currently
+        totalTime: student.totalTime || 0,
         lastActive: student.lastActive,
         completionRate
       };
@@ -1129,6 +1134,41 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
     res.json({ ok: true, students });
   } catch (error) {
     console.error("Analytics students error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Get detailed activities for a specific student
+app.get("/api/analytics/students/:studentId/activities", authMiddleware, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    // Fetch all game submissions for this student with game details
+    const activities = await GameSubmission.find({ studentId })
+      .populate('gameId', 'title type totalPoints')
+      .sort({ submittedAt: -1 })
+      .select('gameId score startedAt completedAt durationSeconds submittedAt');
+
+    const formattedActivities = activities.map(activity => {
+      const totalPoints = activity.gameId?.totalPoints || 100;
+      const earnedPoints = Math.round((activity.score / 100) * totalPoints);
+
+      return {
+        gameName: activity.gameId?.title || 'Unknown Game',
+        gameType: activity.gameId?.type || 'unknown',
+        score: activity.score || 0,
+        earnedPoints: earnedPoints,
+        totalPoints: totalPoints,
+        startTime: activity.startedAt || activity.submittedAt,
+        endTime: activity.completedAt || activity.submittedAt,
+        duration: activity.durationSeconds || 0,
+        submittedAt: activity.submittedAt
+      };
+    });
+
+    res.json({ ok: true, activities: formattedActivities });
+  } catch (error) {
+    console.error("Student activities error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });
@@ -1243,21 +1283,24 @@ app.get("/api/games/:gameId/leaderboard", authMiddleware, async (req, res) => {
 
 app.post("/api/game-submissions", authMiddleware, async (req, res) => {
   try {
-    const { gameId, score, isCorrect, studentAnswers } = req.body;
+    const { gameId, score, isCorrect, studentAnswers, startedAt, completedAt, durationSeconds } = req.body;
     const studentId = req.user.sub;
 
     if (!gameId) {
       return res.status(400).json({ ok: false, message: "Game ID is required" });
     }
 
-    // Create game submission
+    // Create game submission with time tracking
     const submission = await GameSubmission.create({
       gameId,
       studentId,
       score: score || 0,
       isCorrect: isCorrect || false,
       studentAnswers: studentAnswers || [],
-      submittedAt: new Date()
+      submittedAt: new Date(),
+      startedAt: startedAt ? new Date(startedAt) : null,
+      completedAt: completedAt ? new Date(completedAt) : new Date(),
+      durationSeconds: durationSeconds || null
     });
 
     res.status(201).json({ ok: true, submission });

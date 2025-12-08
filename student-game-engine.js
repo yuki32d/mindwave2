@@ -880,7 +880,7 @@ async function saveResult(game, score, totalPoints, startTime, studentAnswers = 
             return false;
         }
 
-        // Submit to backend API
+        // Submit to backend API with time tracking
         const response = await fetch(`${window.location.origin}/api/game-submissions`, {
             method: 'POST',
             headers: {
@@ -891,7 +891,10 @@ async function saveResult(game, score, totalPoints, startTime, studentAnswers = 
                 gameId: game._id || game.id,
                 score: percentage,
                 isCorrect: percentage >= 70,
-                studentAnswers: studentAnswers
+                studentAnswers: studentAnswers,
+                startedAt: new Date(startTime).toISOString(),
+                completedAt: new Date().toISOString(),
+                durationSeconds: timeTaken
             })
         });
 

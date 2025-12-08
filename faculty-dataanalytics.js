@@ -131,21 +131,114 @@ async function renderTopPerformers() {
     const topPerformers = students.slice(0, 3).map(s => s.email);
     const bottomPerformers = students.slice(-3).map(s => s.email);
 
-    topPerformersTable.innerHTML = students.map(student => {
+    topPerformersTable.innerHTML = students.map((student, index) => {
         let highlightClass = '';
         if (topPerformers.includes(student.email)) highlightClass = 'highlight-green';
         if (bottomPerformers.includes(student.email)) highlightClass = 'highlight-red';
 
+        const rowId = `student-row-${index}`;
+        const detailsId = `student-details-${index}`;
+
         return `
-            <tr class="${highlightClass}">
-                <td><strong>${student.name}</strong></td>
+            <tr class="${highlightClass} student-row" data-student-id="${student._id}" data-row-id="${rowId}" style="cursor: pointer;">
+                <td><strong>${student.name}</strong> <span style="font-size: 12px; color: #9ea4b6;">▼</span></td>
                 <td>${student.email}</td>
                 <td>${student.gamesCompleted}</td>
                 <td>${student.avgScore}%</td>
                 <td>${formatTime(student.totalTime)}</td>
             </tr>
+            <tr id="${detailsId}" class="student-details-row" style="display: none;">
+                <td colspan="5" style="padding: 0; background: rgba(255,255,255,0.02);">
+                    <div style="padding: 16px; border-left: 3px solid #0f62fe;">
+                        <div class="loading-details" style="text-align: center; color: #9ea4b6; padding: 20px;">
+                            Loading activity details...
+                        </div>
+                    </div>
+                </td>
+            </tr>
         `;
     }).join('');
+
+    // Add click handlers to student rows
+    document.querySelectorAll('.student-row').forEach(row => {
+        row.addEventListener('click', async function () {
+            const studentId = this.dataset.studentId;
+            const rowId = this.dataset.rowId;
+            const detailsRow = this.nextElementSibling;
+
+            // Toggle visibility
+            if (detailsRow.style.display === 'none') {
+                // Collapse all other rows first
+                document.querySelectorAll('.student-details-row').forEach(r => r.style.display = 'none');
+                document.querySelectorAll('.student-row span').forEach(s => s.textContent = '▼');
+
+                // Expand this row
+                detailsRow.style.display = 'table-row';
+                this.querySelector('span').textContent = '▲';
+
+                // Fetch and display details
+                await loadStudentDetails(studentId, detailsRow);
+            } else {
+                // Collapse this row
+                detailsRow.style.display = 'none';
+                this.querySelector('span').textContent = '▼';
+            }
+        });
+    });
+}
+
+async function loadStudentDetails(studentId, detailsRow) {
+    const detailsContainer = detailsRow.querySelector('div');
+
+    try {
+        const data = await fetchAPI(`/api/analytics/students/${studentId}/activities`);
+
+        if (!data || !data.ok || !data.activities || data.activities.length === 0) {
+            detailsContainer.innerHTML = '<p style="text-align: center; color: #9ea4b6; padding: 20px;">No activity details found</p>';
+            return;
+        }
+
+        const activities = data.activities;
+
+        detailsContainer.innerHTML = `
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.05);">
+                        <th style="padding: 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #9ea4b6;">Activity</th>
+                        <th style="padding: 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #9ea4b6;">Start Time</th>
+                        <th style="padding: 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #9ea4b6;">End Time</th>
+                        <th style="padding: 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #9ea4b6;">Duration</th>
+                        <th style="padding: 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #9ea4b6;">Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${activities.map(activity => {
+            const startTime = new Date(activity.startTime).toLocaleString();
+            const endTime = new Date(activity.endTime).toLocaleString();
+            const duration = formatTime(activity.duration);
+
+            return `
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding: 8px;">
+                                    <span class="tag blue">${activity.gameName}</span>
+                                </td>
+                                <td style="padding: 8px; font-size: 12px; color: #9ea4b6;">${startTime}</td>
+                                <td style="padding: 8px; font-size: 12px; color: #9ea4b6;">${endTime}</td>
+                                <td style="padding: 8px; font-size: 12px; color: #34c759;">${duration}</td>
+                                <td style="padding: 8px; font-size: 12px; font-weight: 600;">
+                                    ${activity.earnedPoints}/${activity.totalPoints} 
+                                    <span style="color: #9ea4b6; font-weight: 400;">(${activity.score}%)</span>
+                                </td>
+                            </tr>
+                        `;
+        }).join('')}
+                </tbody>
+            </table>
+        `;
+    } catch (error) {
+        console.error('Error loading student details:', error);
+        detailsContainer.innerHTML = '<p style="text-align: center; color: #ff3b30; padding: 20px;">Failed to load activity details</p>';
+    }
 }
 
 async function renderStudentActivity() {
