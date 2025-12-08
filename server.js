@@ -248,6 +248,25 @@ const pendingAdminSignupSchema = new mongoose.Schema(
 
 const PendingAdminSignup = mongoose.model("PendingAdminSignup", pendingAdminSignupSchema);
 
+// Schema for student project submissions
+const projectSubmissionSchema = new mongoose.Schema({
+  studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  studentName: { type: String, required: true },
+  studentEmail: { type: String, required: true },
+  projectName: { type: String, required: true },
+  description: { type: String, required: true },
+  githubRepoUrl: { type: String, required: true },
+  liveDemoUrl: { type: String }, // Optional
+  submittedAt: { type: Date, default: Date.now },
+  grade: { type: Number, min: 0, max: 100 }, // null if not graded yet
+  feedback: { type: String },
+  status: { type: String, enum: ['pending', 'reviewed', 'graded'], default: 'pending' },
+  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  reviewedAt: { type: Date }
+}, { timestamps: true });
+
+const ProjectSubmission = mongoose.model("ProjectSubmission", projectSubmissionSchema);
+
 // CONFIGURABLE: Super Admin Email (can be changed for different HODs)
 const SUPER_ADMIN_EMAIL = "jeeban.mca@cmrit.ac.in"; // Change this to the HOD's email
 
@@ -381,7 +400,8 @@ app.use(helmet({
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
       "script-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net"],
       "style-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net"],
-      "connect-src": ["'self'", "https://cdn.jsdelivr.net"]
+      "connect-src": ["'self'", "https://cdn.jsdelivr.net"],
+      "frame-src": ["'self'", "https://*.vercel.app", "https://*.netlify.app", "https://*.github.io", "https://*.onrender.com", "https://*.herokuapp.com", "https://*.replit.dev", "https://*.glitch.me"]
     }
   }
 }));
@@ -1765,6 +1785,144 @@ app.get("/api/admin/active-users", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Get active users error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+
+// ============================================
+// PROJECT SUBMISSION ENDPOINTS
+// ============================================
+
+// Student submits a project
+app.post("/api/projects/submit", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+
+    if (!user || user.role !== 'student') {
+      return res.status(403).json({ ok: false, message: "Only students can submit projects" });
+    }
+
+    const { projectName, description, githubRepoUrl, liveDemoUrl } = req.body;
+
+    if (!projectName || !description || !githubRepoUrl) {
+      return res.status(400).json({ ok: false, message: "Project name, description, and GitHub URL are required" });
+    }
+
+    const newProject = new ProjectSubmission({
+      studentId: userId,
+      studentName: user.name || user.displayName || user.email,
+      studentEmail: user.email,
+      projectName,
+      description,
+      githubRepoUrl,
+      liveDemoUrl: liveDemoUrl || null
+    });
+
+    await newProject.save();
+
+    res.json({ ok: true, message: "Project submitted successfully", project: newProject });
+  } catch (error) {
+    console.error("Submit project error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Student gets their own projects
+app.get("/api/projects/my", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+
+    const projects = await ProjectSubmission.find({ studentId: userId })
+      .sort({ submittedAt: -1 })
+      .populate('reviewedBy', 'name email');
+
+    res.json({ ok: true, projects });
+  } catch (error) {
+    console.error("Get my projects error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Faculty gets all projects
+app.get("/api/projects/all", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+
+    if (!user || (user.role !== 'faculty' && user.role !== 'admin')) {
+      return res.status(403).json({ ok: false, message: "Access denied" });
+    }
+
+    const projects = await ProjectSubmission.find()
+      .sort({ submittedAt: -1 })
+      .populate('studentId', 'name email')
+      .populate('reviewedBy', 'name email');
+
+    res.json({ ok: true, projects });
+  } catch (error) {
+    console.error("Get all projects error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Faculty grades a project
+app.put("/api/projects/:id/grade", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+
+    if (!user || (user.role !== 'faculty' && user.role !== 'admin')) {
+      return res.status(403).json({ ok: false, message: "Access denied" });
+    }
+
+    const { id } = req.params;
+    const { grade, feedback } = req.body;
+
+    if (grade === undefined || grade < 0 || grade > 100) {
+      return res.status(400).json({ ok: false, message: "Grade must be between 0 and 100" });
+    }
+
+    const project = await ProjectSubmission.findByIdAndUpdate(
+      id,
+      {
+        grade,
+        feedback: feedback || '',
+        status: 'graded',
+        reviewedBy: userId,
+        reviewedAt: new Date()
+      },
+      { new: true }
+    );
+
+    if (!project) {
+      return res.status(404).json({ ok: false, message: "Project not found" });
+    }
+
+    res.json({ ok: true, message: "Project graded successfully", project });
+  } catch (error) {
+    console.error("Grade project error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Get single project details
+app.get("/api/projects/:id", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const project = await ProjectSubmission.findById(id)
+      .populate('studentId', 'name email')
+      .populate('reviewedBy', 'name email');
+
+    if (!project) {
+      return res.status(404).json({ ok: false, message: "Project not found" });
+    }
+
+    res.json({ ok: true, project });
+  } catch (error) {
+    console.error("Get project error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – Git Student Review</title>
+    <link rel="stylesheet" href="role-page.css">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme-init.js"></script>
+    <style>
+        .filter-bar {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 32px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-bar select {
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #f5f7ff;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(15, 98, 254, 0.5);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(255, 159, 10, 0.2);
+            color: #ff9f0a;
+        }
+
+        .status-reviewed {
+            background: rgba(15, 98, 254, 0.2);
+            color: #0f62fe;
+        }
+
+        .status-graded {
+            background: rgba(52, 199, 89, 0.2);
+            color: #34c759;
+        }
+
+        .review-btn {
+            background: linear-gradient(120deg, #0f62fe, #8a3ffc);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .review-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(15, 98, 254, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #1a1d2e;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 1200px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .demo-preview {
+            width: 100%;
+            height: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #f5f7ff;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #f5f7ff;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #58a6ff;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .link-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: #58a6ff;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(120deg, #0f62fe, #8a3ffc);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body data-role="faculty" data-section="git-student">
+    <div class="page-shell">
+        <header class="hero">
+            <p class="eyebrow">Faculty Space</p>
+            <h1>Git Student Review</h1>
+            <p class="lede">Review, grade, and provide feedback on student project submissions.</p>
+            <div class="hero-actions">
+                <a class="ghost-link" href="admin.html">← Back to Dashboard</a>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value" id="totalProjects">0</div>
+                <div class="stat-label">Total Submissions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pendingProjects">0</div>
+                <div class="stat-label">Pending Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="gradedProjects">0</div>
+                <div class="stat-label">Graded</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgGrade">--</div>
+                <div class="stat-label">Average Grade</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar">
+            <label style="color: var(--text-muted); font-weight: 600;">Filter by:</label>
+            <select id="statusFilter">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="reviewed">Reviewed</option>
+                <option value="graded">Graded</option>
+            </select>
+            <select id="sortFilter">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="grade-high">Highest Grade</option>
+                <option value="grade-low">Lowest Grade</option>
+            </select>
+        </div>
+
+        <!-- Projects List -->
+        <section id="projectsList" style="display: grid; gap: 24px;">
+            <!-- Projects loaded via JS -->
+        </section>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="margin: 0;" id="modalProjectName">Review Project</h2>
+                <button id="closeReviewModalBtn"
+                    style="background: none; border: none; color: white; font-size: 28px; cursor: pointer;">&times;</button>
+            </div>
+
+            <div id="modalContent">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="faculty-git-student.js"></script>
+    <script src="chatbot.js"></script>
+</body>
+
+</html>

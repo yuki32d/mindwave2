@@ -1,200 +1,232 @@
-// Student GitHub Integration
+// Student GitHub Projects Page
 
-let repos = [];
+document.addEventListener('DOMContentLoaded', () => {
+    loadMyProjects();
 
-async function init() {
-    await loadRepos();
-}
+    // Add event listeners for buttons
+    document.getElementById('submitNewProjectBtn')?.addEventListener('click', openSubmitModal);
+    document.getElementById('cancelSubmitBtn')?.addEventListener('click', closeSubmitModal);
+});
 
-async function loadRepos() {
+// Load student's submitted projects
+async function loadMyProjects() {
     try {
-        const response = await fetch('/api/github/repos', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('mindwave_token')}`
-            }
+        const response = await fetch('/api/projects/my', {
+            credentials: 'include'
         });
 
         const data = await response.json();
 
-        if (!data.connected) {
-            showConnectPrompt();
-            return;
+        if (data.ok) {
+            renderProjects(data.projects);
+        } else {
+            showError('Failed to load projects');
         }
-
-        repos = data.repos || [];
-        renderRepos();
     } catch (error) {
-        console.error('Error loading repos:', error);
-        showError('Failed to load repositories');
+        console.error('Load projects error:', error);
+        showError('Network error');
     }
 }
 
-function showConnectPrompt() {
-    const container = document.getElementById('panelGrid');
-    container.innerHTML = `
-        <div class="connect-prompt" style="text-align: center; padding: 60px 20px;">
-            <div style="font-size: 64px; margin-bottom: 20px;">🐙</div>
-            <h2 style="margin-bottom: 12px;">Connect GitHub</h2>
-            <p style="color: var(--text-muted); margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto;">
-                Link your GitHub account to submit assignments, track commits, and build your portfolio directly in Mindwave.
-            </p>
-            <button id="connectBtn" class="primary-btn" style="background: #24292e; color: white; border: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px;">
-                Connect GitHub
-            </button>
-        </div>
-    `;
+// Render projects list
+function renderProjects(projects) {
+    const container = document.getElementById('projectsList');
 
-    document.getElementById('connectBtn').addEventListener('click', connectGitHub);
-}
-
-function connectGitHub() {
-    window.location.href = '/auth/github';
-}
-
-function renderRepos() {
-    const container = document.getElementById('panelGrid');
-
-    if (repos.length === 0) {
+    if (projects.length === 0) {
         container.innerHTML = `
-            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
-                <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
-                <p>No public repositories found.</p>
+            <div style="text-align: center; padding: 48px; color: var(--text-muted);">
+                <div style="font-size: 48px; margin-bottom: 16px;">📦</div>
+                <h3>No Projects Yet</h3>
+                <p>Submit your first project to get started!</p>
             </div>
         `;
         return;
     }
 
-    container.innerHTML = repos.map(repo => `
-        <div class="repo-card" data-owner="${repo.owner.login}" data-repo="${repo.name}" style="background: var(--gray-900); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 24px; cursor: pointer; transition: transform 0.2s;">
+    container.innerHTML = projects.map(project => `
+        <div class="project-card">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
                 <div>
-                    <h3 style="margin: 0 0 8px; font-size: 18px; color: #58a6ff;">${repo.name}</h3>
-                    <p style="margin: 0; color: var(--text-muted); font-size: 14px;">${repo.description || 'No description'}</p>
+                    <h3 style="margin: 0 0 8px; font-size: 20px;">${escapeHtml(project.projectName)}</h3>
+                    <span class="status-badge status-${project.status}">${formatStatus(project.status)}</span>
                 </div>
-                <div style="text-align: right;">
-                    <span style="display: inline-block; padding: 4px 12px; background: rgba(255,255,255,0.1); border-radius: 999px; font-size: 12px;">${repo.language || 'Text'}</span>
-                </div>
+                ${project.grade !== null && project.grade !== undefined ? `
+                    <div class="grade-display">${project.grade}/100</div>
+                ` : ''}
             </div>
-            <div style="display: flex; gap: 16px; color: var(--text-muted); font-size: 13px;">
-                <span>⭐ ${repo.stargazers_count}</span>
-                <span>🍴 ${repo.forks_count}</span>
-                <span>📅 ${new Date(repo.updated_at).toLocaleDateString()}</span>
+
+            <p style="color: var(--text-muted); margin-bottom: 16px;">${escapeHtml(project.description)}</p>
+
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+                <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" class="link-btn">
+                    🐙 View on GitHub
+                </a>
+                ${project.liveDemoUrl ? `
+                    <button class="link-btn view-demo-btn" data-demo-url="${escapeHtml(project.liveDemoUrl)}" data-project-name="${escapeHtml(project.projectName)}">
+                        🚀 View Live Demo
+                    </button>
+                ` : ''}
+            </div>
+
+            ${project.feedback ? `
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 12px; border-left: 3px solid #0f62fe;">
+                    <div style="font-weight: 600; margin-bottom: 8px; color: #0f62fe;">Faculty Feedback</div>
+                    <p style="margin: 0; color: var(--text-muted);">${escapeHtml(project.feedback)}</p>
+                    ${project.reviewedBy ? `
+                        <small style="color: var(--text-muted); margin-top: 8px; display: block;">
+                            Reviewed by ${escapeHtml(project.reviewedBy.name || project.reviewedBy.email)}
+                        </small>
+                    ` : ''}
+                </div>
+            ` : ''}
+
+            <div style="margin-top: 16px; font-size: 12px; color: var(--text-muted);">
+                Submitted ${formatDate(project.submittedAt)}
             </div>
         </div>
     `).join('');
 
-    // Attach event listeners
-    document.querySelectorAll('.repo-card').forEach(card => {
-        card.addEventListener('click', () => {
-            showRepoDetails(card.dataset.owner, card.dataset.repo);
+    // Add event listeners to view demo buttons
+    document.querySelectorAll('.view-demo-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const url = this.getAttribute('data-demo-url');
+            const name = this.getAttribute('data-project-name');
+            viewDemo(url, name);
         });
     });
 }
 
-async function showRepoDetails(owner, repoName) {
-    const modal = document.createElement('div');
-    modal.className = 'repo-modal';
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        padding: 20px;
-    `;
+// Open submit modal
+function openSubmitModal() {
+    document.getElementById('submitModal').style.display = 'flex';
+}
 
+// Close submit modal
+function closeSubmitModal() {
+    document.getElementById('submitModal').style.display = 'none';
+    document.getElementById('submitForm').reset();
+}
+
+// Handle form submission
+document.getElementById('submitForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const projectName = document.getElementById('projectName').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const githubRepoUrl = document.getElementById('githubRepoUrl').value.trim();
+    const liveDemoUrl = document.getElementById('liveDemoUrl').value.trim();
+
+    // Validate GitHub URL
+    if (!githubRepoUrl.includes('github.com')) {
+        alert('Please enter a valid GitHub repository URL');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/projects/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                projectName,
+                description,
+                githubRepoUrl,
+                liveDemoUrl: liveDemoUrl || null
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+            alert('✅ Project submitted successfully!');
+            closeSubmitModal();
+            loadMyProjects(); // Reload projects list
+        } else {
+            alert('❌ ' + (data.message || 'Failed to submit project'));
+        }
+    } catch (error) {
+        console.error('Submit error:', error);
+        alert('❌ Network error. Please try again.');
+    }
+});
+
+// View live demo in modal
+function viewDemo(url, projectName) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'flex';
     modal.innerHTML = `
-        <div style="background: #1c1f26; border-radius: 16px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
-            <div style="padding: 32px; border-bottom: 1px solid rgba(255,255,255,0.08);">
-                <button id="closeModalBtn" style="position: absolute; top: 24px; right: 24px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">×</button>
-                <h2 style="margin: 0 0 8px;">${repoName}</h2>
-                <p style="color: var(--text-muted);">Recent Commits</p>
+        <div class="modal-content" style="max-width: 1200px; width: 95%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="margin: 0;">${escapeHtml(projectName)} - Live Demo</h2>
+                <button onclick="this.closest('.modal').remove()" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
             </div>
-            <div id="commitsList" style="padding: 32px;">
-                <div style="text-align: center; color: var(--text-muted);">Loading commits...</div>
-            </div>
-            <div style="padding: 24px 32px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.2);">
-                <button id="submitAssignmentBtn" class="primary-btn" style="width: 100%; background: #2ea44f; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    Submit as Assignment
-                </button>
+            <iframe src="${escapeHtml(url)}" class="demo-preview" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+            <div style="margin-top: 16px;">
+                <a href="${escapeHtml(url)}" target="_blank" class="link-btn">🔗 Open in New Tab</a>
             </div>
         </div>
     `;
-
     document.body.appendChild(modal);
 
-    document.getElementById('closeModalBtn').addEventListener('click', () => modal.remove());
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.remove();
-    });
-
-    document.getElementById('submitAssignmentBtn').addEventListener('click', async () => {
-        if (confirm(`Submit ${repoName} as your assignment?`)) {
-            try {
-                const response = await fetch('/api/github/submit-assignment', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('mindwave_token')}`
-                    },
-                    body: JSON.stringify({
-                        repoUrl: `https://github.com/${owner}/${repoName}`,
-                        comments: 'Submitted via Mindwave GitHub Integration'
-                    })
-                });
-                const data = await response.json();
-                if (data.ok) {
-                    alert('Assignment submitted successfully! 🎉');
-                    modal.remove();
-                } else {
-                    alert('Failed to submit assignment.');
-                }
-            } catch (error) {
-                console.error('Submission error:', error);
-                alert('Error submitting assignment.');
-            }
+        if (e.target === modal) {
+            modal.remove();
         }
     });
+}
 
-    try {
-        const response = await fetch(`/api/github/commits/${owner}/${repoName}`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('mindwave_token')}` }
-        });
-        const data = await response.json();
+// Helper functions
+function formatStatus(status) {
+    const statusMap = {
+        'pending': '⏳ Pending Review',
+        'reviewed': '👀 Reviewed',
+        'graded': '✅ Graded'
+    };
+    return statusMap[status] || status;
+}
 
-        const commitsContainer = document.getElementById('commitsList');
-        if (data.commits && data.commits.length > 0) {
-            commitsContainer.innerHTML = data.commits.map(commit => `
-                <div style="padding: 16px; border-left: 2px solid #58a6ff; margin-bottom: 16px; background: rgba(255,255,255,0.02);">
-                    <p style="margin: 0 0 4px; font-weight: 500;">${commit.commit.message}</p>
-                    <div style="font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between;">
-                        <span>${commit.commit.author.name}</span>
-                        <span>${new Date(commit.commit.author.date).toLocaleDateString()}</span>
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            commitsContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No commits found.</p>';
-        }
-    } catch (error) {
-        console.error('Error loading commits:', error);
-        document.getElementById('commitsList').innerHTML = '<p style="text-align: center; color: #ff3b30;">Failed to load commits.</p>';
-    }
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function showError(message) {
-    const container = document.getElementById('panelGrid');
+    const container = document.getElementById('projectsList');
     container.innerHTML = `
-        <div style="text-align: center; padding: 60px 20px; color: #ff3b30;">
+        <div style="text-align: center; padding: 48px; color: #ff3b30;">
             <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
-            <p>${message}</p>
+            <h3>Error</h3>
+            <p>${escapeHtml(message)}</p>
+            <button onclick="loadMyProjects()" class="submit-btn" style="margin-top: 16px;">Retry</button>
         </div>
     `;
 }
 
-init();
+// Close modal on escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeSubmitModal();
+    }
+});
