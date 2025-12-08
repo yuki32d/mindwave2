@@ -203,8 +203,14 @@
     // Check every 1 second
     setInterval(detectDevTools, 1000);
 
-    // Disable drag and drop
+    // Disable drag and drop (except for game elements)
     document.addEventListener('dragstart', function (e) {
+        // Allow dragging for code unjumble game blocks
+        if (e.target.classList.contains('draggable-line') ||
+            e.target.closest('.draggable-line')) {
+            return true; // Allow the drag
+        }
+
         e.preventDefault();
         return false;
     });
