@@ -357,18 +357,43 @@ function playUnjumble(game, container) {
     let startTime = Date.now();
     let shuffledLines = [...(game.lines || [])].map((line, idx) => ({ text: line, originalIndex: idx }))
         .sort(() => Math.random() - 0.5);
-    let selectedIdx = null;
+    let draggedIndex = null;
 
     function render() {
         container.innerHTML = `
             <div class="player-header"><span>Reorder the Code</span><span class="timer">⏱️</span></div>
             <div class="question-display">
-                <p style="margin-bottom: 24px; color: #9ea4b6;">Click two lines to swap them. Arrange in correct order.</p>
-                <div id="code-lines" style="display: flex; flex-direction: column; gap: 8px;">
+                <p style="margin-bottom: 24px; color: #9ea4b6;">
+                    <strong>🎯 Drag and drop</strong> the code blocks to arrange them in the correct order.
+                </p>
+                <div id="code-lines" style="display: flex; flex-direction: column; gap: 12px;">
                     ${shuffledLines.map((line, idx) => `
-                        <div class="option-btn line-item" data-idx="${idx}" style="cursor: pointer; display: flex; justify-content: space-between; ${selectedIdx === idx ? 'border-color: #0f62fe; background: rgba(15, 98, 254, 0.1);' : ''}">
-                            <span style="font-family: monospace;">${line.text}</span>
-                            <span style="color: #666;">↕</span>
+                        <div class="draggable-line" 
+                             draggable="true" 
+                             data-idx="${idx}" 
+                             style="
+                                cursor: grab;
+                                display: flex;
+                                align-items: center;
+                                gap: 12px;
+                                padding: 16px;
+                                background: rgba(255, 255, 255, 0.05);
+                                border: 2px solid rgba(255, 255, 255, 0.1);
+                                border-radius: 12px;
+                                transition: all 0.2s ease;
+                                font-family: 'Courier New', monospace;
+                                font-size: 14px;
+                                user-select: none;
+                             ">
+                            <span style="
+                                color: #9ea4b6;
+                                font-size: 18px;
+                                cursor: grab;
+                                display: flex;
+                                flex-direction: column;
+                                line-height: 0.6;
+                            ">⋮⋮</span>
+                            <span style="flex: 1; color: #f5f7ff;">${line.text}</span>
                         </div>
                     `).join('')}
                 </div>
@@ -376,11 +401,75 @@ function playUnjumble(game, container) {
             </div>
         `;
 
-        // Attach event listeners to line items
-        container.querySelectorAll('.line-item').forEach(lineEl => {
-            lineEl.addEventListener('click', () => {
-                const idx = parseInt(lineEl.dataset.idx);
-                moveLine(idx);
+        // Add drag and drop event listeners
+        const draggableLines = container.querySelectorAll('.draggable-line');
+
+        draggableLines.forEach((lineEl, idx) => {
+            // Drag start
+            lineEl.addEventListener('dragstart', (e) => {
+                draggedIndex = parseInt(lineEl.dataset.idx);
+                lineEl.style.opacity = '0.5';
+                lineEl.style.cursor = 'grabbing';
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            // Drag end
+            lineEl.addEventListener('dragend', (e) => {
+                lineEl.style.opacity = '1';
+                lineEl.style.cursor = 'grab';
+                draggedIndex = null;
+
+                // Remove all drag-over styles
+                draggableLines.forEach(el => {
+                    el.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    el.style.background = 'rgba(255, 255, 255, 0.05)';
+                });
+            });
+
+            // Drag over
+            lineEl.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+
+                if (draggedIndex !== null && draggedIndex !== parseInt(lineEl.dataset.idx)) {
+                    lineEl.style.borderColor = '#0f62fe';
+                    lineEl.style.background = 'rgba(15, 98, 254, 0.1)';
+                }
+            });
+
+            // Drag leave
+            lineEl.addEventListener('dragleave', (e) => {
+                lineEl.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                lineEl.style.background = 'rgba(255, 255, 255, 0.05)';
+            });
+
+            // Drop
+            lineEl.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const dropIndex = parseInt(lineEl.dataset.idx);
+
+                if (draggedIndex !== null && draggedIndex !== dropIndex) {
+                    // Swap the lines
+                    const temp = shuffledLines[draggedIndex];
+                    shuffledLines[draggedIndex] = shuffledLines[dropIndex];
+                    shuffledLines[dropIndex] = temp;
+                    render();
+                }
+            });
+
+            // Hover effects
+            lineEl.addEventListener('mouseenter', () => {
+                if (draggedIndex === null) {
+                    lineEl.style.borderColor = 'rgba(15, 98, 254, 0.5)';
+                    lineEl.style.transform = 'translateX(4px)';
+                }
+            });
+
+            lineEl.addEventListener('mouseleave', () => {
+                if (draggedIndex === null) {
+                    lineEl.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    lineEl.style.transform = 'translateX(0)';
+                }
             });
         });
 
@@ -389,18 +478,6 @@ function playUnjumble(game, container) {
         if (submitBtn) {
             submitBtn.addEventListener('click', checkUnjumble);
         }
-    }
-
-    function moveLine(idx) {
-        if (selectedIdx === null) {
-            selectedIdx = idx;
-        } else {
-            const temp = shuffledLines[selectedIdx];
-            shuffledLines[selectedIdx] = shuffledLines[idx];
-            shuffledLines[idx] = temp;
-            selectedIdx = null;
-        }
-        render();
     }
 
     async function checkUnjumble() {
