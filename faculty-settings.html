@@ -284,17 +284,16 @@
                 <div class="control-group">
                     <div class="control-label">
                         <strong>Manage Students</strong>
-                        <span>View and remove student accounts from the system.</span>
+                        <span>View, search, and remove student accounts from the system.</span>
                     </div>
                 </div>
 
-                <div id="studentList" style="max-height: 400px; overflow-y: auto;">
-                    <p style="color: #9ea4b6; text-align: center; padding: 20px;">Loading students...</p>
-                </div>
-
-                <button class="primary-btn" id="refreshStudentsBtn"
-                    style="background: linear-gradient(120deg, #0f62fe, #8a3ffc); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%;">🔄
-                    Refresh List</button>
+                <a href="manage-students.html" style="display: block; text-decoration: none; margin-top: 8px;">
+                    <button class="primary-btn"
+                        style="background: linear-gradient(120deg, #0f62fe, #8a3ffc); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; font-size: 14px;">
+                        📋 Open Student Management
+                    </button>
+                </a>
             </div>
 
             <!-- 5. Game Management -->
@@ -317,7 +316,6 @@
     <script src="role-page.js"></script>
 
     <script src="faculty-settings.js"></script>
-    <script src="student-management.js"></script>
 </body>
 
 </html>
