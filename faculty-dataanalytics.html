@@ -183,7 +183,34 @@
         #filterPanel input[type='checkbox'] {
             margin-right: 8px;
         }
+
+        #exportPanel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: rgba(15, 17, 27, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 240px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        #exportPanel h2 {
+            margin: 0 0 16px;
+            font-size: 16px;
+            color: #f5f7ff;
+        }
+
+        #exportPanel button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
     </style>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -200,6 +227,15 @@
                     <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='currentColor'
                         stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
                         <polygon points='22 3 2 3 10 12 10 19 14 21 14 12 22 3'></polygon>
+                    </svg>
+                </button>
+                <button id='exportToggleBtn' aria-label='Export Data' title='Export Data'
+                    style='margin-left: 10px; background: rgba(15, 98, 254, 0.2); border: 1px solid rgba(15, 98, 254, 0.5); border-radius: 8px; padding: 8px 12px; cursor: pointer; color: #4da0ff; transition: all 0.3s ease;'>
+                    <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='currentColor'
+                        stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+                        <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'></path>
+                        <polyline points='7 10 12 15 17 10'></polyline>
+                        <line x1='12' y1='15' x2='12' y2='3'></line>
                     </svg>
                 </button>
                 <div id='filterPanel' style='display:none;'>
@@ -219,6 +255,17 @@
                         <label><input type='checkbox' id='bottomLiners' name='bottomLiners'> Show Bottom
                             Performers</label>
                     </form>
+                </div>
+                <div id='exportPanel' style='display:none;'>
+                    <h2>Export Student Activity</h2>
+                    <button id='exportCSVBtn'
+                        style='width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(52, 199, 89, 0.2); border: 1px solid rgba(52, 199, 89, 0.5); border-radius: 8px; color: #34c759; cursor: pointer; font-size: 14px; transition: all 0.3s ease;'>
+                        Export as CSV
+                    </button>
+                    <button id='exportExcelBtn'
+                        style='width: 100%; padding: 10px; background: rgba(15, 98, 254, 0.2); border: 1px solid rgba(15, 98, 254, 0.5); border-radius: 8px; color: #4da0ff; cursor: pointer; font-size: 14px; transition: all 0.3s ease;'>
+                        Export as Excel
+                    </button>
                 </div>
             </div>
         </header>

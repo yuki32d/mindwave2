@@ -398,7 +398,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "script-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net"],
+      "script-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net", "https://cdn.sheetjs.com"],
       "style-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net"],
       "connect-src": ["'self'", "https://cdn.jsdelivr.net"],
       "frame-src": ["'self'", "https://*.vercel.app", "https://*.netlify.app", "https://*.github.io", "https://*.onrender.com", "https://*.herokuapp.com", "https://*.replit.dev", "https://*.glitch.me"]

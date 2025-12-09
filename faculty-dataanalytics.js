@@ -270,22 +270,61 @@ async function renderStudentActivity() {
     const topPerformers = allStudents.slice(0, 3).map(s => s.email);
     const bottomPerformers = allStudents.slice(-3).map(s => s.email);
 
-    studentActivityTable.innerHTML = students.map(student => {
+    studentActivityTable.innerHTML = students.map((student, index) => {
         const lastActive = new Date(student.lastActive).toLocaleString();
         let highlightClass = '';
         if (topPerformers.includes(student.email)) highlightClass = 'highlight-green';
         if (bottomPerformers.includes(student.email)) highlightClass = 'highlight-red';
 
+        const rowId = `student-activity-row-${index}`;
+        const detailsId = `student-activity-details-${index}`;
+
         return `
-            <tr class="${highlightClass}">
-                <td><strong>${student.name}</strong></td>
+            <tr class="${highlightClass} student-activity-row" data-student-id="${student._id}" data-row-id="${rowId}" style="cursor: pointer;">
+                <td><strong>${student.name}</strong> <span style="font-size: 12px; color: #9ea4b6;">▼</span></td>
                 <td>${student.email}</td>
                 <td>${lastActive}</td>
                 <td>${student.gamesPlayed}</td>
                 <td>${student.completionRate}%</td>
             </tr>
+            <tr id="${detailsId}" class="student-activity-details-row" style="display: none;">
+                <td colspan="5" style="padding: 0; background: rgba(255,255,255,0.02);">
+                    <div style="padding: 16px; border-left: 3px solid #0f62fe;">
+                        <div class="loading-details" style="text-align: center; color: #9ea4b6; padding: 20px;">
+                            Loading activity details...
+                        </div>
+                    </div>
+                </td>
+            </tr>
         `;
     }).join('');
+
+    // Add click handlers to student activity rows
+    document.querySelectorAll('.student-activity-row').forEach(row => {
+        row.addEventListener('click', async function () {
+            const studentId = this.dataset.studentId;
+            const rowId = this.dataset.rowId;
+            const detailsRow = this.nextElementSibling;
+
+            // Toggle visibility
+            if (detailsRow.style.display === 'none') {
+                // Collapse all other rows first
+                document.querySelectorAll('.student-activity-details-row').forEach(r => r.style.display = 'none');
+                document.querySelectorAll('.student-activity-row span').forEach(s => s.textContent = '▼');
+
+                // Expand this row
+                detailsRow.style.display = 'table-row';
+                this.querySelector('span').textContent = '▲';
+
+                // Fetch and display details
+                await loadStudentDetails(studentId, detailsRow);
+            } else {
+                // Collapse this row
+                detailsRow.style.display = 'none';
+                this.querySelector('span').textContent = '▼';
+            }
+        });
+    });
 }
 
 async function updateDashboard() {
@@ -297,21 +336,135 @@ async function updateDashboard() {
     ]);
 }
 
+// Export functionality
+async function getStudentActivityData() {
+    const filters = getFilters();
+    const data = await fetchAPI(`/api/analytics/students?timeRange=${filters.timeRange}`);
+
+    if (!data || !data.ok || !data.students || data.students.length === 0) {
+        return [];
+    }
+
+    return data.students.map(student => ({
+        'Student Name': student.name,
+        'Email': student.email,
+        'Last Active': new Date(student.lastActive).toLocaleString(),
+        'Games Played': student.gamesPlayed,
+        'Completion Rate': `${student.completionRate}%`,
+        'Average Score': `${student.avgScore}%`,
+        'Total Time': formatTime(student.totalTime)
+    }));
+}
+
+function exportToCSV() {
+    getStudentActivityData().then(data => {
+        if (data.length === 0) {
+            alert('No student activity data to export');
+            return;
+        }
+
+        // Create CSV content
+        const headers = Object.keys(data[0]);
+        const csvContent = [
+            headers.join(','),
+            ...data.map(row => headers.map(header => {
+                const value = row[header];
+                // Escape commas and quotes in values
+                return `"${String(value).replace(/"/g, '""')}"`;
+            }).join(','))
+        ].join('\n');
+
+        // Create download link
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        const date = new Date().toISOString().split('T')[0];
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', `student_activity_${date}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+}
+
+function exportToExcel() {
+    getStudentActivityData().then(data => {
+        if (data.length === 0) {
+            alert('No student activity data to export');
+            return;
+        }
+
+        // Create workbook and worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(data);
+
+        // Set column widths
+        ws['!cols'] = [
+            { wch: 20 }, // Student Name
+            { wch: 30 }, // Email
+            { wch: 20 }, // Last Active
+            { wch: 15 }, // Games Played
+            { wch: 15 }, // Completion Rate
+            { wch: 15 }, // Average Score
+            { wch: 15 }  // Total Time
+        ];
+
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Student Activity');
+
+        // Generate file and download
+        const date = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(wb, `student_activity_${date}.xlsx`);
+    });
+}
+
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     updateDashboard();
 
     const filterToggleBtn = document.getElementById('filterToggleBtn');
     const filterPanel = document.getElementById('filterPanel');
+    const exportToggleBtn = document.getElementById('exportToggleBtn');
+    const exportPanel = document.getElementById('exportPanel');
+    const exportCSVBtn = document.getElementById('exportCSVBtn');
+    const exportExcelBtn = document.getElementById('exportExcelBtn');
+
+    // Filter toggle
     filterToggleBtn.addEventListener('click', () => {
         const isHidden = filterPanel.style.display === 'none';
         filterPanel.style.display = isHidden ? 'block' : 'none';
+        exportPanel.style.display = 'none'; // Close export panel
     });
 
+    // Export toggle
+    exportToggleBtn.addEventListener('click', () => {
+        const isHidden = exportPanel.style.display === 'none';
+        exportPanel.style.display = isHidden ? 'block' : 'none';
+        filterPanel.style.display = 'none'; // Close filter panel
+    });
+
+    // Close panels when clicking outside
     document.addEventListener('click', (e) => {
         if (!filterToggleBtn.contains(e.target) && !filterPanel.contains(e.target)) {
             filterPanel.style.display = 'none';
         }
+        if (!exportToggleBtn.contains(e.target) && !exportPanel.contains(e.target)) {
+            exportPanel.style.display = 'none';
+        }
+    });
+
+    // Export buttons
+    exportCSVBtn.addEventListener('click', () => {
+        exportToCSV();
+        exportPanel.style.display = 'none';
+    });
+
+    exportExcelBtn.addEventListener('click', () => {
+        exportToExcel();
+        exportPanel.style.display = 'none';
     });
 
     const filterForm = document.getElementById('filterForm');
