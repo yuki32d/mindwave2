@@ -226,8 +226,11 @@ async function loadCourseDetails(courseId) {
         setTimeout(() => {
             document.querySelectorAll('.view-assignment-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const courseId = e.target.dataset.courseId;
-                    const assignmentId = e.target.dataset.assignmentId;
+                    // Use closest to ensure we get the button, not child elements
+                    const button = e.target.closest('.view-assignment-btn');
+                    const courseId = button.dataset.courseId;
+                    const assignmentId = button.dataset.assignmentId;
+                    console.log('Button clicked:', { courseId, assignmentId });
                     viewAssignmentInApp(courseId, assignmentId);
                 });
             });
