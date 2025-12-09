@@ -18,6 +18,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import cron from "node-cron";
 import compression from "compression";
 import mongoSanitize from "express-mongo-sanitize";
+import * as googleClassroomService from "./googleClassroomService.js";
 
 dotenv.config();
 
@@ -380,6 +381,89 @@ const globalSettingsSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const GlobalSettings = mongoose.model("GlobalSettings", globalSettingsSchema);
+
+// Google Classroom Integration Schemas
+const googleClassroomCourseSchema = new mongoose.Schema({
+  courseId: { type: String, required: true, unique: true }, // Google Classroom course ID
+  name: { type: String, required: true },
+  section: { type: String },
+  description: { type: String },
+  room: { type: String },
+  ownerId: { type: String }, // Google user ID of teacher
+  mappedSubjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }, // Map to MindWave subject
+  enrollmentCode: { type: String },
+  courseState: { type: String, enum: ['ACTIVE', 'ARCHIVED', 'PROVISIONED', 'DECLINED', 'SUSPENDED'] },
+  alternateLink: { type: String }, // Link to Google Classroom
+  lastSyncedAt: { type: Date }
+}, { timestamps: true });
+
+const googleClassroomMaterialSchema = new mongoose.Schema({
+  materialId: { type: String, required: true, unique: true },
+  courseId: { type: String, required: true },
+  title: { type: String, required: true },
+  description: { type: String },
+  materials: [{ type: mongoose.Schema.Types.Mixed }], // Array of material objects (driveFile, link, etc.)
+  state: { type: String, enum: ['PUBLISHED', 'DRAFT', 'DELETED'] },
+  creationTime: { type: Date },
+  updateTime: { type: Date },
+  creatorUserId: { type: String },
+  lastSyncedAt: { type: Date }
+}, { timestamps: true });
+
+const googleClassroomAssignmentSchema = new mongoose.Schema({
+  assignmentId: { type: String, required: true, unique: true },
+  courseId: { type: String, required: true },
+  title: { type: String, required: true },
+  description: { type: String },
+  materials: [{ type: mongoose.Schema.Types.Mixed }], // Same structure as materials
+  state: { type: String, enum: ['PUBLISHED', 'DRAFT', 'DELETED'] },
+  workType: { type: String, enum: ['ASSIGNMENT', 'SHORT_ANSWER_QUESTION', 'MULTIPLE_CHOICE_QUESTION'] },
+  maxPoints: { type: Number },
+  dueDate: {
+    year: Number,
+    month: Number,
+    day: Number
+  },
+  dueTime: {
+    hours: Number,
+    minutes: Number
+  },
+  creationTime: { type: Date },
+  updateTime: { type: Date },
+  creatorUserId: { type: String },
+  alternateLink: { type: String },
+  lastSyncedAt: { type: Date }
+}, { timestamps: true });
+
+const googleClassroomSubmissionSchema = new mongoose.Schema({
+  submissionId: { type: String, required: true, unique: true },
+  courseId: { type: String, required: true },
+  assignmentId: { type: String, required: true },
+  studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // MindWave user ID
+  googleUserId: { type: String }, // Google user ID
+  state: { type: String, enum: ['NEW', 'CREATED', 'TURNED_IN', 'RETURNED', 'RECLAIMED_BY_STUDENT'] },
+  assignedGrade: { type: Number },
+  draftGrade: { type: Number },
+  submissionHistory: [{ type: mongoose.Schema.Types.Mixed }],
+  late: { type: Boolean },
+  creationTime: { type: Date },
+  updateTime: { type: Date },
+  lastSyncedAt: { type: Date }
+}, { timestamps: true });
+
+// Add indexes for Google Classroom schemas
+googleClassroomCourseSchema.index({ courseId: 1 });
+googleClassroomCourseSchema.index({ mappedSubjectId: 1 });
+googleClassroomMaterialSchema.index({ courseId: 1, state: 1 });
+googleClassroomAssignmentSchema.index({ courseId: 1, state: 1 });
+googleClassroomAssignmentSchema.index({ dueDate: 1 });
+googleClassroomSubmissionSchema.index({ studentId: 1, assignmentId: 1 });
+googleClassroomSubmissionSchema.index({ courseId: 1 });
+
+const GoogleClassroomCourse = mongoose.model("GoogleClassroomCourse", googleClassroomCourseSchema);
+const GoogleClassroomMaterial = mongoose.model("GoogleClassroomMaterial", googleClassroomMaterialSchema);
+const GoogleClassroomAssignment = mongoose.model("GoogleClassroomAssignment", googleClassroomAssignmentSchema);
+const GoogleClassroomSubmission = mongoose.model("GoogleClassroomSubmission", googleClassroomSubmissionSchema);
 
 
 const app = express();
@@ -4410,6 +4494,177 @@ function listenWithFallback(preferred) {
   }
   attempt();
 }
+
+// ==================== Google Classroom Integration ====================
+
+// Sync all courses from Google Classroom
+app.post('/api/google-classroom/sync/courses', authMiddleware, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ ok: false, message: 'Admin access required' });
+  }
+
+  try {
+    const models = { User, GoogleClassroomCourse };
+    const courses = await googleClassroomService.syncCourses(req.user.sub, models);
+    res.json({ ok: true, courses, count: courses.length });
+  } catch (error) {
+    console.error('Sync courses error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// Sync materials for a specific course
+app.post('/api/google-classroom/sync/materials/:courseId', authMiddleware, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ ok: false, message: 'Admin access required' });
+  }
+
+  try {
+    const models = { User, GoogleClassroomMaterial };
+    const materials = await googleClassroomService.syncCourseMaterials(req.user.sub, req.params.courseId, models);
+    res.json({ ok: true, materials, count: materials.length });
+  } catch (error) {
+    console.error('Sync materials error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// Sync assignments for a specific course
+app.post('/api/google-classroom/sync/assignments/:courseId', authMiddleware, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ ok: false, message: 'Admin access required' });
+  }
+
+  try {
+    const models = { User, GoogleClassroomAssignment };
+    const assignments = await googleClassroomService.syncCourseAssignments(req.user.sub, req.params.courseId, models);
+    res.json({ ok: true, assignments, count: assignments.length });
+  } catch (error) {
+    console.error('Sync assignments error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// Sync full course (materials + assignments + submissions)
+app.post('/api/google-classroom/sync/full/:courseId', authMiddleware, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ ok: false, message: 'Admin access required' });
+  }
+
+  try {
+    const models = { User, GoogleClassroomMaterial, GoogleClassroomAssignment, GoogleClassroomSubmission };
+    const result = await googleClassroomService.syncFullCourse(req.user.sub, req.params.courseId, models);
+    res.json({ ok: true, result });
+  } catch (error) {
+    console.error('Sync full course error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// Get combined materials (MindWave + Google Classroom) for a subject
+app.get('/api/subjects/:subjectId/materials/combined', authMiddleware, async (req, res) => {
+  try {
+    const subjectId = req.params.subjectId;
+
+    // Get MindWave materials
+    const mindwaveMaterials = await Material.find({ subjectId }).sort({ createdAt: -1 });
+
+    // Get Google Classroom course mapped to this subject
+    const gcCourse = await GoogleClassroomCourse.findOne({ mappedSubjectId: subjectId });
+
+    let gcMaterials = [];
+    if (gcCourse) {
+      gcMaterials = await GoogleClassroomMaterial.find({
+        courseId: gcCourse.courseId,
+        state: 'PUBLISHED'
+      }).sort({ creationTime: -1 });
+    }
+
+    // Format materials for frontend
+    const formattedMindwaveMaterials = mindwaveMaterials.map(m => ({
+      id: m._id,
+      title: m.title,
+      type: m.type,
+      fileUrl: m.fileUrl,
+      source: 'mindwave',
+      createdAt: m.createdAt,
+      description: m.description,
+      downloads: m.downloads
+    }));
+
+    const formattedGCMaterials = gcMaterials.map(m => ({
+      id: m.materialId,
+      title: m.title,
+      type: 'google-classroom',
+      materials: m.materials,
+      source: 'google-classroom',
+      createdAt: m.creationTime,
+      description: m.description
+    }));
+
+    const allMaterials = [...formattedMindwaveMaterials, ...formattedGCMaterials];
+
+    res.json({
+      ok: true,
+      materials: allMaterials,
+      count: allMaterials.length,
+      mindwaveCount: formattedMindwaveMaterials.length,
+      googleClassroomCount: formattedGCMaterials.length
+    });
+  } catch (error) {
+    console.error('Get combined materials error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// Get assignments for a subject from Google Classroom
+app.get('/api/subjects/:subjectId/assignments', authMiddleware, async (req, res) => {
+  try {
+    const subjectId = req.params.subjectId;
+
+    // Get Google Classroom course mapped to this subject
+    const gcCourse = await GoogleClassroomCourse.findOne({ mappedSubjectId: subjectId });
+
+    if (!gcCourse) {
+      return res.json({ ok: true, assignments: [], count: 0 });
+    }
+
+    const assignments = await GoogleClassroomAssignment.find({
+      courseId: gcCourse.courseId,
+      state: 'PUBLISHED'
+    }).sort({ creationTime: -1 });
+
+    res.json({ ok: true, assignments, count: assignments.length });
+  } catch (error) {
+    console.error('Get assignments error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// Get assignment details
+app.get('/api/assignments/:assignmentId', authMiddleware, async (req, res) => {
+  try {
+    const assignment = await GoogleClassroomAssignment.findOne({ assignmentId: req.params.assignmentId });
+
+    if (!assignment) {
+      return res.status(404).json({ ok: false, message: 'Assignment not found' });
+    }
+
+    // If student, get their submission
+    let submission = null;
+    if (req.user.role === 'student') {
+      submission = await GoogleClassroomSubmission.findOne({
+        assignmentId: req.params.assignmentId,
+        studentId: req.user.sub
+      });
+    }
+
+    res.json({ ok: true, assignment, submission });
+  } catch (error) {
+    console.error('Get assignment details error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
 
 // Health check endpoint for monitoring
 app.get('/health', (req, res) => {
