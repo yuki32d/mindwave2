@@ -6,9 +6,75 @@ let selectedFile = null;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {
+    checkGoogleConnection();
+});
+
+// Check if user is connected to Google Classroom
+async function checkGoogleConnection() {
+    try {
+        const response = await fetch('/api/auth/google/status', {
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (!data.connected) {
+            // Not connected - show connection prompt
+            showConnectionPrompt();
+        } else {
+            // Connected - load the interface
+            initializeInterface();
+        }
+    } catch (error) {
+        console.error('Error checking Google connection:', error);
+        showConnectionPrompt();
+    }
+}
+
+// Show connection prompt
+function showConnectionPrompt() {
+    document.querySelector('.classroom-container').innerHTML = `
+        <div style="text-align: center; padding: 64px 24px; max-width: 600px; margin: 0 auto;">
+            <div style="font-size: 64px; margin-bottom: 24px;">🔗</div>
+            <h2 style="margin-bottom: 16px;">Connect to Google Classroom</h2>
+            <p style="color: var(--text-muted); margin-bottom: 32px; line-height: 1.6;">
+                To upload materials and manage your Google Classroom courses from MindWave, 
+                you need to connect your Google account first.
+            </p>
+            
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 24px; border-radius: 12px; margin-bottom: 32px; text-align: left;">
+                <h3 style="margin-top: 0;">What you'll be able to do:</h3>
+                <ul style="color: var(--text-muted); line-height: 2;">
+                    <li>✅ Upload materials directly to Google Classroom</li>
+                    <li>✅ Create assignments from MindWave</li>
+                    <li>✅ View your courses and materials</li>
+                    <li>✅ Manage student submissions</li>
+                </ul>
+            </div>
+            
+            <button onclick="connectToGoogle()" class="upload-btn" style="font-size: 18px; padding: 16px 48px;">
+                <img src="https://www.google.com/favicon.ico" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;">
+                Connect with Google
+            </button>
+            
+            <p style="color: var(--text-muted); font-size: 14px; margin-top: 24px;">
+                🔒 Secure OAuth 2.0 authentication
+            </p>
+        </div>
+    `;
+}
+
+// Connect to Google
+window.connectToGoogle = function () {
+    // Redirect to Google OAuth
+    window.location.href = '/auth/google?scope=classroom';
+};
+
+// Initialize the interface (when connected)
+function initializeInterface() {
     loadCourses();
     setupEventListeners();
-});
+}
 
 // Setup event listeners
 function setupEventListeners() {

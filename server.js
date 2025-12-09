@@ -4496,6 +4496,29 @@ function listenWithFallback(preferred) {
 }
 
 // ==================== Google Classroom Integration (Real-Time Proxy) ====================
+
+// Check Google connection status
+app.get('/api/auth/google/status', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub);
+
+    if (!user) {
+      return res.json({ connected: false });
+    }
+
+    // Check if user has Google tokens
+    const connected = !!(user.googleAccessToken && user.googleRefreshToken);
+
+    res.json({
+      connected,
+      email: connected ? user.email : null
+    });
+  } catch (error) {
+    console.error('Error checking Google status:', error);
+    res.json({ connected: false });
+  }
+});
+
 // Get all courses for current user
 app.get('/api/google-classroom/courses', authMiddleware, async (req, res) => {
   if (req.user.role !== 'admin') {
