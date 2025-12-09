@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Assignment API</title>
+</head>
+
+<body>
+    <h1>Google Classroom Assignment API Test</h1>
+    <button onclick="testAPI()">Test API</button>
+    <pre id="output"></pre>
+
+    <script>
+        async function testAPI() {
+            const output = document.getElementById('output');
+            output.textContent = 'Loading...';
+
+            try {
+                const response = await fetch('/api/google-classroom/courses/817767404899/assignments', {
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                output.textContent = JSON.stringify(data, null, 2);
+
+                console.log('Full API Response:', data);
+
+                if (data.assignments && data.assignments.length > 0) {
+                    console.log('First Assignment:', data.assignments[0]);
+                    console.log('Assignment Keys:', Object.keys(data.assignments[0]));
+                }
+            } catch (error) {
+                output.textContent = 'Error: ' + error.message;
+                console.error('API Error:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
