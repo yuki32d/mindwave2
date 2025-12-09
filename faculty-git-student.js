@@ -203,13 +203,6 @@ function showReviewModal() {
             ` : ''}
         </div>
 
-        ${project.liveDemoUrl ? `
-            <div style="margin-bottom: 24px;">
-                <h3>Live Demo Preview</h3>
-                <iframe src="${escapeHtml(project.liveDemoUrl)}" class="demo-preview" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-            </div>
-        ` : ''}
-
         <form id="gradeForm" style="background: rgba(255, 255, 255, 0.05); padding: 24px; border-radius: 12px;">
             <h3 style="margin-top: 0;">Grade & Feedback</h3>
             
