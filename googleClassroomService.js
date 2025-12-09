@@ -1,12 +1,10 @@
-// Google Classroom API Service
-// This file handles all Google Classroom API interactions and data syncing
+// Google Classroom Real-Time Service (Proxy Approach)
+// Teachers upload directly to Google Classroom, students fetch in real-time
 
 import { google } from 'googleapis';
 
 /**
  * Initialize Google Classroom API with user's OAuth tokens
- * @param {Object} user - User object with Google tokens
- * @returns {Object} - Google Classroom API instance
  */
 export async function getClassroomAPI(user) {
     const oauth2Client = new google.auth.OAuth2(
@@ -24,268 +22,263 @@ export async function getClassroomAPI(user) {
 }
 
 /**
- * Sync all courses from Google Classroom
- * @param {String} userId - MindWave user ID
- * @param {Object} models - Mongoose models
- * @returns {Array} - Synced courses
+ * Get all active courses for a teacher
  */
-export async function syncCourses(userId, models) {
-    const { User, GoogleClassroomCourse } = models;
+export async function getCourses(userId, models) {
+    const { User } = models;
 
     try {
         const user = await User.findById(userId);
         if (!user || !user.googleAccessToken) {
-            throw new Error('User not found or not connected to Google');
+            throw new Error('User not connected to Google');
         }
 
         const classroom = await getClassroomAPI(user);
-
         const response = await classroom.courses.list({
             courseStates: ['ACTIVE'],
             pageSize: 100
         });
 
-        const courses = response.data.courses || [];
-        const syncedCourses = [];
-
-        for (const course of courses) {
-            const syncedCourse = await GoogleClassroomCourse.findOneAndUpdate(
-                { courseId: course.id },
-                {
-                    courseId: course.id,
-                    name: course.name,
-                    section: course.section,
-                    description: course.description,
-                    room: course.room,
-                    ownerId: course.ownerId,
-                    enrollmentCode: course.enrollmentCode,
-                    courseState: course.courseState,
-                    alternateLink: course.alternateLink,
-                    lastSyncedAt: new Date()
-                },
-                { upsert: true, new: true }
-            );
-
-            syncedCourses.push(syncedCourse);
-        }
-
-        console.log(`Synced ${syncedCourses.length} courses for user ${userId}`);
-        return syncedCourses;
-
+        return response.data.courses || [];
     } catch (error) {
-        console.error('Error syncing courses:', error);
+        console.error('Error fetching courses:', error);
         throw error;
     }
 }
 
 /**
- * Sync course materials from Google Classroom
- * @param {String} userId - MindWave user ID
- * @param {String} courseId - Google Classroom course ID
- * @param {Object} models - Mongoose models
- * @returns {Array} - Synced materials
+ * Get course materials in real-time
  */
-export async function syncCourseMaterials(userId, courseId, models) {
-    const { User, GoogleClassroomMaterial } = models;
+export async function getCourseMaterials(userId, courseId, models) {
+    const { User } = models;
 
     try {
         const user = await User.findById(userId);
         if (!user || !user.googleAccessToken) {
-            throw new Error('User not found or not connected to Google');
+            throw new Error('User not connected to Google');
         }
 
         const classroom = await getClassroomAPI(user);
-
         const response = await classroom.courses.courseWorkMaterials.list({
             courseId: courseId,
             pageSize: 100
         });
 
-        const materials = response.data.courseWorkMaterial || [];
-        const syncedMaterials = [];
-
-        for (const material of materials) {
-            const syncedMaterial = await GoogleClassroomMaterial.findOneAndUpdate(
-                { materialId: material.id },
-                {
-                    materialId: material.id,
-                    courseId: courseId,
-                    title: material.title,
-                    description: material.description,
-                    materials: material.materials,
-                    state: material.state,
-                    creationTime: material.creationTime,
-                    updateTime: material.updateTime,
-                    creatorUserId: material.creatorUserId,
-                    lastSyncedAt: new Date()
-                },
-                { upsert: true, new: true }
-            );
-
-            syncedMaterials.push(syncedMaterial);
-        }
-
-        console.log(`Synced ${syncedMaterials.length} materials for course ${courseId}`);
-        return syncedMaterials;
-
+        return response.data.courseWorkMaterial || [];
     } catch (error) {
-        console.error('Error syncing materials:', error);
+        console.error('Error fetching materials:', error);
         throw error;
     }
 }
 
 /**
- * Sync course assignments from Google Classroom
- * @param {String} userId - MindWave user ID
- * @param {String} courseId - Google Classroom course ID
- * @param {Object} models - Mongoose models
- * @returns {Array} - Synced assignments
+ * Get course assignments in real-time
  */
-export async function syncCourseAssignments(userId, courseId, models) {
-    const { User, GoogleClassroomAssignment } = models;
+export async function getCourseAssignments(userId, courseId, models) {
+    const { User } = models;
 
     try {
         const user = await User.findById(userId);
         if (!user || !user.googleAccessToken) {
-            throw new Error('User not found or not connected to Google');
+            throw new Error('User not connected to Google');
         }
 
         const classroom = await getClassroomAPI(user);
-
         const response = await classroom.courses.courseWork.list({
             courseId: courseId,
             pageSize: 100
         });
 
-        const assignments = response.data.courseWork || [];
-        const syncedAssignments = [];
-
-        for (const assignment of assignments) {
-            const syncedAssignment = await GoogleClassroomAssignment.findOneAndUpdate(
-                { assignmentId: assignment.id },
-                {
-                    assignmentId: assignment.id,
-                    courseId: courseId,
-                    title: assignment.title,
-                    description: assignment.description,
-                    materials: assignment.materials,
-                    state: assignment.state,
-                    workType: assignment.workType,
-                    maxPoints: assignment.maxPoints,
-                    dueDate: assignment.dueDate,
-                    dueTime: assignment.dueTime,
-                    creationTime: assignment.creationTime,
-                    updateTime: assignment.updateTime,
-                    creatorUserId: assignment.creatorUserId,
-                    alternateLink: assignment.alternateLink,
-                    lastSyncedAt: new Date()
-                },
-                { upsert: true, new: true }
-            );
-
-            syncedAssignments.push(syncedAssignment);
-        }
-
-        console.log(`Synced ${syncedAssignments.length} assignments for course ${courseId}`);
-        return syncedAssignments;
-
+        return response.data.courseWork || [];
     } catch (error) {
-        console.error('Error syncing assignments:', error);
+        console.error('Error fetching assignments:', error);
         throw error;
     }
 }
 
 /**
- * Sync student submissions for an assignment
- * @param {String} userId - MindWave user ID (teacher)
- * @param {String} courseId - Google Classroom course ID
- * @param {String} assignmentId - Google Classroom assignment ID
- * @param {Object} models - Mongoose models
- * @returns {Array} - Synced submissions
+ * Upload material to Google Classroom (for teachers)
  */
-export async function syncAssignmentSubmissions(userId, courseId, assignmentId, models) {
-    const { User, GoogleClassroomSubmission } = models;
+export async function uploadMaterial(userId, courseId, materialData, models) {
+    const { User } = models;
 
     try {
         const user = await User.findById(userId);
         if (!user || !user.googleAccessToken) {
-            throw new Error('User not found or not connected to Google');
+            throw new Error('User not connected to Google');
         }
 
         const classroom = await getClassroomAPI(user);
 
+        const material = {
+            title: materialData.title,
+            description: materialData.description,
+            state: 'PUBLISHED',
+            materials: materialData.materials // Array of material objects
+        };
+
+        const response = await classroom.courses.courseWorkMaterials.create({
+            courseId: courseId,
+            requestBody: material
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error uploading material:', error);
+        throw error;
+    }
+}
+
+/**
+ * Create assignment in Google Classroom (for teachers)
+ */
+export async function createAssignment(userId, courseId, assignmentData, models) {
+    const { User } = models;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user || !user.googleAccessToken) {
+            throw new Error('User not connected to Google');
+        }
+
+        const classroom = await getClassroomAPI(user);
+
+        const assignment = {
+            title: assignmentData.title,
+            description: assignmentData.description,
+            state: 'PUBLISHED',
+            workType: assignmentData.workType || 'ASSIGNMENT',
+            maxPoints: assignmentData.maxPoints,
+            dueDate: assignmentData.dueDate,
+            dueTime: assignmentData.dueTime,
+            materials: assignmentData.materials || []
+        };
+
+        const response = await classroom.courses.courseWork.create({
+            courseId: courseId,
+            requestBody: assignment
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error creating assignment:', error);
+        throw error;
+    }
+}
+
+/**
+ * Upload file to Google Drive and get shareable link
+ * (Google Classroom materials reference Google Drive files)
+ */
+export async function uploadToGoogleDrive(userId, fileData, models) {
+    const { User } = models;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user || !user.googleAccessToken) {
+            throw new Error('User not connected to Google');
+        }
+
+        const oauth2Client = new google.auth.OAuth2(
+            process.env.GOOGLE_CLIENT_ID,
+            process.env.GOOGLE_CLIENT_SECRET,
+            process.env.GOOGLE_REDIRECT_URI
+        );
+
+        oauth2Client.setCredentials({
+            access_token: user.googleAccessToken,
+            refresh_token: user.googleRefreshToken
+        });
+
+        const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+        const fileMetadata = {
+            name: fileData.name,
+            mimeType: fileData.mimeType
+        };
+
+        const media = {
+            mimeType: fileData.mimeType,
+            body: fileData.content // File stream or buffer
+        };
+
+        const response = await drive.files.create({
+            requestBody: fileMetadata,
+            media: media,
+            fields: 'id, name, webViewLink, thumbnailLink'
+        });
+
+        // Make file accessible to anyone with the link
+        await drive.permissions.create({
+            fileId: response.data.id,
+            requestBody: {
+                role: 'reader',
+                type: 'anyone'
+            }
+        });
+
+        return {
+            id: response.data.id,
+            title: response.data.name,
+            alternateLink: response.data.webViewLink,
+            thumbnailUrl: response.data.thumbnailLink
+        };
+    } catch (error) {
+        console.error('Error uploading to Google Drive:', error);
+        throw error;
+    }
+}
+
+/**
+ * Get student submissions for an assignment
+ */
+export async function getAssignmentSubmissions(userId, courseId, assignmentId, models) {
+    const { User } = models;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user || !user.googleAccessToken) {
+            throw new Error('User not connected to Google');
+        }
+
+        const classroom = await getClassroomAPI(user);
         const response = await classroom.courses.courseWork.studentSubmissions.list({
             courseId: courseId,
             courseWorkId: assignmentId,
             pageSize: 100
         });
 
-        const submissions = response.data.studentSubmissions || [];
-        const syncedSubmissions = [];
-
-        for (const submission of submissions) {
-            // Try to find MindWave user by Google user ID (email)
-            const studentUser = await User.findOne({ email: submission.userId });
-
-            const syncedSubmission = await GoogleClassroomSubmission.findOneAndUpdate(
-                { submissionId: submission.id },
-                {
-                    submissionId: submission.id,
-                    courseId: courseId,
-                    assignmentId: assignmentId,
-                    studentId: studentUser?._id, // May be null if user not found
-                    googleUserId: submission.userId,
-                    state: submission.state,
-                    assignedGrade: submission.assignedGrade,
-                    draftGrade: submission.draftGrade,
-                    submissionHistory: submission.submissionHistory,
-                    late: submission.late,
-                    creationTime: submission.creationTime,
-                    updateTime: submission.updateTime,
-                    lastSyncedAt: new Date()
-                },
-                { upsert: true, new: true }
-            );
-
-            syncedSubmissions.push(syncedSubmission);
-        }
-
-        console.log(`Synced ${syncedSubmissions.length} submissions for assignment ${assignmentId}`);
-        return syncedSubmissions;
-
+        return response.data.studentSubmissions || [];
     } catch (error) {
-        console.error('Error syncing submissions:', error);
+        console.error('Error fetching submissions:', error);
         throw error;
     }
 }
 
 /**
- * Sync all data for a course (materials + assignments + submissions)
- * @param {String} userId - MindWave user ID
- * @param {String} courseId - Google Classroom course ID
- * @param {Object} models - Mongoose models
- * @returns {Object} - Sync results
+ * Get student's own submission
  */
-export async function syncFullCourse(userId, courseId, models) {
-    try {
-        const materials = await syncCourseMaterials(userId, courseId, models);
-        const assignments = await syncCourseAssignments(userId, courseId, models);
+export async function getMySubmission(userId, courseId, assignmentId, models) {
+    const { User } = models;
 
-        // Sync submissions for each assignment
-        const allSubmissions = [];
-        for (const assignment of assignments) {
-            const submissions = await syncAssignmentSubmissions(userId, courseId, assignment.assignmentId, models);
-            allSubmissions.push(...submissions);
+    try {
+        const user = await User.findById(userId);
+        if (!user || !user.googleAccessToken) {
+            throw new Error('User not connected to Google');
         }
 
-        return {
-            materials: materials.length,
-            assignments: assignments.length,
-            submissions: allSubmissions.length
-        };
+        const classroom = await getClassroomAPI(user);
+        const response = await classroom.courses.courseWork.studentSubmissions.list({
+            courseId: courseId,
+            courseWorkId: assignmentId,
+            userId: 'me', // Current user
+            pageSize: 1
+        });
 
+        const submissions = response.data.studentSubmissions || [];
+        return submissions.length > 0 ? submissions[0] : null;
     } catch (error) {
-        console.error('Error syncing full course:', error);
+        console.error('Error fetching my submission:', error);
         throw error;
     }
 }
