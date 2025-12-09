@@ -4495,173 +4495,122 @@ function listenWithFallback(preferred) {
   attempt();
 }
 
-// ==================== Google Classroom Integration ====================
-
-// Sync all courses from Google Classroom
-app.post('/api/google-classroom/sync/courses', authMiddleware, async (req, res) => {
+// ==================== Google Classroom Integration (Real-Time Proxy) ====================
+// Get all courses for current user
+app.get('/api/google-classroom/courses', authMiddleware, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ ok: false, message: 'Admin access required' });
   }
 
   try {
-    const models = { User, GoogleClassroomCourse };
-    const courses = await googleClassroomService.syncCourses(req.user.sub, models);
+    const models = { User };
+    const courses = await googleClassroomService.getCourses(req.user.sub, models);
     res.json({ ok: true, courses, count: courses.length });
   } catch (error) {
-    console.error('Sync courses error:', error);
+    console.error('Get courses error:', error);
     res.status(500).json({ ok: false, message: error.message });
   }
 });
-
-// Sync materials for a specific course
-app.post('/api/google-classroom/sync/materials/:courseId', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ ok: false, message: 'Admin access required' });
-  }
-
+// Get materials for a course (real-time)
+app.get('/api/google-classroom/courses/:courseId/materials', authMiddleware, async (req, res) => {
   try {
-    const models = { User, GoogleClassroomMaterial };
-    const materials = await googleClassroomService.syncCourseMaterials(req.user.sub, req.params.courseId, models);
+    const models = { User };
+    const materials = await googleClassroomService.getCourseMaterials(req.user.sub, req.params.courseId, models);
     res.json({ ok: true, materials, count: materials.length });
   } catch (error) {
-    console.error('Sync materials error:', error);
+    console.error('Get materials error:', error);
     res.status(500).json({ ok: false, message: error.message });
   }
 });
-
-// Sync assignments for a specific course
-app.post('/api/google-classroom/sync/assignments/:courseId', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ ok: false, message: 'Admin access required' });
-  }
-
+// Get assignments for a course (real-time)
+app.get('/api/google-classroom/courses/:courseId/assignments', authMiddleware, async (req, res) => {
   try {
-    const models = { User, GoogleClassroomAssignment };
-    const assignments = await googleClassroomService.syncCourseAssignments(req.user.sub, req.params.courseId, models);
-    res.json({ ok: true, assignments, count: assignments.length });
-  } catch (error) {
-    console.error('Sync assignments error:', error);
-    res.status(500).json({ ok: false, message: error.message });
-  }
-});
-
-// Sync full course (materials + assignments + submissions)
-app.post('/api/google-classroom/sync/full/:courseId', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ ok: false, message: 'Admin access required' });
-  }
-
-  try {
-    const models = { User, GoogleClassroomMaterial, GoogleClassroomAssignment, GoogleClassroomSubmission };
-    const result = await googleClassroomService.syncFullCourse(req.user.sub, req.params.courseId, models);
-    res.json({ ok: true, result });
-  } catch (error) {
-    console.error('Sync full course error:', error);
-    res.status(500).json({ ok: false, message: error.message });
-  }
-});
-
-// Get combined materials (MindWave + Google Classroom) for a subject
-app.get('/api/subjects/:subjectId/materials/combined', authMiddleware, async (req, res) => {
-  try {
-    const subjectId = req.params.subjectId;
-
-    // Get MindWave materials
-    const mindwaveMaterials = await Material.find({ subjectId }).sort({ createdAt: -1 });
-
-    // Get Google Classroom course mapped to this subject
-    const gcCourse = await GoogleClassroomCourse.findOne({ mappedSubjectId: subjectId });
-
-    let gcMaterials = [];
-    if (gcCourse) {
-      gcMaterials = await GoogleClassroomMaterial.find({
-        courseId: gcCourse.courseId,
-        state: 'PUBLISHED'
-      }).sort({ creationTime: -1 });
-    }
-
-    // Format materials for frontend
-    const formattedMindwaveMaterials = mindwaveMaterials.map(m => ({
-      id: m._id,
-      title: m.title,
-      type: m.type,
-      fileUrl: m.fileUrl,
-      source: 'mindwave',
-      createdAt: m.createdAt,
-      description: m.description,
-      downloads: m.downloads
-    }));
-
-    const formattedGCMaterials = gcMaterials.map(m => ({
-      id: m.materialId,
-      title: m.title,
-      type: 'google-classroom',
-      materials: m.materials,
-      source: 'google-classroom',
-      createdAt: m.creationTime,
-      description: m.description
-    }));
-
-    const allMaterials = [...formattedMindwaveMaterials, ...formattedGCMaterials];
-
-    res.json({
-      ok: true,
-      materials: allMaterials,
-      count: allMaterials.length,
-      mindwaveCount: formattedMindwaveMaterials.length,
-      googleClassroomCount: formattedGCMaterials.length
-    });
-  } catch (error) {
-    console.error('Get combined materials error:', error);
-    res.status(500).json({ ok: false, message: error.message });
-  }
-});
-
-// Get assignments for a subject from Google Classroom
-app.get('/api/subjects/:subjectId/assignments', authMiddleware, async (req, res) => {
-  try {
-    const subjectId = req.params.subjectId;
-
-    // Get Google Classroom course mapped to this subject
-    const gcCourse = await GoogleClassroomCourse.findOne({ mappedSubjectId: subjectId });
-
-    if (!gcCourse) {
-      return res.json({ ok: true, assignments: [], count: 0 });
-    }
-
-    const assignments = await GoogleClassroomAssignment.find({
-      courseId: gcCourse.courseId,
-      state: 'PUBLISHED'
-    }).sort({ creationTime: -1 });
-
+    const models = { User };
+    const assignments = await googleClassroomService.getCourseAssignments(req.user.sub, req.params.courseId, models);
     res.json({ ok: true, assignments, count: assignments.length });
   } catch (error) {
     console.error('Get assignments error:', error);
     res.status(500).json({ ok: false, message: error.message });
   }
 });
+// Upload material to Google Classroom
+app.post('/api/google-classroom/courses/:courseId/materials', authMiddleware, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ ok: false, message: 'Admin access required' });
+  }
 
-// Get assignment details
-app.get('/api/assignments/:assignmentId', authMiddleware, async (req, res) => {
   try {
-    const assignment = await GoogleClassroomAssignment.findOne({ assignmentId: req.params.assignmentId });
-
-    if (!assignment) {
-      return res.status(404).json({ ok: false, message: 'Assignment not found' });
-    }
-
-    // If student, get their submission
-    let submission = null;
-    if (req.user.role === 'student') {
-      submission = await GoogleClassroomSubmission.findOne({
-        assignmentId: req.params.assignmentId,
-        studentId: req.user.sub
-      });
-    }
-
-    res.json({ ok: true, assignment, submission });
+    const models = { User };
+    const material = await googleClassroomService.uploadMaterial(req.user.sub, req.params.courseId, req.body, models);
+    res.json({ ok: true, material });
   } catch (error) {
-    console.error('Get assignment details error:', error);
+    console.error('Upload material error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+// Create assignment in Google Classroom
+app.post('/api/google-classroom/courses/:courseId/assignments', authMiddleware, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ ok: false, message: 'Admin access required' });
+  }
+
+  try {
+    const models = { User };
+    const assignment = await googleClassroomService.createAssignment(req.user.sub, req.params.courseId, req.body, models);
+    res.json({ ok: true, assignment });
+  } catch (error) {
+    console.error('Create assignment error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+// Upload file to Google Drive (for materials)
+app.post('/api/google-drive/upload', authMiddleware, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ ok: false, message: 'Admin access required' });
+  }
+
+  try {
+    const models = { User };
+    const file = await googleClassroomService.uploadToGoogleDrive(req.user.sub, req.body, models);
+    res.json({ ok: true, file });
+  } catch (error) {
+    console.error('Upload to Drive error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+// Get assignment submissions (for teachers)
+app.get('/api/google-classroom/courses/:courseId/assignments/:assignmentId/submissions', authMiddleware, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ ok: false, message: 'Admin access required' });
+  }
+
+  try {
+    const models = { User };
+    const submissions = await googleClassroomService.getAssignmentSubmissions(
+      req.user.sub,
+      req.params.courseId,
+      req.params.assignmentId,
+      models
+    );
+    res.json({ ok: true, submissions, count: submissions.length });
+  } catch (error) {
+    console.error('Get submissions error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+// Get my submission (for students)
+app.get('/api/google-classroom/courses/:courseId/assignments/:assignmentId/my-submission', authMiddleware, async (req, res) => {
+  try {
+    const models = { User };
+    const submission = await googleClassroomService.getMySubmission(
+      req.user.sub,
+      req.params.courseId,
+      req.params.assignmentId,
+      models
+    );
+    res.json({ ok: true, submission });
+  } catch (error) {
+    console.error('Get my submission error:', error);
     res.status(500).json({ ok: false, message: error.message });
   }
 });
