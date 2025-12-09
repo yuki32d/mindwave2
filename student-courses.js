@@ -183,7 +183,7 @@ async function loadCourseDetails(courseId) {
                                     </div>
                                     ${work.description ? `<p style="margin: 8px 0 0; color: var(--text-muted); font-size: 14px;">${escapeHtml(work.description)}</p>` : ''}
                                     <div style="margin-top: 12px; display: flex; gap: 12px;">
-                                        <button onclick="viewAssignmentInApp('${courseId}', '${work.assignmentId}')" style="background: #0f62fe; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+                                        <button class="view-assignment-btn" data-course-id="${courseId}" data-assignment-id="${work.assignmentId}" style="background: #0f62fe; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
                                             View Assignment
                                         </button>
                                         ${work.maxPoints ? `<span style="color: var(--text-muted); font-size: 13px; align-self: center;">Points: ${work.maxPoints}</span>` : ''}
@@ -221,6 +221,18 @@ async function loadCourseDetails(courseId) {
                 </div>
             </div>
         `;
+
+        // Add event listeners to View Assignment buttons
+        setTimeout(() => {
+            document.querySelectorAll('.view-assignment-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const courseId = e.target.dataset.courseId;
+                    const assignmentId = e.target.dataset.assignmentId;
+                    viewAssignmentInApp(courseId, assignmentId);
+                });
+            });
+        }, 100);
+
     } catch (error) {
         console.error('Error loading course details:', error);
         content.innerHTML = `
@@ -232,12 +244,12 @@ async function loadCourseDetails(courseId) {
 }
 
 // View assignment in-app (instead of redirecting to Google Classroom)
-window.viewAssignmentInApp = function (courseId, assignmentId) {
+function viewAssignmentInApp(courseId, assignmentId) {
     // Store assignment info and navigate to assignment page
     sessionStorage.setItem('currentCourseId', courseId);
     sessionStorage.setItem('currentAssignmentId', assignmentId);
     window.location.href = 'student-assignment.html';
-};
+}
 
 // Escape HTML to prevent XSS
 function escapeHtml(text) {
