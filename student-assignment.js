@@ -46,10 +46,11 @@ async function loadAssignmentDetails() {
         }
 
         // Find the specific assignment
-        const assignment = assignmentData.assignments?.find(a => a.assignmentId === assignmentId);
+        const assignment = assignmentData.assignments?.find(a => a.id === assignmentId);
 
         if (!assignment) {
             console.error('Assignment not found in list:', assignmentData.assignments);
+            console.error('Looking for ID:', assignmentId);
             showError(`Assignment not found. Looking for ID: ${assignmentId}`);
             return;
         }

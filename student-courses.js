@@ -183,7 +183,7 @@ async function loadCourseDetails(courseId) {
                                     </div>
                                     ${work.description ? `<p style="margin: 8px 0 0; color: var(--text-muted); font-size: 14px;">${escapeHtml(work.description)}</p>` : ''}
                                     <div style="margin-top: 12px; display: flex; gap: 12px;">
-                                        <button class="view-assignment-btn" data-course-id="${courseId}" data-assignment-id="${work.assignmentId}" style="background: #0f62fe; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+                                        <button class="view-assignment-btn" data-course-id="${courseId}" data-assignment-id="${work.id}" style="background: #0f62fe; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
                                             View Assignment
                                         </button>
                                         ${work.maxPoints ? `<span style="color: var(--text-muted); font-size: 13px; align-self: center;">Points: ${work.maxPoints}</span>` : ''}
