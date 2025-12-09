@@ -16,6 +16,8 @@ import fs from "fs";
 import multer from "multer";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import cron from "node-cron";
+import compression from "compression";
+import mongoSanitize from "express-mongo-sanitize";
 
 dotenv.config();
 
@@ -130,6 +132,11 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Add indexes for faster queries
+userSchema.index({ email: 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ lastActive: -1 });
+
 const passwordResetSchema = new mongoose.Schema(
   {
     email: { type: String, required: true },
@@ -180,6 +187,11 @@ const gameSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Add indexes for faster game queries
+gameSchema.index({ published: 1, createdAt: -1 });
+gameSchema.index({ createdBy: 1 });
+gameSchema.index({ type: 1, published: 1 });
+
 const User = mongoose.model("User", userSchema);
 const PasswordResetRequest = mongoose.model("PasswordResetRequest", passwordResetSchema);
 const AdminNotification = mongoose.model("AdminNotification", adminNotificationSchema);
@@ -199,6 +211,11 @@ const gameSubmissionSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Add indexes for faster submission queries
+gameSubmissionSchema.index({ studentId: 1, gameId: 1 });
+gameSubmissionSchema.index({ studentId: 1, submittedAt: -1 });
+gameSubmissionSchema.index({ gameId: 1 });
 
 const timeAttackSessionSchema = new mongoose.Schema(
   {
@@ -394,6 +411,9 @@ app.use(
     credentials: true
   })
 );
+// Enable compression for all responses
+app.use(compression());
+
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -407,10 +427,17 @@ app.use(helmet({
 }));
 app.use(express.json());
 app.use(cookieParser());
+// Sanitize data to prevent MongoDB injection
+app.use(mongoSanitize());
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Serve static files (HTML, CSS, JS, images) from the root directory
-app.use(express.static(__dirname, { index: false }));
+// Serve static files (HTML, CSS, JS, images) from the root directory with caching
+app.use(express.static(__dirname, {
+  index: false,
+  maxAge: '1d', // Cache static assets for 1 day
+  etag: true,
+  lastModified: true
+}));
 
 const authLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -418,6 +445,18 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false
 });
+
+// General API rate limiter
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many requests, please try again later.'
+});
+
+// Apply rate limiting to all API routes
+app.use('/api/', apiLimiter);
 
 const STUDENT_EMAIL_REGEX = /\.mca25@cmrit\.ac\.in$/i;
 const ADMIN_EMAIL_REGEX = /\.mca@cmrit\.ac\.in$/i;
@@ -4371,6 +4410,20 @@ function listenWithFallback(preferred) {
   }
   attempt();
 }
+
+// Health check endpoint for monitoring
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    memory: {
+      used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB',
+      total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + ' MB'
+    }
+  });
+});
 
 // Run cleanup on server start
 cleanupOldGames();
