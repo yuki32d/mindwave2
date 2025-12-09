@@ -3387,13 +3387,14 @@ app.post("/api/classroom/upload", authMiddleware, upload.single('file'), async (
 // ============================================
 app.post("/api/chat", async (req, res) => {
   try {
-    const { message, history = [] } = req.body;
+    const { message, history = [], userRole } = req.body;
 
     if (!message) {
       return res.status(400).json({ ok: false, error: 'Message is required' });
     }
 
     const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
+    const BLACKBOX_API_KEY = process.env.BLACKBOX_API_KEY;
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
     let reply = '';
@@ -3436,7 +3437,48 @@ app.post("/api/chat", async (req, res) => {
 
 Keep responses short and helpful. Use emojis occasionally. If you don't know something specific, suggest contacting their instructor.`;
 
-    // Try Hugging Face first
+    // Use Blackbox AI for admin users if API key is available
+    if (userRole === 'admin' && BLACKBOX_API_KEY) {
+      try {
+        console.log('🤖 Using Blackbox AI for admin user...');
+
+        const blackboxResponse = await fetch(
+          'https://api.blackbox.ai/v1/chat/completions',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${BLACKBOX_API_KEY}`
+            },
+            body: JSON.stringify({
+              messages: [
+                { role: 'system', content: SYSTEM_PROMPT },
+                ...history.map(h => ({ role: h.role, content: h.content })),
+                { role: 'user', content: message }
+              ],
+              model: 'blackbox',
+              max_tokens: 1000,
+              temperature: 0.7
+            })
+          }
+        );
+
+        if (blackboxResponse.ok) {
+          const data = await blackboxResponse.json();
+          reply = data.choices[0].message.content;
+          usedAPI = 'blackbox';
+          console.log('✅ Blackbox AI response received');
+          return res.json({ ok: true, reply, api: usedAPI });
+        } else {
+          console.log('⚠️ Blackbox AI failed, falling back to Hugging Face');
+        }
+      } catch (error) {
+        console.error('❌ Blackbox AI error:', error.message);
+        console.log('⚠️ Falling back to Hugging Face');
+      }
+    }
+
+    // Try Hugging Face first (for non-admin or if Blackbox failed)
     if (HUGGINGFACE_API_KEY) {
       try {
         console.log('🤖 Using Hugging Face API (OpenAI Compatible)...');
