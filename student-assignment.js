@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadAssignmentDetails() {
     try {
+        console.log('Loading assignment:', { courseId, assignmentId });
+
         // Fetch assignment details and submission status
         const [assignmentRes, submissionRes] = await Promise.all([
             fetch(`/api/google-classroom/courses/${courseId}/assignments`, {
@@ -28,14 +30,27 @@ async function loadAssignmentDetails() {
             })
         ]);
 
+        console.log('Assignment response status:', assignmentRes.status);
+        console.log('Submission response status:', submissionRes.status);
+
         const assignmentData = await assignmentRes.json();
         const submissionData = await submissionRes.json();
+
+        console.log('Assignment data:', assignmentData);
+        console.log('Submission data:', submissionData);
+
+        // Check for API errors
+        if (!assignmentData.ok) {
+            showError(`Failed to load assignments: ${assignmentData.message || 'Unknown error'}`);
+            return;
+        }
 
         // Find the specific assignment
         const assignment = assignmentData.assignments?.find(a => a.assignmentId === assignmentId);
 
         if (!assignment) {
-            showError('Assignment not found.');
+            console.error('Assignment not found in list:', assignmentData.assignments);
+            showError(`Assignment not found. Looking for ID: ${assignmentId}`);
             return;
         }
 
@@ -45,7 +60,7 @@ async function loadAssignmentDetails() {
 
     } catch (error) {
         console.error('Error loading assignment:', error);
-        showError('Failed to load assignment details.');
+        showError(`Failed to load assignment details: ${error.message}`);
     }
 }
 
