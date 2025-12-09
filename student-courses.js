@@ -153,36 +153,41 @@ async function loadCourseDetails(courseId) {
     const content = document.getElementById('courseDetailsContent');
 
     try {
-        // Fetch coursework and materials in parallel
-        const [courseworkRes, materialsRes] = await Promise.all([
-            fetch(`/api/classroom/coursework/${courseId}`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('mindwave_token')}` }
+        // Fetch assignments and materials from Google Classroom API
+        const [assignmentsRes, materialsRes] = await Promise.all([
+            fetch(`/api/google-classroom/courses/${courseId}/assignments`, {
+                credentials: 'include'
             }),
-            fetch(`/api/classroom/materials/${courseId}`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('mindwave_token')}` }
+            fetch(`/api/google-classroom/courses/${courseId}/materials`, {
+                credentials: 'include'
             })
         ]);
 
-        const courseworkData = await courseworkRes.json();
+        const assignmentsData = await assignmentsRes.json();
         const materialsData = await materialsRes.json();
 
-        const coursework = courseworkData.coursework || [];
+        const assignments = assignmentsData.assignments || [];
         const materials = materialsData.materials || [];
 
         content.innerHTML = `
             <div style="display: grid; gap: 32px;">
                 <div>
-                    <h3 style="margin: 0 0 16px; font-size: 18px;">📝 Assignments (${coursework.length})</h3>
-                    ${coursework.length > 0 ? `
+                    <h3 style="margin: 0 0 16px; font-size: 18px;">📝 Assignments (${assignments.length})</h3>
+                    ${assignments.length > 0 ? `
                         <div style="display: grid; gap: 12px;">
-                            ${coursework.map(work => `
+                            ${assignments.map(work => `
                                 <div style="padding: 16px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
                                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                                        <h4 style="margin: 0; font-size: 16px;">${work.title}</h4>
+                                        <h4 style="margin: 0; font-size: 16px;">${escapeHtml(work.title)}</h4>
                                         ${work.dueDate ? `<span style="font-size: 13px; color: #ff9500; background: rgba(255,149,0,0.1); padding: 4px 12px; border-radius: 999px;">Due: ${formatDate(work.dueDate)}</span>` : ''}
                                     </div>
-                                    ${work.description ? `<p style="margin: 8px 0 0; color: var(--text-muted); font-size: 14px;">${work.description}</p>` : ''}
-                                    ${work.alternateLink ? `<a href="${work.alternateLink}" target="_blank" style="display: inline-block; margin-top: 12px; color: #0f62fe; text-decoration: none; font-size: 13px; font-weight: 500;">View Assignment →</a>` : ''}
+                                    ${work.description ? `<p style="margin: 8px 0 0; color: var(--text-muted); font-size: 14px;">${escapeHtml(work.description)}</p>` : ''}
+                                    <div style="margin-top: 12px; display: flex; gap: 12px;">
+                                        <button onclick="viewAssignmentInApp('${courseId}', '${work.assignmentId}')" style="background: #0f62fe; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+                                            View Assignment
+                                        </button>
+                                        ${work.maxPoints ? `<span style="color: var(--text-muted); font-size: 13px; align-self: center;">Points: ${work.maxPoints}</span>` : ''}
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
@@ -195,9 +200,20 @@ async function loadCourseDetails(courseId) {
                         <div style="display: grid; gap: 12px;">
                             ${materials.map(material => `
                                 <div style="padding: 16px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
-                                    <h4 style="margin: 0 0 8px; font-size: 16px;">${material.title}</h4>
-                                    ${material.description ? `<p style="margin: 0; color: var(--text-muted); font-size: 14px;">${material.description}</p>` : ''}
-                                    ${material.alternateLink ? `<a href="${material.alternateLink}" target="_blank" style="display: inline-block; margin-top: 12px; color: #0f62fe; text-decoration: none; font-size: 13px; font-weight: 500;">View Material →</a>` : ''}
+                                    <h4 style="margin: 0 0 8px; font-size: 16px;">${escapeHtml(material.title)}</h4>
+                                    ${material.description ? `<p style="margin: 0 0 12px; color: var(--text-muted); font-size: 14px;">${escapeHtml(material.description)}</p>` : ''}
+                                    ${material.materials && material.materials.length > 0 ? `
+                                        <div style="display: flex; flex-wrap: gap; gap: 8px;">
+                                            ${material.materials.map(m => {
+            if (m.driveFile) {
+                return `<a href="${m.driveFile.alternateLink}" target="_blank" style="background: rgba(15,98,254,0.1); color: #0f62fe; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">📄 ${escapeHtml(m.driveFile.title || 'View File')}</a>`;
+            } else if (m.link) {
+                return `<a href="${m.link.url}" target="_blank" style="background: rgba(15,98,254,0.1); color: #0f62fe; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">🔗 ${escapeHtml(m.link.title || 'View Link')}</a>`;
+            }
+            return '';
+        }).join('')}
+                                        </div>
+                                    ` : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -213,6 +229,22 @@ async function loadCourseDetails(courseId) {
             </div>
         `;
     }
+}
+
+// View assignment in-app (instead of redirecting to Google Classroom)
+window.viewAssignmentInApp = function (courseId, assignmentId) {
+    // Store assignment info and navigate to assignment page
+    sessionStorage.setItem('currentCourseId', courseId);
+    sessionStorage.setItem('currentAssignmentId', assignmentId);
+    window.location.href = 'student-assignment.html';
+};
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function formatDate(dateObj) {
