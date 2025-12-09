@@ -121,9 +121,9 @@ function renderProjects(projects) {
                     🐙 GitHub Repo
                 </a>
                 ${project.liveDemoUrl ? `
-                    <button class="link-btn view-demo-btn" data-demo-url="${escapeHtml(project.liveDemoUrl)}" data-project-name="${escapeHtml(project.projectName)}">
+                    <a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" class="link-btn">
                         🚀 Live Demo
-                    </button>
+                    </a>
                 ` : ''}
                 <button class="review-btn open-review-btn" data-project-id="${project._id}">
                     ${project.status === 'graded' ? '✏️ Edit Review' : '📝 Review & Grade'}
@@ -145,14 +145,6 @@ function renderProjects(projects) {
     `).join('');
 
     // Add event listeners to dynamically created buttons
-    document.querySelectorAll('.view-demo-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const url = this.getAttribute('data-demo-url');
-            const name = this.getAttribute('data-project-name');
-            viewDemo(url, name);
-        });
-    });
-
     document.querySelectorAll('.open-review-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             const projectId = this.getAttribute('data-project-id');

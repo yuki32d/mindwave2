@@ -67,9 +67,9 @@ function renderProjects(projects) {
                     🐙 View on GitHub
                 </a>
                 ${project.liveDemoUrl ? `
-                    <button class="link-btn view-demo-btn" data-demo-url="${escapeHtml(project.liveDemoUrl)}" data-project-name="${escapeHtml(project.projectName)}">
+                    <a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" class="link-btn">
                         🚀 View Live Demo
-                    </button>
+                    </a>
                 ` : ''}
             </div>
 
@@ -90,15 +90,6 @@ function renderProjects(projects) {
             </div>
         </div>
     `).join('');
-
-    // Add event listeners to view demo buttons
-    document.querySelectorAll('.view-demo-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const url = this.getAttribute('data-demo-url');
-            const name = this.getAttribute('data-project-name');
-            viewDemo(url, name);
-        });
-    });
 
     // Add event listeners to delete buttons
     document.querySelectorAll('.delete-project-btn').forEach(btn => {
