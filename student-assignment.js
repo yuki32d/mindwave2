@@ -138,16 +138,21 @@ function displayAssignment(assignment, submission) {
             <div class="materials-section">
                 <h3 style="margin: 0 0 16px;">📎 Attached Materials</h3>
                 <div style="display: grid; gap: 12px;">
-                    ${assignment.materials.map(material => {
+                    ${assignment.materials.map((material, index) => {
+        console.log(`Material ${index}:`, material);
+
         if (material.driveFile) {
+            const fileLink = material.driveFile.alternateLink || material.driveFile.driveFile?.alternateLink || '#';
+            const fileTitle = material.driveFile.title || material.driveFile.driveFile?.title || 'File';
+            console.log('Drive file link:', fileLink);
             return `
                                 <div class="material-item">
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <div>
-                                            <h4 style="margin: 0 0 4px; font-size: 15px;">📄 ${escapeHtml(material.driveFile.title || 'File')}</h4>
+                                            <h4 style="margin: 0 0 4px; font-size: 15px;">📄 ${escapeHtml(fileTitle)}</h4>
                                             ${material.driveFile.thumbnailUrl ? `<img src="${material.driveFile.thumbnailUrl}" style="max-width: 100px; margin-top: 8px; border-radius: 4px;">` : ''}
                                         </div>
-                                        <a href="${material.driveFile.alternateLink}" target="_blank" style="background: #0f62fe; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">
+                                        <a href="${fileLink}" target="_blank" style="background: #0f62fe; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">
                                             Open File
                                         </a>
                                     </div>
