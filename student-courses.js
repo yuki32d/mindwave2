@@ -204,9 +204,18 @@ async function loadCourseDetails(courseId) {
                                     ${material.description ? `<p style="margin: 0 0 12px; color: var(--text-muted); font-size: 14px;">${escapeHtml(material.description)}</p>` : ''}
                                     ${material.materials && material.materials.length > 0 ? `
                                         <div style="display: flex; flex-wrap: gap; gap: 8px;">
-                                            ${material.materials.map(m => {
+                                            ${material.materials.map((m, idx) => {
+            console.log(`Material ${material.title} - File ${idx}:`, m);
             if (m.driveFile) {
-                return `<a href="${m.driveFile.alternateLink}" target="_blank" style="background: rgba(15,98,254,0.1); color: #0f62fe; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">📄 ${escapeHtml(m.driveFile.title || 'View File')}</a>`;
+                // Try multiple possible structures
+                const link = m.driveFile.alternateLink ||
+                    m.driveFile.driveFile?.alternateLink ||
+                    m.driveFile.shareableLink ||
+                    m.alternateLink ||
+                    '#';
+                const title = m.driveFile.title || m.driveFile.driveFile?.title || 'View File';
+                console.log('Drive file link:', link, 'title:', title);
+                return `<a href="${link}" target="_blank" style="background: rgba(15,98,254,0.1); color: #0f62fe; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">📄 ${escapeHtml(title)}</a>`;
             } else if (m.link) {
                 return `<a href="${m.link.url}" target="_blank" style="background: rgba(15,98,254,0.1); color: #0f62fe; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">🔗 ${escapeHtml(m.link.title || 'View Link')}</a>`;
             }
