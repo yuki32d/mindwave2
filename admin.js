@@ -522,7 +522,8 @@ if (smallElement) {
 }
 
 if (profileToggle && profileDropdown) {
-    profileToggle.addEventListener('click', () => {
+    profileToggle.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from bubbling to document
         const isOpen = profileDropdown.style.display === 'flex';
         profileDropdown.style.display = isOpen ? 'none' : 'flex';
     });
@@ -532,6 +533,7 @@ if (profileToggle && profileDropdown) {
         }
     });
 }
+
 
 async function performLogout() {
     try {
