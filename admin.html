@@ -26,13 +26,15 @@
 
             <!-- Actions Card -->
             <div class="topbar-actions">
-                <span onclick="alert('Notifications feature coming soon!')" style="cursor: pointer;"
-                    title="Notifications">🔔</span>
-                <span onclick="window.location.href='faculty-settings.html'" style="cursor: pointer;"
-                    title="Settings">⚙️</span>
-                <div class="profile-toggle" id="adminProfileToggle">
+                <span id="adminNotificationBtn" style="cursor: pointer;" title="Notifications">🔔</span>
+                <span id="adminSettingsBtn" style="cursor: pointer;" title="Settings">⚙️</span>
+                <div class="profile-toggle" id="profileToggle">
                     <span>👤</span>
                     <small>Account</small>
+                </div>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <a href="faculty-settings.html">Profile</a>
+                    <button type="button" id="signOutBtn">Sign out</button>
                 </div>
             </div>
         </header>

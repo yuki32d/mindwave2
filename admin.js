@@ -508,3 +508,62 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initialize
 loadAnnouncements();
 loadEngagement();
+
+// Profile dropdown logic (same as homepage.js)
+const profileToggle = document.getElementById('profileToggle');
+const profileDropdown = document.getElementById('profileDropdown');
+const signOutBtn = document.getElementById('signOutBtn');
+
+// Update profile toggle with user's name
+const firstName = localStorage.getItem('firstName') || 'Admin';
+const smallElement = profileToggle ? profileToggle.querySelector('small') : null;
+if (smallElement) {
+    smallElement.textContent = firstName;
+}
+
+if (profileToggle && profileDropdown) {
+    profileToggle.addEventListener('click', () => {
+        const isOpen = profileDropdown.style.display === 'flex';
+        profileDropdown.style.display = isOpen ? 'none' : 'flex';
+    });
+    document.addEventListener('click', (event) => {
+        if (!profileToggle.contains(event.target) && !profileDropdown.contains(event.target)) {
+            profileDropdown.style.display = 'none';
+        }
+    });
+}
+
+async function performLogout() {
+    try {
+        await fetch(`${API_BASE}/api/logout`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+    } catch (error) {
+        console.error('Logout failed', error);
+    } finally {
+        localStorage.removeItem('mindwave_user');
+        localStorage.removeItem('mindwave_token');
+        document.cookie = 'mindwave_token=; Max-Age=0; path=/;';
+        window.location.href = 'login.html';
+    }
+}
+
+if (signOutBtn) {
+    signOutBtn.addEventListener('click', performLogout);
+}
+
+// Notification and Settings buttons
+const notificationBtn = document.getElementById('adminNotificationBtn');
+if (notificationBtn) {
+    notificationBtn.addEventListener('click', () => {
+        alert('Notifications feature coming soon!');
+    });
+}
+
+const settingsBtn = document.getElementById('adminSettingsBtn');
+if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+        window.location.href = 'faculty-settings.html';
+    });
+}
