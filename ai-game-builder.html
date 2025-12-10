@@ -365,6 +365,118 @@
             background: rgba(255, 255, 255, 0.15);
         }
 
+        /* Create Games Section */
+        .create-games-section {
+            max-width: 1400px;
+            margin: 60px auto 40px;
+            padding: 0 24px;
+        }
+
+        .create-games-section h2 {
+            font-size: 24px;
+            color: #f5f7ff;
+            margin-bottom: 8px;
+        }
+
+        .create-games-section>p {
+            color: #9ea4b6;
+            margin-bottom: 24px;
+        }
+
+        .game-types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .game-type-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-type-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(15, 98, 254, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .game-type-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(15, 98, 254, 0.5);
+            box-shadow: 0 8px 24px rgba(15, 98, 254, 0.2);
+        }
+
+        .game-type-card:hover::before {
+            opacity: 1;
+        }
+
+        .game-type-icon {
+            font-size: 48px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-type-card h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #f5f7ff;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-type-card p {
+            margin: 0;
+            font-size: 13px;
+            color: #9ea4b6;
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Specific gradient colors for each card */
+        .game-type-card:nth-child(1):hover::before {
+            background: linear-gradient(135deg, rgba(255, 55, 95, 0.15) 0%, rgba(255, 159, 10, 0.15) 100%);
+        }
+
+        .game-type-card:nth-child(2):hover::before {
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.15) 0%, rgba(0, 82, 204, 0.15) 100%);
+        }
+
+        .game-type-card:nth-child(3):hover::before {
+            background: linear-gradient(135deg, rgba(159, 122, 234, 0.15) 0%, rgba(107, 70, 193, 0.15) 100%);
+        }
+
+        .game-type-card:nth-child(4):hover::before {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
+        }
+
+        .game-type-card:nth-child(5):hover::before {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.15) 100%);
+        }
+
+        .game-type-card:nth-child(6):hover::before {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(219, 39, 119, 0.15) 100%);
+        }
+
         /* Modal Styles */
         .modal-overlay {
             position: fixed;
@@ -583,6 +695,46 @@
                         <p>Start chatting to generate a game!</p>
                     </div>
                 </div>
+            </div>
+        </div>
+
+
+
+        <!-- Create Games Section -->
+        <div class="create-games-section">
+            <h2>🎮 Create Games</h2>
+            <p>Choose a game type to start creating your educational game</p>
+            <div class="game-types-grid">
+                <a href="faculty-create-quiz.html" class="game-type-card">
+                    <div class="game-type-icon">❓</div>
+                    <h3>Quiz</h3>
+                    <p>Multiple choice questions with instant feedback</p>
+                </a>
+                <a href="faculty-create-sql.html" class="game-type-card">
+                    <div class="game-type-icon">🕸️</div>
+                    <h3>SQL Builder</h3>
+                    <p>Build and validate SQL queries</p>
+                </a>
+                <a href="faculty-create-unjumble.html" class="game-type-card">
+                    <div class="game-type-icon">🧩</div>
+                    <h3>Code Unjumble</h3>
+                    <p>Reorder code lines to fix logic</p>
+                </a>
+                <a href="faculty-create-fillin.html" class="game-type-card">
+                    <div class="game-type-icon">⌨️</div>
+                    <h3>Syntax Fill-in</h3>
+                    <p>Fill in missing code syntax</p>
+                </a>
+                <a href="faculty-create-debug.html" class="game-type-card">
+                    <div class="game-type-icon">🐛</div>
+                    <h3>Bug Hunt</h3>
+                    <p>Find and fix bugs in code</p>
+                </a>
+                <a href="faculty-create-sorter.html" class="game-type-card">
+                    <div class="game-type-icon">🗂️</div>
+                    <h3>Tech Sorter</h3>
+                    <p>Categorize technologies correctly</p>
+                </a>
             </div>
         </div>
 
