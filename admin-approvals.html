@@ -5,9 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MINDWAVE – Admin Approvals</title>
-    <link rel="stylesheet" href="role-page.css">
-    <link rel="stylesheet" href="theme.css">
-    <script src="theme-init.js"></script>
+    <link rel="stylesheet" href="3d-depth-design.css">
     <style>
         .pending-list {
             display: flex;
@@ -17,22 +15,24 @@
         }
 
         .pending-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--card-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             padding: 28px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 32px;
-            transition: all 0.3s ease;
+            transition: var(--transition-smooth);
+            box-shadow: var(--shadow-md);
+            transform: translateZ(10px);
         }
 
         .pending-item:hover {
             background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border-color: var(--cyan-bright);
+            transform: translateZ(20px) translateY(-4px);
+            box-shadow: var(--shadow-xl);
         }
 
         .pending-info {
@@ -43,12 +43,12 @@
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 8px;
-            color: var(--text);
+            color: var(--text-white);
         }
 
         .pending-date {
             font-size: 14px;
-            color: var(--muted);
+            color: var(--text-gray);
             display: flex;
             align-items: center;
             gap: 6px;
@@ -72,18 +72,19 @@
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: var(--transition-smooth);
+            box-shadow: var(--shadow-md);
+            transform: translateZ(5px);
         }
 
         .approve-btn {
-            background: linear-gradient(120deg, #34c759, #30d158);
+            background: linear-gradient(120deg, var(--green-bright), #30d158);
             color: white;
-            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2);
         }
 
         .approve-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(52, 199, 89, 0.4);
+            transform: translateZ(15px) translateY(-3px);
+            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.4);
         }
 
         .reject-btn {
@@ -95,16 +96,17 @@
         .reject-btn:hover {
             background: rgba(255, 59, 48, 0.2);
             border-color: rgba(255, 59, 48, 0.5);
-            transform: translateY(-2px);
+            transform: translateZ(10px) translateY(-2px);
         }
 
         .empty-state {
             text-align: center;
             padding: 80px 32px;
-            color: var(--muted);
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-gray);
+            background: var(--card-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
+            box-shadow: var(--shadow-md);
         }
 
         .empty-state .emoji {
@@ -116,6 +118,29 @@
         .empty-state h2 {
             margin: 0 0 12px;
             font-size: 28px;
+            color: var(--text-white);
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 80px 32px;
+            color: var(--text-gray);
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--cyan-bright);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @media (max-width: 768px) {
@@ -138,30 +163,80 @@
     </style>
 </head>
 
-<body data-role="faculty" data-section="approvals">
-    <div class="page-shell">
-        <header class="hero">
-            <p class="eyebrow" id="heroEyebrow">Faculty Space</p>
-            <h1 id="pageTitle">✅ Admin Approvals</h1>
-            <p class="lede" id="pageSubtitle">Review and approve or reject admin account requests</p>
-            <div class="hero-actions">
-                <a class="ghost-link" href="faculty-settings.html">← Back to Dashboard</a>
+<body>
+    <div class="app-shell">
+        <!-- Card-Based Floating Header -->
+        <header class="topbar">
+            <!-- Logo Card -->
+            <div class="topbar-brand">
+                <span>🌊</span>
+                <span>MindwaveIo</span>
+            </div>
+
+            <!-- Search Card -->
+            <div class="topbar-search">
+                <span>🔍</span>
+                <input type="text" placeholder="Search courses, games, students...">
+            </div>
+
+            <!-- Actions Card -->
+            <div class="topbar-actions">
+                <span style="cursor: pointer;" title="Notifications">🔔</span>
+                <span style="cursor: pointer;" title="Settings">⚙️</span>
+                <div class="profile-toggle" id="adminProfileToggle">
+                    <span>👤</span>
+                    <small>Account</small>
+                </div>
             </div>
         </header>
 
-        <!-- Loading State -->
-        <div id="loadingState" class="loading-container">
-            <div class="spinner"></div>
-            <p>Loading pending requests...</p>
-        </div>
+        <div class="layout">
+            <!-- 3D Floating Sidebar -->
+            <nav class="sidebar">
+                <ul class="menu">
+                    <li><a href="admin.html">⚡ Creator Tools</a></li>
+                    <li><a href="faculty-dashboard.html">🏠 Dashboard</a></li>
+                    <li><a href="faculty-dataanalytics.html">📊 Data Analytics</a></li>
+                    <li><a href="faculty-classroom.html">📚 Courses</a></li>
+                    <li><a href="faculty-community.html">👥 Community</a></li>
+                    <li><a href="faculty-git-student.html">🐙 GitHub</a></li>
+                    <li class="active"><a href="admin-approvals.html">✅ Approvals</a></li>
+                    <li><a href="faculty-settings.html">⚙️ Settings</a></li>
+                </ul>
 
-        <!-- Pending Signups List -->
-        <div id="pendingList" class="pending-list" style="display: none;">
-            <!-- Will be populated by JavaScript -->
+                <div class="sidebar-footer">
+                    <a class="ghost-btn" href="faculty-help.html">❔ Help Center</a>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main>
+                <!-- Header Section -->
+                <div class="main-header">
+                    <div>
+                        <h1>✅ Admin Approvals</h1>
+                        <p>Review and approve or reject admin account requests</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="secondary-btn" onclick="window.location.href='admin.html'">← Back to
+                            Dashboard</button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="loading-container">
+                    <div class="spinner"></div>
+                    <p>Loading pending requests...</p>
+                </div>
+
+                <!-- Pending Signups List -->
+                <div id="pendingList" class="pending-list" style="display: none;">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </main>
         </div>
     </div>
 
-    <script src="role-page.js"></script>
     <script src="admin-approvals.js"></script>
 </body>
 

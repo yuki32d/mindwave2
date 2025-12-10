@@ -224,14 +224,40 @@ loadEngagement();
 // --- Templates & Tools (Static/Local for now) ---
 function renderGameTemplates() {
     const container = document.getElementById('gameTemplateGrid');
-    if (!container) return;
-    container.innerHTML = GAME_LIBRARY.map(template => `
-        <article class="game-template-card" data-title="${template.title}" data-brief="${template.brief}" data-type="${template.type}">
-            <div class="template-icon">${template.icon}</div>
-            <h3>${template.title}</h3>
-            <p>${template.description}</p>
-        </article>
-    `).join('');
+    if (!container) {
+        console.error('Game template grid container not found!');
+        return;
+    }
+
+    // Direct redirects mapping
+    const redirects = {
+        'Debug the Monolith': 'faculty-create-debug.html',
+        'Quiz': 'faculty-create-quiz.html',
+        'Code Logic Unjumble': 'faculty-create-unjumble.html',
+        'Tech Stack Sorter': 'faculty-create-sorter.html',
+        'Syntax Fill-in': 'faculty-create-fillin.html',
+        'SQL Query Builder': 'faculty-create-sql.html'
+    };
+
+    container.innerHTML = GAME_LIBRARY.map(template => {
+        const redirectUrl = redirects[template.title];
+        const onclickAttr = redirectUrl ? `onclick="window.location.href='${redirectUrl}'"` : '';
+
+        return `
+            <article class="game-template-card" 
+                     data-title="${template.title}" 
+                     data-brief="${template.brief}" 
+                     data-type="${template.type}"
+                     ${onclickAttr}
+                     style="cursor: pointer;">
+                <div class="template-icon">${template.icon}</div>
+                <h3>${template.title}</h3>
+                <p>${template.description}</p>
+            </article>
+        `;
+    }).join('');
+
+    console.log('Game templates rendered:', GAME_LIBRARY.length, 'cards');
 }
 renderGameTemplates();
 

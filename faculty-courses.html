@@ -5,22 +5,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MINDWAVE – Faculty Courses</title>
-    <link rel="stylesheet" href="role-page.css">
-    <link rel="stylesheet" href="theme.css">
-    <script src="theme-init.js"></script>
+    <link rel="stylesheet" href="3d-depth-design.css">
 </head>
 
-<body data-role="faculty" data-section="courses">
-    <div class="page-shell">
-        <header class="hero">
-            <p class="eyebrow" id="heroEyebrow">Faculty Space</p>
-            <h1 id="pageTitle">Courses</h1>
-            <p class="lede" id="pageSubtitle">Design experiences, manage pacing, and push new content live.</p>
-            <div class="hero-actions">
-                <a class="ghost-link" href="admin.html">← Back to Creator Hub</a>
+<body>
+    <div class="app-shell">
+        <!-- Card-Based Floating Header -->
+        <header class="topbar">
+            <div class="topbar-brand">
+                <span>🌊</span>
+                <span>MindwaveIo</span>
+            </div>
+            <div class="topbar-search">
+                <span>🔍</span>
+                <input type="text" placeholder="Search courses, games, students...">
+            </div>
+            <div class="topbar-actions">
+                <span style="cursor: pointer;" title="Notifications">🔔</span>
+                <span style="cursor: pointer;" title="Settings">⚙️</span>
+                <div class="profile-toggle">
+                    <span>👤</span>
+                    <small>Account</small>
+                </div>
             </div>
         </header>
-        <section class="panel-grid" id="panelGrid"></section>
+
+        <div class="layout">
+            <nav class="sidebar">
+                <ul class="menu">
+                    <li><a href="admin.html">⚡ Creator Tools</a></li>
+                    <li><a href="faculty-dashboard.html">🏠 Dashboard</a></li>
+                    <li><a href="faculty-dataanalytics.html">📊 Data Analytics</a></li>
+                    <li><a href="faculty-classroom.html">📚 Courses</a></li>
+                    <li class="active"><a href="faculty-courses.html">📖 Course Management</a></li>
+                    <li><a href="faculty-community.html">👥 Community</a></li>
+                    <li><a href="faculty-git-student.html">🐙 GitHub</a></li>
+                    <li><a href="faculty-settings.html">⚙️ Settings</a></li>
+                </ul>
+                <div class="sidebar-footer">
+                    <a class="ghost-btn" href="faculty-help.html">❔ Help Center</a>
+                </div>
+            </nav>
+
+            <main>
+                <div class="main-header">
+                    <div>
+                        <h1>Courses</h1>
+                        <p>Design experiences, manage pacing, and push new content live.</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="secondary-btn" onclick="window.location.href='admin.html'">← Back to Creator
+                            Hub</button>
+                    </div>
+                </div>
+                <section class="panel-grid" id="panelGrid"></section>
+            </main>
+        </div>
     </div>
     <script src="role-page.js"></script>
 </body>

@@ -293,10 +293,39 @@ if (notificationBell && notificationDropdown) {
 // Update notification badge on page load
 updateNotificationBadge();
 
-// Update badge periodically (every 2 seconds) to catch new announcements
+// Update notification badge periodically (every 2 seconds) to catch new announcements
 setInterval(() => {
     updateNotificationBadge();
 }, 2000);
+
+// Event listeners for navigation buttons (CSP-compliant)
+document.addEventListener('DOMContentLoaded', () => {
+    // Notification button
+    const notificationBtn = document.getElementById('notificationBtn');
+    if (notificationBtn) {
+        notificationBtn.addEventListener('click', () => {
+            alert('Notifications feature coming soon!');
+        });
+    }
+
+    // Settings button
+    const settingsBtn = document.getElementById('settingsBtn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            window.location.href = 'student-settings.html';
+        });
+    }
+
+    // All buttons with data-href attribute
+    document.querySelectorAll('[data-href]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const href = e.currentTarget.getAttribute('data-href');
+            if (href) {
+                window.location.href = href;
+            }
+        });
+    });
+});
 
 renderAnnouncements();
 renderUpdates();

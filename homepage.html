@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MINDWAVE – Engagement Hub</title>
-    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="3d-depth-design.css">
     <script src="theme-init.js"></script>
     <style>
         :root {
@@ -52,7 +52,6 @@
             justify-content: space-between;
             padding: 0 32px;
             height: 64px;
-            background: var(--blue);
             font-weight: 600;
         }
 
@@ -656,18 +655,24 @@
 
 <body>
     <div class="app-shell">
+        <!-- Card-Based Floating Header -->
         <header class="topbar">
-            <div class="topbar-brand" style="display: flex; align-items: center; gap: 12px;">
-                <img src="cmrit2.png" alt="CMRIT Logo" style="height: 40px; width: auto;">
+            <!-- Logo Card -->
+            <div class="topbar-brand">
+                <span>🌊</span>
                 <span>MindwaveIo</span>
             </div>
+
+            <!-- Search Card -->
+            <div class="topbar-search">
+                <span>🔍</span>
+                <input type="text" placeholder="Search courses, games, assignments...">
+            </div>
+
+            <!-- Actions Card -->
             <div class="topbar-actions">
-                <div class="notification-bell" id="notificationBell" style="position: relative;">
-                    <span>🔔</span>
-                    <span class="notification-badge hidden" id="notificationBadge">0</span>
-                    <div class="notification-dropdown" id="notificationDropdown"></div>
-                </div>
-                <span>⚙️</span>
+                <span id="notificationBtn" style="cursor: pointer;" title="Notifications">🔔</span>
+                <span id="settingsBtn" style="cursor: pointer;" title="Settings">⚙️</span>
                 <div class="profile-toggle" id="profileToggle">
                     <span>👤</span>
                     <small>Account</small>
@@ -680,18 +685,15 @@
         </header>
         <div class="layout">
             <nav class="sidebar">
-                <div class="team-card">
-                    <h4>MindwaveIo Devs</h4>
-                    <span> Student access</span>
-                </div>
                 <ul class="menu">
                     <li class="active"><a href="student-dashboard.html"><span class="icon">🏠</span>Dashboard</a></li>
-                    <li> <a href="student-leaderboard.html"><span class="icon">🏆</span>Leaderboard</a></li>
+                    <li><a href="student-leaderboard.html"><span class="icon">🏆</span>Leaderboard</a></li>
                     <li><a href="student-courses.html"><span class="icon">📚</span>Courses</a></li>
                     <li><a href="student-community.html"><span class="icon">👥</span>Community</a></li>
                     <li><a href="student-game.html"><span class="icon">🎯</span>Games</a></li>
                     <li><a href="student-github.html"><span class="icon">🐙</span>GitHub Repos</a></li>
                     <li><a href="student-zoom.html"><span class="icon">🎥</span>Zoom Classes</a></li>
+                    <li><a href="student-assignment.html"><span class="icon">📝</span>Assignments</a></li>
                 </ul>
                 <div class="sidebar-footer">
                     <a class="ghost-btn" style="width: 100%;" href="student-help.html">❔ Help</a>
@@ -699,27 +701,86 @@
                 </div>
             </nav>
             <main class="main">
-                <div class="main-header">
+                <!-- Hero Section -->
+                <div class="hero-section">
                     <div>
-                        <h1>Engagement Feed</h1>
-                        <p class="intro-copy">Track every announcement, update, and game drop from this student view.
-                            Use the navigation to dive deeper into each area.</p>
+                        <p class="eyebrow">STUDENT SPACE</p>
+                        <h1 id="pageTitle">Learning Hub</h1>
+                        <p class="lede" id="pageSubtitle">Track announcements, play games, and engage with your courses.
+                        </p>
+                    </div>
+                    <div class="hero-actions">
+                        <button class="ghost-link" data-href="student-courses.html">📚 View
+                            Courses</button>
+                        <button class="ghost-link" data-href="student-game.html">🎮 Play
+                            Games</button>
                     </div>
                 </div>
+
+                <!-- Quick Action Cards -->
+                <div class="action-grid">
+                    <button class="action-card" data-href="student-courses.html"
+                        style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+                        <span>📚</span>
+                        <span>My Courses</span>
+                    </button>
+                    <button class="action-card" data-href="student-game.html"
+                        style="background: linear-gradient(135deg, #8B5CF6 0%, #6B46C1 100%);">
+                        <span>🎮</span>
+                        <span>Play Games</span>
+                    </button>
+                    <button class="action-card" data-href="student-leaderboard.html"
+                        style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);">
+                        <span>🏆</span>
+                        <span>Leaderboard</span>
+                    </button>
+                    <button class="action-card" data-href="student-assignment.html"
+                        style="background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);">
+                        <span>📝</span>
+                        <span>Assignments</span>
+                    </button>
+                    <button class="action-card" data-href="student-community.html"
+                        style="background: linear-gradient(135deg, #EC4899 0%, #BE185D 100%);">
+                        <span>👥</span>
+                        <span>Community</span>
+                    </button>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="pill-row">
+                    <div class="pill-stat">
+                        <h3>Active Courses</h3>
+                        <strong id="courseCount">0</strong>
+                        <span class="tag green">Enrolled</span>
+                    </div>
+                    <div class="pill-stat">
+                        <h3>Games Played</h3>
+                        <strong id="gamesPlayed">0</strong>
+                        <span class="tag purple">Interactive</span>
+                    </div>
+                    <div class="pill-stat">
+                        <h3>Your Rank</h3>
+                        <strong id="studentRank">#--</strong>
+                        <span class="tag orange">Leaderboard</span>
+                    </div>
+                </div>
+
+                <!-- Content Sections -->
                 <section class="feed-grid">
                     <div class="panel">
-                        <h2>Announcements</h2>
+                        <h2>📢 Announcements</h2>
                         <p class="description">Stay in sync with your faculty. Everything new lands here first.</p>
                         <div class="feed-list" id="announcementFeed"></div>
                     </div>
                     <div class="panel">
-                        <h2>Updates</h2>
+                        <h2>📝 Updates</h2>
                         <p class="description">Weekly progress notes, sprint retros, and action items.</p>
                         <div class="feed-list" id="updateFeed"></div>
                     </div>
                 </section>
+
                 <section class="panel" style="margin-top: 32px;">
-                    <h2>Playground Dropzone</h2>
+                    <h2>🎯 Playground Dropzone</h2>
                     <p class="description">Jump into the latest interactive challenges curated for you.</p>
                     <div class="games-list" id="gameFeed"></div>
                 </section>
