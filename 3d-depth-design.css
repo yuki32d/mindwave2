@@ -526,6 +526,7 @@ main>* {
 }
 
 /* 3D Panel Cards */
+/* Fixed: pointer-events on ::after to allow form interaction */
 .panel {
     background: var(--card-dark);
     border-radius: 24px;
