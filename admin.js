@@ -394,39 +394,6 @@ if (analyticsBtn) {
     });
 }
 
-const newGameBtn = document.getElementById('newGameBtn');
-if (newGameBtn) {
-    newGameBtn.addEventListener('click', () => {
-        document.getElementById('gameForm').scrollIntoView({ behavior: 'smooth' });
-    });
-}
-
-const aiGameBuilderBtn = document.getElementById('aiGameBuilderBtn');
-if (aiGameBuilderBtn) {
-    aiGameBuilderBtn.addEventListener('click', () => {
-        window.location.href = 'ai-game-builder.html';
-    });
-}
-
-const announceBtn = document.getElementById('announceBtn');
-if (announceBtn) {
-    announceBtn.addEventListener('click', () => {
-        document.getElementById('announcementForm').scrollIntoView({ behavior: 'smooth' });
-    });
-}
-
-const updateBtn = document.getElementById('updateBtn');
-if (updateBtn) {
-    updateBtn.addEventListener('click', () => {
-        document.getElementById('updateForm').scrollIntoView({ behavior: 'smooth' });
-    });
-}
-
-const systemStatusBtn = document.getElementById('systemStatusBtn');
-if (systemStatusBtn) {
-    systemStatusBtn.addEventListener('click', showSystemStatus);
-}
-
 // --- Engagement Metrics ---
 async function loadEngagement() {
     const data = await fetchAPI('/api/engagement');
@@ -501,6 +468,40 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === modal) {
                 modal.style.display = 'none';
             }
+        });
+    }
+
+    // Action card click handlers
+    const announceBtn = document.getElementById('announceBtn');
+    if (announceBtn) {
+        announceBtn.addEventListener('click', () => {
+            document.getElementById('announcementForm').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    const updateBtn = document.getElementById('updateBtn');
+    if (updateBtn) {
+        updateBtn.addEventListener('click', () => {
+            document.getElementById('updateForm').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    const systemStatusBtn = document.getElementById('systemStatusBtn');
+    if (systemStatusBtn) {
+        systemStatusBtn.addEventListener('click', showSystemStatus);
+    }
+
+    const newGameBtn = document.getElementById('newGameBtn');
+    if (newGameBtn) {
+        newGameBtn.addEventListener('click', () => {
+            document.getElementById('gameForm').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    const aiGameBuilderBtn = document.getElementById('aiGameBuilderBtn');
+    if (aiGameBuilderBtn) {
+        aiGameBuilderBtn.addEventListener('click', () => {
+            window.location.href = 'ai-game-builder.html';
         });
     }
 });
