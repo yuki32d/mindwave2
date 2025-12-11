@@ -84,8 +84,21 @@ if (announcementForm) {
             body: JSON.stringify(payload)
         });
         if (res && res.ok) {
+            // Create notification for students
+            await fetchAPI('/api/notifications/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    recipientRole: 'student',
+                    title: '📢 New Announcement',
+                    message: payload.title,
+                    type: 'info',
+                    link: '/student-notifications.html'
+                })
+            });
             announcementForm.reset();
             loadAnnouncements();
+            alert('✅ Announcement published and students notified!');
         } else {
             alert('Failed to publish: ' + (res ? res.message : 'Unknown error'));
         }
@@ -116,7 +129,7 @@ function renderUpdates(list) {
     `);
 }
 if (updateForm) {
-    updateForm.addEventListener('submit', (event) => {
+    updateForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const next = {
             headline: updateForm.updateHeadline.value.trim(),
@@ -126,8 +139,23 @@ if (updateForm) {
         const updates = JSON.parse(localStorage.getItem(updatesKey) || '[]');
         updates.push(next);
         localStorage.setItem(updatesKey, JSON.stringify(updates));
+
+        // Create notification for students
+        await fetchAPI('/api/notifications/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                recipientRole: 'student',
+                title: '📝 New Update',
+                message: next.headline,
+                type: 'info',
+                link: '/student-notifications.html'
+            })
+        });
+
         updateForm.reset();
         loadUpdates();
+        alert('✅ Update posted and students notified!');
     });
 }
 
@@ -448,6 +476,20 @@ function showEngagementAnalytics() {
 
 // Add click handler for engagement pulse card
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize all section-content elements to be visible by default
+    document.querySelectorAll('.section-content').forEach(section => {
+        section.style.display = 'block';
+    });
+
+    // Add event listeners to all section headers for toggle functionality
+    document.querySelectorAll('.panel h2[onclick]').forEach(header => {
+        header.style.cursor = 'pointer';
+        // Add programmatic listener as backup to inline onclick
+        header.addEventListener('click', function () {
+            window.toggleSection(this);
+        });
+    });
+
     const engagementCard = document.getElementById('engagementPulseCard');
     if (engagementCard) {
         engagementCard.addEventListener('click', showEngagementAnalytics);
@@ -535,27 +577,6 @@ if (profileToggle && profileDropdown) {
     });
 }
 
-
-async function performLogout() {
-    try {
-        await fetch(`${API_BASE}/api/logout`, {
-            method: 'POST',
-            credentials: 'include'
-        });
-    } catch (error) {
-        console.error('Logout failed', error);
-    } finally {
-        localStorage.removeItem('mindwave_user');
-        localStorage.removeItem('mindwave_token');
-        document.cookie = 'mindwave_token=; Max-Age=0; path=/;';
-        window.location.href = 'login.html';
-    }
-}
-
-if (signOutBtn) {
-    signOutBtn.addEventListener('click', performLogout);
-}
-
 // Notification and Settings buttons
 const notificationBtn = document.getElementById('adminNotificationBtn');
 if (notificationBtn) {
@@ -570,3 +591,17 @@ if (settingsBtn) {
         window.location.href = 'faculty-settings.html';
     });
 }
+
+// Toggle section content visibility - Global function
+window.toggleSection = function (header) {
+    const content = header.nextElementSibling;
+    if (content && content.classList.contains('section-content')) {
+        const isHidden = content.style.display === 'none';
+        content.style.display = isHidden ? 'block' : 'none';
+
+        // Optional: Add visual feedback to the header
+        if (header.style) {
+            header.style.opacity = isHidden ? '1' : '0.7';
+        }
+    }
+};

@@ -183,7 +183,8 @@ const gameSchema = new mongoose.Schema(
     blocks: { type: Array, default: [] }, // For SQL
     distractors: { type: Array, default: [] }, // For SQL
     correctQuery: { type: String }, // For SQL
-    lines: { type: Array, default: [] } // For Unjumble
+    lines: { type: Array, default: [] }, // For Unjumble
+    scenes: { type: Array, default: [] } // For Scenario
   },
   { timestamps: true }
 );
@@ -864,6 +865,23 @@ app.post("/api/games", authMiddleware, async (req, res) => {
     console.log('Creating game with data:', gameData);
     const game = await Game.create(gameData);
     console.log('Game created successfully:', game._id);
+
+    // Create notification for students if game is published
+    if (gameData.published) {
+      try {
+        await Notification.create({
+          recipientRole: 'student',
+          title: '🎮 New Game Available!',
+          message: `${gameData.title} - ${gameData.type}`,
+          type: 'info',
+          link: `/student-game.html?id=${game._id}`
+        });
+        console.log('Notification created for new game:', game._id);
+      } catch (notifError) {
+        console.error('Failed to create notification:', notifError);
+      }
+    }
+
     res.status(201).json({ ok: true, game });
   } catch (error) {
     console.error("Game creation error:", error);

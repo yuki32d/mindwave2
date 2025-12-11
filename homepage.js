@@ -241,13 +241,26 @@ async function fetchNotifications() {
                     dropdown.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No new notifications</div>';
                 } else {
                     dropdown.innerHTML = notifications.map(n => `
-                        <div class="notification-item ${n.read ? '' : 'unread'}">
+                        <div class="notification-item ${n.read ? '' : 'unread'}" data-link="${n.link || ''}" style="cursor: pointer;">
                             <h4>${n.title}</h4>
                             <p>${n.message}</p>
                             <small>${new Date(n.createdAt).toLocaleTimeString()}</small>
-                            ${n.link ? `<a href="${n.link}" style="display:block; margin-top:4px; font-size:11px; color:var(--blue);">View</a>` : ''}
                         </div>
-                    `).join('');
+                    `).join('') + `
+                        <div style="padding: 12px; border-top: 0px solid rgba(255, 255, 255, 0.1); text-align: center;">
+                            <a href="student-notifications.html" style="color: var(--cyan-bright); text-decoration: none; font-size: 13px; font-weight: 600;">View All Notifications →</a>
+                        </div>
+                    `;
+
+                    // Add click handlers to navigate to linked content
+                    dropdown.querySelectorAll('.notification-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const link = item.dataset.link;
+                            if (link) {
+                                window.location.href = link;
+                            }
+                        });
+                    });
                 }
             }
         }
@@ -263,7 +276,7 @@ if (document.getElementById('notificationBadge') || document.getElementById('not
 }
 
 // Bell click handler
-const notificationBell = document.getElementById('notificationBell');
+const notificationBell = document.getElementById('notificationBtn'); // Changed from 'notificationBell' to 'notificationBtn'
 const notificationDropdown = document.getElementById('notificationDropdown');
 
 if (notificationBell && notificationDropdown) {
@@ -306,13 +319,8 @@ setInterval(() => {
 
 // Event listeners for navigation buttons (CSP-compliant)
 document.addEventListener('DOMContentLoaded', () => {
-    // Notification button
-    const notificationBtn = document.getElementById('notificationBtn');
-    if (notificationBtn) {
-        notificationBtn.addEventListener('click', () => {
-            alert('Notifications feature coming soon!');
-        });
-    }
+    // Notification button handler is now in lines 266-296 (notificationBell click handler)
+    // Removed old alert handler to allow proper notification dropdown functionality
 
     // Settings button
     const settingsBtn = document.getElementById('settingsBtn');

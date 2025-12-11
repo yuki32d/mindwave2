@@ -166,6 +166,7 @@ function getGameMeta(game) {
     if (game.type === 'fillin' || game.type === 'syntax-fill') return (game.blanks ? game.blanks.length : 0) + ' Blanks';
     if (game.type === 'sql' || game.type === 'sql-builder') return (game.blocks ? game.blocks.length : 0) + ' Blocks';
     if (game.type === 'bug-hunt') return (game.bugCount || 0) + ' Bugs';
+    if (game.type === 'scenario') return (game.scenes ? game.scenes.length : 0) + ' Scenes';
     return 'Game';
 }
 
@@ -176,6 +177,7 @@ function formatGameType(type) {
     if (type === 'fillin' || type === 'syntax-fill') return 'Syntax Fill-in';
     if (type === 'sql' || type === 'sql-builder') return 'SQL Builder';
     if (type === 'bug-hunt') return 'Debug the Monolith';
+    if (type === 'scenario') return 'Scenario';
     return 'Challenge';
 }
 
@@ -231,6 +233,9 @@ async function initGamePlayer(gameId) {
                     break;
                 case 'bug-hunt':
                     playDebug(game, container);
+                    break;
+                case 'scenario':
+                    playScenario(game, container);
                     break;
                 default:
                     if (game.questions) {
@@ -1059,6 +1064,86 @@ function startTimer(durationMinutes, containerSelector, onFinish) {
             onFinish();
         }
     }, 1000);
+}
+
+// === SCENARIO GAME ENGINE ===
+function playScenario(game, container) {
+    let currentSceneId = game.scenes && game.scenes.length > 0 ? game.scenes[0].id : null;
+    let totalScore = 0;
+    let startTime = Date.now();
+    const studentAnswers = [];
+
+    function renderScene() {
+        const scene = game.scenes.find(s => s.id === currentSceneId);
+
+        if (!scene || currentSceneId === null) {
+            // Game ended
+            finishScenario();
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="player-header">
+                <span>🎭 Scenario</span>
+                <span>Score: ${totalScore} pts</span>
+            </div>
+            <div class="question-display">
+                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                    <p style="font-size: 18px; line-height: 1.6; color: #f5f7ff; margin: 0;">${scene.text}</p>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    ${scene.choices.map((choice, index) => `
+                        <button class="option-btn choice-btn" data-choice-index="${index}" style="text-align: left; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>${choice.text}</span>
+                            <span style="background: ${choice.points >= 0 ? 'rgba(52, 199, 89, 0.2)' : 'rgba(255, 59, 48, 0.2)'}; color: ${choice.points >= 0 ? '#34c759' : '#ff3b30'}; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                ${choice.points > 0 ? '+' : ''}${choice.points} pts
+                            </span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        // Attach event listeners to choice buttons
+        container.querySelectorAll('.choice-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const choiceIndex = parseInt(btn.dataset.choiceIndex);
+                makeChoice(scene, choiceIndex);
+            });
+        });
+    }
+
+    function makeChoice(scene, choiceIndex) {
+        const choice = scene.choices[choiceIndex];
+
+        // Track student answer
+        studentAnswers.push({
+            questionText: scene.text,
+            studentAnswer: choice.text,
+            points: choice.points,
+            isCorrect: choice.points > 0
+        });
+
+        // Update score
+        totalScore += choice.points;
+
+        // Move to next scene or end
+        if (choice.nextSceneId === 'END') {
+            currentSceneId = null;
+        } else {
+            currentSceneId = parseInt(choice.nextSceneId);
+        }
+
+        renderScene();
+    }
+
+    async function finishScenario() {
+        const totalPossiblePoints = game.totalPoints || 100;
+        await saveResult(game, totalScore, totalPossiblePoints, startTime, studentAnswers);
+        showResult(container, totalScore, totalPossiblePoints, startTime, game._id || game.id);
+    }
+
+    renderScene();
 }
 
 function fireConfetti() {

@@ -34,7 +34,7 @@
                 </div>
                 <div class="profile-dropdown" id="profileDropdown">
                     <a href="faculty-settings.html">Profile</a>
-                    <button type="button" id="signOutBtn">Sign out</button>
+                    <a href="login.html">Sign out</a>
                 </div>
             </div>
         </header>
@@ -66,7 +66,7 @@
                         <p>Plan announcements, updates, and playful learning tools.</p>
                     </div>
                     <div class="header-actions">
-                        <button class="secondary-btn" onclick="window.location.href='faculty-dataanalytics.html'">📊
+                        <button class="secondary-btn" onclick="window.location.href= 'faculty-dataanalytics.html'">📊
                             Data Analytics</button>
                         <button class="primary-btn" onclick="window.location.href='homepage.html'">Preview Student
                             View</button>
@@ -126,15 +126,17 @@
                     <!-- Publish Announcement -->
                     <section class="panel">
                         <h2>📢 Publish Announcement</h2>
-                        <p>Share news, reminders, or course-wide updates with every learner.</p>
+                        <p style="color: #9ea4b6; margin-bottom: 16px;">Share news, reminders, or course-wide updates
+                            with every learner. Students will be notified instantly!</p>
                         <form id="announcementForm">
                             <div>
                                 <label for="announcementTitle">Title</label>
-                                <input id="announcementTitle" required placeholder="e.g., Sprint Week Kickoff">
+                                <input id="announcementTitle" name="announcementTitle" type="text" required
+                                    placeholder="e.g., Sprint Week Kickoff">
                             </div>
                             <div>
                                 <label for="announcementAudience">Audience</label>
-                                <select id="announcementAudience" required>
+                                <select id="announcementAudience" name="announcementAudience" required>
                                     <option value="All Students">All Students</option>
                                     <option value="Cohort Alpha">Cohort Alpha</option>
                                     <option value="Cohort Beta">Cohort Beta</option>
@@ -142,39 +144,33 @@
                             </div>
                             <div>
                                 <label for="announcementBody">Message</label>
-                                <textarea id="announcementBody" required
-                                    placeholder="Add context, timeline, and CTA..."></textarea>
+                                <textarea id="announcementBody" name="announcementBody" required
+                                    placeholder="Add context, timeline, and CTA..." rows="4"></textarea>
                             </div>
-                            <button class="submit-btn" type="submit">Publish</button>
+                            <button class="submit-btn" type="submit">📢 Publish Announcement</button>
                         </form>
-                        <div class="list" id="announcementList"></div>
+                        <div class="list" id="announcementList" style="margin-top: 24px;"></div>
                     </section>
 
                     <!-- Post Update -->
                     <section class="panel">
                         <h2>📝 Post Update</h2>
-                        <p>Log release notes, classroom reflections, or weekly digests.</p>
+                        <p style="color: #9ea4b6; margin-bottom: 16px;">Log release notes, classroom reflections, or
+                            weekly digests. Students will be notified!</p>
                         <form id="updateForm">
                             <div>
                                 <label for="updateHeadline">Headline</label>
-                                <input id="updateHeadline" required placeholder="e.g., Week 4 Progress Snapshot">
+                                <input id="updateHeadline" name="updateHeadline" type="text" required
+                                    placeholder="e.g., Week 4 Progress Snapshot">
                             </div>
                             <div>
                                 <label for="updateSummary">Summary</label>
-                                <textarea id="updateSummary" required
-                                    placeholder="Key highlights, blockers, next steps..."></textarea>
+                                <textarea id="updateSummary" name="updateSummary" required
+                                    placeholder="Key highlights, blockers, next steps..." rows="4"></textarea>
                             </div>
-                            <button class="submit-btn" type="submit">Post Update</button>
+                            <button class="submit-btn" type="submit">📝 Post Update</button>
                         </form>
-                        <div class="list" id="updateList"></div>
-                    </section>
-
-                    <!-- Game Templates Gallery -->
-                    <section class="panel full-span" id="gamesPanel">
-                        <h2>🧩 Game Templates Gallery</h2>
-                        <p>Choose a blueprint, then customize the prompts and logistics. Tap a card to pre-fill the
-                            builder.</p>
-                        <div class="game-template-grid" id="gameTemplateGrid"></div>
+                        <div class="list" id="updateList" style="margin-top: 24px;"></div>
                     </section>
                 </div>
 

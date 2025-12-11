@@ -549,6 +549,7 @@ main>* {
     mask-composite: exclude;
     opacity: 0;
     transition: var(--transition-smooth);
+    pointer-events: none;
 }
 
 .panel:hover {
@@ -717,6 +718,11 @@ textarea {
     color: var(--text-gray);
     font-size: 14px;
     line-height: 1.5;
+}
+
+/* Section Content Visibility */
+.section-content {
+    display: block;
 }
 
 /* Make game cards visually clickable */
