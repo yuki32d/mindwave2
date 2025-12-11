@@ -1664,6 +1664,18 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
   }
 });
 
+// Get student's game results count
+app.get("/api/game-results/my-results", authMiddleware, async (req, res) => {
+  try {
+    const studentEmail = req.user.email;
+    const count = await GameSubmission.countDocuments({ studentEmail });
+    res.json({ ok: true, results: Array(count).fill({}), count });
+  } catch (error) {
+    console.error("Game results error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 // ============================================
 // User Profile Update Endpoint
 // ============================================

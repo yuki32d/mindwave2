@@ -365,6 +365,62 @@ if (document.readyState === 'loading') {
     initDataHrefButtons();
 }
 
+// === REAL-TIME STATS ===
+async function updateStats() {
+    await Promise.all([
+        updateCourseCount(),
+        updateGamesPlayed(),
+        updateStudentRank()
+    ]);
+}
+
+async function updateCourseCount() {
+    try {
+        const res = await fetch(`${API_BASE}/api/google-classroom/courses`);
+        const data = await res.json();
+        const courseCount = data.ok && data.courses ? data.courses.length : 0;
+        const element = document.getElementById('courseCount');
+        if (element) {
+            element.textContent = courseCount;
+        }
+    } catch (error) {
+        console.error('Failed to fetch course count:', error);
+    }
+}
+
+async function updateGamesPlayed() {
+    try {
+        const res = await fetch(`${API_BASE}/api/game-results/my-results`);
+        const data = await res.json();
+        const gamesPlayed = data.ok && data.results ? data.results.length : 0;
+        const element = document.getElementById('gamesPlayed');
+        if (element) {
+            element.textContent = gamesPlayed;
+        }
+    } catch (error) {
+        console.error('Failed to fetch games played:', error);
+    }
+}
+
+async function updateStudentRank() {
+    try {
+        const res = await fetch(`${API_BASE}/api/leaderboard`);
+        const data = await res.json();
+        if (data.ok && data.leaderboard) {
+            const studentEmail = getStudentEmail();
+            const studentIndex = data.leaderboard.findIndex(s => s.email === studentEmail);
+            const rank = studentIndex !== -1 ? studentIndex + 1 : '--';
+            const element = document.getElementById('studentRank');
+            if (element) {
+                element.textContent = rank === '--' ? '#--' : `#${rank}`;
+            }
+        }
+    } catch (error) {
+        console.error('Failed to fetch student rank:', error);
+    }
+}
+
 renderAnnouncements();
 renderUpdates();
 renderGames();
+updateStats(); // Fetch real-time stats
