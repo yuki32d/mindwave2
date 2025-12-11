@@ -226,25 +226,29 @@ async function fetchNotifications() {
             const unreadCount = notifications.filter(n => !n.read).length;
 
             const badge = document.getElementById('notificationBadge');
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
             }
 
             const dropdown = document.getElementById('notificationDropdown');
-            if (notifications.length === 0) {
-                dropdown.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No new notifications</div>';
-            } else {
-                dropdown.innerHTML = notifications.map(n => `
-                    <div class="notification-item ${n.read ? '' : 'unread'}">
-                        <h4>${n.title}</h4>
-                        <p>${n.message}</p>
-                        <small>${new Date(n.createdAt).toLocaleTimeString()}</small>
-                        ${n.link ? `<a href="${n.link}" style="display:block; margin-top:4px; font-size:11px; color:var(--blue);">View</a>` : ''}
-                    </div>
-                `).join('');
+            if (dropdown) {
+                if (notifications.length === 0) {
+                    dropdown.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No new notifications</div>';
+                } else {
+                    dropdown.innerHTML = notifications.map(n => `
+                        <div class="notification-item ${n.read ? '' : 'unread'}">
+                            <h4>${n.title}</h4>
+                            <p>${n.message}</p>
+                            <small>${new Date(n.createdAt).toLocaleTimeString()}</small>
+                            ${n.link ? `<a href="${n.link}" style="display:block; margin-top:4px; font-size:11px; color:var(--blue);">View</a>` : ''}
+                        </div>
+                    `).join('');
+                }
             }
         }
     } catch (e) {
@@ -252,9 +256,11 @@ async function fetchNotifications() {
     }
 }
 
-// Poll for notifications every 30 seconds
-fetchNotifications();
-setInterval(fetchNotifications, 30000);
+// Poll for notifications every 30 seconds (only if notification elements exist)
+if (document.getElementById('notificationBadge') || document.getElementById('notificationDropdown')) {
+    fetchNotifications();
+    setInterval(fetchNotifications, 30000);
+}
 
 // Bell click handler
 const notificationBell = document.getElementById('notificationBell');
@@ -319,13 +325,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // All buttons with data-href attribute
     document.querySelectorAll('[data-href]').forEach(button => {
         button.addEventListener('click', (e) => {
+            e.preventDefault();
             const href = e.currentTarget.getAttribute('data-href');
             if (href) {
+                console.log('Navigating to:', href);
                 window.location.href = href;
             }
         });
     });
 });
+
+// Also add the handler outside DOMContentLoaded as a fallback
+function initDataHrefButtons() {
+    document.querySelectorAll('[data-href]').forEach(button => {
+        button.style.cursor = 'pointer'; // Ensure cursor shows it's clickable
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const href = e.currentTarget.getAttribute('data-href');
+            if (href) {
+                console.log('Navigating to:', href);
+                window.location.href = href;
+            }
+        });
+    });
+}
+
+// Call it immediately if DOM is already loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDataHrefButtons);
+} else {
+    initDataHrefButtons();
+}
 
 renderAnnouncements();
 renderUpdates();
