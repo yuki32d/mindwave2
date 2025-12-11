@@ -163,19 +163,13 @@ if (profileToggle && profileDropdown) {
     });
 }
 
-async function performLogout() {
-    try {
-        await fetch(`${API_BASE}/api/logout`, {
-            method: 'POST',
-            credentials: 'include'
-        });
-    } catch (error) {
-        console.error('Logout failed', error);
-    } finally {
-        localStorage.removeItem('mindwave_user');
-        localStorage.removeItem('mindwave_token');
-        document.cookie = 'mindwave_token=; Max-Age=0; path=/;';
-        window.location.href = 'login.html';
+function performLogout() {
+    if (confirm('Are you sure you want to sign out?')) {
+        // Clear all auth data and cache
+        clearAuthAndCache();
+
+        // Use replace to prevent back navigation
+        window.location.replace('login.html');
     }
 }
 

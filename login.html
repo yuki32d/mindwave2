@@ -5,6 +5,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login – Mindwave</title>
+    <script>
+        // Disable browser back/forward buttons on login page
+        (function () {
+            // Clear browser history
+            if (window.history && window.history.pushState) {
+                window.history.pushState(null, null, window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, null, window.location.href);
+                };
+            }
+
+            // Prevent navigation via keyboard shortcuts
+            document.addEventListener('keydown', function (e) {
+                // Prevent Alt+Left (back) and Alt+Right (forward)
+                if (e.altKey && (e.keyCode === 37 || e.keyCode === 39)) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Prevent Backspace navigation
+                if (e.keyCode === 8 && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        })();
+    </script>
     <style>
         :root {
             /* 3D Design Colors */

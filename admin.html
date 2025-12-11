@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindWave – Creator Hub</title>
     <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        // Check admin authentication on page load
+        if (!checkAdminAuth()) {
+            // Will redirect if not authenticated as admin
+        }
+    </script>
 </head>
 
 <body>
