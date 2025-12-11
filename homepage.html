@@ -12,6 +12,11 @@
         if (!checkStudentAuth()) {
             // Will redirect to login if not authenticated
         }
+
+        // Remove login page from history if we just came from there
+        if (document.referrer.includes('login.html')) {
+            window.history.replaceState(null, null, window.location.href);
+        }
     </script>
     <script src="theme-init.js"></script>
     <style>

@@ -44,10 +44,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 localStorage.setItem('role', role);
                 localStorage.setItem('token', data.token); // Store JWT token for API calls
 
+                // Use replace() to remove login page from browser history
+                // This prevents users from navigating back to login using browser back button
                 if (role === 'admin') {
-                    window.location.href = 'admin.html';
+                    window.location.replace('admin.html');
                 } else {
-                    window.location.href = 'homepage.html';
+                    window.location.replace('homepage.html');
                 }
             } else {
                 errorMessageDiv.textContent = data.message || 'Login issue. Please try again.';

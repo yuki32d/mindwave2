@@ -12,6 +12,11 @@
         if (!checkAdminAuth()) {
             // Will redirect if not authenticated as admin
         }
+
+        // Remove login page from history if we just came from there
+        if (document.referrer.includes('login.html')) {
+            window.history.replaceState(null, null, window.location.href);
+        }
     </script>
 </head>
 
