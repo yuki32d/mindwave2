@@ -345,15 +345,44 @@ async function getStudentActivityData() {
         return [];
     }
 
-    return data.students.map(student => ({
-        'Student Name': student.name,
-        'Email': student.email,
-        'Last Active': new Date(student.lastActive).toLocaleString(),
-        'Games Played': student.gamesPlayed,
-        'Completion Rate': `${student.completionRate}%`,
-        'Average Score': `${student.avgScore}%`,
-        'Total Time': formatTime(student.totalTime)
-    }));
+    // Fetch detailed activities for each student
+    const exportData = [];
+
+    for (const student of data.students) {
+        const activitiesData = await fetchAPI(`/api/analytics/students/${student._id}/activities`);
+
+        if (activitiesData && activitiesData.ok && activitiesData.activities) {
+            // Export each activity as a separate row
+            for (const activity of activitiesData.activities) {
+                exportData.push({
+                    'Student Name': student.name,
+                    'Email': student.email,
+                    'Activity': activity.gameName,
+                    'Start Time': new Date(activity.startTime).toLocaleString(),
+                    'End Time': new Date(activity.endTime).toLocaleString(),
+                    'Duration': formatTime(activity.duration),
+                    'Score': `${activity.earnedPoints}/${activity.totalPoints} (${activity.score}%)`,
+                    'Completion Rate': `${student.completionRate}%`,
+                    'Average Score': `${student.avgScore}%`
+                });
+            }
+        } else {
+            // If no activities, still export student summary
+            exportData.push({
+                'Student Name': student.name,
+                'Email': student.email,
+                'Activity': 'No activities',
+                'Start Time': '-',
+                'End Time': '-',
+                'Duration': '-',
+                'Score': '-',
+                'Completion Rate': `${student.completionRate}%`,
+                'Average Score': `${student.avgScore}%`
+            });
+        }
+    }
+
+    return exportData;
 }
 
 function exportToCSV() {
@@ -404,11 +433,13 @@ function exportToExcel() {
         ws['!cols'] = [
             { wch: 20 }, // Student Name
             { wch: 30 }, // Email
-            { wch: 20 }, // Last Active
-            { wch: 15 }, // Games Played
+            { wch: 25 }, // Activity
+            { wch: 20 }, // Start Time
+            { wch: 20 }, // End Time
+            { wch: 12 }, // Duration
+            { wch: 20 }, // Score
             { wch: 15 }, // Completion Rate
-            { wch: 15 }, // Average Score
-            { wch: 15 }  // Total Time
+            { wch: 15 }  // Average Score
         ];
 
         // Add worksheet to workbook
