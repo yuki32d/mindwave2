@@ -1076,7 +1076,8 @@ app.get("/api/engagement", authMiddleware, async (req, res) => {
     }).distinct("studentId");
 
     const activeStudents = activeSubmissions.length;
-    const engagementRate = Math.round((activeStudents / totalStudents) * 100);
+    // Cap engagement rate at 100% to prevent values like 200%
+    const engagementRate = Math.min(100, Math.round((activeStudents / totalStudents) * 100));
 
     // Get detailed analytics
     const submissions = await GameSubmission.find({

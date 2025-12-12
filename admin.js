@@ -470,8 +470,13 @@ function showEngagementAnalytics() {
         trendEl.style.color = '#ff9f0a'; // Orange for neutral
     }
 
-    // Show modal
-    document.getElementById('engagementModal').style.display = 'flex';
+    // Show modal using class instead of inline style
+    const modal = document.getElementById('engagementModal');
+    modal.style.display = 'flex';
+    // Force a reflow to ensure the modal is visible
+    setTimeout(() => {
+        modal.style.opacity = '1';
+    }, 10);
 }
 
 // Add click handler for engagement pulse card
@@ -499,7 +504,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.getElementById('closeEngagementModal');
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
-            document.getElementById('engagementModal').style.display = 'none';
+            const modal = document.getElementById('engagementModal');
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 200);
         });
     }
 
@@ -508,7 +517,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modal) {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.style.display = 'none';
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 200);
             }
         });
     }
