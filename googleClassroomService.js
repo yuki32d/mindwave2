@@ -97,6 +97,31 @@ export async function getCourseAssignments(userId, courseId, models) {
 }
 
 /**
+ * Get course announcements in real-time
+ */
+export async function getCourseAnnouncements(userId, courseId, models) {
+    const { User } = models;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user || !user.googleAccessToken) {
+            throw new Error('User not connected to Google');
+        }
+
+        const classroom = await getClassroomAPI(user);
+        const response = await classroom.courses.announcements.list({
+            courseId: courseId,
+            pageSize: 100
+        });
+
+        return response.data.announcements || [];
+    } catch (error) {
+        console.error('Error fetching announcements:', error);
+        throw error;
+    }
+}
+
+/**
  * Upload material to Google Classroom (for teachers)
  */
 export async function uploadMaterial(userId, courseId, materialData, models) {

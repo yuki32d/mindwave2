@@ -4587,6 +4587,17 @@ app.get('/api/google-classroom/courses/:courseId/assignments', authMiddleware, a
     res.status(500).json({ ok: false, message: error.message });
   }
 });
+// Get announcements for a course (real-time)
+app.get('/api/google-classroom/courses/:courseId/announcements', authMiddleware, async (req, res) => {
+  try {
+    const models = { User };
+    const announcements = await googleClassroomService.getCourseAnnouncements(req.user.sub, req.params.courseId, models);
+    res.json({ ok: true, announcements, count: announcements.length });
+  } catch (error) {
+    console.error('Get announcements error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
 // Upload material to Google Classroom
 app.post('/api/google-classroom/courses/:courseId/materials', authMiddleware, async (req, res) => {
   if (req.user.role !== 'admin') {

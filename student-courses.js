@@ -153,24 +153,59 @@ async function loadCourseDetails(courseId) {
     const content = document.getElementById('courseDetailsContent');
 
     try {
-        // Fetch assignments and materials from Google Classroom API
-        const [assignmentsRes, materialsRes] = await Promise.all([
+        // Fetch assignments, materials, and announcements from Google Classroom API
+        const [assignmentsRes, materialsRes, announcementsRes] = await Promise.all([
             fetch(`/api/google-classroom/courses/${courseId}/assignments`, {
                 credentials: 'include'
             }),
             fetch(`/api/google-classroom/courses/${courseId}/materials`, {
+                credentials: 'include'
+            }),
+            fetch(`/api/google-classroom/courses/${courseId}/announcements`, {
                 credentials: 'include'
             })
         ]);
 
         const assignmentsData = await assignmentsRes.json();
         const materialsData = await materialsRes.json();
+        const announcementsData = await announcementsRes.json();
 
         const assignments = assignmentsData.assignments || [];
         const materials = materialsData.materials || [];
+        const announcements = announcementsData.announcements || [];
 
         content.innerHTML = `
             <div style="display: grid; gap: 32px;">
+                <div>
+                    <h3 style="margin: 0 0 16px; font-size: 18px;">📢 Announcements (${announcements.length})</h3>
+                    ${announcements.length > 0 ? `
+                        <div style="display: grid; gap: 12px;">
+                            ${announcements.map(announcement => `
+                                <div style="padding: 16px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                        <h4 style="margin: 0; font-size: 16px;">${escapeHtml(announcement.text || 'Announcement')}</h4>
+                                        ${announcement.creationTime ? `<span style="font-size: 13px; color: var(--text-muted);">${formatDateTime(announcement.creationTime)}</span>` : ''}
+                                    </div>
+                                    ${announcement.materials && announcement.materials.length > 0 ? `
+                                        <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px;">
+                                            ${announcement.materials.map((m) => {
+            if (m.driveFile) {
+                const link = m.driveFile.alternateLink || m.driveFile.driveFile?.alternateLink || '#';
+                const title = m.driveFile.title || m.driveFile.driveFile?.title || 'View File';
+                return `<a href="${link}" target="_blank" style="background: rgba(15,98,254,0.1); color: #0f62fe; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">📄 ${escapeHtml(title)}</a>`;
+            } else if (m.link) {
+                return `<a href="${m.link.url}" target="_blank" style="background: rgba(15,98,254,0.1); color: #0f62fe; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">🔗 ${escapeHtml(m.link.title || 'View Link')}</a>`;
+            }
+            return '';
+        }).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<p style="color: var(--text-muted); font-size: 14px;">No announcements yet</p>'}
+                </div>
+
                 <div>
                     <h3 style="margin: 0 0 16px; font-size: 18px;">📝 Assignments (${assignments.length})</h3>
                     ${assignments.length > 0 ? `
@@ -274,6 +309,15 @@ function escapeHtml(text) {
 function formatDate(dateObj) {
     if (!dateObj) return '';
     const { year, month, day } = dateObj;
+    return `${month}/${day}/${year}`;
+}
+
+function formatDateTime(isoString) {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const year = date.getFullYear();
     return `${month}/${day}/${year}`;
 }
 
