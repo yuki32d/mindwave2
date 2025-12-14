@@ -502,11 +502,19 @@ app.use(compression());
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "script-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net", "https://cdn.sheetjs.com"],
+      "default-src": ["'self'"],
+      "script-src": ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net", "https://cdn.sheetjs.com", "https://unpkg.com", "https://*.lottiefiles.com"],
       "style-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net"],
-      "connect-src": ["'self'", "https://cdn.jsdelivr.net"],
-      "frame-src": ["'self'", "https://*.vercel.app", "https://*.netlify.app", "https://*.github.io", "https://*.onrender.com", "https://*.herokuapp.com", "https://*.replit.dev", "https://*.glitch.me"]
+      "img-src": ["'self'", "data:", "https:", "blob:"],
+      "font-src": ["'self'", "data:", "https:"],
+      "connect-src": ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com"],
+      "worker-src": ["'self'", "blob:"],
+      "frame-src": ["'self'", "https://*.youtube.com", "https://youtube.com", "https://*.youtube-nocookie.com", "https://youtube-nocookie.com", "https://player.vimeo.com", "https://vimeo.com", "https://*.vimeo.com", "https://scrimba.com", "https://*.scrimba.com", "https://*.vercel.app", "https://*.netlify.app", "https://*.github.io", "https://*.onrender.com", "https://*.herokuapp.com", "https://*.replit.dev", "https://*.glitch.me", "https://sketchfab.com", "https://*.sketchfab.com"],
+      "object-src": ["'none'"],
+      "base-uri": ["'self'"],
+      "form-action": ["'self'"],
+      "frame-ancestors": ["'self'"],
+      "upgrade-insecure-requests": []
     }
   }
 }));
@@ -4678,6 +4686,38 @@ app.get('/api/google-classroom/courses/:courseId/assignments/:assignmentId/my-su
   } catch (error) {
     console.error('Get my submission error:', error);
     res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// ==================== AI CODING ASSISTANT ====================
+import { detectLanguage, analyzeCodeSimple } from './codeAnalysisHelpers.js';
+
+// AI Code Analysis Endpoint
+app.post('/api/analyze-code', async (req, res) => {
+  try {
+    const { code, language, question, hintLevel = 0 } = req.body;
+
+    if (!code && !question) {
+      return res.status(400).json({ ok: false, message: 'Code or question required' });
+    }
+
+    // Auto-detect language if not provided
+    const detectedLanguage = language || detectLanguage(code || '');
+
+    // For now, use simple analysis (can be upgraded to AI later)
+    const feedback = analyzeCodeSimple(code, detectedLanguage, hintLevel);
+
+    res.json({
+      ok: true,
+      feedback,
+      language: detectedLanguage,
+      hasErrors: feedback.toLowerCase().includes('error') || feedback.toLowerCase().includes('mistake') || feedback.toLowerCase().includes('oops'),
+      isCorrect: feedback.toLowerCase().includes('perfect') || feedback.toLowerCase().includes('correct') || feedback.toLowerCase().includes('natural')
+    });
+
+  } catch (error) {
+    console.error('AI code analysis error:', error);
+    res.status(500).json({ ok: false, message: 'Failed to analyze code', error: error.message });
   }
 });
 

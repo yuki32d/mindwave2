@@ -1,7 +1,13 @@
-// MINDWAVE Gemini Chatbot
-// This script injects a floating chat button and handles the chat interface
+// MINDWAVE Gemini Chatbot with Lottie Web Component
+// This script injects a floating chat button with animated robot
 
 (function () {
+    // Load DotLottie Web Component Library
+    const lottieScript = document.createElement('script');
+    lottieScript.src = 'https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.11/dist/dotlottie-wc.js';
+    lottieScript.type = 'module';
+    document.head.appendChild(lottieScript);
+
     // Inject CSS
     const style = document.createElement('style');
     style.textContent = `
@@ -19,37 +25,44 @@
         }
 
         .mw-chat-widget {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 9999;
+            position: fixed !important;
+            bottom: 24px !important;
+            right: 24px !important;
+            z-index: 99999 !important;
             font-family: var(--chat-font);
+            pointer-events: auto !important;
+            display: block !important;
+            visibility: visible !important;
         }
 
         .mw-chat-button {
-            width: 60px;
-            height: 60px;
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
-            background: var(--chat-primary);
+            background: transparent;
             border: none;
-            box-shadow: 0 4px 12px rgba(15, 98, 254, 0.4);
+            box-shadow: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.3s;
             position: relative;
+            overflow: visible;
         }
 
         .mw-chat-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 16px rgba(15, 98, 254, 0.5);
+            transform: scale(1.1);
         }
 
-        .mw-chat-button svg {
-            width: 32px;
-            height: 32px;
-            fill: white;
+        .mw-chat-button:active {
+            transform: scale(0.95);
+        }
+
+        .mw-chat-button dotlottie-wc {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
 
         .mw-chat-window {
@@ -280,11 +293,17 @@
                 </button>
             </div>
         </div>
-        <button class="mw-chat-button" id="mwChatToggle">
-            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"></path></svg>
+        <button class="mw-chat-button chatbot-toggle" id="mwChatToggle">
+            <dotlottie-wc 
+                src="chat bot.lottie" 
+                autoplay 
+                loop
+                style="width: 100%; height: 100%;"
+            ></dotlottie-wc>
         </button>
     `;
     document.body.appendChild(widget);
+    console.log('✅ Mindwave Chatbot loaded successfully!', widget);
 
     // Elements
     const windowEl = document.getElementById('mwChatWindow');

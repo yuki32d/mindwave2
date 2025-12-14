@@ -1,0 +1,4 @@
+/* Hide chatbot on code practice page only */
+body .mw-chat-widget {
+    display: none !important;
+}
