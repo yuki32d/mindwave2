@@ -1341,6 +1341,8 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
         }
       },
       { $unwind: '$student' },
+      // Filter to only include users with role='student'
+      { $match: { 'student.role': 'student' } },
       {
         $group: {
           _id: '$studentId',
