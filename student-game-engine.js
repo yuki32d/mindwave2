@@ -514,7 +514,22 @@ function playUnjumble(game, container) {
 }
 
 function playSorter(game, container) {
-    let remainingItems = [...(game.items || [])];
+    // Handle both old format (items as objects) and new format (items as strings with correctMapping)
+    let items = game.items || [];
+    const correctMapping = game.correctMapping || {};
+
+    // Convert items to objects if they're strings
+    let itemObjects = items.map(item => {
+        if (typeof item === 'string') {
+            return {
+                name: item,
+                category: correctMapping[item] || ''
+            };
+        }
+        return item; // Already an object
+    });
+
+    let remainingItems = [...itemObjects];
     let score = 0;
     let startTime = Date.now();
     let currentItem = remainingItems.pop();
@@ -526,7 +541,7 @@ function playSorter(game, container) {
         container.innerHTML = `
             <div class="player-header"><span>Sort the Item</span><span class="timer">⏱️</span></div>
             <div class="question-display" style="text-align: center;">
-                <h2 style="font-size: 32px; margin-bottom: 32px;">${currentItem.name}</h2>
+                <h2 style="font-size: 32px; margin-bottom: 32px;">${currentItem.name || currentItem}</h2>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
                     ${(game.categories || []).map(cat => `
                         <button class="option-btn category-btn" data-category="${cat}" style="text-align: center; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
@@ -553,7 +568,7 @@ function playSorter(game, container) {
 
         // Track student answer
         studentAnswers.push({
-            questionText: `Sort: ${currentItem.name}`,
+            questionText: `Sort: ${currentItem.name || currentItem}`,
             studentAnswer: cat,
             correctAnswer: currentItem.category,
             isCorrect: isCorrect
@@ -575,11 +590,26 @@ function playSorter(game, container) {
 function playFillIn(game, container) {
     let startTime = Date.now();
     let filledBlanks = {};
-    let wordBank = [...(game.blanks || [])].sort(() => Math.random() - 0.5);
+
+    // Handle both formats: array of strings or array of objects with {answer, position}
+    let blanksArray = game.blanks || [];
+    let wordBank = blanksArray.map(blank => {
+        if (typeof blank === 'string') {
+            return blank;
+        } else if (blank && blank.answer) {
+            return blank.answer;
+        }
+        return String(blank);
+    }).sort(() => Math.random() - 0.5);
 
     function render() {
         let blankIndex = 0;
-        const parts = (game.content || '').split(/(\[.*?\])/g);
+        let content = game.content || '';
+
+        // Replace ___ with [blank] placeholders for consistent parsing
+        content = content.replace(/___/g, '[blank]');
+
+        const parts = content.split(/(\\[.*?\\])/g);
 
         const renderedContent = parts.map(part => {
             if (part.startsWith('[') && part.endsWith(']')) {
@@ -588,7 +618,7 @@ function playFillIn(game, container) {
                 return `<span class="blank-slot" data-idx="${idx}" style="display: inline-block; min-width: 60px; border-bottom: 2px solid var(--blue); color: var(--blue); text-align: center; cursor: pointer; margin: 0 4px;">${filled || '___'}</span>`;
             }
             return part;
-        }).join('').replace(/\n/g, '<br>');
+        }).join('').replace(/\\n/g, '<br>');
 
         container.innerHTML = `
             <div class="player-header"><span>Fill in the blanks</span><span class="timer">⏱️</span></div>
@@ -631,7 +661,7 @@ function playFillIn(game, container) {
     }
 
     function useWord(word) {
-        for (let i = 0; i < (game.blanks || []).length; i++) {
+        for (let i = 0; i < wordBank.length; i++) {
             if (!filledBlanks[i]) {
                 filledBlanks[i] = word;
                 render();
@@ -649,7 +679,17 @@ function playFillIn(game, container) {
         let correct = 0;
         const studentAnswers = [];
 
-        (game.blanks || []).forEach((ans, idx) => {
+        // Get correct answers from blanks array
+        const correctAnswers = blanksArray.map(blank => {
+            if (typeof blank === 'string') {
+                return blank;
+            } else if (blank && blank.answer) {
+                return blank.answer;
+            }
+            return String(blank);
+        });
+
+        correctAnswers.forEach((ans, idx) => {
             const isCorrect = filledBlanks[idx] === ans;
             if (isCorrect) correct++;
 
@@ -661,7 +701,7 @@ function playFillIn(game, container) {
             });
         });
 
-        const score = Math.round((correct / (game.blanks ? game.blanks.length : 1)) * game.totalPoints);
+        const score = Math.round((correct / (correctAnswers.length || 1)) * game.totalPoints);
         await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
         showResult(container, score, game.totalPoints, startTime, game._id || game.id);
     }
