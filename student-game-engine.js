@@ -596,8 +596,9 @@ function playFillIn(game, container) {
     let wordBank = blanksArray.map(blank => {
         if (typeof blank === 'string') {
             return blank;
-        } else if (blank && blank.answer) {
-            return blank.answer;
+        } else if (typeof blank === 'object' && blank !== null) {
+            // Try multiple possible property names
+            return blank.answer || blank.text || blank.value || blank.word || JSON.stringify(blank);
         }
         return String(blank);
     }).sort(() => Math.random() - 0.5);
@@ -683,8 +684,9 @@ function playFillIn(game, container) {
         const correctAnswers = blanksArray.map(blank => {
             if (typeof blank === 'string') {
                 return blank;
-            } else if (blank && blank.answer) {
-                return blank.answer;
+            } else if (typeof blank === 'object' && blank !== null) {
+                // Try multiple possible property names
+                return blank.answer || blank.text || blank.value || blank.word || JSON.stringify(blank);
             }
             return String(blank);
         });
