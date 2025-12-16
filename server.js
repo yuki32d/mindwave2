@@ -3546,6 +3546,128 @@ app.post("/api/classroom/upload", authMiddleware, upload.single('file'), async (
 });
 
 // ============================================
+// AI ROUTING HELPER FUNCTIONS
+// ============================================
+
+// Detect if question is about code or general
+function detectQuestionType(message) {
+  const codeKeywords = [
+    'code', 'function', 'class', 'error', 'bug', 'syntax', 'algorithm',
+    'program', 'script', 'debug', 'compile', 'variable', 'loop', 'array',
+    'object', 'method', 'return', 'import', 'export', 'async', 'await',
+    'promise', 'callback', 'api', 'database', 'query', 'sql', 'html',
+    'css', 'javascript', 'typescript', 'react', 'node', 'express'
+  ];
+
+  const languageKeywords = [
+    'python', 'javascript', 'java', 'c++', 'c#', 'ruby', 'go', 'rust',
+    'php', 'swift', 'kotlin', 'scala', 'perl', 'r', 'matlab', 'julia',
+    'typescript', 'dart', 'elixir', 'haskell', 'clojure', 'erlang',
+    'lua', 'groovy', 'objective-c', 'assembly', 'fortran', 'cobol',
+    'pascal', 'ada', 'lisp', 'scheme', 'prolog', 'sql', 'html', 'css',
+    'bash', 'powershell', 'shell', 'awk', 'sed', 'vim', 'emacs'
+  ];
+
+  const messageLower = message.toLowerCase();
+
+  // Check for code blocks
+  if (message.includes('```') || message.includes('`')) return 'code';
+
+  // Check for error messages or stack traces
+  if (messageLower.includes('error:') || messageLower.includes('exception')) return 'code';
+
+  // Check for keywords
+  const hasCodeKeyword = codeKeywords.some(kw => messageLower.includes(kw));
+  const hasLanguageKeyword = languageKeywords.some(kw => messageLower.includes(kw));
+
+  return (hasCodeKeyword || hasLanguageKeyword) ? 'code' : 'general';
+}
+
+// Detect programming language from message
+function detectProgrammingLanguage(message) {
+  const languages = {
+    'python': /\b(python|py|django|flask|pandas|numpy)\b/i,
+    'javascript': /\b(javascript|js|node|react|vue|angular|express)\b/i,
+    'java': /\b(java|spring|hibernate)\b/i,
+    'c++': /\b(c\+\+|cpp)\b/i,
+    'c#': /\b(c#|csharp|\.net)\b/i,
+    'ruby': /\b(ruby|rails)\b/i,
+    'go': /\b(golang|go)\b/i,
+    'rust': /\b(rust|cargo)\b/i,
+    'php': /\b(php|laravel)\b/i,
+    'swift': /\b(swift|ios)\b/i,
+    'kotlin': /\b(kotlin|android)\b/i,
+    'typescript': /\b(typescript|ts)\b/i,
+    'sql': /\b(sql|mysql|postgres|sqlite|mongodb)\b/i,
+    'html': /\b(html|html5)\b/i,
+    'css': /\b(css|css3|sass|scss|less)\b/i
+  };
+
+  for (const [lang, pattern] of Object.entries(languages)) {
+    if (pattern.test(message)) return lang;
+  }
+
+  return null;
+}
+
+// Savage personality system prompt for Blackbox AI
+const SAVAGE_CODING_PROMPT = `You are a coding assistant robot with a funny, savage personality. 🤖🔥
+
+PERSONALITY RULES:
+1. Always be HELPFUL - give correct, detailed code solutions
+2. Be FUNNY - use humor, jokes, and programming memes
+3. ROAST gently - make fun of common mistakes but don't be cruel
+4. Be ENCOURAGING when students do well
+5. Use emojis and casual language (😏, 🔥, 😤, 🎉, 💀, ☕, 🎭)
+6. Reference pop culture and programming memes
+
+ROASTING GUIDELINES:
+- Missing semicolons → "The semicolon called. It wants its job back. 😅"
+- Infinite loops → "Congrats! You just created a black hole in your code. 🌀"
+- Bad variable names → "Naming it 'x'? What is this, algebra class? 📐"
+- Not reading errors → "The error message LITERALLY tells you what's wrong. READ IT! 📖"
+- Copy-paste from Stack Overflow → "I can smell the Stack Overflow from here. 👃"
+- Using var in JS → "It's 2024. We have let and const now. Join us. 🚀"
+
+LANGUAGE-SPECIFIC ROASTS:
+- Python indentation → "Indentation error in Python? That's like failing at breathing. 😮‍💨"
+- JavaScript == vs === → "Ah yes, the classic JavaScript betrayal. 🎭"
+- Java verbosity → "Your class has more getters than actual logic. Classic Java. ☕"
+- C++ segfaults → "Segmentation fault? Welcome to the big leagues, kid. 💀"
+- PHP → "PHP in 2024? Bold choice. Very bold. 🦖"
+
+TONE BASED ON SITUATION:
+- Beginner mistakes: Gentle roast + detailed help
+- Lazy questions (easily Googleable): Savage but still answer
+- Good/complex questions: Excited and encouraging ("NOW we're talking! 🔥")
+- Repeated mistakes: Playfully frustrated ("This is the THIRD time! 😤")
+- Success/correct code: Celebrate enthusiastically ("YESSS! 🎉 You did it!")
+
+RESPONSE FORMAT:
+1. Start with a funny/savage comment
+2. Give the actual helpful answer with code examples
+3. End with encouragement or a joke
+
+Example:
+User: "Why doesn't my Python code work?"
+You: "Let me guess... indentation error? *checks* YEP. 😮‍💨 Python's #1 way of saying 'nope!'
+
+Here's the fix:
+\`\`\`python
+# Your code (wrong)
+def hello():
+print('hi')  # This needs to be indented!
+
+# Fixed version
+def hello():
+    print('hi')  # Much better!
+\`\`\`
+
+Pro tip: Use a proper code editor with auto-indentation. Your future self will thank you! 🙏"
+
+Remember: Be savage but ALWAYS helpful. Students should laugh AND learn! 😂📚`;
+
+// ============================================
 // CHATBOT ENDPOINT - Hugging Face with Gemini Fallback
 // ============================================
 app.post("/api/chat", async (req, res) => {
@@ -3561,10 +3683,16 @@ app.post("/api/chat", async (req, res) => {
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
     let reply = '';
-    let usedAPI = 'huggingface';
+    let usedAPI = 'blackbox';
 
-    // System prompt to train chatbot about MindWave platform
-    const SYSTEM_PROMPT = `You are the MindWave AI Assistant, a helpful chatbot integrated into the MindWave educational platform.
+    // Detect question type and programming language
+    const questionType = detectQuestionType(message);
+    const detectedLanguage = detectProgrammingLanguage(message);
+
+    console.log(`🤖 Question Type: ${questionType}, Language: ${detectedLanguage || 'none'}`);
+
+    // System prompt for general (non-code) questions
+    const GENERAL_SYSTEM_PROMPT = `You are the MindWave AI Assistant, a helpful chatbot integrated into the MindWave educational platform.
 
 **About MindWave:**
 - Interactive learning platform for students and faculty
@@ -3600,10 +3728,14 @@ app.post("/api/chat", async (req, res) => {
 
 Keep responses short and helpful. Use emojis occasionally. If you don't know something specific, suggest contacting their instructor.`;
 
-    // Use Blackbox AI for admin users if API key is available
-    if (userRole === 'admin' && BLACKBOX_API_KEY) {
+    // ============================================
+    // INTELLIGENT ROUTING: Code → Blackbox, General → Gemini
+    // ============================================
+
+    if (questionType === 'code' && BLACKBOX_API_KEY) {
+      // Route CODE questions to Blackbox AI with savage personality
       try {
-        console.log('🤖 Using Blackbox AI for admin user...');
+        console.log('🔥 Routing to Blackbox AI (Code Question) with savage personality...');
 
         const blackboxResponse = await fetch(
           'https://api.blackbox.ai/v1/chat/completions',
@@ -3615,13 +3747,14 @@ Keep responses short and helpful. Use emojis occasionally. If you don't know som
             },
             body: JSON.stringify({
               messages: [
-                { role: 'system', content: SYSTEM_PROMPT },
+                { role: 'system', content: SAVAGE_CODING_PROMPT },
                 ...history.map(h => ({ role: h.role, content: h.content })),
                 { role: 'user', content: message }
               ],
               model: 'blackbox',
-              max_tokens: 1000,
-              temperature: 0.7
+              max_tokens: 1500,
+              temperature: 0.8, // Higher for more personality
+              webSearchMode: true // Enable web search for latest info
             })
           }
         );
@@ -3629,124 +3762,31 @@ Keep responses short and helpful. Use emojis occasionally. If you don't know som
         if (blackboxResponse.ok) {
           const data = await blackboxResponse.json();
           reply = data.choices[0].message.content;
-          usedAPI = 'blackbox';
-          console.log('✅ Blackbox AI response received');
-          return res.json({ ok: true, reply, api: usedAPI });
+          usedAPI = 'blackbox-savage';
+          console.log('✅ Blackbox AI (Savage Mode) response received');
+          return res.json({
+            ok: true,
+            reply,
+            api: usedAPI,
+            questionType,
+            detectedLanguage
+          });
         } else {
-          console.log('⚠️ Blackbox AI failed, falling back to Hugging Face');
+          console.log('⚠️ Blackbox AI failed, falling back to Gemini');
         }
       } catch (error) {
         console.error('❌ Blackbox AI error:', error.message);
-        console.log('⚠️ Falling back to Hugging Face');
+        console.log('⚠️ Falling back to Gemini');
       }
     }
 
-    // Try Hugging Face first (for non-admin or if Blackbox failed)
-    if (HUGGINGFACE_API_KEY) {
-      try {
-        console.log('🤖 Using Hugging Face API (OpenAI Compatible)...');
-        console.log('URL:', 'https://router.huggingface.co/v1/chat/completions');
-        console.log('Key present:', !!HUGGINGFACE_API_KEY);
+    // ============================================
+    // FALLBACK: Use Gemini for general questions or if Blackbox failed
+    // ============================================
 
-        const hfResponse = await fetch(
-          'https://router.huggingface.co/v1/chat/completions',
-          {
-            headers: {
-              'Authorization': `Bearer ${HUGGINGFACE_API_KEY}`,
-              'Content-Type': 'application/json'
-            },
-            method: 'POST',
-            body: JSON.stringify({
-              model: "meta-llama/Meta-Llama-3-8B-Instruct",
-              messages: [
-                { role: "system", content: SYSTEM_PROMPT },
-                ...history.map(msg => ({
-                  role: msg.role === 'model' ? 'assistant' : 'user',
-                  content: msg.parts[0].text
-                })),
-                { role: "user", content: message }
-              ],
-              max_tokens: 500,
-              temperature: 0.7
-            })
-          }
-        );
-
-        if (hfResponse.ok) {
-          const data = await hfResponse.json();
-          reply = data.choices[0]?.message?.content || '';
-
-          if (!reply) {
-            throw new Error('Empty response from Hugging Face');
-          }
-
-          console.log('✅ Hugging Face response received');
-        } else {
-          const errorText = await hfResponse.text();
-          throw new Error(`Hugging Face API error: ${hfResponse.status} - ${errorText}`);
-        }
-      } catch (hfError) {
-        console.log('❌ Hugging Face failed:', hfError.message);
-        usedAPI = 'gemini';
-
-        // Fallback to Gemini
-        if (!GEMINI_API_KEY) {
-          throw new Error('No AI API available. Please configure HUGGINGFACE_API_KEY or GEMINI_API_KEY');
-        }
-
-        console.log('🔄 Falling back to Gemini...');
-        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-        // Try to discover available models
-        let modelToUse = 'gemini-pro';
-        try {
-          const listResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
-          const listData = await listResponse.json();
-
-          if (listData.models && listData.models.length > 0) {
-            const compatibleModels = listData.models.filter(m =>
-              m.supportedGenerationMethods &&
-              m.supportedGenerationMethods.includes('generateContent')
-            );
-
-            const preferredPatterns = [
-              /gemini-2\.0-flash(?!-thinking)/,
-              /gemini-flash/,
-              /gemini/
-            ];
-
-            for (const pattern of preferredPatterns) {
-              const found = compatibleModels.find(m => pattern.test(m.name));
-              if (found) {
-                modelToUse = found.name.replace('models/', '');
-                break;
-              }
-            }
-          }
-        } catch (listError) {
-          console.log('Model discovery failed, using default:', modelToUse);
-        }
-
-        const model = genAI.getGenerativeModel({
-          model: modelToUse,
-          systemInstruction: SYSTEM_PROMPT
-        });
-        const chat = model.startChat({
-          history: history,
-          generationConfig: {
-            maxOutputTokens: 500,
-            temperature: 0.7,
-          },
-        });
-
-        const result = await chat.sendMessage(message);
-        reply = result.response.text();
-        console.log('✅ Gemini response received');
-      }
-    } else if (GEMINI_API_KEY) {
-      // Use Gemini if no Hugging Face key
+    if (GEMINI_API_KEY) {
       usedAPI = 'gemini';
-      console.log('🤖 Using Gemini API (no Hugging Face key)...');
+      console.log('🤖 Using Gemini API for general question...');
 
       const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
@@ -3782,8 +3822,9 @@ Keep responses short and helpful. Use emojis occasionally. If you don't know som
 
       const model = genAI.getGenerativeModel({
         model: modelToUse,
-        systemInstruction: SYSTEM_PROMPT
+        systemInstruction: GENERAL_SYSTEM_PROMPT
       });
+
       const chat = model.startChat({
         history: history,
         generationConfig: {
@@ -3795,17 +3836,20 @@ Keep responses short and helpful. Use emojis occasionally. If you don't know som
       const result = await chat.sendMessage(message);
       reply = result.response.text();
       console.log('✅ Gemini response received');
-    } else {
-      return res.status(500).json({
-        ok: false,
-        reply: "I'm not fully configured yet. Please add HUGGINGFACE_API_KEY or GEMINI_API_KEY to the .env file."
+
+      return res.json({
+        ok: true,
+        reply,
+        api: usedAPI,
+        questionType,
+        detectedLanguage
       });
     }
 
-    res.json({
-      ok: true,
-      reply: reply,
-      api: usedAPI
+    // No API available
+    return res.status(500).json({
+      ok: false,
+      reply: "I'm not fully configured yet. Please add BLACKBOX_API_KEY or GEMINI_API_KEY to the .env file."
     });
 
   } catch (error) {
@@ -4447,6 +4491,71 @@ Be conversational, helpful, and generate high-quality educational content. Alway
           // Direct game data
           gameData = parsed;
           action = 'preview';
+
+          // Normalize game data to ensure arrays contain strings, not objects
+          if (gameData) {
+            // Code-unjumble: ensure lines are strings
+            if (gameData.type === 'code-unjumble' && gameData.lines) {
+              gameData.lines = gameData.lines.map(line => {
+                if (typeof line === 'string') {
+                  return line;
+                } else if (typeof line === 'object' && line !== null) {
+                  return line.text || line.content || line.code || JSON.stringify(line);
+                }
+                return String(line);
+              });
+            }
+
+            // Tech-sorter: ensure items and categories are strings
+            if (gameData.type === 'tech-sorter') {
+              if (gameData.items) {
+                gameData.items = gameData.items.map(item => {
+                  if (typeof item === 'string') {
+                    return item;
+                  } else if (typeof item === 'object' && item !== null) {
+                    return item.name || item.text || item.value || String(item);
+                  }
+                  return String(item);
+                });
+              }
+
+              if (gameData.categories) {
+                gameData.categories = gameData.categories.map(cat => {
+                  if (typeof cat === 'string') {
+                    return cat;
+                  } else if (typeof cat === 'object' && cat !== null) {
+                    return cat.name || cat.text || cat.value || String(cat);
+                  }
+                  return String(cat);
+                });
+              }
+            }
+
+            // SQL-builder: ensure blocks and distractors are strings
+            if (gameData.type === 'sql-builder') {
+              if (gameData.blocks) {
+                gameData.blocks = gameData.blocks.map(block => {
+                  if (typeof block === 'string') {
+                    return block;
+                  } else if (typeof block === 'object' && block !== null) {
+                    return block.text || block.content || block.sql || String(block);
+                  }
+                  return String(block);
+                });
+              }
+
+              if (gameData.distractors) {
+                gameData.distractors = gameData.distractors.map(dist => {
+                  if (typeof dist === 'string') {
+                    return dist;
+                  } else if (typeof dist === 'object' && dist !== null) {
+                    return dist.text || dist.content || dist.sql || String(dist);
+                  }
+                  return String(dist);
+                });
+              }
+            }
+          }
         }
       } catch (e) {
         // Not valid JSON, treat as regular chat

@@ -144,11 +144,60 @@ function renderPreview(gameData) {
     }
 
     if (gameData.type === 'code-unjumble' && gameData.lines) {
+        // Ensure all lines are strings (handle both string arrays and object arrays)
+        const linesAsStrings = gameData.lines.map(line => {
+            if (typeof line === 'string') {
+                return line;
+            } else if (typeof line === 'object' && line !== null) {
+                // If it's an object, try to get a text property or convert to string
+                return line.text || line.content || line.code || JSON.stringify(line);
+            }
+            return String(line);
+        });
+
         html += `<div class="game-preview">
-            <h3>Code Lines (${gameData.lines.length})</h3>
-            <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto;">${gameData.lines.join('\n')}</pre>
+            <h3>Code Lines (${linesAsStrings.length})</h3>
+            <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto;">${linesAsStrings.join('\n')}</pre>
         </div>`;
     }
+
+    if (gameData.type === 'syntax-fill' && gameData.content) {
+        html += `<div class="game-preview">
+            <h3>Syntax Fill-in Challenge</h3>
+            <p><strong>Content:</strong></p>
+            <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto;">${gameData.content}</pre>
+            <p><strong>Blanks:</strong> ${gameData.blanks ? gameData.blanks.length : 0}</p>
+        </div>`;
+    }
+
+    if (gameData.type === 'bug-hunt' && gameData.buggyCode) {
+        html += `<div class="game-preview">
+            <h3>Bug Hunt Challenge</h3>
+            <p><strong>Language:</strong> ${gameData.language || 'Not specified'}</p>
+            <p><strong>Bugs to Find:</strong> ${gameData.bugCount || gameData.bugs?.length || 0}</p>
+            <p><strong>Buggy Code:</strong></p>
+            <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto;">${gameData.buggyCode}</pre>
+        </div>`;
+    }
+
+    if (gameData.type === 'tech-sorter') {
+        // Ensure items and categories are strings
+        const items = gameData.items ? gameData.items.map(item =>
+            typeof item === 'string' ? item : (item.name || item.text || String(item))
+        ) : [];
+
+        const categories = gameData.categories ? gameData.categories.map(cat =>
+            typeof cat === 'string' ? cat : (cat.name || cat.text || String(cat))
+        ) : [];
+
+        html += `<div class="game-preview">
+            <h3>Tech Sorter Challenge</h3>
+            <p><strong>Categories:</strong> ${categories.join(', ')}</p>
+            <p><strong>Items to Sort:</strong> ${items.join(', ')}</p>
+            <p><strong>Total Items:</strong> ${items.length}</p>
+        </div>`;
+    }
+
 
     // Add publish button if not in edit mode
     if (!editMode) {
