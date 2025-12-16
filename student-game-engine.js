@@ -616,15 +616,15 @@ function playFillIn(game, container) {
             if (part.startsWith('[') && part.endsWith(']')) {
                 const idx = blankIndex++;
                 const filled = filledBlanks[idx];
-                return `<span class="blank-slot" data-idx="${idx}" style="display: inline-block; min-width: 60px; border-bottom: 2px solid var(--blue); color: var(--blue); text-align: center; cursor: pointer; margin: 0 4px;">${filled || '___'}</span>`;
+                return `<span class="blank-slot" data-idx="${idx}" style="display: inline-block; min-width: 80px; padding: 4px 8px; border: 2px dashed #0f62fe; background: rgba(15, 98, 254, 0.1); border-radius: 4px; color: #0f62fe; text-align: center; cursor: pointer; margin: 0 4px; font-weight: 600;">${filled || '___'}</span>`;
             }
             return part;
-        }).join('').replace(/\\n/g, '<br>');
+        }).join('').replace(/\\n/g, '\n').replace(/\n/g, '<br>');
 
         container.innerHTML = `
             <div class="player-header"><span>Fill in the blanks</span><span class="timer">⏱️</span></div>
             <div class="question-display">
-                <div style="font-family: monospace; line-height: 2; margin-bottom: 32px; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px;">
+                <div style="font-family: 'Courier New', monospace; line-height: 2; margin-bottom: 32px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; white-space: pre-wrap; font-size: 14px;">
                     ${renderedContent}
                 </div>
                 <div style="display: flex; flex-wrap: wrap; gap: 12px;">
