@@ -47,6 +47,13 @@ async function sendMessage() {
         // Remove typing indicator
         removeMessage(typingId);
 
+        // Debug logging
+        console.log('AI Response:', data);
+        if (data.gameData) {
+            console.log('Game Data Type:', data.gameData.type);
+            console.log('Game Data:', data.gameData);
+        }
+
         if (data.ok) {
             // Add AI response
             addMessage(data.reply, 'ai');
@@ -67,6 +74,7 @@ async function sendMessage() {
                 await publishGame(currentGameData);
             }
         } else {
+            console.error('Server returned error:', data);
             addMessage('Sorry, I encountered an error. Please try again.', 'ai');
         }
     } catch (error) {
@@ -170,15 +178,32 @@ function renderPreview(gameData) {
         </div>`;
     }
 
-    if (gameData.type === 'bug-hunt' && gameData.buggyCode) {
-        html += `<div class="game-preview">
-            <h3>Bug Hunt Challenge</h3>
-            <p><strong>Language:</strong> ${gameData.language || 'Not specified'}</p>
-            <p><strong>Bugs to Find:</strong> ${gameData.bugCount || gameData.bugs?.length || 0}</p>
-            <p><strong>Buggy Code:</strong></p>
-            <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto;">${gameData.buggyCode}</pre>
-        </div>`;
+
+    if (gameData.type === 'bug-hunt') {
+        // Handle different possible property names for buggy code
+        const buggyCode = gameData.buggyCode || gameData.code || gameData.content || '';
+        const perfectCode = gameData.perfectCode || gameData.correctCode || '';
+
+        if (buggyCode) {
+            html += `<div class="game-preview">
+                <h3>Bug Hunt Challenge</h3>
+                <p><strong>Language:</strong> ${gameData.language || 'Not specified'}</p>
+                <p><strong>Bugs to Find:</strong> ${gameData.bugCount || gameData.bugs?.length || 0}</p>
+                <p><strong>Buggy Code:</strong></p>
+                <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto;">${buggyCode}</pre>
+                ${perfectCode ? `<p><strong>Perfect Code:</strong></p>
+                <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto;">${perfectCode}</pre>` : ''}
+            </div>`;
+        } else {
+            console.warn('Bug hunt game data missing buggyCode:', gameData);
+            html += `<div class="game-preview">
+                <h3>Bug Hunt Challenge</h3>
+                <p style="color: #ff6b6b;">⚠️ Preview unavailable - buggy code not generated yet</p>
+                <p>Game data: ${JSON.stringify(gameData, null, 2)}</p>
+            </div>`;
+        }
     }
+
 
     if (gameData.type === 'tech-sorter') {
         // Ensure items and categories are strings
