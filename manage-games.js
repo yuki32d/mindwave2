@@ -60,11 +60,20 @@ function renderGameList(games) {
                     ${game.published ? '<span style="color: #34c759;">✓ Published</span>' : '<span style="color: #9ea4b6;">○ Draft</span>'}
                 </div>
             </div>
-            <button class="danger-btn" onclick="deleteGame('${game._id || game.id}', '${escapeHtml(game.title).replace(/'/g, "\\'")}')">
+            <button class="danger-btn delete-game-btn" data-game-id="${game._id || game.id}" data-game-title="${escapeHtml(game.title)}">
                 🗑️ Delete
             </button>
         </div>
     `).join('');
+
+    // Add event listeners to delete buttons
+    document.querySelectorAll('.delete-game-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const gameId = btn.dataset.gameId;
+            const gameTitle = btn.dataset.gameTitle;
+            deleteGame(gameId, gameTitle);
+        });
+    });
 }
 
 async function deleteGame(gameId, gameTitle) {
