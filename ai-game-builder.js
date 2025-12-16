@@ -24,6 +24,15 @@ async function sendMessage() {
     const message = chatInput.value.trim();
     if (!message) return;
 
+    // Handle "preview" command locally if game data exists
+    if (message.toLowerCase() === 'preview' && currentGameData) {
+        addMessage(message, 'user');
+        addMessage("Here's your current game preview!", 'ai');
+        renderPreview(currentGameData);
+        chatInput.value = '';
+        return;
+    }
+
     // Add user message to chat
     addMessage(message, 'user');
     chatInput.value = '';
