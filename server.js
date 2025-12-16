@@ -1191,12 +1191,52 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
     // Get total students
     const totalStudents = await User.countDocuments({ role: 'student' });
 
-    // Get total game submissions
-    const gamesPlayed = await GameSubmission.countDocuments();
+    // Get total game submissions (excluding admin and super admin)
+    const gamesPlayedData = await GameSubmission.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'studentId',
+          foreignField: '_id',
+          as: 'student'
+        }
+      },
+      { $unwind: '$student' },
+      {
+        $match: {
+          'student.role': { $ne: 'admin' },
+          'student.email': { $ne: SUPER_ADMIN_EMAIL }
+        }
+      },
+      { $count: 'total' }
+    ]);
+    const gamesPlayed = gamesPlayedData[0]?.total || 0;
 
-    // Get active students (those who submitted games)
-    const activeStudents = await GameSubmission.distinct('studentId');
-    const totalEngagement = totalStudents > 0 ? Math.round((activeStudents.length / totalStudents) * 100) : 0;
+    // Get active students (those who submitted games, excluding admin)
+    const activeStudentsData = await GameSubmission.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'studentId',
+          foreignField: '_id',
+          as: 'student'
+        }
+      },
+      { $unwind: '$student' },
+      {
+        $match: {
+          'student.role': { $ne: 'admin' },
+          'student.email': { $ne: SUPER_ADMIN_EMAIL }
+        }
+      },
+      {
+        $group: {
+          _id: '$studentId'
+        }
+      }
+    ]);
+    const activeStudents = activeStudentsData.length;
+    const totalEngagement = totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100) : 0;
 
     // Get top performer
     const topPerformerData = await GameSubmission.aggregate([
