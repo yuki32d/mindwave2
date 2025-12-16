@@ -1209,6 +1209,13 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
         }
       },
       { $unwind: '$student' },
+      // Filter to exclude admin users and super admin email
+      {
+        $match: {
+          'student.role': { $ne: 'admin' },
+          'student.email': { $ne: SUPER_ADMIN_EMAIL }
+        }
+      },
       {
         $group: {
           _id: '$studentId',
