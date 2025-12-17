@@ -452,6 +452,21 @@ const googleClassroomSubmissionSchema = new mongoose.Schema({
   lastSyncedAt: { type: Date }
 }, { timestamps: true });
 
+const googleClassroomAnnouncementSchema = new mongoose.Schema({
+  announcementId: { type: String, required: true, unique: true },
+  courseId: { type: String, required: true },
+  text: { type: String, required: true },
+  state: { type: String, enum: ['PUBLISHED', 'DRAFT', 'DELETED'] },
+  creationTime: { type: Date },
+  updateTime: { type: Date },
+  creatorUserId: { type: String },
+  alternateLink: { type: String },
+  materials: [{ type: mongoose.Schema.Types.Mixed }],
+  lastSyncedAt: { type: Date },
+  syncedToMindWave: { type: Boolean, default: false },
+  mindWaveAnnouncementId: { type: mongoose.Schema.Types.ObjectId, ref: 'Announcement' }
+}, { timestamps: true });
+
 // Add indexes for Google Classroom schemas
 googleClassroomCourseSchema.index({ courseId: 1 });
 googleClassroomCourseSchema.index({ mappedSubjectId: 1 });
@@ -460,11 +475,14 @@ googleClassroomAssignmentSchema.index({ courseId: 1, state: 1 });
 googleClassroomAssignmentSchema.index({ dueDate: 1 });
 googleClassroomSubmissionSchema.index({ studentId: 1, assignmentId: 1 });
 googleClassroomSubmissionSchema.index({ courseId: 1 });
+googleClassroomAnnouncementSchema.index({ courseId: 1, state: 1 });
+googleClassroomAnnouncementSchema.index({ announcementId: 1 });
 
 const GoogleClassroomCourse = mongoose.model("GoogleClassroomCourse", googleClassroomCourseSchema);
 const GoogleClassroomMaterial = mongoose.model("GoogleClassroomMaterial", googleClassroomMaterialSchema);
 const GoogleClassroomAssignment = mongoose.model("GoogleClassroomAssignment", googleClassroomAssignmentSchema);
 const GoogleClassroomSubmission = mongoose.model("GoogleClassroomSubmission", googleClassroomSubmissionSchema);
+const GoogleClassroomAnnouncement = mongoose.model("GoogleClassroomAnnouncement", googleClassroomAnnouncementSchema);
 
 
 const app = express();
@@ -1191,6 +1209,178 @@ app.delete("/api/announcements/:id", authMiddleware, async (req, res) => {
     res.json({ ok: true, message: "Announcement deleted" });
   } catch (error) {
     console.error("Delete announcement error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// ============================================
+// Google Classroom Announcements Sync
+// ============================================
+
+// Sync announcements from Google Classroom to MindWave
+app.post("/api/google-classroom/sync-announcements", authMiddleware, async (req, res) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ ok: false, message: "Only admins can sync announcements" });
+  }
+
+  try {
+    const user = await User.findById(req.user.sub);
+    if (!user || !user.googleAccessToken) {
+      return res.status(400).json({
+        ok: false,
+        message: "Google account not connected. Please connect your Google account first."
+      });
+    }
+
+    // Fetch all active courses
+    const courses = await GoogleClassroomCourse.find({ courseState: 'ACTIVE' });
+
+    if (courses.length === 0) {
+      return res.json({
+        ok: true,
+        message: "No active courses found. Please sync courses first.",
+        synced: 0
+      });
+    }
+
+    let totalSynced = 0;
+    let errors = [];
+
+    // Sync announcements for each course
+    for (const course of courses) {
+      try {
+        // Fetch announcements from Google Classroom API
+        const response = await fetch(
+          `https://classroom.googleapis.com/v1/courses/${course.courseId}/announcements?pageSize=50`,
+          {
+            headers: {
+              'Authorization': `Bearer ${user.googleAccessToken}`,
+              'Accept': 'application/json'
+            }
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            errors.push({ course: course.name, error: 'Access token expired' });
+            continue;
+          }
+          throw new Error(`Google API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const announcements = data.announcements || [];
+
+        // Process each announcement
+        for (const gcAnnouncement of announcements) {
+          try {
+            // Check if already synced
+            let existingAnnouncement = await GoogleClassroomAnnouncement.findOne({
+              announcementId: gcAnnouncement.id
+            });
+
+            if (existingAnnouncement) {
+              // Update existing
+              existingAnnouncement.text = gcAnnouncement.text;
+              existingAnnouncement.state = gcAnnouncement.state;
+              existingAnnouncement.updateTime = gcAnnouncement.updateTime ? new Date(gcAnnouncement.updateTime) : null;
+              existingAnnouncement.lastSyncedAt = new Date();
+              await existingAnnouncement.save();
+
+              // Update MindWave announcement if it exists
+              if (existingAnnouncement.mindWaveAnnouncementId) {
+                await Announcement.findByIdAndUpdate(
+                  existingAnnouncement.mindWaveAnnouncementId,
+                  {
+                    title: `[Google Classroom] ${course.name}`,
+                    body: gcAnnouncement.text,
+                    audience: 'All Students'
+                  }
+                );
+              }
+            } else {
+              // Create new Google Classroom announcement record
+              const newGCAnnouncement = await GoogleClassroomAnnouncement.create({
+                announcementId: gcAnnouncement.id,
+                courseId: course.courseId,
+                text: gcAnnouncement.text,
+                state: gcAnnouncement.state || 'PUBLISHED',
+                creationTime: gcAnnouncement.creationTime ? new Date(gcAnnouncement.creationTime) : new Date(),
+                updateTime: gcAnnouncement.updateTime ? new Date(gcAnnouncement.updateTime) : null,
+                creatorUserId: gcAnnouncement.creatorUserId,
+                alternateLink: gcAnnouncement.alternateLink,
+                materials: gcAnnouncement.materials || [],
+                lastSyncedAt: new Date(),
+                syncedToMindWave: false
+              });
+
+              // Create corresponding MindWave announcement
+              const mindWaveAnnouncement = await Announcement.create({
+                title: `[Google Classroom] ${course.name}`,
+                body: gcAnnouncement.text,
+                audience: 'All Students',
+                createdBy: req.user.sub
+              });
+
+              // Link them
+              newGCAnnouncement.syncedToMindWave = true;
+              newGCAnnouncement.mindWaveAnnouncementId = mindWaveAnnouncement._id;
+              await newGCAnnouncement.save();
+
+              // Create notification for students
+              await Notification.create({
+                recipientRole: 'student',
+                title: `📢 New Announcement from ${course.name}`,
+                message: gcAnnouncement.text.substring(0, 100) + (gcAnnouncement.text.length > 100 ? '...' : ''),
+                type: 'info',
+                link: '/student-dashboard.html'
+              });
+
+              totalSynced++;
+            }
+          } catch (announcementError) {
+            console.error(`Error processing announcement ${gcAnnouncement.id}:`, announcementError);
+            errors.push({
+              course: course.name,
+              announcementId: gcAnnouncement.id,
+              error: announcementError.message
+            });
+          }
+        }
+      } catch (courseError) {
+        console.error(`Error syncing course ${course.name}:`, courseError);
+        errors.push({ course: course.name, error: courseError.message });
+      }
+    }
+
+    res.json({
+      ok: true,
+      message: `Successfully synced ${totalSynced} new announcements`,
+      synced: totalSynced,
+      coursesProcessed: courses.length,
+      errors: errors.length > 0 ? errors : undefined
+    });
+
+  } catch (error) {
+    console.error("Sync announcements error:", error);
+    res.status(500).json({ ok: false, message: "Server error: " + error.message });
+  }
+});
+
+// Get all Google Classroom announcements (for debugging/admin view)
+app.get("/api/google-classroom/announcements", authMiddleware, async (req, res) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ ok: false, message: "Admin access required" });
+  }
+
+  try {
+    const gcAnnouncements = await GoogleClassroomAnnouncement.find()
+      .sort({ creationTime: -1 })
+      .limit(50);
+
+    res.json({ ok: true, announcements: gcAnnouncements });
+  } catch (error) {
+    console.error("Get GC announcements error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });
