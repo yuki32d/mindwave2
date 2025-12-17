@@ -1386,55 +1386,68 @@ app.get("/api/google-classroom/announcements", authMiddleware, async (req, res) 
 });
 
 // ============================================
-// Chatbot API Endpoint - Blackbox AI
+// Chatbot API Endpoint - Groq AI
 // ============================================
 
 app.post("/api/chat", async (req, res) => {
   try {
-    const { message, history } = req.body;
+    const { message, history = [] } = req.body;
 
     if (!message) {
       return res.status(400).json({ ok: false, message: "Message is required" });
     }
 
-    // Use Blackbox AI
-    if (!process.env.BLACKBOX_API_KEY) {
+    // Use Groq AI (fast and free)
+    if (!process.env.GROQ_API_KEY) {
       return res.status(503).json({
         ok: false,
-        message: "Chatbot unavailable. Please configure BLACKBOX_API_KEY."
+        message: "Chatbot unavailable. Please add GROQ_API_KEY to Render environment variables."
       });
     }
 
-    const response = await fetch("https://api.blackbox.ai/api/chat", {
+    // Build messages array with history
+    const messages = [
+      {
+        role: "system",
+        content: "You are a helpful AI assistant for students. Be friendly, concise, and educational."
+      },
+      ...history.map(msg => ({
+        role: msg.role === 'model' ? 'assistant' : 'user',
+        content: msg.parts?.[0]?.text || msg.content || ''
+      })),
+      {
+        role: "user",
+        content: message
+      }
+    ];
+
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        messages: [
-          {
-            role: "user",
-            content: message
-          }
-        ],
-        apiKey: process.env.BLACKBOX_API_KEY,
-        model: "blackbox",
-        max_tokens: 500
+        model: "llama-3.1-8b-instant",
+        messages: messages,
+        max_tokens: 500,
+        temperature: 0.7
       })
     });
 
     if (!response.ok) {
-      throw new Error(`Blackbox API error: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Groq API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || data.response || "I'm having trouble responding right now.";
+    const reply = data.choices?.[0]?.message?.content || "I'm having trouble responding right now.";
 
     res.json({ ok: true, reply: reply.trim() });
 
   } catch (error) {
     console.error("Chat API error:", error);
-    res.status(500).json({ ok: false, message: "Server error: " + error.message });
+    res.status(500).json({ ok: false, message: "Chatbot error: " + error.message });
   }
 });
 
