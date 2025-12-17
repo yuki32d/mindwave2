@@ -1386,6 +1386,59 @@ app.get("/api/google-classroom/announcements", authMiddleware, async (req, res) 
 });
 
 // ============================================
+// Chatbot API Endpoint - Blackbox AI
+// ============================================
+
+app.post("/api/chat", async (req, res) => {
+  try {
+    const { message, history } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ ok: false, message: "Message is required" });
+    }
+
+    // Use Blackbox AI
+    if (!process.env.BLACKBOX_API_KEY) {
+      return res.status(503).json({
+        ok: false,
+        message: "Chatbot unavailable. Please configure BLACKBOX_API_KEY."
+      });
+    }
+
+    const response = await fetch("https://api.blackbox.ai/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: message
+          }
+        ],
+        apiKey: process.env.BLACKBOX_API_KEY,
+        model: "blackbox",
+        max_tokens: 500
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Blackbox API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || data.response || "I'm having trouble responding right now.";
+
+    res.json({ ok: true, reply: reply.trim() });
+
+  } catch (error) {
+    console.error("Chat API error:", error);
+    res.status(500).json({ ok: false, message: "Server error: " + error.message });
+  }
+});
+
+// ============================================
 // Engagement Metrics Endpoint
 // ============================================
 
