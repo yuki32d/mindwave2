@@ -1491,7 +1491,7 @@ app.get("/api/games/:gameId/leaderboard", authMiddleware, async (req, res) => {
 
     // Get all submissions for this game with aggregated stats per student
     const submissions = await GameSubmission.aggregate([
-      { $match: { gameId: mongoose.Types.ObjectId(gameId) } },
+      { $match: { gameId: new mongoose.Types.ObjectId(gameId) } },
       {
         $group: {
           _id: '$studentId',
