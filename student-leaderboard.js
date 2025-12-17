@@ -84,7 +84,6 @@ function renderPodium(leaderboard) {
 
 function renderLeaderboard(leaderboard) {
     const body = document.getElementById('leaderboardBody');
-    const startFrom = 4; // Start after podium (top 3)
 
     if (leaderboard.length === 0) {
         body.innerHTML = `
@@ -98,8 +97,8 @@ function renderLeaderboard(leaderboard) {
 
     const maxPoints = leaderboard[0]?.totalPoints || 1;
 
-    body.innerHTML = leaderboard.slice(startFrom - 1).map((player, idx) => {
-        const rank = startFrom + idx;
+    body.innerHTML = leaderboard.map((player, idx) => {
+        const rank = idx + 1;
         const isCurrentUser = player.email === currentUserEmail;
         const progressPercent = (player.totalPoints / maxPoints) * 100;
 
