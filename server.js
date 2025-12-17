@@ -1491,7 +1491,7 @@ app.get("/api/games/:gameId/leaderboard", authMiddleware, async (req, res) => {
 
     // Get all submissions for this game with aggregated stats per student
     const submissions = await GameSubmission.aggregate([
-      { $match: { gameId: new mongoose.Types.ObjectId(gameId) } },
+      { $match: { gameId: mongoose.Types.ObjectId(gameId) } },
       {
         $group: {
           _id: '$studentId',
@@ -1642,6 +1642,30 @@ app.post("/api/game-submissions", authMiddleware, async (req, res) => {
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });
+
+// Reset Season - Delete all game submissions (admin only)
+app.delete("/api/reset-season", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    // Delete all game submissions
+    const result = await GameSubmission.deleteMany({});
+
+    res.json({
+      ok: true,
+      message: "Season reset complete",
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    console.error("Reset season error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 
 // ============================================
 // Leaderboard Endpoint

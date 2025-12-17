@@ -105,11 +105,32 @@ function setAccent(color, el) {
     el.classList.add('active');
 }
 
-function resetSeason() {
-    if (confirm('Are you sure? This will wipe ALL student progress and cannot be undone.')) {
-        // This would ideally be an API call too, but for now we keep the local logic or add an endpoint later
-        localStorage.setItem('student_activities', '[]');
-        alert('Season reset complete. All leaderboards are clean.');
+async function resetSeason() {
+    if (!confirm('Are you sure? This will wipe ALL student progress and cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/reset-season', {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+            alert(`Season reset complete. Deleted ${data.deletedCount} game submissions.`);
+            // Reload page to reflect changes
+            window.location.reload();
+        } else {
+            alert(`Failed to reset season: ${data.message}`);
+        }
+    } catch (error) {
+        console.error('Reset season error:', error);
+        alert('Failed to reset season. Please try again.');
     }
 }
 
