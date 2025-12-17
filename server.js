@@ -1489,41 +1489,73 @@ app.get("/api/games/:gameId/leaderboard", authMiddleware, async (req, res) => {
       return res.status(404).json({ ok: false, message: "Game not found" });
     }
 
-    // Get all submissions for this game
-    const submissions = await GameSubmission.find({ gameId })
-      .populate('studentId', 'name email')
-      .sort({ score: -1, submittedAt: 1 })
-      .lean();
+    // Get all submissions for this game with aggregated stats per student
+    const submissions = await GameSubmission.aggregate([
+      { $match: { gameId: mongoose.Types.ObjectId(gameId) } },
+      {
+        $group: {
+          _id: '$studentId',
+          bestScore: { $max: '$score' },
+          gamesPlayed: { $sum: 1 },
+          avgScore: { $avg: '$score' },
+          lastSubmittedAt: { $max: '$submittedAt' },
+          studentAnswers: { $last: '$studentAnswers' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'studentInfo'
+        }
+      },
+      { $unwind: '$studentInfo' },
+      {
+        $project: {
+          studentId: '$_id',
+          studentName: '$studentInfo.name',
+          studentEmail: '$studentInfo.email',
+          score: '$bestScore',
+          gamesPlayed: 1,
+          accuracy: { $round: ['$avgScore', 0] },
+          submittedAt: '$lastSubmittedAt',
+          studentAnswers: 1
+        }
+      },
+      { $sort: { score: -1, submittedAt: 1 } }
+    ]);
 
     const totalParticipants = submissions.length;
 
-    // Calculate rankings
+    // Calculate rankings and add isCurrentStudent flag
     const rankedSubmissions = submissions.map((sub, index) => ({
       rank: index + 1,
-      studentName: sub.studentId.name,
-      studentEmail: sub.studentId.email,
-      score: sub.score || (sub.isCorrect ? 100 : 0),
+      studentName: sub.studentName,
+      studentEmail: sub.studentEmail,
+      score: sub.score || 0,
+      gamesPlayed: sub.gamesPlayed || 1,
+      accuracy: sub.accuracy || sub.score || 0,
       submittedAt: sub.submittedAt,
-      isCurrentStudent: sub.studentId._id.toString() === studentId
+      isCurrentStudent: sub.studentId.toString() === studentId,
+      studentAnswers: sub.studentAnswers
     }));
 
     // Find current student's submission
-    const currentStudentSubmission = submissions.find(
-      sub => sub.studentId._id.toString() === studentId
+    const currentStudentSubmission = rankedSubmissions.find(
+      sub => sub.isCurrentStudent
     );
 
     let currentStudent = null;
     let answerReview = null;
 
     if (currentStudentSubmission) {
-      const currentRank = rankedSubmissions.findIndex(
-        s => s.studentEmail === currentStudentSubmission.studentId.email
-      ) + 1;
-
       currentStudent = {
-        rank: currentRank,
-        score: currentStudentSubmission.score || (currentStudentSubmission.isCorrect ? 100 : 0),
-        isCorrect: currentStudentSubmission.isCorrect,
+        rank: currentStudentSubmission.rank,
+        score: currentStudentSubmission.score,
+        gamesPlayed: currentStudentSubmission.gamesPlayed,
+        accuracy: currentStudentSubmission.accuracy,
+        isCorrect: currentStudentSubmission.score >= 70,
         submittedAt: currentStudentSubmission.submittedAt
       };
 
