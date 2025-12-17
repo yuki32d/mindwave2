@@ -996,6 +996,148 @@ app.get("/api/games/debug", async (req, res) => {
   }
 });
 
+// Game Submission Endpoint - Save student game results
+app.post("/api/game-submissions", authMiddleware, async (req, res) => {
+  try {
+    const { gameId, score, isCorrect, studentAnswers, startedAt, completedAt, durationSeconds } = req.body;
+
+    if (!gameId) {
+      return res.status(400).json({ ok: false, message: "Game ID is required" });
+    }
+
+    // Verify game exists
+    const game = await Game.findById(gameId);
+    if (!game) {
+      return res.status(404).json({ ok: false, message: "Game not found" });
+    }
+
+    // Create submission
+    const submission = await GameSubmission.create({
+      gameId,
+      studentId: req.user.sub,
+      score: score || 0,
+      isCorrect: isCorrect || false,
+      studentAnswers: studentAnswers || [],
+      startedAt: startedAt ? new Date(startedAt) : new Date(),
+      completedAt: completedAt ? new Date(completedAt) : new Date(),
+      durationSeconds: durationSeconds || 0
+    });
+
+    res.status(201).json({ ok: true, submission });
+  } catch (error) {
+    console.error("Game submission error:", error);
+    res.status(500).json({ ok: false, message: "Server error: " + error.message });
+  }
+});
+
+// Leaderboard Endpoint - Get leaderboard and answer review for a game
+app.get("/api/games/:id/leaderboard", authMiddleware, async (req, res) => {
+  try {
+    const gameId = req.params.id;
+    const currentStudentId = req.user.sub;
+
+    // Verify game exists
+    const game = await Game.findById(gameId);
+    if (!game) {
+      return res.status(404).json({ ok: false, message: "Game not found" });
+    }
+
+    // Get all submissions for this game
+    const submissions = await GameSubmission.find({ gameId })
+      .populate('studentId', 'name displayName email')
+      .sort({ score: -1, submittedAt: 1 });
+
+    if (submissions.length === 0) {
+      return res.json({
+        ok: true,
+        leaderboard: [],
+        currentStudent: null,
+        totalParticipants: 0,
+        answerReview: null
+      });
+    }
+
+    // Calculate leaderboard with rankings
+    // Group by student and get their best score
+    const studentBestScores = new Map();
+    submissions.forEach(sub => {
+      const studentId = sub.studentId._id.toString();
+      if (!studentBestScores.has(studentId) || sub.score > studentBestScores.get(studentId).score) {
+        studentBestScores.set(studentId, {
+          studentId: sub.studentId._id,
+          studentName: sub.studentId.displayName || sub.studentId.name,
+          email: sub.studentId.email,
+          score: sub.score,
+          submittedAt: sub.submittedAt,
+          gamesPlayed: 1 // We'll count this properly below
+        });
+      }
+    });
+
+    // Count games played per student
+    const studentGameCounts = await GameSubmission.aggregate([
+      { $match: { studentId: { $in: Array.from(studentBestScores.keys()).map(id => new mongoose.Types.ObjectId(id)) } } },
+      { $group: { _id: '$studentId', count: { $sum: 1 } } }
+    ]);
+
+    studentGameCounts.forEach(item => {
+      const studentId = item._id.toString();
+      if (studentBestScores.has(studentId)) {
+        studentBestScores.get(studentId).gamesPlayed = item.count;
+      }
+    });
+
+    // Convert to array and sort by score
+    let leaderboardData = Array.from(studentBestScores.values())
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return new Date(a.submittedAt) - new Date(b.submittedAt);
+      });
+
+    // Add rankings
+    leaderboardData = leaderboardData.map((entry, index) => ({
+      rank: index + 1,
+      studentName: entry.studentName,
+      score: entry.score,
+      gamesPlayed: entry.gamesPlayed,
+      accuracy: entry.score, // For now, accuracy = score
+      isCurrentStudent: entry.studentId.toString() === currentStudentId
+    }));
+
+    // Find current student's data
+    const currentStudentEntry = leaderboardData.find(entry => entry.isCurrentStudent);
+
+    // Get current student's most recent submission for answer review
+    const currentStudentSubmission = submissions.find(
+      sub => sub.studentId._id.toString() === currentStudentId
+    );
+
+    let answerReview = null;
+    if (currentStudentSubmission && currentStudentSubmission.studentAnswers && currentStudentSubmission.studentAnswers.length > 0) {
+      answerReview = {
+        questions: currentStudentSubmission.studentAnswers.map(answer => ({
+          questionText: answer.questionText || 'Question',
+          studentAnswer: answer.studentAnswer || 'No answer',
+          correctAnswer: answer.correctAnswer || 'N/A',
+          isCorrect: answer.isCorrect || false
+        }))
+      };
+    }
+
+    res.json({
+      ok: true,
+      leaderboard: leaderboardData,
+      currentStudent: currentStudentEntry || null,
+      totalParticipants: leaderboardData.length,
+      answerReview: answerReview
+    });
+
+  } catch (error) {
+    console.error("Leaderboard error:", error);
+    res.status(500).json({ ok: false, message: "Server error: " + error.message });
+  }
+});
+
 
 // Announcement Endpoints
 app.post("/api/announcements", authMiddleware, async (req, res) => {
