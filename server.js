@@ -1397,7 +1397,36 @@ app.post("/api/chat", async (req, res) => {
       return res.status(400).json({ ok: false, message: "Message is required" });
     }
 
-    // Try Hugging Face first (if API key is available)
+    // Try Gemini first (if API key is available) - More reliable
+    if (process.env.GEMINI_API_KEY) {
+      try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+        // Convert history to Gemini format
+        const chatHistory = (history || []).map(msg => ({
+          role: msg.role === 'model' ? 'model' : 'user',
+          parts: [{ text: msg.parts[0].text }]
+        }));
+
+        const chat = model.startChat({
+          history: chatHistory,
+          generationConfig: {
+            maxOutputTokens: 500,
+            temperature: 0.7,
+          },
+        });
+
+        const result = await chat.sendMessage(message);
+        const reply = result.response.text();
+        return res.json({ ok: true, reply: reply.trim() });
+      } catch (geminiError) {
+        console.error("Gemini error:", geminiError);
+        // Fall through to Hugging Face
+      }
+    }
+
+    // Fallback to Hugging Face (if API key is available)
     if (process.env.HUGGINGFACE_API_KEY) {
       try {
         const response = await fetch(
@@ -1427,35 +1456,6 @@ app.post("/api/chat", async (req, res) => {
         }
       } catch (hfError) {
         console.error("Hugging Face error:", hfError);
-        // Fall through to Gemini
-      }
-    }
-
-    // Fallback to Gemini (if API key is available)
-    if (process.env.GEMINI_API_KEY) {
-      try {
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-        // Convert history to Gemini format
-        const chatHistory = (history || []).map(msg => ({
-          role: msg.role === 'model' ? 'model' : 'user',
-          parts: [{ text: msg.parts[0].text }]
-        }));
-
-        const chat = model.startChat({
-          history: chatHistory,
-          generationConfig: {
-            maxOutputTokens: 500,
-            temperature: 0.7,
-          },
-        });
-
-        const result = await chat.sendMessage(message);
-        const reply = result.response.text();
-        return res.json({ ok: true, reply: reply.trim() });
-      } catch (geminiError) {
-        console.error("Gemini error:", geminiError);
         // Fall through to error response
       }
     }
@@ -1463,7 +1463,7 @@ app.post("/api/chat", async (req, res) => {
     // If both fail or no API keys available
     return res.status(503).json({
       ok: false,
-      message: "AI service unavailable. Please configure HUGGINGFACE_API_KEY or GEMINI_API_KEY in your .env file."
+      message: "AI service unavailable. Please configure GEMINI_API_KEY or HUGGINGFACE_API_KEY in your .env file."
     });
 
   } catch (error) {
