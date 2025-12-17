@@ -1272,11 +1272,13 @@ function renderScoreboard(data, score, totalPoints) {
                     <td>${entry.rank}</td>
                     <td>${entry.isCurrentStudent ? 'You' : entry.studentName}</td>
                     <td>${entry.score}%</td>
+                    <td>${entry.gamesPlayed || 1}</td>
+                    <td>${entry.accuracy || entry.score}%</td>
                 </tr>
             `;
         }).join('');
     } else {
-        leaderboardBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #9ea4b6;">No leaderboard data available</td></tr>';
+        leaderboardBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ea4b6;">No leaderboard data available</td></tr>';
     }
 
     // Show modal
