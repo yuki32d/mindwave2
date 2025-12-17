@@ -1185,6 +1185,8 @@ async function showScoreboard(gameId, score, totalPoints) {
         const token = localStorage.getItem('token');
         if (!token) {
             console.error('No auth token found');
+            // Show modal with empty leaderboard
+            renderScoreboard({ leaderboard: [], currentStudent: null, totalParticipants: 0 }, score, totalPoints);
             return;
         }
 
@@ -1196,18 +1198,25 @@ async function showScoreboard(gameId, score, totalPoints) {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch leaderboard');
+            console.error('Leaderboard API error:', response.status, response.statusText);
+            // Show modal with empty leaderboard
+            renderScoreboard({ leaderboard: [], currentStudent: null, totalParticipants: 0 }, score, totalPoints);
+            return;
         }
 
         const data = await response.json();
 
         if (data.ok) {
             renderScoreboard(data, score, totalPoints);
+        } else {
+            console.error('Leaderboard data error:', data.message);
+            // Show modal with empty leaderboard
+            renderScoreboard({ leaderboard: [], currentStudent: null, totalParticipants: 0 }, score, totalPoints);
         }
     } catch (error) {
         console.error('Scoreboard error:', error);
-        // Fallback to simple result display
-        showSimpleResult(score, totalPoints);
+        // Show modal with empty leaderboard instead of alert
+        renderScoreboard({ leaderboard: [], currentStudent: null, totalParticipants: 0 }, score, totalPoints);
     }
 }
 
