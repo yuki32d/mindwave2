@@ -616,7 +616,7 @@ function authMiddleware(req, res, next) {
 }
 
 app.get("/", (_req, res) => {
-  res.redirect("/marketing-site/website-home.html");
+  res.redirect("/login.html");
 });
 
 async function createAdminNotification(message, meta = {}) {
