@@ -219,7 +219,7 @@
 
             <div class="cards-container">
                 <!-- Student Card -->
-                <div class="role-card" onclick="window.location.href='student-login.html'">
+                <div class="role-card" data-redirect="student-login.html">
                     <div class="role-icon">
                         🎓
                     </div>
@@ -233,7 +233,7 @@
                 </div>
 
                 <!-- Admin Card -->
-                <div class="role-card" onclick="window.location.href='admin-login.html'">
+                <div class="role-card" data-redirect="admin-login.html">
                     <div class="role-icon">
                         👨‍💼
                     </div>
@@ -258,6 +258,18 @@
             <a href="contact.html">Contact</a>
         </p>
     </footer>
+
+    <script>
+        // Add click handlers to role cards (CSP compliant)
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('click', function () {
+                const redirect = this.getAttribute('data-redirect');
+                if (redirect) {
+                    window.location.href = redirect;
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
