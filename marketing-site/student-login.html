@@ -502,33 +502,11 @@
     </div>
 
     <script>
-        // Auto-set role to student
-        document.getElementById('login-form').addEventListener('submit', async function (e) {
+        // Redirect to actual app login with student role pre-selected
+        document.getElementById('login-form').addEventListener('submit', function (e) {
             e.preventDefault();
-
-            const email = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('error-message');
-
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, role: 'student' })
-                });
-
-                const data = await response.json();
-
-                if (data.ok) {
-                    window.location.href = '../homepage.html';
-                } else {
-                    errorMessage.textContent = data.message || 'Invalid credentials';
-                    errorMessage.classList.add('show');
-                }
-            } catch (error) {
-                errorMessage.textContent = 'An error occurred. Please try again.';
-                errorMessage.classList.add('show');
-            }
+            // Redirect to the real app login page with student role
+            window.location.href = '../login.html?role=student';
         });
     </script>
 </body>
