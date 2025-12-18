@@ -314,6 +314,22 @@ body {
     background: var(--gray-300);
 }
 
+/* macOS-style window control buttons */
+.browser-dots span:nth-child(1) {
+    background: #FF5F57;
+    /* Red - Close */
+}
+
+.browser-dots span:nth-child(2) {
+    background: #FFBD2E;
+    /* Yellow - Minimize */
+}
+
+.browser-dots span:nth-child(3) {
+    background: #28CA42;
+    /* Green - Maximize */
+}
+
 .browser-url {
     flex: 1;
     padding: 0.5rem 1rem;
