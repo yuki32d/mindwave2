@@ -502,11 +502,34 @@
     </div>
 
     <script>
-        // Redirect to actual app login with student role pre-selected
-        document.getElementById('login-form').addEventListener('submit', function (e) {
+        // Authenticate and redirect to student homepage
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
             e.preventDefault();
-            // Redirect to the real app login page with student role
-            window.location.href = '../login.html?role=student';
+
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, role: 'student' })
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    // Redirect to student homepage
+                    window.location.href = '../homepage.html';
+                } else {
+                    errorMessage.textContent = data.message || 'Invalid credentials';
+                    errorMessage.classList.add('show');
+                }
+            } catch (error) {
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.classList.add('show');
+            }
         });
     </script>
 </body>
