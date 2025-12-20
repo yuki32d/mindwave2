@@ -19,6 +19,7 @@ import cron from "node-cron";
 import compression from "compression";
 import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
+import Stripe from "stripe";
 
 dotenv.config();
 
@@ -45,8 +46,19 @@ const {
   ZOOM_REDIRECT_URI = "http://localhost:8081/auth/zoom/callback",
   // Auto-cleanup settings
   AUTO_DELETE_DAYS = "20",
-  CLEANUP_ENABLED = "true"
+  CLEANUP_ENABLED = "true",
+  // Stripe Configuration
+  STRIPE_SECRET_KEY,
+  STRIPE_WEBHOOK_SECRET
 } = process.env;
+
+// Initialize Stripe
+const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY) : null;
+if (!stripe) {
+  console.warn('⚠️  Stripe not configured - subscription features will be disabled');
+} else {
+  console.log('✓ Stripe initialized');
+}
 
 let mailer = null;
 if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
@@ -119,6 +131,9 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["student", "admin"], default: "student" },
+    // Multi-tenant subscription fields
+    organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
+    orgRole: { type: String, enum: ['owner', 'admin', 'faculty', 'student'], default: 'student' },
     googleAccessToken: { type: String },
     googleRefreshToken: { type: String },
     // GitHub Integration
@@ -137,6 +152,8 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ lastActive: -1 });
+userSchema.index({ organizationId: 1 });
+userSchema.index({ orgRole: 1 });
 
 const passwordResetSchema = new mongoose.Schema(
   {
@@ -155,6 +172,111 @@ const adminNotificationSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// ============================================
+// SUBSCRIPTION SYSTEM SCHEMAS
+// ============================================
+
+// Organization Schema (Multi-tenant)
+const organizationSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    slug: { type: String, required: true, unique: true }, // URL-friendly identifier
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+
+    // Subscription Details
+    subscriptionTier: {
+      type: String,
+      enum: ['trial', 'personal', 'team', 'enterprise'],
+      default: 'trial'
+    },
+    subscriptionStatus: {
+      type: String,
+      enum: ['active', 'trialing', 'past_due', 'canceled', 'incomplete'],
+      default: 'trialing'
+    },
+
+    // Stripe Integration
+    stripeCustomerId: { type: String },
+    stripeSubscriptionId: { type: String },
+    stripePriceId: { type: String },
+
+    // Trial Management
+    trialEndsAt: { type: Date },
+    trialStartedAt: { type: Date, default: Date.now },
+
+    // Billing
+    billingEmail: { type: String },
+    currentPeriodStart: { type: Date },
+    currentPeriodEnd: { type: Date },
+    cancelAtPeriodEnd: { type: Boolean, default: false },
+
+    // Usage Limits (based on tier)
+    limits: {
+      maxStudents: { type: Number, default: 50 },
+      maxCourses: { type: Number, default: 5 },
+      maxStorage: { type: Number, default: 1024 }, // MB
+      features: {
+        customBranding: { type: Boolean, default: false },
+        apiAccess: { type: Boolean, default: false },
+        ssoIntegration: { type: Boolean, default: false },
+        prioritySupport: { type: Boolean, default: false },
+        advancedAnalytics: { type: Boolean, default: false }
+      }
+    },
+
+    // Current Usage
+    usage: {
+      studentCount: { type: Number, default: 0 },
+      courseCount: { type: Number, default: 0 },
+      storageUsed: { type: Number, default: 0 } // MB
+    },
+
+    // Settings
+    settings: {
+      brandColor: { type: String, default: '#4F46E5' },
+      logo: { type: String },
+      customDomain: { type: String }
+    }
+  },
+  { timestamps: true }
+);
+
+// Add indexes
+organizationSchema.index({ slug: 1 });
+organizationSchema.index({ ownerId: 1 });
+organizationSchema.index({ subscriptionStatus: 1 });
+organizationSchema.index({ stripeCustomerId: 1 });
+
+// Subscription Events Schema (for audit trail)
+const subscriptionEventSchema = new mongoose.Schema(
+  {
+    organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
+    eventType: {
+      type: String,
+      required: true,
+      enum: [
+        'subscription.created',
+        'subscription.updated',
+        'subscription.canceled',
+        'subscription.trial_will_end',
+        'payment.succeeded',
+        'payment.failed',
+        'tier.upgraded',
+        'tier.downgraded'
+      ]
+    },
+    stripeEventId: { type: String },
+    data: { type: mongoose.Schema.Types.Mixed },
+    processedAt: { type: Date, default: Date.now }
+  },
+  { timestamps: true }
+);
+
+// Add indexes
+subscriptionEventSchema.index({ organizationId: 1, createdAt: -1 });
+subscriptionEventSchema.index({ eventType: 1 });
+subscriptionEventSchema.index({ stripeEventId: 1 });
 
 const gameSchema = new mongoose.Schema(
   {
@@ -197,6 +319,8 @@ gameSchema.index({ type: 1, published: 1 });
 const User = mongoose.model("User", userSchema);
 const PasswordResetRequest = mongoose.model("PasswordResetRequest", passwordResetSchema);
 const AdminNotification = mongoose.model("AdminNotification", adminNotificationSchema);
+const Organization = mongoose.model("Organization", organizationSchema);
+const SubscriptionEvent = mongoose.model("SubscriptionEvent", subscriptionEventSchema);
 const Game = mongoose.model("Game", gameSchema);
 
 const gameSubmissionSchema = new mongoose.Schema(
@@ -616,7 +740,7 @@ function authMiddleware(req, res, next) {
 }
 
 app.get("/", (_req, res) => {
-  res.redirect("/login.html");
+  res.redirect("/marketing-site/website-home.html");
 });
 
 async function createAdminNotification(message, meta = {}) {
