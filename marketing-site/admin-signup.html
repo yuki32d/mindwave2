@@ -469,7 +469,19 @@
                 const data = await response.json();
 
                 if (data.ok) {
-                    window.location.href = '../admin.html';
+                    // Admin signups require approval
+                    if (data.pending) {
+                        alert(data.message || 'Admin signup request submitted! You will be notified once approved.');
+                        window.location.href = 'admin-login.html';
+                    } else {
+                        // In case admin is auto-approved, store auth data
+                        if (data.user) {
+                            localStorage.setItem('role', data.user.role);
+                            localStorage.setItem('email', data.user.email);
+                            localStorage.setItem('token', 'authenticated');
+                        }
+                        window.location.href = '../admin.html';
+                    }
                 } else {
                     errorMessage.textContent = data.message || 'Signup failed';
                     errorMessage.style.display = 'block';

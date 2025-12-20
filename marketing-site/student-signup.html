@@ -459,6 +459,13 @@
                 const data = await response.json();
 
                 if (data.ok) {
+                    // Store authentication data in localStorage
+                    if (data.user) {
+                        localStorage.setItem('role', data.user.role);
+                        localStorage.setItem('email', data.user.email);
+                        localStorage.setItem('token', 'authenticated'); // Simple flag
+                    }
+                    // Redirect to student homepage
                     window.location.href = '../homepage.html';
                 } else {
                     errorMessage.textContent = data.message || 'Signup failed';
