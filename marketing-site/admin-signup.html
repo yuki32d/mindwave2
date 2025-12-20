@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Sign Up - MindWave</title>
+    <meta name="description" content="Create your admin account and manage your institution with MindWave.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body>
+    <div class="auth-container-simple admin-theme">
+        <div class="auth-card-simple">
+            <div class="auth-header-simple">
+                <a href="website-home.html" class="logo-simple">
+                    <i class="fas fa-brain"></i>
+                    <span>Mind<span class="gradient-text">Wave</span></span>
+                </a>
+                <h1>Create Admin Account</h1>
+                <p>Manage your institution with powerful tools</p>
+            </div>
+
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" placeholder="Dr. Jane Smith" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Work Email</label>
+                    <input type="email" id="email" placeholder="admin@institution.edu" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="organization">Institution Name</label>
+                    <input type="text" id="organization" placeholder="Your School or University" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Create a strong password" required>
+                    <small>At least 8 characters with uppercase, lowercase, and numbers</small>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="terms" required>
+                        <span>I agree to the <a href="terms.html" target="_blank">Terms</a> and <a href="privacy.html"
+                                target="_blank">Privacy Policy</a></span>
+                    </label>
+                </div>
+
+                <div class="error-message" id="error-message" style="display: none;"></div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    Create Admin Account <i class="fas fa-arrow-right"></i>
+                </button>
+
+                <div class="auth-links-simple">
+                    <a href="admin-login.html"><i class="fas fa-arrow-left"></i> Back to Login</a>
+                    <a href="student-signup.html">Student Signup</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const organization = document.getElementById('organization').value;
+            const errorMessage = document.getElementById('error-message');
+
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password,
+                        role: 'admin',
+                        organization
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    // Redirect to admin dashboard
+                    window.location.href = '../admin.html';
+                } else {
+                    errorMessage.textContent = data.message || 'Signup failed';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>
