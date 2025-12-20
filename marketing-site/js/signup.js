@@ -273,14 +273,150 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ===================================
+    // OAuth 2.0 Configuration
+    // ===================================
+    const OAUTH_CONFIG = {
+        google: {
+            clientId: '354642649256-dequ81au879v846gnukejhu6cacmbhrg.apps.googleusercontent.com',
+            authEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+            scope: 'openid email profile',
+            responseType: 'code',
+            redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
+        },
+        microsoft: {
+            clientId: 'YOUR_MICROSOFT_CLIENT_ID',
+            authEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+            scope: 'openid email profile User.Read',
+            responseType: 'code',
+            redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
+        }
+    };
+
+    // ===================================
+    // OAuth Helper Functions
+    // ===================================
+
+    // Generate random state for CSRF protection
+    function generateState() {
+        const array = new Uint8Array(32);
+        crypto.getRandomValues(array);
+        return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Generate code verifier for PKCE
+    function generateCodeVerifier() {
+        const array = new Uint8Array(32);
+        crypto.getRandomValues(array);
+        return base64URLEncode(array);
+    }
+
+    // Generate code challenge from verifier
+    async function generateCodeChallenge(verifier) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(verifier);
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        return base64URLEncode(new Uint8Array(hash));
+    }
+
+    // Base64 URL encoding
+    function base64URLEncode(buffer) {
+        const base64 = btoa(String.fromCharCode(...buffer));
+        return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+
+    // Store OAuth state in sessionStorage
+    function storeOAuthState(provider, state, codeVerifier) {
+        sessionStorage.setItem('oauth_state', state);
+        sessionStorage.setItem('oauth_provider', provider);
+        if (codeVerifier) {
+            sessionStorage.setItem('oauth_code_verifier', codeVerifier);
+        }
+    }
+
+    // ===================================
+    // Google OAuth Login
+    // ===================================
+    async function initiateGoogleLogin() {
+        const config = OAUTH_CONFIG.google;
+        const state = generateState();
+        const codeVerifier = generateCodeVerifier();
+        const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+        // Store state and verifier for later verification
+        storeOAuthState('google', state, codeVerifier);
+
+        // Build authorization URL
+        const params = new URLSearchParams({
+            client_id: config.clientId,
+            redirect_uri: config.redirectUri,
+            response_type: config.responseType,
+            scope: config.scope,
+            state: state,
+            code_challenge: codeChallenge,
+            code_challenge_method: 'S256',
+            access_type: 'offline',
+            prompt: 'consent'
+        });
+
+        // Redirect to Google OAuth
+        window.location.href = `${config.authEndpoint}?${params.toString()}`;
+    }
+
+    // ===================================
+    // Microsoft OAuth Login
+    // ===================================
+    async function initiateMicrosoftLogin() {
+        const config = OAUTH_CONFIG.microsoft;
+        const state = generateState();
+        const codeVerifier = generateCodeVerifier();
+        const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+        // Store state and verifier for later verification
+        storeOAuthState('microsoft', state, codeVerifier);
+
+        // Build authorization URL
+        const params = new URLSearchParams({
+            client_id: config.clientId,
+            redirect_uri: config.redirectUri,
+            response_type: config.responseType,
+            scope: config.scope,
+            state: state,
+            code_challenge: codeChallenge,
+            code_challenge_method: 'S256',
+            response_mode: 'query',
+            prompt: 'select_account'
+        });
+
+        // Redirect to Microsoft OAuth
+        window.location.href = `${config.authEndpoint}?${params.toString()}`;
+    }
+
+    // ===================================
     // Social Login Buttons
     // ===================================
-    document.querySelectorAll('.btn-social').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const provider = this.classList.contains('btn-google') ? 'Google' : 'Microsoft';
-            alert(`${provider} login will be implemented with OAuth 2.0`);
-            // TODO: Implement OAuth flow
+    const googleBtn = document.querySelector('.btn-google');
+    const microsoftBtn = document.querySelector('.btn-microsoft');
+
+    if (googleBtn) {
+        googleBtn.addEventListener('click', async function () {
+            try {
+                await initiateGoogleLogin();
+            } catch (error) {
+                console.error('Google login error:', error);
+                alert('Failed to initiate Google login. Please try again.');
+            }
         });
-    });
+    }
+
+    if (microsoftBtn) {
+        microsoftBtn.addEventListener('click', async function () {
+            try {
+                await initiateMicrosoftLogin();
+            } catch (error) {
+                console.error('Microsoft login error:', error);
+                alert('Failed to initiate Microsoft login. Please try again.');
+            }
+        });
+    }
 
 });
