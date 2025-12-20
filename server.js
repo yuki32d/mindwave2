@@ -936,11 +936,20 @@ app.post("/api/auth/oauth/token", async (req, res) => {
     // ===================================
     if (provider === 'google') {
       const GOOGLE_CLIENT_ID = '354642649256-dequ81au879v846gnukejhu6cacmbhrg.apps.googleusercontent.com';
+      const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+
+      if (!GOOGLE_CLIENT_SECRET) {
+        return res.status(500).json({
+          ok: false,
+          message: "Google OAuth not configured on server"
+        });
+      }
 
       // Exchange code for token
       const tokenParams = new URLSearchParams({
         code: code,
         client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
         redirect_uri: redirectUri,
         grant_type: 'authorization_code',
         code_verifier: codeVerifier
