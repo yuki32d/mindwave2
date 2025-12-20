@@ -6,8 +6,8 @@ function checkAuth() {
     const role = localStorage.getItem('role');
 
     if (!token || !role) {
-        // No authentication found, redirect to login
-        window.location.replace('/login.html');
+        // No authentication found, redirect to marketing login
+        window.location.replace('/marketing-site/website-login.html');
         return false;
     }
 
@@ -20,7 +20,7 @@ function checkAdminAuth() {
     const role = localStorage.getItem('role');
     if (role !== 'admin') {
         // Not an admin, redirect to appropriate page
-        window.location.replace(role === 'student' ? '/homepage.html' : '/login.html');
+        window.location.replace(role === 'student' ? '/homepage.html' : '/marketing-site/website-login.html');
         return false;
     }
 
@@ -33,7 +33,7 @@ function checkStudentAuth() {
     const role = localStorage.getItem('role');
     if (role !== 'student') {
         // Not a student, redirect to appropriate page
-        window.location.replace(role === 'admin' ? '/admin.html' : '/login.html');
+        window.location.replace(role === 'admin' ? '/admin.html' : '/marketing-site/website-login.html');
         return false;
     }
 
