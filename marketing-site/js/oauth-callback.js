@@ -73,16 +73,55 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
 
     const providerConfig = config[provider];
 
-    // Prepare token request
-    const tokenParams = new URLSearchParams({
-        client_id: providerConfig.clientId,
-        code: code,
-        code_verifier: codeVerifier,
-        grant_type: 'authorization_code',
-        redirect_uri: providerConfig.redirectUri
-    });
-
     try {
+        // LinkedIn requires backend token exchange
+        if (provider === 'linkedin') {
+            const response = await fetch('/api/auth/linkedin/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    code: code,
+                    codeVerifier: codeVerifier,
+                    redirectUri: providerConfig.redirectUri
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'LinkedIn authentication failed');
+            }
+
+            const result = await response.json();
+
+            // Store authentication token
+            if (result.token) {
+                localStorage.setItem('auth_token', result.token);
+                localStorage.setItem('user_email', result.user.email);
+                localStorage.setItem('user_name', result.user.name);
+                localStorage.setItem('user_role', result.user.role);
+            }
+
+            // Clear OAuth session data
+            sessionStorage.removeItem('oauth_state');
+            sessionStorage.removeItem('oauth_provider');
+            sessionStorage.removeItem('oauth_code_verifier');
+
+            // Show success and redirect
+            showSuccess('linkedin', result.user.name);
+            return;
+        }
+
+        // Google and Facebook use client-side PKCE flow
+        const tokenParams = new URLSearchParams({
+            client_id: providerConfig.clientId,
+            code: code,
+            code_verifier: codeVerifier,
+            grant_type: 'authorization_code',
+            redirect_uri: providerConfig.redirectUri
+        });
+
         // Exchange code for token
         const response = await fetch(providerConfig.tokenEndpoint, {
             method: 'POST',

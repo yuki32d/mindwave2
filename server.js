@@ -915,6 +915,120 @@ app.get("/api/me", authMiddleware, async (req, res) => {
   res.json({ ok: true, user });
 });
 
+// ===================================
+// LinkedIn OAuth Token Exchange
+// ===================================
+app.post("/api/auth/linkedin/token", async (req, res) => {
+  const { code, codeVerifier, redirectUri } = req.body;
+
+  if (!code || !codeVerifier || !redirectUri) {
+    return res.status(400).json({
+      ok: false,
+      message: "Missing required parameters"
+    });
+  }
+
+  try {
+    const LINKEDIN_CLIENT_ID = process.env.LINKEDIN_CLIENT_ID || '861kbeeryboggw';
+    const LINKEDIN_CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
+
+    if (!LINKEDIN_CLIENT_SECRET) {
+      return res.status(500).json({
+        ok: false,
+        message: "LinkedIn OAuth not configured on server"
+      });
+    }
+
+    // Exchange authorization code for access token
+    const tokenParams = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: redirectUri,
+      client_id: LINKEDIN_CLIENT_ID,
+      client_secret: LINKEDIN_CLIENT_SECRET,
+      code_verifier: codeVerifier
+    });
+
+    const tokenResponse = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: tokenParams.toString()
+    });
+
+    if (!tokenResponse.ok) {
+      const errorData = await tokenResponse.json();
+      console.error('LinkedIn token exchange error:', errorData);
+      return res.status(400).json({
+        ok: false,
+        message: errorData.error_description || 'Failed to exchange token'
+      });
+    }
+
+    const tokenData = await tokenResponse.json();
+
+    // Get user info from LinkedIn
+    const userInfoResponse = await fetch('https://api.linkedin.com/v2/userinfo', {
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`
+      }
+    });
+
+    if (!userInfoResponse.ok) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Failed to fetch user information'
+      });
+    }
+
+    const userInfo = await userInfoResponse.json();
+
+    // Find or create user in database
+    let user = await User.findOne({ email: userInfo.email.toLowerCase() });
+
+    if (!user) {
+      // Create new user
+      const randomPassword = crypto.randomBytes(32).toString('hex');
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      user = await User.create({
+        name: userInfo.name,
+        email: userInfo.email.toLowerCase(),
+        password: hashedPassword,
+        role: 'student' // Default role for OAuth users
+      });
+    }
+
+    // Generate JWT token
+    const jwtToken = signToken(user);
+
+    // Return token and user info
+    res.json({
+      ok: true,
+      token: jwtToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      },
+      linkedinData: {
+        accessToken: tokenData.access_token,
+        expiresIn: tokenData.expires_in
+      }
+    });
+
+  } catch (error) {
+    console.error('LinkedIn OAuth error:', error);
+    res.status(500).json({
+      ok: false,
+      message: 'Server error during LinkedIn authentication'
+    });
+  }
+});
+
+
 app.post("/api/password/forgot", authLimiter, async (req, res) => {
   const { email } = req.body || {};
   if (!email) {
