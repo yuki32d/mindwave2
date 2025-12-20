@@ -284,14 +284,14 @@ document.addEventListener('DOMContentLoaded', function () {
             redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
         },
         linkedin: {
-            clientId: 'YOUR_LINKEDIN_CLIENT_ID',
+            clientId: '861kbeeryboggw',
             authEndpoint: 'https://www.linkedin.com/oauth/v2/authorization',
             scope: 'openid profile email',
             responseType: 'code',
             redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
         },
         facebook: {
-            clientId: 'YOUR_FACEBOOK_APP_ID',
+            clientId: '1261081012497583',
             authEndpoint: 'https://www.facebook.com/v18.0/dialog/oauth',
             scope: 'email public_profile',
             responseType: 'code',

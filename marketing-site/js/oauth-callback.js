@@ -61,12 +61,12 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
         },
         linkedin: {
             tokenEndpoint: 'https://www.linkedin.com/oauth/v2/accessToken',
-            clientId: 'YOUR_LINKEDIN_CLIENT_ID',
+            clientId: '861kbeeryboggw',
             redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
         },
         facebook: {
             tokenEndpoint: 'https://graph.facebook.com/v18.0/oauth/access_token',
-            clientId: 'YOUR_FACEBOOK_APP_ID',
+            clientId: '1261081012497583',
             redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
         }
     };
