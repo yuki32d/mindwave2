@@ -261,12 +261,14 @@ function showSuccess(provider, userName) {
 
     document.querySelector('.callback-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
     document.querySelector('.callback-title').textContent = 'Success!';
-    document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Redirecting you to your dashboard...`;
+    document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
     document.querySelector('.spinner').style.display = 'none';
 
-    // Redirect to dashboard after 2 seconds
+    // Set onboarding flag for new organizations
+    localStorage.setItem('needs_org_setup', 'true');
+
+    // Redirect to organization setup page after 2 seconds
     setTimeout(() => {
-        // TODO: Update this to your actual dashboard URL
-        window.location.href = '../faculty-classroom.html';
+        window.location.href = 'organization-setup.html';
     }, 2000);
 }
