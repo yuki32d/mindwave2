@@ -521,6 +521,12 @@
                 const data = await response.json();
 
                 if (data.ok) {
+                    // Store authentication data in localStorage
+                    if (data.user) {
+                        localStorage.setItem('role', data.user.role);
+                        localStorage.setItem('email', data.user.email);
+                        localStorage.setItem('token', data.token || 'authenticated');
+                    }
                     // Redirect to admin dashboard
                     window.location.href = '../admin.html';
                 } else {
