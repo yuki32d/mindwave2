@@ -83,7 +83,7 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
             body: JSON.stringify({
                 provider: provider,
                 code: code,
-                codeVerifier: codeVerifier,
+                codeVerifier: codeVerifier || null, // Facebook doesn't use PKCE
                 redirectUri: providerConfig.redirectUri
             })
         });

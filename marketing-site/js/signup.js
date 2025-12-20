@@ -402,21 +402,18 @@ document.addEventListener('DOMContentLoaded', function () {
     async function initiateFacebookLogin() {
         const config = OAUTH_CONFIG.facebook;
         const state = generateState();
-        const codeVerifier = generateCodeVerifier();
-        const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-        // Store state and verifier for later verification
-        storeOAuthState('facebook', state, codeVerifier);
+        // Store state for CSRF protection (Facebook doesn't use PKCE)
+        sessionStorage.setItem('oauth_state', state);
+        sessionStorage.setItem('oauth_provider', 'facebook');
 
-        // Build authorization URL
+        // Build authorization URL (no PKCE for Facebook)
         const params = new URLSearchParams({
             client_id: config.clientId,
             redirect_uri: config.redirectUri,
             response_type: config.responseType,
             scope: config.scope,
-            state: state,
-            code_challenge: codeChallenge,
-            code_challenge_method: 'S256'
+            state: state
         });
 
         // Redirect to Facebook OAuth

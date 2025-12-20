@@ -1046,30 +1046,40 @@ app.post("/api/auth/oauth/token", async (req, res) => {
     // ===================================
     else if (provider === 'facebook') {
       const FACEBOOK_APP_ID = '1261081012497583';
+      const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
+
+      if (!FACEBOOK_APP_SECRET) {
+        return res.status(500).json({
+          ok: false,
+          message: "Facebook OAuth not configured on server"
+        });
+      }
 
       const tokenParams = new URLSearchParams({
         code: code,
         client_id: FACEBOOK_APP_ID,
-        redirect_uri: redirectUri,
-        code_verifier: codeVerifier
+        client_secret: FACEBOOK_APP_SECRET,
+        redirect_uri: redirectUri
       });
 
       const tokenResponse = await fetch('https://graph.facebook.com/v18.0/oauth/access_token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: tokenParams.toString()
+        method: 'GET',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
 
-      if (!tokenResponse.ok) {
-        const errorData = await tokenResponse.json();
+      const tokenUrl = `https://graph.facebook.com/v18.0/oauth/access_token?${tokenParams.toString()}`;
+      const tokenResponseFetch = await fetch(tokenUrl);
+
+      if (!tokenResponseFetch.ok) {
+        const errorData = await tokenResponseFetch.json();
         console.error('Facebook token exchange error:', errorData);
         return res.status(400).json({
           ok: false,
-          message: errorData.error_description || 'Failed to exchange token'
+          message: errorData.error?.message || 'Failed to exchange token'
         });
       }
 
-      tokenData = await tokenResponse.json();
+      tokenData = await tokenResponseFetch.json();
 
       const userInfoResponse = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${tokenData.access_token}`);
 
