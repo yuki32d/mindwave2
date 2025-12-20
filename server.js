@@ -19,7 +19,7 @@ import cron from "node-cron";
 import compression from "compression";
 import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
-import Stripe from "stripe";
+// Stripe will be imported conditionally based on environment variable
 
 dotenv.config();
 
@@ -52,12 +52,18 @@ const {
   STRIPE_WEBHOOK_SECRET
 } = process.env;
 
-// Initialize Stripe
-const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY) : null;
-if (!stripe) {
-  console.warn('⚠️  Stripe not configured - subscription features will be disabled');
+// Initialize Stripe (dynamic import to prevent deployment failures)
+let stripe = null;
+if (STRIPE_SECRET_KEY) {
+  try {
+    const { default: Stripe } = await import('stripe');
+    stripe = new Stripe(STRIPE_SECRET_KEY);
+    console.log('✓ Stripe initialized');
+  } catch (error) {
+    console.warn('⚠️  Stripe package not available - subscription features will be disabled');
+  }
 } else {
-  console.log('✓ Stripe initialized');
+  console.warn('⚠️  Stripe not configured - subscription features will be disabled');
 }
 
 let mailer = null;

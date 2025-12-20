@@ -28,7 +28,8 @@
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.10",
-    "openai": "^6.9.1"
+    "openai": "^6.9.1",
+    "stripe": "^20.1.0"
   },
   "devDependencies": {
     "http-server": "^14.1.1",
