@@ -424,8 +424,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Social Login Buttons
     // ===================================
     const googleBtn = document.querySelector('.btn-google');
-    const linkedinBtn = document.querySelector('.btn-linkedin');
-    const facebookBtn = document.querySelector('.btn-facebook');
 
     if (googleBtn) {
         googleBtn.addEventListener('click', async function () {
@@ -434,28 +432,6 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (error) {
                 console.error('Google login error:', error);
                 alert('Failed to initiate Google login. Please try again.');
-            }
-        });
-    }
-
-    if (linkedinBtn) {
-        linkedinBtn.addEventListener('click', async function () {
-            try {
-                await initiateLinkedInLogin();
-            } catch (error) {
-                console.error('LinkedIn login error:', error);
-                alert('Failed to initiate LinkedIn login. Please try again.');
-            }
-        });
-    }
-
-    if (facebookBtn) {
-        facebookBtn.addEventListener('click', async function () {
-            try {
-                await initiateFacebookLogin();
-            } catch (error) {
-                console.error('Facebook login error:', error);
-                alert('Failed to initiate Facebook login. Please try again.');
             }
         });
     }
