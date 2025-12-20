@@ -151,10 +151,16 @@
     background: rgba(219, 68, 55, 0.05);
 }
 
-.btn-microsoft:hover {
-    border-color: #00A4EF;
-    color: #00A4EF;
-    background: rgba(0, 164, 239, 0.05);
+.btn-linkedin:hover {
+    border-color: #0A66C2;
+    color: #0A66C2;
+    background: rgba(10, 102, 194, 0.05);
+}
+
+.btn-facebook:hover {
+    border-color: #1877F2;
+    color: #1877F2;
+    background: rgba(24, 119, 242, 0.05);
 }
 
 /* Divider */

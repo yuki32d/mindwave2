@@ -283,10 +283,17 @@ document.addEventListener('DOMContentLoaded', function () {
             responseType: 'code',
             redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
         },
-        microsoft: {
-            clientId: 'YOUR_MICROSOFT_CLIENT_ID',
-            authEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
-            scope: 'openid email profile User.Read',
+        linkedin: {
+            clientId: 'YOUR_LINKEDIN_CLIENT_ID',
+            authEndpoint: 'https://www.linkedin.com/oauth/v2/authorization',
+            scope: 'openid profile email',
+            responseType: 'code',
+            redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
+        },
+        facebook: {
+            clientId: 'YOUR_FACEBOOK_APP_ID',
+            authEndpoint: 'https://www.facebook.com/v18.0/dialog/oauth',
+            scope: 'email public_profile',
             responseType: 'code',
             redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
         }
@@ -363,16 +370,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ===================================
-    // Microsoft OAuth Login
+    // LinkedIn OAuth Login
     // ===================================
-    async function initiateMicrosoftLogin() {
-        const config = OAUTH_CONFIG.microsoft;
+    async function initiateLinkedInLogin() {
+        const config = OAUTH_CONFIG.linkedin;
         const state = generateState();
         const codeVerifier = generateCodeVerifier();
         const codeChallenge = await generateCodeChallenge(codeVerifier);
 
         // Store state and verifier for later verification
-        storeOAuthState('microsoft', state, codeVerifier);
+        storeOAuthState('linkedin', state, codeVerifier);
 
         // Build authorization URL
         const params = new URLSearchParams({
@@ -382,12 +389,37 @@ document.addEventListener('DOMContentLoaded', function () {
             scope: config.scope,
             state: state,
             code_challenge: codeChallenge,
-            code_challenge_method: 'S256',
-            response_mode: 'query',
-            prompt: 'select_account'
+            code_challenge_method: 'S256'
         });
 
-        // Redirect to Microsoft OAuth
+        // Redirect to LinkedIn OAuth
+        window.location.href = `${config.authEndpoint}?${params.toString()}`;
+    }
+
+    // ===================================
+    // Facebook OAuth Login
+    // ===================================
+    async function initiateFacebookLogin() {
+        const config = OAUTH_CONFIG.facebook;
+        const state = generateState();
+        const codeVerifier = generateCodeVerifier();
+        const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+        // Store state and verifier for later verification
+        storeOAuthState('facebook', state, codeVerifier);
+
+        // Build authorization URL
+        const params = new URLSearchParams({
+            client_id: config.clientId,
+            redirect_uri: config.redirectUri,
+            response_type: config.responseType,
+            scope: config.scope,
+            state: state,
+            code_challenge: codeChallenge,
+            code_challenge_method: 'S256'
+        });
+
+        // Redirect to Facebook OAuth
         window.location.href = `${config.authEndpoint}?${params.toString()}`;
     }
 
@@ -395,7 +427,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Social Login Buttons
     // ===================================
     const googleBtn = document.querySelector('.btn-google');
-    const microsoftBtn = document.querySelector('.btn-microsoft');
+    const linkedinBtn = document.querySelector('.btn-linkedin');
+    const facebookBtn = document.querySelector('.btn-facebook');
 
     if (googleBtn) {
         googleBtn.addEventListener('click', async function () {
@@ -408,13 +441,24 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    if (microsoftBtn) {
-        microsoftBtn.addEventListener('click', async function () {
+    if (linkedinBtn) {
+        linkedinBtn.addEventListener('click', async function () {
             try {
-                await initiateMicrosoftLogin();
+                await initiateLinkedInLogin();
             } catch (error) {
-                console.error('Microsoft login error:', error);
-                alert('Failed to initiate Microsoft login. Please try again.');
+                console.error('LinkedIn login error:', error);
+                alert('Failed to initiate LinkedIn login. Please try again.');
+            }
+        });
+    }
+
+    if (facebookBtn) {
+        facebookBtn.addEventListener('click', async function () {
+            try {
+                await initiateFacebookLogin();
+            } catch (error) {
+                console.error('Facebook login error:', error);
+                alert('Failed to initiate Facebook login. Please try again.');
             }
         });
     }

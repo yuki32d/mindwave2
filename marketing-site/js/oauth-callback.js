@@ -1,6 +1,6 @@
 // ===================================
 // OAuth Callback Handler
-// Processes OAuth responses from Google and Microsoft
+// Processes OAuth responses from Google, LinkedIn, and Facebook
 // ===================================
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -59,9 +59,14 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
             clientId: '354642649256-dequ81au879v846gnukejhu6cacmbhrg.apps.googleusercontent.com',
             redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
         },
-        microsoft: {
-            tokenEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
-            clientId: 'YOUR_MICROSOFT_CLIENT_ID',
+        linkedin: {
+            tokenEndpoint: 'https://www.linkedin.com/oauth/v2/accessToken',
+            clientId: 'YOUR_LINKEDIN_CLIENT_ID',
+            redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
+        },
+        facebook: {
+            tokenEndpoint: 'https://graph.facebook.com/v18.0/oauth/access_token',
+            clientId: 'YOUR_FACEBOOK_APP_ID',
             redirectUri: window.location.origin + '/marketing-site/oauth-callback.html'
         }
     };
@@ -111,7 +116,8 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
 async function getUserInfo(provider, accessToken) {
     const endpoints = {
         google: 'https://www.googleapis.com/oauth2/v2/userinfo',
-        microsoft: 'https://graph.microsoft.com/v1.0/me'
+        linkedin: 'https://api.linkedin.com/v2/userinfo',
+        facebook: 'https://graph.facebook.com/me?fields=id,name,email,picture'
     };
 
     try {
@@ -127,14 +133,33 @@ async function getUserInfo(provider, accessToken) {
 
         const userInfo = await response.json();
 
-        // Normalize user data structure
-        return {
-            id: userInfo.id || userInfo.sub,
-            email: userInfo.email || userInfo.mail || userInfo.userPrincipalName,
-            name: userInfo.name || userInfo.displayName,
-            picture: userInfo.picture || userInfo.photo,
-            provider: provider
-        };
+        // Normalize user data structure based on provider
+        if (provider === 'linkedin') {
+            return {
+                id: userInfo.sub,
+                email: userInfo.email,
+                name: userInfo.name,
+                picture: userInfo.picture,
+                provider: provider
+            };
+        } else if (provider === 'facebook') {
+            return {
+                id: userInfo.id,
+                email: userInfo.email,
+                name: userInfo.name,
+                picture: userInfo.picture?.data?.url,
+                provider: provider
+            };
+        } else {
+            // Google
+            return {
+                id: userInfo.id || userInfo.sub,
+                email: userInfo.email,
+                name: userInfo.name,
+                picture: userInfo.picture,
+                provider: provider
+            };
+        }
 
     } catch (error) {
         throw new Error(`Failed to get user info: ${error.message}`);
