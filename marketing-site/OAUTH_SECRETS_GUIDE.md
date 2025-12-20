@@ -39,9 +39,9 @@ LINKEDIN_CLIENT_SECRET=your_linkedin_secret_here
 
 ---
 
-## 3️⃣ Facebook App Secret (Optional)
+## 3️⃣ Facebook App Secret
 
-Facebook works with just the App ID for now, but if you need the secret:
+Facebook requires the App Secret for server-side token exchange.
 
 ### Get the Secret:
 1. Go to [Facebook Developers](https://developers.facebook.com/)
@@ -49,6 +49,11 @@ Facebook works with just the App ID for now, but if you need the secret:
 3. Go to **Settings** → **Basic**
 4. Click **"Show"** next to App Secret
 5. Copy the secret
+
+### Add to `.env`:
+```env
+FACEBOOK_APP_SECRET=your_facebook_secret_here
+```
 
 ---
 
@@ -62,8 +67,8 @@ GOOGLE_CLIENT_SECRET=your_google_secret_here
 LINKEDIN_CLIENT_ID=861kbeeryboggw
 LINKEDIN_CLIENT_SECRET=your_linkedin_secret_here
 
-# Facebook OAuth (App ID already in code)
-# FACEBOOK_APP_SECRET=your_facebook_secret_here (optional)
+# Facebook OAuth
+FACEBOOK_APP_SECRET=your_facebook_secret_here
 ```
 
 ---
@@ -81,6 +86,7 @@ Once you have all secrets, add them to Render:
 GOOGLE_CLIENT_SECRET = [your Google secret]
 LINKEDIN_CLIENT_ID = 861kbeeryboggw
 LINKEDIN_CLIENT_SECRET = [your LinkedIn secret]
+FACEBOOK_APP_SECRET = [your Facebook secret]
 ```
 
 5. Click **"Save Changes"**
