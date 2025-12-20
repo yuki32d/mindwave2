@@ -239,6 +239,98 @@ document.addEventListener('DOMContentLoaded', function () {
     document.head.appendChild(style);
 
     // ===================================
+    // Pricing Calculator
+    // ===================================
+    const studentCountSlider = document.getElementById('studentCount');
+    const studentCountValue = document.getElementById('studentCountValue');
+    const monthlyPriceDisplay = document.getElementById('monthlyPrice');
+    const annualPriceDisplay = document.getElementById('annualPrice');
+    const savingsDisplay = document.getElementById('savings');
+
+    if (studentCountSlider) {
+        function calculatePrice(studentCount) {
+            let monthlyPrice;
+
+            if (studentCount <= 50) {
+                monthlyPrice = 19;
+            } else if (studentCount <= 200) {
+                monthlyPrice = 49;
+            } else if (studentCount <= 500) {
+                monthlyPrice = 99;
+            } else {
+                monthlyPrice = 199;
+            }
+
+            return monthlyPrice;
+        }
+
+        function updatePricing() {
+            const studentCount = parseInt(studentCountSlider.value);
+            const monthlyPrice = calculatePrice(studentCount);
+            const annualPrice = Math.round(monthlyPrice * 12 * 0.8); // 20% discount
+            const savings = (monthlyPrice * 12) - annualPrice;
+
+            // Update displays with animation
+            studentCountValue.textContent = studentCount;
+            monthlyPriceDisplay.textContent = monthlyPrice;
+            annualPriceDisplay.textContent = annualPrice;
+            savingsDisplay.textContent = savings;
+
+            // Update slider background
+            const percentage = ((studentCount - 10) / (1000 - 10)) * 100;
+            studentCountSlider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${percentage}%, var(--gray-200) ${percentage}%, var(--gray-200) 100%)`;
+        }
+
+        studentCountSlider.addEventListener('input', updatePricing);
+        updatePricing(); // Initial calculation
+    }
+
+    // ===================================
+    // Success Modal for Forms
+    // ===================================
+    window.showSuccessModal = function (title, message) {
+        // Create modal overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+
+        // Create success modal
+        const modal = document.createElement('div');
+        modal.className = 'success-modal';
+        modal.innerHTML = `
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3>${title}</h3>
+            <p>${message}</p>
+            <button class="btn btn-primary" onclick="closeSuccessModal()">Got it!</button>
+        `;
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(modal);
+
+        // Show with animation
+        setTimeout(() => {
+            overlay.classList.add('show');
+            modal.classList.add('show');
+        }, 10);
+    };
+
+    window.closeSuccessModal = function () {
+        const overlay = document.querySelector('.modal-overlay');
+        const modal = document.querySelector('.success-modal');
+
+        if (overlay && modal) {
+            overlay.classList.remove('show');
+            modal.classList.remove('show');
+
+            setTimeout(() => {
+                overlay.remove();
+                modal.remove();
+            }, 300);
+        }
+    };
+
+    // ===================================
     // Console Welcome Message
     // ===================================
     console.log('%c🧠 MindWave Marketing Site', 'font-size: 20px; font-weight: bold; color: #4F46E5;');
