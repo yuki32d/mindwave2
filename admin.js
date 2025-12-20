@@ -367,7 +367,7 @@ async function performLogout() {
     } catch (error) { console.error('Logout failed', error); }
     finally {
         localStorage.clear(); // Clear all local storage on logout
-        window.location.href = 'login.html';
+        window.location.href = 'marketing-site/admin-login.html';
     }
 }
 

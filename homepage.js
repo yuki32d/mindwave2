@@ -168,8 +168,8 @@ function performLogout() {
         // Clear all auth data and cache
         clearAuthAndCache();
 
-        // Use replace to prevent back navigation
-        window.location.replace('login.html');
+        // Use replace to prevent back navigation - redirect to student login
+        window.location.replace('marketing-site/student-login.html');
     }
 }
 
