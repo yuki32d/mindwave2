@@ -74,75 +74,42 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
     const providerConfig = config[provider];
 
     try {
-        // LinkedIn requires backend token exchange
-        if (provider === 'linkedin') {
-            const response = await fetch('/api/auth/linkedin/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    code: code,
-                    codeVerifier: codeVerifier,
-                    redirectUri: providerConfig.redirectUri
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'LinkedIn authentication failed');
-            }
-
-            const result = await response.json();
-
-            // Store authentication token
-            if (result.token) {
-                localStorage.setItem('auth_token', result.token);
-                localStorage.setItem('user_email', result.user.email);
-                localStorage.setItem('user_name', result.user.name);
-                localStorage.setItem('user_role', result.user.role);
-            }
-
-            // Clear OAuth session data
-            sessionStorage.removeItem('oauth_state');
-            sessionStorage.removeItem('oauth_provider');
-            sessionStorage.removeItem('oauth_code_verifier');
-
-            // Show success and redirect
-            showSuccess('linkedin', result.user.name);
-            return;
-        }
-
-        // Google and Facebook use client-side PKCE flow
-        const tokenParams = new URLSearchParams({
-            client_id: providerConfig.clientId,
-            code: code,
-            code_verifier: codeVerifier,
-            grant_type: 'authorization_code',
-            redirect_uri: providerConfig.redirectUri
-        });
-
-        // Exchange code for token
-        const response = await fetch(providerConfig.tokenEndpoint, {
+        // All providers now use backend token exchange
+        const response = await fetch('/api/auth/oauth/token', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/json'
             },
-            body: tokenParams.toString()
+            body: JSON.stringify({
+                provider: provider,
+                code: code,
+                codeVerifier: codeVerifier,
+                redirectUri: providerConfig.redirectUri
+            })
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error_description || 'Token exchange failed');
+            throw new Error(errorData.message || `${provider} authentication failed`);
         }
 
-        const tokenData = await response.json();
+        const result = await response.json();
 
-        // Get user info
-        const userInfo = await getUserInfo(provider, tokenData.access_token);
+        // Store authentication token
+        if (result.token) {
+            localStorage.setItem('auth_token', result.token);
+            localStorage.setItem('user_email', result.user.email);
+            localStorage.setItem('user_name', result.user.name);
+            localStorage.setItem('user_role', result.user.role);
+        }
 
-        // Send to backend for account creation/login
-        await processUserLogin(provider, userInfo, tokenData);
+        // Clear OAuth session data
+        sessionStorage.removeItem('oauth_state');
+        sessionStorage.removeItem('oauth_provider');
+        sessionStorage.removeItem('oauth_code_verifier');
+
+        // Show success and redirect
+        showSuccess(provider, result.user.name);
 
     } catch (error) {
         throw new Error(`Failed to exchange authorization code: ${error.message}`);
