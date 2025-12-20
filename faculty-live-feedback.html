@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Feedback - MindWave</title>
+    <link rel="stylesheet" href="css/3d-depth-design.css">
+    <link rel="stylesheet" href="css/live-feedback.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-brain"></i>
+                <span>MindWave</span>
+            </div>
+            <div class="nav-links">
+                <a href="admin.html"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="faculty-live-feedback.html" class="active"><i class="fas fa-comments"></i> Live Feedback</a>
+                <a href="#" id="accountBtn"><i class="fas fa-user-circle"></i> Account</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="feedback-container">
+        <!-- Header -->
+        <section class="feedback-header">
+            <div class="header-content">
+                <div class="icon-badge">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div>
+                    <h1>Live Student Feedback</h1>
+                    <p>Get an in-the-moment, honest snapshot of how your lesson is landing</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-toggle" id="toggleFeedbackBtn">
+                    <i class="fas fa-play"></i> Start Collecting
+                </button>
+            </div>
+        </section>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Sentiment Gauge -->
+            <div class="dashboard-card gauge-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-tachometer-alt"></i> Average Confidence</h3>
+                    <span class="live-indicator">
+                        <span class="pulse-dot"></span> Live
+                    </span>
+                </div>
+                <div class="gauge-container">
+                    <canvas id="sentimentGauge"></canvas>
+                    <div class="gauge-value">
+                        <span class="value-number" id="avgConfidence">0.0</span>
+                        <span class="value-label">/ 5.0</span>
+                    </div>
+                </div>
+                <div class="gauge-labels">
+                    <span class="label-low">😟 Confused</span>
+                    <span class="label-mid">😐 Neutral</span>
+                    <span class="label-high">😄 Confident</span>
+                </div>
+            </div>
+
+            <!-- Distribution Chart -->
+            <div class="dashboard-card chart-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-bar"></i> Confidence Distribution</h3>
+                    <span class="response-count" id="totalFeedback">0 responses</span>
+                </div>
+                <canvas id="distributionChart"></canvas>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="dashboard-card stats-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-line"></i> Quick Stats</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon confused">
+                            <i class="fas fa-frown"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="confusedCount">0</div>
+                            <div class="stat-label">Confused</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon neutral">
+                            <i class="fas fa-meh"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="neutralCount">0</div>
+                            <div class="stat-label">Neutral</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon confident">
+                            <i class="fas fa-smile"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="confidentCount">0</div>
+                            <div class="stat-label">Confident</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Anonymous Comments Stream -->
+            <div class="dashboard-card comments-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-comment-dots"></i> Anonymous Comments</h3>
+                    <button class="btn-clear" id="clearCommentsBtn">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                </div>
+                <div class="comments-stream" id="commentsStream">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No comments yet. Students can submit anonymous questions.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trend Chart -->
+            <div class="dashboard-card trend-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-area"></i> Confidence Trend</h3>
+                    <select id="trendPeriod" class="period-select">
+                        <option value="5">Last 5 min</option>
+                        <option value="10" selected>Last 10 min</option>
+                        <option value="30">Last 30 min</option>
+                    </select>
+                </div>
+                <canvas id="trendChart"></canvas>
+            </div>
+
+            <!-- Insights Panel -->
+            <div class="dashboard-card insights-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-lightbulb"></i> AI Insights</h3>
+                </div>
+                <div class="insights-list" id="insightsList">
+                    <div class="insight-item">
+                        <div class="insight-icon">💡</div>
+                        <div class="insight-text">
+                            Start collecting feedback to see insights
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session History -->
+        <section class="history-section">
+            <h2><i class="fas fa-history"></i> Recent Sessions</h2>
+            <div class="sessions-grid" id="sessionsGrid">
+                <!-- Will be populated dynamically -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Feedback Active Modal -->
+    <div class="modal" id="activeModal">
+        <div class="modal-content success">
+            <div class="modal-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Feedback Collection Started!</h2>
+            <p>Students can now submit their confidence levels and questions.</p>
+            <button class="btn-primary" onclick="closeModal()">Got it!</button>
+        </div>
+    </div>
+
+    <script src="js/faculty-live-feedback.js"></script>
+</body>
+
+</html>
