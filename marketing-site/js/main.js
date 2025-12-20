@@ -173,9 +173,8 @@ document.addEventListener('DOMContentLoaded', function () {
     signupLinks.forEach(link => {
         link.addEventListener('click', function (e) {
             e.preventDefault();
-            // For now, redirect to main app login
-            // In future, this will open a signup modal
-            window.location.href = '../login.html';
+            // Redirect to marketing login (role selection)
+            window.location.href = 'website-login.html';
         });
     });
 

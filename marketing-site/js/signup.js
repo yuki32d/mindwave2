@@ -248,9 +248,9 @@ document.addEventListener('DOMContentLoaded', function () {
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-            // For now, redirect to main app login
+            // Redirect to marketing login (role selection)
             alert('Account created successfully! Please check your email to verify your account.');
-            window.location.href = '../login.html';
+            window.location.href = 'website-login.html';
 
         } catch (error) {
             console.error('Signup error:', error);
