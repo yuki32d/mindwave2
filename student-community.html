@@ -20,10 +20,10 @@
             <p class="lede" id="pageSubtitle">Share projects, collaborate, and connect with fellow students.</p>
             <div class="hero-actions">
                 <button class="primary-btn" id="createPostBtn">✨ Create Post</button>
-                <button class="ghost-btn active" onclick="showSection('community')">📝 My Posts</button>
-                <button class="ghost-btn" onclick="showSection('poll')">📊 Quick Poll</button>
-                <button class="ghost-btn" onclick="showSection('feedback')">💬 Feedback</button>
-                <button class="ghost-btn" onclick="showSection('quiz')">🏆 Live Quiz</button>
+                <button class="ghost-btn active" data-section="community">📝 My Posts</button>
+                <button class="ghost-btn" data-section="poll">📊 Quick Poll</button>
+                <button class="ghost-btn" data-section="feedback">💬 Feedback</button>
+                <button class="ghost-btn" data-section="quiz">🏆 Live Quiz</button>
             </div>
         </header>
 
@@ -213,38 +213,10 @@
         </div>
 
 
+
         <script src="student-community.js"></script>
         <script src="chatbot.js"></script>
-        <script>
-            // Function to switch between sections
-            function showSection(sectionName) {
-                // Hide all sections
-                document.querySelectorAll('.content-section').forEach(section => {
-                    section.style.display = 'none';
-                });
-
-                // Remove active class from all buttons
-                document.querySelectorAll('.hero-actions button').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-
-                // Show selected section
-                const sectionMap = {
-                    'community': 'communitySection',
-                    'poll': 'pollSection',
-                    'feedback': 'feedbackSection',
-                    'quiz': 'quizSection'
-                };
-
-                const sectionId = sectionMap[sectionName];
-                if (sectionId) {
-                    document.getElementById(sectionId).style.display = 'block';
-                }
-
-                // Add active class to clicked button
-                event.target.classList.add('active');
-            }
-        </script>
+        <script src="marketing-site/js/community-navigation.js"></script>
 </body>
 
 </html>
