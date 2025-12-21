@@ -269,6 +269,7 @@ function showSuccess(provider, userName) {
 
     // Set onboarding flag for new organizations
     localStorage.setItem('needs_org_setup', 'true');
+    localStorage.setItem('org_role', 'admin'); // Organization creator is admin
 
     // Redirect to organization setup page after 2 seconds
     setTimeout(() => {
