@@ -1,22 +1,33 @@
 /* ===================================
-   Student Poll - Interactive Styles
+   Student Poll - Dark 3D Theme
    =================================== */
 
+/* Import MindWave color variables */
 :root {
-    --primary: #6366F1;
-    --primary-dark: #4F46E5;
-    --success: #10B981;
-    --option-a: #FF6B6B;
-    --option-b: #4ECDC4;
-    --option-c: #FFD93D;
-    --option-d: #95E1D3;
-    --option-e: #C7CEEA;
-    --option-f: #FFDAC1;
+    --bg-deep: #0B0B0F;
+    --bg-mid: #1A1F3A;
+    --card-dark: #1E2433;
+    --card-darker: #161B28;
+    --cyan-bright: #00D9FF;
+    --purple-bright: #8B5CF6;
+    --green-bright: #10B981;
+    --text-white: #FFFFFF;
+    --text-gray: #9CA3AF;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.35);
+    --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.45);
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ===================================
-   Layout
-   =================================== */
+/* Force dark background on body */
+body {
+    background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-mid) 100%) !important;
+    color: var(--text-white) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    min-height: 100vh;
+}
 
 .poll-response-container {
     min-height: 100vh;
@@ -24,30 +35,28 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
 }
 
-/* ===================================
-   Waiting Section
-   =================================== */
-
+/* Waiting Section */
 .waiting-section {
     width: 100%;
     max-width: 600px;
 }
 
 .waiting-card {
-    background: white;
+    background: var(--card-dark);
     border-radius: 30px;
     padding: 4rem 3rem;
     text-align: center;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-xl);
+    transform: translateZ(20px);
 }
 
 .waiting-icon {
     width: 120px;
     height: 120px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    background: linear-gradient(135deg, var(--cyan-bright), var(--purple-bright));
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -56,6 +65,7 @@
     font-size: 3.5rem;
     color: white;
     animation: pulse 2s ease-in-out infinite;
+    box-shadow: 0 8px 32px rgba(0, 217, 255, 0.4);
 }
 
 @keyframes pulse {
@@ -63,25 +73,25 @@
     0%,
     100% {
         transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+        box-shadow: 0 8px 32px rgba(0, 217, 255, 0.4);
     }
 
     50% {
         transform: scale(1.05);
-        box-shadow: 0 0 0 20px rgba(99, 102, 241, 0);
+        box-shadow: 0 12px 48px rgba(0, 217, 255, 0.6);
     }
 }
 
 .waiting-card h1 {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #1F2937;
+    color: var(--text-white);
     margin-bottom: 1rem;
 }
 
 .waiting-card p {
     font-size: 1.25rem;
-    color: #6B7280;
+    color: var(--text-gray);
     margin-bottom: 2rem;
 }
 
@@ -94,7 +104,7 @@
 .pulse-indicator span {
     width: 12px;
     height: 12px;
-    background: var(--primary);
+    background: var(--cyan-bright);
     border-radius: 50%;
     animation: bounce 1.4s ease-in-out infinite;
 }
@@ -122,10 +132,7 @@
     }
 }
 
-/* ===================================
-   Active Poll Section
-   =================================== */
-
+/* Active Poll Section */
 .active-poll-section {
     width: 100%;
     max-width: 800px;
@@ -152,34 +159,31 @@
 .poll-badge {
     width: 80px;
     height: 80px;
-    background: white;
+    background: var(--card-dark);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem;
     font-size: 2.5rem;
-    color: var(--primary);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    color: var(--cyan-bright);
+    box-shadow: var(--shadow-lg);
 }
 
 .poll-header h1 {
     font-size: 2rem;
     font-weight: 700;
-    color: white;
+    color: var(--text-white);
     margin-bottom: 0.75rem;
     line-height: 1.4;
 }
 
 .poll-subtitle {
     font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-gray);
 }
 
-/* ===================================
-   Options Grid
-   =================================== */
-
+/* Options Grid */
 .options-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -188,14 +192,16 @@
 }
 
 .option-card {
-    background: white;
+    background: var(--card-dark);
     border-radius: 20px;
     padding: 2rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition-smooth);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
+    transform: translateZ(10px);
+    border: 2px solid transparent;
 }
 
 .option-card::before {
@@ -205,39 +211,39 @@
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, var(--option-a), var(--option-b));
+    background: linear-gradient(90deg, var(--cyan-bright), var(--purple-bright));
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.3s ease;
 }
 
 .option-card:nth-child(1)::before {
-    background: linear-gradient(90deg, var(--option-a), #ff5252);
+    background: linear-gradient(90deg, #FF6B6B, #ff5252);
 }
 
 .option-card:nth-child(2)::before {
-    background: linear-gradient(90deg, var(--option-b), #3ab8b0);
+    background: linear-gradient(90deg, #4ECDC4, #3ab8b0);
 }
 
 .option-card:nth-child(3)::before {
-    background: linear-gradient(90deg, var(--option-c), #ffc107);
+    background: linear-gradient(90deg, #FFD93D, #ffc107);
 }
 
 .option-card:nth-child(4)::before {
-    background: linear-gradient(90deg, var(--option-d), #7bc8c0);
+    background: linear-gradient(90deg, #95E1D3, #7bc8c0);
 }
 
 .option-card:nth-child(5)::before {
-    background: linear-gradient(90deg, var(--option-e), #a8b3d9);
+    background: linear-gradient(90deg, #C7CEEA, #a8b3d9);
 }
 
 .option-card:nth-child(6)::before {
-    background: linear-gradient(90deg, var(--option-f), #ffcba4);
+    background: linear-gradient(90deg, #FFDAC1, #ffcba4);
 }
 
 .option-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: translateZ(20px) translateY(-5px);
+    box-shadow: var(--shadow-xl);
 }
 
 .option-card:hover::before {
@@ -245,8 +251,9 @@
 }
 
 .option-card.selected {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+    transform: translateZ(25px) translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 217, 255, 0.4);
+    border-color: var(--cyan-bright);
 }
 
 .option-card.selected::before {
@@ -267,33 +274,33 @@
 }
 
 .option-card:nth-child(1) .option-letter {
-    background: linear-gradient(135deg, var(--option-a), #ff5252);
+    background: linear-gradient(135deg, #FF6B6B, #ff5252);
 }
 
 .option-card:nth-child(2) .option-letter {
-    background: linear-gradient(135deg, var(--option-b), #3ab8b0);
+    background: linear-gradient(135deg, #4ECDC4, #3ab8b0);
 }
 
 .option-card:nth-child(3) .option-letter {
-    background: linear-gradient(135deg, var(--option-c), #ffc107);
+    background: linear-gradient(135deg, #FFD93D, #ffc107);
 }
 
 .option-card:nth-child(4) .option-letter {
-    background: linear-gradient(135deg, var(--option-d), #7bc8c0);
+    background: linear-gradient(135deg, #95E1D3, #7bc8c0);
 }
 
 .option-card:nth-child(5) .option-letter {
-    background: linear-gradient(135deg, var(--option-e), #a8b3d9);
+    background: linear-gradient(135deg, #C7CEEA, #a8b3d9);
 }
 
 .option-card:nth-child(6) .option-letter {
-    background: linear-gradient(135deg, var(--option-f), #ffcba4);
+    background: linear-gradient(135deg, #FFDAC1, #ffcba4);
 }
 
 .option-text {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #1F2937;
+    color: var(--text-white);
     line-height: 1.5;
 }
 
@@ -303,17 +310,17 @@
     right: 1rem;
     width: 30px;
     height: 30px;
-    border: 3px solid #E5E7EB;
+    border: 3px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: var(--transition-fast);
 }
 
 .option-card.selected .option-check {
-    background: var(--success);
-    border-color: var(--success);
+    background: var(--green-bright);
+    border-color: var(--green-bright);
     transform: scale(1.1);
 }
 
@@ -328,28 +335,26 @@
     opacity: 1;
 }
 
-/* ===================================
-   Poll Footer
-   =================================== */
-
+/* Poll Footer */
 .poll-footer {
     text-align: center;
 }
 
 .btn-submit {
     padding: 1.25rem 3rem;
-    background: white;
-    color: var(--primary);
+    background: linear-gradient(135deg, var(--cyan-bright), var(--purple-bright));
+    color: white;
     border: none;
-    border-radius: 16px;
+    border-radius: 999px;
     font-weight: 700;
     font-size: 1.1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition-smooth);
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+    transform: translateZ(10px);
 }
 
 .btn-submit:disabled {
@@ -358,14 +363,11 @@
 }
 
 .btn-submit:not(:disabled):hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    transform: translateZ(20px) translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 217, 255, 0.5);
 }
 
-/* ===================================
-   Results Section
-   =================================== */
-
+/* Results Section */
 .results-section {
     width: 100%;
     max-width: 700px;
@@ -380,15 +382,15 @@
 .success-icon {
     width: 100px;
     height: 100px;
-    background: white;
+    background: linear-gradient(135deg, var(--green-bright), #059669);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem;
     font-size: 3rem;
-    color: var(--success);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    color: white;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
     animation: successPop 0.6s ease;
 }
 
@@ -411,24 +413,21 @@
 .results-header h1 {
     font-size: 2.5rem;
     font-weight: 700;
-    color: white;
+    color: var(--text-white);
     margin-bottom: 0.75rem;
 }
 
 .results-header p {
     font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-gray);
 }
 
-/* ===================================
-   Results Container
-   =================================== */
-
+/* Results Container */
 .results-container {
-    background: white;
+    background: var(--card-dark);
     border-radius: 24px;
     padding: 2.5rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-xl);
     margin-bottom: 2rem;
 }
 
@@ -486,7 +485,7 @@
     align-items: center;
     gap: 0.75rem;
     font-weight: 600;
-    color: #1F2937;
+    color: var(--text-white);
 }
 
 .result-letter-small {
@@ -504,12 +503,12 @@
 .result-percentage {
     font-weight: 700;
     font-size: 1.25rem;
-    color: var(--primary);
+    color: var(--cyan-bright);
 }
 
 .result-progress {
     height: 12px;
-    background: #F3F4F6;
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 6px;
     overflow: hidden;
 }
@@ -548,17 +547,18 @@
 
 .result-bar.selected {
     padding: 1rem;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.1));
+    background: rgba(0, 217, 255, 0.1);
     border-radius: 12px;
     margin-left: -1rem;
     margin-right: -1rem;
     padding-left: 2rem;
     padding-right: 2rem;
+    border: 2px solid var(--cyan-bright);
 }
 
 .result-bar.selected .result-label::before {
     content: '✓ Your answer';
-    background: var(--success);
+    background: var(--green-bright);
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 6px;
@@ -566,38 +566,33 @@
     margin-left: auto;
 }
 
-/* ===================================
-   Results Footer
-   =================================== */
-
+/* Results Footer */
 .results-footer {
     text-align: center;
 }
 
 .btn-back {
     padding: 1rem 2.5rem;
-    background: white;
-    color: var(--primary);
-    border: none;
-    border-radius: 12px;
+    background: transparent;
+    color: var(--text-white);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition-smooth);
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
 }
 
 .btn-back:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.05);
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* ===================================
-   Responsive
-   =================================== */
-
+/* Responsive */
 @media (max-width: 768px) {
     .poll-response-container {
         padding: 1rem;

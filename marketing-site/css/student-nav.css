@@ -1,0 +1,46 @@
+/* Unified Navigation Styles for Student Pages */
+.nav-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.nav-btn {
+    padding: 0.625rem 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-white);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.nav-btn.active {
+    background: #0f62fe;
+    border-color: #0f62fe;
+}
+
+.nav-btn.primary-nav-btn {
+    background: #0f62fe;
+    border-color: #0f62fe;
+}
+
+.nav-btn.primary-nav-btn:hover {
+    background: #0353e9;
+}
+
+.nav-btn i {
+    font-size: 0.875rem;
+}

@@ -818,8 +818,3 @@ body {
         width: 100%;
     }
 }
-
-/* SLEEK ROUNDED BUTTON STYLES - ADDED 12/21/2025 12:20:56 */
-.btn-primary { padding: 1rem 2rem !important; background: linear-gradient(135deg, #00D9FF, #8B5CF6) !important; color: white !important; border: none !important; border-radius: 50px !important; font-weight: 600 !important; }
-.btn-secondary { padding: 1rem 2rem !important; background: transparent !important; color: white !important; border: 2px solid rgba(255, 255, 255, 0.2) !important; border-radius: 50px !important; font-weight: 600 !important; }
-.btn-secondary:hover { border-color: rgba(255, 255, 255, 0.4) !important; background: rgba(255, 255, 255, 0.05) !important; }

@@ -1,0 +1,197 @@
+/* Faculty Tool Cards - Professional Design */
+.faculty-tool-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 4rem 3rem;
+    text-align: center;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* Tool Icons */
+.tool-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    font-size: 4rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.poll-icon {
+    background: linear-gradient(135deg, #00D9FF, #0EA5E9);
+}
+
+.feedback-icon {
+    background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+}
+
+.quiz-icon {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+}
+
+.faculty-tool-card h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-white);
+}
+
+.faculty-tool-card .subtitle {
+    color: var(--text-muted);
+    font-size: 1.125rem;
+    margin-bottom: 2.5rem;
+}
+
+/* Form Elements */
+.poll-creator,
+.feedback-controls,
+.quiz-creator {
+    margin-top: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-white);
+}
+
+.input-field {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-white);
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #0f62fe;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.input-field::placeholder {
+    color: var(--text-muted);
+}
+
+/* Options Grid */
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Feedback Stats */
+.feedback-stats {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    min-width: 120px;
+    flex: 1;
+    max-width: 150px;
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-4px);
+}
+
+.stat-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Primary Button */
+.primary-btn {
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, #0f62fe, #0353e9);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.0625rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 4px 16px rgba(15, 98, 254, 0.3);
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(15, 98, 254, 0.4);
+}
+
+.primary-btn i {
+    font-size: 1.125rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .faculty-tool-card {
+        padding: 3rem 2rem;
+    }
+
+    .tool-icon {
+        width: 100px;
+        height: 100px;
+        font-size: 3rem;
+    }
+
+    .faculty-tool-card h1 {
+        font-size: 2rem;
+    }
+
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .feedback-stats {
+        gap: 0.75rem;
+    }
+
+    .stat-card {
+        min-width: 100px;
+    }
+}

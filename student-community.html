@@ -7,6 +7,7 @@
     <title>MINDWAVE – Student Community</title>
     <link rel="stylesheet" href="3d-depth-design.css">
     <link rel="stylesheet" href="student-community.css">
+    <link rel="stylesheet" href="marketing-site/css/community-features.css">
     <script src="theme-init.js"></script>
 </head>
 
@@ -19,116 +20,232 @@
             <p class="lede" id="pageSubtitle">Share projects, collaborate, and connect with fellow students.</p>
             <div class="hero-actions">
                 <button class="primary-btn" id="createPostBtn">✨ Create Post</button>
-                <button class="ghost-btn" id="myPostsBtn">📝 My Posts</button>
+                <button class="ghost-btn active" onclick="showSection('community')">📝 My Posts</button>
+                <button class="ghost-btn" onclick="showSection('poll')">📊 Quick Poll</button>
+                <button class="ghost-btn" onclick="showSection('feedback')">💬 Feedback</button>
+                <button class="ghost-btn" onclick="showSection('quiz')">🏆 Live Quiz</button>
             </div>
         </header>
 
-        <!-- Search and Filter Bar -->
-        <div class="filter-section">
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="🔍 Search posts..." />
+        <!-- Community Posts Section (Default) -->
+        <div id="communitySection" class="content-section active">
+            <!-- Search and Filter Bar -->
+            <div class="filter-section">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="🔍 Search posts..." />
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-sort="recent">🕒 Recent</button>
+                    <button class="filter-btn" data-sort="popular">🔥 Popular</button>
+                    <button class="filter-btn" data-sort="trending">📈 Trending</button>
+                </div>
             </div>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-sort="recent">🕒 Recent</button>
-                <button class="filter-btn" data-sort="popular">🔥 Popular</button>
-                <button class="filter-btn" data-sort="trending">📈 Trending</button>
+
+            <!-- Trending Tags -->
+            <div class="trending-tags" id="trendingTags">
+                <h3>🏷️ Trending Tags</h3>
+                <div class="tag-list" id="tagList">
+                    <!-- Tags will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Posts Feed -->
+            <div class="posts-container" id="postsContainer">
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner"></div>
+                    <p>Loading posts...</p>
+                </div>
+            </div>
+
+            <!-- Load More Button -->
+            <div class="load-more-container" id="loadMoreContainer" style="display: none;">
+                <button class="ghost-btn" id="loadMoreBtn">Load More Posts</button>
+            </div>
+        </div>
+
+        <!-- Quick Poll Section -->
+        <div id="pollSection" class="content-section" style="display: none;">
+            <div class="feature-content-area">
+                <div class="waiting-card">
+                    <div class="waiting-icon">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <h1>Waiting for Poll</h1>
+                    <p>Your instructor will launch a poll soon...</p>
+                    <div class="pulse-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Trending Tags -->
-        <div class="trending-tags" id="trendingTags">
-            <h3>🏷️ Trending Tags</h3>
-            <div class="tag-list" id="tagList">
-                <!-- Tags will be loaded here -->
+        <!-- Feedback Section -->
+        <div id="feedbackSection" class="content-section" style="display: none;">
+            <div class="feature-content-area">
+                <div class="feedback-card">
+                    <div class="card-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h1>How are you feeling?</h1>
+                    <p class="subtitle">Your feedback is anonymous and helps improve the lesson</p>
+
+                    <div class="confidence-selector">
+                        <label>How confident are you feeling about this topic?</label>
+                        <div class="emoji-options">
+                            <button class="emoji-btn" data-value="1">
+                                <span class="emoji">😟</span>
+                                <span class="label">Very Confused</span>
+                            </button>
+                            <button class="emoji-btn" data-value="2">
+                                <span class="emoji">😕</span>
+                                <span class="label">Confused</span>
+                            </button>
+                            <button class="emoji-btn" data-value="3">
+                                <span class="emoji">😐</span>
+                                <span class="label">Neutral</span>
+                            </button>
+                            <button class="emoji-btn" data-value="4">
+                                <span class="emoji">🙂</span>
+                                <span class="label">Confident</span>
+                            </button>
+                            <button class="emoji-btn" data-value="5">
+                                <span class="emoji">😄</span>
+                                <span class="label">Very Confident</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="primary-btn" disabled>
+                        <i class="fas fa-paper-plane"></i> Submit Feedback
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Posts Feed -->
-        <div class="posts-container" id="postsContainer">
-            <div class="loading-spinner" id="loadingSpinner">
-                <div class="spinner"></div>
-                <p>Loading posts...</p>
+        <!-- Live Quiz Section -->
+        <div id="quizSection" class="content-section" style="display: none;">
+            <div class="feature-content-area">
+                <div class="waiting-card">
+                    <div class="quiz-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h1>Get Ready!</h1>
+                    <p>Waiting for your teacher to start the quiz...</p>
+                    <div class="pulse-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Load More Button -->
-        <div class="load-more-container" id="loadMoreContainer" style="display: none;">
-            <button class="ghost-btn" id="loadMoreBtn">Load More Posts</button>
-        </div>
-    </div>
+        <!-- Create Post Modal -->
+        <div class="modal" id="createPostModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Create New Post</h2>
+                    <button class="close-btn" id="closeModalBtn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="createPostForm">
+                        <div class="form-group">
+                            <label for="postTitle">Title *</label>
+                            <input type="text" id="postTitle" maxlength="300" required
+                                placeholder="Give your post a catchy title...">
+                        </div>
 
-    <!-- Create Post Modal -->
-    <div class="modal" id="createPostModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Create New Post</h2>
-                <button class="close-btn" id="closeModalBtn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="createPostForm">
-                    <div class="form-group">
-                        <label for="postTitle">Title *</label>
-                        <input type="text" id="postTitle" maxlength="300" required
-                            placeholder="Give your post a catchy title...">
-                    </div>
+                        <div class="form-group">
+                            <label for="postContent">Content *</label>
+                            <textarea id="postContent" rows="6" maxlength="5000" required
+                                placeholder="Share your thoughts, project details, or ask a question..."></textarea>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="postContent">Content *</label>
-                        <textarea id="postContent" rows="6" maxlength="5000" required
-                            placeholder="Share your thoughts, project details, or ask a question..."></textarea>
-                    </div>
+                        <div class="form-group">
+                            <label for="postType">Post Type</label>
+                            <select id="postType">
+                                <option value="text">📝 Text Post</option>
+                                <option value="image">🖼️ Image Post</option>
+                                <option value="video">🎥 Video Post</option>
+                                <option value="project">🚀 Project Showcase</option>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="postType">Post Type</label>
-                        <select id="postType">
-                            <option value="text">📝 Text Post</option>
-                            <option value="image">🖼️ Image Post</option>
-                            <option value="video">🎥 Video Post</option>
-                            <option value="project">🚀 Project Showcase</option>
-                        </select>
-                    </div>
+                        <div class="form-group" id="mediaUploadGroup" style="display: none;">
+                            <label for="mediaFile">Upload Media</label>
+                            <input type="file" id="mediaFile" accept="image/*,video/*">
+                            <small class="help-text">Max 50MB for videos, 5MB for images</small>
+                        </div>
 
-                    <div class="form-group" id="mediaUploadGroup" style="display: none;">
-                        <label for="mediaFile">Upload Media</label>
-                        <input type="file" id="mediaFile" accept="image/*,video/*">
-                        <small class="help-text">Max 50MB for videos, 5MB for images</small>
-                    </div>
+                        <div class="form-group" id="projectUrlGroup" style="display: none;">
+                            <label for="projectUrl">Project URL</label>
+                            <input type="url" id="projectUrl" placeholder="https://github.com/username/project">
+                        </div>
 
-                    <div class="form-group" id="projectUrlGroup" style="display: none;">
-                        <label for="projectUrl">Project URL</label>
-                        <input type="url" id="projectUrl" placeholder="https://github.com/username/project">
-                    </div>
+                        <div class="form-group">
+                            <label for="postTags">Tags (comma separated)</label>
+                            <input type="text" id="postTags" placeholder="e.g., javascript, web-dev, project">
+                            <small class="help-text">Add tags to help others find your post</small>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="postTags">Tags (comma separated)</label>
-                        <input type="text" id="postTags" placeholder="e.g., javascript, web-dev, project">
-                        <small class="help-text">Add tags to help others find your post</small>
-                    </div>
-
-                    <div class="modal-actions">
-                        <button type="button" class="ghost-btn" id="cancelPostBtn">Cancel</button>
-                        <button type="submit" class="primary-btn">🚀 Publish Post</button>
-                    </div>
-                </form>
+                        <div class="modal-actions">
+                            <button type="button" class="ghost-btn" id="cancelPostBtn">Cancel</button>
+                            <button type="submit" class="primary-btn">🚀 Publish Post</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Post Detail Modal -->
-    <div class="modal" id="postDetailModal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h2>Post Details</h2>
-                <button class="close-btn" id="closeDetailModalBtn">&times;</button>
-            </div>
-            <div class="modal-body" id="postDetailContent">
-                <!-- Post details will be loaded here -->
+        <!-- Post Detail Modal -->
+        <div class="modal" id="postDetailModal">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h2>Post Details</h2>
+                    <button class="close-btn" id="closeDetailModalBtn">&times;</button>
+                </div>
+                <div class="modal-body" id="postDetailContent">
+                    <!-- Post details will be loaded here -->
+                </div>
             </div>
         </div>
-    </div>
 
-    <script src="student-community.js"></script>
-    <script src="chatbot.js"></script>
+
+        <script src="student-community.js"></script>
+        <script src="chatbot.js"></script>
+        <script>
+            // Function to switch between sections
+            function showSection(sectionName) {
+                // Hide all sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                // Remove active class from all buttons
+                document.querySelectorAll('.hero-actions button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // Show selected section
+                const sectionMap = {
+                    'community': 'communitySection',
+                    'poll': 'pollSection',
+                    'feedback': 'feedbackSection',
+                    'quiz': 'quizSection'
+                };
+
+                const sectionId = sectionMap[sectionName];
+                if (sectionId) {
+                    document.getElementById(sectionId).style.display = 'block';
+                }
+
+                // Add active class to clicked button
+                event.target.classList.add('active');
+            }
+        </script>
 </body>
 
 </html>
+```
