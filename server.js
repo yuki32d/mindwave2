@@ -5726,6 +5726,59 @@ app.post('/api/analyze-code', async (req, res) => {
   }
 });
 
+// ===================================
+// Migration Endpoint - Fix Existing Org Users
+// ===================================
+app.post('/api/admin/fix-org-users', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    // Find all users with organizationId but missing orgRole
+    const usersToFix = await User.find({
+      $and: [
+        { organizationId: { $exists: true, $ne: null } },
+        {
+          $or: [
+            { orgRole: { $exists: false } },
+            { orgRole: null },
+            { orgRole: 'student' }
+          ]
+        }
+      ]
+    });
+
+    let fixedCount = 0;
+    const fixedUsers = [];
+
+    for (const user of usersToFix) {
+      // Set orgRole to 'admin' for organization owners/creators
+      user.orgRole = user.role === 'admin' ? 'admin' : 'faculty';
+      await user.save();
+      fixedCount++;
+      fixedUsers.push({
+        email: user.email,
+        name: user.name,
+        orgRole: user.orgRole
+      });
+    }
+
+    res.json({
+      ok: true,
+      message: `Fixed ${fixedCount} organization users`,
+      fixedCount,
+      users: fixedUsers
+    });
+
+  } catch (error) {
+    console.error("Migration error:", error);
+    res.status(500).json({ ok: false, message: "Migration failed", error: error.message });
+  }
+});
+
 // Health check endpoint for monitoring
 app.get('/health', (req, res) => {
   res.json({
