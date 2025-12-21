@@ -2614,7 +2614,14 @@ app.get("/api/admin/students", authMiddleware, async (req, res) => {
       return res.status(403).json({ ok: false, message: "Admin access required" });
     }
 
-    const students = await User.find({ role: 'student' })
+    // Get only regular students (exclude organization users)
+    const students = await User.find({
+      role: 'student',
+      $or: [
+        { organizationId: { $exists: false } },
+        { organizationId: null }
+      ]
+    })
       .select('-password')
       .sort({ createdAt: -1 });
 
