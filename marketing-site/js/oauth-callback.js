@@ -188,7 +188,10 @@ async function processUserLogin(provider, userInfo, tokenData) {
                 userInfo: userInfo,
                 accessToken: tokenData.access_token,
                 refreshToken: tokenData.refresh_token,
-                expiresIn: tokenData.expires_in
+                expiresIn: tokenData.expires_in,
+                // Include organization setup data if available
+                orgRole: localStorage.getItem('org_role') || 'student',
+                organizationId: localStorage.getItem('organization_id') || null
             })
         });
 

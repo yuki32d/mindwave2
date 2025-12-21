@@ -1109,11 +1109,17 @@ app.post("/api/auth/oauth/token", async (req, res) => {
       const randomPassword = crypto.randomBytes(32).toString('hex');
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
+      // Get orgRole from request body (sent from organization setup)
+      const orgRole = req.body.orgRole || 'student';
+      const organizationId = req.body.organizationId || null;
+
       user = await User.create({
         name: userInfo.name,
         email: userInfo.email.toLowerCase(),
         password: hashedPassword,
-        role: 'student'
+        role: 'student',
+        orgRole: orgRole,
+        organizationId: organizationId
       });
     }
 
@@ -2614,12 +2620,13 @@ app.get("/api/admin/students", authMiddleware, async (req, res) => {
       return res.status(403).json({ ok: false, message: "Admin access required" });
     }
 
-    // Get only regular students (exclude organization users)
+    // Get only regular students (exclude organization faculty/admin)
     const students = await User.find({
       role: 'student',
       $or: [
-        { organizationId: { $exists: false } },
-        { organizationId: null }
+        { orgRole: 'student' },
+        { orgRole: { $exists: false } },
+        { orgRole: null }
       ]
     })
       .select('-password')

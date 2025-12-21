@@ -215,39 +215,9 @@
         <section class="panel-grid" id="panelGrid"></section>
     </div>
 
+
     <script src="role-page.js"></script>
-    <script>
-        // Function to switch between sections
-        function showSection(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-            });
-
-            // Remove active class from all buttons
-            document.querySelectorAll('.hero-actions button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Show selected section
-            const sectionMap = {
-                'poll': 'pollSection',
-                'feedback': 'feedbackSection',
-                'quiz': 'quizSection'
-            };
-
-            const sectionId = sectionMap[sectionName];
-            if (sectionId) {
-                document.getElementById(sectionId).style.display = 'block';
-            }
-
-            // Add active class to clicked button
-            // This assumes the event object is available, which it is in inline onclick.
-            // For better practice, pass event or use event listeners.
-            // For this specific change, event.target is sufficient.
-            event.target.classList.add('active');
-        }
-    </script>
+    <script src="marketing-site/js/community-navigation.js"></script>
 </body>
 
 </html>
