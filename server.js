@@ -5945,7 +5945,7 @@ app.post('/api/quiz/generate-from-pdf', authMiddleware, upload.single('pdf'), as
 
     // Extract text from PDF
     const pdfBuffer = req.file.buffer;
-    const pdfData = await pdfParse(pdfBuffer);
+    const pdfData = await pdfParse.default(pdfBuffer);
     const pdfText = pdfData.text;
 
     if (!pdfText || pdfText.trim().length < 100) {
