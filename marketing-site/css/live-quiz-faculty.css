@@ -3,36 +3,38 @@
 /* AI Topic Section */
 .ai-topic-section {
     background: #2d3748;
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
     border: 2px solid #4a5568;
 }
 
 .ai-topic-section label {
     display: block;
     color: #e2e8f0;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .ai-topic-section label i {
     color: #667eea;
-    margin-right: 0.5rem;
+    margin-right: 0.75rem;
+    font-size: 1.3rem;
 }
 
 .topic-textarea {
     width: 100%;
-    padding: 1rem;
+    padding: 1.5rem;
     background: #1a202c;
     border: 2px solid #4a5568;
-    border-radius: 8px;
+    border-radius: 12px;
     color: #e2e8f0;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-family: inherit;
     resize: vertical;
     transition: border-color 0.3s;
+    line-height: 1.6;
 }
 
 .topic-textarea:focus {
@@ -46,13 +48,13 @@
 
 .generate-ai-btn {
     width: 100%;
-    margin-top: 1rem;
-    padding: 1rem 2rem;
+    margin-top: 1.5rem;
+    padding: 1.25rem 2rem;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
+    border-radius: 12px;
+    font-size: 1.2rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s;
@@ -64,29 +66,29 @@
 }
 
 .generate-ai-btn i {
-    margin-right: 0.5rem;
+    margin-right: 0.75rem;
 }
 
 /* Quiz Builder Container */
 .quiz-builder-container {
     display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-    min-height: 500px;
+    grid-template-columns: 250px 1fr;
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+    min-height: 600px;
 }
 
 /* Questions Sidebar */
 .questions-sidebar {
     background: #2d3748;
-    border-radius: 12px;
+    border-radius: 16px;
     border: 2px solid #4a5568;
     overflow: hidden;
 }
 
 .sidebar-header {
     background: #1a202c;
-    padding: 1rem;
+    padding: 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -96,16 +98,16 @@
 .sidebar-header span {
     color: #e2e8f0;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 .add-question-btn {
     background: #667eea;
     color: white;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
@@ -117,26 +119,26 @@
 }
 
 .add-question-btn i {
-    margin-right: 0.3rem;
+    margin-right: 0.5rem;
 }
 
 .questions-list {
-    padding: 0.5rem;
-    max-height: 450px;
+    padding: 1rem;
+    max-height: 550px;
     overflow-y: auto;
 }
 
 .question-item {
     background: #1a202c;
     border: 2px solid #4a5568;
-    border-radius: 8px;
-    padding: 0.75rem;
-    margin-bottom: 0.5rem;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 1rem;
 }
 
 .question-item:hover {
@@ -152,14 +154,15 @@
 .question-item .question-number {
     background: #667eea;
     color: white;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
+    flex-shrink: 0;
 }
 
 .question-item.active .question-number {
@@ -170,7 +173,7 @@
 .question-item .question-preview {
     flex: 1;
     color: #e2e8f0;
-    font-size: 0.9rem;
+    font-size: 1rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -178,15 +181,16 @@
 
 .question-item.active .question-preview {
     color: white;
+    font-weight: 600;
 }
 
 /* Question Editor */
 .question-editor {
     background: #2d3748;
-    border-radius: 12px;
+    border-radius: 16px;
     border: 2px solid #4a5568;
-    padding: 2rem;
-    min-height: 500px;
+    padding: 3rem;
+    min-height: 600px;
 }
 
 .editor-placeholder {
@@ -200,42 +204,44 @@
 }
 
 .editor-placeholder i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
 }
 
 .editor-placeholder p {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 /* Question Editor Content */
 .editor-content {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2.5rem;
 }
 
 .editor-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 1rem;
+    padding-bottom: 1.5rem;
     border-bottom: 2px solid #4a5568;
 }
 
 .editor-header h3 {
     color: #e2e8f0;
-    font-size: 1.3rem;
+    font-size: 1.75rem;
 }
 
 .delete-btn {
     background: #e53e3e;
     color: white;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .delete-btn:hover {
@@ -245,22 +251,23 @@
 .question-input-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
 }
 
 .question-input-group label {
     color: #e2e8f0;
     font-weight: 600;
+    font-size: 1.1rem;
 }
 
 .question-input {
     width: 100%;
-    padding: 1rem;
+    padding: 1.5rem;
     background: #1a202c;
     border: 2px solid #4a5568;
-    border-radius: 8px;
+    border-radius: 12px;
     color: #e2e8f0;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-family: inherit;
 }
 
@@ -277,20 +284,21 @@
 .answers-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
 .answer-option {
     background: #1a202c;
     border: 3px solid #4a5568;
-    border-radius: 12px;
-    padding: 1.5rem;
+    border-radius: 16px;
+    padding: 2rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
+    min-height: 100px;
 }
 
 .answer-option:hover {
@@ -305,8 +313,8 @@
 
 /* Kahoot-style colored shapes */
 .answer-shape {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -337,8 +345,8 @@
     background: transparent;
     border: none;
     color: #e2e8f0;
-    font-size: 1rem;
-    padding: 0.5rem;
+    font-size: 1.1rem;
+    padding: 0.75rem;
 }
 
 .answer-input:focus {
@@ -351,38 +359,38 @@
 
 .correct-indicator {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    top: 1rem;
+    right: 1rem;
     color: #48bb78;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
 }
 
 /* Settings Row */
 .settings-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 2rem;
 }
 
 .setting-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
 }
 
 .setting-group label {
     color: #e2e8f0;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
 }
 
 .setting-input {
-    padding: 0.75rem;
+    padding: 1.25rem;
     background: #1a202c;
     border: 2px solid #4a5568;
-    border-radius: 8px;
+    border-radius: 12px;
     color: #e2e8f0;
-    font-size: 1rem;
+    font-size: 1.1rem;
 }
 
 .setting-input:focus {
@@ -393,15 +401,16 @@
 /* Launch Button */
 .launch-quiz-btn {
     width: 100%;
-    padding: 1.25rem 2rem;
+    padding: 1.5rem 2rem;
     background: linear-gradient(135deg, #00D084, #10B981);
     color: white;
     border: none;
-    border-radius: 12px;
-    font-size: 1.25rem;
+    border-radius: 16px;
+    font-size: 1.4rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s;
+    margin-top: 2rem;
 }
 
 .launch-quiz-btn:hover {
@@ -410,7 +419,7 @@
 }
 
 .launch-quiz-btn i {
-    margin-right: 0.5rem;
+    margin-right: 1rem;
 }
 
 /* Responsive */
