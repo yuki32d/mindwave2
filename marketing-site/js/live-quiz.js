@@ -23,9 +23,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const uploadProgress = document.getElementById('uploadProgress');
     const generateQuestionsBtn = document.getElementById('generateQuestionsBtn');
 
-    // Add first question by default
-    addQuestion();
-
     // PDF Upload Area Click
     pdfUploadArea.addEventListener('click', () => {
         pdfFileInput.click();
@@ -109,6 +106,9 @@ document.addEventListener('DOMContentLoaded', function () {
     endQuizBtn.addEventListener('click', async () => {
         await endQuiz();
     });
+
+    // Add first question by default (after all functions are defined)
+    setTimeout(() => addQuestion(), 100);
 });
 
 async function generateQuestionsFromPDF() {
