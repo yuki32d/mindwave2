@@ -19,6 +19,7 @@ import cron from "node-cron";
 import compression from "compression";
 import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
+import { WebSocketServer } from 'ws';
 // Stripe will be imported conditionally based on environment variable
 
 dotenv.config();
@@ -450,9 +451,57 @@ const notificationSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
+// Live Feedback Session Schema
+const liveFeedbackSessionSchema = new mongoose.Schema({
+  sessionCode: { type: String, required: true, unique: true, index: true },
+  facultyId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  title: { type: String, default: 'Live Feedback Session' },
+  status: { type: String, enum: ['active', 'ended'], default: 'active' },
+  startedAt: { type: Date, default: Date.now },
+  endedAt: { type: Date },
+  responses: [{
+    studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    studentName: { type: String },
+    emoji: { type: String, enum: ['confused', 'unsure', 'neutral', 'good', 'excellent'] },
+    timestamp: { type: Date, default: Date.now }
+  }]
+}, { timestamps: true });
+
+// Live Quiz Session Schema
+const liveQuizSessionSchema = new mongoose.Schema({
+  sessionCode: { type: String, required: true, unique: true, index: true },
+  facultyId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  title: { type: String, required: true },
+  questions: [{
+    text: { type: String, required: true },
+    options: [String, String, String, String],
+    correctIndex: { type: Number, required: true, min: 0, max: 3 },
+    timeLimit: { type: Number, default: 15 }, // seconds
+    points: { type: Number, default: 1000 }
+  }],
+  currentQuestionIndex: { type: Number, default: -1 }, // -1 = lobby, 0+ = question number
+  status: { type: String, enum: ['lobby', 'question', 'leaderboard', 'ended'], default: 'lobby' },
+  startedAt: { type: Date, default: Date.now },
+  endedAt: { type: Date },
+  participants: [{
+    studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    name: { type: String, required: true },
+    score: { type: Number, default: 0 },
+    answers: [{
+      questionIndex: { type: Number },
+      selectedIndex: { type: Number },
+      timeToAnswer: { type: Number }, // milliseconds
+      pointsEarned: { type: Number },
+      isCorrect: { type: Boolean }
+    }]
+  }]
+}, { timestamps: true });
+
 const Subject = mongoose.model("Subject", subjectSchema);
 const Material = mongoose.model("Material", materialSchema);
 const Notification = mongoose.model("Notification", notificationSchema);
+const LiveFeedbackSession = mongoose.model("LiveFeedbackSession", liveFeedbackSessionSchema);
+const LiveQuizSession = mongoose.model("LiveQuizSession", liveQuizSessionSchema);
 
 const announcementSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -5521,12 +5570,18 @@ if (CLEANUP_ENABLED === 'true') {
 function listenWithFallback(preferred) {
   let port = Number(preferred) || 8080;
   let attempts = 0;
+  let httpServer;
+
   function attempt() {
-    const server = app.listen(port, () => {
+    httpServer = app.listen(port, () => {
       console.log(`\n🚀 MINDWAVE Server running on http://localhost:${port}`);
       console.log(`📊 MongoDB: ${mongoose.connection.readyState === 1 ? 'Connected ✅' : 'Disconnected ❌'}`);
+
+      // Setup WebSocket server for Live Quiz
+      setupWebSocket(httpServer);
     });
-    server.on("error", (err) => {
+
+    httpServer.on("error", (err) => {
       if (err && err.code === "EADDRINUSE" && attempts < 10) {
         attempts += 1;
         port += 1;
@@ -5538,6 +5593,138 @@ function listenWithFallback(preferred) {
     });
   }
   attempt();
+  return httpServer;
+}
+
+// WebSocket Setup for Live Quiz
+function setupWebSocket(server) {
+  const wss = new WebSocketServer({ server, path: '/ws/quiz' });
+
+  // Store active quiz sessions and their connections
+  const quizConnections = new Map(); // sessionCode -> Set of WebSocket connections
+
+  wss.on('connection', (ws, req) => {
+    console.log('📡 New WebSocket connection');
+
+    let currentSessionCode = null;
+    let userId = null;
+
+    ws.on('message', async (data) => {
+      try {
+        const message = JSON.parse(data.toString());
+
+        switch (message.type) {
+          case 'join':
+            // Student or faculty joining a quiz session
+            currentSessionCode = message.sessionCode;
+            userId = message.userId;
+
+            if (!quizConnections.has(currentSessionCode)) {
+              quizConnections.set(currentSessionCode, new Set());
+            }
+            quizConnections.get(currentSessionCode).add(ws);
+
+            // Send confirmation
+            ws.send(JSON.stringify({ type: 'joined', sessionCode: currentSessionCode }));
+
+            // Broadcast participant count
+            broadcastToSession(currentSessionCode, {
+              type: 'participant-count',
+              count: quizConnections.get(currentSessionCode).size
+            });
+            break;
+
+          case 'start-quiz':
+            // Faculty starting the quiz
+            if (currentSessionCode) {
+              broadcastToSession(currentSessionCode, {
+                type: 'quiz-started',
+                timestamp: Date.now()
+              });
+            }
+            break;
+
+          case 'show-question':
+            // Faculty showing next question
+            if (currentSessionCode) {
+              broadcastToSession(currentSessionCode, {
+                type: 'question-shown',
+                questionIndex: message.questionIndex,
+                timestamp: Date.now()
+              });
+            }
+            break;
+
+          case 'submit-answer':
+            // Student submitting answer
+            if (currentSessionCode) {
+              // Broadcast to faculty that an answer was submitted
+              broadcastToSession(currentSessionCode, {
+                type: 'answer-submitted',
+                userId: userId,
+                questionIndex: message.questionIndex
+              });
+            }
+            break;
+
+          case 'show-leaderboard':
+            // Faculty showing leaderboard
+            if (currentSessionCode) {
+              broadcastToSession(currentSessionCode, {
+                type: 'leaderboard-shown',
+                leaderboard: message.leaderboard
+              });
+            }
+            break;
+
+          case 'end-quiz':
+            // Faculty ending the quiz
+            if (currentSessionCode) {
+              broadcastToSession(currentSessionCode, {
+                type: 'quiz-ended',
+                timestamp: Date.now()
+              });
+            }
+            break;
+        }
+      } catch (error) {
+        console.error('WebSocket message error:', error);
+        ws.send(JSON.stringify({ type: 'error', message: error.message }));
+      }
+    });
+
+    ws.on('close', () => {
+      if (currentSessionCode && quizConnections.has(currentSessionCode)) {
+        quizConnections.get(currentSessionCode).delete(ws);
+
+        // Broadcast updated participant count
+        if (quizConnections.get(currentSessionCode).size > 0) {
+          broadcastToSession(currentSessionCode, {
+            type: 'participant-count',
+            count: quizConnections.get(currentSessionCode).size
+          });
+        } else {
+          quizConnections.delete(currentSessionCode);
+        }
+      }
+    });
+  });
+
+  // Helper function to broadcast to all connections in a session
+  function broadcastToSession(sessionCode, message) {
+    if (quizConnections.has(sessionCode)) {
+      const connections = quizConnections.get(sessionCode);
+      const messageStr = JSON.stringify(message);
+
+      connections.forEach(client => {
+        if (client.readyState === 1) { // WebSocket.OPEN
+          client.send(messageStr);
+        }
+      });
+    }
+  }
+
+  console.log('✅ WebSocket server initialized on /ws/quiz');
 }
 
 // ==================== Google Classroom Integration (Real-Time Proxy) ====================
@@ -5723,6 +5910,370 @@ app.post('/api/analyze-code', async (req, res) => {
   } catch (error) {
     console.error('AI code analysis error:', error);
     res.status(500).json({ ok: false, message: 'Failed to analyze code', error: error.message });
+  }
+});
+
+// ===================================
+// Live Quiz API Endpoints
+// ===================================
+
+// Helper function to generate unique session code
+function generateSessionCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Avoid confusing characters
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+// Create new quiz session
+app.post('/api/quiz/create', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Faculty access required" });
+    }
+
+    const { title, questions } = req.body;
+
+    if (!title || !questions || questions.length === 0) {
+      return res.status(400).json({ ok: false, message: "Title and questions are required" });
+    }
+
+    // Generate unique session code
+    let sessionCode;
+    let codeExists = true;
+    while (codeExists) {
+      sessionCode = generateSessionCode();
+      const existing = await LiveQuizSession.findOne({ sessionCode });
+      codeExists = !!existing;
+    }
+
+    const quizSession = await LiveQuizSession.create({
+      sessionCode,
+      facultyId: currentUser._id,
+      title,
+      questions,
+      status: 'lobby'
+    });
+
+    res.json({
+      ok: true,
+      sessionCode,
+      quizId: quizSession._id,
+      message: "Quiz session created successfully"
+    });
+
+  } catch (error) {
+    console.error("Create quiz error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Get quiz session details
+app.get('/api/quiz/:code', async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    const quiz = await LiveQuizSession.findOne({ sessionCode: code })
+      .populate('facultyId', 'name email');
+
+    if (!quiz) {
+      return res.status(404).json({ ok: false, message: "Quiz session not found" });
+    }
+
+    // Don't send correct answers to students
+    const sanitizedQuiz = {
+      sessionCode: quiz.sessionCode,
+      title: quiz.title,
+      status: quiz.status,
+      currentQuestionIndex: quiz.currentQuestionIndex,
+      totalQuestions: quiz.questions.length,
+      participantCount: quiz.participants.length,
+      faculty: quiz.facultyId ? quiz.facultyId.name : 'Unknown'
+    };
+
+    // If it's the current question, send it (without correct answer for students)
+    if (quiz.currentQuestionIndex >= 0 && quiz.currentQuestionIndex < quiz.questions.length) {
+      const currentQ = quiz.questions[quiz.currentQuestionIndex];
+      sanitizedQuiz.currentQuestion = {
+        text: currentQ.text,
+        options: currentQ.options,
+        timeLimit: currentQ.timeLimit,
+        points: currentQ.points
+      };
+    }
+
+    res.json({ ok: true, quiz: sanitizedQuiz });
+
+  } catch (error) {
+    console.error("Get quiz error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Join quiz session (student)
+app.post('/api/quiz/:code/join', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.params;
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser) {
+      return res.status(401).json({ ok: false, message: "User not found" });
+    }
+
+    const quiz = await LiveQuizSession.findOne({ sessionCode: code });
+
+    if (!quiz) {
+      return res.status(404).json({ ok: false, message: "Quiz session not found" });
+    }
+
+    if (quiz.status === 'ended') {
+      return res.status(400).json({ ok: false, message: "Quiz has ended" });
+    }
+
+    // Check if already joined
+    const existingParticipant = quiz.participants.find(
+      p => p.studentId && p.studentId.toString() === currentUser._id.toString()
+    );
+
+    if (!existingParticipant) {
+      quiz.participants.push({
+        studentId: currentUser._id,
+        name: currentUser.name,
+        score: 0,
+        answers: []
+      });
+      await quiz.save();
+    }
+
+    res.json({
+      ok: true,
+      message: "Joined quiz successfully",
+      participantCount: quiz.participants.length
+    });
+
+  } catch (error) {
+    console.error("Join quiz error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Start quiz (faculty only)
+app.post('/api/quiz/:code/start', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.params;
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Faculty access required" });
+    }
+
+    const quiz = await LiveQuizSession.findOne({ sessionCode: code });
+
+    if (!quiz) {
+      return res.status(404).json({ ok: false, message: "Quiz session not found" });
+    }
+
+    if (quiz.facultyId.toString() !== currentUser._id.toString()) {
+      return res.status(403).json({ ok: false, message: "Not your quiz session" });
+    }
+
+    quiz.status = 'question';
+    quiz.currentQuestionIndex = 0;
+    await quiz.save();
+
+    res.json({ ok: true, message: "Quiz started" });
+
+  } catch (error) {
+    console.error("Start quiz error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Show next question (faculty only)
+app.post('/api/quiz/:code/next', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.params;
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Faculty access required" });
+    }
+
+    const quiz = await LiveQuizSession.findOne({ sessionCode: code });
+
+    if (!quiz) {
+      return res.status(404).json({ ok: false, message: "Quiz session not found" });
+    }
+
+    if (quiz.facultyId.toString() !== currentUser._id.toString()) {
+      return res.status(403).json({ ok: false, message: "Not your quiz session" });
+    }
+
+    if (quiz.currentQuestionIndex < quiz.questions.length - 1) {
+      quiz.currentQuestionIndex += 1;
+      quiz.status = 'question';
+      await quiz.save();
+
+      const currentQ = quiz.questions[quiz.currentQuestionIndex];
+      res.json({
+        ok: true,
+        questionIndex: quiz.currentQuestionIndex,
+        question: {
+          text: currentQ.text,
+          options: currentQ.options,
+          timeLimit: currentQ.timeLimit,
+          points: currentQ.points
+        }
+      });
+    } else {
+      quiz.status = 'ended';
+      quiz.endedAt = new Date();
+      await quiz.save();
+
+      res.json({ ok: true, message: "Quiz completed", status: 'ended' });
+    }
+
+  } catch (error) {
+    console.error("Next question error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Submit answer (student)
+app.post('/api/quiz/:code/answer', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.params;
+    const { questionIndex, selectedIndex, timeToAnswer } = req.body;
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser) {
+      return res.status(401).json({ ok: false, message: "User not found" });
+    }
+
+    const quiz = await LiveQuizSession.findOne({ sessionCode: code });
+
+    if (!quiz) {
+      return res.status(404).json({ ok: false, message: "Quiz session not found" });
+    }
+
+    const participant = quiz.participants.find(
+      p => p.studentId && p.studentId.toString() === currentUser._id.toString()
+    );
+
+    if (!participant) {
+      return res.status(400).json({ ok: false, message: "Not a participant" });
+    }
+
+    const question = quiz.questions[questionIndex];
+    if (!question) {
+      return res.status(400).json({ ok: false, message: "Invalid question" });
+    }
+
+    const isCorrect = selectedIndex === question.correctIndex;
+
+    // Calculate points (Kahoot-style: base points + time bonus)
+    let pointsEarned = 0;
+    if (isCorrect) {
+      const basePoints = question.points || 1000;
+      const timeLimit = question.timeLimit * 1000; // convert to ms
+      const timeBonus = Math.floor(((timeLimit - timeToAnswer) / timeLimit) * 500);
+      pointsEarned = basePoints + Math.max(0, timeBonus);
+    }
+
+    // Check if already answered this question
+    const existingAnswer = participant.answers.find(a => a.questionIndex === questionIndex);
+    if (existingAnswer) {
+      return res.status(400).json({ ok: false, message: "Already answered this question" });
+    }
+
+    participant.answers.push({
+      questionIndex,
+      selectedIndex,
+      timeToAnswer,
+      pointsEarned,
+      isCorrect
+    });
+
+    participant.score += pointsEarned;
+    await quiz.save();
+
+    res.json({
+      ok: true,
+      isCorrect,
+      pointsEarned,
+      totalScore: participant.score,
+      correctAnswer: question.correctIndex
+    });
+
+  } catch (error) {
+    console.error("Submit answer error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Get leaderboard
+app.get('/api/quiz/:code/leaderboard', async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    const quiz = await LiveQuizSession.findOne({ sessionCode: code });
+
+    if (!quiz) {
+      return res.status(404).json({ ok: false, message: "Quiz session not found" });
+    }
+
+    // Sort participants by score
+    const leaderboard = quiz.participants
+      .map(p => ({
+        name: p.name,
+        score: p.score,
+        answersCount: p.answers.length,
+        correctCount: p.answers.filter(a => a.isCorrect).length
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10); // Top 10
+
+    res.json({ ok: true, leaderboard });
+
+  } catch (error) {
+    console.error("Get leaderboard error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// End quiz (faculty only)
+app.post('/api/quiz/:code/end', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.params;
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Faculty access required" });
+    }
+
+    const quiz = await LiveQuizSession.findOne({ sessionCode: code });
+
+    if (!quiz) {
+      return res.status(404).json({ ok: false, message: "Quiz session not found" });
+    }
+
+    if (quiz.facultyId.toString() !== currentUser._id.toString()) {
+      return res.status(403).json({ ok: false, message: "Not your quiz session" });
+    }
+
+    quiz.status = 'ended';
+    quiz.endedAt = new Date();
+    await quiz.save();
+
+    res.json({ ok: true, message: "Quiz ended successfully" });
+
+  } catch (error) {
+    console.error("End quiz error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
   }
 });
 
