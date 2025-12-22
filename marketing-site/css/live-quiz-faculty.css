@@ -1,5 +1,17 @@
 /* Kahoot-Style Quiz Builder - Dark Theme */
 
+/* Override parent container to use full width */
+#quizSection .faculty-tool-card {
+    max-width: 100%;
+    width: 100%;
+    padding: 2rem 3rem;
+}
+
+.quiz-creator {
+    max-width: 100%;
+    width: 100%;
+}
+
 /* AI Topic Section */
 .ai-topic-section {
     background: #2d3748;
