@@ -20,9 +20,7 @@ import compression from "compression";
 import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
 import { WebSocketServer } from 'ws';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
+// pdf-parse will be imported dynamically in the endpoint
 // Stripe will be imported conditionally based on environment variable
 
 dotenv.config();
@@ -5943,9 +5941,12 @@ app.post('/api/quiz/generate-from-pdf', authMiddleware, upload.single('pdf'), as
       return res.status(400).json({ ok: false, message: "No PDF file uploaded" });
     }
 
-    // Extract text from PDF
+    // Extract text from PDF using dynamic import
     const pdfBuffer = req.file.buffer;
-    const pdfData = await pdfParse.default(pdfBuffer);
+
+    // Dynamic import for CommonJS module
+    const pdfParse = (await import('pdf-parse')).default;
+    const pdfData = await pdfParse(pdfBuffer);
     const pdfText = pdfData.text;
 
     if (!pdfText || pdfText.trim().length < 100) {
