@@ -6057,6 +6057,124 @@ Return ONLY the JSON array, no additional text or explanation.`;
   }
 });
 
+// AI-Powered Quiz Generation from Text Topic (using Groq AI)
+app.post('/api/quiz/generate-from-text', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Faculty access required" });
+    }
+
+    const { topic } = req.body;
+
+    if (!topic || topic.trim().length < 10) {
+      return res.status(400).json({ ok: false, message: "Please provide a detailed topic description" });
+    }
+
+    // Call Groq AI to generate quiz questions
+    const groqApiKey = process.env.GROQ_API_KEY;
+
+    if (!groqApiKey) {
+      return res.status(500).json({ ok: false, message: "Groq AI API key not configured" });
+    }
+
+    const prompt = `You are a quiz generator. Based on the following topic, create 10 multiple-choice quiz questions.
+
+Topic: ${topic}
+
+For each question, provide:
+1. Question text
+2. Four options (A, B, C, D)
+3. The correct answer (0 for A, 1 for B, 2 for C, 3 for D)
+4. Time limit in seconds (10-30 seconds based on difficulty)
+
+Return ONLY a valid JSON array with this exact structure:
+[
+  {
+    "text": "Question text here?",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correctIndex": 0,
+    "timeLimit": 15
+  }
+]
+
+Return ONLY the JSON array, no additional text or explanation.`;
+
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${groqApiKey}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful quiz generator that creates educational multiple-choice questions. Always return valid JSON.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    });
+
+    if (!groqResponse.ok) {
+      const errorText = await groqResponse.text();
+      console.error('Groq AI error:', errorText);
+      return res.status(500).json({ ok: false, message: "AI generation failed" });
+    }
+
+    const groqData = await groqResponse.json();
+    const aiResponse = groqData.choices[0].message.content;
+
+    // Parse AI response
+    let questions;
+    try {
+      // Try to extract JSON from response
+      const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        questions = JSON.parse(jsonMatch[0]);
+      } else {
+        questions = JSON.parse(aiResponse);
+      }
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      console.error('AI Response:', aiResponse);
+      return res.status(500).json({ ok: false, message: "Failed to parse AI response" });
+    }
+
+    // Validate questions
+    if (!Array.isArray(questions) || questions.length === 0) {
+      return res.status(500).json({ ok: false, message: "No valid questions generated" });
+    }
+
+    // Add default points to each question
+    const formattedQuestions = questions.map(q => ({
+      text: q.text,
+      options: q.options,
+      correctIndex: q.correctIndex,
+      timeLimit: q.timeLimit || 15,
+      points: 1000
+    }));
+
+    res.json({
+      ok: true,
+      questions: formattedQuestions,
+      message: `Generated ${formattedQuestions.length} questions`
+    });
+
+  } catch (error) {
+    console.error("AI quiz generation error:", error);
+    res.status(500).json({ ok: false, message: "Server error: " + error.message });
+  }
+});
+
 // Create new quiz session
 app.post('/api/quiz/create', authMiddleware, async (req, res) => {
   try {

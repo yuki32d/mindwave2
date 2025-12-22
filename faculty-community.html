@@ -190,54 +190,51 @@
                     <p class="subtitle">Host Kahoot-style quiz competitions</p>
 
                     <div class="quiz-creator" id="quizBuilder">
-                        <div class="form-group">
+                        <!-- Quiz Title -->
+                        <div class="form-group" style="margin-bottom: 2rem;">
                             <label>Quiz Title</label>
                             <input type="text" id="quizTitle" class="input-field"
                                 placeholder="e.g., JavaScript Basics Quiz" />
                         </div>
 
-                        <!-- AI Quiz Generation from PDF -->
-                        <div class="ai-upload-section">
-                            <div class="upload-header">
-                                <i class="fas fa-magic"></i>
-                                <h3>Generate Quiz from PDF</h3>
-                                <p>Upload a PDF and let AI create quiz questions automatically</p>
-                            </div>
-
-                            <div class="upload-area" id="pdfUploadArea">
-                                <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;" />
-                                <div class="upload-placeholder" id="uploadPlaceholder">
-                                    <i class="fas fa-file-pdf"></i>
-                                    <p>Click to upload PDF or drag & drop</p>
-                                    <small>Maximum file size: 10MB</small>
-                                </div>
-                                <div class="upload-progress" id="uploadProgress" style="display: none;">
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" id="progressFill"></div>
-                                    </div>
-                                    <p id="progressText">Uploading...</p>
-                                </div>
-                            </div>
-
-                            <button class="ai-generate-btn" id="generateQuestionsBtn" style="display: none;">
-                                <i class="fas fa-wand-magic-sparkles"></i> Generate Questions with AI
+                        <!-- AI Topic Input -->
+                        <div class="ai-topic-section">
+                            <label><i class="fas fa-robot"></i> AI Quiz Generator</label>
+                            <textarea id="aiTopicInput" class="topic-textarea"
+                                placeholder="Describe your quiz topic... Example: Create 10 questions about JavaScript arrays, including map, filter, reduce methods with practical examples."
+                                rows="3"></textarea>
+                            <button class="generate-ai-btn" id="generateAiBtn">
+                                <i class="fas fa-wand-magic-sparkles"></i> Generate
                             </button>
                         </div>
 
-                        <div class="divider">
-                            <span>OR</span>
+                        <!-- Quiz Builder Container -->
+                        <div class="quiz-builder-container">
+                            <!-- Questions Sidebar -->
+                            <div class="questions-sidebar">
+                                <div class="sidebar-header">
+                                    <span>Questions</span>
+                                    <button class="add-question-btn" id="addQuestionBtn" title="Add Question">
+                                        <i class="fas fa-plus"></i> Add
+                                    </button>
+                                </div>
+                                <div id="questionsList" class="questions-list">
+                                    <!-- Question items will be added here dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Question Editor -->
+                            <div class="question-editor" id="questionEditor">
+                                <!-- Editor content will be populated when a question is selected -->
+                                <div class="editor-placeholder">
+                                    <i class="fas fa-arrow-left"></i>
+                                    <p>Select a question from the sidebar or click "Add" to create one</p>
+                                </div>
+                            </div>
                         </div>
 
-                        <div id="questionsContainer">
-                            <!-- Questions will be added here -->
-                        </div>
-
-                        <button class="primary-btn" id="addQuestionBtn">
-                            <i class="fas fa-plus"></i> Add Question
-                        </button>
-
-                        <button class="primary-btn" id="launchQuizBtn"
-                            style="margin-top: 1rem; background: linear-gradient(135deg, #00D084, #10B981);">
+                        <!-- Launch Button -->
+                        <button class="launch-quiz-btn" id="launchQuizBtn">
                             <i class="fas fa-rocket"></i> Launch Quiz
                         </button>
                     </div>

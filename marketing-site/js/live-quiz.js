@@ -1,90 +1,29 @@
-// Live Quiz - Faculty Control
-// This script handles quiz creation, WebSocket connection, and quiz control
+// Live Quiz - Kahoot-Style Interface with AI Generation
+// This handles the new quiz builder interface
 
+let questions = [];
+let currentQuestionIndex = -1;
 let currentQuiz = null;
 let ws = null;
-let questions = [];
-let uploadedPdfFile = null;
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Only run on faculty community page
     if (!document.getElementById('quizBuilder')) return;
 
+    const generateAiBtn = document.getElementById('generateAiBtn');
     const addQuestionBtn = document.getElementById('addQuestionBtn');
     const launchQuizBtn = document.getElementById('launchQuizBtn');
     const startQuizBtn = document.getElementById('startQuizBtn');
     const nextQuestionBtn = document.getElementById('nextQuestionBtn');
     const endQuizBtn = document.getElementById('endQuizBtn');
 
-    // PDF Upload Elements
-    const pdfUploadArea = document.getElementById('pdfUploadArea');
-    const pdfFileInput = document.getElementById('pdfFileInput');
-    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-    const uploadProgress = document.getElementById('uploadProgress');
-    const generateQuestionsBtn = document.getElementById('generateQuestionsBtn');
-
-    // PDF Upload Area Click
-    pdfUploadArea.addEventListener('click', () => {
-        pdfFileInput.click();
-    });
-
-    // PDF File Selected
-    pdfFileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file && file.type === 'application/pdf') {
-            if (file.size > 10 * 1024 * 1024) { // 10MB limit
-                alert('File size must be less than 10MB');
-                return;
-            }
-            uploadedPdfFile = file;
-            uploadPlaceholder.innerHTML = `
-                <i class="fas fa-file-pdf" style="color: #e74c3c;"></i>
-                <p><strong>${file.name}</strong></p>
-                <small>${(file.size / 1024).toFixed(2)} KB</small>
-            `;
-            generateQuestionsBtn.style.display = 'block';
-        }
-    });
-
-    // Drag and Drop
-    pdfUploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        pdfUploadArea.style.borderColor = '#667eea';
-    });
-
-    pdfUploadArea.addEventListener('dragleave', () => {
-        pdfUploadArea.style.borderColor = '#e2e8f0';
-    });
-
-    pdfUploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        pdfUploadArea.style.borderColor = '#e2e8f0';
-
-        const file = e.dataTransfer.files[0];
-        if (file && file.type === 'application/pdf') {
-            if (file.size > 10 * 1024 * 1024) {
-                alert('File size must be less than 10MB');
-                return;
-            }
-            uploadedPdfFile = file;
-            pdfFileInput.files = e.dataTransfer.files;
-            uploadPlaceholder.innerHTML = `
-                <i class="fas fa-file-pdf" style="color: #e74c3c;"></i>
-                <p><strong>${file.name}</strong></p>
-                <small>${(file.size / 1024).toFixed(2)} KB</small>
-            `;
-            generateQuestionsBtn.style.display = 'block';
-        }
-    });
-
-    // Generate Questions from PDF
-    generateQuestionsBtn.addEventListener('click', async () => {
-        await generateQuestionsFromPDF();
+    // AI Generate Button
+    generateAiBtn.addEventListener('click', async () => {
+        await generateQuestionsWithAI();
     });
 
     // Add Question Button
     addQuestionBtn.addEventListener('click', () => {
-        addQuestion();
+        addNewQuestion();
     });
 
     // Launch Quiz Button
@@ -106,195 +45,236 @@ document.addEventListener('DOMContentLoaded', function () {
     endQuizBtn.addEventListener('click', async () => {
         await endQuiz();
     });
-
-    // Add first question by default (after all functions are defined)
-    setTimeout(() => addQuestion(), 100);
 });
 
-async function generateQuestionsFromPDF() {
-    if (!uploadedPdfFile) {
-        alert('Please select a PDF file first');
+// AI Generation Function
+async function generateQuestionsWithAI() {
+    const topic = document.getElementById('aiTopicInput').value.trim();
+
+    if (!topic) {
+        alert('Please describe your quiz topic first');
         return;
     }
 
-    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-    const uploadProgress = document.getElementById('uploadProgress');
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
+    const generateBtn = document.getElementById('generateAiBtn');
+    const originalText = generateBtn.innerHTML;
 
     try {
-        // Show progress
-        uploadPlaceholder.style.display = 'none';
-        uploadProgress.style.display = 'block';
-        progressText.textContent = 'Uploading PDF...';
-        progressFill.style.width = '30%';
-
-        const formData = new FormData();
-        formData.append('pdf', uploadedPdfFile);
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
 
         const token = localStorage.getItem('auth_token');
-
-        progressText.textContent = 'Analyzing PDF with AI...';
-        progressFill.style.width = '60%';
-
-        const response = await fetch('/api/quiz/generate-from-pdf', {
+        const response = await fetch('/api/quiz/generate-from-text', {
             method: 'POST',
             headers: {
+                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: formData
+            body: JSON.stringify({ topic })
         });
 
         const data = await response.json();
 
         if (data.ok) {
-            progressText.textContent = 'Questions generated!';
-            progressFill.style.width = '100%';
-
             // Clear existing questions
-            const container = document.getElementById('questionsContainer');
-            container.innerHTML = '';
             questions = [];
+            document.getElementById('questionsList').innerHTML = '';
 
             // Add generated questions
-            data.questions.forEach((question, index) => {
-                addQuestionWithData(question, index);
+            data.questions.forEach((q, index) => {
+                const questionData = {
+                    text: q.text,
+                    options: q.options,
+                    correctIndex: q.correctIndex,
+                    timeLimit: q.timeLimit || 20,
+                    points: q.points || 1000
+                };
+                questions.push(questionData);
+                addQuestionToSidebar(index);
             });
 
-            setTimeout(() => {
-                uploadProgress.style.display = 'none';
-                uploadPlaceholder.style.display = 'block';
-                uploadPlaceholder.innerHTML = `
-                    <i class="fas fa-check-circle" style="color: #2ecc71; font-size: 3rem;"></i>
-                    <p><strong>✅ ${data.questions.length} questions generated!</strong></p>
-                    <small>You can edit them below or generate again</small>
-                `;
-            }, 1000);
+            // Select first question
+            if (questions.length > 0) {
+                selectQuestion(0);
+            }
 
-            alert(`Successfully generated ${data.questions.length} questions from PDF!`);
+            alert(`✅ Generated ${data.questions.length} questions!`);
         } else {
             throw new Error(data.message || 'Failed to generate questions');
         }
     } catch (error) {
-        console.error('PDF generation error:', error);
-        uploadProgress.style.display = 'none';
-        uploadPlaceholder.style.display = 'block';
+        console.error('AI generation error:', error);
         alert('Failed to generate questions: ' + error.message);
+    } finally {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = originalText;
     }
 }
 
-function addQuestionWithData(questionData, index) {
-    const container = document.getElementById('questionsContainer');
-    const questionIndex = questions.length;
+// Add New Question
+function addNewQuestion() {
+    const questionData = {
+        text: '',
+        options: ['', '', '', ''],
+        correctIndex: 0,
+        timeLimit: 20,
+        points: 1000
+    };
 
-    const questionDiv = document.createElement('div');
-    questionDiv.className = 'question-card';
-    questionDiv.innerHTML = `
-        <div class="question-header">
-            <h3>Question ${questionIndex + 1}</h3>
-            <button class="delete-question-btn" onclick="deleteQuestion(${questionIndex})">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-        
-        <div class="form-group">
-            <label>Question Text</label>
-            <input type="text" class="input-field question-text" placeholder="Enter your question" />
-        </div>
-
-        <div class="form-group">
-            <label>Time Limit (seconds)</label>
-            <input type="number" class="input-field question-time" value="15" min="5" max="60" />
-        </div>
-
-        <div class="options-grid">
-            <div class="option-item">
-                <input type="text" class="input-field option-input" placeholder="Option A" />
-                <input type="radio" name="correct-${questionIndex}" value="0" />
-            </div>
-            <div class="option-item">
-                <input type="text" class="input-field option-input" placeholder="Option B" />
-                <input type="radio" name="correct-${questionIndex}" value="1" />
-            </div>
-            <div class="option-item">
-                <input type="text" class="input-field option-input" placeholder="Option C" />
-                <input type="radio" name="correct-${questionIndex}" value="2" />
-            </div>
-            <div class="option-item">
-                <input type="text" class="input-field option-input" placeholder="Option D" />
-                <input type="radio" name="correct-${questionIndex}" value="3" />
-            </div>
-        </div>
-        <small style="color: #888;">Select the correct answer by clicking the radio button</small>
-    `;
-
-    container.appendChild(questionDiv);
-    questions.push({ index: questionIndex, element: questionDiv });
+    questions.push(questionData);
+    const index = questions.length - 1;
+    addQuestionToSidebar(index);
+    selectQuestion(index);
 }
 
-function addQuestionWithData(questionData, index) {
-    const container = document.getElementById('questionsContainer');
-    const questionIndex = questions.length;
+// Add Question to Sidebar
+function addQuestionToSidebar(index) {
+    const questionsList = document.getElementById('questionsList');
 
-    const questionDiv = document.createElement('div');
-    questionDiv.className = 'question-card';
-    questionDiv.innerHTML = `
-        <div class="question-header">
-            <h3>Question ${questionIndex + 1}</h3>
-            <button class="delete-question-btn" onclick="deleteQuestion(${questionIndex})">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-        
-        <div class="form-group">
-            <label>Question Text</label>
-            <input type="text" class="input-field question-text" value="${questionData.text.replace(/"/g, '&quot;')}" />
-        </div>
+    const questionItem = document.createElement('div');
+    questionItem.className = 'question-item';
+    questionItem.dataset.index = index;
+    questionItem.onclick = () => selectQuestion(index);
 
-        <div class="form-group">
-            <label>Time Limit (seconds)</label>
-            <input type="number" class="input-field question-time" value="${questionData.timeLimit}" min="5" max="60" />
-        </div>
-
-        <div class="options-grid">
-            <div class="option-item">
-                <input type="text" class="input-field option-input" value="${questionData.options[0].replace(/"/g, '&quot;')}" />
-                <input type="radio" name="correct-${questionIndex}" value="0" ${questionData.correctIndex === 0 ? 'checked' : ''} />
-            </div>
-            <div class="option-item">
-                <input type="text" class="input-field option-input" value="${questionData.options[1].replace(/"/g, '&quot;')}" />
-                <input type="radio" name="correct-${questionIndex}" value="1" ${questionData.correctIndex === 1 ? 'checked' : ''} />
-            </div>
-            <div class="option-item">
-                <input type="text" class="input-field option-input" value="${questionData.options[2].replace(/"/g, '&quot;')}" />
-                <input type="radio" name="correct-${questionIndex}" value="2" ${questionData.correctIndex === 2 ? 'checked' : ''} />
-            </div>
-            <div class="option-item">
-                <input type="text" class="input-field option-input" value="${questionData.options[3].replace(/"/g, '&quot;')}" />
-                <input type="radio" name="correct-${questionIndex}" value="3" ${questionData.correctIndex === 3 ? 'checked' : ''} />
-            </div>
-        </div>
-        <small style="color: #888;">Select the correct answer by clicking the radio button</small>
+    questionItem.innerHTML = `
+        <div class="question-number">${index + 1}</div>
+        <div class="question-preview">${questions[index].text || 'New Question'}</div>
     `;
 
-    container.appendChild(questionDiv);
-    questions.push({ index: questionIndex, element: questionDiv });
+    questionsList.appendChild(questionItem);
+}
+
+// Select Question
+function selectQuestion(index) {
+    currentQuestionIndex = index;
+
+    // Update sidebar active state
+    document.querySelectorAll('.question-item').forEach((item, i) => {
+        item.classList.toggle('active', i === index);
+    });
+
+    // Render question editor
+    renderQuestionEditor(index);
+}
+
+// Render Question Editor
+function renderQuestionEditor(index) {
+    const editor = document.getElementById('questionEditor');
+    const question = questions[index];
+
+    const colors = ['red', 'blue', 'yellow', 'green'];
+
+    editor.innerHTML = `
+        <div class="editor-content">
+            <div class="editor-header">
+                <h3>Question ${index + 1}</h3>
+                <button class="delete-btn" onclick="deleteQuestion(${index})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+
+            <div class="question-input-group">
+                <label>Question</label>
+                <input type="text" class="question-input" 
+                    placeholder="Start typing your question" 
+                    value="${question.text}"
+                    oninput="updateQuestionText(${index}, this.value)" />
+            </div>
+
+            <div class="question-input-group">
+                <label>Answer options</label>
+                <div class="answers-grid">
+                    ${question.options.map((opt, i) => `
+                        <div class="answer-option ${colors[i]} ${question.correctIndex === i ? 'correct' : ''}" 
+                            onclick="setCorrectAnswer(${index}, ${i})">
+                            <div class="answer-shape"></div>
+                            <input type="text" class="answer-input" 
+                                placeholder="Add answer ${i + 1}" 
+                                value="${opt}"
+                                oninput="updateOption(${index}, ${i}, this.value)"
+                                onclick="event.stopPropagation()" />
+                            ${question.correctIndex === i ? '<i class="fas fa-check-circle correct-indicator"></i>' : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="settings-row">
+                <div class="setting-group">
+                    <label>Time limit (seconds)</label>
+                    <input type="number" class="setting-input" 
+                        value="${question.timeLimit}" 
+                        min="5" max="60"
+                        oninput="updateTimeLimit(${index}, this.value)" />
+                </div>
+                <div class="setting-group">
+                    <label>Points</label>
+                    <input type="number" class="setting-input" 
+                        value="${question.points}" 
+                        min="100" max="2000" step="100"
+                        oninput="updatePoints(${index}, this.value)" />
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Update Functions
+function updateQuestionText(index, value) {
+    questions[index].text = value;
+    updateSidebarPreview(index);
+}
+
+function updateOption(index, optionIndex, value) {
+    questions[index].options[optionIndex] = value;
+}
+
+function setCorrectAnswer(index, optionIndex) {
+    questions[index].correctIndex = optionIndex;
+    renderQuestionEditor(index);
+}
+
+function updateTimeLimit(index, value) {
+    questions[index].timeLimit = parseInt(value) || 20;
+}
+
+function updatePoints(index, value) {
+    questions[index].points = parseInt(value) || 1000;
+}
+
+function updateSidebarPreview(index) {
+    const item = document.querySelector(`.question-item[data-index="${index}"]`);
+    if (item) {
+        const preview = item.querySelector('.question-preview');
+        preview.textContent = questions[index].text || 'New Question';
+    }
 }
 
 function deleteQuestion(index) {
-    const question = questions.find(q => q.index === index);
-    if (question) {
-        question.element.remove();
-        questions = questions.filter(q => q.index !== index);
+    if (!confirm('Delete this question?')) return;
 
-        // Renumber remaining questions
-        questions.forEach((q, i) => {
-            const header = q.element.querySelector('.question-header h3');
-            header.textContent = `Question ${i + 1}`;
-        });
+    questions.splice(index, 1);
+
+    // Rebuild sidebar
+    const questionsList = document.getElementById('questionsList');
+    questionsList.innerHTML = '';
+    questions.forEach((q, i) => addQuestionToSidebar(i));
+
+    // Select previous or first question
+    if (questions.length > 0) {
+        const newIndex = Math.max(0, index - 1);
+        selectQuestion(newIndex);
+    } else {
+        document.getElementById('questionEditor').innerHTML = `
+            <div class="editor-placeholder">
+                <i class="fas fa-arrow-left"></i>
+                <p>Select a question from the sidebar or click "Add" to create one</p>
+            </div>
+        `;
     }
 }
 
+// Launch Quiz
 async function launchQuiz() {
     const title = document.getElementById('quizTitle').value.trim();
 
@@ -303,34 +283,18 @@ async function launchQuiz() {
         return;
     }
 
-    // Collect questions
-    const questionCards = document.querySelectorAll('.question-card');
-    const quizQuestions = [];
+    if (questions.length === 0) {
+        alert('Please add at least one question');
+        return;
+    }
 
-    for (let i = 0; i < questionCards.length; i++) {
-        const card = questionCards[i];
-        const text = card.querySelector('.question-text').value.trim();
-        const timeLimit = parseInt(card.querySelector('.question-time').value);
-        const options = Array.from(card.querySelectorAll('.option-input')).map(input => input.value.trim());
-        const correctRadio = card.querySelector(`input[name="correct-${i}"]:checked`);
-
-        if (!text || options.some(opt => !opt) || !correctRadio) {
+    // Validate questions
+    for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        if (!q.text || q.options.some(opt => !opt)) {
             alert(`Please complete Question ${i + 1}`);
             return;
         }
-
-        quizQuestions.push({
-            text,
-            options,
-            correctIndex: parseInt(correctRadio.value),
-            timeLimit,
-            points: 1000
-        });
-    }
-
-    if (quizQuestions.length === 0) {
-        alert('Please add at least one question');
-        return;
     }
 
     try {
@@ -343,7 +307,7 @@ async function launchQuiz() {
             },
             body: JSON.stringify({
                 title,
-                questions: quizQuestions
+                questions
             })
         });
 
@@ -353,7 +317,7 @@ async function launchQuiz() {
             currentQuiz = {
                 sessionCode: data.sessionCode,
                 title,
-                questions: quizQuestions
+                questions
             };
 
             // Hide builder, show control panel
@@ -374,6 +338,7 @@ async function launchQuiz() {
     }
 }
 
+// WebSocket and Quiz Control Functions (same as before)
 function connectWebSocket(sessionCode) {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws/quiz`;
@@ -416,7 +381,6 @@ function handleWebSocketMessage(message) {
 
         case 'answer-submitted':
             console.log('Student submitted answer');
-            // Could show real-time answer counts here
             break;
     }
 }
@@ -437,12 +401,10 @@ async function startQuiz() {
         const data = await response.json();
 
         if (data.ok) {
-            // Broadcast start event via WebSocket
             ws.send(JSON.stringify({
                 type: 'start-quiz'
             }));
 
-            // Show first question
             await showNextQuestion();
 
             document.getElementById('startQuizBtn').style.display = 'none';
@@ -473,22 +435,18 @@ async function showNextQuestion() {
 
         if (data.ok) {
             if (data.status === 'ended') {
-                // Quiz completed
                 await showFinalLeaderboard();
             } else {
-                // Show question
                 displayCurrentQuestion(data.question, data.questionIndex);
 
-                // Broadcast question via WebSocket
                 ws.send(JSON.stringify({
                     type: 'show-question',
                     questionIndex: data.questionIndex
                 }));
 
-                // After time limit, show leaderboard
                 setTimeout(() => {
                     showLeaderboard();
-                }, data.question.timeLimit * 1000 + 3000); // Add 3s buffer
+                }, data.question.timeLimit * 1000 + 3000);
             }
         } else {
             alert('Failed to show next question: ' + data.message);
@@ -522,7 +480,6 @@ async function showLeaderboard() {
         if (data.ok) {
             displayLeaderboard(data.leaderboard);
 
-            // Broadcast leaderboard via WebSocket
             ws.send(JSON.stringify({
                 type: 'show-leaderboard',
                 leaderboard: data.leaderboard
@@ -576,7 +533,6 @@ async function endQuiz() {
         const data = await response.json();
 
         if (data.ok) {
-            // Broadcast end event via WebSocket
             ws.send(JSON.stringify({
                 type: 'end-quiz'
             }));
@@ -586,8 +542,6 @@ async function endQuiz() {
             }
 
             alert('Quiz ended successfully');
-
-            // Reload page to reset
             window.location.reload();
         } else {
             alert('Failed to end quiz: ' + data.message);
