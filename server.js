@@ -20,7 +20,9 @@ import compression from "compression";
 import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
 import { WebSocketServer } from 'ws';
-import pdfParse from 'pdf-parse';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse');
 // Stripe will be imported conditionally based on environment variable
 
 dotenv.config();
