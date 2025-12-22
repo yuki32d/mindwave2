@@ -195,6 +195,38 @@
                                 placeholder="e.g., JavaScript Basics Quiz" />
                         </div>
 
+                        <!-- AI Quiz Generation from PDF -->
+                        <div class="ai-upload-section">
+                            <div class="upload-header">
+                                <i class="fas fa-magic"></i>
+                                <h3>Generate Quiz from PDF</h3>
+                                <p>Upload a PDF and let AI create quiz questions automatically</p>
+                            </div>
+
+                            <div class="upload-area" id="pdfUploadArea">
+                                <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;" />
+                                <div class="upload-placeholder" id="uploadPlaceholder">
+                                    <i class="fas fa-file-pdf"></i>
+                                    <p>Click to upload PDF or drag & drop</p>
+                                    <small>Maximum file size: 10MB</small>
+                                </div>
+                                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="progressFill"></div>
+                                    </div>
+                                    <p id="progressText">Uploading...</p>
+                                </div>
+                            </div>
+
+                            <button class="ai-generate-btn" id="generateQuestionsBtn" style="display: none;">
+                                <i class="fas fa-wand-magic-sparkles"></i> Generate Questions with AI
+                            </button>
+                        </div>
+
+                        <div class="divider">
+                            <span>OR</span>
+                        </div>
+
                         <div id="questionsContainer">
                             <!-- Questions will be added here -->
                         </div>
