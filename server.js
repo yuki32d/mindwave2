@@ -5950,11 +5950,11 @@ app.post('/api/quiz/generate-from-pdf', authMiddleware, upload.single('pdf'), as
       return res.status(400).json({ ok: false, message: "PDF content is too short or empty" });
     }
 
-    // Call Qwork AI to generate quiz questions
-    const qworkApiKey = process.env.QWORK_API_KEY;
+    // Call Qrok AI to generate quiz questions
+    const qrokApiKey = process.env.QROK_API_KEY;
 
-    if (!qworkApiKey) {
-      return res.status(500).json({ ok: false, message: "Qwork AI API key not configured" });
+    if (!qrokApiKey) {
+      return res.status(500).json({ ok: false, message: "Qrok AI API key not configured" });
     }
 
     const prompt = `You are a quiz generator. Based on the following text, create 10 multiple-choice quiz questions.
@@ -5980,11 +5980,11 @@ ${pdfText.substring(0, 3000)}
 
 Return ONLY the JSON array, no additional text or explanation.`;
 
-    const qworkResponse = await fetch('https://api.qworkai.com/v1/chat/completions', {
+    const qrokResponse = await fetch('https://api.qrok.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${qworkApiKey}`
+        'Authorization': `Bearer ${qrokApiKey}`
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
@@ -6003,14 +6003,14 @@ Return ONLY the JSON array, no additional text or explanation.`;
       })
     });
 
-    if (!qworkResponse.ok) {
-      const errorText = await qworkResponse.text();
-      console.error('Qwork AI error:', errorText);
+    if (!qrokResponse.ok) {
+      const errorText = await qrokResponse.text();
+      console.error('Qrok AI error:', errorText);
       return res.status(500).json({ ok: false, message: "AI generation failed" });
     }
 
-    const qworkData = await qworkResponse.json();
-    const aiResponse = qworkData.choices[0].message.content;
+    const qrokData = await qrokResponse.json();
+    const aiResponse = qrokData.choices[0].message.content;
 
     // Parse AI response
     let questions;
