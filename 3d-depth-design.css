@@ -295,6 +295,7 @@ nav.sidebar {
     transition: var(--transition-smooth);
     box-shadow: var(--shadow-sm);
     transform: translateZ(5px);
+    cursor: pointer;
 }
 
 .ghost-btn:hover {
@@ -302,6 +303,13 @@ nav.sidebar {
     color: var(--text-white);
     transform: translateZ(10px) translateY(-2px);
     box-shadow: var(--shadow-md);
+}
+
+.ghost-btn.active {
+    background: rgba(0, 217, 255, 0.15);
+    border-color: rgba(0, 217, 255, 0.3);
+    color: var(--cyan-bright);
+    box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
 }
 
 /* Main Content Area */
