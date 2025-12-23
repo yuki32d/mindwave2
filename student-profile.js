@@ -35,13 +35,15 @@ async function fetchCurrentUser() {
 async function uploadProfilePhoto(file) {
     const formData = new FormData();
     formData.append('profilePhoto', file);
+    // Add email from localStorage for authentication
+    const email = localStorage.getItem('email');
+    if (email) {
+        formData.append('email', email);
+    }
 
     try {
         const response = await fetch(`${API_BASE}/api/upload-profile-photo`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-            },
             body: formData
         });
 
