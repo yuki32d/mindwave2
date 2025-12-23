@@ -6585,7 +6585,7 @@ app.post('/api/admin/fix-org-users', authMiddleware, async (req, res) => {
 });
 
 // Configure multer for profile photo uploads
-const storage = multer.diskStorage({
+const profileStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = path.join(__dirname, 'uploads', 'profiles');
     // Create directory if it doesn't exist
@@ -6600,8 +6600,8 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({
-  storage: storage,
+const profileUpload = multer({
+  storage: profileStorage,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit
   },
@@ -6615,7 +6615,7 @@ const upload = multer({
 });
 
 // Upload profile photo endpoint
-app.post('/api/upload-profile-photo', authMiddleware, upload.single('profilePhoto'), async (req, res) => {
+app.post('/api/upload-profile-photo', authMiddleware, profileUpload.single('profilePhoto'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ ok: false, message: 'No file uploaded' });
