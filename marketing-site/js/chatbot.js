@@ -246,7 +246,7 @@ Keep responses conversational, friendly, and under 100 words.`;
             quickRepliesHTML = `
                 <div class="quick-replies">
                     ${quickReplies.map(reply =>
-                `<button class="quick-reply-btn" onclick="marketingChatbot.handleQuickReply('${reply}')">${reply}</button>`
+                `<button class="quick-reply-btn" data-reply="${this.escapeHtml(reply)}">${reply}</button>`
             ).join('')}
                 </div>
             `;
@@ -264,6 +264,20 @@ Keep responses conversational, friendly, and under 100 words.`;
         `;
 
         messagesDiv.insertAdjacentHTML('beforeend', messageHTML);
+
+        // Add event listeners to quick reply buttons using event delegation
+        if (quickReplies && quickReplies.length > 0) {
+            setTimeout(() => {
+                const buttons = messagesDiv.querySelectorAll('.quick-reply-btn:not([data-listener])');
+                buttons.forEach(btn => {
+                    btn.setAttribute('data-listener', 'true');
+                    btn.addEventListener('click', () => {
+                        this.handleQuickReply(btn.getAttribute('data-reply'));
+                    });
+                });
+            }, 0);
+        }
+
         this.scrollToBottom();
     }
 
