@@ -53,9 +53,14 @@ async function uploadProfilePhoto(file) {
             // Save to localStorage as backup
             localStorage.setItem('profilePhoto', data.photoUrl);
             return data.photoUrl;
+        } else {
+            console.error('Server error:', data.message || 'Unknown error');
+            alert('Failed to upload photo: ' + (data.message || 'Unknown error'));
+            return null;
         }
     } catch (error) {
         console.error('Failed to upload photo:', error);
+        alert('Network error: ' + error.message);
     }
     return null;
 }
