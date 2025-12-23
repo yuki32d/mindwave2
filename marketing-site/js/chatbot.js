@@ -265,30 +265,107 @@ class MarketingChatbot {
         // Check if Groq API key is available
         const apiKey = this.groqApiKey || 'YOUR_GROQ_API_KEY_HERE';
 
-        const systemPrompt = `You are MindWave Assistant, a helpful AI assistant for MindWave - an AI-powered educational gamification platform. 
+        const systemPrompt = `You are Nova, the AI assistant for MindWave - an innovative AI-powered educational gamification platform.
 
-About MindWave:
-- AI-powered platform that transforms learning into engaging games
-- Features: Interactive quizzes, AI game builder, real-time analytics, leaderboards
-- Target audience: Educators, schools, and educational institutions
-- Pricing: Free tier available, premium plans starting at $29/month
-- Key benefits: Increased student engagement, personalized learning, easy-to-use interface
+ABOUT MINDWAVE:
+MindWave transforms traditional learning into engaging, interactive game experiences. We help educators create fun, effective learning content that students actually enjoy.
 
-Your role:
-- Answer questions about MindWave's features, pricing, and benefits
-- Help users understand how MindWave can improve their teaching/learning
-- Provide friendly, concise, and helpful responses
-- Encourage users to sign up for a free trial or request a demo
-- If asked about technical support, direct them to support@mindwave.com
+CORE FEATURES:
+1. AI Quiz Builder
+   - Generate quizzes instantly from any topic using AI
+   - Multiple question types: MCQ, True/False, Fill-in-the-blank
+   - Auto-grading and instant feedback
+   - Customizable difficulty levels
 
-Keep responses conversational, friendly, and under 100 words.`;
+2. Interactive Game Templates
+   - Memory Match games
+   - Crossword puzzles
+   - Word searches
+   - Drag-and-drop activities
+   - Jeopardy-style quiz games
+
+3. Live Quiz Mode
+   - Real-time multiplayer quizzes
+   - Student join codes
+   - Live leaderboards
+   - Instant results and analytics
+
+4. AI Tutor
+   - 24/7 homework help
+   - Step-by-step explanations
+   - Personalized learning support
+   - Multi-subject coverage
+
+5. Analytics Dashboard
+   - Track student progress
+   - Identify knowledge gaps
+   - Performance metrics
+   - Engagement insights
+
+6. GitHub Integration
+   - Sync coding assignments
+   - Track student repositories
+   - Code review tools
+   - Project management
+
+7. Google Classroom Integration
+   - Import classes and students
+   - Sync assignments
+   - Grade synchronization
+   - Seamless workflow
+
+PRICING:
+- Free Plan: Try all features, limited games
+- Pro Plan: $29/month for individual educators
+- School Plan: Custom pricing for institutions
+- All plans include: AI features, analytics, unlimited students
+
+TARGET USERS:
+- K-12 Teachers
+- College Professors
+- Corporate Trainers
+- Tutoring Centers
+- Homeschool Educators
+- EdTech Enthusiasts
+
+KEY BENEFITS:
+✓ Increase student engagement by 3x
+✓ Save 5+ hours/week on content creation
+✓ AI-powered personalization
+✓ Real-time progress tracking
+✓ Works on any device
+✓ No technical skills required
+
+GETTING STARTED:
+1. Sign up for free at mindwave.com
+2. Create your first quiz using AI
+3. Share with students via join code
+4. Watch engagement soar!
+
+YOUR ROLE AS NOVA:
+- Answer questions about features, pricing, and use cases
+- Help users understand how MindWave solves their problems
+- Provide specific examples and recommendations
+- Be friendly, enthusiastic, and helpful
+- Keep responses concise (under 100 words)
+- Encourage users to try the free trial
+- Direct technical issues to support@mindwave.com
+
+CONVERSATION STYLE:
+- Friendly and approachable
+- Use emojis sparingly (1-2 per response)
+- Focus on benefits, not just features
+- Ask clarifying questions when needed
+- Provide actionable next steps
+
+Remember: You're helping educators transform education through gamification!`;
 
         try {
             const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
+                    'Authorization': `Bearer ${apiKey} `
                 },
                 body: JSON.stringify({
                     model: 'llama-3.3-70b-versatile', // Fast Groq model
@@ -349,7 +426,7 @@ Keep responses conversational, friendly, and under 100 words.`;
                     <div class="message-time">${time}</div>
                 </div>
             </div>
-        `;
+            `;
 
         messagesDiv.insertAdjacentHTML('beforeend', messageHTML);
         this.scrollToBottom();
@@ -362,10 +439,11 @@ Keep responses conversational, friendly, and under 100 words.`;
         let quickRepliesHTML = '';
         if (quickReplies && quickReplies.length > 0) {
             quickRepliesHTML = `
-                <div class="quick-replies">
-                    ${quickReplies.map(reply =>
+            <div class="quick-replies">
+                ${quickReplies.map(reply =>
                 `<button class="quick-reply-btn" data-reply="${this.escapeHtml(reply)}">${reply}</button>`
-            ).join('')}
+            ).join('')
+                }
                 </div>
             `;
         }
@@ -379,7 +457,7 @@ Keep responses conversational, friendly, and under 100 words.`;
                     ${quickRepliesHTML}
                 </div>
             </div>
-        `;
+            `;
 
         messagesDiv.insertAdjacentHTML('beforeend', messageHTML);
 
@@ -416,7 +494,7 @@ Keep responses conversational, friendly, and under 100 words.`;
                     <div class="typing-dot"></div>
                 </div>
             </div>
-        `;
+            `;
         messagesDiv.insertAdjacentHTML('beforeend', typingHTML);
         this.scrollToBottom();
     }
