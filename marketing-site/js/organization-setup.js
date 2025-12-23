@@ -495,7 +495,12 @@ function loadSavedProgress() {
 
 function goToDashboard() {
     localStorage.removeItem('org_setup_progress');
-    window.location.href = '/admin.html';
+
+    // Redirect to checkout page with selected plan
+    const plan = setupState.selectedPlan || 'Personal';
+    const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
+
+    window.location.href = `/marketing-site/checkout.html?plan=${planName}&currency=INR`;
 }
 
 function logout() {
