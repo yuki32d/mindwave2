@@ -20,6 +20,7 @@ import compression from "compression";
 import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
 import { WebSocketServer } from 'ws';
+import paymentRoutes from './payment-routes.js';
 // pdf-parse will be imported dynamically in the endpoint
 // Stripe will be imported conditionally based on environment variable
 

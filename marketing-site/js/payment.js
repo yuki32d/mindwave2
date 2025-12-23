@@ -84,7 +84,11 @@ async function initiatePayment() {
         const amount = currency === 'USD' ? selectedPlan.priceUSD : selectedPlan.priceINR;
 
         // Create order on backend
-        const response = await fetch('http://localhost:3000/api/create-order', {
+        const apiUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000'
+            : 'https://mindwave2.onrender.com';
+
+        const response = await fetch(`${apiUrl}/api/create-order`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -148,7 +152,11 @@ async function initiatePayment() {
 // Verify payment on backend
 async function verifyPayment(response) {
     try {
-        const verifyResponse = await fetch('http://localhost:3000/api/verify-payment', {
+        const apiUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000'
+            : 'https://mindwave2.onrender.com';
+
+        const verifyResponse = await fetch(`${apiUrl}/api/verify-payment`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
