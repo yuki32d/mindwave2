@@ -7,7 +7,7 @@ const currency = urlParams.get('currency') || 'INR';
 const plans = {
     Personal: {
         name: 'Personal Plan',
-        priceINR: 999,
+        priceINR: 499,
         priceUSD: 12,
         features: [
             'Up to 100 students',
@@ -19,7 +19,7 @@ const plans = {
     },
     Team: {
         name: 'Team Plan',
-        priceINR: 4999,
+        priceINR: 2499,
         priceUSD: 59,
         features: [
             'Up to 500 students',
@@ -33,7 +33,7 @@ const plans = {
     },
     Enterprise: {
         name: 'Enterprise Plan',
-        priceINR: 14999,
+        priceINR: 9999,
         priceUSD: 179,
         features: [
             'Unlimited students',
