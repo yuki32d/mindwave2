@@ -217,6 +217,26 @@ class MarketingChatbot {
         this.sendWelcomeMessage();
     }
 
+    toggleSettings() {
+        const panel = document.getElementById('chatbotSettingsPanel');
+        panel.classList.toggle('open');
+    }
+
+    emailTranscript() {
+        const email = prompt('Enter your email address to receive the chat transcript:');
+        if (email && email.includes('@')) {
+            alert(`Chat transcript will be sent to ${email}`);
+            this.toggleSettings();
+        } else if (email) {
+            alert('Please enter a valid email address');
+        }
+    }
+
+    changeLanguage() {
+        alert('Language selection coming soon! Currently only English is supported.');
+    }
+
+
     async sendMessage() {
         const input = document.getElementById('chatbotInput');
         const message = input.value.trim();
