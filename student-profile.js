@@ -335,18 +335,29 @@ async function renderActivity() {
             }
 
             activityList.innerHTML = activities.map(a => {
-                const date = new Date(a.completedAt);
+                const date = new Date(a.completedAt || a.createdAt || Date.now());
                 const timeAgo = getTimeAgo(date);
+
+                // Get game type with fallback
+                const gameType = a.gameType || a.type || 'Game';
+
+                // Get score with fallback
+                const score = a.score !== undefined ? Math.round(a.score) : 0;
+
+                // Get time taken with fallback
+                const timeTaken = a.timeTaken || 0;
+                const minutes = Math.floor(timeTaken / 60);
+                const seconds = timeTaken % 60;
 
                 return `
                     <div class="activity-item">
                         <div class="activity-icon">🎮</div>
                         <div class="activity-info">
-                            <h4>${a.gameTitle || 'Game'}</h4>
-                            <p>${a.gameType} • ${timeAgo}</p>
+                            <h4>${a.gameTitle || a.title || 'Untitled Game'}</h4>
+                            <p>${gameType} • ${timeAgo}</p>
                         </div>
-                        <div class="activity-score">${a.score}%</div>
-                        <div class="activity-time">${Math.floor((a.timeTaken || 0) / 60)}m ${(a.timeTaken || 0) % 60}s</div>
+                        <div class="activity-score">${score}%</div>
+                        <div class="activity-time">${minutes}m ${seconds}s</div>
                     </div>
                 `;
             }).join('');
