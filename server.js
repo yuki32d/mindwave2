@@ -151,6 +151,8 @@ const userSchema = new mongoose.Schema(
     // Zoom Integration
     zoomAccessToken: { type: String },
     zoomRefreshToken: { type: String },
+    // Profile Photo
+    profilePhoto: { type: String }, // URL to profile photo
     // Activity Tracking
     lastActive: { type: Date, default: Date.now }
   },
@@ -6579,6 +6581,141 @@ app.post('/api/admin/fix-org-users', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Migration error:", error);
     res.status(500).json({ ok: false, message: "Migration failed", error: error.message });
+  }
+});
+
+// Configure multer for profile photo uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, 'uploads', 'profiles');
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Accept images only
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are allowed!'), false);
+    }
+    cb(null, true);
+  }
+});
+
+// Upload profile photo endpoint
+app.post('/api/upload-profile-photo', authMiddleware, upload.single('profilePhoto'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ ok: false, message: 'No file uploaded' });
+    }
+
+    const photoUrl = `/uploads/profiles/${req.file.filename}`;
+
+    // Update user's profile photo in database
+    const user = await User.findByIdAndUpdate(
+      req.user.userId,
+      { profilePhoto: photoUrl },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ ok: false, message: 'User not found' });
+    }
+
+    res.json({
+      ok: true,
+      message: 'Profile photo uploaded successfully',
+      photoUrl: photoUrl
+    });
+  } catch (error) {
+    console.error('Profile photo upload error:', error);
+    res.status(500).json({ ok: false, message: 'Failed to upload profile photo', error: error.message });
+  }
+});
+
+// Update profile endpoint
+app.post('/api/update-profile', authMiddleware, async (req, res) => {
+  try {
+    const { name, displayName, bio, phone, department, yearSemester } = req.body;
+
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (displayName) updateData.displayName = displayName;
+    if (bio !== undefined) updateData.bio = bio;
+    if (phone !== undefined) updateData.phone = phone;
+    if (department !== undefined) updateData.department = department;
+    if (yearSemester !== undefined) updateData.yearSemester = yearSemester;
+
+    const user = await User.findByIdAndUpdate(
+      req.user.userId,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ ok: false, message: 'User not found' });
+    }
+
+    res.json({
+      ok: true,
+      message: 'Profile updated successfully',
+      user: {
+        name: user.name,
+        displayName: user.displayName,
+        email: user.email,
+        bio: user.bio,
+        phone: user.phone,
+        department: user.department,
+        yearSemester: user.yearSemester,
+        profilePhoto: user.profilePhoto
+      }
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ ok: false, message: 'Failed to update profile', error: error.message });
+  }
+});
+
+// Get current user profile endpoint
+app.get('/api/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select('-password -googleAccessToken -googleRefreshToken -githubAccessToken -zoomAccessToken -zoomRefreshToken');
+
+    if (!user) {
+      return res.status(404).json({ ok: false, message: 'User not found' });
+    }
+
+    res.json({
+      ok: true,
+      user: {
+        name: user.name,
+        displayName: user.displayName,
+        email: user.email,
+        role: user.role,
+        bio: user.bio,
+        phone: user.phone,
+        department: user.department,
+        yearSemester: user.yearSemester,
+        profilePhoto: user.profilePhoto,
+        organizationId: user.organizationId,
+        orgRole: user.orgRole
+      }
+    });
+  } catch (error) {
+    console.error('Get user profile error:', error);
+    res.status(500).json({ ok: false, message: 'Failed to get user profile', error: error.message });
   }
 });
 
