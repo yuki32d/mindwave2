@@ -6,8 +6,8 @@ class MarketingChatbot {
         this.isOpen = false;
         this.messages = [];
         this.groqApiKey = null; // Will be set from environment or config
-        this.botName = "MindWave Assistant";
-        this.botAvatar = "🤖";
+        this.botName = "Nova";
+        this.botAvatar = "✨";
 
         this.quickReplies = [
             "What is MindWave?",
@@ -43,17 +43,71 @@ class MarketingChatbot {
                     <!-- Header -->
                     <div class="chatbot-header">
                         <div class="chatbot-header-left">
+                            <button class="chatbot-settings-btn" id="chatbotSettingsBtn" title="Settings">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <circle cx="12" cy="5" r="2"/>
+                                    <circle cx="12" cy="12" r="2"/>
+                                    <circle cx="12" cy="19" r="2"/>
+                                </svg>
+                            </button>
                             <div class="chatbot-avatar">${this.botAvatar}</div>
                             <div class="chatbot-info">
                                 <h3>${this.botName}</h3>
                                 <p>Online • Ready to help</p>
                             </div>
                         </div>
-                        <button class="chatbot-close" id="chatbotClose">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                            </svg>
-                        </button>
+                        <div class="chatbot-header-right">
+                            <button class="chatbot-new-chat" id="chatbotNewChat" title="Start new conversation">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                                New
+                            </button>
+                            <button class="chatbot-close" id="chatbotClose" title="Close chat">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Panel -->
+                    <div class="chatbot-settings-panel" id="chatbotSettingsPanel">
+                        <div class="chatbot-settings-header">
+                            <h3>Settings</h3>
+                            <button class="chatbot-settings-close" id="chatbotSettingsClose">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="chatbot-settings-content">
+                            <div class="chatbot-settings-item" id="settingSound">
+                                <svg class="chatbot-settings-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                                </svg>
+                                <div class="chatbot-settings-text">
+                                    <h4>Turn on sound</h4>
+                                </div>
+                                <div class="settings-toggle" data-setting="sound"></div>
+                            </div>
+                            <div class="chatbot-settings-item" id="settingLanguage">
+                                <svg class="chatbot-settings-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+                                </svg>
+                                <div class="chatbot-settings-text">
+                                    <h4>Change language</h4>
+                                </div>
+                            </div>
+                            <div class="chatbot-settings-item" id="settingEmail">
+                                <svg class="chatbot-settings-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                                </svg>
+                                <div class="chatbot-settings-text">
+                                    <h4>Email transcript</h4>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Messages Area -->
@@ -86,15 +140,47 @@ class MarketingChatbot {
     attachEventListeners() {
         const toggleBtn = document.getElementById('chatbotToggle');
         const closeBtn = document.getElementById('chatbotClose');
+        const newChatBtn = document.getElementById('chatbotNewChat');
+        const settingsBtn = document.getElementById('chatbotSettingsBtn');
+        const settingsCloseBtn = document.getElementById('chatbotSettingsClose');
         const sendBtn = document.getElementById('chatbotSend');
         const input = document.getElementById('chatbotInput');
 
         toggleBtn.addEventListener('click', () => this.toggleChat());
         closeBtn.addEventListener('click', () => this.toggleChat());
+        newChatBtn.addEventListener('click', () => this.startNewChat());
+        settingsBtn.addEventListener('click', () => this.toggleSettings());
+        settingsCloseBtn.addEventListener('click', () => this.toggleSettings());
         sendBtn.addEventListener('click', () => this.sendMessage());
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.sendMessage();
         });
+
+        // Settings toggle switches
+        const soundToggle = document.querySelector('[data-setting="sound"]');
+        if (soundToggle) {
+            soundToggle.addEventListener('click', () => {
+                soundToggle.classList.toggle('active');
+                // Save setting to localStorage
+                localStorage.setItem('chatbot_sound', soundToggle.classList.contains('active'));
+            });
+            // Load saved setting
+            if (localStorage.getItem('chatbot_sound') === 'true') {
+                soundToggle.classList.add('active');
+            }
+        }
+
+        // Email transcript handler
+        const emailSetting = document.getElementById('settingEmail');
+        if (emailSetting) {
+            emailSetting.addEventListener('click', () => this.emailTranscript());
+        }
+
+        // Language setting handler
+        const languageSetting = document.getElementById('settingLanguage');
+        if (languageSetting) {
+            languageSetting.addEventListener('click', () => this.changeLanguage());
+        }
     }
 
     toggleChat() {
@@ -117,6 +203,18 @@ class MarketingChatbot {
                 this.quickReplies
             );
         }, 500);
+    }
+
+    startNewChat() {
+        // Clear messages
+        const messagesDiv = document.getElementById('chatbotMessages');
+        messagesDiv.innerHTML = '<div class="date-separator">Today</div>';
+
+        // Reset messages array
+        this.messages = [];
+
+        // Send welcome message again
+        this.sendWelcomeMessage();
     }
 
     async sendMessage() {
