@@ -262,10 +262,10 @@ class FlyingRobot3D {
 
         const time = Date.now() * 0.001;
 
-        // Log state every 60 frames (about once per second)
-        if (Math.floor(time) % 2 === 0 && time % 1 < 0.016) {
-            console.log('Current state:', this.state);
-        }
+        // Log state every 60 frames (about once per second) - DISABLED FOR PRODUCTION
+        // if (Math.floor(time) % 2 === 0 && time % 1 < 0.016) {
+        //     console.log('Current state:', this.state);
+        // }
 
         switch (this.state) {
             case 'ROAMING':
@@ -323,9 +323,8 @@ class FlyingRobot3D {
                 );
                 break;
 
-            case 'PARKED':
                 // Robot stays still at parking position
-                console.log('In PARKED state, setting position to:', this.parkingPosition);
+                // console.log('In PARKED state, setting position to:', this.parkingPosition); // Disabled for production
                 this.robot.position.set(
                     this.parkingPosition.x,
                     this.parkingPosition.y,

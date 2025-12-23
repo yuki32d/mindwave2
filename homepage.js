@@ -370,7 +370,7 @@ async function updateStats() {
 
 async function updateCourseCount() {
     try {
-        const res = await fetch(`${API_BASE}/api/google-classroom/courses`);
+        const res = await fetch(`${API_BASE}/api/classroom/courses`);
         const data = await res.json();
         const courseCount = data.ok && data.courses ? data.courses.length : 0;
         const element = document.getElementById('courseCount');
