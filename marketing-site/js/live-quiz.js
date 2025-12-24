@@ -557,6 +557,11 @@ function startFacultyTimer(duration) {
         if (timeRemaining <= 0) {
             clearInterval(facultyTimerInterval);
             timerCircle.classList.add('expired');
+
+            // Auto-advance to next question after 3 seconds
+            setTimeout(async () => {
+                await showNextQuestion();
+            }, 3000);
         }
     }, 1000);
 }
