@@ -63,6 +63,7 @@ function initializeWebSocket() {
                     console.log('Quiz started!');
                     showWaitingRoom(false);
                     showQuizPlay(true);
+                    // The first question will come via 'question-shown' event
                     break;
 
                 case 'question-shown':
