@@ -541,7 +541,6 @@ function debounce(func, wait) {
 }
 
 // Quiz Join Functionality
-let quizSocket = null;
 
 function setupQuizJoin() {
     const quizCodeInput = document.getElementById('quizCodeInput');
@@ -572,13 +571,17 @@ function setupQuizJoin() {
             quizError.style.display = 'none';
 
             try {
-                // Initialize Socket.IO connection if not already connected
-                if (!quizSocket || !quizSocket.connected) {
-                    quizSocket = io();
-                }
+                // Validate quiz code via API
+                const response = await fetch('/api/quiz/validate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ code: code })
+                });
 
-                // Set up event listeners for quiz join
-                quizSocket.once('joinSuccess', (data) => {
+                const data = await response.json();
+
+                if (response.ok && data.ok) {
                     // Store quiz session data
                     localStorage.setItem('quizCode', code);
                     localStorage.setItem('quizSessionId', data.sessionId || code);
@@ -586,35 +589,11 @@ function setupQuizJoin() {
 
                     // Redirect to live quiz page
                     window.location.href = `student-live-quiz.html?code=${code}`;
-                });
-
-                quizSocket.once('joinError', (error) => {
-                    showQuizError(error.message || 'Failed to join quiz. Please check the code.');
+                } else {
+                    showQuizError(data.message || 'Invalid quiz code. Please check and try again.');
                     joinQuizBtn.disabled = false;
                     joinQuizBtn.textContent = '🎯 Join Quiz';
-                });
-
-                quizSocket.once('error', (error) => {
-                    showQuizError('Connection error. Please try again.');
-                    joinQuizBtn.disabled = false;
-                    joinQuizBtn.textContent = '🎯 Join Quiz';
-                });
-
-                // Emit join request
-                quizSocket.emit('joinQuiz', {
-                    code: code,
-                    studentName: studentName,
-                    studentEmail: studentEmail
-                });
-
-                // Set timeout for join attempt
-                setTimeout(() => {
-                    if (joinQuizBtn.disabled && joinQuizBtn.textContent === '🔄 Joining...') {
-                        showQuizError('Connection timeout. Please try again.');
-                        joinQuizBtn.disabled = false;
-                        joinQuizBtn.textContent = '🎯 Join Quiz';
-                    }
-                }, 10000); // 10 second timeout
+                }
 
             } catch (error) {
                 console.error('Error joining quiz:', error);
