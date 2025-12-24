@@ -459,12 +459,28 @@ async function showNextQuestion() {
 
 function displayCurrentQuestion(question, index) {
     const display = document.getElementById('currentQuestionDisplay');
+
+    const colors = ['red', 'blue', 'yellow', 'green'];
+    const letters = ['A', 'B', 'C', 'D'];
+
     display.innerHTML = `
-        <div class="current-question">
-            <h3>Question ${index + 1}</h3>
-            <p class="question-text">${question.text}</p>
-            <div class="timer-display">
-                <i class="fas fa-clock"></i> ${question.timeLimit}s
+        <div class="faculty-question-card">
+            <div class="question-meta">
+                <span><i class="fas fa-hashtag"></i> Question ${index + 1}</span>
+                <span><i class="fas fa-clock"></i> ${question.timeLimit}s</span>
+                <span><i class="fas fa-star"></i> ${question.points} pts</span>
+            </div>
+            <div class="question-text-display">
+                ${question.text}
+            </div>
+            <div class="faculty-answers-grid">
+                ${question.options.map((option, i) => `
+                    <div class="faculty-answer ${colors[i]} ${i === question.correctIndex ? 'correct' : ''}">
+                        <div class="answer-letter">${letters[i]}</div>
+                        <div class="answer-text">${option}</div>
+                        ${i === question.correctIndex ? '<i class="fas fa-check-circle"></i>' : ''}
+                    </div>
+                `).join('')}
             </div>
         </div>
     `;
