@@ -9,37 +9,114 @@ let score = 0;
 let correctAnswers = 0;
 let totalQuestions = 0;
 let hasAnswered = false;
+let quizCode = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    initializeSocket();
+    // Get quiz code from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    quizCode = urlParams.get('code');
+
+    if (!quizCode) {
+        alert('No quiz code provided');
+        window.location.href = 'student-community.html';
+        return;
+    }
+
+    initializeWebSocket();
 });
 
-// Socket.io Setup
-function initializeSocket() {
-    socket = io();
+// WebSocket Setup
+function initializeWebSocket() {
+    // Determine WebSocket URL based on current location
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host;
+    const wsUrl = `${protocol}//${host}/ws/quiz`;
 
-    socket.on('connect', () => {
+    socket = new WebSocket(wsUrl);
+
+    socket.onopen = () => {
         console.log('Connected to quiz server');
-    });
 
-    socket.on('quiz-started', (data) => {
-        totalQuestions = data.totalQuestions;
-        showWaitingRoom(false);
-        showQuizPlay(true);
-    });
+        // Join the quiz session
+        socket.send(JSON.stringify({
+            type: 'join',
+            sessionCode: quizCode,
+            userId: localStorage.getItem('email') || 'student'
+        }));
+    };
 
-    socket.on('show-question', (data) => {
-        displayQuestion(data);
-    });
+    socket.onmessage = (event) => {
+        try {
+            const message = JSON.parse(event.data);
 
-    socket.on('quiz-ended', () => {
-        showResults();
-    });
+            switch (message.type) {
+                case 'joined':
+                    console.log('Successfully joined quiz:', message.sessionCode);
+                    break;
 
-    socket.on('leaderboard-update', (data) => {
-        updateLeaderboard(data);
-    });
+                case 'participant-count':
+                    console.log('Participants:', message.count);
+                    break;
+
+                case 'quiz-started':
+                    console.log('Quiz started!');
+                    showWaitingRoom(false);
+                    showQuizPlay(true);
+                    break;
+
+                case 'question-shown':
+                    console.log('New question:', message.questionIndex);
+                    fetchAndDisplayQuestion(message.questionIndex);
+                    break;
+
+                case 'quiz-ended':
+                    console.log('Quiz ended');
+                    showResults();
+                    break;
+
+                case 'leaderboard-shown':
+                    updateLeaderboard(message.leaderboard);
+                    break;
+
+                case 'error':
+                    console.error('WebSocket error:', message.message);
+                    break;
+            }
+        } catch (error) {
+            console.error('Error parsing message:', error);
+        }
+    };
+
+    socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+
+    socket.onclose = () => {
+        console.log('Disconnected from quiz server');
+    };
+}
+
+// Fetch and display question from API
+async function fetchAndDisplayQuestion(questionIndex) {
+    try {
+        const response = await fetch(`/api/quiz/${quizCode}`);
+        const data = await response.json();
+
+        if (data.ok && data.quiz.currentQuestion) {
+            const question = data.quiz.currentQuestion;
+            displayQuestion({
+                questionIndex: questionIndex,
+                question: question.text,
+                options: question.options,
+                timeLimit: question.timeLimit,
+                correctAnswer: question.correctIndex,
+                points: question.points
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching question:', error);
+    }
 }
 
 // Show/Hide Sections
@@ -60,6 +137,7 @@ function displayQuestion(data) {
     currentQuestion = data;
     hasAnswered = false;
     timeRemaining = data.timeLimit;
+    totalQuestions = totalQuestions || data.totalQuestions || 10;
 
     // Update question number
     document.getElementById('questionNumber').textContent =
@@ -83,6 +161,7 @@ function displayQuestion(data) {
         btn.disabled = false;
         btn.onclick = () => submitAnswer(index);
         btn.classList.remove('correct', 'incorrect');
+        btn.style.boxShadow = '';
     });
 
     // Hide feedback
@@ -118,7 +197,7 @@ function startTimer() {
 }
 
 // Submit Answer
-function submitAnswer(answerIndex) {
+async function submitAnswer(answerIndex) {
     if (hasAnswered) return;
 
     hasAnswered = true;
@@ -128,39 +207,58 @@ function submitAnswer(answerIndex) {
     const buttons = document.querySelectorAll('.answer-btn');
     buttons.forEach(btn => btn.disabled = true);
 
-    // Check if correct
-    const isCorrect = answerIndex === currentQuestion.correctAnswer;
+    // Calculate time taken
+    const timeToAnswer = (currentQuestion.timeLimit - timeRemaining) * 1000; // in milliseconds
 
-    // Calculate points (base 1000 * time remaining ratio)
-    const points = isCorrect ? Math.round(1000 * (timeRemaining / currentQuestion.timeLimit)) : 0;
+    try {
+        // Submit answer to server API
+        const response = await fetch(`/api/quiz/${quizCode}/answer`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                questionIndex: currentQuestion.questionIndex,
+                selectedIndex: answerIndex,
+                timeToAnswer: timeToAnswer
+            })
+        });
 
-    if (isCorrect) {
-        score += points;
-        correctAnswers++;
-    }
+        const data = await response.json();
 
-    // Visual feedback
-    buttons.forEach((btn, index) => {
-        if (index === currentQuestion.correctAnswer) {
-            btn.classList.add('correct');
-            btn.style.boxShadow = '0 0 30px rgba(0, 208, 132, 0.6)';
-        } else if (index === answerIndex && !isCorrect) {
-            btn.classList.add('incorrect');
-            btn.style.boxShadow = '0 0 30px rgba(255, 90, 95, 0.6)';
+        if (data.ok) {
+            const isCorrect = data.isCorrect;
+            const points = data.pointsEarned;
+
+            if (isCorrect) {
+                score += points;
+                correctAnswers++;
+            }
+
+            // Visual feedback
+            buttons.forEach((btn, index) => {
+                if (index === data.correctAnswer) {
+                    btn.classList.add('correct');
+                    btn.style.boxShadow = '0 0 30px rgba(0, 208, 132, 0.6)';
+                } else if (index === answerIndex && !isCorrect) {
+                    btn.classList.add('incorrect');
+                    btn.style.boxShadow = '0 0 30px rgba(255, 90, 95, 0.6)';
+                }
+            });
+
+            // Show feedback
+            showFeedback(isCorrect, points);
+
+            // Notify server via WebSocket
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: 'submit-answer',
+                    questionIndex: currentQuestion.questionIndex
+                }));
+            }
         }
-    });
-
-    // Show feedback
-    showFeedback(isCorrect, points);
-
-    // Send response to server
-    socket.emit('submit-answer', {
-        questionIndex: currentQuestion.questionIndex,
-        answer: answerIndex,
-        timeRemaining,
-        isCorrect,
-        points
-    });
+    } catch (error) {
+        console.error('Error submitting answer:', error);
+    }
 }
 
 // Show Feedback
@@ -186,7 +284,7 @@ function showFeedback(isCorrect, points) {
 }
 
 // Show Results
-function showResults() {
+async function showResults() {
     showQuizPlay(false);
     showResultsScreen(true);
 
@@ -195,16 +293,30 @@ function showResults() {
     document.getElementById('correctAnswers').textContent = correctAnswers;
     document.getElementById('totalQuestions').textContent = totalQuestions;
 
-    // Request leaderboard
-    socket.emit('get-leaderboard');
+    // Fetch leaderboard
+    try {
+        const response = await fetch(`/api/quiz/${quizCode}/leaderboard`);
+        const data = await response.json();
+
+        if (data.ok) {
+            updateLeaderboard(data.leaderboard);
+        }
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+    }
 }
 
 // Update Leaderboard
-function updateLeaderboard(data) {
-    const { leaderboard, yourRank } = data;
+function updateLeaderboard(leaderboard) {
+    if (!leaderboard || leaderboard.length === 0) return;
 
-    // Show your rank
-    document.getElementById('yourRank').textContent = `#${yourRank}`;
+    // Find your rank
+    const studentName = localStorage.getItem('firstName') || 'You';
+    const yourRank = leaderboard.findIndex(entry => entry.name === studentName) + 1;
+
+    if (yourRank > 0) {
+        document.getElementById('yourRank').textContent = `#${yourRank}`;
+    }
 
     // Show top 5
     const topFive = document.getElementById('topFive');
