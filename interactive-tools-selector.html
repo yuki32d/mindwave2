@@ -119,6 +119,10 @@
             background: rgba(255, 255, 255, 0.1);
             transform: translateX(-4px);
         }
+
+        .recent-tool-item:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
     </style>
 </head>
 
@@ -128,7 +132,7 @@
         <header class="topbar">
             <div style="display: flex; align-items: center; gap: 16px;">
                 <button id="backBtn" class="back-btn"
-                    style="padding: 8px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                    style="padding: 8px 16px; margin-top: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
                     ← Back
                 </button>
                 <div class="topbar-brand">
@@ -274,16 +278,19 @@
                         <div
                             style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <span style="color: #9ea4b6; font-size: 14px;">Tools Created</span>
-                            <span style="color: #0f62fe; font-weight: 600; font-size: 16px;">12</span>
+                            <span id="toolsCreatedCount"
+                                style="color: #0f62fe; font-weight: 600; font-size: 16px;">0</span>
                         </div>
                         <div
                             style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <span style="color: #9ea4b6; font-size: 14px;">Student Responses</span>
-                            <span style="color: #34c759; font-weight: 600; font-size: 16px;">156</span>
+                            <span id="studentResponsesCount"
+                                style="color: #34c759; font-weight: 600; font-size: 16px;">0</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; padding: 8px 0;">
                             <span style="color: #9ea4b6; font-size: 14px;">Avg Engagement</span>
-                            <span style="color: #ff9f0a; font-weight: 600; font-size: 16px;">89%</span>
+                            <span id="avgEngagementRate"
+                                style="color: #ff9f0a; font-weight: 600; font-size: 16px;">0%</span>
                         </div>
                     </div>
                 </div>
@@ -295,22 +302,19 @@
                         🕐 Recently Used
                     </h3>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer; transition: all 0.2s;"
-                            onmouseover="this.style.background='rgba(255,255,255,0.08)'"
-                            onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                        <div class="recent-tool-item"
+                            style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
                             <div style="font-size: 13px; color: #f5f7ff; font-weight: 500;">📊 Poll</div>
                             <div style="font-size: 11px; color: #9ea4b6; margin-top: 4px;">"Course Feedback Survey"
                             </div>
                         </div>
-                        <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer; transition: all 0.2s;"
-                            onmouseover="this.style.background='rgba(255,255,255,0.08)'"
-                            onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                        <div class="recent-tool-item"
+                            style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
                             <div style="font-size: 13px; color: #f5f7ff; font-weight: 500;">🎯 Quiz</div>
                             <div style="font-size: 11px; color: #9ea4b6; margin-top: 4px;">"Week 5 Assessment"</div>
                         </div>
-                        <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer; transition: all 0.2s;"
-                            onmouseover="this.style.background='rgba(255,255,255,0.08)'"
-                            onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                        <div class="recent-tool-item"
+                            style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
                             <div style="font-size: 13px; color: #f5f7ff; font-weight: 500;">📊 Slider</div>
                             <div style="font-size: 11px; color: #9ea4b6; margin-top: 4px;">"Study Hours Tracker"</div>
                         </div>
@@ -352,6 +356,35 @@
     </div>
 
     <script>
+        // Load real-time activity stats
+        async function loadActivityStats() {
+            try {
+                // Fetch tools created count
+                const gamesRes = await fetch('/api/games/my');
+                const gamesData = await gamesRes.json();
+                if (gamesData && gamesData.ok) {
+                    document.getElementById('toolsCreatedCount').textContent = gamesData.games.length;
+                }
+
+                // Fetch engagement data
+                const engagementRes = await fetch('/api/engagement');
+                const engagementData = await engagementRes.json();
+                if (engagementData && engagementData.ok && engagementData.summary) {
+                    document.getElementById('avgEngagementRate').textContent = `${engagementData.summary.engagementRate}%`;
+
+                    // Calculate total responses from games data
+                    if (engagementData.games && engagementData.games.totalPlays) {
+                        document.getElementById('studentResponsesCount').textContent = engagementData.games.totalPlays;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load activity stats:', error);
+            }
+        }
+
+        // Load stats on page load
+        loadActivityStats();
+
         // Search functionality
         document.getElementById('searchTools').addEventListener('input', function (e) {
             const searchTerm = e.target.value.toLowerCase();
