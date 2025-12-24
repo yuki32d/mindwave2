@@ -6268,6 +6268,39 @@ app.get('/api/quiz/:code', async (req, res) => {
   }
 });
 
+// Validate quiz code (no auth required - just checks if code exists)
+app.post('/api/quiz/validate', async (req, res) => {
+  try {
+    const { code } = req.body;
+
+    if (!code || code.length !== 6) {
+      return res.status(400).json({ ok: false, message: "Invalid quiz code format" });
+    }
+
+    const quiz = await LiveQuizSession.findOne({ sessionCode: code.toUpperCase() });
+
+    if (!quiz) {
+      return res.status(404).json({ ok: false, message: "Quiz not found. Please check the code." });
+    }
+
+    if (quiz.status === 'ended') {
+      return res.status(400).json({ ok: false, message: "This quiz has already ended." });
+    }
+
+    res.json({
+      ok: true,
+      sessionId: quiz._id,
+      title: quiz.title,
+      status: quiz.status,
+      message: "Quiz code is valid"
+    });
+
+  } catch (error) {
+    console.error("Validate quiz error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 // Join quiz session (student)
 app.post('/api/quiz/:code/join', authMiddleware, async (req, res) => {
   try {
