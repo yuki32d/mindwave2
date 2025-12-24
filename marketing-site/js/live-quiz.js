@@ -547,20 +547,64 @@ async function showLeaderboard() {
 
 function displayLeaderboard(leaderboard) {
     const display = document.getElementById('liveLeaderboard');
+    if (!leaderboard || leaderboard.length === 0) {
+        display.innerHTML = '';
+        return;
+    }
 
-    let html = '<div class="leaderboard"><h3>🏆 Leaderboard</h3><div class="leaderboard-list">';
+    const getMedalIcon = (rank) => {
+        if (rank === 1) return '🥇';
+        if (rank === 2) return '🥈';
+        if (rank === 3) return '🥉';
+        return '';
+    };
+
+    const getRankClass = (rank) => {
+        if (rank === 1) return 'gold';
+        if (rank === 2) return 'silver';
+        if (rank === 3) return 'bronze';
+        return '';
+    };
+
+    let html = `
+        <div class="faculty-leaderboard-panel">
+            <div class="leaderboard-header">
+                <h3><i class="fas fa-trophy"></i> Live Leaderboard</h3>
+                <div class="total-participants">${leaderboard.length} students</div>
+            </div>
+            <div class="leaderboard-table">
+                <div class="leaderboard-table-header">
+                    <div class="col-rank">Rank</div>
+                    <div class="col-name">Student</div>
+                    <div class="col-score">Score</div>
+                </div>
+                <div class="leaderboard-table-body">
+    `;
 
     leaderboard.forEach((player, index) => {
+        const rank = index + 1;
+        const medal = getMedalIcon(rank);
+        const rankClass = getRankClass(rank);
+
         html += `
-            <div class="leaderboard-item rank-${index + 1}">
-                <span class="rank">${index + 1}</span>
-                <span class="name">${player.name}</span>
-                <span class="score">${player.score} pts</span>
+            <div class="leaderboard-row ${rankClass}" style="animation-delay: ${index * 0.05}s">
+                <div class="col-rank">
+                    <div class="rank-badge ${rankClass}">
+                        ${medal ? medal : rank}
+                    </div>
+                </div>
+                <div class="col-name">${player.name}</div>
+                <div class="col-score">${player.score}</div>
             </div>
         `;
     });
 
-    html += '</div></div>';
+    html += `
+                </div>
+            </div>
+        </div>
+    `;
+
     display.innerHTML = html;
 }
 

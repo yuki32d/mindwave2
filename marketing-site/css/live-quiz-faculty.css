@@ -901,6 +901,194 @@
     }
 }
 
+/* Faculty Leaderboard Panel */
+.faculty-leaderboard-panel {
+    background: #2d3748;
+    border: 2px solid #4a5568;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    animation: panelSlideIn 0.4s ease-out;
+}
+
+.leaderboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #4a5568;
+}
+
+.leaderboard-header h3 {
+    font-size: 1.5rem;
+    color: #FFD700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.leaderboard-header i {
+    font-size: 1.75rem;
+}
+
+.total-participants {
+    background: rgba(102, 126, 234, 0.2);
+    padding: 0.5rem 1.25rem;
+    border-radius: 20px;
+    color: #e2e8f0;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.leaderboard-table {
+    width: 100%;
+}
+
+.leaderboard-table-header {
+    display: grid;
+    grid-template-columns: 80px 1fr 120px;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: #a0aec0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.leaderboard-table-body {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.leaderboard-table-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.leaderboard-table-body::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.leaderboard-table-body::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 4px;
+}
+
+.leaderboard-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 120px;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    align-items: center;
+    transition: all 0.3s;
+    animation: rowSlideIn 0.4s ease-out;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+@keyframes rowSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.leaderboard-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(4px);
+}
+
+.leaderboard-row.gold {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+    border-left: 4px solid #FFD700;
+}
+
+.leaderboard-row.silver {
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.15), rgba(192, 192, 192, 0.05));
+    border-left: 4px solid #C0C0C0;
+}
+
+.leaderboard-row.bronze {
+    background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.05));
+    border-left: 4px solid #CD7F32;
+}
+
+.rank-badge {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+}
+
+.rank-badge.gold {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #333;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    animation: goldPulse 2s ease-in-out infinite;
+}
+
+@keyframes goldPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 4px 25px rgba(255, 215, 0, 0.6);
+    }
+}
+
+.rank-badge.silver {
+    background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+    color: #333;
+    box-shadow: 0 4px 15px rgba(192, 192, 192, 0.4);
+}
+
+.rank-badge.bronze {
+    background: linear-gradient(135deg, #CD7F32, #B8722D);
+    color: white;
+    box-shadow: 0 4px 15px rgba(205, 127, 50, 0.4);
+}
+
+.col-rank {
+    text-align: center;
+}
+
+.col-name {
+    color: #e2e8f0;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.col-score {
+    text-align: right;
+    color: #00D9FF;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
 
 /* Responsive */
 @media (max-width: 968px) {
@@ -976,5 +1164,32 @@
         font-size: 1.25rem;
         flex-direction: column;
         gap: 0.5rem;
+    }
+
+    .leaderboard-table-header,
+    .leaderboard-row {
+        grid-template-columns: 60px 1fr 90px;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+
+    .rank-badge {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .col-name {
+        font-size: 1rem;
+    }
+
+    .col-score {
+        font-size: 1.1rem;
+    }
+
+    .leaderboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
     }
 }
