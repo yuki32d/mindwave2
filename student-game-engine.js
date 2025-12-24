@@ -212,6 +212,9 @@ async function initGamePlayer(gameId) {
 
         try {
             switch (game.type) {
+                case 'poll':
+                    playPoll(game, container);
+                    break;
                 case 'quiz':
                     playQuiz(game, container);
                     break;
@@ -261,6 +264,129 @@ async function initGamePlayer(gameId) {
 }
 
 // === GAME ENGINES ===
+
+// Poll Engine - For opinion collection
+function playPoll(game, container) {
+    let selectedOptions = [];
+    let startTime = Date.now();
+    const allowMultiple = game.settings?.allowMultiple || false;
+    const showResults = game.settings?.showResults !== false;
+
+    function render() {
+        container.innerHTML = `
+            <div class="player-header"><span>📊 ${game.question}</span></div>
+            <div class="question-display">
+                ${game.description ? `<p style="color: #9ea4b6; margin-bottom: 24px;">${game.description}</p>` : ''}
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    ${(game.options || []).map((option, idx) => `
+                        <button class="poll-option ${selectedOptions.includes(idx) ? 'selected' : ''}" 
+                                data-idx="${idx}"
+                                style="
+                                    padding: 16px 20px;
+                                    background: ${selectedOptions.includes(idx) ? 'rgba(15, 98, 254, 0.2)' : 'rgba(255, 255, 255, 0.05)'};
+                                    border: 2px solid ${selectedOptions.includes(idx) ? '#0f62fe' : 'rgba(255, 255, 255, 0.1)'};
+                                    border-radius: 12px;
+                                    color: #f5f7ff;
+                                    cursor: pointer;
+                                    text-align: left;
+                                    transition: all 0.2s;
+                                    font-size: 16px;
+                                ">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 20px; height: 20px; border: 2px solid ${selectedOptions.includes(idx) ? '#0f62fe' : 'rgba(255,255,255,0.3)'}; border-radius: ${allowMultiple ? '4px' : '50%'}; background: ${selectedOptions.includes(idx) ? '#0f62fe' : 'transparent'};"></div>
+                                <span>${option}</span>
+                            </div>
+                        </button>
+                    `).join('')}
+                </div>
+                <button id="pollSubmitBtn" class="submit-btn" style="margin-top: 32px; width: 100%; opacity: ${selectedOptions.length === 0 ? '0.5' : '1'};" ${selectedOptions.length === 0 ? 'disabled' : ''}>
+                    Submit ${allowMultiple ? 'Votes' : 'Vote'}
+                </button>
+            </div>
+        `;
+
+        // Attach option listeners
+        container.querySelectorAll('.poll-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.idx);
+                if (allowMultiple) {
+                    if (selectedOptions.includes(idx)) {
+                        selectedOptions = selectedOptions.filter(i => i !== idx);
+                    } else {
+                        selectedOptions.push(idx);
+                    }
+                } else {
+                    selectedOptions = [idx];
+                }
+                render();
+            });
+        });
+
+        // Submit button
+        const submitBtn = document.getElementById('pollSubmitBtn');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', submitPoll);
+        }
+    }
+
+    async function submitPoll() {
+        const studentAnswers = selectedOptions.map(idx => ({
+            questionText: game.question,
+            studentAnswer: game.options[idx],
+            isCorrect: true // Polls don't have correct answers
+        }));
+
+        // For polls, score is just participation
+        const score = 10;
+        await saveResult(game, score, 10, startTime, studentAnswers);
+
+        if (showResults) {
+            showPollResults(container, game, selectedOptions);
+        } else {
+            showResult(container, score, 10, startTime, game._id || game.id);
+        }
+    }
+
+    render();
+}
+
+function showPollResults(container, game, userSelections) {
+    // Simulate results (in production, fetch from server)
+    const results = game.options.map((opt, idx) => ({
+        option: opt,
+        votes: Math.floor(Math.random() * 50) + (userSelections.includes(idx) ? 1 : 0),
+        percentage: 0
+    }));
+
+    const totalVotes = results.reduce((sum, r) => sum + r.votes, 0);
+    results.forEach(r => r.percentage = totalVotes > 0 ? (r.votes / totalVotes * 100).toFixed(1) : 0);
+
+    container.innerHTML = `
+        <div class="player-header"><span>📊 Poll Results</span></div>
+        <div class="question-display">
+            <h2 style="margin-bottom: 24px;">${game.question}</h2>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                ${results.map((result, idx) => `
+                    <div style="background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 2px solid ${userSelections.includes(idx) ? '#0f62fe' : 'rgba(255,255,255,0.1)'};">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #f5f7ff;">${result.option}</span>
+                            <span style="color: #9ea4b6;">${result.votes} votes (${result.percentage}%)</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #0f62fe, #9f7aea); height: 100%; width: ${result.percentage}%; transition: width 0.5s;"></div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <div style="margin-top: 32px; text-align: center; color: #9ea4b6;">
+                <p>Total votes: ${totalVotes}</p>
+            </div>
+            <button class="submit-btn" onclick="window.location.href='student-game.html'" style="margin-top: 24px; width: 100%;">
+                Back to Games
+            </button>
+        </div>
+    `;
+}
 
 function playQuiz(game, container) {
     let currentQuestionIndex = 0;
