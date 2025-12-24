@@ -5609,6 +5609,7 @@ function setupWebSocket(server) {
 
   // Store active quiz sessions and their connections
   const quizConnections = new Map(); // sessionCode -> Set of WebSocket connections
+  const answerDistribution = new Map(); // sessionCode -> { questionIndex -> { A: 0, B: 0, C: 0, D: 0, total: 0 } }
 
   wss.on('connection', (ws, req) => {
     console.log('📡 New WebSocket connection');
@@ -5664,12 +5665,51 @@ function setupWebSocket(server) {
 
           case 'submit-answer':
             // Student submitting answer
-            if (currentSessionCode) {
-              // Broadcast to faculty that an answer was submitted
+            if (currentSessionCode && message.questionIndex !== undefined && message.selectedAnswer !== undefined) {
+              // Initialize distribution for this session if needed
+              if (!answerDistribution.has(currentSessionCode)) {
+                answerDistribution.set(currentSessionCode, new Map());
+              }
+
+              const sessionDist = answerDistribution.get(currentSessionCode);
+              const qIndex = message.questionIndex;
+
+              // Initialize distribution for this question if needed
+              if (!sessionDist.has(qIndex)) {
+                sessionDist.set(qIndex, { A: 0, B: 0, C: 0, D: 0, total: 0 });
+              }
+
+              const dist = sessionDist.get(qIndex);
+              const letters = ['A', 'B', 'C', 'D'];
+              const selectedLetter = letters[message.selectedAnswer];
+
+              if (selectedLetter && dist[selectedLetter] !== undefined) {
+                dist[selectedLetter]++;
+                dist.total++;
+              }
+
+              // Get participant count for percentage calculation
+              const participantCount = quizConnections.get(currentSessionCode)?.size || 0;
+
+              // Broadcast updated distribution to all participants
+              broadcastToSession(currentSessionCode, {
+                type: 'answer-distribution',
+                questionIndex: qIndex,
+                distribution: {
+                  A: dist.A,
+                  B: dist.B,
+                  C: dist.C,
+                  D: dist.D,
+                  total: dist.total,
+                  expected: participantCount
+                }
+              });
+
+              // Also broadcast simple answer-submitted for backward compatibility
               broadcastToSession(currentSessionCode, {
                 type: 'answer-submitted',
                 userId: userId,
-                questionIndex: message.questionIndex
+                questionIndex: qIndex
               });
             }
             break;

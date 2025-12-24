@@ -246,6 +246,16 @@ async function submitAnswer(answerIndex) {
                 }
             });
 
+            // Update score display immediately with animation
+            const scoreElement = document.getElementById('currentScore');
+            scoreElement.textContent = score;
+            scoreElement.style.transform = 'scale(1.3)';
+            scoreElement.style.color = isCorrect ? 'var(--quiz-green)' : 'var(--quiz-red)';
+            setTimeout(() => {
+                scoreElement.style.transform = 'scale(1)';
+                scoreElement.style.color = '';
+            }, 500);
+
             // Show feedback
             showFeedback(isCorrect, points);
 
@@ -253,7 +263,8 @@ async function submitAnswer(answerIndex) {
             if (socket && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({
                     type: 'submit-answer',
-                    questionIndex: currentQuestion.questionIndex
+                    questionIndex: currentQuestion.questionIndex,
+                    selectedAnswer: answerIndex
                 }));
             }
         }
@@ -307,7 +318,7 @@ async function showResults() {
     }
 }
 
-// Update Leaderboard
+// Update Leaderboard with Podium
 function updateLeaderboard(leaderboard) {
     if (!leaderboard || leaderboard.length === 0) return;
 
@@ -319,15 +330,37 @@ function updateLeaderboard(leaderboard) {
         document.getElementById('yourRank').textContent = `#${yourRank}`;
     }
 
-    // Show top 5
-    const topFive = document.getElementById('topFive');
-    topFive.innerHTML = leaderboard.slice(0, 5).map((entry, index) => {
-        const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+    // Create podium for top 3
+    const podium = document.getElementById('podium');
+    const top3 = leaderboard.slice(0, 3);
+
+    if (top3.length === 0) {
+        podium.innerHTML = '<p style="text-align: center; color: var(--text-gray);">No participants yet</p>';
+        return;
+    }
+
+    // Podium order: 2nd, 1st, 3rd (visual arrangement)
+    const podiumOrder = [
+        top3[1], // 2nd place (left)
+        top3[0], // 1st place (center, tallest)
+        top3[2]  // 3rd place (right)
+    ];
+
+    const medals = ['🥈', '🥇', '🥉'];
+    const heights = ['medium', 'tall', 'short'];
+    const positions = [2, 1, 3];
+
+    podium.innerHTML = podiumOrder.map((entry, index) => {
+        if (!entry) return '';
         return `
-            <div class="leaderboard-entry">
-                <div class="entry-rank ${rankClass}">${index + 1}</div>
-                <div class="entry-name">${entry.name}</div>
-                <div class="entry-score">${entry.score}</div>
+            <div class="podium-place ${heights[index]}">
+                <div class="podium-medal">${medals[index]}</div>
+                <div class="podium-name">${entry.name}</div>
+                <div class="podium-score">${entry.score}</div>
+                <div class="podium-rank">#${positions[index]}</div>
+                <div class="podium-stand">
+                    <div class="stand-number">${positions[index]}</div>
+                </div>
             </div>
         `;
     }).join('');

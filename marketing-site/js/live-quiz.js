@@ -382,7 +382,46 @@ function handleWebSocketMessage(message) {
         case 'answer-submitted':
             console.log('Student submitted answer');
             break;
+
+        case 'answer-distribution':
+            updateAnswerDistribution(message.distribution);
+            break;
     }
+}
+
+function updateAnswerDistribution(data) {
+    const display = document.getElementById('answerDistribution');
+    if (!display) return;
+
+    const { A, B, C, D, total, expected } = data;
+
+    // Show the panel
+    display.style.display = 'block';
+
+    const createBar = (letter, count, total, color) => {
+        const percentage = total > 0 ? (count / total * 100) : 0;
+        return `
+            <div class="answer-bar ${color}">
+                <div class="bar-label">${letter}</div>
+                <div class="bar-track">
+                    <div class="bar-fill" style="width: ${percentage}%"></div>
+                </div>
+                <div class="bar-count">${count}</div>
+            </div>
+        `;
+    };
+
+    display.innerHTML = `
+        <div class="response-counter">
+            <i class="fas fa-users"></i> ${total}/${expected} answered
+        </div>
+        <div class="distribution-bars">
+            ${createBar('A', A, total, 'red')}
+            ${createBar('B', B, total, 'blue')}
+            ${createBar('C', C, total, 'yellow')}
+            ${createBar('D', D, total, 'green')}
+        </div>
+    `;
 }
 
 async function startQuiz() {
