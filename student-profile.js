@@ -200,7 +200,7 @@ async function calculateSkills() {
             };
 
             data.results.forEach(r => {
-                const type = gameTypeMap[r.gameType] || r.gameType;
+                const type = gameTypeMap[r.gameType] || r.gameType || r.type || 'General';
                 if (!skills[type]) {
                     skills[type] = { count: 0, totalScore: 0 };
                 }
@@ -353,7 +353,7 @@ async function renderActivity() {
                     <div class="activity-item">
                         <div class="activity-icon">🎮</div>
                         <div class="activity-info">
-                            <h4>${a.gameTitle || a.title || 'Untitled Game'}</h4>
+                            <h4>${a.gameTitle || a.title || a.gameName || 'Game'}</h4>
                             <p>${gameType} • ${timeAgo}</p>
                         </div>
                         <div class="activity-score">${score}%</div>
