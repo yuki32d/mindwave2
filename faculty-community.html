@@ -241,16 +241,24 @@
 
                     <!-- Quiz Control Panel (shown after launch) -->
                     <div class="quiz-control-panel" id="quizControlPanel" style="display: none;">
-                        <div class="session-code-display">
-                            <h2>Quiz Code</h2>
-                            <div class="code-box" id="sessionCodeDisplay"></div>
-                            <p>Students join at: <strong><a href="student-join-quiz.html" target="_blank"
-                                        style="color: #667eea;">student-join-quiz.html</a></strong></p>
-                        </div>
+                        <div class="control-panel-header">
+                            <div class="session-info-card">
+                                <div class="info-label">
+                                    <i class="fas fa-qrcode"></i> Quiz Code
+                                </div>
+                                <div class="code-display" id="sessionCodeDisplay">ABCD12</div>
+                                <div class="info-hint">Share this code with your students</div>
+                            </div>
 
-                        <div class="participants-count">
-                            <i class="fas fa-users"></i>
-                            <span id="participantCount">0</span> participants
+                            <div class="participants-card">
+                                <div class="info-label">
+                                    <i class="fas fa-users"></i> Participants
+                                </div>
+                                <div class="participant-count-display">
+                                    <span id="participantCount">0</span>
+                                </div>
+                                <div class="info-hint">Students joined</div>
+                            </div>
                         </div>
 
                         <div class="quiz-controls">
