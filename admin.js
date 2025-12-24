@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const newGameBtn = document.getElementById('newGameBtn');
     if (newGameBtn) {
         newGameBtn.addEventListener('click', () => {
-            document.getElementById('gameForm').scrollIntoView({ behavior: 'smooth' });
+            window.location.href = 'interactive-tools-selector.html';
         });
     }
 
@@ -556,6 +556,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aiGameBuilderBtn) {
         aiGameBuilderBtn.addEventListener('click', () => {
             window.location.href = 'ai-game-builder.html';
+        });
+    }
+
+    const dataAnalyticsBtn = document.getElementById('dataAnalyticsBtn');
+    if (dataAnalyticsBtn) {
+        dataAnalyticsBtn.addEventListener('click', () => {
+            window.location.href = 'faculty-dataanalytics.html';
+        });
+    }
+
+    const previewStudentBtn = document.getElementById('previewStudentBtn');
+    if (previewStudentBtn) {
+        previewStudentBtn.addEventListener('click', () => {
+            window.location.href = 'homepage.html';
         });
     }
 });

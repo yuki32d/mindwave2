@@ -78,9 +78,9 @@
                         <p>Plan announcements, updates, and playful learning tools.</p>
                     </div>
                     <div class="header-actions">
-                        <button class="secondary-btn" onclick="window.location.href= 'faculty-dataanalytics.html'">📊
+                        <button class="secondary-btn" id="dataAnalyticsBtn">📊
                             Data Analytics</button>
-                        <button class="primary-btn" onclick="window.location.href='homepage.html'">Preview Student
+                        <button class="primary-btn" id="previewStudentBtn">Preview Student
                             View</button>
                     </div>
                 </div>
@@ -88,7 +88,6 @@
                 <!-- Quick Action Cards -->
                 <div class="quick-actions">
                     <button class="action-card" id="newGameBtn"
-                        onclick="window.location.href='interactive-tools-selector.html'"
                         style="background: linear-gradient(135deg, #FF375F 0%, #FF9F0A 100%);">
                         <span>🎮</span>
                         <span>Interactive Tools</span>
@@ -205,6 +204,16 @@
                         <button class="submit-btn" type="submit">Attach Tool</button>
                     </form>
                     <div class="list" id="gameToolsList"></div>
+                </section>
+
+                <!-- Game Templates Gallery -->
+                <section class="panel" style="margin-top: 24px;">
+                    <h2>🎮 Game Templates Gallery</h2>
+                    <p>Quick-start templates for popular game types</p>
+                    <div id="gameTemplateGrid"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 24px;">
+                        <!-- Templates will be rendered here by admin.js -->
+                    </div>
                 </section>
             </main>
         </div>
