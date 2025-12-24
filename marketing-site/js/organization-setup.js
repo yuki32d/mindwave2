@@ -496,11 +496,17 @@ function loadSavedProgress() {
 function goToDashboard() {
     localStorage.removeItem('org_setup_progress');
 
-    // Redirect to checkout page with selected plan
-    const plan = setupState.selectedPlan || 'Personal';
-    const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
+    // Map organization setup plan names to checkout page plan names
+    const planMapping = {
+        'starter': 'Personal',
+        'professional': 'Team',
+        'enterprise': 'Enterprise'
+    };
 
-    window.location.href = `/marketing-site/checkout.html?plan=${planName}&currency=INR`;
+    // Get the correct plan name for checkout
+    const checkoutPlan = planMapping[setupState.selectedPlan] || 'Personal';
+
+    window.location.href = `/marketing-site/checkout.html?plan=${checkoutPlan}&currency=INR`;
 }
 
 function logout() {
