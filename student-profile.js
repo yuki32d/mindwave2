@@ -334,7 +334,27 @@ async function renderActivity() {
                 return;
             }
 
-            activityList.innerHTML = activities.map(a => {
+            // Fetch game details for each activity
+            const activitiesWithTitles = await Promise.all(activities.map(async (a) => {
+                let gameTitle = a.gameTitle || a.title || a.gameName;
+
+                // If no title, try to fetch from games API
+                if (!gameTitle && a.gameId) {
+                    try {
+                        const gameResponse = await fetch(`${API_BASE}/api/games/${a.gameId}`);
+                        const gameData = await gameResponse.json();
+                        if (gameData.ok && gameData.game) {
+                            gameTitle = gameData.game.title || gameData.game.question || gameData.game.name;
+                        }
+                    } catch (err) {
+                        console.error('Failed to fetch game details:', err);
+                    }
+                }
+
+                return { ...a, gameTitle: gameTitle || 'Game' };
+            }));
+
+            activityList.innerHTML = activitiesWithTitles.map(a => {
                 const date = new Date(a.completedAt || a.createdAt || Date.now());
                 const timeAgo = getTimeAgo(date);
 
@@ -353,7 +373,7 @@ async function renderActivity() {
                     <div class="activity-item">
                         <div class="activity-icon">🎮</div>
                         <div class="activity-info">
-                            <h4>${a.gameTitle || a.title || a.gameName || 'Game'}</h4>
+                            <h4>${a.gameTitle}</h4>
                             <p>${gameType} • ${timeAgo}</p>
                         </div>
                         <div class="activity-score">${score}%</div>
