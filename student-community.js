@@ -560,6 +560,18 @@ function setupQuizJoin() {
                 return;
             }
 
+            // Check if user is logged in
+            const studentName = localStorage.getItem('firstName');
+            const studentEmail = localStorage.getItem('email');
+
+            if (!studentName || !studentEmail) {
+                showQuizError('Please log in to join a quiz');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+                return;
+            }
+
             // Disable button and show loading
             joinQuizBtn.disabled = true;
             joinQuizBtn.textContent = '🔄 Joining...';
