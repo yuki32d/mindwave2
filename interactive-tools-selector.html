@@ -369,21 +369,6 @@
         // Load stats on page load
         loadActivityStats();
 
-        // Search functionality
-        document.getElementById('searchTools').addEventListener('input', function (e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const toolCards = document.querySelectorAll('.tool-card');
-
-            toolCards.forEach(card => {
-                const toolName = card.querySelector('.tool-name').textContent.toLowerCase();
-                if (toolName.includes(searchTerm)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
-
         // Tool card click handlers
         document.querySelectorAll('.tool-card').forEach(card => {
             card.addEventListener('click', function () {
