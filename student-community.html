@@ -127,16 +127,25 @@
         <!-- Live Quiz Section -->
         <div id="quizSection" class="content-section" style="display: none;">
             <div class="feature-content-area">
-                <div class="waiting-card">
-                    <div class="quiz-icon">
-                        <i class="fas fa-trophy"></i>
+                <div class="waiting-card" style="max-width: 500px; margin: 0 auto;">
+                    <div class="quiz-icon" style="font-size: 64px; margin-bottom: 24px;">
+                        🏆
                     </div>
-                    <h1>Get Ready!</h1>
-                    <p>Waiting for your teacher to start the quiz...</p>
-                    <div class="pulse-indicator">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+                    <h1 style="margin-bottom: 12px;">Join Live Quiz</h1>
+                    <p style="margin-bottom: 32px; color: #9ea4b6;">Enter the quiz code from your instructor</p>
+
+                    <div style="margin-bottom: 24px;">
+                        <input type="text" id="quizCodeInput" placeholder="ENTER CODE" maxlength="6"
+                            style="width: 100%; padding: 16px 24px; font-size: 24px; text-align: center; letter-spacing: 8px; text-transform: uppercase; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; color: #f5f7ff; font-weight: 600;">
+                    </div>
+
+                    <button id="joinQuizBtn" class="primary-btn"
+                        style="width: 100%; padding: 16px; font-size: 18px; font-weight: 600;">
+                        🎯 Join Quiz
+                    </button>
+
+                    <div id="quizError"
+                        style="display: none; margin-top: 16px; padding: 12px; background: rgba(255, 55, 95, 0.1); border: 1px solid rgba(255, 55, 95, 0.3); border-radius: 8px; color: #ff5b87; font-size: 14px; text-align: center;">
                     </div>
                 </div>
             </div>

@@ -540,6 +540,69 @@ function debounce(func, wait) {
     };
 }
 
+// Quiz Join Functionality
+function setupQuizJoin() {
+    const quizCodeInput = document.getElementById('quizCodeInput');
+    const joinQuizBtn = document.getElementById('joinQuizBtn');
+    const quizError = document.getElementById('quizError');
+
+    if (joinQuizBtn) {
+        joinQuizBtn.addEventListener('click', async () => {
+            const code = quizCodeInput.value.trim().toUpperCase();
+
+            if (!code) {
+                showQuizError('Please enter a quiz code');
+                return;
+            }
+
+            if (code.length !== 6) {
+                showQuizError('Quiz code must be 6 characters');
+                return;
+            }
+
+            // Disable button and show loading
+            joinQuizBtn.disabled = true;
+            joinQuizBtn.textContent = '🔄 Joining...';
+            quizError.style.display = 'none';
+
+            try {
+                // Redirect to join quiz page with code
+                window.location.href = `student-join-quiz.html?code=${code}`;
+            } catch (error) {
+                console.error('Error joining quiz:', error);
+                showQuizError('Failed to join quiz. Please try again.');
+                joinQuizBtn.disabled = false;
+                joinQuizBtn.textContent = '🎯 Join Quiz';
+            }
+        });
+
+        // Allow Enter key to submit
+        quizCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                joinQuizBtn.click();
+            }
+        });
+
+        // Auto-uppercase input
+        quizCodeInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    }
+}
+
+function showQuizError(message) {
+    const quizError = document.getElementById('quizError');
+    if (quizError) {
+        quizError.textContent = message;
+        quizError.style.display = 'block';
+    }
+}
+
+// Initialize quiz join when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    setupQuizJoin();
+});
+
 // Make functions globally available
 window.toggleLike = toggleLike;
 window.addComment = addComment;
