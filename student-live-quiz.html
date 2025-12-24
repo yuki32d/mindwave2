@@ -7,30 +7,10 @@
     <title>Live Quiz - MindWave</title>
     <link rel="stylesheet" href="../3d-depth-design.css">
     <link rel="stylesheet" href="marketing-site/css/live-quiz.css">
-    <link rel="stylesheet" href="marketing-site/css/student-nav.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 </head>
 
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <i class="fas fa-brain"></i>
-                <span>MindWave</span>
-            </div>
-            <div class="nav-actions">
-                <a href="student-community.html" class="nav-btn primary-nav-btn"><i class="fas fa-plus"></i> Create
-                    Post</a>
-                <a href="student-community.html" class="nav-btn"><i class="fas fa-file-alt"></i> My Posts</a>
-                <a href="student-poll-response.html" class="nav-btn"><i class="fas fa-poll"></i> Quick Poll</a>
-                <a href="student-feedback.html" class="nav-btn"><i class="fas fa-comments"></i> Feedback</a>
-                <a href="student-live-quiz.html" class="nav-btn active"><i class="fas fa-trophy"></i> Live Quiz</a>
-            </div>
-        </div>
-    </nav>
-
     <!-- Main Content -->
     <main class="quiz-play-container">
         <!-- Waiting Room -->
@@ -73,19 +53,19 @@
             <div class="answer-grid" id="answerGrid">
                 <button class="answer-btn red" data-index="0">
                     <div class="answer-letter">A</div>
-                    <div class="answer-text" id="answerA">22</div>
+                    <div class="answer-text" id="answerA">For loop</div>
                 </button>
                 <button class="answer-btn blue" data-index="1">
                     <div class="answer-letter">B</div>
-                    <div class="answer-text" id="answerB">4</div>
+                    <div class="answer-text" id="answerB">While loop</div>
                 </button>
                 <button class="answer-btn yellow" data-index="2">
                     <div class="answer-letter">C</div>
-                    <div class="answer-text" id="answerC">Error</div>
+                    <div class="answer-text" id="answerC">Do-while loop</div>
                 </button>
                 <button class="answer-btn green" data-index="3">
                     <div class="answer-letter">D</div>
-                    <div class="answer-text" id="answerD">undefined</div>
+                    <div class="answer-text" id="answerD">If-else statement</div>
                 </button>
             </div>
 
@@ -126,8 +106,8 @@
                     </div>
                 </div>
 
-                <button class="btn-primary" onclick="window.location.href='homepage.html'">
-                    <i class="fas fa-home"></i> Back to Home
+                <button class="btn-primary" onclick="window.location.href='student-community.html'">
+                    <i class="fas fa-home"></i> Back to Community
                 </button>
             </div>
         </section>
