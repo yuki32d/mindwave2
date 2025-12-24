@@ -506,7 +506,11 @@ function displayCurrentQuestion(question, index) {
         <div class="faculty-question-card">
             <div class="question-meta">
                 <span><i class="fas fa-hashtag"></i> Question ${index + 1}</span>
-                <span><i class="fas fa-clock"></i> ${question.timeLimit}s</span>
+                <div class="faculty-timer-container">
+                    <div class="faculty-timer-circle" id="facultyTimer">
+                        <span id="facultyTimerValue">${question.timeLimit}</span>
+                    </div>
+                </div>
                 <span><i class="fas fa-star"></i> ${question.points} pts</span>
             </div>
             <div class="question-text-display">
@@ -523,6 +527,54 @@ function displayCurrentQuestion(question, index) {
             </div>
         </div>
     `;
+
+    // Start countdown timer
+    startFacultyTimer(question.timeLimit);
+}
+
+let facultyTimerInterval = null;
+
+function startFacultyTimer(duration) {
+    // Clear any existing timer
+    if (facultyTimerInterval) {
+        clearInterval(facultyTimerInterval);
+    }
+
+    let timeRemaining = duration;
+    const timerElement = document.getElementById('facultyTimerValue');
+    const timerCircle = document.getElementById('facultyTimer');
+
+    if (!timerElement || !timerCircle) return;
+
+    // Update immediately
+    updateFacultyTimerDisplay(timeRemaining, duration, timerElement, timerCircle);
+
+    // Start countdown
+    facultyTimerInterval = setInterval(() => {
+        timeRemaining--;
+        updateFacultyTimerDisplay(timeRemaining, duration, timerElement, timerCircle);
+
+        if (timeRemaining <= 0) {
+            clearInterval(facultyTimerInterval);
+            timerCircle.classList.add('expired');
+        }
+    }, 1000);
+}
+
+function updateFacultyTimerDisplay(timeRemaining, totalTime, timerElement, timerCircle) {
+    timerElement.textContent = timeRemaining;
+
+    // Calculate percentage for conic gradient
+    const percentage = (timeRemaining / totalTime) * 100;
+    const degrees = (percentage / 100) * 360;
+    timerCircle.style.background = `conic-gradient(var(--cyan-bright) ${degrees}deg, var(--card-darker) ${degrees}deg)`;
+
+    // Add warning class when time is low
+    if (timeRemaining <= 5 && timeRemaining > 0) {
+        timerCircle.classList.add('warning');
+    } else {
+        timerCircle.classList.remove('warning');
+    }
 }
 
 async function showLeaderboard() {
