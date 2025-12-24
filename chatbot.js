@@ -70,7 +70,7 @@
             bottom: 80px;
             right: 0;
             width: 380px;
-            height: 600px;
+            height: 450px;
             max-height: calc(100vh - 120px);
             background: var(--chat-bg);
             border-radius: var(--chat-radius);
