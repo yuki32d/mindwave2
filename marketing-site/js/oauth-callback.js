@@ -103,6 +103,17 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
             localStorage.setItem('user_name', result.user.name);
             localStorage.setItem('user_role', result.user.role);
 
+            // Store complete user object (required by org-dashboard-data.js)
+            localStorage.setItem('user', JSON.stringify({
+                email: result.user.email,
+                name: result.user.name,
+                role: result.user.role,
+                userType: result.user.userType,
+                orgRole: result.user.orgRole,
+                organizationId: result.user.organizationId,
+                token: result.token
+            }));
+
             // Store organization-related data
             if (result.user.userType) {
                 localStorage.setItem('user_type', result.user.userType);
