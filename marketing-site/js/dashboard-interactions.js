@@ -25,24 +25,18 @@ function initializeButtons() {
         createBtn.addEventListener('click', handleCreate);
     }
 
-    // Manage subscription button
-    const manageBtn = document.querySelector('button:contains("Manage")') ||
-        document.querySelector('[href*="manage"]');
-    if (manageBtn) {
-        manageBtn.addEventListener('click', handleManageSubscription);
-    }
-
-    // View Invoices button
-    const invoicesBtn = document.querySelector('button:contains("View Invoices")');
-    if (invoicesBtn) {
-        invoicesBtn.addEventListener('click', handleViewInvoices);
-    }
-
-    // Update Payment button
-    const paymentBtn = document.querySelector('button:contains("Update Payment")');
-    if (paymentBtn) {
-        paymentBtn.addEventListener('click', handleUpdatePayment);
-    }
+    // Manage subscription button - find by onclick or text content
+    const allButtons = document.querySelectorAll('button');
+    allButtons.forEach(btn => {
+        const text = btn.textContent.toLowerCase();
+        if (text.includes('manage') && text.includes('→')) {
+            btn.addEventListener('click', handleManageSubscription);
+        } else if (text.includes('view invoices')) {
+            btn.addEventListener('click', handleViewInvoices);
+        } else if (text.includes('update payment')) {
+            btn.addEventListener('click', handleUpdatePayment);
+        }
+    });
 
     // Logout button
     const logoutBtn = document.getElementById('logoutBtn');

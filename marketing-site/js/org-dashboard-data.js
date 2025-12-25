@@ -308,6 +308,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Determine which page we're on and fetch appropriate data
     const currentPage = window.location.pathname;
 
+    // Temporarily disabled API calls to prevent CSP errors
+    // These will be enabled once proper CSP headers are configured
+    /*
     if (currentPage.includes('modern-dashboard')) {
         fetchOrganizationData();
     } else if (currentPage.includes('org-team')) {
@@ -322,6 +325,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Start auto-refresh
     startAutoRefresh();
+    */
+
+    console.log('Dashboard loaded with demo data (API calls disabled for CSP compliance)');
 });
 
 // ============================================
