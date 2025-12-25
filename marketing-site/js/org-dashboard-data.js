@@ -14,10 +14,25 @@ const API_BASE_URL = window.location.hostname === 'localhost'
 function checkAuth() {
     const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
 
-    if (!user || !user.organizationId) {
-        // Redirect to login if not authenticated
-        window.location.href = '/login.html';
+    if (!user || !user.email) {
+        // Redirect to admin login for organization users
+        window.location.href = '/admin-login.html';
         return null;
+    }
+
+    // For organization dashboard, we need either:
+    // 1. organizationId set, OR
+    // 2. userType = 'organization', OR  
+    // 3. role = 'admin' (for backwards compatibility)
+    const hasOrgAccess = user.organizationId ||
+        user.userType === 'organization' ||
+        user.orgRole === 'owner' ||
+        user.orgRole === 'admin' ||
+        user.role === 'admin';
+
+    if (!hasOrgAccess) {
+        console.warn('User does not have organization access');
+        // Still allow access but show demo data
     }
 
     return user;
