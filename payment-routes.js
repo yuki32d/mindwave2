@@ -52,7 +52,8 @@ router.post('/verify-payment', async (req, res) => {
             razorpay_payment_id,
             razorpay_signature,
             plan,
-            userId
+            userId,
+            organizationName
         } = req.body;
 
         // Verify signature
@@ -63,16 +64,109 @@ router.post('/verify-payment', async (req, res) => {
             .digest('hex');
 
         if (razorpay_signature === expectedSign) {
-            // Payment is verified
-            // TODO: Save payment details to database
-            // TODO: Update user subscription status
+            // Payment is verified - Now create organization
+            try {
+                // Import models (assuming they're available in server.js context)
+                const { User, Organization } = await import('./server.js');
 
-            res.json({
-                success: true,
-                message: 'Payment verified successfully',
-                paymentId: razorpay_payment_id,
-                orderId: razorpay_order_id
-            });
+                // Find user
+                const user = await User.findById(userId);
+                if (!user) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'User not found'
+                    });
+                }
+
+                // Check if user already has an organization
+                let organization;
+                if (user.organizationId) {
+                    organization = await Organization.findById(user.organizationId);
+                } else {
+                    // Create organization slug
+                    const orgName = organizationName || `${user.name}'s Organization`;
+                    const slug = orgName.toLowerCase()
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/(^-|-$)/g, '');
+
+                    // Create new organization
+                    organization = new Organization({
+                        name: orgName,
+                        slug: slug,
+                        ownerId: user._id,
+                        subscriptionTier: plan || 'premium',
+                        subscriptionStatus: 'active',
+                        setupCompleted: true,
+                        setupCompletedAt: new Date(),
+                        firstLoginAt: new Date(),
+                        lastLoginAt: new Date(),
+                        setupSteps: {
+                            profileCompleted: true,
+                            teamInvited: false,
+                            studentsImported: false,
+                            firstGameCreated: false
+                        },
+                        analytics: {
+                            aiCallsThisMonth: 0,
+                            totalImpressions: 0,
+                            totalInteractions: 0,
+                            lastResetDate: new Date()
+                        },
+                        trialStartedAt: new Date(),
+                        trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                        billingEmail: user.email,
+                        currentPeriodStart: new Date(),
+                        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                        limits: {
+                            maxStudents: -1,
+                            maxCourses: -1,
+                            maxStorage: 10240,
+                            features: {
+                                customBranding: true,
+                                apiAccess: true,
+                                ssoIntegration: true,
+                                prioritySupport: true,
+                                advancedAnalytics: true
+                            }
+                        },
+                        usage: {
+                            studentCount: 0,
+                            courseCount: 0,
+                            storageUsed: 0
+                        }
+                    });
+
+                    await organization.save();
+
+                    // Update user
+                    user.organizationId = organization._id;
+                    user.orgRole = 'owner';
+                    user.userType = 'organization';
+                    await user.save();
+                }
+
+                res.json({
+                    success: true,
+                    message: 'Payment verified successfully',
+                    paymentId: razorpay_payment_id,
+                    orderId: razorpay_order_id,
+                    organizationCreated: true,
+                    organizationId: organization._id,
+                    redirectUrl: '/modern-dashboard.html' // REDIRECT TO DASHBOARD
+                });
+            } catch (dbError) {
+                console.error('Error creating organization:', dbError);
+                // Payment verified but org creation failed
+                res.json({
+                    success: true,
+                    message: 'Payment verified successfully',
+                    paymentId: razorpay_payment_id,
+                    orderId: razorpay_order_id,
+                    organizationCreated: false,
+                    error: 'Organization creation pending',
+                    redirectUrl: '/modern-dashboard.html' // Still redirect to dashboard
+                });
+            }
         } else {
             res.status(400).json({
                 success: false,
