@@ -2282,8 +2282,11 @@ app.get("/api/engagement", authMiddleware, async (req, res) => {
     const fourteenDaysAgo = new Date();
     fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
-    // Get total students
-    const totalStudents = await User.countDocuments({ role: "student" });
+    // Get total students (exclude organization users)
+    const totalStudents = await User.countDocuments({
+      role: "student",
+      userType: { $ne: "organization" }
+    });
 
     if (totalStudents === 0) {
       return res.json({
@@ -2313,9 +2316,10 @@ app.get("/api/engagement", authMiddleware, async (req, res) => {
       createdAt: { $gte: fourteenDaysAgo, $lt: sevenDaysAgo }
     });
 
-    // Student activity breakdown
+    // Student activity breakdown (exclude organization users)
     const newStudents = await User.countDocuments({
       role: "student",
+      userType: { $ne: "organization" },
       createdAt: { $gte: sevenDaysAgo }
     });
 
