@@ -105,7 +105,7 @@ async function checkExistingOrganization() {
         // If user has organization, redirect to modern dashboard
         if (user.organizationId || user.orgRole || user.userType === 'organization') {
             console.log('User already has organization, redirecting to dashboard...');
-            window.location.href = '/modern-dashboard.html';
+            window.location.href = '/marketing-site/modern-dashboard.html';
             return;
         }
 
@@ -133,7 +133,7 @@ async function checkExistingOrganization() {
                 sessionStorage.setItem('user', JSON.stringify(updatedUser));
             }
 
-            window.location.href = '/modern-dashboard.html';
+            window.location.href = '/marketing-site/modern-dashboard.html';
         }
     } catch (error) {
         console.error('Error checking organization:', error);

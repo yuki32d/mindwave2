@@ -14,7 +14,7 @@ function handleLoginSuccess(userData) {
 
     if (userData.organizationId || userData.userType === 'organization' || userData.orgRole) {
         // User has organization access - redirect to modern dashboard
-        redirectUrl = '/modern-dashboard.html';
+        redirectUrl = '/marketing-site/modern-dashboard.html';
         console.log('✅ Redirecting to Organization Dashboard');
     } else if (userData.role === 'admin') {
         // Admin without organization - redirect to admin page
@@ -111,7 +111,7 @@ function checkAndRedirect() {
         // User is logged in
         if (user.organizationId || user.userType === 'organization' || user.orgRole) {
             // Has organization - redirect to modern dashboard
-            window.location.href = '/modern-dashboard.html';
+            window.location.href = '/marketing-site/modern-dashboard.html';
         } else if (user.role === 'admin') {
             // Admin - redirect to admin dashboard
             window.location.href = '/admin.html';

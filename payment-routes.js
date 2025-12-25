@@ -152,7 +152,7 @@ router.post('/verify-payment', async (req, res) => {
                     orderId: razorpay_order_id,
                     organizationCreated: true,
                     organizationId: organization._id,
-                    redirectUrl: '/modern-dashboard.html' // REDIRECT TO DASHBOARD
+                    redirectUrl: '/marketing-site/modern-dashboard.html' // REDIRECT TO DASHBOARD
                 });
             } catch (dbError) {
                 console.error('Error creating organization:', dbError);
@@ -164,7 +164,7 @@ router.post('/verify-payment', async (req, res) => {
                     orderId: razorpay_order_id,
                     organizationCreated: false,
                     error: 'Organization creation pending',
-                    redirectUrl: '/modern-dashboard.html' // Still redirect to dashboard
+                    redirectUrl: '/marketing-site/modern-dashboard.html' // Still redirect to dashboard
                 });
             }
         } else {

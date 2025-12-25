@@ -16,7 +16,7 @@ function checkAuth() {
 
     if (!user || !user.email) {
         // Redirect to admin login for organization users
-        window.location.href = '/admin-login.html';
+        window.location.href = '/marketing-site/admin-login.html';
         return null;
     }
 

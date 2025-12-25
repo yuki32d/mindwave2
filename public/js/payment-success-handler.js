@@ -62,7 +62,7 @@ async function handlePaymentSuccess(paymentData) {
 
             // Redirect to dashboard after 2 seconds
             setTimeout(() => {
-                window.location.href = result.redirectUrl || '/modern-dashboard.html';
+                window.location.href = result.redirectUrl || '/marketing-site/modern-dashboard.html';
             }, 2000);
         } else {
             throw new Error(result.message || 'Payment verification failed');
