@@ -88,6 +88,7 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
             })
         });
 
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || `${provider} authentication failed`);
@@ -95,12 +96,26 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
 
         const result = await response.json();
 
-        // Store authentication token
+        // Store authentication token and user data
         if (result.token) {
             localStorage.setItem('auth_token', result.token);
             localStorage.setItem('user_email', result.user.email);
             localStorage.setItem('user_name', result.user.name);
             localStorage.setItem('user_role', result.user.role);
+
+            // Store organization-related data
+            if (result.user.userType) {
+                localStorage.setItem('user_type', result.user.userType);
+            }
+            if (result.user.orgRole) {
+                localStorage.setItem('org_role', result.user.orgRole);
+            }
+            if (result.user.organizationId) {
+                localStorage.setItem('organization_id', result.user.organizationId);
+            }
+            if (result.user.needsOrgSetup) {
+                localStorage.setItem('needs_org_setup', 'true');
+            }
         }
 
         // Clear OAuth session data
@@ -108,8 +123,8 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
         sessionStorage.removeItem('oauth_provider');
         sessionStorage.removeItem('oauth_code_verifier');
 
-        // Show success and redirect
-        showSuccess(provider, result.user.name);
+        // Show success and redirect - pass full user object
+        showSuccess(provider, result.user);
 
     } catch (error) {
         throw new Error(`Failed to exchange authorization code: ${error.message}`);
@@ -259,28 +274,26 @@ function showError(title, message) {
     document.querySelector('.callback-message').style.display = 'none';
 }
 
-async function showSuccess(provider, userName) {
+async function showSuccess(provider, user) {
     const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+    const userName = user.name || user;  // Handle both object and string for backward compatibility
 
     document.querySelector('.callback-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
     document.querySelector('.callback-title').textContent = 'Success!';
     document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Checking your account...`;
     document.querySelector('.spinner').style.display = 'none';
 
-    // Get user email from localStorage
-    const userEmail = localStorage.getItem('user_email');
-
-    // Check if this specific email has organization access
-    if (userEmail === 'rajkumarw88d@gmail.com') {
+    // Special handling for rajkumarw88d@gmail.com - redirect to modern dashboard
+    if (user.email === 'rajkumarw88d@gmail.com') {
         document.querySelector('.callback-message').textContent = `Welcome back, ${userName}! Redirecting to your dashboard...`;
 
         // Set organization data in localStorage
         localStorage.setItem('user', JSON.stringify({
-            email: userEmail,
+            email: user.email,
             name: userName,
-            organizationId: 'existing',
-            orgRole: 'owner',
-            userType: 'organization'
+            organizationId: user.organizationId || 'existing',
+            orgRole: user.orgRole || 'owner',
+            userType: user.userType || 'organization'
         }));
 
         setTimeout(() => {
@@ -289,15 +302,28 @@ async function showSuccess(provider, userName) {
         return;
     }
 
-    // User doesn't have organization - redirect to setup
-    document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
+    // For all other users - check if they need organization setup
+    if (user.needsOrgSetup || localStorage.getItem('needs_org_setup') === 'true') {
+        // New user - redirect to organization setup
+        document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
 
-    // Set onboarding flag for new organizations
-    localStorage.setItem('needs_org_setup', 'true');
-    localStorage.setItem('org_role', 'admin'); // Organization creator is admin
+        // Redirect to organization setup page after 2 seconds
+        setTimeout(() => {
+            window.location.href = '/marketing-site/organization-setup.html';
+        }, 2000);
+    } else if (user.organizationId) {
+        // Existing user with organization - redirect to dashboard
+        document.querySelector('.callback-message').textContent = `Welcome back, ${userName}! Redirecting to your dashboard...`;
 
-    // Redirect to organization setup page after 2 seconds
-    setTimeout(() => {
-        window.location.href = '/marketing-site/organization-setup.html';
-    }, 2000);
+        setTimeout(() => {
+            window.location.href = '/marketing-site/modern-dashboard.html';
+        }, 1500);
+    } else {
+        // Fallback - redirect to organization setup
+        document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
+
+        setTimeout(() => {
+            window.location.href = '/marketing-site/organization-setup.html';
+        }, 2000);
+    }
 }

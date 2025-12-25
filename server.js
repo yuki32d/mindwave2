@@ -1350,14 +1350,18 @@ app.post("/api/auth/oauth/token", authLimiter, async (req, res) => {
 
     // Find or create user
     let user = await User.findOne({ email: email.toLowerCase() });
+    let isNewUser = false;
 
     if (!user) {
-      // Create new user
+      // Create new user - treat as organization owner
+      isNewUser = true;
       user = await User.create({
         name: name,
         displayName: name,
         email: email.toLowerCase(),
-        role: 'student', // Default role for OAuth users
+        role: 'admin', // Organization owners are admins
+        userType: 'organization', // Mark as organization user
+        orgRole: 'owner', // Set as organization owner
         authProvider: provider,
         providerId: providerId,
         profilePhoto: userInfo.picture || null,
@@ -1393,7 +1397,11 @@ app.post("/api/auth/oauth/token", authLimiter, async (req, res) => {
           name: user.name,
           email: user.email,
           role: user.role,
-          profilePhoto: user.profilePhoto
+          userType: user.userType,
+          orgRole: user.orgRole,
+          organizationId: user.organizationId,
+          profilePhoto: user.profilePhoto,
+          needsOrgSetup: isNewUser && !user.organizationId // Flag if new user needs org setup
         }
       });
 
