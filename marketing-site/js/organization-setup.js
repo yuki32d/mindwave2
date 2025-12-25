@@ -99,6 +99,17 @@ function checkUserAuthentication() {
 
 async function checkExistingOrganization() {
     try {
+        // Check user data from localStorage/sessionStorage
+        const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+
+        // If user has organization, redirect to modern dashboard
+        if (user.organizationId || user.orgRole || user.userType === 'organization') {
+            console.log('User already has organization, redirecting to dashboard...');
+            window.location.href = '/modern-dashboard.html';
+            return;
+        }
+
+        // Also check via API
         const response = await fetch('/api/me', {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -107,13 +118,22 @@ async function checkExistingOrganization() {
 
         const data = await response.json();
 
-        if (data.ok && data.user.organizationId) {
-            // User already has an organization, redirect to dashboard
-            if (data.user.role === 'admin') {
-                window.location.href = '/admin.html';
+        if (data.ok && (data.user.organizationId || data.user.orgRole)) {
+            // User already has an organization, redirect to modern dashboard
+            console.log('User has organization (from API), redirecting to dashboard...');
+
+            // Update local storage with organization data
+            const updatedUser = {
+                ...user,
+                ...data.user
+            };
+            if (localStorage.getItem('user')) {
+                localStorage.setItem('user', JSON.stringify(updatedUser));
             } else {
-                window.location.href = '/homepage.html';
+                sessionStorage.setItem('user', JSON.stringify(updatedUser));
             }
+
+            window.location.href = '/modern-dashboard.html';
         }
     } catch (error) {
         console.error('Error checking organization:', error);
