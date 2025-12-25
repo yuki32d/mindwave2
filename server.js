@@ -1544,16 +1544,21 @@ app.post("/api/auth/oauth/token", async (req, res) => {
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
       // Get orgRole from request body (sent from organization setup)
-      const orgRole = req.body.orgRole || 'student';
+      const orgRole = req.body.orgRole || null;
       const organizationId = req.body.organizationId || null;
+
+      // Determine user role: if they have orgRole (organization user), make them owner
+      // Otherwise, they're a regular student
+      const userRole = orgRole ? 'owner' : 'student';
 
       user = await User.create({
         name: userInfo.name,
         email: userInfo.email.toLowerCase(),
         password: hashedPassword,
-        role: 'student',
+        role: userRole,
         orgRole: orgRole,
-        organizationId: organizationId
+        organizationId: organizationId,
+        userType: orgRole ? 'organization' : 'student'
       });
     }
 
