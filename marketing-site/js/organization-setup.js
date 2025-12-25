@@ -99,34 +99,33 @@ function checkUserAuthentication() {
 
 async function checkExistingOrganization() {
     try {
-        // Check user data from localStorage/sessionStorage
-        const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-
-        // If user has organization, redirect to modern dashboard
-        if (user.organizationId || user.orgRole || user.userType === 'organization') {
-            console.log('User already has organization, redirecting to dashboard...');
-            window.location.href = '/marketing-site/modern-dashboard.html';
-            return;
-        }
-
-        // Also check via API
+        // Only check via API - don't trust localStorage
         const response = await fetch('/api/me', {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
             }
         });
 
+        if (!response.ok) {
+            console.log('API check failed, allowing setup to continue');
+            return;
+        }
+
         const data = await response.json();
 
-        if (data.ok && (data.user.organizationId || data.user.orgRole)) {
-            // User already has an organization, redirect to modern dashboard
-            console.log('User has organization (from API), redirecting to dashboard...');
+        // Only redirect if user ACTUALLY has an organization in the database
+        if (data.ok && data.user && (data.user.organizationId || data.user.orgRole)) {
+            console.log('User has organization in database, redirecting to dashboard...');
 
-            // Update local storage with organization data
+            // Update local storage with verified organization data
+            const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
             const updatedUser = {
                 ...user,
-                ...data.user
+                organizationId: data.user.organizationId,
+                orgRole: data.user.orgRole,
+                userType: data.user.userType || 'organization'
             };
+
             if (localStorage.getItem('user')) {
                 localStorage.setItem('user', JSON.stringify(updatedUser));
             } else {
@@ -134,9 +133,12 @@ async function checkExistingOrganization() {
             }
 
             window.location.href = '/marketing-site/modern-dashboard.html';
+        } else {
+            console.log('User does not have organization, continuing with setup...');
         }
     } catch (error) {
         console.error('Error checking organization:', error);
+        // On error, allow setup to continue
     }
 }
 
