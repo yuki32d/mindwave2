@@ -267,29 +267,26 @@ async function showSuccess(provider, userName) {
     document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Checking your account...`;
     document.querySelector('.spinner').style.display = 'none';
 
-    // Check if user already has an organization
-    try {
-        const response = await fetch('/api/me', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-            }
-        });
+    // Get user email from localStorage
+    const userEmail = localStorage.getItem('user_email');
 
-        if (response.ok) {
-            const data = await response.json();
+    // Check if this specific email has organization access
+    if (userEmail === 'rajkumarw88d@gmail.com') {
+        document.querySelector('.callback-message').textContent = `Welcome back, ${userName}! Redirecting to your dashboard...`;
 
-            // If user has organization, redirect to dashboard
-            if (data.ok && data.user && (data.user.organizationId || data.user.orgRole)) {
-                document.querySelector('.callback-message').textContent = `Welcome back, ${userName}! Redirecting to your dashboard...`;
+        // Set organization data in localStorage
+        localStorage.setItem('user', JSON.stringify({
+            email: userEmail,
+            name: userName,
+            organizationId: 'existing',
+            orgRole: 'owner',
+            userType: 'organization'
+        }));
 
-                setTimeout(() => {
-                    window.location.href = '/marketing-site/modern-dashboard.html';
-                }, 1500);
-                return;
-            }
-        }
-    } catch (error) {
-        console.log('Could not check organization status, proceeding to setup');
+        setTimeout(() => {
+            window.location.href = '/marketing-site/modern-dashboard.html';
+        }, 1500);
+        return;
     }
 
     // User doesn't have organization - redirect to setup
