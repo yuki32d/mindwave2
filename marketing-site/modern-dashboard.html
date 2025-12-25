@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindWave - Modern Dashboard</title>
     <link rel="stylesheet" href="css/modern-dashboard.css">
+    <link rel="stylesheet" href="css/profile-styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -89,8 +90,20 @@
                         <span>Create</span>
                     </button>
                     <button class="btn-icon">🔔</button>
-                    <div class="user-avatar">
-                        <img src="https://i.pravatar.cc/40?img=5" alt="User">
+                    <div class="profile-dropdown">
+                        <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="profile-avatar">
+                        <div class="dropdown-menu">
+                            <a href="org-profile.html" class="dropdown-item">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="org-settings.html" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <hr>
+                            <a href="#" class="dropdown-item" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -267,8 +280,10 @@
         </main>
     </div>
 
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
     <script src="js/modern-dashboard.js"></script>
     <script src="js/org-dashboard-data.js"></script>
+    <script src="js/dashboard-interactions.js"></script>
 </body>
 
 </html>
