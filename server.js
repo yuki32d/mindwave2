@@ -290,6 +290,9 @@ const userSchema = new mongoose.Schema(
     // Multi-tenant subscription fields
     organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
     orgRole: { type: String, enum: ['owner', 'admin', 'faculty', 'student'], default: 'student' },
+    // OAuth Authentication
+    authProvider: { type: String, enum: ['google', 'linkedin', 'facebook', 'local'], default: 'local' },
+    providerId: { type: String }, // OAuth provider's user ID
     googleAccessToken: { type: String },
     googleRefreshToken: { type: String },
     // GitHub Integration
@@ -301,7 +304,8 @@ const userSchema = new mongoose.Schema(
     // Profile Photo
     profilePhoto: { type: String }, // URL to profile photo
     // Activity Tracking
-    lastActive: { type: Date, default: Date.now }
+    lastActive: { type: Date, default: Date.now },
+    lastLogin: { type: Date }
   },
   { timestamps: true }
 );
@@ -1138,6 +1142,268 @@ app.post("/api/logout", (_req, res) => {
   res
     .clearCookie("mindwave_token", { httpOnly: true, sameSite: "lax", secure: false })
     .json({ ok: true });
+});
+
+// ===================================
+// OAUTH AUTHENTICATION ENDPOINTS
+// ===================================
+
+// Exchange OAuth authorization code for access token
+app.post("/api/auth/oauth/token", authLimiter, async (req, res) => {
+  try {
+    const { provider, code, codeVerifier, redirectUri } = req.body;
+
+    if (!provider || !code || !redirectUri) {
+      return res.status(400).json({
+        ok: false,
+        message: "Missing required fields: provider, code, or redirectUri"
+      });
+    }
+
+    let tokenResponse;
+    let accessToken;
+    let userInfo;
+
+    // Exchange code for token based on provider
+    if (provider === 'google') {
+      // Exchange authorization code for Google access token
+      try {
+        const tokenData = {
+          code: code,
+          client_id: GOOGLE_CLIENT_ID,
+          client_secret: GOOGLE_CLIENT_SECRET,
+          redirect_uri: redirectUri,
+          grant_type: 'authorization_code'
+        };
+
+        if (codeVerifier) {
+          tokenData.code_verifier = codeVerifier;
+        }
+
+        const response = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams(tokenData)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('Google token exchange error:', errorData);
+          return res.status(500).json({
+            ok: false,
+            message: "Server error during google authentication"
+          });
+        }
+
+        tokenResponse = await response.json();
+        accessToken = tokenResponse.access_token;
+
+        // Get user info from Google
+        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+
+        if (!userInfoResponse.ok) {
+          return res.status(500).json({
+            ok: false,
+            message: "Failed to fetch user information"
+          });
+        }
+
+        userInfo = await userInfoResponse.json();
+
+      } catch (error) {
+        console.error('Google OAuth error:', error);
+        return res.status(500).json({
+          ok: false,
+          message: `Server error during google authentication: ${error.message}`
+        });
+      }
+
+    } else if (provider === 'linkedin') {
+      // LinkedIn token exchange
+      try {
+        const response = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            grant_type: 'authorization_code',
+            code: code,
+            client_id: process.env.LINKEDIN_CLIENT_ID,
+            client_secret: process.env.LINKEDIN_CLIENT_SECRET,
+            redirect_uri: redirectUri
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('LinkedIn token exchange error:', errorData);
+          return res.status(500).json({
+            ok: false,
+            message: "Server error during LinkedIn authentication"
+          });
+        }
+
+        tokenResponse = await response.json();
+        accessToken = tokenResponse.access_token;
+
+        // Get user info from LinkedIn
+        const userInfoResponse = await fetch('https://api.linkedin.com/v2/userinfo', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+
+        if (!userInfoResponse.ok) {
+          return res.status(500).json({
+            ok: false,
+            message: "Failed to fetch LinkedIn user information"
+          });
+        }
+
+        userInfo = await userInfoResponse.json();
+
+      } catch (error) {
+        console.error('LinkedIn OAuth error:', error);
+        return res.status(500).json({
+          ok: false,
+          message: `Server error during LinkedIn authentication: ${error.message}`
+        });
+      }
+
+    } else if (provider === 'facebook') {
+      // Facebook token exchange
+      try {
+        const response = await fetch('https://graph.facebook.com/v18.0/oauth/access_token', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          params: {
+            client_id: process.env.FACEBOOK_CLIENT_ID,
+            client_secret: process.env.FACEBOOK_CLIENT_SECRET,
+            redirect_uri: redirectUri,
+            code: code
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('Facebook token exchange error:', errorData);
+          return res.status(500).json({
+            ok: false,
+            message: "Server error during Facebook authentication"
+          });
+        }
+
+        tokenResponse = await response.json();
+        accessToken = tokenResponse.access_token;
+
+        // Get user info from Facebook
+        const userInfoResponse = await fetch('https://graph.facebook.com/me?fields=id,name,email,picture', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+
+        if (!userInfoResponse.ok) {
+          return res.status(500).json({
+            ok: false,
+            message: "Failed to fetch Facebook user information"
+          });
+        }
+
+        userInfo = await userInfoResponse.json();
+
+      } catch (error) {
+        console.error('Facebook OAuth error:', error);
+        return res.status(500).json({
+          ok: false,
+          message: `Server error during Facebook authentication: ${error.message}`
+        });
+      }
+
+    } else {
+      return res.status(400).json({
+        ok: false,
+        message: "Unsupported OAuth provider"
+      });
+    }
+
+    // Normalize user data
+    const email = userInfo.email || userInfo.mail || userInfo.userPrincipalName;
+    const name = userInfo.name || userInfo.given_name || 'User';
+    const providerId = userInfo.id || userInfo.sub;
+
+    if (!email) {
+      return res.status(400).json({
+        ok: false,
+        message: "Email not provided by OAuth provider"
+      });
+    }
+
+    // Find or create user
+    let user = await User.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      // Create new user
+      user = await User.create({
+        name: name,
+        displayName: name,
+        email: email.toLowerCase(),
+        role: 'student', // Default role for OAuth users
+        authProvider: provider,
+        providerId: providerId,
+        profilePhoto: userInfo.picture || null,
+        // No password for OAuth users
+        password: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10) // Random password
+      });
+    } else {
+      // Update existing user's OAuth info
+      user.authProvider = provider;
+      user.providerId = providerId;
+      user.lastLogin = new Date();
+      if (userInfo.picture) {
+        user.profilePhoto = userInfo.picture;
+      }
+      await user.save();
+    }
+
+    // Generate JWT token
+    const token = signToken(user);
+
+    // Set cookie and return response
+    res
+      .cookie("mindwave_token", token, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      })
+      .json({
+        ok: true,
+        token: token,
+        user: {
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          profilePhoto: user.profilePhoto
+        }
+      });
+
+  } catch (error) {
+    console.error("OAuth token exchange error:", error);
+    res.status(500).json({
+      ok: false,
+      message: "Server error during authentication"
+    });
+  }
 });
 
 app.get("/api/me", authMiddleware, async (req, res) => {
