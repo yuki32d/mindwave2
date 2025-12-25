@@ -310,7 +310,8 @@ async function showSuccess(provider, user) {
             name: userName,
             organizationId: user.organizationId || 'existing',
             orgRole: user.orgRole || 'owner',
-            userType: user.userType || 'organization'
+            userType: user.userType || 'organization',
+            token: localStorage.getItem('auth_token')
         }));
 
         setTimeout(() => {
@@ -319,10 +320,11 @@ async function showSuccess(provider, user) {
         return;
     }
 
-    // For all other users - check if they need organization setup
-    if (user.needsOrgSetup || localStorage.getItem('needs_org_setup') === 'true') {
+    // For all other users - check if they have an organization
+    // If no organizationId, they need to complete setup
+    if (!user.organizationId) {
         // New user - redirect to organization setup
-        console.log('Redirecting new user to organization-setup.html');
+        console.log('Redirecting new user (no organizationId) to organization-setup.html');
         document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
 
         // Redirect to organization setup page after 2 seconds
@@ -330,7 +332,7 @@ async function showSuccess(provider, user) {
             console.log('Executing redirect to organization-setup.html');
             window.location.href = '/marketing-site/organization-setup.html';
         }, 2000);
-    } else if (user.organizationId) {
+    } else {
         // Existing user with organization - redirect to dashboard
         console.log('Redirecting existing user with org to modern-dashboard.html');
         document.querySelector('.callback-message').textContent = `Welcome back, ${userName}! Redirecting to your dashboard...`;
@@ -338,13 +340,5 @@ async function showSuccess(provider, user) {
         setTimeout(() => {
             window.location.href = '/marketing-site/modern-dashboard.html';
         }, 1500);
-    } else {
-        // Fallback - redirect to organization setup
-        console.log('Fallback: Redirecting to organization-setup.html');
-        document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
-
-        setTimeout(() => {
-            window.location.href = '/marketing-site/organization-setup.html';
-        }, 2000);
     }
 }
