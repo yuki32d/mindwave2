@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave - Modern Dashboard</title>
+    <link rel="stylesheet" href="css/modern-dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🌊</span>
+                    <span class="logo-text">MindWave</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-label">MAIN MENU</span>
+                    <a href="modern-dashboard.html" class="nav-item active">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="org-analytics.html" class="nav-item">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                    <a href="org-billing.html" class="nav-item">
+                        <span class="nav-icon">�</span>
+                        <span class="nav-text">Billing</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">MANAGEMENT</span>
+                    <a href="org-team.html" class="nav-item">
+                        <span class="nav-icon">�</span>
+                        <span class="nav-text">Team Members</span>
+                    </a>
+                    <a href="org-students.html" class="nav-item">
+                        <span class="nav-icon">🎓</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a href="org-games.html" class="nav-item">
+                        <span class="nav-icon">🎮</span>
+                        <span class="nav-text">Games</span>
+                    </a>
+                    <a href="org-settings.html" class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">SUPPORT</span>
+                    <a href="#help" class="nav-item">
+                        <span class="nav-icon">�</span>
+                        <span class="nav-text">Help Center</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="search-container">
+                    <input type="text" placeholder="Search Anything here ..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-export">
+                        <span>📤</span>
+                        <span>Export</span>
+                    </button>
+                    <button class="btn-create">
+                        <span>➕</span>
+                        <span>Create</span>
+                    </button>
+                    <button class="btn-icon">🔔</button>
+                    <div class="user-avatar">
+                        <img src="https://i.pravatar.cc/40?img=5" alt="User">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+                <div class="welcome-text">
+                    <h1>Welcome Back, <span id="orgName">TechEdu Institute</span> 🎉</h1>
+                    <p>Manage your organization, team, and subscription</p>
+                </div>
+            </section>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Left Column -->
+                <div class="left-column">
+                    <!-- Subscription Card -->
+                    <div class="performance-card">
+                        <div class="performance-header">
+                            <div class="lecturer-info">
+                                <div class="subscription-icon">💎</div>
+                                <div>
+                                    <div class="performance-score" id="planName">Premium Plan</div>
+                                    <div class="performance-label">Active Subscription</div>
+                                </div>
+                            </div>
+                            <button class="see-more" onclick="window.location.href='#billing'">Manage →</button>
+                        </div>
+
+                        <div class="performance-detail">
+                            <div class="detail-text">
+                                <span class="detail-score">$99/month</span>
+                                <p>Your subscription renews on <strong>January 25, 2026</strong>. You have access to all
+                                    premium features including unlimited AI calls and priority support.</p>
+                            </div>
+                            <div class="subscription-actions">
+                                <button class="action-btn" onclick="alert('View Invoices')">📄 View Invoices</button>
+                                <button class="action-btn" onclick="alert('Update Payment')">💳 Update Payment</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="stats-row">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Team Members</span>
+                                <button class="stat-menu">⋯</button>
+                            </div>
+                            <div class="stat-value" id="teamCount">5</div>
+                            <div class="stat-change positive">
+                                <span class="change-icon">↗</span>
+                                <span>2 added this month</span>
+                            </div>
+                            <div class="team-avatars">
+                                <img src="https://i.pravatar.cc/32?img=1" alt="Member">
+                                <img src="https://i.pravatar.cc/32?img=2" alt="Member">
+                                <img src="https://i.pravatar.cc/32?img=3" alt="Member">
+                                <img src="https://i.pravatar.cc/32?img=4" alt="Member">
+                                <div class="avatar-more">+1</div>
+                            </div>
+                            <button class="add-member-btn" onclick="alert('Add Team Member')">+ Add Member</button>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Total Students</span>
+                                <button class="stat-menu">⋯</button>
+                            </div>
+                            <div class="stat-value" id="studentCount">243</div>
+                            <div class="stat-change positive">
+                                <span class="change-icon">↗</span>
+                                <span>18% increase this month</span>
+                            </div>
+                            <div class="stat-chart">
+                                <canvas id="newStudentsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Usage Metrics Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Usage Metrics</h3>
+                            <div class="chart-legend">
+                                <span class="legend-item">
+                                    <span class="legend-dot blue"></span>
+                                    AI Calls
+                                </span>
+                                <span class="legend-item">
+                                    <span class="legend-dot purple"></span>
+                                    Storage
+                                </span>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="workingHoursChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="right-column">
+                    <!-- AI Usage Card -->
+                    <div class="stat-card-small">
+                        <div class="stat-header">
+                            <span class="stat-label">AI API Calls</span>
+                            <button class="stat-menu">⋯</button>
+                        </div>
+                        <div class="stat-value" id="aiCalls">2,450</div>
+                        <div class="usage-limit">of 5,000 this month</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: 49%"></div>
+                        </div>
+                        <div class="stat-change positive">
+                            <span>49% used • 2,550 remaining</span>
+                        </div>
+                    </div>
+
+                    <!-- Storage Card -->
+                    <div class="stat-card-small">
+                        <div class="stat-header">
+                            <span class="stat-label">Storage Used</span>
+                            <button class="stat-menu">⋯</button>
+                        </div>
+                        <div class="stat-value">3.2 GB</div>
+                        <div class="usage-limit">of 10 GB</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: 32%"></div>
+                        </div>
+                        <div class="stat-change positive">
+                            <span>32% used • 6.8 GB remaining</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="agenda-card">
+                        <div class="agenda-header">
+                            <h3>Quick Actions</h3>
+                        </div>
+                        <div class="quick-actions-list">
+                            <button class="quick-action-btn">
+                                <span class="action-icon">👥</span>
+                                <div class="action-text">
+                                    <div class="action-title">Invite Team Member</div>
+                                    <div class="action-desc">Add faculty or admins</div>
+                                </div>
+                            </button>
+                            <button class="quick-action-btn">
+                                <span class="action-icon">🎓</span>
+                                <div class="action-text">
+                                    <div class="action-title">Add Students</div>
+                                    <div class="action-desc">Bulk upload via CSV</div>
+                                </div>
+                            </button>
+                            <button class="quick-action-btn">
+                                <span class="action-icon">📊</span>
+                                <div class="action-text">
+                                    <div class="action-title">View Reports</div>
+                                    <div class="action-desc">Analytics & insights</div>
+                                </div>
+                            </button>
+                            <button class="quick-action-btn">
+                                <span class="action-icon">⚙️</span>
+                                <div class="action-text">
+                                    <div class="action-title">Settings</div>
+                                    <div class="action-desc">Organization preferences</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/modern-dashboard.js"></script>
+    <script src="js/org-dashboard-data.js"></script>
+</body>
+
+</html>

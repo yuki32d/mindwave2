@@ -69,6 +69,152 @@ if (STRIPE_SECRET_KEY) {
   console.warn('⚠️  Stripe not configured - subscription features will be disabled');
 }
 
+// ============================================
+// SUBSCRIPTION TIER CONFIGURATION
+// ============================================
+const SUBSCRIPTION_TIERS = {
+  trial: {
+    name: 'Free Trial',
+    price: 0,
+    currency: 'INR',
+    limits: {
+      maxGames: 5,
+      maxStudents: 30,
+      maxStorage: 100, // MB
+      aiCallsPerMonth: 50
+    },
+    features: {
+      // Game Tools (3 basic)
+      quiz: true,
+      unjumble: true,
+      sorter: true,
+      fillin: false,
+      debug: false,
+      sql: false,
+      scenario: false,
+      flashcard: false,
+      matching: false,
+      findMatch: false,
+      spinWheel: false,
+      anagram: false,
+      speakingCards: false,
+
+      // Premium Features
+      aiGameBuilder: false,
+      advancedAnalytics: false,
+      liveQuiz: false,
+      customBranding: false,
+      apiAccess: false,
+      prioritySupport: false,
+      exportCSV: false,
+      exportExcel: false,
+      githubIntegration: false,
+      zoomIntegration: false
+    }
+  },
+
+  basic: {
+    name: 'Basic Plan',
+    price: 499,
+    currency: 'INR',
+    billingCycle: 'monthly',
+    limits: {
+      maxGames: 50,
+      maxStudents: 100,
+      maxStorage: 1024, // 1GB
+      liveQuizParticipants: 50,
+      aiCallsPerMonth: 500
+    },
+    features: {
+      // Game Tools (8 tools)
+      quiz: true,
+      unjumble: true,
+      sorter: true,
+      fillin: true,
+      debug: true,
+      flashcard: true,
+      matching: true,
+      findMatch: true,
+      sql: false,
+      scenario: false,
+      spinWheel: false,
+      anagram: false,
+      speakingCards: false,
+
+      // Premium Features
+      aiGameBuilder: false,
+      advancedAnalytics: true,
+      liveQuiz: true,
+      customBranding: true,
+      apiAccess: false,
+      prioritySupport: false,
+      exportCSV: true,
+      exportExcel: false,
+      githubIntegration: false,
+      zoomIntegration: false
+    }
+  },
+
+  premium: {
+    name: 'Premium Plan',
+    price: 2499,
+    currency: 'INR',
+    billingCycle: 'monthly',
+    limits: {
+      maxGames: -1, // Unlimited
+      maxStudents: -1, // Unlimited
+      maxStorage: 10240, // 10GB
+      liveQuizParticipants: -1, // Unlimited
+      aiCallsPerMonth: 5000
+    },
+    features: {
+      // All Game Tools (13 tools)
+      quiz: true,
+      unjumble: true,
+      sorter: true,
+      fillin: true,
+      debug: true,
+      flashcard: true,
+      matching: true,
+      findMatch: true,
+      sql: true,
+      scenario: true,
+      spinWheel: true,
+      anagram: true,
+      speakingCards: true,
+
+      // All Premium Features
+      aiGameBuilder: true,
+      advancedAnalytics: true,
+      liveQuiz: true,
+      customBranding: true,
+      apiAccess: true,
+      prioritySupport: true,
+      exportCSV: true,
+      exportExcel: true,
+      githubIntegration: true,
+      zoomIntegration: true
+    }
+  }
+};
+
+// Helper function to check feature access
+function hasFeatureAccess(subscriptionTier, featureName) {
+  const tier = SUBSCRIPTION_TIERS[subscriptionTier] || SUBSCRIPTION_TIERS.trial;
+  return tier.features[featureName] === true;
+}
+
+// Helper function to check limit
+function checkLimit(subscriptionTier, limitName, currentUsage) {
+  const tier = SUBSCRIPTION_TIERS[subscriptionTier] || SUBSCRIPTION_TIERS.trial;
+  const limit = tier.limits[limitName];
+
+  // -1 means unlimited
+  if (limit === -1) return true;
+
+  return currentUsage < limit;
+}
+
 let mailer = null;
 if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
   mailer = nodemailer.createTransport({
@@ -140,6 +286,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["student", "admin"], default: "student" },
+    userType: { type: String, enum: ["student", "admin", "organization"], default: "student" }, // For routing logic
     // Multi-tenant subscription fields
     organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
     orgRole: { type: String, enum: ['owner', 'admin', 'faculty', 'student'], default: 'student' },
@@ -198,13 +345,40 @@ const organizationSchema = new mongoose.Schema(
     // Subscription Details
     subscriptionTier: {
       type: String,
-      enum: ['trial', 'personal', 'team', 'enterprise'],
+      enum: ['trial', 'basic', 'premium'],
       default: 'trial'
     },
     subscriptionStatus: {
       type: String,
       enum: ['active', 'trialing', 'past_due', 'canceled', 'incomplete'],
       default: 'trialing'
+    },
+
+    // Setup Tracking
+    setupCompleted: {
+      type: Boolean,
+      default: false
+    },
+    setupCompletedAt: {
+      type: Date
+    },
+    setupSteps: {
+      profileCompleted: { type: Boolean, default: false },
+      teamInvited: { type: Boolean, default: false },
+      studentsImported: { type: Boolean, default: false },
+      firstGameCreated: { type: Boolean, default: false }
+    },
+
+    // Login Tracking
+    firstLoginAt: { type: Date },
+    lastLoginAt: { type: Date },
+
+    // Usage Analytics Tracking
+    analytics: {
+      aiCallsThisMonth: { type: Number, default: 0 },
+      totalImpressions: { type: Number, default: 0 },
+      totalInteractions: { type: Number, default: 0 },
+      lastResetDate: { type: Date, default: Date.now }
     },
 
     // Stripe Integration
@@ -969,6 +1143,210 @@ app.post("/api/logout", (_req, res) => {
 app.get("/api/me", authMiddleware, async (req, res) => {
   const user = await User.findById(req.user.sub).select("-password");
   res.json({ ok: true, user });
+});
+
+// ===================================
+// ORGANIZATION MANAGEMENT API
+// ===================================
+
+// Check user's organization status (for smart routing after login)
+app.get("/api/auth/check-org-status", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId).select('organizationId orgRole userType role');
+
+    if (!user.organizationId) {
+      // Regular user (student/admin)
+      return res.json({
+        ok: true,
+        hasOrganization: false,
+        userType: user.userType || user.role,
+        redirectTo: user.role === 'student' ? '/homepage.html' : '/admin.html'
+      });
+    }
+
+    // Organization user
+    const organization = await Organization.findById(user.organizationId);
+
+    if (!organization) {
+      return res.status(404).json({ ok: false, message: 'Organization not found' });
+    }
+
+    // Update last login
+    organization.lastLoginAt = new Date();
+    if (!organization.firstLoginAt) {
+      organization.firstLoginAt = new Date();
+    }
+    await organization.save();
+
+    res.json({
+      ok: true,
+      hasOrganization: true,
+      setupCompleted: organization.setupCompleted,
+      organizationRole: user.orgRole,
+      organizationId: organization._id,
+      organizationName: organization.name,
+      subscriptionTier: organization.subscriptionTier,
+      subscriptionStatus: organization.subscriptionStatus,
+      redirectTo: organization.setupCompleted
+        ? '/organization-dashboard.html'
+        : '/organization-setup.html'
+    });
+
+  } catch (error) {
+    console.error('Check org status error:', error);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// Complete organization setup
+app.post("/api/organization/complete-setup", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+
+    if (!user.organizationId) {
+      return res.status(403).json({ ok: false, message: 'Not an organization member' });
+    }
+
+    const organization = await Organization.findById(user.organizationId);
+
+    if (!organization) {
+      return res.status(404).json({ ok: false, message: 'Organization not found' });
+    }
+
+    // Only owner can complete setup
+    if (user.orgRole !== 'owner') {
+      return res.status(403).json({ ok: false, message: 'Only owner can complete setup' });
+    }
+
+    // Mark setup as completed
+    organization.setupCompleted = true;
+    organization.setupCompletedAt = new Date();
+    await organization.save();
+
+    res.json({
+      ok: true,
+      message: 'Setup completed successfully',
+      redirectTo: '/organization-dashboard.html'
+    });
+
+  } catch (error) {
+    console.error('Complete setup error:', error);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// Update organization setup step
+app.post("/api/organization/update-setup-step", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const { step } = req.body; // 'profileCompleted', 'teamInvited', etc.
+
+    const user = await User.findById(userId);
+    const organization = await Organization.findById(user.organizationId);
+
+    if (!organization) {
+      return res.status(404).json({ ok: false, message: 'Organization not found' });
+    }
+
+    // Update setup step
+    if (organization.setupSteps && step in organization.setupSteps) {
+      organization.setupSteps[step] = true;
+      await organization.save();
+    }
+
+    res.json({
+      ok: true,
+      setupSteps: organization.setupSteps
+    });
+
+  } catch (error) {
+    console.error('Update setup step error:', error);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// Get subscription status and features
+app.get("/api/subscription/status", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+
+    if (!user.organizationId) {
+      // Regular user - return default trial tier
+      return res.json({
+        ok: true,
+        tier: 'trial',
+        tierName: SUBSCRIPTION_TIERS.trial.name,
+        status: 'trialing',
+        features: SUBSCRIPTION_TIERS.trial.features,
+        limits: SUBSCRIPTION_TIERS.trial.limits,
+        usage: { studentCount: 0, courseCount: 0, storageUsed: 0 }
+      });
+    }
+
+    const organization = await Organization.findById(user.organizationId);
+
+    if (!organization) {
+      return res.status(404).json({ ok: false, message: 'Organization not found' });
+    }
+
+    const tierConfig = SUBSCRIPTION_TIERS[organization.subscriptionTier] || SUBSCRIPTION_TIERS.trial;
+
+    res.json({
+      ok: true,
+      tier: organization.subscriptionTier,
+      tierName: tierConfig.name,
+      status: organization.subscriptionStatus,
+      features: tierConfig.features,
+      limits: tierConfig.limits,
+      usage: organization.usage || { studentCount: 0, courseCount: 0, storageUsed: 0 },
+      analytics: organization.analytics || { aiCallsThisMonth: 0, totalImpressions: 0, totalInteractions: 0 },
+      billingInfo: {
+        currentPeriodStart: organization.currentPeriodStart,
+        currentPeriodEnd: organization.currentPeriodEnd,
+        cancelAtPeriodEnd: organization.cancelAtPeriodEnd
+      }
+    });
+
+  } catch (error) {
+    console.error('Get subscription status error:', error);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// Check if user has access to a specific feature
+app.post("/api/subscription/check-feature", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const { feature } = req.body;
+
+    const user = await User.findById(userId);
+    let subscriptionTier = 'trial';
+
+    if (user.organizationId) {
+      const organization = await Organization.findById(user.organizationId);
+      if (organization) {
+        subscriptionTier = organization.subscriptionTier;
+      }
+    }
+
+    const hasAccess = hasFeatureAccess(subscriptionTier, feature);
+    const tierConfig = SUBSCRIPTION_TIERS[subscriptionTier];
+
+    res.json({
+      ok: true,
+      hasAccess,
+      feature,
+      currentTier: subscriptionTier,
+      requiredTier: hasAccess ? subscriptionTier : 'basic' // Simplified logic
+    });
+
+  } catch (error) {
+    console.error('Check feature error:', error);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
 });
 
 // ===================================
@@ -6819,7 +7197,145 @@ app.get('/api/me', authMiddleware, async (req, res) => {
   }
 });
 
+// ============================================
+// SPECIAL: Grant Dashboard Access Endpoint
+// One-time use endpoint for existing paid users
+// ============================================
+app.post('/api/grant-dashboard-access', async (req, res) => {
+  try {
+    const { email, organizationName, secretKey } = req.body;
+
+    // Security: Require a secret key (set this in your .env file)
+    const GRANT_ACCESS_SECRET = process.env.GRANT_ACCESS_SECRET || 'mindwave-grant-access-2024';
+
+    if (secretKey !== GRANT_ACCESS_SECRET) {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    if (!email || !organizationName) {
+      return res.status(400).json({ error: 'Email and organization name required' });
+    }
+
+    // Find user
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ error: `User not found with email: ${email}` });
+    }
+
+    // Check if user already has an organization
+    if (user.organizationId) {
+      const existingOrg = await Organization.findById(user.organizationId);
+      if (existingOrg) {
+        return res.json({
+          success: true,
+          message: 'User already has dashboard access',
+          organization: {
+            id: existingOrg._id,
+            name: existingOrg.name,
+            tier: existingOrg.subscriptionTier,
+            status: existingOrg.subscriptionStatus
+          },
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.orgRole
+          }
+        });
+      }
+    }
+
+    // Create organization slug
+    const slug = organizationName.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    // Create organization
+    const organization = new Organization({
+      name: organizationName,
+      slug: slug,
+      ownerId: user._id,
+      subscriptionTier: 'premium',
+      subscriptionStatus: 'active',
+      setupCompleted: true,
+      setupCompletedAt: new Date(),
+      firstLoginAt: new Date(),
+      lastLoginAt: new Date(),
+      setupSteps: {
+        profileCompleted: true,
+        teamInvited: false,
+        studentsImported: false,
+        firstGameCreated: false
+      },
+      analytics: {
+        aiCallsThisMonth: 0,
+        totalImpressions: 0,
+        totalInteractions: 0,
+        lastResetDate: new Date()
+      },
+      trialStartedAt: new Date(),
+      trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      billingEmail: user.email,
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      limits: {
+        maxStudents: -1, // Unlimited
+        maxCourses: -1, // Unlimited
+        maxStorage: 10240, // 10GB
+        features: {
+          customBranding: true,
+          apiAccess: true,
+          ssoIntegration: true,
+          prioritySupport: true,
+          advancedAnalytics: true
+        }
+      },
+      usage: {
+        studentCount: 0,
+        courseCount: 0,
+        storageUsed: 0
+      }
+    });
+
+    await organization.save();
+
+    // Update user
+    user.organizationId = organization._id;
+    user.orgRole = 'owner';
+    user.userType = 'organization';
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Dashboard access granted successfully!',
+      organization: {
+        id: organization._id,
+        name: organization.name,
+        slug: organization.slug,
+        tier: organization.subscriptionTier,
+        status: organization.subscriptionStatus
+      },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.orgRole
+      },
+      nextSteps: [
+        'Login to your account',
+        'Navigate to /modern-dashboard.html',
+        'Start managing your organization!'
+      ]
+    });
+
+  } catch (error) {
+    console.error('Error granting dashboard access:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Health check endpoint for monitoring
+
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
