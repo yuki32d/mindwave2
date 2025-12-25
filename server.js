@@ -2617,12 +2617,39 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
   }
 });
 
-// Get student's game results count
+// Get student's game results with full details
 app.get("/api/game-results/my-results", authMiddleware, async (req, res) => {
   try {
-    const studentEmail = req.user.email;
-    const count = await GameSubmission.countDocuments({ studentEmail });
-    res.json({ ok: true, results: Array(count).fill({}), count });
+    const studentId = req.user.sub;
+
+    // Fetch all game submissions for this student with game details populated
+    const submissions = await GameSubmission.find({ studentId })
+      .populate('gameId', 'title type questions')
+      .sort({ submittedAt: -1 })
+      .lean();
+
+    // Format the results to include all necessary data
+    const results = submissions.map(sub => {
+      const game = sub.gameId || {};
+      return {
+        _id: sub._id,
+        gameId: game._id,
+        gameTitle: game.title || 'Untitled Game',
+        gameName: game.title || 'Untitled Game',
+        title: game.title || 'Untitled Game',
+        gameType: game.type || 'game',
+        type: game.type || 'game',
+        score: sub.score || 0,
+        rawScore: sub.score || 0,
+        timeTaken: sub.durationSeconds || 0,
+        completedAt: sub.completedAt || sub.submittedAt,
+        createdAt: sub.submittedAt,
+        submittedAt: sub.submittedAt,
+        studentAnswers: sub.studentAnswers || []
+      };
+    });
+
+    res.json({ ok: true, results, count: results.length });
   } catch (error) {
     console.error("Game results error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
