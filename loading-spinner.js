@@ -11,19 +11,27 @@ const MindWaveLoader = {
             return;
         }
 
-        // Create loader HTML
+        // Create loader HTML with new MW design
         const loaderHTML = `
             <div id="mindwave-loader" class="mindwave-loading-overlay ${theme === 'light' ? 'light-theme' : ''}" role="status" aria-live="polite">
                 <div class="mindwave-loader-container">
                     <div class="mindwave-loader">
-                        <div class="brain-wave">
-                            <div class="wave-circle"></div>
-                            <div class="wave-circle"></div>
-                            <div class="wave-circle"></div>
-                            <div class="brain-icon">🧠</div>
-                        </div>
+                        <div class="wave-ring"></div>
+                        <div class="wave-ring"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="mw-text">MW</div>
                     </div>
                     <div class="mindwave-loading-text" aria-label="Loading MindWave">Loading MindWave...</div>
+                    <div class="progress-dots">
+                        <div class="progress-dot"></div>
+                        <div class="progress-dot"></div>
+                        <div class="progress-dot"></div>
+                    </div>
                 </div>
             </div>
         `;
@@ -94,7 +102,7 @@ window.addEventListener('load', function () {
     // Add a small delay so users can actually see the animation
     setTimeout(function () {
         MindWaveLoader.hide();
-    }, 500); // Show for at least 500ms
+    }, 800); // Show for at least 800ms to appreciate the animation
 });
 
 // Export for use in modules (if needed)
