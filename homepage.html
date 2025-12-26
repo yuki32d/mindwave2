@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MINDWAVE – Engagement Hub</title>
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
     <link rel="stylesheet" href="3d-depth-design.css">
     <script src="auth-guard.js"></script>
     <script>
@@ -714,7 +715,7 @@
     </style>
 </head>
 
-<body>
+<body data-theme="dark">
     <div class="app-shell">
         <!-- Card-Based Floating Header -->
         <header class="topbar">
@@ -907,6 +908,7 @@
         // Expose function globally for manual tour restart
         window.startStudentTour = startStudentTour;
     </script>
+    <script src="loading-spinner.js"></script>
 </body>
 
 </html>

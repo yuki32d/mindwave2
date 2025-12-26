@@ -1,0 +1,194 @@
+/* 
+ * MindWave Loading Spinner - Adaptive Styles
+ * Brain Wave Pulse animation with dark and light theme support
+ */
+
+/* Loading Overlay */
+.mindwave-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(11, 11, 15, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mindwave-loading-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Light theme variant */
+.mindwave-loading-overlay.light-theme {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* Loading Container */
+.mindwave-loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Brain Wave Pulse Loader - Dark Theme */
+.mindwave-loader {
+    width: 140px;
+    height: 140px;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.brain-wave {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.wave-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 4px solid transparent;
+    border-top-color: #00d9ff;
+    border-right-color: #8b5cf6;
+    border-radius: 50%;
+    animation: brainPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.wave-circle:nth-child(2) {
+    animation-delay: 0.3s;
+    border-top-color: #8b5cf6;
+    border-right-color: #ec4899;
+}
+
+.wave-circle:nth-child(3) {
+    animation-delay: 0.6s;
+    border-top-color: #ec4899;
+    border-right-color: #00d9ff;
+}
+
+@keyframes brainPulse {
+    0% {
+        transform: rotate(0deg) scale(0.8);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: rotate(360deg) scale(1.2);
+        opacity: 0;
+    }
+}
+
+.brain-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(0, 217, 255, 0.5));
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) translateY(0);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) translateY(-10px);
+    }
+}
+
+.mindwave-loading-text {
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Light Theme Overrides */
+.mindwave-loading-overlay.light-theme .wave-circle {
+    border-top-color: #667eea;
+    border-right-color: #764ba2;
+}
+
+.mindwave-loading-overlay.light-theme .wave-circle:nth-child(2) {
+    border-top-color: #764ba2;
+    border-right-color: #f093fb;
+}
+
+.mindwave-loading-overlay.light-theme .wave-circle:nth-child(3) {
+    border-top-color: #f093fb;
+    border-right-color: #667eea;
+}
+
+.mindwave-loading-overlay.light-theme .brain-icon {
+    filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3));
+}
+
+.mindwave-loading-overlay.light-theme .mindwave-loading-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .mindwave-loader {
+        width: 100px;
+        height: 100px;
+    }
+
+    .brain-icon {
+        font-size: 36px;
+    }
+
+    .mindwave-loading-text {
+        font-size: 16px;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+
+    .wave-circle,
+    .brain-icon,
+    .mindwave-loading-text {
+        animation: none;
+    }
+
+    .wave-circle {
+        opacity: 0.5;
+    }
+}

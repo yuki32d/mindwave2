@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Help Center – Mindwave</title>
     <link rel="stylesheet" href="3d-depth-design.css">
@@ -221,7 +222,7 @@
     <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/intro.min.js"></script>
 </head>
 
-<body>
+<body data-theme="dark">
     <div class="container">
         <a href="homepage.html" class="back-link">← Back to Dashboard</a>
 
@@ -373,6 +374,7 @@
         // Add event listener for tour button
         document.getElementById('startTourBtn').addEventListener('click', startStudentTour);
     </script>
+    <script src="loading-spinner.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave Loading - Dark & Light Preview</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: #9ea4b6;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .preview-section {
+            border-radius: 20px;
+            padding: 60px 40px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .dark-bg {
+            background: #0b0b0f;
+        }
+
+        .light-bg {
+            background: #ffffff;
+        }
+
+        .section-label {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 999px;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+        }
+
+        .dark-bg .section-label {
+            color: #00d9ff;
+        }
+
+        .light-bg .section-label {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        /* Brain Wave Pulse Loader - Dark Version */
+        .loader-dark {
+            width: 140px;
+            height: 140px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .brain-wave-dark {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .wave-circle-dark {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top-color: #00d9ff;
+            border-right-color: #8b5cf6;
+            border-radius: 50%;
+            animation: brainPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .wave-circle-dark:nth-child(2) {
+            animation-delay: 0.3s;
+            border-top-color: #8b5cf6;
+            border-right-color: #ec4899;
+        }
+
+        .wave-circle-dark:nth-child(3) {
+            animation-delay: 0.6s;
+            border-top-color: #ec4899;
+            border-right-color: #00d9ff;
+        }
+
+        @keyframes brainPulse {
+            0% {
+                transform: rotate(0deg) scale(0.8);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .brain-icon-dark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(0, 217, 255, 0.5));
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) translateY(0);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) translateY(-10px);
+            }
+        }
+
+        .loading-text-dark {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Brain Wave Pulse Loader - Light Version */
+        .loader-light {
+            width: 140px;
+            height: 140px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .brain-wave-light {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .wave-circle-light {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top-color: #667eea;
+            border-right-color: #764ba2;
+            border-radius: 50%;
+            animation: brainPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .wave-circle-light:nth-child(2) {
+            animation-delay: 0.3s;
+            border-top-color: #764ba2;
+            border-right-color: #f093fb;
+        }
+
+        .wave-circle-light:nth-child(3) {
+            animation-delay: 0.6s;
+            border-top-color: #f093fb;
+            border-right-color: #667eea;
+        }
+
+        .brain-icon-light {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3));
+        }
+
+        .loading-text-light {
+            font-size: 18px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .code-section {
+            background: #111319;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .code-section p {
+            color: #9ea4b6;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 217, 255, 0.4);
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .feature-list li {
+            padding: 12px 0;
+            color: #9ea4b6;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #00d9ff, #8b5cf6);
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 968px) {
+            .preview-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="container">
+        <div class="header">
+            <h1>🌊 Brain Wave Pulse Loader</h1>
+            <p>Adaptive loading animation for dark and light backgrounds</p>
+        </div>
+
+        <div class="preview-grid">
+            <!-- Dark Background Version -->
+            <div class="preview-section dark-bg">
+                <div class="section-label">Dark Background (Main App)</div>
+                <div class="loader-dark">
+                    <div class="brain-wave-dark">
+                        <div class="wave-circle-dark"></div>
+                        <div class="wave-circle-dark"></div>
+                        <div class="wave-circle-dark"></div>
+                        <div class="brain-icon-dark">🧠</div>
+                    </div>
+                </div>
+                <div class="loading-text-dark">Loading MindWave...</div>
+            </div>
+
+            <!-- Light Background Version -->
+            <div class="preview-section light-bg">
+                <div class="section-label">Light Background (Marketing Site)</div>
+                <div class="loader-light">
+                    <div class="brain-wave-light">
+                        <div class="wave-circle-light"></div>
+                        <div class="wave-circle-light"></div>
+                        <div class="wave-circle-light"></div>
+                        <div class="brain-icon-light">🧠</div>
+                    </div>
+                </div>
+                <div class="loading-text-light">Loading MindWave...</div>
+            </div>
+        </div>
+
+        <div class="code-section">
+            <h2>✨ Features</h2>
+            <p>This loading animation is designed to work seamlessly across your entire MindWave platform:</p>
+            <ul class="feature-list">
+                <li>Adaptive colors for dark and light backgrounds</li>
+                <li>Smooth, professional animations using CSS</li>
+                <li>Lightweight - no external dependencies</li>
+                <li>Brand-consistent gradient colors</li>
+                <li>Pulsing wave effect that represents "MindWave"</li>
+                <li>Floating brain icon with subtle animation</li>
+                <li>Fully responsive and mobile-friendly</li>
+            </ul>
+            <button class="btn"
+                onclick="alert('Ready to implement! I will create the loading component and integrate it into your pages.')">Implement
+                This Animation</button>
+        </div>
+    </div>
+    <script src="loading-spinner.js"></script>
+</body>
+
+</html>

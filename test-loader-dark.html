@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Spinner Test - Dark Theme</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0b0b0f;
+            color: white;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #9ea4b6;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .test-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 217, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.1);
+        }
+
+        .status {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status h3 {
+            margin-top: 0;
+            color: #00d9ff;
+        }
+
+        code {
+            background: rgba(0, 217, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #00d9ff;
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="container">
+        <h1>🌊 Loading Spinner Test</h1>
+        <p>This page tests the MindWave Brain Wave Pulse loading animation on a <strong>dark background</strong> (main
+            app theme).</p>
+
+        <div class="test-controls">
+            <button class="btn" onclick="testShow()">Show Loader</button>
+            <button class="btn btn-secondary" onclick="testHide()">Hide Loader</button>
+            <button class="btn" onclick="testDuration()">Show for 3 Seconds</button>
+            <button class="btn" onclick="testAsync()">Test Async Wrap (2s delay)</button>
+        </div>
+
+        <div class="status">
+            <h3>Test Instructions</h3>
+            <ul>
+                <li>Click "Show Loader" to display the loading animation</li>
+                <li>Click "Hide Loader" to hide it</li>
+                <li>Click "Show for 3 Seconds" to auto-hide after 3 seconds</li>
+                <li>Click "Test Async Wrap" to simulate an async operation</li>
+                <li>Open browser console and try: <code>MindWaveLoader.show()</code></li>
+            </ul>
+            <p><strong>Expected Result:</strong> Brain Wave Pulse animation with cyan/purple gradient on dark background
+            </p>
+        </div>
+    </div>
+
+    <script src="loading-spinner.js"></script>
+    <script>
+        function testShow() {
+            console.log('Testing MindWaveLoader.show()');
+            MindWaveLoader.show();
+        }
+
+        function testHide() {
+            console.log('Testing MindWaveLoader.hide()');
+            MindWaveLoader.hide();
+        }
+
+        function testDuration() {
+            console.log('Testing MindWaveLoader.showFor(3000)');
+            MindWaveLoader.showFor(3000);
+        }
+
+        async function testAsync() {
+            console.log('Testing MindWaveLoader.wrap() with async function');
+            await MindWaveLoader.wrap(async () => {
+                console.log('Simulating async operation...');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                console.log('Async operation complete!');
+                alert('Async operation completed successfully!');
+            });
+        }
+
+        // Log that test page is ready
+        console.log('MindWave Loading Spinner Test Page Ready');
+        console.log('Available functions: testShow(), testHide(), testDuration(), testAsync()');
+        console.log('MindWaveLoader object:', MindWaveLoader);
+    </script>
+</body>
+
+</html>
