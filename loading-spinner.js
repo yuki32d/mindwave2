@@ -67,17 +67,17 @@ const MindWaveLoader = {
     }
 };
 
-// Auto-initialize on DOM ready
+// Auto-initialize on DOM ready (but don't show automatically)
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
         const theme = document.body.dataset.theme || 'dark';
         MindWaveLoader.init(theme);
-        MindWaveLoader.show();
+        // Removed auto-show - loader will only show when explicitly called
     });
 } else {
     const theme = document.body.dataset.theme || 'dark';
     MindWaveLoader.init(theme);
-    MindWaveLoader.show();
+    // Removed auto-show - loader will only show when explicitly called
 }
 
 // Hide loader when page is fully loaded
