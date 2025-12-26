@@ -78,17 +78,23 @@ if (document.readyState === 'loading') {
         // Detect theme based on body background or data attribute
         const theme = document.body.dataset.theme || 'dark';
         MindWaveLoader.init(theme);
+        // Show loader immediately
+        MindWaveLoader.show();
     });
 } else {
     // DOM already loaded
     const theme = document.body.dataset.theme || 'dark';
     MindWaveLoader.init(theme);
+    // Show loader immediately
+    MindWaveLoader.show();
 }
 
-// Optional: Show loader on page load until everything is ready
+// Hide loader when page is fully loaded (images, scripts, etc.)
 window.addEventListener('load', function () {
-    // Hide loader when page is fully loaded
-    MindWaveLoader.hide();
+    // Add a small delay so users can actually see the animation
+    setTimeout(function () {
+        MindWaveLoader.hide();
+    }, 500); // Show for at least 500ms
 });
 
 // Export for use in modules (if needed)

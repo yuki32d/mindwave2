@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Loader Test</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #0b0b0f;
+            color: white;
+            padding: 60px 40px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 48px;
+            background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #9ea4b6;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 217, 255, 0.4);
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="content">
+        <h1>🌊 Loader Test</h1>
+        <p>You should have seen the Brain Wave Pulse animation when this page loaded!</p>
+        <p>Click the button below to see it again:</p>
+        <button class="btn" onclick="location.reload()">Reload Page</button>
+        <button class="btn" onclick="MindWaveLoader.showFor(2000)">Show for 2 Seconds</button>
+    </div>
+
+    <script src="loading-spinner.js"></script>
+</body>
+
+</html>
