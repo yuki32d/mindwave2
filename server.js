@@ -7978,6 +7978,308 @@ app.post('/api/organizations/send-invites', authMiddleware, async (req, res) => 
   }
 });
 
+// GET /api/organizations/team-members - Get all team members
+app.get('/api/organizations/team-members', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub);
+
+    if (!user || !user.organizationId) {
+      return res.status(404).json({ ok: false, message: 'No organization found' });
+    }
+
+    // Get all users in the organization
+    const teamMembers = await User.find({
+      organizationId: user.organizationId,
+      orgRole: { $in: ['owner', 'admin', 'faculty'] }
+    })
+      .select('name email orgRole profilePhoto lastActive createdAt')
+      .sort({ orgRole: 1, createdAt: -1 });
+
+    // Group by role
+    const grouped = {
+      owner: teamMembers.filter(m => m.orgRole === 'owner'),
+      admins: teamMembers.filter(m => m.orgRole === 'admin'),
+      faculty: teamMembers.filter(m => m.orgRole === 'faculty')
+    };
+
+    res.json({
+      ok: true,
+      teamMembers,
+      grouped,
+      total: teamMembers.length,
+      counts: {
+        owner: grouped.owner.length,
+        admins: grouped.admins.length,
+        faculty: grouped.faculty.length
+      }
+    });
+  } catch (error) {
+    console.error('Get team members error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// POST /api/organizations/team-members - Add team member (admin/faculty)
+app.post('/api/organizations/team-members', authMiddleware, async (req, res) => {
+  try {
+    const { email, role, name } = req.body;
+    const user = await User.findById(req.user.sub);
+
+    if (!user || !user.organizationId) {
+      return res.status(404).json({ ok: false, message: 'No organization found' });
+    }
+
+    // Check permissions: only owner can add admins, owner/admin can add faculty
+    if (role === 'admin' && user.orgRole !== 'owner') {
+      return res.status(403).json({ ok: false, message: 'Only organization owner can add admins' });
+    }
+
+    if (role === 'faculty' && !['owner', 'admin'].includes(user.orgRole)) {
+      return res.status(403).json({ ok: false, message: 'Only owner or admin can add faculty' });
+    }
+
+    // Check if user already exists
+    let newMember = await User.findOne({ email });
+
+    if (newMember) {
+      // Update existing user
+      newMember.organizationId = user.organizationId;
+      newMember.orgRole = role;
+      await newMember.save();
+    } else {
+      // Create new user (they'll set password on first login)
+      const tempPassword = crypto.randomBytes(16).toString('hex');
+      const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+      newMember = await User.create({
+        name: name || email.split('@')[0],
+        email,
+        password: hashedPassword,
+        role: 'admin', // System role
+        organizationId: user.organizationId,
+        orgRole: role,
+        userType: 'organization'
+      });
+    }
+
+    // Send invitation email
+    if (mailer) {
+      const organization = await Organization.findById(user.organizationId);
+      await mailer.sendMail({
+        from: SMTP_FROM,
+        to: email,
+        subject: `You've been added as ${role} to ${organization.name}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Welcome to ${organization.name}!</h2>
+            <p>${user.name} has added you as a <strong>${role}</strong> to the organization.</p>
+            <p><a href="${CLIENT_ORIGIN}/marketing-site/website-signup.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+              Access Dashboard
+            </a></p>
+          </div>
+        `
+      });
+    }
+
+    res.json({ ok: true, member: newMember });
+  } catch (error) {
+    console.error('Add team member error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// GET /api/organizations/students - Get all students with activity data
+app.get('/api/organizations/students', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub);
+
+    if (!user || !user.organizationId) {
+      return res.status(404).json({ ok: false, message: 'No organization found' });
+    }
+
+    // Get all students in the organization
+    const students = await User.find({
+      organizationId: user.organizationId,
+      orgRole: 'student'
+    })
+      .select('name email profilePhoto lastActive createdAt')
+      .sort({ createdAt: -1 });
+
+    // Calculate activity stats
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const active = students.filter(s => s.lastActive && s.lastActive > sevenDaysAgo).length;
+    const newThisMonth = students.filter(s => s.createdAt > thirtyDaysAgo).length;
+    const inactive = students.filter(s => !s.lastActive || s.lastActive < thirtyDaysAgo).length;
+
+    res.json({
+      ok: true,
+      students,
+      total: students.length,
+      stats: {
+        active,
+        inactive,
+        newThisMonth,
+        activePercentage: students.length > 0 ? Math.round((active / students.length) * 100) : 0
+      }
+    });
+  } catch (error) {
+    console.error('Get students error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// GET /api/organizations/games - Get all games with statistics
+app.get('/api/organizations/games', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub);
+
+    if (!user || !user.organizationId) {
+      return res.status(404).json({ ok: false, message: 'No organization found' });
+    }
+
+    // Get all games created by organization members
+    const orgUsers = await User.find({ organizationId: user.organizationId }).select('_id');
+    const userIds = orgUsers.map(u => u._id);
+
+    const games = await Game.find({
+      createdBy: { $in: userIds }
+    })
+      .populate('createdBy', 'name email')
+      .sort({ createdAt: -1 });
+
+    // Get submission statistics
+    const gameIds = games.map(g => g._id);
+    const submissions = await GameSubmission.find({
+      gameId: { $in: gameIds }
+    });
+
+    // Calculate stats per game
+    const gamesWithStats = games.map(game => {
+      const gameSubmissions = submissions.filter(s => s.gameId.toString() === game._id.toString());
+      const totalPlays = gameSubmissions.length;
+      const avgScore = totalPlays > 0
+        ? gameSubmissions.reduce((sum, s) => sum + s.score, 0) / totalPlays
+        : 0;
+
+      return {
+        ...game.toObject(),
+        stats: {
+          totalPlays,
+          avgScore: Math.round(avgScore),
+          uniquePlayers: new Set(gameSubmissions.map(s => s.studentId.toString())).size
+        }
+      };
+    });
+
+    const totalPlays = submissions.length;
+    const publishedGames = games.filter(g => g.published).length;
+
+    res.json({
+      ok: true,
+      games: gamesWithStats,
+      total: games.length,
+      stats: {
+        totalGames: games.length,
+        published: publishedGames,
+        draft: games.length - publishedGames,
+        totalPlays,
+        avgPlaysPerGame: games.length > 0 ? Math.round(totalPlays / games.length) : 0
+      }
+    });
+  } catch (error) {
+    console.error('Get games error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// GET /api/organizations/analytics - Get organization analytics
+app.get('/api/organizations/analytics', authMiddleware, async (req, res) => {
+  try {
+    const { range = '7d' } = req.query;
+    const user = await User.findById(req.user.sub);
+
+    if (!user || !user.organizationId) {
+      return res.status(404).json({ ok: false, message: 'No organization found' });
+    }
+
+    // Calculate date range
+    const now = new Date();
+    let startDate;
+    switch (range) {
+      case '24h':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case '7d':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case '30d':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case '90d':
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    }
+
+    // Get organization users
+    const orgUsers = await User.find({ organizationId: user.organizationId });
+    const userIds = orgUsers.map(u => u._id);
+
+    // Get games and submissions in date range
+    const games = await Game.find({
+      createdBy: { $in: userIds }
+    });
+
+    const submissions = await GameSubmission.find({
+      gameId: { $in: games.map(g => g._id) },
+      submittedAt: { $gte: startDate }
+    });
+
+    // Calculate daily stats
+    const dailyStats = [];
+    const days = range === '24h' ? 24 : (range === '7d' ? 7 : (range === '30d' ? 30 : 90));
+
+    for (let i = 0; i < days; i++) {
+      const dayStart = new Date(now.getTime() - (i + 1) * 24 * 60 * 60 * 1000);
+      const dayEnd = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+
+      const daySubmissions = submissions.filter(s =>
+        s.submittedAt >= dayStart && s.submittedAt < dayEnd
+      );
+
+      dailyStats.unshift({
+        date: dayStart.toISOString().split('T')[0],
+        plays: daySubmissions.length,
+        uniqueStudents: new Set(daySubmissions.map(s => s.studentId.toString())).size,
+        avgScore: daySubmissions.length > 0
+          ? Math.round(daySubmissions.reduce((sum, s) => sum + s.score, 0) / daySubmissions.length)
+          : 0
+      });
+    }
+
+    res.json({
+      ok: true,
+      range,
+      dailyStats,
+      summary: {
+        totalPlays: submissions.length,
+        totalGames: games.length,
+        totalStudents: orgUsers.filter(u => u.orgRole === 'student').length,
+        avgScore: submissions.length > 0
+          ? Math.round(submissions.reduce((sum, s) => sum + s.score, 0) / submissions.length)
+          : 0
+      }
+    });
+  } catch (error) {
+    console.error('Get analytics error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
 
 
 app.get('/health', (req, res) => {

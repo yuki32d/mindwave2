@@ -121,27 +121,33 @@
                 <!-- Left Column -->
                 <div class="left-column">
                     <!-- Subscription Card -->
-                    <div class="performance-card">
+                    <div class="performance-card" id="subscriptionCard">
                         <div class="performance-header">
                             <div class="lecturer-info">
-                                <div class="subscription-icon">💎</div>
+                                <div class="subscription-icon" id="subscriptionIcon">💎</div>
                                 <div>
-                                    <div class="performance-score" id="planName">Premium Plan</div>
-                                    <div class="performance-label">Active Subscription</div>
+                                    <div class="performance-score" id="planName">Professional Plan</div>
+                                    <div class="performance-label" id="subscriptionStatus">Active Subscription</div>
                                 </div>
                             </div>
-                            <button class="see-more" onclick="window.location.href='#billing'">Manage →</button>
+                            <button class="see-more" id="manageSubscriptionBtn"
+                                onclick="window.location.href='#billing'">Manage →</button>
                         </div>
 
                         <div class="performance-detail">
                             <div class="detail-text">
-                                <span class="detail-score">$99/month</span>
-                                <p>Your subscription renews on <strong>January 25, 2026</strong>. You have access to all
-                                    premium features including unlimited AI calls and priority support.</p>
+                                <span class="detail-score" id="planPrice">₹2,499/month</span>
+                                <p id="subscriptionDetails">
+                                    Your subscription renews on <strong id="renewalDate">January 25, 2026</strong>. You
+                                    have access to all
+                                    premium features including unlimited AI calls and priority support.
+                                </p>
                             </div>
                             <div class="subscription-actions">
-                                <button class="action-btn" onclick="alert('View Invoices')">📄 View Invoices</button>
-                                <button class="action-btn" onclick="alert('Update Payment')">💳 Update Payment</button>
+                                <button class="action-btn" id="viewInvoicesBtn" onclick="alert('View Invoices')">📄 View
+                                    Invoices</button>
+                                <button class="action-btn" id="updatePaymentBtn" onclick="alert('Update Payment')">💳
+                                    Update Payment</button>
                             </div>
                         </div>
                     </div>
@@ -280,9 +286,11 @@
         </main>
     </div>
 
+    <script src="js/org-data-service.js"></script>
     <script src="js/modern-dashboard.js"></script>
     <script src="js/org-dashboard-data.js"></script>
     <script src="js/dashboard-interactions.js"></script>
 </body>
 
 </html>
+```

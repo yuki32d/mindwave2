@@ -424,14 +424,96 @@ function updateDashboardMetrics(data) {
         orgNameEl.textContent = data.organization.name;
     }
 
-    // Update plan name
+    // Update subscription card based on trial status
+    const subscriptionCard = document.getElementById('subscriptionCard');
+    const subscriptionIcon = document.getElementById('subscriptionIcon');
     const planNameEl = document.getElementById('planName');
-    if (planNameEl) {
+    const subscriptionStatusEl = document.getElementById('subscriptionStatus');
+    const planPriceEl = document.getElementById('planPrice');
+    const subscriptionDetailsEl = document.getElementById('subscriptionDetails');
+    const viewInvoicesBtn = document.getElementById('viewInvoicesBtn');
+    const updatePaymentBtn = document.getElementById('updatePaymentBtn');
+
+    if (data.isTrialActive) {
+        // TRIAL MODE
+        subscriptionIcon.textContent = '⏰';
+
         const planNames = {
             'basic': 'Starter Plan',
             'premium': 'Professional Plan'
         };
         planNameEl.textContent = planNames[data.subscriptionTier] || 'Free Trial';
+
+        subscriptionStatusEl.textContent = `${data.daysRemaining} Days Free Trial Remaining`;
+        subscriptionStatusEl.style.color = data.daysRemaining <= 3 ? '#f59e0b' : '#10b981';
+
+        const planPrices = {
+            'basic': '₹499',
+            'premium': '₹2,499'
+        };
+        planPriceEl.textContent = `${planPrices[data.subscriptionTier] || '₹499'}/month after trial`;
+
+        const trialEndDate = new Date(data.trialEndsAt).toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        subscriptionDetailsEl.innerHTML = `
+            Your <strong>14-day free trial</strong> ends on <strong>${trialEndDate}</strong>. 
+            You have full access to all ${planNames[data.subscriptionTier] || 'plan'} features. 
+            No payment required until trial ends.
+        `;
+
+        // Update buttons for trial
+        viewInvoicesBtn.textContent = '🎉 Enjoying the Trial?';
+        viewInvoicesBtn.onclick = () => {
+            window.location.href = '/marketing-site/checkout.html?plan=' + (data.subscriptionTier === 'basic' ? 'Personal' : 'Professional') + '&currency=INR';
+        };
+
+        updatePaymentBtn.textContent = '⚡ Upgrade Now';
+        updatePaymentBtn.onclick = () => {
+            window.location.href = '/marketing-site/checkout.html?plan=' + (data.subscriptionTier === 'basic' ? 'Personal' : 'Professional') + '&currency=INR';
+        };
+
+    } else {
+        // ACTIVE SUBSCRIPTION MODE
+        subscriptionIcon.textContent = '💎';
+
+        const planNames = {
+            'basic': 'Starter Plan',
+            'premium': 'Professional Plan'
+        };
+        planNameEl.textContent = planNames[data.subscriptionTier] || 'Active Plan';
+
+        subscriptionStatusEl.textContent = 'Active Subscription';
+        subscriptionStatusEl.style.color = '#10b981';
+
+        const planPrices = {
+            'basic': '₹499',
+            'premium': '₹2,499'
+        };
+        planPriceEl.textContent = `${planPrices[data.subscriptionTier] || '₹499'}/month`;
+
+        // For active subscriptions, show renewal date
+        const renewalDate = data.trialEndsAt ? new Date(data.trialEndsAt).toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }) : 'N/A';
+
+        subscriptionDetailsEl.innerHTML = `
+            Your subscription renews on <strong>${renewalDate}</strong>. 
+            You have access to all ${planNames[data.subscriptionTier] || 'plan'} features 
+            including ${data.subscriptionTier === 'premium' ? 'unlimited AI calls and priority support' : 'essential features and email support'}.
+        `;
+
+        // Reset buttons for active subscription
+        viewInvoicesBtn.textContent = '📄 View Invoices';
+        viewInvoicesBtn.onclick = () => alert('View Invoices');
+
+        updatePaymentBtn.textContent = '💳 Update Payment';
+        updatePaymentBtn.onclick = () => alert('Update Payment');
     }
 
     // Update AI API calls
@@ -449,6 +531,22 @@ function updateDashboardMetrics(data) {
         const progressBars = document.querySelectorAll('.progress-bar-fill');
         if (progressBars.length > 0) {
             progressBars[0].style.width = `${data.usage.aiCallsPercentage}%`;
+
+            // Change color based on usage
+            if (data.usage.aiCallsPercentage > 80) {
+                progressBars[0].style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
+            } else if (data.usage.aiCallsPercentage > 50) {
+                progressBars[0].style.background = 'linear-gradient(90deg, #3b82f6, #8b5cf6)';
+            } else {
+                progressBars[0].style.background = 'linear-gradient(90deg, #10b981, #3b82f6)';
+            }
+        }
+
+        // Update stat change text
+        const statChanges = document.querySelectorAll('.stat-change');
+        if (statChanges.length > 0) {
+            const remaining = data.usage.aiCallsLimit - data.usage.aiCallsThisMonth;
+            statChanges[0].innerHTML = `<span>${data.usage.aiCallsPercentage}% used • ${remaining.toLocaleString()} remaining</span>`;
         }
 
         // Show warning if approaching limit
@@ -475,6 +573,21 @@ function updateDashboardMetrics(data) {
         const progressBars = document.querySelectorAll('.progress-bar-fill');
         if (progressBars.length > 1) {
             progressBars[1].style.width = `${data.usage.storagePercentage}%`;
+
+            // Change color based on usage
+            if (data.usage.storagePercentage > 80) {
+                progressBars[1].style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
+            } else if (data.usage.storagePercentage > 50) {
+                progressBars[1].style.background = 'linear-gradient(90deg, #8b5cf6, #ec4899)';
+            } else {
+                progressBars[1].style.background = 'linear-gradient(90deg, #10b981, #8b5cf6)';
+            }
+        }
+
+        const statChanges = document.querySelectorAll('.stat-change');
+        if (statChanges.length > 1) {
+            const remainingGB = ((data.usage.storageLimit - data.usage.storageUsed) / 1024).toFixed(1);
+            statChanges[1].innerHTML = `<span>${data.usage.storagePercentage}% used • ${remainingGB} GB remaining</span>`;
         }
     }
 
@@ -484,11 +597,10 @@ function updateDashboardMetrics(data) {
         studentCountEl.textContent = data.usage.studentCount || 0;
     }
 
-    // Update team count
+    // Update team count (would come from separate API call)
     const teamCountEl = document.getElementById('teamCount');
     if (teamCountEl) {
-        // This would come from a separate API call
-        // For now, keep existing value
+        // Keep existing value or fetch from API
     }
 }
 
@@ -522,8 +634,58 @@ function showLimitWarning(resourceName, used, limit) {
 // Initialize trial checking
 document.addEventListener('DOMContentLoaded', () => {
     checkTrialStatus();
+
+    // Start auto-refresh for real-time updates
+    if (typeof orgDataService !== 'undefined') {
+        console.log('🚀 Starting real-time data service...');
+
+        // Initial data load
+        orgDataService.refreshAll();
+
+        // Set up event listeners for data updates
+        orgDataService.on('trialStatus', (data) => {
+            console.log('📊 Trial status updated');
+            updateDashboardMetrics(data);
+        });
+
+        orgDataService.on('students', (data) => {
+            console.log('🎓 Student data updated:', data.total);
+            const studentCountEl = document.getElementById('studentCount');
+            if (studentCountEl) {
+                studentCountEl.textContent = data.total || 0;
+            }
+        });
+
+        orgDataService.on('teamMembers', (data) => {
+            console.log('👥 Team members updated:', data.total);
+            const teamCountEl = document.getElementById('teamCount');
+            if (teamCountEl) {
+                teamCountEl.textContent = data.total || 0;
+            }
+        });
+
+        orgDataService.on('games', (data) => {
+            console.log('🎮 Games data updated:', data.total);
+            // Update games count if element exists
+        });
+
+        // Start auto-refresh every 30 seconds
+        orgDataService.startAutoRefresh(30000);
+
+        console.log('✅ Real-time data service initialized');
+    } else {
+        console.warn('⚠️ org-data-service.js not loaded - real-time updates disabled');
+    }
 });
 
 // Refresh trial status every 5 minutes
 setInterval(checkTrialStatus, 5 * 60 * 1000);
+
+// Clean up on page unload
+window.addEventListener('beforeunload', () => {
+    if (typeof orgDataService !== 'undefined') {
+        orgDataService.stopAutoRefresh();
+    }
+});
+
 
