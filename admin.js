@@ -362,12 +362,14 @@ if (adminProfileToggle && adminProfileDropdown) {
 }
 
 async function performLogout() {
-    try {
-        await fetch(`${API_BASE}/api/logout`, { method: 'POST', credentials: 'include' });
-    } catch (error) { console.error('Logout failed', error); }
-    finally {
-        localStorage.clear(); // Clear all local storage on logout
-        window.location.href = 'marketing-site/admin-login.html';
+    if (confirm('Are you sure you want to sign out?')) {
+        try {
+            await fetch(`${API_BASE}/api/logout`, { method: 'POST', credentials: 'include' });
+        } catch (error) { console.error('Logout failed', error); }
+        finally {
+            localStorage.clear(); // Clear all local storage on logout
+            window.location.href = 'marketing-site/admin-login.html';
+        }
     }
 }
 
