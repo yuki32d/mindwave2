@@ -1,6 +1,6 @@
 /**
  * MindWave Loading Spinner Utility
- * Simple JavaScript utility to show/hide the loading animation
+ * Uiverse.io loader with auto theme detection
  */
 
 const MindWaveLoader = {
@@ -11,27 +11,16 @@ const MindWaveLoader = {
             return;
         }
 
-        // Create loader HTML with new MW design
+        // Create loader HTML with Uiverse.io design
         const loaderHTML = `
             <div id="mindwave-loader" class="mindwave-loading-overlay ${theme === 'light' ? 'light-theme' : ''}" role="status" aria-live="polite">
-                <div class="mindwave-loader-container">
-                    <div class="mindwave-loader">
-                        <div class="wave-ring"></div>
-                        <div class="wave-ring"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="mw-text">MW</div>
-                    </div>
-                    <div class="mindwave-loading-text" aria-label="Loading MindWave">Loading MindWave...</div>
-                    <div class="progress-dots">
-                        <div class="progress-dot"></div>
-                        <div class="progress-dot"></div>
-                        <div class="progress-dot"></div>
-                    </div>
+                <div class="loader">
+                    <div class="loader__bar"></div>
+                    <div class="loader__bar"></div>
+                    <div class="loader__bar"></div>
+                    <div class="loader__bar"></div>
+                    <div class="loader__bar"></div>
+                    <div class="loader__ball"></div>
                 </div>
             </div>
         `;
@@ -45,7 +34,6 @@ const MindWaveLoader = {
         const loader = document.getElementById('mindwave-loader');
         if (loader) {
             loader.classList.add('active');
-            // Prevent body scroll when loader is active
             document.body.style.overflow = 'hidden';
         }
     },
@@ -55,7 +43,6 @@ const MindWaveLoader = {
         const loader = document.getElementById('mindwave-loader');
         if (loader) {
             loader.classList.remove('active');
-            // Restore body scroll
             document.body.style.overflow = '';
         }
     },
@@ -83,26 +70,21 @@ const MindWaveLoader = {
 // Auto-initialize on DOM ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
-        // Detect theme based on body background or data attribute
         const theme = document.body.dataset.theme || 'dark';
         MindWaveLoader.init(theme);
-        // Show loader immediately
         MindWaveLoader.show();
     });
 } else {
-    // DOM already loaded
     const theme = document.body.dataset.theme || 'dark';
     MindWaveLoader.init(theme);
-    // Show loader immediately
     MindWaveLoader.show();
 }
 
-// Hide loader when page is fully loaded (images, scripts, etc.)
+// Hide loader when page is fully loaded
 window.addEventListener('load', function () {
-    // Add a small delay so users can actually see the animation
     setTimeout(function () {
         MindWaveLoader.hide();
-    }, 800); // Show for at least 800ms to appreciate the animation
+    }, 800);
 });
 
 // Export for use in modules (if needed)

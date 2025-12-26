@@ -1,6 +1,6 @@
 /* 
- * MindWave Loading Spinner - Animated MW Logo
- * New design with rotating rings and floating particles
+ * MindWave Loading Spinner - Uiverse.io Loader
+ * Adaptive for dark and light themes
  */
 
 /* Loading Overlay */
@@ -30,289 +30,357 @@
     background: rgba(255, 255, 255, 0.95);
 }
 
-/* Loading Container */
-.mindwave-loader-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Animated MW Logo Loader */
-.mindwave-loader {
-    width: 200px;
-    height: 200px;
+/* From Uiverse.io by Nawsome */
+.loader {
     position: relative;
-    margin-bottom: 30px;
+    width: 75px;
+    height: 100px;
 }
 
-/* Rotating Wave Rings */
-.wave-ring {
+.loader__bar {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    bottom: 0;
+    width: 10px;
+    height: 50%;
+    background: linear-gradient(180deg, #00d9ff 0%, #8b5cf6 100%);
+    transform-origin: center bottom;
+    box-shadow: 1px 1px 0 rgba(0, 217, 255, 0.2);
+}
+
+.loader__bar:nth-child(1) {
+    left: 0px;
+    transform: scale(1, 0.2);
+    -webkit-animation: barUp1 4s infinite;
+    animation: barUp1 4s infinite;
+}
+
+.loader__bar:nth-child(2) {
+    left: 15px;
+    transform: scale(1, 0.4);
+    -webkit-animation: barUp2 4s infinite;
+    animation: barUp2 4s infinite;
+}
+
+.loader__bar:nth-child(3) {
+    left: 30px;
+    transform: scale(1, 0.6);
+    -webkit-animation: barUp3 4s infinite;
+    animation: barUp3 4s infinite;
+}
+
+.loader__bar:nth-child(4) {
+    left: 45px;
+    transform: scale(1, 0.8);
+    -webkit-animation: barUp4 4s infinite;
+    animation: barUp4 4s infinite;
+}
+
+.loader__bar:nth-child(5) {
+    left: 60px;
+    transform: scale(1, 1);
+    -webkit-animation: barUp5 4s infinite;
+    animation: barUp5 4s infinite;
+}
+
+.loader__ball {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    background: rgb(44, 143, 255);
     border-radius: 50%;
-    border: 3px solid transparent;
-    border-top-color: #00d9ff;
-    border-right-color: #8b5cf6;
-    animation: rotate 3s linear infinite;
+    -webkit-animation: ball624 4s infinite;
+    animation: ball624 4s infinite;
 }
 
-.wave-ring:nth-child(2) {
-    width: 80%;
-    height: 80%;
-    top: 10%;
-    left: 10%;
-    border-top-color: #8b5cf6;
-    border-right-color: #ec4899;
-    animation: rotate 2s linear infinite reverse;
-}
-
-@keyframes rotate {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* Center MW Text */
-.mw-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 56px;
-    font-weight: 900;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 50%, #ec4899 100%);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradientShift 3s ease infinite, pulse 2s ease-in-out infinite;
-    letter-spacing: -2px;
-    z-index: 10;
-    line-height: 1;
-}
-
-@keyframes gradientShift {
-
-    0%,
-    100% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-    }
-
-    50% {
-        transform: translate(-50%, -50%) scale(1.1);
-        opacity: 0.8;
-    }
-}
-
-/* Floating Particles */
-.particle {
-    position: absolute;
-    width: 6px;
-    height: 6px;
-    background: #00d9ff;
-    border-radius: 50%;
-    opacity: 0;
-    animation: float-particle 4s ease-in-out infinite;
-}
-
-.particle:nth-child(3) {
-    top: 20%;
-    left: 20%;
-    animation-delay: 0s;
-    background: #00d9ff;
-}
-
-.particle:nth-child(4) {
-    top: 20%;
-    right: 20%;
-    animation-delay: 0.5s;
-    background: #8b5cf6;
-}
-
-.particle:nth-child(5) {
-    bottom: 20%;
-    left: 20%;
-    animation-delay: 1s;
-    background: #ec4899;
-}
-
-.particle:nth-child(6) {
-    bottom: 20%;
-    right: 20%;
-    animation-delay: 1.5s;
-    background: #00d9ff;
-}
-
-.particle:nth-child(7) {
-    top: 50%;
-    left: 10%;
-    animation-delay: 2s;
-    background: #8b5cf6;
-}
-
-.particle:nth-child(8) {
-    top: 50%;
-    right: 10%;
-    animation-delay: 2.5s;
-    background: #ec4899;
-}
-
-@keyframes float-particle {
+@keyframes ball624 {
     0% {
-        transform: translateY(0) scale(0);
-        opacity: 0;
+        transform: translate(0, 0);
+    }
+
+    5% {
+        transform: translate(8px, -14px);
+    }
+
+    10% {
+        transform: translate(15px, -10px);
+    }
+
+    17% {
+        transform: translate(23px, -24px);
+    }
+
+    20% {
+        transform: translate(30px, -20px);
+    }
+
+    27% {
+        transform: translate(38px, -34px);
+    }
+
+    30% {
+        transform: translate(45px, -30px);
+    }
+
+    37% {
+        transform: translate(53px, -44px);
+    }
+
+    40% {
+        transform: translate(60px, -40px);
     }
 
     50% {
-        opacity: 1;
+        transform: translate(60px, 0);
+    }
+
+    57% {
+        transform: translate(53px, -14px);
+    }
+
+    60% {
+        transform: translate(45px, -10px);
+    }
+
+    67% {
+        transform: translate(37px, -24px);
+    }
+
+    70% {
+        transform: translate(30px, -20px);
+    }
+
+    77% {
+        transform: translate(22px, -34px);
+    }
+
+    80% {
+        transform: translate(15px, -30px);
+    }
+
+    87% {
+        transform: translate(7px, -44px);
+    }
+
+    90% {
+        transform: translate(0, -40px);
     }
 
     100% {
-        transform: translateY(-30px) scale(1);
-        opacity: 0;
+        transform: translate(0, 0);
     }
 }
 
-/* Loading Text */
-.mindwave-loading-text {
-    font-size: 18px;
-    font-weight: 600;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradientShift 3s ease infinite;
-    margin-bottom: 20px;
-}
+@-webkit-keyframes barUp1 {
+    0% {
+        transform: scale(1, 0.2);
+    }
 
-/* Progress Dots */
-.progress-dots {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-}
-
-.progress-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%);
-    animation: dotPulse 1.5s ease-in-out infinite;
-}
-
-.progress-dot:nth-child(1) {
-    animation-delay: 0s;
-}
-
-.progress-dot:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.progress-dot:nth-child(3) {
-    animation-delay: 0.4s;
-}
-
-@keyframes dotPulse {
-
-    0%,
-    100% {
-        transform: scale(0.8);
-        opacity: 0.5;
+    40% {
+        transform: scale(1, 0.2);
     }
 
     50% {
-        transform: scale(1.2);
-        opacity: 1;
+        transform: scale(1, 1);
+    }
+
+    90% {
+        transform: scale(1, 1);
+    }
+
+    100% {
+        transform: scale(1, 0.2);
     }
 }
 
-/* Light Theme Overrides */
-.mindwave-loading-overlay.light-theme .wave-ring {
-    border-top-color: #667eea;
-    border-right-color: #764ba2;
+@keyframes barUp1 {
+    0% {
+        transform: scale(1, 0.2);
+    }
+
+    40% {
+        transform: scale(1, 0.2);
+    }
+
+    50% {
+        transform: scale(1, 1);
+    }
+
+    90% {
+        transform: scale(1, 1);
+    }
+
+    100% {
+        transform: scale(1, 0.2);
+    }
 }
 
-.mindwave-loading-overlay.light-theme .wave-ring:nth-child(2) {
-    border-top-color: #764ba2;
-    border-right-color: #f093fb;
+@-webkit-keyframes barUp2 {
+    0% {
+        transform: scale(1, 0.4);
+    }
+
+    40% {
+        transform: scale(1, 0.4);
+    }
+
+    50% {
+        transform: scale(1, 0.8);
+    }
+
+    90% {
+        transform: scale(1, 0.8);
+    }
+
+    100% {
+        transform: scale(1, 0.4);
+    }
 }
 
-.mindwave-loading-overlay.light-theme .mw-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+@keyframes barUp2 {
+    0% {
+        transform: scale(1, 0.4);
+    }
+
+    40% {
+        transform: scale(1, 0.4);
+    }
+
+    50% {
+        transform: scale(1, 0.8);
+    }
+
+    90% {
+        transform: scale(1, 0.8);
+    }
+
+    100% {
+        transform: scale(1, 0.4);
+    }
 }
 
-.mindwave-loading-overlay.light-theme .particle {
-    background: #667eea;
+@-webkit-keyframes barUp3 {
+    0% {
+        transform: scale(1, 0.6);
+    }
+
+    100% {
+        transform: scale(1, 0.6);
+    }
 }
 
-.mindwave-loading-overlay.light-theme .particle:nth-child(4),
-.mindwave-loading-overlay.light-theme .particle:nth-child(7) {
-    background: #764ba2;
+@keyframes barUp3 {
+    0% {
+        transform: scale(1, 0.6);
+    }
+
+    100% {
+        transform: scale(1, 0.6);
+    }
 }
 
-.mindwave-loading-overlay.light-theme .particle:nth-child(5),
-.mindwave-loading-overlay.light-theme .particle:nth-child(8) {
-    background: #f093fb;
+@-webkit-keyframes barUp4 {
+    0% {
+        transform: scale(1, 0.8);
+    }
+
+    40% {
+        transform: scale(1, 0.8);
+    }
+
+    50% {
+        transform: scale(1, 0.4);
+    }
+
+    90% {
+        transform: scale(1, 0.4);
+    }
+
+    100% {
+        transform: scale(1, 0.8);
+    }
 }
 
-.mindwave-loading-overlay.light-theme .mindwave-loading-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+@keyframes barUp4 {
+    0% {
+        transform: scale(1, 0.8);
+    }
+
+    40% {
+        transform: scale(1, 0.8);
+    }
+
+    50% {
+        transform: scale(1, 0.4);
+    }
+
+    90% {
+        transform: scale(1, 0.4);
+    }
+
+    100% {
+        transform: scale(1, 0.8);
+    }
+}
+
+@-webkit-keyframes barUp5 {
+    0% {
+        transform: scale(1, 1);
+    }
+
+    40% {
+        transform: scale(1, 1);
+    }
+
+    50% {
+        transform: scale(1, 0.2);
+    }
+
+    90% {
+        transform: scale(1, 0.2);
+    }
+
+    100% {
+        transform: scale(1, 1);
+    }
+}
+
+@keyframes barUp5 {
+    0% {
+        transform: scale(1, 1);
+    }
+
+    40% {
+        transform: scale(1, 1);
+    }
+
+    50% {
+        transform: scale(1, 0.2);
+    }
+
+    90% {
+        transform: scale(1, 0.2);
+    }
+
+    100% {
+        transform: scale(1, 1);
+    }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .mindwave-loader {
-        width: 150px;
-        height: 150px;
-    }
-
-    .mw-text {
-        font-size: 42px;
-    }
-
-    .mindwave-loading-text {
-        font-size: 16px;
+    .loader {
+        width: 60px;
+        height: 80px;
     }
 }
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
 
-    .wave-ring,
-    .mw-text,
-    .particle,
-    .mindwave-loading-text,
-    .progress-dot {
+    .loader__bar,
+    .loader__ball {
         animation: none;
-    }
-
-    .wave-ring {
-        opacity: 0.5;
     }
 }
