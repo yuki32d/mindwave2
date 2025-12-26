@@ -114,16 +114,17 @@ const SUBSCRIPTION_TIERS = {
   },
 
   basic: {
-    name: 'Basic Plan',
+    name: 'Starter Plan',
     price: 499,
     currency: 'INR',
     billingCycle: 'monthly',
     limits: {
       maxGames: 50,
-      maxStudents: 100,
-      maxStorage: 1024, // 1GB
+      maxStudents: 50,        // Updated to match org setup
+      maxCourses: 10,         // Added course limit
+      maxStorage: 5120,       // 5GB (updated from 1GB)
       liveQuizParticipants: 50,
-      aiCallsPerMonth: 500
+      aiCallsPerMonth: 1000   // Updated limit
     },
     features: {
       // Game Tools (8 tools)
@@ -143,9 +144,9 @@ const SUBSCRIPTION_TIERS = {
 
       // Premium Features
       aiGameBuilder: false,
-      advancedAnalytics: true,
+      advancedAnalytics: false,
       liveQuiz: true,
-      customBranding: true,
+      customBranding: false,
       apiAccess: false,
       prioritySupport: false,
       exportCSV: true,
@@ -156,14 +157,15 @@ const SUBSCRIPTION_TIERS = {
   },
 
   premium: {
-    name: 'Premium Plan',
+    name: 'Professional Plan',
     price: 2499,
     currency: 'INR',
     billingCycle: 'monthly',
     limits: {
-      maxGames: -1, // Unlimited
-      maxStudents: -1, // Unlimited
-      maxStorage: 10240, // 10GB
+      maxGames: -1,           // Unlimited
+      maxStudents: 200,       // Updated to match org setup
+      maxCourses: -1,         // Unlimited
+      maxStorage: 51200,      // 50GB (updated from 10GB)
       liveQuizParticipants: -1, // Unlimited
       aiCallsPerMonth: 5000
     },
@@ -195,8 +197,55 @@ const SUBSCRIPTION_TIERS = {
       githubIntegration: true,
       zoomIntegration: true
     }
+  },
+
+  enterprise: {
+    name: 'Enterprise Plan',
+    price: null,            // Custom pricing
+    currency: 'INR',
+    billingCycle: 'custom',
+    limits: {
+      maxGames: -1,         // Unlimited
+      maxStudents: -1,      // Unlimited
+      maxCourses: -1,       // Unlimited
+      maxStorage: -1,       // Unlimited
+      liveQuizParticipants: -1, // Unlimited
+      aiCallsPerMonth: -1   // Unlimited
+    },
+    features: {
+      // All Game Tools
+      quiz: true,
+      unjumble: true,
+      sorter: true,
+      fillin: true,
+      debug: true,
+      flashcard: true,
+      matching: true,
+      findMatch: true,
+      sql: true,
+      scenario: true,
+      spinWheel: true,
+      anagram: true,
+      speakingCards: true,
+
+      // All Premium Features + Enterprise
+      aiGameBuilder: true,
+      advancedAnalytics: true,
+      liveQuiz: true,
+      customBranding: true,
+      apiAccess: true,
+      prioritySupport: true,
+      exportCSV: true,
+      exportExcel: true,
+      githubIntegration: true,
+      zoomIntegration: true,
+      ssoIntegration: true,
+      dedicatedSupport: true,
+      slaGuarantee: true
+    }
   }
 };
+
 
 // Helper function to check feature access
 function hasFeatureAccess(subscriptionTier, featureName) {
@@ -7617,7 +7666,319 @@ app.post('/api/grant-dashboard-access', async (req, res) => {
   }
 });
 
-// Health check endpoint for monitoring
+// ============================================
+// ORGANIZATION MANAGEMENT API ENDPOINTS
+// ============================================
+
+// POST /api/organizations/create - Create new organization with 14-day trial
+app.post('/api/organizations/create', authMiddleware, async (req, res) => {
+  try {
+    const { name, type, size, subdomain, timezone, language, academicYear, plan, invites } = req.body;
+    const userId = req.user.sub;
+
+    // Check if user already has an organization
+    const existingUser = await User.findById(userId);
+    if (existingUser.organizationId) {
+      return res.status(400).json({ ok: false, message: 'User already has an organization' });
+    }
+
+    // Check if subdomain is taken
+    const existingOrg = await Organization.findOne({ slug: subdomain });
+    if (existingOrg) {
+      return res.status(400).json({ ok: false, message: 'Subdomain already taken' });
+    }
+
+    // Calculate trial dates (14 days)
+    const trialStartDate = new Date();
+    const trialEndDate = new Date(trialStartDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+
+    // Map plan names from frontend to backend
+    const planMapping = {
+      'starter': 'basic',
+      'professional': 'premium',
+      'enterprise': 'premium'
+    };
+
+    const subscriptionTier = planMapping[plan] || 'basic';
+
+    // Set limits based on plan
+    const planLimits = {
+      starter: {
+        maxStudents: 50,
+        maxCourses: 10,
+        maxStorage: 5120, // 5GB in MB
+        features: {
+          customBranding: false,
+          apiAccess: false,
+          ssoIntegration: false,
+          prioritySupport: false,
+          advancedAnalytics: false
+        }
+      },
+      professional: {
+        maxStudents: 200,
+        maxCourses: -1, // Unlimited
+        maxStorage: 51200, // 50GB in MB
+        features: {
+          customBranding: true,
+          apiAccess: true,
+          ssoIntegration: false,
+          prioritySupport: true,
+          advancedAnalytics: true
+        }
+      },
+      enterprise: {
+        maxStudents: -1, // Unlimited
+        maxCourses: -1,
+        maxStorage: -1,
+        features: {
+          customBranding: true,
+          apiAccess: true,
+          ssoIntegration: true,
+          prioritySupport: true,
+          advancedAnalytics: true
+        }
+      }
+    };
+
+    const limits = planLimits[plan] || planLimits.starter;
+
+    // Create organization
+    const organization = await Organization.create({
+      name,
+      slug: subdomain,
+      ownerId: userId,
+      subscriptionTier,
+      subscriptionStatus: 'trialing',
+      trialStartedAt: trialStartDate,
+      trialEndsAt: trialEndDate,
+      setupCompleted: true,
+      setupCompletedAt: new Date(),
+      firstLoginAt: new Date(),
+      lastLoginAt: new Date(),
+      billingEmail: req.user.email,
+      currentPeriodStart: trialStartDate,
+      currentPeriodEnd: trialEndDate,
+      limits,
+      usage: {
+        studentCount: 0,
+        courseCount: 0,
+        storageUsed: 0
+      },
+      analytics: {
+        aiCallsThisMonth: 0,
+        totalImpressions: 0,
+        totalInteractions: 0,
+        lastResetDate: new Date()
+      },
+      setupSteps: {
+        profileCompleted: true,
+        teamInvited: invites && invites.length > 0,
+        studentsImported: false,
+        firstGameCreated: false
+      }
+    });
+
+    // Update user with organization info
+    await User.findByIdAndUpdate(userId, {
+      organizationId: organization._id,
+      orgRole: 'owner',
+      userType: 'organization'
+    });
+
+    // Log subscription event
+    await SubscriptionEvent.create({
+      organizationId: organization._id,
+      eventType: 'subscription.created',
+      data: {
+        plan,
+        tier: subscriptionTier,
+        trialEndsAt: trialEndDate
+      }
+    });
+
+    // Send welcome email
+    if (mailer) {
+      try {
+        await mailer.sendMail({
+          from: SMTP_FROM,
+          to: req.user.email,
+          subject: 'Welcome to MindWave - Your 14-Day Trial Has Started! 🎉',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #667eea;">Welcome to MindWave, ${name}!</h2>
+              <p>Your 14-day free trial has started. You have full access to all features until <strong>${trialEndDate.toLocaleDateString()}</strong>.</p>
+              <p><strong>Selected Plan:</strong> ${plan.charAt(0).toUpperCase() + plan.slice(1)}</p>
+              <h3>Get started by:</h3>
+              <ul>
+                <li>Inviting team members</li>
+                <li>Adding students</li>
+                <li>Creating your first interactive game</li>
+              </ul>
+              <p style="margin-top: 30px;">
+                <a href="${CLIENT_ORIGIN}/marketing-site/modern-dashboard.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                  Go to Dashboard
+                </a>
+              </p>
+              <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                Need help? Contact us at support@mindwave.com
+              </p>
+            </div>
+          `
+        });
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError);
+        // Don't fail the request if email fails
+      }
+    }
+
+    res.json({ ok: true, organization });
+  } catch (error) {
+    console.error('Organization creation error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// GET /api/organizations/check-subdomain - Check if subdomain is available
+app.get('/api/organizations/check-subdomain', async (req, res) => {
+  try {
+    const { subdomain } = req.query;
+
+    if (!subdomain) {
+      return res.status(400).json({ ok: false, message: 'Subdomain is required' });
+    }
+
+    const existing = await Organization.findOne({ slug: subdomain });
+    res.json({ available: !existing });
+  } catch (error) {
+    console.error('Subdomain check error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// GET /api/me - Get current user with organization info
+app.get('/api/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub)
+      .select('-password')
+      .populate('organizationId');
+
+    if (!user) {
+      return res.status(404).json({ ok: false, message: 'User not found' });
+    }
+
+    res.json({ ok: true, user });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// GET /api/organizations/trial-status - Get trial status for current organization
+app.get('/api/organizations/trial-status', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub);
+    if (!user || !user.organizationId) {
+      return res.status(404).json({ ok: false, message: 'No organization found' });
+    }
+
+    const organization = await Organization.findById(user.organizationId);
+    if (!organization) {
+      return res.status(404).json({ ok: false, message: 'Organization not found' });
+    }
+
+    const now = new Date();
+    const daysRemaining = Math.ceil((organization.trialEndsAt - now) / (1000 * 60 * 60 * 24));
+    const isTrialActive = organization.subscriptionStatus === 'trialing' && daysRemaining > 0;
+    const isTrialExpired = organization.subscriptionStatus === 'trialing' && daysRemaining <= 0;
+
+    // Calculate usage percentages
+    const aiCallsLimit = organization.subscriptionTier === 'basic' ? 500 : 5000;
+    const aiCallsPercentage = (organization.analytics.aiCallsThisMonth / aiCallsLimit) * 100;
+
+    const storageLimit = organization.limits.maxStorage;
+    const storagePercentage = storageLimit > 0 ? (organization.usage.storageUsed / storageLimit) * 100 : 0;
+
+    res.json({
+      ok: true,
+      subscriptionStatus: organization.subscriptionStatus,
+      subscriptionTier: organization.subscriptionTier,
+      trialStartedAt: organization.trialStartedAt,
+      trialEndsAt: organization.trialEndsAt,
+      daysRemaining,
+      isTrialActive,
+      isTrialExpired,
+      organization: {
+        name: organization.name,
+        slug: organization.slug
+      },
+      usage: {
+        ...organization.usage,
+        aiCallsThisMonth: organization.analytics.aiCallsThisMonth,
+        aiCallsLimit,
+        aiCallsPercentage: Math.round(aiCallsPercentage),
+        storageLimit,
+        storagePercentage: Math.round(storagePercentage)
+      },
+      limits: organization.limits
+    });
+  } catch (error) {
+    console.error('Trial status error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+// POST /api/organizations/send-invites - Send team invitations
+app.post('/api/organizations/send-invites', authMiddleware, async (req, res) => {
+  try {
+    const { invites } = req.body;
+    const user = await User.findById(req.user.sub);
+
+    if (!user || !user.organizationId) {
+      return res.status(404).json({ ok: false, message: 'No organization found' });
+    }
+
+    const organization = await Organization.findById(user.organizationId);
+
+    // Send invitation emails
+    if (mailer && invites && invites.length > 0) {
+      for (const invite of invites) {
+        try {
+          await mailer.sendMail({
+            from: SMTP_FROM,
+            to: invite.email,
+            subject: `You've been invited to join ${organization.name} on MindWave`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2>You've been invited!</h2>
+                <p>${user.name} has invited you to join <strong>${organization.name}</strong> as a <strong>${invite.role}</strong> on MindWave.</p>
+                <p style="margin-top: 30px;">
+                  <a href="${CLIENT_ORIGIN}/marketing-site/website-signup.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                    Accept Invitation
+                  </a>
+                </p>
+              </div>
+            `
+          });
+        } catch (emailError) {
+          console.error(`Failed to send invite to ${invite.email}:`, emailError);
+        }
+      }
+    }
+
+    // Update organization setup steps
+    await Organization.findByIdAndUpdate(user.organizationId, {
+      'setupSteps.teamInvited': true
+    });
+
+    res.json({ ok: true, message: 'Invitations sent successfully' });
+  } catch (error) {
+    console.error('Send invites error:', error);
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+
 
 app.get('/health', (req, res) => {
   res.json({

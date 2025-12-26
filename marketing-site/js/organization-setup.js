@@ -518,17 +518,13 @@ function loadSavedProgress() {
 function goToDashboard() {
     localStorage.removeItem('org_setup_progress');
 
-    // Map organization setup plan names to checkout page plan names
-    const planMapping = {
-        'starter': 'Personal',
-        'professional': 'Team',
-        'enterprise': 'Enterprise'
-    };
+    // Store the selected plan for future reference
+    if (setupState.selectedPlan) {
+        localStorage.setItem('selected_plan', setupState.selectedPlan);
+    }
 
-    // Get the correct plan name for checkout
-    const checkoutPlan = planMapping[setupState.selectedPlan] || 'Personal';
-
-    window.location.href = `/marketing-site/checkout.html?plan=${checkoutPlan}&currency=INR`;
+    // Redirect directly to the dashboard after organization setup
+    window.location.href = '/marketing-site/modern-dashboard.html';
 }
 
 function logout() {
