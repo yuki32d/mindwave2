@@ -96,37 +96,19 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
 
         const result = await response.json();
 
-        // Store authentication token and user data
+        // Store ONLY authentication token and basic user data
+        // DO NOT store organizationId to prevent redirect to dashboard
         if (result.token) {
             localStorage.setItem('auth_token', result.token);
             localStorage.setItem('user_email', result.user.email);
             localStorage.setItem('user_name', result.user.name);
-            localStorage.setItem('user_role', result.user.role);
 
-            // Store complete user object (required by org-dashboard-data.js)
+            // Store minimal user object WITHOUT organizationId
             localStorage.setItem('user', JSON.stringify({
                 email: result.user.email,
                 name: result.user.name,
-                role: result.user.role,
-                userType: result.user.userType,
-                orgRole: result.user.orgRole,
-                organizationId: result.user.organizationId,
                 token: result.token
             }));
-
-            // Store organization-related data
-            if (result.user.userType) {
-                localStorage.setItem('user_type', result.user.userType);
-            }
-            if (result.user.orgRole) {
-                localStorage.setItem('org_role', result.user.orgRole);
-            }
-            if (result.user.organizationId) {
-                localStorage.setItem('organization_id', result.user.organizationId);
-            }
-            if (result.user.needsOrgSetup) {
-                localStorage.setItem('needs_org_setup', 'true');
-            }
         }
 
         // Clear OAuth session data
@@ -134,7 +116,7 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
         sessionStorage.removeItem('oauth_provider');
         sessionStorage.removeItem('oauth_code_verifier');
 
-        // Show success and redirect - pass full user object
+        // ALWAYS redirect to organization setup - no conditions
         showSuccess(provider, result.user);
 
     } catch (error) {
@@ -286,48 +268,22 @@ function showError(title, message) {
 }
 
 async function showSuccess(provider, user) {
-    const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
-    const userName = user.name || user;  // Handle both object and string for backward compatibility
+    const userName = user.name || user;
 
-    console.log('OAuth Success - User data:', user);
-    console.log('needsOrgSetup:', user.needsOrgSetup);
-    console.log('organizationId:', user.organizationId);
-    console.log('email:', user.email);
+    console.log('OAuth Success - Redirecting ALL users to organization setup');
+    console.log('User email:', user.email);
+    console.log('User name:', userName);
 
     document.querySelector('.callback-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
     document.querySelector('.callback-title').textContent = 'Success!';
-    document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Checking your account...`;
+    document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
     document.querySelector('.spinner').style.display = 'none';
 
-    // Check if user has an organization
-    // All new users (no organizationId) go through organization setup
-    if (!user.organizationId) {
-        // New user - redirect to organization setup
-        console.log('Redirecting new user (no organizationId) to organization-setup.html');
-        document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
+    // ALWAYS redirect to organization setup - NO CONDITIONS
+    console.log('Redirecting to organization-setup.html');
 
-        // Redirect to organization setup page after 1.5 seconds
-        setTimeout(() => {
-            console.log('Executing redirect to organization-setup.html');
-            window.location.href = '/marketing-site/organization-setup.html';
-        }, 1500);
-    } else {
-        // Existing user with organization - redirect to dashboard
-        console.log('Redirecting existing user with org to modern-dashboard.html');
-        document.querySelector('.callback-message').textContent = `Welcome back, ${userName}! Redirecting to your dashboard...`;
-
-        // Set organization data in localStorage
-        localStorage.setItem('user', JSON.stringify({
-            email: user.email,
-            name: userName,
-            organizationId: user.organizationId,
-            orgRole: user.orgRole || 'member',
-            userType: user.userType || 'organization',
-            token: localStorage.getItem('auth_token')
-        }));
-
-        setTimeout(() => {
-            window.location.href = '/marketing-site/modern-dashboard.html';
-        }, 1500);
-    }
+    setTimeout(() => {
+        console.log('Executing redirect to organization-setup.html');
+        window.location.href = '/marketing-site/organization-setup.html';
+    }, 1500);
 }
