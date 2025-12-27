@@ -248,20 +248,20 @@ document.addEventListener('DOMContentLoaded', function () {
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-            // Show success modal
+            // Show success modal and redirect to organization setup
             if (typeof showSuccessModal === 'function') {
                 showSuccessModal(
                     'Account Created Successfully!',
-                    'Please check your email to verify your account. You will be redirected to the login page.'
+                    'Let\'s set up your organization workspace.'
                 );
 
-                // Redirect after 3 seconds
+                // Redirect to organization setup after 2 seconds
                 setTimeout(() => {
-                    window.location.href = 'website-login.html';
-                }, 3000);
+                    window.location.href = 'organization-setup.html';
+                }, 2000);
             } else {
-                alert('Account created successfully! Please check your email to verify your account.');
-                window.location.href = 'website-login.html';
+                alert('Account created successfully! Setting up your workspace...');
+                window.location.href = 'organization-setup.html';
             }
 
         } catch (error) {

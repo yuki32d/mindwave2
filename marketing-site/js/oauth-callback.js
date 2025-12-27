@@ -299,43 +299,32 @@ async function showSuccess(provider, user) {
     document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Checking your account...`;
     document.querySelector('.spinner').style.display = 'none';
 
-    // Special handling for rajkumarw88d@gmail.com - redirect to modern dashboard
-    if (user.email === 'rajkumarw88d@gmail.com') {
-        console.log('Redirecting rajkumarw88d@gmail.com to modern-dashboard.html');
+    // Check if user has an organization
+    // All new users (no organizationId) go through organization setup
+    if (!user.organizationId) {
+        // New user - redirect to organization setup
+        console.log('Redirecting new user (no organizationId) to organization-setup.html');
+        document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
+
+        // Redirect to organization setup page after 1.5 seconds
+        setTimeout(() => {
+            console.log('Executing redirect to organization-setup.html');
+            window.location.href = '/marketing-site/organization-setup.html';
+        }, 1500);
+    } else {
+        // Existing user with organization - redirect to dashboard
+        console.log('Redirecting existing user with org to modern-dashboard.html');
         document.querySelector('.callback-message').textContent = `Welcome back, ${userName}! Redirecting to your dashboard...`;
 
         // Set organization data in localStorage
         localStorage.setItem('user', JSON.stringify({
             email: user.email,
             name: userName,
-            organizationId: user.organizationId || 'existing',
-            orgRole: user.orgRole || 'owner',
+            organizationId: user.organizationId,
+            orgRole: user.orgRole || 'member',
             userType: user.userType || 'organization',
             token: localStorage.getItem('auth_token')
         }));
-
-        setTimeout(() => {
-            window.location.href = '/marketing-site/modern-dashboard.html';
-        }, 1500);
-        return;
-    }
-
-    // For all other users - check if they have an organization
-    // If no organizationId, they need to complete setup
-    if (!user.organizationId) {
-        // New user - redirect to organization setup
-        console.log('Redirecting new user (no organizationId) to organization-setup.html');
-        document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
-
-        // Redirect to organization setup page after 2 seconds
-        setTimeout(() => {
-            console.log('Executing redirect to organization-setup.html');
-            window.location.href = '/marketing-site/organization-setup.html';
-        }, 2000);
-    } else {
-        // Existing user with organization - redirect to dashboard
-        console.log('Redirecting existing user with org to modern-dashboard.html');
-        document.querySelector('.callback-message').textContent = `Welcome back, ${userName}! Redirecting to your dashboard...`;
 
         setTimeout(() => {
             window.location.href = '/marketing-site/modern-dashboard.html';
