@@ -93,9 +93,8 @@ function checkUserAuthentication() {
         return;
     }
 
-    // DISABLED: Allow all users to go through organization setup
-    // This ensures everyone starts fresh with organization setup
-    // checkExistingOrganization();
+    // Check if user already has an organization (for returning users)
+    checkExistingOrganization();
 }
 
 async function checkExistingOrganization() {
@@ -433,8 +432,17 @@ async function createOrganization() {
         const data = await response.json();
 
         if (data.ok) {
-            // Store organization ID
+            // Store organization ID and data
             localStorage.setItem('organization_id', data.organization._id);
+            localStorage.setItem('organization_name', setupState.organizationData.name);
+
+            // Update user object with organization info
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            user.organizationId = data.organization._id;
+            user.orgRole = 'owner';
+            user.userType = 'organization';
+            localStorage.setItem('user', JSON.stringify(user));
+
             localStorage.removeItem('needs_org_setup');
 
             hideLoading();
