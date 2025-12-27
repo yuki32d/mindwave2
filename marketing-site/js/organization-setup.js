@@ -93,8 +93,9 @@ function checkUserAuthentication() {
         return;
     }
 
-    // Check if user already has an organization
-    checkExistingOrganization();
+    // DISABLED: Allow all users to go through organization setup
+    // This ensures everyone starts fresh with organization setup
+    // checkExistingOrganization();
 }
 
 async function checkExistingOrganization() {

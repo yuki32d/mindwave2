@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Storage - MindWave</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0.5rem;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .success {
+            background: #10b981;
+            padding: 1rem;
+            border-radius: 8px;
+            color: white;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .info {
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔄 Start Fresh</h1>
+        <p>Clear all stored data and start with a clean slate.</p>
+
+        <button onclick="clearAllData()">Clear All Data</button>
+        <button onclick="window.location.href='website-signup.html'" style="background: #6b7280;">Go to Signup</button>
+
+        <div class="success" id="success">
+            ✅ All data cleared! You can now start fresh.
+        </div>
+
+        <div class="info">
+            <strong>This will clear:</strong><br>
+            • Authentication tokens<br>
+            • User information<br>
+            • Organization data<br>
+            • Setup progress
+        </div>
+    </div>
+
+    <script>
+        function clearAllData() {
+            // Clear localStorage
+            localStorage.clear();
+
+            // Clear sessionStorage
+            sessionStorage.clear();
+
+            // Show success message
+            document.getElementById('success').style.display = 'block';
+
+            // Redirect to signup after 2 seconds
+            setTimeout(() => {
+                window.location.href = 'website-signup.html';
+            }, 2000);
+        }
+    </script>
+</body>
+
+</html>
