@@ -1672,6 +1672,99 @@ app.post("/api/subscription/check-feature", authMiddleware, async (req, res) => 
   }
 });
 
+// Create organization (called from organization-setup.html)
+app.post("/api/organizations/create", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ ok: false, message: 'User not found' });
+    }
+
+    // Check if user already has an organization
+    if (user.organizationId) {
+      const existingOrg = await Organization.findById(user.organizationId);
+      if (existingOrg) {
+        return res.json({
+          ok: true,
+          organization: existingOrg,
+          message: 'Organization already exists'
+        });
+      }
+    }
+
+    const {
+      name,
+      type,
+      size,
+      subdomain,
+      timezone,
+      language,
+      academicYear,
+      plan
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !type || !size || !subdomain || !timezone) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Missing required fields'
+      });
+    }
+
+    // Create organization
+    const organization = await Organization.create({
+      name: name,
+      type: type,
+      size: size,
+      subdomain: subdomain,
+      timezone: timezone,
+      language: language || 'en',
+      academicYear: academicYear,
+      ownerId: userId,
+      subscriptionTier: plan || 'trial',
+      subscriptionStatus: 'trialing',
+      setupCompleted: true,
+      setupCompletedAt: new Date(),
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days trial
+      members: [{
+        userId: userId,
+        role: 'owner',
+        joinedAt: new Date()
+      }]
+    });
+
+    // Link organization to user
+    user.organizationId = organization._id;
+    user.orgRole = 'owner';
+    user.userType = 'organization';
+    await user.save();
+
+    res.json({
+      ok: true,
+      organization: {
+        _id: organization._id,
+        name: organization.name,
+        subdomain: organization.subdomain,
+        subscriptionTier: organization.subscriptionTier
+      },
+      message: 'Organization created successfully'
+    });
+
+  } catch (error) {
+    console.error('Create organization error:', error);
+    if (error.code === 11000) {
+      return res.status(409).json({
+        ok: false,
+        message: 'Subdomain already taken'
+      });
+    }
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
 // ===================================
 // Unified OAuth Token Exchange for All Providers
 // ===================================
