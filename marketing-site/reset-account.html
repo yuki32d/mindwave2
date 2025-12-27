@@ -124,39 +124,16 @@
             </ul>
         </div>
 
-        <button class="btn" onclick="resetEverything()">🗑️ Clear Everything & Start Over</button>
+        <button class="btn" id="resetBtn">🗑️ Clear Everything & Start Over</button>
         <br>
-        <button class="btn btn-secondary" onclick="window.location.href='website-signup.html'">Cancel</button>
+        <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
 
         <div class="success" id="success">
             ✅ All data cleared!<br>Redirecting to signup...
         </div>
     </div>
 
-    <script>
-        function resetEverything() {
-            // Clear all localStorage
-            localStorage.clear();
-
-            // Clear all sessionStorage
-            sessionStorage.clear();
-
-            // Clear all cookies (if any)
-            document.cookie.split(";").forEach(function (c) {
-                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-            });
-
-            // Show success message
-            document.getElementById('success').style.display = 'block';
-
-            console.log('✅ All data cleared successfully!');
-
-            // Redirect to signup page after 2 seconds
-            setTimeout(() => {
-                window.location.href = 'website-signup.html';
-            }, 2000);
-        }
-    </script>
+    <script src="js/reset-account.js"></script>
 </body>
 
 </html>
