@@ -38,15 +38,26 @@ async function loadOrganizationData() {
             }
         });
 
-        // If organization was deleted (404), redirect to setup
+        // If organization was deleted (404), show message but don't auto-redirect
         if (response.status === 404) {
+            console.warn('No organization found for user');
+
+            // Clear organization data
             localStorage.removeItem('organization_id');
             localStorage.removeItem('organization_name');
             localStorage.removeItem('organization_type');
             localStorage.removeItem('orgRole');
 
-            alert('Your organization has been removed. Please set up a new organization.');
-            window.location.href = 'organization-setup.html';
+            // Show message in dashboard instead of alert
+            if (document.getElementById('orgName')) {
+                document.getElementById('orgName').textContent = 'No Organization';
+            }
+            if (document.getElementById('planName')) {
+                document.getElementById('planName').innerHTML = '<a href="/marketing-site/organization-setup.html" style="color: #ef4444;">Create Organization</a>';
+            }
+            if (document.getElementById('trialStatus')) {
+                document.getElementById('trialStatus').textContent = 'Setup Required';
+            }
             return;
         }
 
