@@ -31,52 +31,69 @@ async function loadOrganizationData() {
             document.getElementById('orgType').textContent = formatOrgType(orgType);
         }
 
-        // Set default values since backend doesn't have Organization model yet
-        if (document.getElementById('planName')) {
-            document.getElementById('planName').textContent = 'Trial Plan';
-        }
-
-        if (document.getElementById('trialStatus')) {
-            document.getElementById('trialStatus').textContent = '14 days remaining in trial';
-        }
-
-        // NOTE: Backend API call disabled - Organization model doesn't exist in server.js
-        // If you want to enable organization verification, you need to:
-        // 1. Create Organization schema in server.js
-        // 2. Create /api/organizations/details endpoint
-        // 3. Uncomment the code below
-
-        /*
-        // Load organization details from backend
+        // Load organization details from backend to verify it still exists
         const response = await fetch('/api/organizations/details', {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
             }
         });
 
-        // Only redirect if organization was definitely deleted (404)
+        // If organization was deleted (404), redirect to setup
         if (response.status === 404) {
             localStorage.removeItem('organization_id');
             localStorage.removeItem('organization_name');
+            localStorage.removeItem('organization_type');
             localStorage.removeItem('orgRole');
-            
+
             alert('Your organization has been removed. Please set up a new organization.');
             window.location.href = 'organization-setup.html';
             return;
         }
 
+        // If successful, update dashboard with real data from backend
         if (response.ok) {
             const data = await response.json();
             if (data.ok && data.organization) {
+                // Update localStorage with fresh data
                 if (data.organization._id) {
                     localStorage.setItem('organization_id', data.organization._id);
                 }
+                if (data.organization.name) {
+                    localStorage.setItem('organization_name', data.organization.name);
+                }
+
+                // Update dashboard UI
                 updateDashboardWithOrgData(data.organization);
+            } else {
+                // No organization found
+                localStorage.removeItem('organization_id');
+                localStorage.removeItem('organization_name');
+                localStorage.removeItem('organization_type');
+                localStorage.removeItem('orgRole');
+
+                alert('No organization found. Please set up your organization.');
+                window.location.href = 'organization-setup.html';
+                return;
+            }
+        } else if (response.status === 429) {
+            // Rate limited - use localStorage as fallback
+            console.warn('Rate limited. Using cached organization data.');
+            if (document.getElementById('planName')) {
+                document.getElementById('planName').textContent = 'Trial Plan';
+            }
+            if (document.getElementById('trialStatus')) {
+                document.getElementById('trialStatus').textContent = '14 days remaining in trial';
             }
         }
-        */
     } catch (error) {
         console.error('Error loading organization data:', error);
+        // On network error, use localStorage as fallback
+        if (document.getElementById('planName')) {
+            document.getElementById('planName').textContent = 'Trial Plan';
+        }
+        if (document.getElementById('trialStatus')) {
+            document.getElementById('trialStatus').textContent = '14 days remaining in trial';
+        }
     }
 }
 

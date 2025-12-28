@@ -286,13 +286,14 @@ async function showSuccess(provider, user) {
     document.querySelector('.callback-title').textContent = 'Success!';
     document.querySelector('.spinner').style.display = 'none';
 
-    // Check if user has completed organization setup (check localStorage, not backend)
-    const hasOrganization = localStorage.getItem('organization_name');
-
-    if (hasOrganization) {
+    // Check if user has an organization in the backend
+    if (user.organizationId) {
         // Returning user with organization - go to dashboard
         console.log('Returning user with organization - redirecting to dashboard');
         document.querySelector('.callback-message').textContent = `Welcome back, ${userName}!`;
+
+        // Save organization info to localStorage
+        localStorage.setItem('organization_id', user.organizationId);
 
         setTimeout(() => {
             window.location.href = '/marketing-site/modern-dashboard.html';
@@ -301,6 +302,12 @@ async function showSuccess(provider, user) {
         // New user or deleted user - go to setup
         console.log('New/deleted user - redirecting to organization setup');
         document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
+
+        // Clear any old organization data
+        localStorage.removeItem('organization_id');
+        localStorage.removeItem('organization_name');
+        localStorage.removeItem('organization_type');
+        localStorage.removeItem('orgRole');
 
         setTimeout(() => {
             window.location.href = '/marketing-site/organization-setup.html';
