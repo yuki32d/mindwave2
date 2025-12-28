@@ -42,7 +42,7 @@ const elements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
     loadSavedProgress();
-    checkUserAuthentication();
+    // checkUserAuthentication(); // Removed - function doesn't exist and blocks setup
 });
 
 function initializeEventListeners() {
