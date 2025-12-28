@@ -1052,11 +1052,18 @@ function superAdminMiddleware(req, res, next) {
 // Create Organization
 app.post("/api/organizations/create", authMiddleware, async (req, res) => {
   try {
+    console.log('=== Organization Creation Request ===');
+    console.log('User ID:', req.user.sub);
+    console.log('Request body:', req.body);
+
     const { name, subdomain, type, size, country, website } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.sub;
+
+    console.log('Extracted fields:', { name, subdomain, type, size, country, website, userId });
 
     // Validate required fields
     if (!name || !subdomain || !type) {
+      console.log('Validation failed - missing required fields');
       return res.status(400).json({
         ok: false,
         message: "Name, subdomain, and type are required"
@@ -1064,8 +1071,10 @@ app.post("/api/organizations/create", authMiddleware, async (req, res) => {
     }
 
     // Check if subdomain is already taken
+    console.log('Checking if subdomain exists:', subdomain);
     const existingOrg = await Organization.findOne({ slug: subdomain });
     if (existingOrg) {
+      console.log('Subdomain already taken:', subdomain);
       return res.status(400).json({
         ok: false,
         message: "Subdomain is already taken. Please choose another."
@@ -1073,6 +1082,7 @@ app.post("/api/organizations/create", authMiddleware, async (req, res) => {
     }
 
     // Create organization
+    console.log('Creating organization...');
     const organization = await Organization.create({
       name,
       slug: subdomain,
@@ -1086,13 +1096,16 @@ app.post("/api/organizations/create", authMiddleware, async (req, res) => {
       firstLoginAt: new Date(),
       lastLoginAt: new Date()
     });
+    console.log('Organization created:', organization._id);
 
     // Update user with organization info
+    console.log('Updating user with organizationId...');
     await User.findByIdAndUpdate(userId, {
       organizationId: organization._id,
       orgRole: 'owner',
       userType: 'organization'
     });
+    console.log('User updated successfully');
 
     res.json({
       ok: true,
@@ -1109,10 +1122,12 @@ app.post("/api/organizations/create", authMiddleware, async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error creating organization:", error);
+    console.error("=== Organization Creation Error ===");
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
     res.status(500).json({
       ok: false,
-      message: "Failed to create organization"
+      message: "Failed to create organization: " + error.message
     });
   }
 });
@@ -1495,6 +1510,8 @@ app.get("/api/superadmin/users", authMiddleware, superAdminMiddleware, async (re
       if (user.organizationId) {
         const org = await Organization.findById(user.organizationId).select('name');
         user.organizationName = org ? org.name : 'N/A';
+      } else {
+        user.organizationName = 'N/A';
       }
       return user;
     }));
