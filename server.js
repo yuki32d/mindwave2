@@ -1120,7 +1120,7 @@ app.post("/api/organizations/create", authMiddleware, async (req, res) => {
 // Get Organization Details
 app.get("/api/organizations/details", authMiddleware, async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.sub;
 
     // Get user to find their organization
     const user = await User.findById(userId);
@@ -1205,7 +1205,7 @@ app.get("/api/organizations/student-domains", authMiddleware, async (req, res) =
 app.post("/api/organizations/configure-student-domains", authMiddleware, async (req, res) => {
   try {
     const { allowedDomains } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.sub;
 
     const user = await User.findById(userId);
     if (!user || !user.organizationId) {
