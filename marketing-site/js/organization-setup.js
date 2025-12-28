@@ -524,7 +524,10 @@ function loadSavedProgress() {
 // Navigation
 // ===================================
 
-function goToDashboard() {
+async function goToDashboard() {
+    // Create organization in backend before going to dashboard
+    await createOrganization();
+
     localStorage.removeItem('org_setup_progress');
 
     // Store the selected plan for future reference
