@@ -2,10 +2,7 @@
 // Handles welcome section, admin invitations, and student domain configuration
 
 document.addEventListener('DOMContentLoaded', async function () {
-    // Verify user still has organization access
-    await verifyOrganizationAccess();
-
-    // Load organization data
+    // Load organization data (includes verification)
     await loadOrganizationData();
 
     // Initialize modals
@@ -14,48 +11,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Initialize event listeners
     initializeEventListeners();
 });
-
-// ===================================
-// Verify Organization Access
-// ===================================
-async function verifyOrganizationAccess() {
-    try {
-        const response = await fetch('/api/organizations/details', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-            }
-        });
-
-        // If user doesn't have an organization or was deleted, redirect to setup
-        if (!response.ok || response.status === 404) {
-            // Clear organization data from localStorage
-            localStorage.removeItem('organization_id');
-            localStorage.removeItem('organization_name');
-            localStorage.removeItem('orgRole');
-
-            // Redirect to organization setup
-            alert('Your organization access has been removed. Please set up a new organization.');
-            window.location.href = 'organization-setup.html';
-            return;
-        }
-
-        const data = await response.json();
-        if (!data.ok || !data.organization) {
-            // Organization was deleted
-            localStorage.removeItem('organization_id');
-            localStorage.removeItem('organization_name');
-            localStorage.removeItem('orgRole');
-
-            alert('Your organization has been removed. Please set up a new organization.');
-            window.location.href = 'organization-setup.html';
-            return;
-        }
-    } catch (error) {
-        console.error('Error verifying organization access:', error);
-        // On error, redirect to setup to be safe
-        window.location.href = 'organization-setup.html';
-    }
-}
 
 // ===================================
 // Load Organization Data
@@ -75,14 +30,44 @@ async function loadOrganizationData() {
             }
         });
 
+        // Only redirect if organization was definitely deleted (404)
+        // Don't redirect on rate limit (429) or other errors
+        if (response.status === 404) {
+            // Organization was deleted by super admin
+            localStorage.removeItem('organization_id');
+            localStorage.removeItem('organization_name');
+            localStorage.removeItem('orgRole');
+
+            alert('Your organization has been removed. Please set up a new organization.');
+            window.location.href = 'organization-setup.html';
+            return;
+        }
+
         if (response.ok) {
             const data = await response.json();
             if (data.ok && data.organization) {
+                // Save organization ID to localStorage
+                if (data.organization._id) {
+                    localStorage.setItem('organization_id', data.organization._id);
+                }
                 updateDashboardWithOrgData(data.organization);
+            } else if (!data.organization) {
+                // No organization found for this user
+                localStorage.removeItem('organization_id');
+                localStorage.removeItem('organization_name');
+                localStorage.removeItem('orgRole');
+
+                alert('No organization found. Please set up your organization.');
+                window.location.href = 'organization-setup.html';
+                return;
             }
+        } else if (response.status === 429) {
+            // Rate limited - just show error, don't redirect
+            console.error('Rate limited. Please refresh the page.');
         }
     } catch (error) {
         console.error('Error loading organization data:', error);
+        // Don't redirect on network errors - just log them
     }
 }
 
