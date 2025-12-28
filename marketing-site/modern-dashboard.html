@@ -3,15 +3,15 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindWave - Modern Dashboard</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave - Dashboard</title>
     <link rel="stylesheet" href="css/modern-dashboard.css">
-    <link rel="stylesheet" href="css/profile-styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body data-theme="light">
@@ -37,7 +37,7 @@
                         <span class="nav-text">Analytics</span>
                     </a>
                     <a href="org-billing.html" class="nav-item">
-                        <span class="nav-icon">�</span>
+                        <span class="nav-icon">💳</span>
                         <span class="nav-text">Billing</span>
                     </a>
                 </div>
@@ -45,7 +45,7 @@
                 <div class="nav-section">
                     <span class="nav-label">MANAGEMENT</span>
                     <a href="org-team.html" class="nav-item">
-                        <span class="nav-icon">�</span>
+                        <span class="nav-icon">👥</span>
                         <span class="nav-text">Team Members</span>
                     </a>
                     <a href="org-students.html" class="nav-item">
@@ -65,7 +65,7 @@
                 <div class="nav-section">
                     <span class="nav-label">SUPPORT</span>
                     <a href="#help" class="nav-item">
-                        <span class="nav-icon">�</span>
+                        <span class="nav-icon">❓</span>
                         <span class="nav-text">Help Center</span>
                     </a>
                 </div>
@@ -77,18 +77,10 @@
             <!-- Top Header -->
             <header class="top-header">
                 <div class="search-container">
-                    <input type="text" placeholder="Search Anything here ..." class="search-input">
+                    <input type="text" placeholder="Search..." class="search-input">
                     <span class="search-icon">🔍</span>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-export">
-                        <span>📤</span>
-                        <span>Export</span>
-                    </button>
-                    <button class="btn-create">
-                        <span>➕</span>
-                        <span>Create</span>
-                    </button>
                     <button class="btn-icon">🔔</button>
                     <div class="profile-dropdown">
                         <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="profile-avatar">
@@ -108,188 +100,206 @@
                 </div>
             </header>
 
-            <!-- Welcome Section -->
-            <section class="welcome-section">
-                <div class="welcome-text">
-                    <h1>Welcome Back, <span id="orgName">TechEdu Institute</span> 🎉</h1>
-                    <p>Manage your organization, team, and subscription</p>
+            <!-- Welcome Hero Section -->
+            <section class="welcome-hero">
+                <div class="welcome-content">
+                    <h1>Welcome to MindWave, <span id="orgName">Organization</span>! 🎉</h1>
+                    <p class="welcome-subtitle">
+                        <span id="orgType">University</span> •
+                        <span id="planName">Professional Plan</span> •
+                        <span id="trialStatus" class="trial-badge">14 days remaining in trial</span>
+                    </p>
                 </div>
             </section>
 
-            <!-- Dashboard Grid -->
-            <div class="dashboard-grid">
-                <!-- Left Column -->
-                <div class="left-column">
-                    <!-- Subscription Card -->
-                    <div class="performance-card" id="subscriptionCard">
-                        <div class="performance-header">
-                            <div class="lecturer-info">
-                                <div class="subscription-icon" id="subscriptionIcon">💎</div>
-                                <div>
-                                    <div class="performance-score" id="planName">Professional Plan</div>
-                                    <div class="performance-label" id="subscriptionStatus">Active Subscription</div>
-                                </div>
-                            </div>
-                            <button class="see-more" id="manageSubscriptionBtn"
-                                onclick="window.location.href='#billing'">Manage →</button>
-                        </div>
-
-                        <div class="performance-detail">
-                            <div class="detail-text">
-                                <span class="detail-score" id="planPrice">₹2,499/month</span>
-                                <p id="subscriptionDetails">
-                                    Your subscription renews on <strong id="renewalDate">January 25, 2026</strong>. You
-                                    have access to all
-                                    premium features including unlimited AI calls and priority support.
-                                </p>
-                            </div>
-                            <div class="subscription-actions">
-                                <button class="action-btn" id="viewInvoicesBtn" onclick="alert('View Invoices')">📄 View
-                                    Invoices</button>
-                                <button class="action-btn" id="updatePaymentBtn" onclick="alert('Update Payment')">💳
-                                    Update Payment</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Stats Row -->
-                    <div class="stats-row">
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <span class="stat-label">Team Members</span>
-                                <button class="stat-menu">⋯</button>
-                            </div>
-                            <div class="stat-value" id="teamCount">5</div>
-                            <div class="stat-change positive">
-                                <span class="change-icon">↗</span>
-                                <span>2 added this month</span>
-                            </div>
-                            <div class="team-avatars">
-                                <img src="https://i.pravatar.cc/32?img=1" alt="Member">
-                                <img src="https://i.pravatar.cc/32?img=2" alt="Member">
-                                <img src="https://i.pravatar.cc/32?img=3" alt="Member">
-                                <img src="https://i.pravatar.cc/32?img=4" alt="Member">
-                                <div class="avatar-more">+1</div>
-                            </div>
-                            <button class="add-member-btn" onclick="alert('Add Team Member')">+ Add Member</button>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <span class="stat-label">Total Students</span>
-                                <button class="stat-menu">⋯</button>
-                            </div>
-                            <div class="stat-value" id="studentCount">243</div>
-                            <div class="stat-change positive">
-                                <span class="change-icon">↗</span>
-                                <span>18% increase this month</span>
-                            </div>
-                            <div class="stat-chart">
-                                <canvas id="newStudentsChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Usage Metrics Chart -->
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3>Usage Metrics</h3>
-                            <div class="chart-legend">
-                                <span class="legend-item">
-                                    <span class="legend-dot blue"></span>
-                                    AI Calls
-                                </span>
-                                <span class="legend-item">
-                                    <span class="legend-dot purple"></span>
-                                    Storage
-                                </span>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="workingHoursChart"></canvas>
-                        </div>
-                    </div>
+            <!-- Getting Started Section -->
+            <section class="getting-started-section" id="gettingStartedSection">
+                <div class="section-header">
+                    <h2>🚀 Getting Started</h2>
+                    <p>Complete these steps to set up your organization</p>
                 </div>
 
-                <!-- Right Column -->
-                <div class="right-column">
-                    <!-- AI Usage Card -->
-                    <div class="stat-card-small">
-                        <div class="stat-header">
-                            <span class="stat-label">AI API Calls</span>
-                            <button class="stat-menu">⋯</button>
-                        </div>
-                        <div class="stat-value" id="aiCalls">2,450</div>
-                        <div class="usage-limit">of 5,000 this month</div>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar-fill" style="width: 49%"></div>
-                        </div>
-                        <div class="stat-change positive">
-                            <span>49% used • 2,550 remaining</span>
+                <div class="checklist-grid">
+                    <div class="checklist-item" data-step="invite-admin">
+                        <div class="checklist-icon">👥</div>
+                        <div class="checklist-content">
+                            <h3>Invite Team Members</h3>
+                            <p>Add admins and faculty to help manage your organization</p>
+                            <button class="btn-primary" id="inviteAdminBtn">
+                                <i class="fas fa-user-plus"></i> Invite Admin
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Storage Card -->
-                    <div class="stat-card-small">
-                        <div class="stat-header">
-                            <span class="stat-label">Storage Used</span>
-                            <button class="stat-menu">⋯</button>
-                        </div>
-                        <div class="stat-value">3.2 GB</div>
-                        <div class="usage-limit">of 10 GB</div>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar-fill" style="width: 32%"></div>
-                        </div>
-                        <div class="stat-change positive">
-                            <span>32% used • 6.8 GB remaining</span>
+                    <div class="checklist-item" data-step="configure-students">
+                        <div class="checklist-icon">🎓</div>
+                        <div class="checklist-content">
+                            <h3>Configure Student Access</h3>
+                            <p>Set up allowed email domains for student self-signup</p>
+                            <button class="btn-primary" id="configureStudentsBtn">
+                                <i class="fas fa-cog"></i> Configure
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Quick Actions -->
-                    <div class="agenda-card">
-                        <div class="agenda-header">
-                            <h3>Quick Actions</h3>
+                    <div class="checklist-item" data-step="add-students">
+                        <div class="checklist-icon">📝</div>
+                        <div class="checklist-content">
+                            <h3>Add Students</h3>
+                            <p>Bulk upload students or let them self-signup</p>
+                            <button class="btn-secondary" id="addStudentsBtn">
+                                <i class="fas fa-upload"></i> Add Students
+                            </button>
                         </div>
-                        <div class="quick-actions-list">
-                            <button class="quick-action-btn">
-                                <span class="action-icon">👥</span>
-                                <div class="action-text">
-                                    <div class="action-title">Invite Team Member</div>
-                                    <div class="action-desc">Add faculty or admins</div>
-                                </div>
-                            </button>
-                            <button class="quick-action-btn">
-                                <span class="action-icon">🎓</span>
-                                <div class="action-text">
-                                    <div class="action-title">Add Students</div>
-                                    <div class="action-desc">Bulk upload via CSV</div>
-                                </div>
-                            </button>
-                            <button class="quick-action-btn">
-                                <span class="action-icon">📊</span>
-                                <div class="action-text">
-                                    <div class="action-title">View Reports</div>
-                                    <div class="action-desc">Analytics & insights</div>
-                                </div>
-                            </button>
-                            <button class="quick-action-btn">
-                                <span class="action-icon">⚙️</span>
-                                <div class="action-text">
-                                    <div class="action-title">Settings</div>
-                                    <div class="action-desc">Organization preferences</div>
-                                </div>
+                    </div>
+
+                    <div class="checklist-item" data-step="create-course">
+                        <div class="checklist-icon">📚</div>
+                        <div class="checklist-content">
+                            <h3>Create First Course</h3>
+                            <p>Start building your first course or game</p>
+                            <button class="btn-secondary" id="createCourseBtn">
+                                <i class="fas fa-plus"></i> Create Course
                             </button>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <!-- Quick Stats (Hidden for new users) -->
+            <section class="stats-section" id="statsSection" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value" id="teamCount">0</div>
+                        <div class="stat-label">Team Members</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎓</div>
+                        <div class="stat-value" id="studentCount">0</div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-value" id="courseCount">0</div>
+                        <div class="stat-label">Courses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎮</div>
+                        <div class="stat-value" id="gameCount">0</div>
+                        <div class="stat-label">Games</div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
-    <script src="js/org-data-service.js"></script>
+    <!-- Invite Admin Modal -->
+    <div class="modal" id="inviteAdminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Invite Team Member</h2>
+                <button class="modal-close" id="closeInviteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="inviteAdminForm">
+                    <div class="form-group">
+                        <label for="adminEmail">Email Address</label>
+                        <input type="email" id="adminEmail" placeholder="admin@organization.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adminRole">Role</label>
+                        <select id="adminRole" required>
+                            <option value="admin">Admin</option>
+                            <option value="faculty">Faculty</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="autoGeneratePassword" checked>
+                            Auto-generate secure password
+                        </label>
+                    </div>
+
+                    <div class="credentials-display" id="credentialsDisplay" style="display: none;">
+                        <div class="credentials-header">
+                            <i class="fas fa-key"></i> Generated Credentials
+                        </div>
+                        <div class="credentials-content">
+                            <div class="credential-item">
+                                <label>Email:</label>
+                                <span id="displayEmail"></span>
+                            </div>
+                            <div class="credential-item">
+                                <label>Password:</label>
+                                <div class="password-display">
+                                    <span id="displayPassword"></span>
+                                    <button type="button" class="btn-copy" id="copyPasswordBtn">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="credentials-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Share these credentials securely with the admin. They will be required to reset their
+                            password on first login.
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" id="cancelInviteBtn">Cancel</button>
+                        <button type="submit" class="btn-primary" id="sendInviteBtn">
+                            <i class="fas fa-paper-plane"></i> Send Invitation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configure Students Modal -->
+    <div class="modal" id="configureStudentsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Configure Student Email Domains</h2>
+                <button class="modal-close" id="closeStudentsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    Students with these email domains will be able to self-signup and will be automatically linked to
+                    your organization.
+                </p>
+                <form id="configureStudentsForm">
+                    <div class="form-group">
+                        <label>Allowed Student Email Domains</label>
+                        <div class="domain-list" id="domainList">
+                            <div class="domain-item">
+                                <input type="text" class="domain-input" placeholder="@student.org.ac.in" required>
+                                <button type="button" class="btn-remove-domain">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-add-domain" id="addDomainBtn">
+                            <i class="fas fa-plus"></i> Add Another Domain
+                        </button>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" id="cancelStudentsBtn">Cancel</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="js/modern-dashboard.js"></script>
-    <script src="js/org-dashboard-data.js"></script>
-    <script src="js/dashboard-interactions.js"></script></body>
+</body>
 
 </html>
-```

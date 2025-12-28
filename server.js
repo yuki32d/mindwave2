@@ -1765,6 +1765,189 @@ app.post("/api/organizations/create", authMiddleware, async (req, res) => {
   }
 });
 
+// Get organization details
+app.get("/api/organizations/details", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+
+    if (!user || !user.organizationId) {
+      return res.status(404).json({ ok: false, message: 'Organization not found' });
+    }
+
+    const organization = await Organization.findById(user.organizationId);
+
+    if (!organization) {
+      return res.status(404).json({ ok: false, message: 'Organization not found' });
+    }
+
+    res.json({
+      ok: true,
+      organization: {
+        name: organization.name,
+        type: organization.type,
+        size: organization.size,
+        subdomain: organization.subdomain,
+        subscriptionTier: organization.subscriptionTier,
+        subscriptionStatus: organization.subscriptionStatus,
+        currentPeriodEnd: organization.currentPeriodEnd,
+        allowedStudentDomains: organization.allowedStudentDomains || []
+      }
+    });
+  } catch (error) {
+    console.error('Get organization details error:', error);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// Invite admin with auto-generated password
+app.post("/api/organizations/invite-admin", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+
+    if (!user || !user.organizationId) {
+      return res.status(403).json({ ok: false, message: 'Not an organization member' });
+    }
+
+    // Only owner can invite admins
+    if (user.orgRole !== 'owner') {
+      return res.status(403).json({ ok: false, message: 'Only owner can invite admins' });
+    }
+
+    const { email, role, autoGeneratePassword } = req.body;
+
+    if (!email || !role) {
+      return res.status(400).json({ ok: false, message: 'Email and role are required' });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(409).json({ ok: false, message: 'User already exists' });
+    }
+
+    // Generate secure password
+    const password = generateSecurePassword();
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create admin user
+    const adminUser = await User.create({
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      role: role,
+      organizationId: user.organizationId,
+      orgRole: role,
+      userType: 'organization',
+      mustResetPassword: true,
+      temporaryPassword: true,
+      name: email.split('@')[0]
+    });
+
+    // Add to organization members
+    const organization = await Organization.findById(user.organizationId);
+    organization.members.push({
+      userId: adminUser._id,
+      role: role,
+      joinedAt: new Date()
+    });
+    await organization.save();
+
+    res.json({
+      ok: true,
+      credentials: {
+        email: email,
+        password: password
+      },
+      message: 'Admin invited successfully'
+    });
+
+  } catch (error) {
+    console.error('Invite admin error:', error);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// Configure student email domains
+app.post("/api/organizations/configure-student-domains", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+
+    if (!user || !user.organizationId) {
+      return res.status(403).json({ ok: false, message: 'Not an organization member' });
+    }
+
+    // Only owner can configure domains
+    if (user.orgRole !== 'owner') {
+      return res.status(403).json({ ok: false, message: 'Only owner can configure domains' });
+    }
+
+    const { allowedDomains } = req.body;
+
+    if (!allowedDomains || !Array.isArray(allowedDomains)) {
+      return res.status(400).json({ ok: false, message: 'Invalid domains' });
+    }
+
+    const organization = await Organization.findById(user.organizationId);
+    organization.allowedStudentDomains = allowedDomains;
+    await organization.save();
+
+    res.json({
+      ok: true,
+      message: 'Student domains configured successfully'
+    });
+
+  } catch (error) {
+    console.error('Configure domains error:', error);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// Get student domains
+app.get("/api/organizations/student-domains", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+
+    if (!user || !user.organizationId) {
+      return res.status(404).json({ ok: false, message: 'Organization not found' });
+    }
+
+    const organization = await Organization.findById(user.organizationId);
+
+    res.json({
+      ok: true,
+      domains: organization.allowedStudentDomains || []
+    });
+
+  } catch (error) {
+    console.error('Get domains error:', error);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// Helper function to generate secure password
+function generateSecurePassword() {
+  const length = 12;
+  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+  let password = "";
+
+  // Ensure at least one of each type
+  password += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
+  password += "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)];
+  password += "0123456789"[Math.floor(Math.random() * 10)];
+  password += "!@#$%^&*"[Math.floor(Math.random() * 8)];
+
+  // Fill remaining characters
+  for (let i = password.length; i < length; i++) {
+    password += charset[Math.floor(Math.random() * charset.length)];
+  }
+
+  // Shuffle
+  return password.split('').sort(() => Math.random() - 0.5).join('');
+}
+
 // ===================================
 // Unified OAuth Token Exchange for All Providers
 // ===================================
