@@ -19,10 +19,34 @@ async function loadOrganizationData() {
     try {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const orgName = localStorage.getItem('organization_name') || 'Your Organization';
+        const orgType = localStorage.getItem('organization_type') || 'university';
 
         // Update organization name
-        document.getElementById('orgName').textContent = orgName;
+        if (document.getElementById('orgName')) {
+            document.getElementById('orgName').textContent = orgName;
+        }
 
+        // Update organization type
+        if (document.getElementById('orgType')) {
+            document.getElementById('orgType').textContent = formatOrgType(orgType);
+        }
+
+        // Set default values since backend doesn't have Organization model yet
+        if (document.getElementById('planName')) {
+            document.getElementById('planName').textContent = 'Trial Plan';
+        }
+
+        if (document.getElementById('trialStatus')) {
+            document.getElementById('trialStatus').textContent = '14 days remaining in trial';
+        }
+
+        // NOTE: Backend API call disabled - Organization model doesn't exist in server.js
+        // If you want to enable organization verification, you need to:
+        // 1. Create Organization schema in server.js
+        // 2. Create /api/organizations/details endpoint
+        // 3. Uncomment the code below
+
+        /*
         // Load organization details from backend
         const response = await fetch('/api/organizations/details', {
             headers: {
@@ -31,13 +55,11 @@ async function loadOrganizationData() {
         });
 
         // Only redirect if organization was definitely deleted (404)
-        // Don't redirect on rate limit (429) or other errors
         if (response.status === 404) {
-            // Organization was deleted by super admin
             localStorage.removeItem('organization_id');
             localStorage.removeItem('organization_name');
             localStorage.removeItem('orgRole');
-
+            
             alert('Your organization has been removed. Please set up a new organization.');
             window.location.href = 'organization-setup.html';
             return;
@@ -46,28 +68,15 @@ async function loadOrganizationData() {
         if (response.ok) {
             const data = await response.json();
             if (data.ok && data.organization) {
-                // Save organization ID to localStorage
                 if (data.organization._id) {
                     localStorage.setItem('organization_id', data.organization._id);
                 }
                 updateDashboardWithOrgData(data.organization);
-            } else if (!data.organization) {
-                // No organization found for this user
-                localStorage.removeItem('organization_id');
-                localStorage.removeItem('organization_name');
-                localStorage.removeItem('orgRole');
-
-                alert('No organization found. Please set up your organization.');
-                window.location.href = 'organization-setup.html';
-                return;
             }
-        } else if (response.status === 429) {
-            // Rate limited - just show error, don't redirect
-            console.error('Rate limited. Please refresh the page.');
         }
+        */
     } catch (error) {
         console.error('Error loading organization data:', error);
-        // Don't redirect on network errors - just log them
     }
 }
 
