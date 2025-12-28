@@ -420,6 +420,9 @@ async function createOrganization() {
     showLoading('Creating your organization...');
 
     try {
+        // Log what we're sending
+        console.log('Creating organization with data:', setupState.organizationData);
+
         const response = await fetch('/api/organizations/create', {
             method: 'POST',
             headers: {
@@ -431,10 +434,13 @@ async function createOrganization() {
 
         const data = await response.json();
 
+        console.log('Server response:', data);
+
         if (data.ok) {
             // Store organization ID and data
             localStorage.setItem('organization_id', data.organization._id);
             localStorage.setItem('organization_name', setupState.organizationData.name);
+            localStorage.setItem('organization_type', setupState.organizationData.type);
 
             // Update user object with organization info
             const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -450,9 +456,10 @@ async function createOrganization() {
             throw new Error(data.message || 'Failed to create organization');
         }
     } catch (error) {
+        console.error('Organization creation error:', error);
         hideLoading();
         showError('Failed to create organization: ' + error.message);
-        goToStep(1);
+        throw error; // Re-throw to prevent redirect
     }
 }
 
