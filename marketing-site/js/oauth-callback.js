@@ -286,9 +286,11 @@ async function showSuccess(provider, user) {
     document.querySelector('.callback-title').textContent = 'Success!';
     document.querySelector('.spinner').style.display = 'none';
 
-    // Check if user has an organization
-    if (user.organizationId) {
-        // Returning user - go to dashboard
+    // Check if user has completed organization setup (check localStorage, not backend)
+    const hasOrganization = localStorage.getItem('organization_name');
+
+    if (hasOrganization) {
+        // Returning user with organization - go to dashboard
         console.log('Returning user with organization - redirecting to dashboard');
         document.querySelector('.callback-message').textContent = `Welcome back, ${userName}!`;
 
@@ -296,8 +298,8 @@ async function showSuccess(provider, user) {
             window.location.href = '/marketing-site/modern-dashboard.html';
         }, 1500);
     } else {
-        // New user - go to setup
-        console.log('New user - redirecting to organization setup');
+        // New user or deleted user - go to setup
+        console.log('New/deleted user - redirecting to organization setup');
         document.querySelector('.callback-message').textContent = `Welcome, ${userName}! Setting up your workspace...`;
 
         setTimeout(() => {
