@@ -2,6 +2,9 @@
 // Handles welcome section, admin invitations, and student domain configuration
 
 document.addEventListener('DOMContentLoaded', async function () {
+    // Verify user still has organization access
+    await verifyOrganizationAccess();
+
     // Load organization data
     await loadOrganizationData();
 
@@ -11,6 +14,48 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Initialize event listeners
     initializeEventListeners();
 });
+
+// ===================================
+// Verify Organization Access
+// ===================================
+async function verifyOrganizationAccess() {
+    try {
+        const response = await fetch('/api/organizations/details', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+            }
+        });
+
+        // If user doesn't have an organization or was deleted, redirect to setup
+        if (!response.ok || response.status === 404) {
+            // Clear organization data from localStorage
+            localStorage.removeItem('organization_id');
+            localStorage.removeItem('organization_name');
+            localStorage.removeItem('orgRole');
+
+            // Redirect to organization setup
+            alert('Your organization access has been removed. Please set up a new organization.');
+            window.location.href = 'organization-setup.html';
+            return;
+        }
+
+        const data = await response.json();
+        if (!data.ok || !data.organization) {
+            // Organization was deleted
+            localStorage.removeItem('organization_id');
+            localStorage.removeItem('organization_name');
+            localStorage.removeItem('orgRole');
+
+            alert('Your organization has been removed. Please set up a new organization.');
+            window.location.href = 'organization-setup.html';
+            return;
+        }
+    } catch (error) {
+        console.error('Error verifying organization access:', error);
+        // On error, redirect to setup to be safe
+        window.location.href = 'organization-setup.html';
+    }
+}
 
 // ===================================
 // Load Organization Data
