@@ -149,28 +149,59 @@ function displayUsers(users) {
             <td>${formatDate(user.createdAt)}</td>
             <td>
                 <div class="action-buttons">
-                    <button class="btn-action btn-view" onclick="viewUser('${user._id}')" title="View Details">
+                    <button class="btn-action btn-view" data-action="view" data-user-id="${user._id}" title="View Details">
                         <i class="fas fa-eye"></i>
                     </button>
                     ${!user.suspended ? `
-                        <button class="btn-action btn-suspend" onclick="suspendUser('${user._id}', '${user.email}')" title="Suspend">
+                        <button class="btn-action btn-suspend" data-action="suspend" data-user-id="${user._id}" data-email="${user.email}" title="Suspend">
                             <i class="fas fa-pause"></i>
                         </button>
                     ` : `
-                        <button class="btn-action btn-activate" onclick="activateUser('${user._id}', '${user.email}')" title="Activate">
+                        <button class="btn-action btn-activate" data-action="activate" data-user-id="${user._id}" data-email="${user.email}" title="Activate">
                             <i class="fas fa-play"></i>
                         </button>
                     `}
-                    <button class="btn-action btn-block" onclick="blockEmail('${user.email}')" title="Block Email">
+                    <button class="btn-action btn-block" data-action="block" data-email="${user.email}" title="Block Email">
                         <i class="fas fa-ban"></i>
                     </button>
-                    <button class="btn-action btn-delete" onclick="deleteUser('${user._id}', '${user.email}')" title="Delete User">
+                    <button class="btn-action btn-delete" data-action="delete" data-user-id="${user._id}" data-email="${user.email}" title="Delete User">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </td>
         </tr>
     `).join('');
+
+    // Add event delegation for user action buttons
+    tbody.querySelectorAll('.btn-action').forEach(btn => {
+        btn.addEventListener('click', handleUserAction);
+    });
+}
+
+// Handle user action button clicks
+function handleUserAction(e) {
+    const btn = e.currentTarget;
+    const action = btn.dataset.action;
+    const userId = btn.dataset.userId;
+    const email = btn.dataset.email;
+
+    switch (action) {
+        case 'view':
+            viewUser(userId);
+            break;
+        case 'suspend':
+            suspendUser(userId, email);
+            break;
+        case 'activate':
+            activateUser(userId, email);
+            break;
+        case 'block':
+            blockEmail(email);
+            break;
+        case 'delete':
+            deleteUser(userId, email);
+            break;
+    }
 }
 
 async function loadOrganizations() {
@@ -208,16 +239,38 @@ function displayOrganizations(orgs) {
             <td><span class="status-badge ${org.subscriptionStatus}">${org.subscriptionStatus}</span></td>
             <td>
                 <div class="action-buttons">
-                    <button class="btn-action btn-view" onclick="viewOrganization('${org._id}')" title="View Details">
+                    <button class="btn-action btn-view" data-action="view-org" data-org-id="${org._id}" title="View Details">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn-action btn-delete" onclick="deleteOrganization('${org._id}', '${org.name}')" title="Delete Organization">
+                    <button class="btn-action btn-delete" data-action="delete-org" data-org-id="${org._id}" data-org-name="${org.name}" title="Delete Organization">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </td>
         </tr>
     `).join('');
+
+    // Add event delegation for org action buttons
+    tbody.querySelectorAll('.btn-action').forEach(btn => {
+        btn.addEventListener('click', handleOrgAction);
+    });
+}
+
+// Handle organization action button clicks
+function handleOrgAction(e) {
+    const btn = e.currentTarget;
+    const action = btn.dataset.action;
+    const orgId = btn.dataset.orgId;
+    const orgName = btn.dataset.orgName;
+
+    switch (action) {
+        case 'view-org':
+            viewOrganization(orgId);
+            break;
+        case 'delete-org':
+            deleteOrganization(orgId, orgName);
+            break;
+    }
 }
 
 async function loadBlockedEmails() {
@@ -251,12 +304,25 @@ function displayBlockedEmails(blocked) {
             <td>${item.reason || 'N/A'}</td>
             <td>${formatDate(item.blockedAt)}</td>
             <td>
-                <button class="btn-action btn-unblock" onclick="unblockEmail('${item._id}', '${item.email}')" title="Unblock">
+                <button class="btn-action btn-unblock" data-action="unblock" data-blocked-id="${item._id}" data-email="${item.email}" title="Unblock">
                     <i class="fas fa-check"></i> Unblock
                 </button>
             </td>
         </tr>
     `).join('');
+
+    // Add event delegation for unblock buttons
+    tbody.querySelectorAll('.btn-unblock').forEach(btn => {
+        btn.addEventListener('click', handleUnblockAction);
+    });
+}
+
+// Handle unblock action
+function handleUnblockAction(e) {
+    const btn = e.currentTarget;
+    const id = btn.dataset.blockedId;
+    const email = btn.dataset.email;
+    unblockEmail(id, email);
 }
 
 // ===================================
