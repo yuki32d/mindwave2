@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Initialize event listeners
     initializeEventListeners();
+
+    // Initialize real-time dashboard data
+    await initializeRealTimeData();
 });
 
 // ===================================
@@ -419,4 +422,29 @@ function generateSecurePassword() {
 
     // Shuffle
     return password.split('').sort(() => Math.random() - 0.5).join('');
+}
+
+// ===================================
+// Real-time Data Integration
+// ===================================
+async function initializeRealTimeData() {
+    try {
+        // Fetch initial dashboard stats
+        const data = await window.dashboardService.getStats();
+
+        // Update UI with real-time data
+        window.dashboardService.updateDashboardUI(data);
+
+        // Start auto-refresh (updates every 30 seconds)
+        window.dashboardService.startAutoRefresh((newData) => {
+            window.dashboardService.updateDashboardUI(newData);
+            console.log('✓ Dashboard data auto-refreshed');
+        });
+
+        console.log('✅ Real-time dashboard data initialized');
+    } catch (error) {
+        console.error('Failed to initialize real-time data:', error);
+        // Fallback to static data from localStorage if API fails
+        console.log('Using cached organization data as fallback');
+    }
 }

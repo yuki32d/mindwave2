@@ -793,6 +793,44 @@ const globalSettingsSchema = new mongoose.Schema({
 
 const GlobalSettings = mongoose.model("GlobalSettings", globalSettingsSchema);
 
+// ============================================
+// USER ACTIVITY TRACKING SCHEMA
+// ============================================
+const userActivitySchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
+  activityType: {
+    type: String,
+    required: true,
+    enum: [
+      'login',
+      'logout',
+      'profile_update',
+      'password_change',
+      'team_invite',
+      'game_create',
+      'game_play',
+      'game_complete',
+      'student_add',
+      'settings_update',
+      'subscription_change',
+      'payment_success',
+      'payment_failed'
+    ]
+  },
+  description: { type: String, required: true },
+  metadata: { type: mongoose.Schema.Types.Mixed }, // Additional data about the activity
+  ipAddress: { type: String },
+  userAgent: { type: String }
+}, { timestamps: true });
+
+// Add indexes for faster queries
+userActivitySchema.index({ userId: 1, createdAt: -1 });
+userActivitySchema.index({ organizationId: 1, createdAt: -1 });
+userActivitySchema.index({ activityType: 1 });
+
+const UserActivity = mongoose.model("UserActivity", userActivitySchema);
+
 // Google Classroom Integration Schemas
 const googleClassroomCourseSchema = new mongoose.Schema({
   courseId: { type: String, required: true, unique: true }, // Google Classroom course ID
@@ -9050,6 +9088,199 @@ app.get('/api/organizations/analytics', authMiddleware, async (req, res) => {
   }
 });
 
+// ============================================
+// USER ACTIVITY API ENDPOINTS
+// ============================================
+
+// GET /api/user/activity - Fetch user activity history
+app.get('/api/user/activity', authMiddleware, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = parseInt(req.query.skip) || 0;
+
+    const activities = await UserActivity.find({ userId: req.user._id })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip(skip)
+      .lean();
+
+    res.json({
+      ok: true,
+      activities,
+      total: await UserActivity.countDocuments({ userId: req.user._id })
+    });
+  } catch (error) {
+    console.error('Error fetching user activity:', error);
+    res.status(500).json({ ok: false, message: 'Failed to fetch activity' });
+  }
+});
+
+// POST /api/user/activity - Log user activity
+app.post('/api/user/activity', authMiddleware, async (req, res) => {
+  try {
+    const { activityType, description, metadata } = req.body;
+
+    const activity = new UserActivity({
+      userId: req.user._id,
+      organizationId: req.user.organizationId,
+      activityType,
+      description,
+      metadata,
+      ipAddress: req.ip || req.connection.remoteAddress,
+      userAgent: req.headers['user-agent']
+    });
+
+    await activity.save();
+
+    res.json({ ok: true, activity });
+  } catch (error) {
+    console.error('Error logging activity:', error);
+    res.status(500).json({ ok: false, message: 'Failed to log activity' });
+  }
+});
+
+// ============================================
+// DASHBOARD STATS API ENDPOINT
+// ============================================
+
+// GET /api/organizations/dashboard-stats - Real-time dashboard statistics
+app.get('/api/organizations/dashboard-stats', authMiddleware, async (req, res) => {
+  try {
+    if (!req.user.organizationId) {
+      return res.status(404).json({ ok: false, message: 'No organization found' });
+    }
+
+    const organization = await Organization.findById(req.user.organizationId);
+    if (!organization) {
+      return res.status(404).json({ ok: false, message: 'Organization not found' });
+    }
+
+    // Get counts
+    const studentCount = await User.countDocuments({
+      organizationId: req.user.organizationId,
+      orgRole: 'student'
+    });
+
+    const teamCount = await User.countDocuments({
+      organizationId: req.user.organizationId,
+      orgRole: { $in: ['owner', 'admin', 'faculty'] }
+    });
+
+    const gameCount = await Game.countDocuments({
+      createdBy: { $in: await User.find({ organizationId: req.user.organizationId }).distinct('_id') }
+    });
+
+    // Calculate trial days remaining
+    let trialDaysRemaining = 0;
+    if (organization.trialEndsAt) {
+      const now = new Date();
+      const trialEnd = new Date(organization.trialEndsAt);
+      trialDaysRemaining = Math.max(0, Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24)));
+    }
+
+    // Get recent activity
+    const recentActivity = await UserActivity.find({
+      organizationId: req.user.organizationId
+    })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('userId', 'name email')
+      .lean();
+
+    res.json({
+      ok: true,
+      stats: {
+        studentCount,
+        teamCount,
+        gameCount,
+        trialDaysRemaining,
+        subscriptionTier: organization.subscriptionTier,
+        subscriptionStatus: organization.subscriptionStatus,
+        aiCallsUsed: organization.analytics?.aiCallsThisMonth || 0,
+        aiCallsLimit: SUBSCRIPTION_TIERS[organization.subscriptionTier]?.limits?.aiCallsPerMonth || 50,
+        storageUsed: organization.usage?.storageUsed || 0,
+        storageLimit: SUBSCRIPTION_TIERS[organization.subscriptionTier]?.limits?.maxStorage || 100
+      },
+      recentActivity
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ ok: false, message: 'Failed to fetch dashboard stats' });
+  }
+});
+
+// ============================================
+// BILLING INFO API ENDPOINT
+// ============================================
+
+// GET /api/organizations/billing-info - Subscription and billing data
+app.get('/api/organizations/billing-info', authMiddleware, async (req, res) => {
+  try {
+    if (!req.user.organizationId) {
+      return res.status(404).json({ ok: false, message: 'No organization found' });
+    }
+
+    const organization = await Organization.findById(req.user.organizationId);
+    if (!organization) {
+      return res.status(404).json({ ok: false, message: 'Organization not found' });
+    }
+
+    // Get subscription tier details
+    const tierDetails = SUBSCRIPTION_TIERS[organization.subscriptionTier] || SUBSCRIPTION_TIERS.trial;
+
+    // Get billing events (payment history)
+    const billingEvents = await SubscriptionEvent.find({
+      organizationId: req.user.organizationId,
+      eventType: { $in: ['payment.succeeded', 'payment.failed', 'subscription.created', 'subscription.updated'] }
+    })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
+
+    // Calculate next billing date
+    let nextBillingDate = null;
+    if (organization.currentPeriodEnd) {
+      nextBillingDate = organization.currentPeriodEnd;
+    } else if (organization.trialEndsAt) {
+      nextBillingDate = organization.trialEndsAt;
+    }
+
+    res.json({
+      ok: true,
+      billing: {
+        currentPlan: {
+          name: tierDetails.name,
+          tier: organization.subscriptionTier,
+          price: tierDetails.price,
+          currency: tierDetails.currency,
+          billingCycle: tierDetails.billingCycle || 'trial'
+        },
+        status: organization.subscriptionStatus,
+        nextBillingDate,
+        cancelAtPeriodEnd: organization.cancelAtPeriodEnd || false,
+        features: tierDetails.features,
+        limits: tierDetails.limits,
+        usage: {
+          students: organization.usage?.studentCount || 0,
+          courses: organization.usage?.courseCount || 0,
+          storage: organization.usage?.storageUsed || 0,
+          aiCalls: organization.analytics?.aiCallsThisMonth || 0
+        }
+      },
+      paymentHistory: billingEvents.map(event => ({
+        id: event._id,
+        type: event.eventType,
+        date: event.createdAt,
+        amount: event.data?.amount || 0,
+        status: event.eventType.includes('succeeded') ? 'paid' : 'failed',
+        description: event.data?.description || event.eventType.replace(/_/g, ' ')
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching billing info:', error);
+    res.status(500).json({ ok: false, message: 'Failed to fetch billing info' });
+  }
+});
 
 
 app.get('/health', (req, res) => {
