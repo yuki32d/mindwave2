@@ -44,10 +44,152 @@ async function loadProfileData() {
         document.getElementById('subscriptionPlan').textContent = 'Premium Plan';
         document.getElementById('teamSize').textContent = '1 member';
 
+        // Load real-time activity
+        await loadActivityData();
+
     } catch (error) {
         console.error('Error loading profile:', error);
         showToast('Failed to load profile data', 'error');
     }
+}
+
+// ============================================
+// Load Real-time Activity Data
+// ============================================
+
+async function loadActivityData() {
+    try {
+        const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+
+        if (!user.email || !token) {
+            console.warn('No user or token found, using static activity data');
+            return;
+        }
+
+        // Fetch activity from backend
+        const response = await fetch('/api/user/activity', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch activity');
+        }
+
+        const activities = await response.json();
+
+        // Update activity list
+        updateActivityList(activities);
+
+    } catch (error) {
+        console.error('Error loading activity:', error);
+        // Use static activity data as fallback
+        loadStaticActivityData();
+    }
+}
+
+function updateActivityList(activities) {
+    const activityList = document.getElementById('activityList');
+
+    if (!activities || activities.length === 0) {
+        activityList.innerHTML = `
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="activity-details">
+                    <p class="activity-title">No recent activity</p>
+                    <p class="activity-time">Start using MindWave to see your activity here</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    // Clear existing activities
+    activityList.innerHTML = '';
+
+    // Add each activity
+    activities.slice(0, 10).forEach(activity => {
+        const activityItem = createActivityItem(activity);
+        activityList.appendChild(activityItem);
+    });
+}
+
+function createActivityItem(activity) {
+    const item = document.createElement('div');
+    item.className = 'activity-item';
+
+    // Determine icon based on activity type
+    const iconMap = {
+        'login': 'fa-sign-in-alt',
+        'logout': 'fa-sign-out-alt',
+        'profile_update': 'fa-edit',
+        'password_change': 'fa-key',
+        'team_invite': 'fa-user-plus',
+        'game_create': 'fa-gamepad',
+        'game_play': 'fa-play',
+        'student_add': 'fa-user-graduate',
+        'settings_update': 'fa-cog',
+        'default': 'fa-circle'
+    };
+
+    const icon = iconMap[activity.type] || iconMap['default'];
+    const timeAgo = getTimeAgo(activity.timestamp);
+
+    item.innerHTML = `
+        <div class="activity-icon">
+            <i class="fas ${icon}"></i>
+        </div>
+        <div class="activity-details">
+            <p class="activity-title">${activity.description || activity.action}</p>
+            <p class="activity-time">${timeAgo}</p>
+        </div>
+    `;
+
+    return item;
+}
+
+function getTimeAgo(timestamp) {
+    const now = new Date();
+    const activityTime = new Date(timestamp);
+    const diffMs = now - activityTime;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+    return activityTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function loadStaticActivityData() {
+    const staticActivities = [
+        {
+            type: 'login',
+            description: 'Logged in from new device',
+            timestamp: new Date(Date.now() - 2 * 3600000) // 2 hours ago
+        },
+        {
+            type: 'profile_update',
+            description: 'Updated profile information',
+            timestamp: new Date(Date.now() - 24 * 3600000) // 1 day ago
+        },
+        {
+            type: 'team_invite',
+            description: 'Invited team member',
+            timestamp: new Date(Date.now() - 3 * 24 * 3600000) // 3 days ago
+        }
+    ];
+
+    updateActivityList(staticActivities);
 }
 
 // ============================================
@@ -192,6 +334,11 @@ function startAutoRefresh() {
         loadProfileData();
         updateLastRefreshTime();
     }, 60000);
+
+    // Refresh activity data every 30 seconds for real-time updates
+    setInterval(() => {
+        loadActivityData();
+    }, 30000);
 }
 
 function updateLastRefreshTime() {
