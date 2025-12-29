@@ -63,7 +63,8 @@ async function loadActivityData() {
         const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
 
         if (!user.email || !token) {
-            console.warn('No user or token found, using static activity data');
+            // No authentication, use static data
+            loadStaticActivityData();
             return;
         }
 
@@ -77,7 +78,9 @@ async function loadActivityData() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch activity');
+            // API endpoint not available, use static data
+            loadStaticActivityData();
+            return;
         }
 
         const activities = await response.json();
@@ -86,8 +89,7 @@ async function loadActivityData() {
         updateActivityList(activities);
 
     } catch (error) {
-        console.error('Error loading activity:', error);
-        // Use static activity data as fallback
+        // Silently fall back to static activity data
         loadStaticActivityData();
     }
 }
