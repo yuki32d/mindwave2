@@ -19,7 +19,8 @@ async function loadProfileData() {
         const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
 
         if (!user || !user.email) {
-            window.location.href = '/marketing-site/admin-login.html';
+            // Redirect to home page, not admin login
+            window.location.href = '/marketing-site/website-home.html';
             return;
         }
 

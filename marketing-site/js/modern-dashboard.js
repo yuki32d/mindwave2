@@ -21,7 +21,69 @@ document.addEventListener('DOMContentLoaded', async function () {
 async function loadOrganizationData() {
     try {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const orgName = localStorage.getItem('organization_name') || 'Your Organization';
+
+        // Try to get organization details from backend first
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+
+        if (token) {
+            try {
+                const response = await fetch('/api/organizations/details', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                // If successful, update with real data from backend
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.ok && data.organization) {
+                        // Update localStorage with fresh data from backend
+                        if (data.organization._id) {
+                            localStorage.setItem('organization_id', data.organization._id);
+                        }
+                        if (data.organization.name) {
+                            localStorage.setItem('organization_name', data.organization.name);
+                        }
+                        if (data.organization.type) {
+                            localStorage.setItem('organization_type', data.organization.type);
+                        }
+
+                        // Update dashboard UI with backend data
+                        updateDashboardWithOrgData(data.organization);
+                        return; // Exit early, we have real data
+                    }
+                }
+
+                // If organization was deleted (404), show message
+                if (response.status === 404) {
+                    console.warn('No organization found for user');
+
+                    // Clear organization data
+                    localStorage.removeItem('organization_id');
+                    localStorage.removeItem('organization_name');
+                    localStorage.removeItem('organization_type');
+                    localStorage.removeItem('orgRole');
+
+                    // Show message in dashboard
+                    if (document.getElementById('orgName')) {
+                        document.getElementById('orgName').textContent = 'No Organization';
+                    }
+                    if (document.getElementById('planName')) {
+                        document.getElementById('planName').innerHTML = '<a href="/marketing-site/organization-setup.html" style="color: #ef4444;">Create Organization</a>';
+                    }
+                    if (document.getElementById('trialStatus')) {
+                        document.getElementById('trialStatus').textContent = 'Setup Required';
+                    }
+                    return;
+                }
+            } catch (apiError) {
+                console.error('Error fetching organization from API:', apiError);
+                // Fall through to use localStorage as fallback
+            }
+        }
+
+        // Fallback to localStorage (only if API call failed or no token)
+        const orgName = localStorage.getItem('organization_name') || 'Loading...';
         const orgType = localStorage.getItem('organization_type') || 'university';
 
         // Update organization name
@@ -34,71 +96,6 @@ async function loadOrganizationData() {
             document.getElementById('orgType').textContent = formatOrgType(orgType);
         }
 
-        // Load organization details from backend to verify it still exists
-        const response = await fetch('/api/organizations/details', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-            }
-        });
-
-        // If organization was deleted (404), show message but don't auto-redirect
-        if (response.status === 404) {
-            console.warn('No organization found for user');
-
-            // Clear organization data
-            localStorage.removeItem('organization_id');
-            localStorage.removeItem('organization_name');
-            localStorage.removeItem('organization_type');
-            localStorage.removeItem('orgRole');
-
-            // Show message in dashboard instead of alert
-            if (document.getElementById('orgName')) {
-                document.getElementById('orgName').textContent = 'No Organization';
-            }
-            if (document.getElementById('planName')) {
-                document.getElementById('planName').innerHTML = '<a href="/marketing-site/organization-setup.html" style="color: #ef4444;">Create Organization</a>';
-            }
-            if (document.getElementById('trialStatus')) {
-                document.getElementById('trialStatus').textContent = 'Setup Required';
-            }
-            return;
-        }
-
-        // If successful, update dashboard with real data from backend
-        if (response.ok) {
-            const data = await response.json();
-            if (data.ok && data.organization) {
-                // Update localStorage with fresh data
-                if (data.organization._id) {
-                    localStorage.setItem('organization_id', data.organization._id);
-                }
-                if (data.organization.name) {
-                    localStorage.setItem('organization_name', data.organization.name);
-                }
-
-                // Update dashboard UI
-                updateDashboardWithOrgData(data.organization);
-            } else {
-                // No organization found
-                localStorage.removeItem('organization_id');
-                localStorage.removeItem('organization_name');
-                localStorage.removeItem('organization_type');
-                localStorage.removeItem('orgRole');
-
-                alert('No organization found. Please set up your organization.');
-                window.location.href = 'organization-setup.html';
-                return;
-            }
-        } else if (response.status === 429) {
-            // Rate limited - use localStorage as fallback
-            console.warn('Rate limited. Using cached organization data.');
-            if (document.getElementById('planName')) {
-                document.getElementById('planName').textContent = 'Trial Plan';
-            }
-            if (document.getElementById('trialStatus')) {
-                document.getElementById('trialStatus').textContent = '14 days remaining in trial';
-            }
-        }
     } catch (error) {
         console.error('Error loading organization data:', error);
         // On network error, use localStorage as fallback
