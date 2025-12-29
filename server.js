@@ -9398,6 +9398,14 @@ app.get('/api/notifications', authMiddleware, async (req, res) => {
       query.read = false;
     }
 
+    // Filter out student-specific notifications for org owners/admins
+    if (req.user.orgRole === 'owner' || req.user.orgRole === 'admin' || req.user.orgRole === 'faculty') {
+      // Exclude student-only notification types
+      query.type = {
+        $nin: ['game_available', 'material_uploaded', 'assignment_due']
+      };
+    }
+
     const notifications = await Notification.find(query)
       .sort({ createdAt: -1 })
       .limit(limit)
@@ -9408,7 +9416,10 @@ app.get('/api/notifications', authMiddleware, async (req, res) => {
     const unreadCount = await Notification.countDocuments({
       userId: req.user._id,
       read: false,
-      archived: false
+      archived: false,
+      ...(req.user.orgRole === 'owner' || req.user.orgRole === 'admin' || req.user.orgRole === 'faculty'
+        ? { type: { $nin: ['game_available', 'material_uploaded', 'assignment_due'] } }
+        : {})
     });
 
     res.json({
