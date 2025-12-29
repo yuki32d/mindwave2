@@ -17,7 +17,8 @@ class DashboardDataService {
         try {
             const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
             if (!token) {
-                throw new Error('No authentication token found');
+                console.warn('No auth token - skipping dashboard stats');
+                return null;
             }
 
             const response = await fetch('/api/organizations/dashboard-stats', {
@@ -28,8 +29,14 @@ class DashboardDataService {
                 }
             });
 
+            if (response.status === 404) {
+                console.warn('Organization not found - user may not have completed setup');
+                return null;
+            }
+
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                console.error(`HTTP ${response.status}: ${response.statusText}`);
+                return null;
             }
 
             const data = await response.json();
@@ -39,11 +46,12 @@ class DashboardDataService {
                 this.lastFetch = Date.now();
                 return data;
             } else {
-                throw new Error(data.message || 'Failed to fetch dashboard stats');
+                console.error(data.message || 'Failed to fetch dashboard stats');
+                return null;
             }
         } catch (error) {
             console.error('Error fetching dashboard stats:', error);
-            throw error;
+            return null;
         }
     }
 
