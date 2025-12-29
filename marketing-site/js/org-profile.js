@@ -15,42 +15,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadProfileData() {
     try {
-        // Get user from localStorage
-        const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+        // Fetch user profile from MongoDB via API
+        const user = await window.userProfileService.getProfile();
 
         if (!user || !user.email) {
-            // Redirect to home page, not admin login
+            // Redirect to home page if no user found
             window.location.href = '/marketing-site/website-home.html';
             return;
         }
 
-        // Update profile UI
-        document.getElementById('profileName').textContent = user.name || 'User';
-        document.getElementById('profileEmail').textContent = user.email || '';
-        document.getElementById('profileRole').textContent = user.orgRole || 'Member';
-        document.getElementById('fullName').value = user.name || '';
-        document.getElementById('emailAddress').value = user.email || '';
-        document.getElementById('userRole').textContent = (user.orgRole || 'member').toUpperCase();
+        // Update UI with MongoDB data
+        window.userProfileService.updateProfileUI(user);
 
-        // Set member since (mock data for now)
-        const memberSince = new Date();
-        memberSince.setMonth(memberSince.getMonth() - 3);
-        document.getElementById('memberSince').textContent = memberSince.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
-        // Set last login
-        document.getElementById('lastLogin').textContent = 'Just now';
+        // Update organization info if available
+        if (user.organizationId) {
+            const orgNameEl = document.getElementById('orgName');
+            if (orgNameEl && user.organizationId.name) {
+                orgNameEl.textContent = user.organizationId.name;
+            }
 
-        // Load organization data
-        document.getElementById('orgName').textContent = 'CMRIT MCA Department';
-        document.getElementById('subscriptionPlan').textContent = 'Premium Plan';
-        document.getElementById('teamSize').textContent = '1 member';
+            const subscriptionPlanEl = document.getElementById('subscriptionPlan');
+            if (subscriptionPlanEl && user.organizationId.subscriptionTier) {
+                const planNames = {
+                    'trial': 'Free Trial',
+                    'basic': 'Starter Plan',
+                    'premium': 'Professional Plan',
+                    'enterprise': 'Enterprise Plan'
+                };
+                subscriptionPlanEl.textContent = planNames[user.organizationId.subscriptionTier] || 'Trial';
+            }
+        }
 
         // Load real-time activity
         await loadActivityData();
 
+        console.log('✅ Profile loaded from MongoDB');
     } catch (error) {
         console.error('Error loading profile:', error);
-        showToast('Failed to load profile data', 'error');
+        // Redirect to home on error
+        window.location.href = '/marketing-site/website-home.html';
     }
 }
 

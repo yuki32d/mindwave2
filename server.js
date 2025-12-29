@@ -9210,6 +9210,68 @@ app.get('/api/organizations/dashboard-stats', authMiddleware, async (req, res) =
 });
 
 // ============================================
+// USER PROFILE API ENDPOINTS
+// ============================================
+
+// GET /api/user/profile - Get current user profile
+app.get('/api/user/profile', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .select('name email phone department yearSemester bio displayName profilePhoto orgRole organizationId role lastActive lastLogin')
+      .populate('organizationId', 'name type subscriptionTier')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ ok: false, message: 'User not found' });
+    }
+
+    res.json({ ok: true, user });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ ok: false, message: 'Failed to fetch profile' });
+  }
+});
+
+// PUT /api/user/profile - Update user profile
+app.put('/api/user/profile', authMiddleware, async (req, res) => {
+  try {
+    const { name, phone, department, yearSemester, bio, displayName } = req.body;
+
+    // Update user
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        name,
+        phone,
+        department,
+        yearSemester,
+        bio,
+        displayName
+      },
+      { new: true, runValidators: true }
+    ).select('name email phone department yearSemester bio displayName profilePhoto orgRole');
+
+    if (!user) {
+      return res.status(404).json({ ok: false, message: 'User not found' });
+    }
+
+    // Log activity
+    await UserActivity.create({
+      userId: req.user._id,
+      organizationId: req.user.organizationId,
+      activityType: 'profile_update',
+      description: 'Updated profile information',
+      metadata: { fields: Object.keys(req.body) }
+    });
+
+    res.json({ ok: true, user });
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500).json({ ok: false, message: 'Failed to update profile' });
+  }
+});
+
+// ============================================
 // BILLING INFO API ENDPOINT
 // ============================================
 
