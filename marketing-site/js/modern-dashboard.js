@@ -432,13 +432,21 @@ async function initializeRealTimeData() {
         // Fetch initial dashboard stats
         const data = await window.dashboardService.getStats();
 
+        // Skip if no data (user not set up)
+        if (!data) {
+            console.warn('Dashboard stats not available - skipping real-time updates');
+            return;
+        }
+
         // Update UI with real-time data
         window.dashboardService.updateDashboardUI(data);
 
         // Start auto-refresh (updates every 30 seconds)
         window.dashboardService.startAutoRefresh((newData) => {
-            window.dashboardService.updateDashboardUI(newData);
-            console.log('✓ Dashboard data auto-refreshed');
+            if (newData) {
+                window.dashboardService.updateDashboardUI(newData);
+                console.log('✓ Dashboard data auto-refreshed');
+            }
         });
 
         console.log('✅ Real-time dashboard data initialized');

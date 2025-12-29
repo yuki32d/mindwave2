@@ -58,7 +58,15 @@ class DashboardDataService {
             return this.cache;
         }
 
-        return await this.fetchDashboardStats();
+        const data = await this.fetchDashboardStats();
+
+        // Return cached data if fetch failed
+        if (!data && this.cache) {
+            console.log('Using cached data as fallback');
+            return this.cache;
+        }
+
+        return data;
     }
 
     /**
