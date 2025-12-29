@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Initialize real-time dashboard data
     await initializeRealTimeData();
+
+    // Initialize notification system
+    initializeNotifications();
 });
 
 // ===================================
@@ -444,4 +447,62 @@ async function initializeRealTimeData() {
         // Fallback to static data from localStorage if API fails
         console.log('Using cached organization data as fallback');
     }
+}
+
+// ===================================
+// Initialize Notifications
+// ===================================
+function initializeNotifications() {
+    const notificationBell = document.getElementById('notificationBell');
+    const notificationDropdown = document.getElementById('notificationDropdown');
+    const markAllReadBtn = document.getElementById('markAllRead');
+
+    if (!notificationBell || !notificationDropdown) {
+        console.warn('Notification elements not found');
+        return;
+    }
+
+    // Toggle notification dropdown
+    notificationBell.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const isVisible = notificationDropdown.style.display === 'block';
+
+        if (isVisible) {
+            notificationDropdown.style.display = 'none';
+        } else {
+            // Fetch and display notifications
+            try {
+                const data = await window.notificationService.fetchNotifications();
+                window.notificationService.renderNotifications(data.notifications);
+                notificationDropdown.style.display = 'block';
+            } catch (error) {
+                console.error('Failed to load notifications:', error);
+            }
+        }
+    });
+
+    // Mark all as read
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', async () => {
+            try {
+                await window.notificationService.markAllAsRead();
+                const data = await window.notificationService.fetchNotifications();
+                window.notificationService.renderNotifications(data.notifications);
+            } catch (error) {
+                console.error('Failed to mark all as read:', error);
+            }
+        });
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
+            notificationDropdown.style.display = 'none';
+        }
+    });
+
+    // Start polling for new notifications
+    window.notificationService.startPolling();
+
+    console.log('✅ Notification system initialized');
 }

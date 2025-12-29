@@ -672,16 +672,6 @@ const materialSchema = new mongoose.Schema({
   fileSize: { type: Number, default: 0 }
 }, { timestamps: true });
 
-const notificationSchema = new mongoose.Schema({
-  recipientRole: { type: String, enum: ['student', 'all'], default: 'student' },
-  title: { type: String, required: true },
-  message: { type: String, required: true },
-  type: { type: String, default: 'info' }, // 'material', 'game', 'info'
-  read: { type: Boolean, default: false },
-  link: String,
-  createdAt: { type: Date, default: Date.now }
-}, { timestamps: true });
-
 // Live Feedback Session Schema
 const liveFeedbackSessionSchema = new mongoose.Schema({
   sessionCode: { type: String, required: true, unique: true, index: true },
@@ -730,7 +720,6 @@ const liveQuizSessionSchema = new mongoose.Schema({
 
 const Subject = mongoose.model("Subject", subjectSchema);
 const Material = mongoose.model("Material", materialSchema);
-const Notification = mongoose.model("Notification", notificationSchema);
 const LiveFeedbackSession = mongoose.model("LiveFeedbackSession", liveFeedbackSessionSchema);
 const LiveQuizSession = mongoose.model("LiveQuizSession", liveQuizSessionSchema);
 
@@ -830,6 +819,51 @@ userActivitySchema.index({ organizationId: 1, createdAt: -1 });
 userActivitySchema.index({ activityType: 1 });
 
 const UserActivity = mongoose.model("UserActivity", userActivitySchema);
+
+// ============================================
+// NOTIFICATION SCHEMA
+// ============================================
+const notificationSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
+  type: {
+    type: String,
+    required: true,
+    enum: [
+      'trial_expiring',
+      'trial_expired',
+      'payment_failed',
+      'payment_success',
+      'new_student',
+      'team_invite',
+      'subscription_changed',
+      'game_created',
+      'system_update',
+      'security_alert'
+    ]
+  },
+  title: { type: String, required: true },
+  message: { type: String, required: true },
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high', 'critical'],
+    default: 'medium'
+  },
+  read: { type: Boolean, default: false },
+  readAt: { type: Date },
+  actionUrl: { type: String }, // URL to navigate when clicked
+  metadata: { type: mongoose.Schema.Types.Mixed }, // Additional data
+  archived: { type: Boolean, default: false },
+  archivedAt: { type: Date }
+}, { timestamps: true });
+
+// Add indexes for faster queries
+notificationSchema.index({ userId: 1, read: 1, createdAt: -1 });
+notificationSchema.index({ organizationId: 1, createdAt: -1 });
+notificationSchema.index({ type: 1 });
+notificationSchema.index({ archived: 1 });
+
+const Notification = mongoose.model("Notification", notificationSchema);
 
 // Google Classroom Integration Schemas
 const googleClassroomCourseSchema = new mongoose.Schema({
@@ -9341,6 +9375,150 @@ app.get('/api/organizations/billing-info', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error fetching billing info:', error);
     res.status(500).json({ ok: false, message: 'Failed to fetch billing info' });
+  }
+});
+
+// ============================================
+// NOTIFICATION API ENDPOINTS
+// ============================================
+
+// GET /api/notifications - Fetch user notifications
+app.get('/api/notifications', authMiddleware, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = parseInt(req.query.skip) || 0;
+    const unreadOnly = req.query.unreadOnly === 'true';
+
+    const query = {
+      userId: req.user._id,
+      archived: false
+    };
+
+    if (unreadOnly) {
+      query.read = false;
+    }
+
+    const notifications = await Notification.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip(skip)
+      .lean();
+
+    const total = await Notification.countDocuments(query);
+    const unreadCount = await Notification.countDocuments({
+      userId: req.user._id,
+      read: false,
+      archived: false
+    });
+
+    res.json({
+      ok: true,
+      notifications,
+      total,
+      unreadCount
+    });
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    res.status(500).json({ ok: false, message: 'Failed to fetch notifications' });
+  }
+});
+
+// GET /api/notifications/unread-count - Get unread notification count
+app.get('/api/notifications/unread-count', authMiddleware, async (req, res) => {
+  try {
+    const count = await Notification.countDocuments({
+      userId: req.user._id,
+      read: false,
+      archived: false
+    });
+
+    res.json({ ok: true, count });
+  } catch (error) {
+    console.error('Error fetching unread count:', error);
+    res.status(500).json({ ok: false, message: 'Failed to fetch unread count' });
+  }
+});
+
+// PUT /api/notifications/:id/read - Mark notification as read
+app.put('/api/notifications/:id/read', authMiddleware, async (req, res) => {
+  try {
+    const notification = await Notification.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user._id },
+      { read: true, readAt: new Date() },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({ ok: false, message: 'Notification not found' });
+    }
+
+    res.json({ ok: true, notification });
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    res.status(500).json({ ok: false, message: 'Failed to mark as read' });
+  }
+});
+
+// PUT /api/notifications/mark-all-read - Mark all notifications as read
+app.put('/api/notifications/mark-all-read', authMiddleware, async (req, res) => {
+  try {
+    const result = await Notification.updateMany(
+      { userId: req.user._id, read: false, archived: false },
+      { read: true, readAt: new Date() }
+    );
+
+    res.json({
+      ok: true,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Error marking all as read:', error);
+    res.status(500).json({ ok: false, message: 'Failed to mark all as read' });
+  }
+});
+
+// DELETE /api/notifications/:id - Delete notification
+app.delete('/api/notifications/:id', authMiddleware, async (req, res) => {
+  try {
+    const notification = await Notification.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user._id },
+      { archived: true, archivedAt: new Date() },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({ ok: false, message: 'Notification not found' });
+    }
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error deleting notification:', error);
+    res.status(500).json({ ok: false, message: 'Failed to delete notification' });
+  }
+});
+
+// POST /api/notifications - Create notification (internal/admin use)
+app.post('/api/notifications', authMiddleware, async (req, res) => {
+  try {
+    const { userId, type, title, message, priority, actionUrl, metadata } = req.body;
+
+    const notification = new Notification({
+      userId: userId || req.user._id,
+      organizationId: req.user.organizationId,
+      type,
+      title,
+      message,
+      priority: priority || 'medium',
+      actionUrl,
+      metadata
+    });
+
+    await notification.save();
+
+    res.json({ ok: true, notification });
+  } catch (error) {
+    console.error('Error creating notification:', error);
+    res.status(500).json({ ok: false, message: 'Failed to create notification' });
   }
 });
 
