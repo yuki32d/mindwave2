@@ -395,23 +395,67 @@ Remember: You're helping educators transform education through gamification!`;
     getFallbackResponse(message) {
         const lowerMessage = message.toLowerCase();
 
-        if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('pricing')) {
-            return "MindWave offers flexible pricing:\n\n• Free Plan: Perfect for trying out\n• Pro Plan: $29/month for educators\n• School Plan: Custom pricing for institutions\n\nWould you like to start with our free trial?";
+        // PRICING & COST QUESTIONS
+        if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('pricing') ||
+            lowerMessage.includes('how much') || lowerMessage.includes('subscription') || lowerMessage.includes('plan')) {
+
+            if (lowerMessage.includes('free') || lowerMessage.includes('trial')) {
+                return "Yes! MindWave offers a FREE plan with:\n\n✓ All core features\n✓ AI game builder\n✓ Up to 50 students\n✓ 100 AI calls/month\n✓ No credit card required\n\nReady to start? Click 'Get Started' above!";
+            } else if (lowerMessage.includes('school') || lowerMessage.includes('institution') || lowerMessage.includes('enterprise')) {
+                return "For schools and institutions, we offer custom pricing based on:\n\n• Number of teachers\n• Student count\n• Required features\n• Training needs\n\nContact our sales team for a personalized quote!";
+            } else {
+                return "MindWave Pricing:\n\n💎 Free Plan: $0 - Perfect for trying out\n🚀 Pro Plan: $29/month - For individual educators\n🏫 School Plan: Custom pricing\n\nAll plans include AI features, analytics, and unlimited students!\n\nWant to start with our free trial?";
+            }
         }
 
-        if (lowerMessage.includes('feature') || lowerMessage.includes('what') || lowerMessage.includes('mindwave')) {
-            return "MindWave is an AI-powered gamification platform that makes learning fun! 🎮\n\nKey features:\n• AI Game Builder\n• Interactive Quizzes\n• Real-time Analytics\n• Student Leaderboards\n• Progress Tracking\n\nWant to see it in action? Request a demo!";
+        // FEATURES & CAPABILITIES
+        if (lowerMessage.includes('feature') || lowerMessage.includes('what can') || lowerMessage.includes('what does') ||
+            lowerMessage.includes('capabilities') || lowerMessage.includes('functions')) {
+
+            if (lowerMessage.includes('ai') || lowerMessage.includes('artificial intelligence')) {
+                return "MindWave's AI Features:\n\n🤖 AI Quiz Builder - Generate quizzes from any topic\n📚 AI Tutor - 24/7 homework help\n🎯 Smart Recommendations - Personalized learning paths\n📊 Predictive Analytics - Identify struggling students\n\nOur AI saves teachers 5+ hours per week!";
+            } else if (lowerMessage.includes('game') || lowerMessage.includes('gamification')) {
+                return "Interactive Game Templates:\n\n🎮 Memory Match\n🧩 Crossword Puzzles\n🔍 Word Searches\n🎯 Drag-and-Drop\n🏆 Jeopardy-Style Quizzes\n📊 Live Multiplayer Quizzes\n\nMake learning fun and engaging!";
+            } else if (lowerMessage.includes('analytics') || lowerMessage.includes('tracking') || lowerMessage.includes('progress')) {
+                return "Analytics & Tracking:\n\n📊 Real-time dashboards\n📈 Student progress tracking\n🎯 Knowledge gap identification\n⏱️ Time-on-task metrics\n🏆 Engagement scores\n📧 Automated reports\n\nData-driven insights for better teaching!";
+            } else {
+                return "MindWave Key Features:\n\n✨ AI Game Builder\n🎮 Interactive Quizzes\n📊 Real-time Analytics\n🏆 Student Leaderboards\n📚 AI Tutor (24/7)\n🔗 Google Classroom Integration\n💻 GitHub Integration\n\nWant details on a specific feature?";
+            }
         }
 
-        if (lowerMessage.includes('demo') || lowerMessage.includes('trial')) {
-            return "Great! You can start a free trial right now:\n\n1. Click 'Get Started' on our homepage\n2. Create your account\n3. Start building games immediately!\n\nNo credit card required. Need help getting started?";
+        // GETTING STARTED & DEMO
+        if (lowerMessage.includes('demo') || lowerMessage.includes('start') || lowerMessage.includes('begin') ||
+            lowerMessage.includes('how to use') || lowerMessage.includes('get started')) {
+
+            if (lowerMessage.includes('demo') || lowerMessage.includes('show me')) {
+                return "I'd love to show you MindWave!\n\n🎥 Watch Demo Video\n📅 Schedule Live Demo\n🆓 Start Free Trial\n\nThe quickest way? Sign up free and create your first quiz in under 2 minutes!\n\nClick 'Get Started' to begin!";
+            } else {
+                return "Getting Started is Easy:\n\n1️⃣ Sign up free (no credit card)\n2️⃣ Create your first quiz using AI\n3️⃣ Share with students via join code\n4️⃣ Watch engagement soar!\n\nReady? Click 'Get Started' above!";
+            }
         }
 
-        if (lowerMessage.includes('contact') || lowerMessage.includes('support') || lowerMessage.includes('help')) {
-            return "I'm here to help! You can:\n\n• Email: support@mindwave.com\n• Live Chat: Right here!\n• Schedule a call: Book a demo\n\nWhat would you like to know about MindWave?";
+        // SUPPORT & CONTACT
+        if (lowerMessage.includes('contact') || lowerMessage.includes('support') || lowerMessage.includes('help') ||
+            lowerMessage.includes('problem') || lowerMessage.includes('issue')) {
+
+            if (lowerMessage.includes('email') || lowerMessage.includes('mail')) {
+                return "📧 Email Support:\n\nsupport@mindwave.com\n\nWe typically respond within 24 hours!\n\nFor urgent issues, use the live chat on our dashboard.";
+            } else {
+                return "Need Help?\n\n💬 Live Chat: Right here!\n📧 Email: support@mindwave.com\n📚 Help Center: mindwave.com/help\n🎥 Video Tutorials: Available in dashboard\n\nWhat can I help you with?";
+            }
         }
 
-        return "Thanks for your question! MindWave helps educators create engaging learning experiences through AI-powered games. Would you like to know more about our features, pricing, or see a demo?";
+        // GREETINGS
+        if (lowerMessage.includes('hi') || lowerMessage.includes('hello') || lowerMessage.includes('hey')) {
+            return "Hi there! 👋\n\nI'm Nova, your MindWave assistant!\n\nI can help you with:\n• Features & pricing\n• Getting started\n• Technical support\n• Demo requests\n\nWhat would you like to know?";
+        }
+
+        if (lowerMessage.includes('thank') || lowerMessage.includes('thanks')) {
+            return "You're welcome! 😊\n\nAnything else you'd like to know about MindWave?\n\nI'm here to help!";
+        }
+
+        // DEFAULT FALLBACK
+        return "Great question! 🤔\n\nI can help you with:\n\n💰 Pricing & plans\n✨ Features & capabilities\n🚀 Getting started\n📞 Contact & support\n\nWhat would you like to know more about?";
     }
 
     addUserMessage(text) {
