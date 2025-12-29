@@ -57,7 +57,11 @@ class NotificationService {
     async getUnreadCount() {
         try {
             const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-            if (!token) return 0;
+            if (!token) {
+                // No token, user not authenticated - return 0 silently
+                this.unreadCount = 0;
+                return 0;
+            }
 
             const response = await fetch('/api/notifications/unread-count', {
                 method: 'GET',
@@ -67,13 +71,17 @@ class NotificationService {
                 }
             });
 
-            if (!response.ok) return 0;
+            if (!response.ok) {
+                this.unreadCount = 0;
+                return 0;
+            }
 
             const data = await response.json();
             this.unreadCount = data.count || 0;
             return this.unreadCount;
         } catch (error) {
             console.error('Error fetching unread count:', error);
+            this.unreadCount = 0;
             return 0;
         }
     }
@@ -351,6 +359,13 @@ class NotificationService {
      * Start polling for new notifications
      */
     startPolling() {
+        // Check if user is authenticated before starting polling
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        if (!token) {
+            console.log('⚠️ No auth token - skipping notification polling');
+            return;
+        }
+
         // Initial fetch
         this.getUnreadCount().then(() => this.updateBadge());
 
