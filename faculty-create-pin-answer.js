@@ -6,6 +6,9 @@ let canvas, ctx;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Back button event listener
+    document.getElementById('backBtn')?.addEventListener('click', () => window.history.back());
+
     canvas = document.getElementById('imageCanvas');
     ctx = canvas.getContext('2d');
     setupEventListeners();

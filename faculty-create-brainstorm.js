@@ -1,5 +1,8 @@
 // Faculty Create Brainstorm - Collaborative Sticky Notes Board
 document.addEventListener('DOMContentLoaded', () => {
+    // Back button event listener
+    document.getElementById('backBtn')?.addEventListener('click', () => window.history.back());
+
     setupEventListeners();
     updatePreview();
 });

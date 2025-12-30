@@ -18,7 +18,7 @@
             <main>
                 <!-- Back Button -->
                 <div style="margin-bottom: 32px;">
-                    <button class="secondary-btn" onclick="window.history.back()"
+                    <button class="secondary-btn" id="backBtn"
                         style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
                         Back</button>
                 </div>
@@ -68,6 +68,9 @@
     <script>
         let mediaData = null;
         document.addEventListener('DOMContentLoaded', () => {
+            // Back button event listener
+            document.getElementById('backBtn')?.addEventListener('click', () => window.history.back());
+
             document.getElementById('mediaUpload').addEventListener('change', handleMediaUpload);
             document.getElementById('title').addEventListener('input', updateCaption);
             document.getElementById('publishBtn').addEventListener('click', publishSlide);

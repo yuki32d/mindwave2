@@ -18,7 +18,7 @@
             <main>
                 <!-- Back Button -->
                 <div style="margin-bottom: 32px;">
-                    <button class="secondary-btn" onclick="window.history.back()"
+                    <button class="secondary-btn" id="backBtn"
                         style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
                         Back</button>
                 </div>
@@ -76,6 +76,9 @@
         const bgColors = { dark: '#1E2433', light: '#F5F7FF', blue: '#0F62FE', green: '#10B981', purple: '#8B5CF6' };
         const textColors = { dark: { title: '#f5f7ff', content: '#9ea4b6' }, light: { title: '#1E2433', content: '#6e6e73' }, blue: { title: '#FFFFFF', content: '#E0E7FF' }, green: { title: '#FFFFFF', content: '#D1FAE5' }, purple: { title: '#FFFFFF', content: '#EDE9FE' } };
         document.addEventListener('DOMContentLoaded', () => {
+            // Back button event listener
+            document.getElementById('backBtn')?.addEventListener('click', () => window.history.back());
+
             ['title', 'content', 'backgroundColor'].forEach(id => document.getElementById(id).addEventListener(id === 'backgroundColor' ? 'change' : 'input', updatePreview));
             document.getElementById('publishBtn').addEventListener('click', publishSlide); updatePreview();
         });

@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupEventListeners() {
+    // Back button
+    document.getElementById('backBtn')?.addEventListener('click', () => window.history.back());
+
     // Add answer button
     document.getElementById('addAnswerBtn').addEventListener('click', addAnswer);
 

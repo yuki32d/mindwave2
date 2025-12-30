@@ -4,6 +4,9 @@ let puzzleMode = 'match';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Back button event listener
+    document.getElementById('backBtn')?.addEventListener('click', () => window.history.back());
+
     setupEventListeners();
     updatePreview();
 });
