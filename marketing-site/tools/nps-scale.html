@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPS Scale - MindWave</title>
+    <meta name="description"
+        content="Measure student satisfaction and likelihood to recommend with the industry-standard Net Promoter Score system.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        .tool-hero {
+            padding: 120px 5% 80px;
+            text-align: center;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .tool-hero h1 {
+            font-size: 64px;
+            font-weight: 900;
+            margin-bottom: 24px;
+        }
+
+        .tool-hero p {
+            font-size: 24px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+        }
+
+        .tool-demo {
+            padding: 80px 5%;
+            background: white;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-visual {
+            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ea 100%);
+            border-radius: 20px;
+            padding: 60px;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-visual::before {
+            content: '📈';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .feature-item {
+            padding: 40px;
+            background: #f5f5f7;
+            border-radius: 16px;
+        }
+
+        .feature-item i {
+            font-size: 40px;
+            color: #10b981;
+            margin-bottom: 20px;
+        }
+
+        .feature-item h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .feature-item p {
+            color: #6e6e73;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-brain"></i>
+                <span>Mind<span class="gradient-text">Wave</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="../website-home.html">Home</a>
+                <a href="../website-home.html#pricing">Pricing</a>
+                <a href="../website-signup.html" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tool Hero -->
+    <section class="tool-hero">
+        <h1>NPS Scale</h1>
+        <p>Measure student satisfaction and likelihood to recommend with the industry-standard Net Promoter Score
+            system.</p>
+        <a href="../website-signup.html" class="btn btn-white btn-lg">Try It Free <i class="fas fa-arrow-right"></i></a>
+    </section>
+
+    <!-- Tool Demo -->
+    <section class="tool-demo">
+        <div class="demo-container">
+            <h2 style="font-size: 48px; text-align: center; margin-bottom: 24px;">How It Works</h2>
+            <p style="text-align: center; font-size: 20px; color: #6e6e73; margin-bottom: 60px;">Industry-standard
+                satisfaction measurement</p>
+
+            <div class="demo-visual">
+                <div style="text-align: center; z-index: 1;">
+                    <h3 style="font-size: 32px; color: #1d1d1f; margin-bottom: 16px;">NPS Rating Interface</h3>
+                    <p style="font-size: 18px; color: #6e6e73;">Students rate from 0-10 with automatic categorization
+                    </p>
+                </div>
+            </div>
+
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="fas fa-question-circle"></i>
+                    <h3>1. Ask the Question</h3>
+                    <p>"How likely are you to recommend this course?" Students rate from 0 (not at all) to 10 (extremely
+                        likely).</p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-users"></i>
+                    <h3>2. Auto Categorization</h3>
+                    <p>Responses are automatically grouped: Detractors (0-6), Passives (7-8), Promoters (9-10).</p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>3. Calculate NPS</h3>
+                    <p>Get your NPS score (-100 to +100) and see detailed breakdowns by category.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 80px;">
+                <h2 style="font-size: 40px; margin-bottom: 40px;">Key Features</h2>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="fas fa-calculator"></i>
+                        <h3>Auto NPS Calculation</h3>
+                        <p>Automatically calculates your Net Promoter Score using the standard formula</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <h3>Category Breakdown</h3>
+                        <p>See the percentage of Promoters, Passives, and Detractors at a glance</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-comments"></i>
+                        <h3>Follow-up Questions</h3>
+                        <p>Add optional text fields to understand the "why" behind each rating</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-clock"></i>
+                        <h3>Track Over Time</h3>
+                        <p>Monitor NPS trends across semesters to measure course improvement</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-filter"></i>
+                        <h3>Segment Analysis</h3>
+                        <p>Break down NPS by class, section, or demographic groups</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-file-export"></i>
+                        <h3>Detailed Reports</h3>
+                        <p>Export comprehensive NPS reports with all responses and comments</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Measure Student Satisfaction?</h2>
+                <p>Start tracking your Net Promoter Score and improve your courses</p>
+                <a href="../website-signup.html" class="btn btn-white btn-lg">Start Free Trial <i
+                        class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-brain"></i>
+                        <span>Mind<span class="gradient-text">Wave</span></span>
+                    </div>
+                    <p>Pioneering the next generation of digital learning through AI and gamification.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 MindWave Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+
+</html>

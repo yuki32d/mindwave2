@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pin on Image - MindWave</title>
+    <meta name="description"
+        content="Upload an image and students click to mark specific locations. Perfect for geography, anatomy, diagrams, and visual identification.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        .tool-hero {
+            padding: 120px 5% 80px;
+            text-align: center;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .tool-hero h1 {
+            font-size: 64px;
+            font-weight: 900;
+            margin-bottom: 24px;
+        }
+
+        .tool-hero p {
+            font-size: 24px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+        }
+
+        .tool-demo {
+            padding: 80px 5%;
+            background: white;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-visual {
+            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ea 100%);
+            border-radius: 20px;
+            padding: 60px;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-visual::before {
+            content: '📍';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .feature-item {
+            padding: 40px;
+            background: #f5f5f7;
+            border-radius: 16px;
+        }
+
+        .feature-item i {
+            font-size: 40px;
+            color: #f093fb;
+            margin-bottom: 20px;
+        }
+
+        .feature-item h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .feature-item p {
+            color: #6e6e73;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-brain"></i>
+                <span>Mind<span class="gradient-text">Wave</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="../website-home.html">Home</a>
+                <a href="../website-home.html#pricing">Pricing</a>
+                <a href="../website-signup.html" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tool Hero -->
+    <section class="tool-hero">
+        <h1>Pin on Image</h1>
+        <p>Upload an image and students click to mark specific locations. Perfect for geography, anatomy, diagrams, and
+            visual identification.</p>
+        <a href="../website-signup.html" class="btn btn-white btn-lg">Try It Free <i class="fas fa-arrow-right"></i></a>
+    </section>
+
+    <!-- Tool Demo -->
+    <section class="tool-demo">
+        <div class="demo-container">
+            <h2 style="font-size: 48px; text-align: center; margin-bottom: 24px;">How It Works</h2>
+            <p style="text-align: center; font-size: 20px; color: #6e6e73; margin-bottom: 60px;">Visual location-based
+                assessment</p>
+
+            <div class="demo-visual">
+                <div style="text-align: center; z-index: 1;">
+                    <h3 style="font-size: 32px; color: #1d1d1f; margin-bottom: 16px;">Interactive Image Pinning</h3>
+                    <p style="font-size: 18px; color: #6e6e73;">Students click on images to mark correct locations</p>
+                </div>
+            </div>
+
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="fas fa-image"></i>
+                    <h3>1. Upload Your Image</h3>
+                    <p>Upload a map, diagram, anatomy chart, or any image. Ask "Where is the heart?" or "Locate Paris
+                        on the map."</p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-hand-pointer"></i>
+                    <h3>2. Students Click to Pin</h3>
+                    <p>Students click on the image to place a pin at the location they think is correct.</p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-bullseye"></i>
+                    <h3>3. Auto-Grade by Proximity</h3>
+                    <p>Answers are graded based on how close the pin is to the correct location - set tolerance levels.
+                    </p>
+                </div>
+            </div>
+
+            <div style="margin-top: 80px;">
+                <h2 style="font-size: 40px; margin-bottom: 40px;">Key Features</h2>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="fas fa-upload"></i>
+                        <h3>Image Upload</h3>
+                        <p>Upload any image - maps, diagrams, anatomy charts, historical documents, or custom graphics
+                        </p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <h3>Multiple Pins</h3>
+                        <p>Ask students to identify multiple locations on the same image in one question</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-search-plus"></i>
+                        <h3>Zoom Support</h3>
+                        <p>Students can zoom in and out on large images for precise pin placement</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-crosshairs"></i>
+                        <h3>Tolerance Zones</h3>
+                        <p>Set how close pins need to be to the correct answer - strict or lenient grading</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-globe"></i>
+                        <h3>Perfect for Geography</h3>
+                        <p>Ideal for identifying countries, cities, landmarks, rivers, and geographical features</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-microscope"></i>
+                        <h3>Great for Science</h3>
+                        <p>Label parts of cells, organs, chemical structures, or scientific diagrams</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready for Visual Assessment?</h2>
+                <p>Create your first pin-on-image question and test visual knowledge</p>
+                <a href="../website-signup.html" class="btn btn-white btn-lg">Start Free Trial <i
+                        class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-brain"></i>
+                        <span>Mind<span class="gradient-text">Wave</span></span>
+                    </div>
+                    <p>Pioneering the next generation of digital learning through AI and gamification.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 MindWave Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+
+</html>

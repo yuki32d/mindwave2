@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poll Tool - MindWave</title>
+    <meta name="description"
+        content="Quick voting and opinion gathering made easy. See live results as students vote on multiple choice polls.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        .tool-hero {
+            padding: 120px 5% 80px;
+            text-align: center;
+            background: linear-gradient(135deg, #0f62fe 0%, #6b46c1 100%);
+            color: white;
+        }
+
+        .tool-hero h1 {
+            font-size: 64px;
+            font-weight: 900;
+            margin-bottom: 24px;
+        }
+
+        .tool-hero p {
+            font-size: 24px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+        }
+
+        .tool-demo {
+            padding: 80px 5%;
+            background: white;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-visual {
+            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ea 100%);
+            border-radius: 20px;
+            padding: 60px;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-visual::before {
+            content: '📊';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .feature-item {
+            padding: 40px;
+            background: #f5f5f7;
+            border-radius: 16px;
+        }
+
+        .feature-item i {
+            font-size: 40px;
+            color: #0f62fe;
+            margin-bottom: 20px;
+        }
+
+        .feature-item h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .feature-item p {
+            color: #6e6e73;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-brain"></i>
+                <span>Mind<span class="gradient-text">Wave</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="../website-home.html">Home</a>
+                <a href="../website-home.html#pricing">Pricing</a>
+                <a href="../website-signup.html" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tool Hero -->
+    <section class="tool-hero">
+        <h1>Poll Tool</h1>
+        <p>Quick voting and opinion gathering made easy. See live results as students vote on multiple choice polls.</p>
+        <a href="../website-signup.html" class="btn btn-white btn-lg">Try It Free <i class="fas fa-arrow-right"></i></a>
+    </section>
+
+    <!-- Tool Demo -->
+    <section class="tool-demo">
+        <div class="demo-container">
+            <h2 style="font-size: 48px; text-align: center; margin-bottom: 24px;">How It Works</h2>
+            <p style="text-align: center; font-size: 20px; color: #6e6e73; margin-bottom: 60px;">Gather opinions and
+                make decisions together</p>
+
+            <div class="demo-visual">
+                <div style="text-align: center; z-index: 1;">
+                    <h3 style="font-size: 32px; color: #1d1d1f; margin-bottom: 16px;">Live Poll Results</h3>
+                    <p style="font-size: 18px; color: #6e6e73;">Watch votes come in and see percentages update in
+                        real-time</p>
+                </div>
+            </div>
+
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="fas fa-list"></i>
+                    <h3>1. Create Options</h3>
+                    <p>Add 2-10 answer choices for your poll question. Keep them clear and concise.</p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-vote-yea"></i>
+                    <h3>2. Students Vote</h3>
+                    <p>Students select their choice with one click. Fast, simple, and engaging.</p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>3. View Live Results</h3>
+                    <p>See results update instantly with animated bar charts and percentages.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 80px;">
+                <h2 style="font-size: 40px; margin-bottom: 40px;">Key Features</h2>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="fas fa-bolt"></i>
+                        <h3>Instant Results</h3>
+                        <p>Results appear in real-time as students vote - no waiting or refreshing needed</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <h3>Beautiful Visualizations</h3>
+                        <p>Animated bar charts and pie charts make results easy to understand at a glance</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-users"></i>
+                        <h3>Participation Tracking</h3>
+                        <p>See exactly how many students have voted and who hasn't responded yet</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-lock"></i>
+                        <h3>Anonymous Voting</h3>
+                        <p>Enable anonymous mode for honest opinions on sensitive topics</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-image"></i>
+                        <h3>Image Options</h3>
+                        <p>Add images to poll options for visual polls and surveys</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-download"></i>
+                        <h3>Export Data</h3>
+                        <p>Download poll results as CSV or PDF for further analysis</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Gather Opinions?</h2>
+                <p>Create your first poll and engage your students in decision-making</p>
+                <a href="../website-signup.html" class="btn btn-white btn-lg">Start Free Trial <i
+                        class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-brain"></i>
+                        <span>Mind<span class="gradient-text">Wave</span></span>
+                    </div>
+                    <p>Pioneering the next generation of digital learning through AI and gamification.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 MindWave Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+
+</html>

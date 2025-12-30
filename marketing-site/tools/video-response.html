@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Response - MindWave</title>
+    <meta name="description"
+        content="Students record video responses using their webcam. Perfect for presentations, oral exams, language practice, and building communication skills.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        .tool-hero {
+            padding: 120px 5% 80px;
+            text-align: center;
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+            color: white;
+        }
+
+        .tool-hero h1 {
+            font-size: 64px;
+            font-weight: 900;
+            margin-bottom: 24px;
+        }
+
+        .tool-hero p {
+            font-size: 24px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+        }
+
+        .tool-demo {
+            padding: 80px 5%;
+            background: white;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-visual {
+            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ea 100%);
+            border-radius: 20px;
+            padding: 60px;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-visual::before {
+            content: '🎥';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .feature-item {
+            padding: 40px;
+            background: #f5f5f7;
+            border-radius: 16px;
+        }
+
+        .feature-item i {
+            font-size: 40px;
+            color: #30cfd0;
+            margin-bottom: 20px;
+        }
+
+        .feature-item h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .feature-item p {
+            color: #6e6e73;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-brain"></i>
+                <span>Mind<span class="gradient-text">Wave</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="../website-home.html">Home</a>
+                <a href="../website-home.html#pricing">Pricing</a>
+                <a href="../website-signup.html" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tool Hero -->
+    <section class="tool-hero">
+        <h1>Video Response</h1>
+        <p>Students record video responses using their webcam. Perfect for presentations, oral exams, language practice,
+            and building communication skills.</p>
+        <a href="../website-signup.html" class="btn btn-white btn-lg">Try It Free <i class="fas fa-arrow-right"></i></a>
+    </section>
+
+    <!-- Tool Demo -->
+    <section class="tool-demo">
+        <div class="demo-container">
+            <h2 style="font-size: 48px; text-align: center; margin-bottom: 24px;">How It Works</h2>
+            <p style="text-align: center; font-size: 20px; color: #6e6e73; margin-bottom: 60px;">Record and submit video
+                answers</p>
+
+            <div class="demo-visual">
+                <div style="text-align: center; z-index: 1;">
+                    <h3 style="font-size: 32px; color: #1d1d1f; margin-bottom: 16px;">Webcam Recording Interface</h3>
+                    <p style="font-size: 18px; color: #6e6e73;">Easy-to-use video recording with preview and playback
+                    </p>
+                </div>
+            </div>
+
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="fas fa-question-circle"></i>
+                    <h3>1. Ask Your Question</h3>
+                    <p>"Present your project" or "Explain this concept in your own words" - students record their video
+                        response.</p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-video"></i>
+                    <h3>2. Students Record</h3>
+                    <p>Students use their webcam to record video responses - they can review and re-record if needed.
+                    </p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-play-circle"></i>
+                    <h3>3. Review Videos</h3>
+                    <p>Watch all student video submissions, provide feedback, and assess communication skills.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 80px;">
+                <h2 style="font-size: 40px; margin-bottom: 40px;">Key Features</h2>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="fas fa-camera"></i>
+                        <h3>Webcam Recording</h3>
+                        <p>Simple one-click recording using the student's built-in or external webcam</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-clock"></i>
+                        <h3>Time Limits</h3>
+                        <p>Set minimum and maximum recording lengths to guide response duration</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-redo"></i>
+                        <h3>Review & Re-record</h3>
+                        <p>Students can preview their recording and re-record if they're not satisfied</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-language"></i>
+                        <h3>Perfect for Languages</h3>
+                        <p>Ideal for practicing pronunciation, speaking skills, and oral presentations</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-comments"></i>
+                        <h3>Build Communication Skills</h3>
+                        <p>Develop public speaking, presentation, and verbal communication abilities</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-download"></i>
+                        <h3>Download Videos</h3>
+                        <p>Download student video submissions for offline review or archiving</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready for Video Assessments?</h2>
+                <p>Create your first video response question and assess communication skills</p>
+                <a href="../website-signup.html" class="btn btn-white btn-lg">Start Free Trial <i
+                        class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-brain"></i>
+                        <span>Mind<span class="gradient-text">Wave</span></span>
+                    </div>
+                    <p>Pioneering the next generation of digital learning through AI and gamification.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 MindWave Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+
+</html>
