@@ -21,6 +21,9 @@ import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
 import { WebSocketServer } from 'ws';
 import paymentRoutes from './payment-routes.js';
+// Live Activity System
+import activitiesRouter from './routes/activities.js';
+import liveSessionsRouter from './routes/live-sessions.js';
 // pdf-parse will be imported dynamically in the endpoint
 // Stripe will be imported conditionally based on environment variable
 
@@ -1040,6 +1043,12 @@ app.use(express.static(__dirname, {
   etag: true,
   lastModified: true
 }));
+
+// ============================================
+// LIVE ACTIVITY SYSTEM ROUTES
+// ============================================
+app.use('/api/activities', activitiesRouter);
+app.use('/api/live-sessions', liveSessionsRouter);
 
 const authLimiter = rateLimit({
   windowMs: 60 * 1000,
