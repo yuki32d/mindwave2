@@ -1,194 +1,198 @@
-// Student Live Activity - Join with Code
+// Student Live Activity - Browse and Start Activities
 document.addEventListener('DOMContentLoaded', () => {
-    const codeInput = document.getElementById('codeInput');
-    const joinBtn = document.getElementById('joinBtn');
-    const joinBtnText = document.getElementById('joinBtnText');
-    const joinBtnLoader = document.getElementById('joinBtnLoader');
-    const errorMessage = document.getElementById('errorMessage');
-    const successMessage = document.getElementById('successMessage');
     const backBtn = document.getElementById('backBtn');
+    const activitiesGrid = document.getElementById('activitiesGrid');
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    const filterTabs = document.querySelectorAll('.filter-tab');
+
+    let allActivities = [];
+    let currentFilter = 'all';
 
     // Back button
     backBtn.addEventListener('click', () => {
         window.location.href = 'homepage.html';
     });
 
-    // Auto-focus on code input
-    codeInput.focus();
-
-    // Format code input (uppercase, remove spaces)
-    codeInput.addEventListener('input', (e) => {
-        e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        hideMessages();
+    // Filter tabs
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            filterTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentFilter = tab.dataset.filter;
+            renderActivities();
+        });
     });
 
-    // Join on Enter key
-    codeInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && codeInput.value.length === 6) {
-            joinActivity();
-        }
-    });
+    // Load activities
+    loadActivities();
 
-    // Join button click
-    joinBtn.addEventListener('click', joinActivity);
-
-    async function joinActivity() {
-        const code = codeInput.value.trim();
-
-        // Validate code format
-        if (!/^[A-Z0-9]{6}$/.test(code)) {
-            showError('Please enter a valid 6-character code');
-            return;
-        }
-
-        // Show loading state
-        setLoading(true);
-        hideMessages();
-
+    async function loadActivities() {
         try {
-            // Get user info from token
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = 'login.html';
                 return;
             }
 
+            // Get user's organization from token
             const userInfo = JSON.parse(atob(token.split('.')[1]));
-            const studentName = userInfo.name || 'Student';
 
-            // Step 1: Validate code and get session info
-            const sessionResponse = await fetch(`/api/live-sessions/code/${code}`, {
+            // Fetch all activities from the organization
+            const response = await fetch('/api/activities/organization', {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 }
             });
 
-            const sessionData = await sessionResponse.json();
-
-            if (!sessionResponse.ok || !sessionData.success) {
-                showError(sessionData.message || 'Invalid or expired code. Please check with your instructor.');
-                setLoading(false);
-                return;
+            if (response.ok) {
+                const data = await response.json();
+                allActivities = data.activities || [];
+                renderActivities();
+            } else {
+                throw new Error('Failed to load activities');
             }
-
-            // Step 2: Join the session
-            const joinResponse = await fetch(`/api/live-sessions/${code}/join`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    studentName: studentName
-                })
-            });
-
-            const joinData = await joinResponse.json();
-
-            if (!joinResponse.ok || !joinData.success) {
-                showError(joinData.message || 'Failed to join session. Please try again.');
-                setLoading(false);
-                return;
-            }
-
-            // Success! Show message and redirect
-            showSuccess(`Joined ${sessionData.session.activityTitle}! Redirecting...`);
-
-            // Store session info
-            localStorage.setItem('currentSessionId', sessionData.session.sessionId);
-            localStorage.setItem('currentSessionCode', code);
-
-            // Redirect to appropriate activity player based on type
-            setTimeout(() => {
-                redirectToActivityPlayer(sessionData.session);
-            }, 1500);
-
         } catch (error) {
-            console.error('Error joining activity:', error);
-            showError('Network error. Please check your connection and try again.');
-            setLoading(false);
+            console.error('Error loading activities:', error);
+            loadingState.innerHTML = `
+                <div style="text-align: center; padding: 64px 24px;">
+                    <div style="font-size: 64px; margin-bottom: 16px;">⚠️</div>
+                    <h3 style="color: #f5f7ff; margin-bottom: 8px;">Error Loading Activities</h3>
+                    <p style="color: #9ea4b6; margin-bottom: 16px;">Failed to load activities. Please try again.</p>
+                    <button onclick="location.reload()" class="primary-btn">Retry</button>
+                </div>
+            `;
         }
     }
 
-    function redirectToActivityPlayer(session) {
-        const { activityType, sessionId } = session;
+    function renderActivities() {
+        // Filter activities
+        const filtered = currentFilter === 'all'
+            ? allActivities
+            : allActivities.filter(a => {
+                if (currentFilter === 'slide') {
+                    return a.type.startsWith('slide-');
+                }
+                return a.type === currentFilter;
+            });
 
-        // Map activity types to player pages
+        // Clear grid
+        activitiesGrid.innerHTML = '';
+
+        if (filtered.length === 0) {
+            activitiesGrid.appendChild(emptyState);
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+
+        // Render activity cards
+        filtered.forEach(activity => {
+            const card = createActivityCard(activity);
+            activitiesGrid.appendChild(card);
+        });
+    }
+
+    function createActivityCard(activity) {
+        const card = document.createElement('div');
+        card.className = 'activity-card';
+
+        const typeColors = {
+            'quiz': { bg: 'rgba(139, 92, 246, 0.1)', border: 'rgba(139, 92, 246, 0.3)', text: '#a78bfa' },
+            'poll': { bg: 'rgba(59, 130, 246, 0.1)', border: 'rgba(59, 130, 246, 0.3)', text: '#60a5fa' },
+            'puzzle': { bg: 'rgba(236, 72, 153, 0.1)', border: 'rgba(236, 72, 153, 0.3)', text: '#f472b6' },
+            'type-answer': { bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.3)', text: '#34d399' },
+            'default': { bg: 'rgba(0, 217, 255, 0.1)', border: 'rgba(0, 217, 255, 0.3)', text: '#00d9ff' }
+        };
+
+        const typeKey = activity.type.startsWith('slide-') ? 'default' : activity.type;
+        const colors = typeColors[typeKey] || typeColors.default;
+
+        const typeIcons = {
+            'quiz': '🎯',
+            'poll': '📊',
+            'puzzle': '🧩',
+            'type-answer': '✍️',
+            'pin-answer': '📍',
+            'brainstorm': '💡',
+            'slider': '🎚️',
+            'ranking': '📋',
+            'default': '📝'
+        };
+
+        const icon = typeIcons[activity.type] || typeIcons.default;
+        const displayType = activity.type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+        card.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <span class="activity-type-badge" style="background: ${colors.bg}; border: 1px solid ${colors.border}; color: ${colors.text};">
+                    ${icon} ${displayType}
+                </span>
+                <span style="color: #9ea4b6; font-size: 12px;">
+                    ${formatDate(activity.createdAt)}
+                </span>
+            </div>
+            <h3 style="color: #f5f7ff; font-size: 20px; margin-bottom: 8px; font-weight: 600;">
+                ${activity.title}
+            </h3>
+            <p style="color: #9ea4b6; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">
+                ${activity.description || 'No description provided'}
+            </p>
+            <button class="primary-btn" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 600; background: linear-gradient(135deg, #00d9ff 0%, #8b5cf6 100%); border: none; border-radius: 8px; color: white; cursor: pointer;">
+                🚀 Start Activity
+            </button>
+        `;
+
+        card.querySelector('button').addEventListener('click', (e) => {
+            e.stopPropagation();
+            startActivity(activity);
+        });
+
+        return card;
+    }
+
+    function startActivity(activity) {
+        // Store activity info
+        localStorage.setItem('currentActivityId', activity._id);
+        localStorage.setItem('currentActivityType', activity.type);
+
+        // Redirect to appropriate player
         const playerPages = {
             'quiz': 'student-play-quiz.html',
             'poll': 'student-play-poll.html',
-            'true-false': 'student-play-quiz.html',
             'type-answer': 'student-play-type-answer.html',
             'pin-answer': 'student-play-pin-answer.html',
             'puzzle': 'student-play-puzzle.html',
             'slider': 'student-play-slider.html',
-            'scale': 'student-play-scale.html',
-            'nps': 'student-play-nps.html',
             'ranking': 'student-play-ranking.html',
-            'drop-pin': 'student-play-drop-pin.html',
             'brainstorm': 'student-play-brainstorm.html',
             'slide-classic': 'student-view-slide.html',
             'slide-big-title': 'student-view-slide.html',
             'slide-title-text': 'student-view-slide.html',
             'slide-bullets': 'student-view-slide.html',
             'slide-quote': 'student-view-slide.html',
-            'slide-big-media': 'student-view-slide.html',
-            'draw': 'student-play-draw.html',
-            'video-response': 'student-play-video.html',
-            'spinner': 'student-play-spinner.html',
-            'sorter': 'student-play-sorter.html'
+            'slide-big-media': 'student-view-slide.html'
         };
 
-        const playerPage = playerPages[activityType] || 'student-play-generic.html';
-        window.location.href = `${playerPage}?session=${sessionId}`;
+        const playerPage = playerPages[activity.type] || 'student-play-generic.html';
+        window.location.href = `${playerPage}?activity=${activity._id}`;
     }
 
-    function setLoading(loading) {
-        joinBtn.disabled = loading;
-        codeInput.disabled = loading;
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
 
-        if (loading) {
-            joinBtnText.style.display = 'none';
-            joinBtnLoader.style.display = 'inline-block';
-        } else {
-            joinBtnText.style.display = 'inline';
-            joinBtnLoader.style.display = 'none';
-        }
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
-
-    function showError(message) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = 'block';
-        successMessage.style.display = 'none';
-
-        // Shake animation
-        codeInput.style.animation = 'shake 0.5s';
-        setTimeout(() => {
-            codeInput.style.animation = '';
-        }, 500);
-    }
-
-    function showSuccess(message) {
-        successMessage.textContent = message;
-        successMessage.style.display = 'block';
-        errorMessage.style.display = 'none';
-    }
-
-    function hideMessages() {
-        errorMessage.style.display = 'none';
-        successMessage.style.display = 'none';
-    }
-
-    // Add shake animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-    `;
-    document.head.appendChild(style);
 });

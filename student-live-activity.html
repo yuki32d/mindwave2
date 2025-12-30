@@ -6,14 +6,14 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="loading-spinner.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Activity – MindWave</title>
+    <title>Live Activities – MindWave</title>
     <link rel="stylesheet" href="3d-depth-design.css">
     <script src="auth-guard.js"></script>
 </head>
 
 <body data-theme="dark">
     <div class="app-shell">
-        <div style="max-width: 800px; margin: 0 auto; padding: 48px 24px;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 48px 24px;">
             <!-- Back Button -->
             <div style="margin-bottom: 32px;">
                 <button class="secondary-btn" id="backBtn"
@@ -21,138 +21,111 @@
                     Back to Dashboard</button>
             </div>
 
-            <!-- Main Content -->
-            <div style="text-align: center;">
-                <!-- Icon -->
-                <div style="font-size: 80px; margin-bottom: 24px; animation: bounce 2s infinite;">
-                    🎮
-                </div>
-
-                <!-- Title -->
-                <h1 style="font-size: 48px; font-weight: 700; color: #f5f7ff; margin-bottom: 12px;">
-                    Join Live Activity
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 48px;">
+                <div style="font-size: 64px; margin-bottom: 16px;">🎮</div>
+                <h1 style="font-size: 42px; font-weight: 700; color: #f5f7ff; margin-bottom: 12px;">
+                    Live Activities
                 </h1>
-
-                <!-- Subtitle -->
-                <p
-                    style="color: #9ea4b6; font-size: 18px; margin-bottom: 48px; max-width: 500px; margin-left: auto; margin-right: auto;">
-                    Enter the 6-digit code from your instructor to join the live session
+                <p style="color: #9ea4b6; font-size: 18px;">
+                    Interactive activities from your instructors
                 </p>
+            </div>
 
-                <!-- Code Input Card -->
-                <div class="panel" style="max-width: 500px; margin: 0 auto 32px; padding: 48px;">
-                    <!-- Code Input -->
-                    <div style="margin-bottom: 32px;">
-                        <input type="text" id="codeInput" placeholder="ENTER CODE" maxlength="6"
-                            style="width: 100%; padding: 20px 24px; font-size: 32px; text-align: center; letter-spacing: 12px; text-transform: uppercase; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; color: #f5f7ff; font-weight: 700; transition: all 0.3s ease;"
-                            autocomplete="off">
-                    </div>
+            <!-- Filter Tabs -->
+            <div style="display: flex; gap: 12px; margin-bottom: 32px; justify-content: center; flex-wrap: wrap;">
+                <button class="filter-tab active" data-filter="all"
+                    style="padding: 10px 20px; background: rgba(0, 217, 255, 0.1); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 8px; color: #00d9ff; cursor: pointer; font-weight: 600;">
+                    All Activities
+                </button>
+                <button class="filter-tab" data-filter="quiz"
+                    style="padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600;">
+                    Quizzes
+                </button>
+                <button class="filter-tab" data-filter="poll"
+                    style="padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600;">
+                    Polls
+                </button>
+                <button class="filter-tab" data-filter="puzzle"
+                    style="padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600;">
+                    Puzzles
+                </button>
+                <button class="filter-tab" data-filter="slide"
+                    style="padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600;">
+                    Slides
+                </button>
+            </div>
 
-                    <!-- Join Button -->
-                    <button id="joinBtn" class="primary-btn"
-                        style="width: 100%; padding: 18px; font-size: 20px; font-weight: 600; position: relative; overflow: hidden;">
-                        <span id="joinBtnText">🚀 Join Activity</span>
-                        <span id="joinBtnLoader" style="display: none;">
-                            <div class="spinner-small"
-                                style="display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;">
-                            </div>
-                        </span>
-                    </button>
-
-                    <!-- Error Message -->
-                    <div id="errorMessage"
-                        style="display: none; margin-top: 20px; padding: 16px; background: rgba(255, 59, 48, 0.1); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 8px; color: #ff3b30; font-size: 14px; text-align: center;">
-                    </div>
-
-                    <!-- Success Message -->
-                    <div id="successMessage"
-                        style="display: none; margin-top: 20px; padding: 16px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #10b981; font-size: 14px; text-align: center;">
-                    </div>
+            <!-- Activities Grid -->
+            <div id="activitiesGrid"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+                <!-- Loading State -->
+                <div id="loadingState" style="grid-column: 1 / -1; text-align: center; padding: 64px 24px;">
+                    <div class="spinner" style="margin: 0 auto 16px;"></div>
+                    <p style="color: #9ea4b6;">Loading activities...</p>
                 </div>
+            </div>
 
-                <!-- Help Text -->
-                <div
-                    style="max-width: 500px; margin: 0 auto; padding: 24px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                    <h3 style="font-size: 16px; font-weight: 600; color: #f5f7ff; margin-bottom: 12px;">
-                        💡 How it works
-                    </h3>
-                    <ul
-                        style="text-align: left; color: #9ea4b6; font-size: 14px; line-height: 1.8; list-style: none; padding: 0;">
-                        <li style="margin-bottom: 8px;">
-                            <span style="color: #00D9FF; margin-right: 8px;">1.</span>
-                            Your instructor starts a live activity
-                        </li>
-                        <li style="margin-bottom: 8px;">
-                            <span style="color: #00D9FF; margin-right: 8px;">2.</span>
-                            They share a 6-digit code with the class
-                        </li>
-                        <li style="margin-bottom: 8px;">
-                            <span style="color: #00D9FF; margin-right: 8px;">3.</span>
-                            Enter the code above to join instantly
-                        </li>
-                        <li>
-                            <span style="color: #00D9FF; margin-right: 8px;">4.</span>
-                            Participate in real-time with your classmates
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Recent Activities (Optional) -->
-                <div id="recentActivities" style="margin-top: 48px; display: none;">
-                    <h3 style="font-size: 18px; font-weight: 600; color: #f5f7ff; margin-bottom: 16px;">
-                        📋 Recent Activities
-                    </h3>
-                    <div id="recentList" style="display: flex; flex-direction: column; gap: 12px;">
-                        <!-- Recent activities will be loaded here -->
-                    </div>
-                </div>
+            <!-- Empty State -->
+            <div id="emptyState" style="display: none; text-align: center; padding: 64px 24px; grid-column: 1 / -1;">
+                <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.5;">📭</div>
+                <h3 style="color: #f5f7ff; margin-bottom: 8px;">No Activities Yet</h3>
+                <p style="color: #9ea4b6;">Your instructors haven't posted any activities yet.</p>
             </div>
         </div>
     </div>
 
     <style>
-        @keyframes bounce {
+        .filter-tab:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            transition: all 0.2s;
+        }
 
-            0%,
-            100% {
-                transform: translateY(0);
-            }
+        .filter-tab.active {
+            background: rgba(0, 217, 255, 0.1) !important;
+            border-color: rgba(0, 217, 255, 0.3) !important;
+            color: #00d9ff !important;
+        }
 
-            50% {
-                transform: translateY(-10px);
-            }
+        .activity-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 217, 255, 0.15);
+            border-color: rgba(0, 217, 255, 0.3);
+        }
+
+        .activity-type-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #00d9ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
             to {
                 transform: rotate(360deg);
             }
-        }
-
-        #codeInput:focus {
-            outline: none;
-            border-color: #00D9FF;
-            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
-        }
-
-        #joinBtn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        #joinBtn:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 217, 255, 0.3);
-        }
-
-        .spinner-small {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
         }
     </style>
 
