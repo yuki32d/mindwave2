@@ -18,37 +18,26 @@
 
 <body data-theme="dark">
     <div class="app-shell">
-        <!-- Header -->
-        <header class="topbar">
-            <div class="topbar-brand">
-                <span>🌊</span>
-                <span>MindwaveIo</span>
-            </div>
-            <div class="topbar-search">
-                <span>🔍</span>
-                <input type="text" placeholder="Search...">
-            </div>
-            <div class="topbar-actions">
-                <span id="adminNotificationBtn" style="cursor: pointer;" title="Notifications">🔔</span>
-                <span id="adminSettingsBtn" style="cursor: pointer;" title="Settings">⚙️</span>
-                <div class="profile-toggle" id="profileToggle">
-                    <span>👤</span>
-                    <small>Account</small>
-                </div>
-            </div>
-        </header>
-
-
         <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
             <!-- Main Content -->
             <main>
-                <div class="main-header">
+                <!-- Back Button -->
+                <div style="margin-bottom: 24px;">
+                    <button class="secondary-btn" onclick="window.history.back()"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
+                        Back</button>
+                </div>
+
+                <!-- Page Header -->
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px;">
                     <div>
-                        <h1>📌 Create Drop Pin</h1>
-                        <p>Students drop pins on images to share opinions, feedback, or identify issues</p>
+                        <h1 style="font-size: 36px; font-weight: 700; margin-bottom: 8px; color: #f5f7ff;">📌 Create
+                            Drop Pin</h1>
+                        <p style="color: #9ea4b6; font-size: 16px;">Students drop pins on images to share opinions,
+                            feedback, or identify issues</p>
                     </div>
-                    <div class="header-actions">
-                        <button class="secondary-btn" onclick="window.history.back()">← Back</button>
+                    <div>
                         <button class="primary-btn" id="publishBtn">🚀 Publish Activity</button>
                     </div>
                 </div>
