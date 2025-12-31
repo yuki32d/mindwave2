@@ -145,9 +145,9 @@
         }
 
         // Using OUR customized Jitsi build on localhost:9000
-        // We configured it to disable lobby and authentication!
-        const roomName = 'mindwave-' + meetingCode.toLowerCase();
-        const jitsiUrl = `http://localhost:9000/${roomName}`;
+        // Jitsi uses hash-based room naming: http://localhost:9000/#/roomname
+        const roomName = 'MindWave' + meetingCode;
+        const jitsiUrl = `http://localhost:9000/#/${roomName}`;
 
         // Create iframe for our custom Jitsi
         const iframe = document.createElement('iframe');
