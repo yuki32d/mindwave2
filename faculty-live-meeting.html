@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Meeting - MindWave</title>
-    <script src="https://unpkg.com/@daily-co/daily-js"></script>
+
     <style>
         * {
             margin: 0;
@@ -144,14 +144,14 @@
             }
         }
 
-        // Create Daily.co room URL
-        // Daily.co allows instant rooms without API - just use their domain
+        // Create Whereby room URL
+        // Whereby allows instant rooms - just use their domain
         const roomName = 'mindwave-' + meetingCode.toLowerCase();
-        const dailyUrl = `https://mindwave2.daily.co/${roomName}`;
+        const wherebyUrl = `https://whereby.com/${roomName}`;
 
-        // Create iframe for Daily.co
+        // Create iframe for Whereby
         const iframe = document.createElement('iframe');
-        iframe.src = dailyUrl;
+        iframe.src = wherebyUrl;
         iframe.allow = 'camera; microphone; fullscreen; display-capture; autoplay';
         document.getElementById('daily-container').appendChild(iframe);
 
