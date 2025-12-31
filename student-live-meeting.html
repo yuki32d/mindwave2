@@ -226,7 +226,12 @@
                     startWithVideoMuted: false,
                     enableWelcomePage: false,
                     prejoinPageEnabled: false,
-                    disableDeepLinking: true
+                    disableDeepLinking: true,
+                    // Disable authentication
+                    enableUserRolesBasedOnToken: false,
+                    enableInsecureRoomNameWarning: false,
+                    hideConferenceSubject: true,
+                    hideConferenceTimer: false
                 },
                 interfaceConfigOverwrite: {
                     TOOLBAR_BUTTONS: [
@@ -235,10 +240,16 @@
                         'chat', 'raisehand', 'videoquality', 'filmstrip',
                         'feedback', 'stats', 'shortcuts', 'tileview', 'help'
                     ],
+                    // Hide Jitsi branding
                     SHOW_JITSI_WATERMARK: false,
                     SHOW_WATERMARK_FOR_GUESTS: false,
+                    SHOW_BRAND_WATERMARK: false,
+                    BRAND_WATERMARK_LINK: '',
+                    JITSI_WATERMARK_LINK: '',
                     DEFAULT_BACKGROUND: '#202124',
-                    DISABLE_JOIN_LEAVE_NOTIFICATIONS: true
+                    DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+                    HIDE_INVITE_MORE_HEADER: true,
+                    MOBILE_APP_PROMO: false
                 },
                 userInfo: {
                     displayName: userName,

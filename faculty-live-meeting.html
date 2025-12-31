@@ -166,7 +166,15 @@
                 startWithVideoMuted: false,
                 enableWelcomePage: false,
                 prejoinPageEnabled: false,
-                disableDeepLinking: true
+                disableDeepLinking: true,
+                // Disable authentication - no login required
+                enableUserRolesBasedOnToken: false,
+                enableInsecureRoomNameWarning: false,
+                // Hide Jitsi branding
+                hideConferenceSubject: true,
+                hideConferenceTimer: false,
+                // Auto-grant moderator to first person (faculty)
+                startSilent: false
             },
             interfaceConfigOverwrite: {
                 TOOLBAR_BUTTONS: [
@@ -177,10 +185,17 @@
                     'filmstrip', 'feedback', 'stats', 'shortcuts', 'tileview',
                     'download', 'help', 'mute-everyone', 'security'
                 ],
+                // Hide Jitsi branding
                 SHOW_JITSI_WATERMARK: false,
                 SHOW_WATERMARK_FOR_GUESTS: false,
+                SHOW_BRAND_WATERMARK: false,
+                BRAND_WATERMARK_LINK: '',
+                JITSI_WATERMARK_LINK: '',
                 DEFAULT_BACKGROUND: '#202124',
-                DISABLE_JOIN_LEAVE_NOTIFICATIONS: true
+                DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+                // Hide "powered by Jitsi"
+                HIDE_INVITE_MORE_HEADER: true,
+                MOBILE_APP_PROMO: false
             },
             userInfo: {
                 displayName: userName,
