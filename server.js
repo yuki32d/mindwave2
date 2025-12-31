@@ -24,6 +24,8 @@ import paymentRoutes from './payment-routes.js';
 // Live Activity System
 import activitiesRouter from './routes/activities.js';
 import liveSessionsRouter from './routes/live-sessions.js';
+// Meeting Server for WebRTC
+import { initializeMeetingServer, getMeetingRoutes } from './meeting-server.js';
 // pdf-parse will be imported dynamically in the endpoint
 // Stripe will be imported conditionally based on environment variable
 
@@ -9542,6 +9544,22 @@ app.post('/api/notifications', authMiddleware, async (req, res) => {
   }
 });
 
+// ============================================
+// LIVE MEETING API ROUTES
+// ============================================
+const meetingRoutes = getMeetingRoutes();
+
+// Create meeting
+app.post('/api/meetings/create', authMiddleware, meetingRoutes.createMeeting);
+
+// Get meeting info
+app.get('/api/meetings/:code', authMiddleware, meetingRoutes.getMeeting);
+
+// End meeting
+app.post('/api/meetings/:code/end', authMiddleware, meetingRoutes.endMeeting);
+
+// Get active meetings
+app.get('/api/meetings/active/all', authMiddleware, meetingRoutes.getActiveMeetings);
 
 app.get('/health', (req, res) => {
   res.json({
@@ -9559,4 +9577,6 @@ app.get('/health', (req, res) => {
 // Run cleanup on server start
 cleanupOldGames();
 
-listenWithFallback(PORT);
+// Initialize Meeting Server with Socket.IO
+const httpServer = listenWithFallback(PORT);
+initializeMeetingServer(httpServer);
