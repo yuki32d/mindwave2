@@ -96,18 +96,10 @@
             background: #5f6368;
         }
 
-        #jitsi-container {
+        #meeting-frame {
             flex: 1;
             width: 100%;
-        }
-
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            font-size: 18px;
-            color: #9aa0a6;
+            border: none;
         }
     </style>
 </head>
@@ -123,12 +115,9 @@
             </div>
             <button class="back-btn" id="endBtn">End Meeting</button>
         </div>
-        <div id="jitsi-container">
-            <div class="loading">Loading meeting...</div>
-        </div>
+        <iframe id="meeting-frame" allow="camera; microphone; fullscreen; speaker; display-capture"></iframe>
     </div>
 
-    <script src="https://meet.jit.si/external_api.js"></script>
     <script>
         // Generate 6-digit meeting code
         const meetingCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -138,7 +127,6 @@
         const token = localStorage.getItem('token');
         let userName = 'Faculty';
 
-        // Try to get user name from token
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
@@ -148,76 +136,15 @@
             }
         }
 
+        // Load meeting using self-hosted Jitsi
+        const roomUrl = `http://localhost:8000/MindWave_${meetingCode}#userInfo.displayName="${encodeURIComponent(userName)}"&config.startWithAudioMuted=false&config.startWithVideoMuted=false`;
+        document.getElementById('meeting-frame').src = roomUrl;
+
         // Add event listeners
         document.getElementById('copyBtn').addEventListener('click', copyCode);
         document.getElementById('whatsappBtn').addEventListener('click', shareWhatsApp);
         document.getElementById('endBtn').addEventListener('click', endMeeting);
         document.getElementById('meetingCode').addEventListener('click', copyCode);
-
-        // Jitsi Meet configuration
-        const domain = 'meet.jit.si';
-        const options = {
-            roomName: `MindWave_${meetingCode}`,
-            width: '100%',
-            height: '100%',
-            parentNode: document.getElementById('jitsi-container'),
-            configOverwrite: {
-                startWithAudioMuted: false,
-                startWithVideoMuted: false,
-                enableWelcomePage: false,
-                prejoinPageEnabled: false,
-                disableDeepLinking: true,
-                // Disable authentication - no login required
-                enableUserRolesBasedOnToken: false,
-                enableInsecureRoomNameWarning: false,
-                // Hide Jitsi branding
-                hideConferenceSubject: true,
-                hideConferenceTimer: false,
-                // Auto-grant moderator to first person (faculty)
-                startSilent: false
-            },
-            interfaceConfigOverwrite: {
-                TOOLBAR_BUTTONS: [
-                    'microphone', 'camera', 'closedcaptions', 'desktop',
-                    'fullscreen', 'fodeviceselection', 'hangup', 'profile',
-                    'chat', 'recording', 'livestreaming', 'etherpad',
-                    'sharedvideo', 'settings', 'raisehand', 'videoquality',
-                    'filmstrip', 'feedback', 'stats', 'shortcuts', 'tileview',
-                    'download', 'help', 'mute-everyone', 'security'
-                ],
-                // Hide Jitsi branding
-                SHOW_JITSI_WATERMARK: false,
-                SHOW_WATERMARK_FOR_GUESTS: false,
-                SHOW_BRAND_WATERMARK: false,
-                BRAND_WATERMARK_LINK: '',
-                JITSI_WATERMARK_LINK: '',
-                DEFAULT_BACKGROUND: '#202124',
-                DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-                // Hide "powered by Jitsi"
-                HIDE_INVITE_MORE_HEADER: true,
-                MOBILE_APP_PROMO: false
-            },
-            userInfo: {
-                displayName: userName,
-                email: ''
-            }
-        };
-
-        // Initialize Jitsi Meet
-        const api = new JitsiMeetExternalAPI(domain, options);
-
-        // Event listeners
-        api.addEventListener('videoConferenceJoined', () => {
-            console.log('Meeting joined successfully');
-        });
-
-        api.addEventListener('participantJoined', (participant) => {
-            console.log('Participant joined:', participant);
-        });
-
-        api.addEventListener('readyToClose', () => {
-            window.location.href = 'admin.html';
-        });
 
         // Copy meeting code
         function copyCode() {
@@ -239,8 +166,7 @@
 
         // End meeting
         function endMeeting() {
-            if (confirm('End meeting for everyone?')) {
-                api.executeCommand('hangup');
+            if (confirm('End meeting and return to dashboard?')) {
                 window.location.href = 'admin.html';
             }
         }

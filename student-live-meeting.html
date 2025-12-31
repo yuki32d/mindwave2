@@ -132,9 +132,10 @@
             display: block;
         }
 
-        #jitsi-container {
+        #meeting-frame {
             width: 100%;
             height: 100%;
+            border: none;
         }
     </style>
 </head>
@@ -157,10 +158,9 @@
 
     <!-- Meeting Container -->
     <div class="meeting-container" id="meetingContainer">
-        <div id="jitsi-container"></div>
+        <iframe id="meeting-frame" allow="camera; microphone; fullscreen; speaker; display-capture"></iframe>
     </div>
 
-    <script src="https://meet.jit.si/external_api.js"></script>
     <script>
         const codeInput = document.getElementById('codeInput');
         const joinBtn = document.getElementById('joinBtn');
@@ -214,60 +214,9 @@
             document.getElementById('joinContainer').style.display = 'none';
             document.getElementById('meetingContainer').classList.add('active');
 
-            // Jitsi Meet configuration
-            const domain = 'meet.jit.si';
-            const options = {
-                roomName: `MindWave_${meetingCode}`,
-                width: '100%',
-                height: '100%',
-                parentNode: document.getElementById('jitsi-container'),
-                configOverwrite: {
-                    startWithAudioMuted: false,
-                    startWithVideoMuted: false,
-                    enableWelcomePage: false,
-                    prejoinPageEnabled: false,
-                    disableDeepLinking: true,
-                    // Disable authentication
-                    enableUserRolesBasedOnToken: false,
-                    enableInsecureRoomNameWarning: false,
-                    hideConferenceSubject: true,
-                    hideConferenceTimer: false
-                },
-                interfaceConfigOverwrite: {
-                    TOOLBAR_BUTTONS: [
-                        'microphone', 'camera', 'closedcaptions', 'desktop',
-                        'fullscreen', 'fodeviceselection', 'hangup', 'profile',
-                        'chat', 'raisehand', 'videoquality', 'filmstrip',
-                        'feedback', 'stats', 'shortcuts', 'tileview', 'help'
-                    ],
-                    // Hide Jitsi branding
-                    SHOW_JITSI_WATERMARK: false,
-                    SHOW_WATERMARK_FOR_GUESTS: false,
-                    SHOW_BRAND_WATERMARK: false,
-                    BRAND_WATERMARK_LINK: '',
-                    JITSI_WATERMARK_LINK: '',
-                    DEFAULT_BACKGROUND: '#202124',
-                    DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-                    HIDE_INVITE_MORE_HEADER: true,
-                    MOBILE_APP_PROMO: false
-                },
-                userInfo: {
-                    displayName: userName,
-                    email: ''
-                }
-            };
-
-            // Initialize Jitsi Meet
-            const api = new JitsiMeetExternalAPI(domain, options);
-
-            // Event listeners
-            api.addEventListener('videoConferenceJoined', () => {
-                console.log('Successfully joined meeting');
-            });
-
-            api.addEventListener('readyToClose', () => {
-                window.location.href = 'student-community.html';
-            });
+            // Load meeting using self-hosted Jitsi
+            const roomUrl = `http://localhost:8000/MindWave_${meetingCode}#userInfo.displayName="${encodeURIComponent(userName)}"&config.startWithAudioMuted=false&config.startWithVideoMuted=false`;
+            document.getElementById('meeting-frame').src = roomUrl;
         }
 
         // Focus code input
