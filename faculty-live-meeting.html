@@ -56,7 +56,8 @@
             background: #5f6368;
         }
 
-        .copy-btn {
+        .copy-btn,
+        .whatsapp-btn {
             background: #1a73e8;
             color: white;
             border: none;
@@ -70,6 +71,14 @@
 
         .copy-btn:hover {
             background: #1557b0;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+        }
+
+        .whatsapp-btn:hover {
+            background: #1da851;
         }
 
         .back-btn {
@@ -108,11 +117,11 @@
         <div class="meeting-header">
             <div class="meeting-info">
                 <span style="font-weight: 600;">Meeting Code:</span>
-                <div class="meeting-code" id="meetingCode" onclick="copyCode()">Loading...</div>
-                <button class="copy-btn" onclick="copyCode()">📋 Copy</button>
-                <button class="copy-btn" onclick="shareWhatsApp()" style="background: #25D366;">📱 WhatsApp</button>
+                <div class="meeting-code" id="meetingCode">Loading...</div>
+                <button class="copy-btn" id="copyBtn">📋 Copy</button>
+                <button class="whatsapp-btn" id="whatsappBtn">📱 WhatsApp</button>
             </div>
-            <button class="back-btn" onclick="endMeeting()">End Meeting</button>
+            <button class="back-btn" id="endBtn">End Meeting</button>
         </div>
         <div id="jitsi-container">
             <div class="loading">Loading meeting...</div>
@@ -192,7 +201,7 @@
         // Copy meeting code
         function copyCode() {
             navigator.clipboard.writeText(meetingCode);
-            const btn = event.target;
+            const btn = document.getElementById('copyBtn');
             const originalText = btn.textContent;
             btn.textContent = '✓ Copied!';
             setTimeout(() => {
