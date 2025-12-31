@@ -194,9 +194,9 @@
             document.getElementById('joinContainer').style.display = 'none';
             document.getElementById('meetingContainer').classList.add('active');
 
-            // Using OUR customized Jitsi build on localhost:9000
+            // Using OUR customized Jitsi deployed on Render
             const roomName = 'MindWave' + meetingCode;
-            const jitsiUrl = `http://localhost:9000/#/${roomName}`;
+            const jitsiUrl = `/jitsi/#/${roomName}`;
 
             // Create iframe for our custom Jitsi
             const iframe = document.createElement('iframe');

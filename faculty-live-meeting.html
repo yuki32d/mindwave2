@@ -144,10 +144,9 @@
             }
         }
 
-        // Using OUR customized Jitsi build on localhost:9000
-        // Jitsi uses hash-based room naming: http://localhost:9000/#/roomname
+        // Using OUR customized Jitsi deployed on Render at /jitsi/
         const roomName = 'MindWave' + meetingCode;
-        const jitsiUrl = `http://localhost:9000/#/${roomName}`;
+        const jitsiUrl = `/jitsi/#/${roomName}`;
 
         // Create iframe for our custom Jitsi
         const iframe = document.createElement('iframe');
