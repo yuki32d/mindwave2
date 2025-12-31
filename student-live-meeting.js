@@ -175,6 +175,8 @@ function setupSocketListeners() {
 
 // Create WebRTC peer connection
 function createPeer(peerId, initiator) {
+    console.log(`Creating peer for ${peerId}, initiator: ${initiator}`);
+
     const peer = new SimplePeer({
         initiator,
         trickle: true,
@@ -188,24 +190,31 @@ function createPeer(peerId, initiator) {
     });
 
     peer.on('signal', (data) => {
+        console.log('Sending signal:', data.type, 'to', peerId);
         if (data.type === 'offer') {
-            socket.emit('offer', data, meetingCode);
+            socket.emit('offer', data, meetingCode, peerId);
         } else if (data.type === 'answer') {
-            socket.emit('answer', data, meetingCode);
+            socket.emit('answer', data, meetingCode, peerId);
         } else {
-            socket.emit('ice-candidate', data, meetingCode);
+            socket.emit('ice-candidate', data, meetingCode, peerId);
         }
     });
 
     peer.on('stream', (stream) => {
+        console.log('Received stream from', peerId);
         addVideoTile(peerId, stream);
     });
 
     peer.on('error', (err) => {
-        console.error('Peer error:', err);
+        console.error('Peer error for', peerId, ':', err);
+    });
+
+    peer.on('connect', () => {
+        console.log('Peer connected:', peerId);
     });
 
     peers.set(peerId, peer);
+    console.log('Peer created and stored for', peerId);
     return peer;
 }
 

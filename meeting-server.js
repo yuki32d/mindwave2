@@ -32,24 +32,26 @@ export function initializeMeetingServer(httpServer) {
             socket.userId = userId;
 
             // Notify others in the room
-            socket.to(meetingCode).emit('user-joined', userId);
+            socket.to(meetingCode).emit('user-joined', socket.id);
 
-            console.log(`User ${userId} joined meeting ${meetingCode}`);
+            console.log(`User ${userId} (${socket.id}) joined meeting ${meetingCode}`);
         });
 
-        // WebRTC Signaling - Offer
-        socket.on('offer', (offer, meetingCode) => {
-            socket.to(meetingCode).emit('offer', offer, socket.id);
+        // WebRTC Signaling - Offer (with target peer)
+        socket.on('offer', (offer, meetingCode, targetPeerId) => {
+            console.log(`Routing offer from ${socket.id} to ${targetPeerId}`);
+            io.to(targetPeerId).emit('offer', offer, socket.id);
         });
 
-        // WebRTC Signaling - Answer
-        socket.on('answer', (answer, meetingCode) => {
-            socket.to(meetingCode).emit('answer', answer, socket.id);
+        // WebRTC Signaling - Answer (with target peer)
+        socket.on('answer', (answer, meetingCode, targetPeerId) => {
+            console.log(`Routing answer from ${socket.id} to ${targetPeerId}`);
+            io.to(targetPeerId).emit('answer', answer, socket.id);
         });
 
-        // WebRTC Signaling - ICE Candidate
-        socket.on('ice-candidate', (candidate, meetingCode) => {
-            socket.to(meetingCode).emit('ice-candidate', candidate, socket.id);
+        // WebRTC Signaling - ICE Candidate (with target peer)
+        socket.on('ice-candidate', (candidate, meetingCode, targetPeerId) => {
+            io.to(targetPeerId).emit('ice-candidate', candidate, socket.id);
         });
 
         // Live captions
