@@ -1038,8 +1038,15 @@ app.use(cookieParser());
 app.use(mongoSanitize());
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Serve Jitsi Meet - custom build
-app.get('/jitsi/*', (req, res) => {
+// Serve Jitsi Meet static files first
+app.use('/jitsi', express.static(path.join(__dirname, 'public', 'jitsi'), {
+  maxAge: '1d',
+  etag: true,
+  lastModified: true
+}));
+
+// Serve Jitsi index.html for room URLs (e.g., /jitsi/#/RoomName)
+app.get('/jitsi', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'jitsi', 'index.html'));
 });
 
