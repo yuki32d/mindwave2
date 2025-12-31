@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Join Meeting - MindWave</title>
-    <script src="http://localhost:8000/external_api.js"></script>
+    <script src="https://meet.jit.si/external_api.js"></script>
     <style>
         * {
             margin: 0;
@@ -188,7 +188,7 @@
             document.getElementById('joinContainer').style.display = 'none';
             document.getElementById('meetingContainer').classList.add('active');
 
-            const domain = 'localhost:8000';
+            const domain = 'meet.jit.si';
             const options = {
                 roomName: 'MindWave' + meetingCode,
                 width: '100%',
