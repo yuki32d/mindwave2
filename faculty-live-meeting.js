@@ -159,7 +159,17 @@ function createPeer(peerId, initiator) {
 
 // Add video tile for remote participant
 function addVideoTile(peerId, stream) {
+    console.log('Adding video tile for', peerId, 'with stream:', stream);
     const videoGrid = document.getElementById('videoGrid');
+
+    // Check if tile already exists
+    const existingTile = document.getElementById(`video-${peerId}`);
+    if (existingTile) {
+        console.log('Tile already exists for', peerId, '- updating stream');
+        const existingVideo = existingTile.querySelector('video');
+        existingVideo.srcObject = stream;
+        return;
+    }
 
     const videoTile = document.createElement('div');
     videoTile.className = 'video-tile';
@@ -169,6 +179,17 @@ function addVideoTile(peerId, stream) {
     video.srcObject = stream;
     video.autoplay = true;
     video.playsinline = true;
+    video.muted = false; // Remote video should NOT be muted
+
+    // Add event listeners for debugging
+    video.onloadedmetadata = () => {
+        console.log('Video metadata loaded for', peerId);
+        video.play().catch(err => console.error('Error playing video:', err));
+    };
+
+    video.onerror = (e) => {
+        console.error('Video error for', peerId, ':', e);
+    };
 
     const nameTag = document.createElement('div');
     nameTag.className = 'participant-name';
@@ -177,6 +198,8 @@ function addVideoTile(peerId, stream) {
     videoTile.appendChild(video);
     videoTile.appendChild(nameTag);
     videoGrid.appendChild(videoTile);
+
+    console.log('Video tile added to grid for', peerId);
 }
 
 // Remove peer
