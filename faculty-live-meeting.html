@@ -6,6 +6,7 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Meeting - MindWave</title>
+    <script src="http://localhost:8000/external_api.js"></script>
     <style>
         * {
             margin: 0;
@@ -34,6 +35,7 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #3c4043;
+            z-index: 1000;
         }
 
         .meeting-info {
@@ -82,8 +84,8 @@
         }
 
         .back-btn {
-            background: #3c4043;
-            color: #e8eaed;
+            background: #ea4335;
+            color: white;
             border: none;
             padding: 8px 16px;
             border-radius: 8px;
@@ -93,13 +95,12 @@
         }
 
         .back-btn:hover {
-            background: #5f6368;
+            background: #d33426;
         }
 
-        #meeting-frame {
+        #jitsi-container {
             flex: 1;
             width: 100%;
-            border: none;
         }
     </style>
 </head>
@@ -115,7 +116,7 @@
             </div>
             <button class="back-btn" id="endBtn">End Meeting</button>
         </div>
-        <iframe id="meeting-frame" allow="camera; microphone; fullscreen; speaker; display-capture"></iframe>
+        <div id="jitsi-container"></div>
     </div>
 
     <script>
@@ -136,15 +137,51 @@
             }
         }
 
-        // Load meeting using self-hosted Jitsi
-        const roomUrl = `http://localhost:8000/MindWave_${meetingCode}#userInfo.displayName="${encodeURIComponent(userName)}"&config.startWithAudioMuted=false&config.startWithVideoMuted=false`;
-        document.getElementById('meeting-frame').src = roomUrl;
-
         // Add event listeners
         document.getElementById('copyBtn').addEventListener('click', copyCode);
         document.getElementById('whatsappBtn').addEventListener('click', shareWhatsApp);
         document.getElementById('endBtn').addEventListener('click', endMeeting);
         document.getElementById('meetingCode').addEventListener('click', copyCode);
+
+        // Initialize Jitsi Meet - Docker Jitsi with ALL features!
+        const domain = 'localhost:8000';
+        const options = {
+            roomName: 'MindWave' + meetingCode,
+            width: '100%',
+            height: '100%',
+            parentNode: document.getElementById('jitsi-container'),
+            userInfo: {
+                displayName: userName
+            },
+            configOverwrite: {
+                startWithAudioMuted: false,
+                startWithVideoMuted: false,
+                prejoinPageEnabled: false,
+                disableDeepLinking: true
+            },
+            interfaceConfigOverwrite: {
+                SHOW_JITSI_WATERMARK: false,
+                SHOW_WATERMARK_FOR_GUESTS: false,
+                SHOW_BRAND_WATERMARK: false,
+                BRAND_WATERMARK_LINK: '',
+                SHOW_POWERED_BY: false,
+                DISPLAY_WELCOME_PAGE_CONTENT: false,
+                DISPLAY_WELCOME_PAGE_TOOLBAR_ADDITIONAL_CONTENT: false,
+                APP_NAME: 'MindWave',
+                NATIVE_APP_NAME: 'MindWave',
+                PROVIDER_NAME: 'MindWave College',
+                TOOLBAR_BUTTONS: [
+                    'microphone', 'camera', 'closedcaptions', 'desktop', 'embedmeeting', 'fullscreen',
+                    'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
+                    'livestreaming', 'etherpad', 'sharedvideo', 'shareaudio', 'settings', 'raisehand',
+                    'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
+                    'tileview', 'select-background', 'download', 'help', 'mute-everyone', 'mute-video-everyone',
+                    'security'
+                ]
+            }
+        };
+
+        const api = new JitsiMeetExternalAPI(domain, options);
 
         // Copy meeting code
         function copyCode() {
@@ -167,6 +204,7 @@
         // End meeting
         function endMeeting() {
             if (confirm('End meeting and return to dashboard?')) {
+                api.dispose();
                 window.location.href = 'admin.html';
             }
         }
