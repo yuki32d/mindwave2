@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Slider - MindWave</title>
     <link rel="stylesheet" href="3d-depth-design.css">
 </head>
@@ -26,7 +27,7 @@
                     <p>Ask students to select a value on a slider</p>
                 </div>
                 <div class="header-actions">
-                    <button class="primary-btn" onclick="saveSlider()">💾 Save & Publish</button>
+                    <button class="primary-btn" id="saveBtn">💾 Save & Publish</button>
                 </div>
             </div>
 
@@ -90,8 +91,7 @@
                                 <span style="color: #9ea4b6; font-size: 14px;" id="previewMaxLabel">10</span>
                             </div>
                             <input type="range" id="previewSlider" min="0" max="10" value="5" step="1"
-                                style="width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0f62fe 0%, #9f7aea 100%); outline: none; appearance: none; -webkit-appearance: none;"
-                                oninput="document.getElementById('sliderValue').textContent = this.value">
+                                style="width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0f62fe 0%, #9f7aea 100%); outline: none; appearance: none; -webkit-appearance: none;">
                         </div>
                     </div>
                 </section>
@@ -176,10 +176,19 @@
 
         updatePreview();
 
+        // Preview slider handler
+        document.getElementById('previewSlider').addEventListener('input', function () {
+            document.getElementById('sliderValue').textContent = this.value;
+        });
+
+        // Save button handler
+        document.getElementById('saveBtn').addEventListener('click', saveSlider);
+
         // Back button handler
         document.getElementById('backBtn').addEventListener('click', function () {
             window.location.href = 'interactive-tools-selector.html';
         });
-    </script></body>
+    </script>
+</body>
 
 </html>

@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Poll - MindWave</title>
     <link rel="stylesheet" href="3d-depth-design.css">
     <script src="auth-guard.js"></script>
@@ -28,8 +29,8 @@
                     <p>Collect opinions from students with real-time results</p>
                 </div>
                 <div class="header-actions">
-                    <button class="secondary-btn" onclick="previewPoll()">👁️ Preview</button>
-                    <button class="primary-btn" onclick="savePoll()">💾 Save & Publish</button>
+                    <button class="secondary-btn" id="previewBtn">👁️ Preview</button>
+                    <button class="primary-btn" id="saveBtn">💾 Save & Publish</button>
                 </div>
             </div>
 
@@ -55,14 +56,14 @@
                             <div id="pollOptions">
                                 <div class="option-row">
                                     <input type="text" placeholder="Option 1" class="poll-option" required>
-                                    <button type="button" class="btn-icon" onclick="removeOption(this)">🗑️</button>
+                                    <button type="button" class="btn-icon remove-option">🗑️</button>
                                 </div>
                                 <div class="option-row">
                                     <input type="text" placeholder="Option 2" class="poll-option" required>
                                     <button type="button" class="btn-icon" onclick="removeOption(this)">🗑️</button>
                                 </div>
                             </div>
-                            <button type="button" class="secondary-btn" onclick="addOption()">+ Add Option</button>
+                            <button type="button" class="secondary-btn" id="addOptionBtn">+ Add Option</button>
                         </div>
 
                         <div>
@@ -153,7 +154,7 @@
             optionRow.className = 'option-row';
             optionRow.innerHTML = `
                 <input type="text" placeholder="Option ${optionCount}" class="poll-option" required>
-                <button type="button" class="btn-icon" onclick="removeOption(this)">🗑️</button>
+                <button type="button" class="btn-icon remove-option">🗑️</button>
             `;
             container.appendChild(optionRow);
             updatePreview();
@@ -194,7 +195,7 @@
 
             options.forEach((option, index) => {
                 html += `
-                    <div class="poll-option-preview" onclick="this.classList.toggle('selected')">
+                    <div class="poll-option-preview">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <div style="width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;"></div>
                             <span style="color: #f5f7ff;">${option}</span>
@@ -270,10 +271,32 @@
         document.getElementById('pollDescription').addEventListener('input', updatePreview);
         document.getElementById('pollOptions').addEventListener('input', updatePreview);
 
+        // Button handlers
+        document.getElementById('previewBtn').addEventListener('click', previewPoll);
+        document.getElementById('saveBtn').addEventListener('click', savePoll);
+        document.getElementById('addOptionBtn').addEventListener('click', addOption);
+
+        // Event delegation for remove buttons
+        document.getElementById('pollOptions').addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-option') || e.target.closest('.remove-option')) {
+                const btn = e.target.classList.contains('remove-option') ? e.target : e.target.closest('.remove-option');
+                removeOption(btn);
+            }
+        });
+
+        // Event delegation for preview options
+        document.getElementById('pollPreview').addEventListener('click', function (e) {
+            const option = e.target.closest('.poll-option-preview');
+            if (option) {
+                option.classList.toggle('selected');
+            }
+        });
+
         // Back button handler
         document.getElementById('backBtn').addEventListener('click', function () {
             window.location.href = 'interactive-tools-selector.html';
         });
-    </script></body>
+    </script>
+</body>
 
 </html>

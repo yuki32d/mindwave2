@@ -68,3 +68,11 @@ document.getElementById('fillinForm').addEventListener('submit', async (e) => {
         alert('Failed to publish game. Please check your connection.');
     }
 });
+
+// Cancel button handler
+const cancelBtn = document.getElementById('cancelBtn');
+if (cancelBtn) {
+    cancelBtn.addEventListener('click', () => {
+        window.location.href = 'admin.html';
+    });
+}

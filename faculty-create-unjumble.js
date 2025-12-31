@@ -48,3 +48,11 @@ document.getElementById('unjumbleForm').addEventListener('submit', async (e) => 
         alert('Failed to publish game. Please try again.');
     }
 });
+
+// Cancel button handler
+const cancelBtn = document.getElementById('cancelBtn');
+if (cancelBtn) {
+    cancelBtn.addEventListener('click', () => {
+        window.location.href = 'admin.html';
+    });
+}

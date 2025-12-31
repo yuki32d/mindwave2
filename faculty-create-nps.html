@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create NPS Scale - MindWave</title>
     <link rel="stylesheet" href="3d-depth-design.css">
 </head>
@@ -26,7 +27,7 @@
                     <p>Net Promoter Score - Measure student satisfaction (0-10)</p>
                 </div>
                 <div class="header-actions">
-                    <button class="primary-btn" onclick="saveNPS()">💾 Save & Publish</button>
+                    <button class="primary-btn" id="saveBtn">💾 Save & Publish</button>
                 </div>
             </div>
 
@@ -70,28 +71,29 @@
                                 <span style="color: #ff3b30; font-size: 12px;">Not likely</span>
                                 <span style="color: #34c759; font-size: 12px;">Very likely</span>
                             </div>
-                            <div style="display: grid; grid-template-columns: repeat(11, 1fr); gap: 8px;">
-                                <button onclick="selectNPS(0, this)"
+                            <div style="display: grid; grid-template-columns: repeat(11, 1fr); gap: 8px;"
+                                id="npsButtons">
+                                <button data-score="0"
                                     style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">0</button>
-                                <button onclick="selectNPS(1, this)"
+                                <button data-score="1"
                                     style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">1</button>
-                                <button onclick="selectNPS(2, this)"
+                                <button data-score="2"
                                     style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">2</button>
-                                <button onclick="selectNPS(3, this)"
+                                <button data-score="3"
                                     style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">3</button>
-                                <button onclick="selectNPS(4, this)"
+                                <button data-score="4"
                                     style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">4</button>
-                                <button onclick="selectNPS(5, this)"
+                                <button data-score="5"
                                     style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">5</button>
-                                <button onclick="selectNPS(6, this)"
+                                <button data-score="6"
                                     style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">6</button>
-                                <button onclick="selectNPS(7, this)"
+                                <button data-score="7"
                                     style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">7</button>
-                                <button onclick="selectNPS(8, this)"
+                                <button data-score="8"
                                     style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">8</button>
-                                <button onclick="selectNPS(9, this)"
+                                <button data-score="9"
                                     style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">9</button>
-                                <button onclick="selectNPS(10, this)"
+                                <button data-score="10"
                                     style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">10</button>
                             </div>
                         </div>
@@ -111,7 +113,7 @@
 
     <script>
         function selectNPS(score, btn) {
-            document.querySelectorAll('button[onclick^="selectNPS"]').forEach(b => {
+            document.querySelectorAll('#npsButtons button').forEach(b => {
                 b.style.background = 'rgba(255,255,255,0.05)';
                 b.style.borderColor = 'rgba(255,255,255,0.1)';
             });
@@ -167,10 +169,23 @@
                 alert('❌ Failed to save NPS. Please try again.');
             }
         }
+
+        // Event delegation for NPS buttons
+        document.getElementById('npsButtons').addEventListener('click', function (e) {
+            if (e.target.tagName === 'BUTTON' && e.target.dataset.score !== undefined) {
+                const score = parseInt(e.target.dataset.score);
+                selectNPS(score, e.target);
+            }
+        });
+
+        // Save button handler
+        document.getElementById('saveBtn').addEventListener('click', saveNPS);
+
         // Back button handler
         document.getElementById('backBtn').addEventListener('click', function () {
             window.location.href = 'interactive-tools-selector.html';
         });
-    </script></body>
+    </script>
+</body>
 
 </html>

@@ -67,7 +67,7 @@ function updateItemsList() {
             <div style="width: 32px; height: 32px; background: #8B5CF6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700;">${item.order}</div>
             <span style="color: #8B5CF6; font-size: 20px;">☰</span>
             <span style="flex: 1; color: #f5f7ff;">${item.text}</span>
-            <button onclick="removeItem(${item.id})" style="background: rgba(255,59,48,0.2); color: #ff3b30; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;">Remove</button>
+            <button data-item-id="${item.id}" class="remove-item-btn" style="background: rgba(255,59,48,0.2); color: #ff3b30; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;">Remove</button>
         </div>
     `).join('');
 
@@ -207,4 +207,20 @@ async function publishRanking() {
         console.error('Error publishing ranking:', error);
         alert('❌ Error publishing ranking. Please try again.');
     }
+}
+
+// Event delegation for remove buttons
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-item-btn')) {
+        const itemId = parseInt(e.target.dataset.itemId);
+        if (itemId) {
+            removeItem(itemId);
+        }
+    }
+});
+
+// Back button handler
+const backBtn = document.getElementById('backBtn');
+if (backBtn) {
+    backBtn.addEventListener('click', () => window.history.back());
 }

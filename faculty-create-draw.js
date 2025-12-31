@@ -144,3 +144,9 @@ async function publishActivity() {
         alert('❌ Error publishing activity. Please try again.');
     }
 }
+
+// Back button handler
+const backBtn = document.getElementById('backBtn');
+if (backBtn) {
+    backBtn.addEventListener('click', () => window.history.back());
+}

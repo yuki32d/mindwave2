@@ -3,7 +3,7 @@ function createQuestionHTML(id, index) {
     return `
         <div class="question-card" id="q-${id}">
             <h3>Question ${index + 1}</h3>
-            <button type="button" class="remove-btn" onclick="removeQuestion('${id}')">Remove</button>
+            <button type="button" class="remove-btn" data-question-id="${id}">Remove</button>
             
             <label>Question Text</label>
             <input type="text" name="q-${id}-text" placeholder="Enter your question..." required>
@@ -33,7 +33,7 @@ function createQuestionHTML(id, index) {
             
             <div style="margin-top: 16px;">
                 <label>Points for this question</label>
-                <input type="number" name="q-${id}-points" value="10" min="1" oninput="updateTotalPoints()">
+                <input type="number" name="q-${id}-points" value="10" min="1" class="points-input">
             </div>
         </div>
     `;
@@ -231,4 +231,30 @@ function showLiveSessionCode(session) {
     `;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     document.getElementById('closeLiveModal').addEventListener('click', () => window.location.href = 'interactive-tools-selector.html');
+}
+
+// Event delegation for dynamically created elements
+document.addEventListener('click', (e) => {
+    // Handle remove button clicks
+    if (e.target.classList.contains('remove-btn')) {
+        const questionId = e.target.dataset.questionId;
+        if (questionId) {
+            removeQuestion(questionId);
+        }
+    }
+});
+
+// Event delegation for points input
+document.addEventListener('input', (e) => {
+    if (e.target.classList.contains('points-input')) {
+        updateTotalPoints();
+    }
+});
+
+// Cancel button handler
+const cancelBtn = document.getElementById('cancelBtn');
+if (cancelBtn) {
+    cancelBtn.addEventListener('click', () => {
+        window.location.href = 'admin.html';
+    });
 }

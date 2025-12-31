@@ -79,7 +79,7 @@ function updateOptionsList() {
         <div class="list-item" style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
             <div style="width: 24px; height: 24px; border-radius: 6px; background: ${option.color}; flex-shrink: 0;"></div>
             <span style="flex: 1;">${option.text}</span>
-            <button onclick="removeOption(${option.id})" style="background: rgba(255,59,48,0.2); color: #ff3b30; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;">Remove</button>
+            <button data-option-id="${option.id}" class="remove-option-btn" style="background: rgba(255,59,48,0.2); color: #ff3b30; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;">Remove</button>
         </div>
     `).join('');
 }
@@ -278,4 +278,20 @@ async function publishSpinner() {
         console.error('Error publishing spinner:', error);
         alert('❌ Error publishing spinner. Please try again.');
     }
+}
+
+// Event delegation for remove buttons
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-option-btn')) {
+        const optionId = parseInt(e.target.dataset.optionId);
+        if (optionId) {
+            removeOption(optionId);
+        }
+    }
+});
+
+// Back button handler
+const backBtn = document.getElementById('backBtn');
+if (backBtn) {
+    backBtn.addEventListener('click', () => window.history.back());
 }

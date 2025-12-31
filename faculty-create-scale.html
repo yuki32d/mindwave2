@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Scale - MindWave</title>
     <link rel="stylesheet" href="3d-depth-design.css">
 </head>
@@ -26,8 +27,8 @@
                     <p>Collect ratings from students on a scale</p>
                 </div>
                 <div class="header-actions">
-                    <button class="secondary-btn" onclick="updatePreview()">👁️ Preview</button>
-                    <button class="primary-btn" onclick="saveScale()">💾 Save & Publish</button>
+                    <button class="secondary-btn" id="previewBtn">👁️ Preview</button>
+                    <button class="primary-btn" id="saveBtn">💾 Save & Publish</button>
                 </div>
             </div>
 
@@ -43,7 +44,7 @@
 
                         <div>
                             <label for="scaleType">Scale Type *</label>
-                            <select id="scaleType" onchange="updatePreview()">
+                            <select id="scaleType">
                                 <option value="1-5">1-5 (Likert Scale)</option>
                                 <option value="1-7">1-7 (Extended Likert)</option>
                                 <option value="1-10">1-10 (Full Range)</option>
@@ -117,7 +118,7 @@
 
             for (let i = min; i <= max; i++) {
                 html += `
-                    <button class="scale-option" onclick="this.parentElement.querySelectorAll('.scale-option').forEach(b => b.style.background = 'rgba(255,255,255,0.05)'); this.style.background = 'rgba(15, 98, 254, 0.3)';"
+                    <button class="scale-option"
                         style="
                             flex: 1;
                             padding: 16px 8px;
@@ -191,14 +192,20 @@
 
         // Live preview
         document.getElementById('scaleQuestion').addEventListener('input', updatePreview);
+        document.getElementById('scaleType').addEventListener('change', updatePreview);
         document.getElementById('lowLabel').addEventListener('input', updatePreview);
         document.getElementById('highLabel').addEventListener('input', updatePreview);
         updatePreview();
+
+        // Button handlers
+        document.getElementById('previewBtn').addEventListener('click', updatePreview);
+        document.getElementById('saveBtn').addEventListener('click', saveScale);
 
         // Back button handler
         document.getElementById('backBtn').addEventListener('click', function () {
             window.location.href = 'interactive-tools-selector.html';
         });
-    </script></body>
+    </script>
+</body>
 
 </html>

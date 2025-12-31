@@ -16,6 +16,12 @@ function setupEventListeners() {
 
     // Publish button
     document.getElementById('publishBtn').addEventListener('click', publishActivity);
+
+    // Back button
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => window.history.back());
+    }
 }
 
 function updatePreview() {
