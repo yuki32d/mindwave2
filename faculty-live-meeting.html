@@ -148,6 +148,12 @@
             }
         }
 
+        // Add event listeners
+        document.getElementById('copyBtn').addEventListener('click', copyCode);
+        document.getElementById('whatsappBtn').addEventListener('click', shareWhatsApp);
+        document.getElementById('endBtn').addEventListener('click', endMeeting);
+        document.getElementById('meetingCode').addEventListener('click', copyCode);
+
         // Jitsi Meet configuration
         const domain = 'meet.jit.si';
         const options = {
