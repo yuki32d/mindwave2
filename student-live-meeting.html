@@ -194,13 +194,13 @@
             document.getElementById('joinContainer').style.display = 'none';
             document.getElementById('meetingContainer').classList.add('active');
 
-            // Create Whereby room URL
+            // Using OUR customized Jitsi build on localhost:9000
             const roomName = 'mindwave-' + meetingCode.toLowerCase();
-            const wherebyUrl = `https://whereby.com/${roomName}`;
+            const jitsiUrl = `http://localhost:9000/${roomName}`;
 
-            // Create iframe for Whereby
+            // Create iframe for our custom Jitsi
             const iframe = document.createElement('iframe');
-            iframe.src = wherebyUrl;
+            iframe.src = jitsiUrl;
             iframe.allow = 'camera; microphone; fullscreen; display-capture; autoplay';
             document.getElementById('daily-container').appendChild(iframe);
         }
