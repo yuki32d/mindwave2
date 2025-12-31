@@ -1038,6 +1038,11 @@ app.use(cookieParser());
 app.use(mongoSanitize());
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Serve Jitsi Meet - custom build
+app.get('/jitsi/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'jitsi', 'index.html'));
+});
+
 // Serve static files (HTML, CSS, JS, images) from the root directory with caching
 app.use(express.static(__dirname, {
   index: false,
