@@ -7663,20 +7663,44 @@ Return ONLY the JSON array, no additional text or explanation.`;
     const groqData = await groqResponse.json();
     const aiResponse = groqData.choices[0].message.content;
 
-    // Parse AI response
+    // Parse AI response with improved error handling
     let questions;
     try {
-      // Try to extract JSON from response
-      const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        questions = JSON.parse(jsonMatch[0]);
-      } else {
+      console.log('Raw AI Response:', aiResponse);
+
+      // Method 1: Try to extract JSON array from response
+      const jsonArrayMatch = aiResponse.match(/\[\s*\{[\s\S]*\}\s*\]/);
+      if (jsonArrayMatch) {
+        questions = JSON.parse(jsonArrayMatch[0]);
+      }
+      // Method 2: Try to parse entire response as JSON
+      else if (aiResponse.trim().startsWith('[')) {
         questions = JSON.parse(aiResponse);
+      }
+      // Method 3: Try to find JSON between code blocks
+      else if (aiResponse.includes('```json')) {
+        const jsonBlockMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
+        if (jsonBlockMatch) {
+          questions = JSON.parse(jsonBlockMatch[1]);
+        }
+      }
+      // Method 4: Try to find any JSON-like structure
+      else {
+        const anyJsonMatch = aiResponse.match(/\[[\s\S]*\]/);
+        if (anyJsonMatch) {
+          questions = JSON.parse(anyJsonMatch[0]);
+        } else {
+          throw new Error('No JSON found in response');
+        }
       }
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
       console.error('AI Response:', aiResponse);
-      return res.status(500).json({ ok: false, message: "Failed to parse AI response" });
+      return res.status(500).json({
+        ok: false,
+        message: "Failed to parse AI response. The AI returned invalid JSON format.",
+        details: aiResponse.substring(0, 200) // First 200 chars for debugging
+      });
     }
 
     // Validate questions
