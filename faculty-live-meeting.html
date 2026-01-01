@@ -80,13 +80,11 @@
         // Generate 6-digit meeting code
         const meetingCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Build MediaSoup URL
-        // For local testing: http://localhost:3000
-        // For production: https://mindwave-meet.onrender.com
-        const mediasoupUrl = 'http://localhost:3000';
-        const roomId = 'mindwave-' + meetingCode;
+        // Use Jitsi Meet - works immediately on Render!
+        const roomId = 'MindWave' + meetingCode;
+        const iframeUrl = `https://meet.jit.si/${roomId}#config.prejoinPageEnabled=false&userInfo.displayName="${encodeURIComponent(userName)}"`;
 
-        const iframeUrl = `${mediasoupUrl}?roomId=${roomId}&displayName=${encodeURIComponent(userName)}&produce=true&consume=true`;
+        console.log('Jitsi Room:', roomId);
 
         // Load iframe
         const iframe = document.getElementById('meeting-frame');
