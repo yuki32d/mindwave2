@@ -6,7 +6,6 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Meeting - MindWave</title>
-
     <style>
         * {
             margin: 0;
@@ -17,173 +16,93 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #202124;
-            color: #e8eaed;
             overflow: hidden;
         }
 
-        .meeting-container {
+        #meeting-frame {
             width: 100vw;
             height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .meeting-header {
-            background: #292a2d;
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #3c4043;
-            z-index: 1000;
-        }
-
-        .meeting-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .meeting-code {
-            background: #3c4043;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .meeting-code:hover {
-            background: #5f6368;
-        }
-
-        .copy-btn,
-        .whatsapp-btn {
-            background: #1a73e8;
-            color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
         }
 
-        .copy-btn:hover {
-            background: #1557b0;
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #e8eaed;
+            font-size: 18px;
+            text-align: center;
         }
 
-        .whatsapp-btn {
-            background: #25D366;
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #3c4043;
+            border-top-color: #1a73e8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
         }
 
-        .whatsapp-btn:hover {
-            background: #1da851;
-        }
-
-        .back-btn {
-            background: #ea4335;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .back-btn:hover {
-            background: #d33426;
-        }
-
-        #daily-container {
-            flex: 1;
-            width: 100%;
-            position: relative;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="meeting-container">
-        <div class="meeting-header">
-            <div class="meeting-info">
-                <span style="font-weight: 600;">Meeting Code:</span>
-                <div class="meeting-code" id="meetingCode">Loading...</div>
-                <button class="copy-btn" id="copyBtn">📋 Copy</button>
-                <button class="whatsapp-btn" id="whatsappBtn">📱 WhatsApp</button>
-            </div>
-            <button class="back-btn" id="endBtn">End Meeting</button>
-        </div>
-        <div id="daily-container"></div>
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <p>Starting meeting...</p>
     </div>
 
-    <script>
-        // Generate 6-digit meeting code
-        const meetingCode = Math.floor(100000 + Math.random() * 900000).toString();
-        document.getElementById('meetingCode').textContent = meetingCode;
+    <iframe id="meeting-frame" allow="camera; microphone; display-capture; autoplay"></iframe>
 
-        // Get user info
+    <script>
+        // Get user info from token
         const token = localStorage.getItem('token');
         let userName = 'Faculty';
+        let userId = 'faculty-' + Math.random().toString(36).substr(2, 9);
 
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 userName = payload.name || 'Faculty';
+                userId = payload.userId || userId;
             } catch (e) {
                 console.log('Could not parse token');
             }
         }
 
-        // Using OUR customized Jitsi deployed on Render at /jitsi/
-        const roomName = 'MindWave' + meetingCode;
-        const jitsiUrl = `/jitsi/#/${roomName}`;
+        // Generate 6-digit meeting code
+        const meetingCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Create iframe for our custom Jitsi
-        const iframe = document.createElement('iframe');
-        iframe.src = jitsiUrl;
-        iframe.allow = 'camera; microphone; fullscreen; display-capture; autoplay';
-        document.getElementById('daily-container').appendChild(iframe);
+        // Build MediaSoup URL
+        // For local testing: http://localhost:3000
+        // For production: https://mindwave-meet.onrender.com
+        const mediasoupUrl = 'http://localhost:3000';
+        const roomId = 'mindwave-' + meetingCode;
 
-        // Add event listeners
-        document.getElementById('copyBtn').addEventListener('click', copyCode);
-        document.getElementById('whatsappBtn').addEventListener('click', shareWhatsApp);
-        document.getElementById('endBtn').addEventListener('click', endMeeting);
-        document.getElementById('meetingCode').addEventListener('click', copyCode);
+        const iframeUrl = `${mediasoupUrl}?roomId=${roomId}&displayName=${encodeURIComponent(userName)}&produce=true&consume=true`;
 
-        // Copy meeting code
-        function copyCode() {
-            navigator.clipboard.writeText(meetingCode);
-            const btn = document.getElementById('copyBtn');
-            const originalText = btn.textContent;
-            btn.textContent = '✓ Copied!';
-            setTimeout(() => {
-                btn.textContent = originalText;
-            }, 2000);
-        }
+        // Load iframe
+        const iframe = document.getElementById('meeting-frame');
+        iframe.src = iframeUrl;
 
-        // Share on WhatsApp
-        function shareWhatsApp() {
-            const message = `Join my MindWave live class!\n\nMeeting Code: ${meetingCode}\n\nGo to: ${window.location.origin}/student-live-meeting.html`;
-            const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-            window.open(url, '_blank');
-        }
+        iframe.onload = () => {
+            document.getElementById('loading').style.display = 'none';
+        };
 
-        // End meeting
-        function endMeeting() {
-            if (confirm('End meeting and return to dashboard?')) {
-                window.location.href = 'admin.html';
-            }
-        }
+        // Store meeting code for sharing
+        sessionStorage.setItem('currentMeetingCode', meetingCode);
+
+        // Log meeting info
+        console.log('Meeting Code:', meetingCode);
+        console.log('Room ID:', roomId);
+        console.log('Faculty:', userName);
     </script>
 </body>
 

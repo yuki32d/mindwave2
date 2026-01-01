@@ -1,0 +1,330 @@
+/* Google Meet-Inspired Styles for MediaSoup */
+
+.google-meet-container {
+    width: 100vw;
+    height: 100vh;
+    background: #202124;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+}
+
+/* ===== TOP BAR ===== */
+.meet-header {
+    background: #292a2d;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #3c4043;
+    z-index: 1000;
+}
+
+.meet-info {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.meet-logo .logo-text {
+    color: #e8eaed;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.meet-code {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #3c4043;
+    padding: 8px 16px;
+    border-radius: 8px;
+}
+
+.code-label {
+    color: #9aa0a6;
+    font-size: 14px;
+}
+
+.code-value {
+    color: #e8eaed;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 2px;
+}
+
+.copy-code-btn {
+    background: transparent;
+    border: none;
+    color: #e8eaed;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.copy-code-btn:hover {
+    background: #5f6368;
+}
+
+.meet-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.connection-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 16px;
+    background: #3c4043;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #34a853;
+}
+
+.connection-indicator.connecting .status-dot {
+    background: #fbbc04;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.connection-indicator.closed .status-dot {
+    background: #ea4335;
+}
+
+.status-text {
+    color: #e8eaed;
+    font-size: 13px;
+    text-transform: capitalize;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ===== VIDEO GRID ===== */
+.meet-video-grid {
+    flex: 1;
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    overflow-y: auto;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-auto-rows: minmax(200px, 1fr);
+}
+
+/* Responsive grid layouts */
+@media (min-width: 1200px) {
+    .meet-video-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .meet-video-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+    .meet-video-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.video-tile {
+    position: relative;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.video-tile:hover {
+    transform: scale(1.02);
+}
+
+.video-tile.active-speaker {
+    box-shadow: 0 0 0 3px #1a73e8;
+}
+
+.video-tile.local-video {
+    border: 2px solid #5f6368;
+}
+
+/* ===== CONTROL BAR ===== */
+.meet-controls {
+    background: #292a2d;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #3c4043;
+}
+
+.controls-left,
+.controls-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 150px;
+}
+
+.controls-left {
+    justify-content: flex-start;
+}
+
+.controls-right {
+    justify-content: flex-end;
+}
+
+.controls-center {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.meeting-time {
+    color: #9aa0a6;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Control Buttons */
+.control-btn {
+    background: #3c4043;
+    border: none;
+    color: #e8eaed;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.control-btn:hover {
+    background: #5f6368;
+    transform: scale(1.05);
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+}
+
+.control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.control-btn.btn-danger {
+    background: #ea4335;
+}
+
+.control-btn.btn-danger:hover {
+    background: #d33426;
+}
+
+.control-btn.btn-active {
+    background: #1a73e8;
+}
+
+.control-btn.btn-active:hover {
+    background: #1557b0;
+}
+
+.control-btn.btn-end-call {
+    background: #ea4335;
+    width: 64px;
+    height: 64px;
+}
+
+.control-btn.btn-end-call:hover {
+    background: #d33426;
+    transform: scale(1.08);
+}
+
+.control-btn-icon {
+    background: transparent;
+    border: none;
+    color: #e8eaed;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.control-btn-icon:hover {
+    background: #3c4043;
+}
+
+.control-btn-icon.active {
+    background: #1a73e8;
+}
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .meet-header {
+        padding: 8px 16px;
+    }
+
+    .meet-logo .logo-text {
+        font-size: 16px;
+    }
+
+    .meet-code {
+        padding: 6px 12px;
+    }
+
+    .code-label {
+        display: none;
+    }
+
+    .meet-controls {
+        padding: 12px 16px;
+    }
+
+    .control-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+
+    .control-btn.btn-end-call {
+        width: 56px;
+        height: 56px;
+    }
+
+    .controls-left .meeting-time {
+        display: none;
+    }
+}

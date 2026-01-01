@@ -6,7 +6,6 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Join Meeting - MindWave</title>
-
     <style>
         * {
             margin: 0;
@@ -81,7 +80,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: background 0.2s;
-            margin-bottom: 16px;
         }
 
         .join-btn:hover {
@@ -89,46 +87,60 @@
         }
 
         .join-btn:disabled {
-            background: #3c4043;
-            color: #5f6368;
+            background: #5f6368;
             cursor: not-allowed;
         }
 
         .back-btn {
-            width: 100%;
-            background: #3c4043;
-            color: #e8eaed;
+            margin-top: 24px;
+            background: transparent;
+            color: #9aa0a6;
             border: none;
-            border-radius: 12px;
-            padding: 12px 24px;
+            padding: 12px;
             font-size: 14px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: color 0.2s;
         }
 
         .back-btn:hover {
-            background: #5f6368;
+            color: #e8eaed;
         }
 
-        .meeting-container {
+        #meeting-frame {
             display: none;
             width: 100vw;
             height: 100vh;
-        }
-
-        .meeting-container.active {
-            display: block;
-        }
-
-        #daily-container {
-            width: 100%;
-            height: 100%;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
             border: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #e8eaed;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #3c4043;
+            border-top-color: #1a73e8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -136,75 +148,98 @@
 <body>
     <div class="join-container" id="joinContainer">
         <div class="join-card">
-            <h1 class="join-title">Join Live Class</h1>
-            <p class="join-subtitle">Enter the 6-digit code shared by your teacher</p>
+            <h1 class="join-title">Join Meeting</h1>
+            <p class="join-subtitle">Enter the 6-digit meeting code</p>
 
             <input type="text" class="code-input" id="codeInput" placeholder="000000" maxlength="6" pattern="[0-9]*"
                 inputmode="numeric">
 
-            <button class="join-btn" id="joinBtn" disabled>Join Meeting</button>
-            <button class="back-btn" id="backBtn">Back to Dashboard</button>
+            <button class="join-btn" id="joinBtn">Join Meeting</button>
+
+            <button class="back-btn" onclick="window.location.href='student-community.html'">
+                ← Back to Dashboard
+            </button>
         </div>
     </div>
 
-    <div class="meeting-container" id="meetingContainer">
-        <div id="daily-container"></div>
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <p>Joining meeting...</p>
     </div>
+
+    <iframe id="meeting-frame" allow="camera; microphone; display-capture; autoplay"></iframe>
 
     <script>
         const codeInput = document.getElementById('codeInput');
         const joinBtn = document.getElementById('joinBtn');
 
+        // Get user info from token
+        const token = localStorage.getItem('token');
+        let userName = 'Student';
+        let userId = 'student-' + Math.random().toString(36).substr(2, 9);
+
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                userName = payload.name || 'Student';
+                userId = payload.userId || userId;
+            } catch (e) {
+                console.log('Could not parse token');
+            }
+        }
+
+        // Auto-format code input
         codeInput.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/\D/g, '').substring(0, 6);
             joinBtn.disabled = e.target.value.length !== 6;
         });
 
+        // Join on Enter key
         codeInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && codeInput.value.length === 6) {
                 joinMeeting();
             }
         });
 
+        // Join button click
         joinBtn.addEventListener('click', joinMeeting);
-        document.getElementById('backBtn').addEventListener('click', () => {
-            window.location.href = 'student-community.html';
-        });
-
-        const token = localStorage.getItem('token');
-        let userName = 'Student';
-
-        if (token) {
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                userName = payload.name || 'Student';
-            } catch (e) {
-                console.log('Could not parse token');
-            }
-        }
 
         function joinMeeting() {
             const meetingCode = codeInput.value;
 
             if (meetingCode.length !== 6) {
-                alert('Please enter a 6-digit code');
+                alert('Please enter a valid 6-digit code');
                 return;
             }
 
+            // Hide join form, show loading
             document.getElementById('joinContainer').style.display = 'none';
-            document.getElementById('meetingContainer').classList.add('active');
+            document.getElementById('loading').style.display = 'block';
 
-            // Using OUR customized Jitsi deployed on Render
-            const roomName = 'MindWave' + meetingCode;
-            const jitsiUrl = `/jitsi/#/${roomName}`;
+            // Build MediaSoup URL
+            // For local testing: http://localhost:3000
+            // For production: https://mindwave-meet.onrender.com
+            const mediasoupUrl = 'http://localhost:3000';
+            const roomId = 'mindwave-' + meetingCode;
 
-            // Create iframe for our custom Jitsi
-            const iframe = document.createElement('iframe');
-            iframe.src = jitsiUrl;
-            iframe.allow = 'camera; microphone; fullscreen; display-capture; autoplay';
-            document.getElementById('daily-container').appendChild(iframe);
+            const iframeUrl = `${mediasoupUrl}?roomId=${roomId}&displayName=${encodeURIComponent(userName)}&produce=true&consume=true`;
+
+            // Load iframe
+            const iframe = document.getElementById('meeting-frame');
+            iframe.src = iframeUrl;
+
+            iframe.onload = () => {
+                document.getElementById('loading').style.display = 'none';
+                iframe.style.display = 'block';
+            };
+
+            // Log meeting info
+            console.log('Joining Meeting Code:', meetingCode);
+            console.log('Room ID:', roomId);
+            console.log('Student:', userName);
         }
 
+        // Focus on input
         codeInput.focus();
     </script>
 </body>
