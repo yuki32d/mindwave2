@@ -66,12 +66,12 @@
 
         .code-input:focus {
             outline: none;
-            border-color: #1a73e8;
+            border-color: #667eea;
         }
 
         .join-btn {
             width: 100%;
-            background: #1a73e8;
+            background: #667eea;
             color: white;
             border: none;
             border-radius: 12px;
@@ -83,7 +83,7 @@
         }
 
         .join-btn:hover {
-            background: #1557b0;
+            background: #5568d3;
         }
 
         .join-btn:disabled {
@@ -100,47 +100,12 @@
             font-size: 14px;
             cursor: pointer;
             transition: color 0.2s;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .back-btn:hover {
             color: #e8eaed;
-        }
-
-        #meeting-frame {
-            display: none;
-            width: 100vw;
-            height: 100vh;
-            border: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
-
-        .loading {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #e8eaed;
-            font-size: 18px;
-            text-align: center;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #3c4043;
-            border-top-color: #1a73e8;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
         }
     </style>
 </head>
@@ -154,92 +119,15 @@
             <input type="text" class="code-input" id="codeInput" placeholder="000000" maxlength="6" pattern="[0-9]*"
                 inputmode="numeric">
 
-            <button class="join-btn" id="joinBtn">Join Meeting</button>
+            <button class="join-btn" id="joinBtn" disabled>Join Meeting</button>
 
-            <button class="back-btn" onclick="window.location.href='student-community.html'">
+            <a href="student-community.html" class="back-btn">
                 ← Back to Dashboard
-            </button>
+            </a>
         </div>
     </div>
 
-    <div class="loading" id="loading">
-        <div class="loading-spinner"></div>
-        <p>Joining meeting...</p>
-    </div>
-
-    <iframe id="meeting-frame" allow="camera; microphone; display-capture; autoplay"></iframe>
-
-    <script>
-        const codeInput = document.getElementById('codeInput');
-        const joinBtn = document.getElementById('joinBtn');
-
-        // Get user info from token
-        const token = localStorage.getItem('token');
-        let userName = 'Student';
-        let userId = 'student-' + Math.random().toString(36).substr(2, 9);
-
-        if (token) {
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                userName = payload.name || 'Student';
-                userId = payload.userId || userId;
-            } catch (e) {
-                console.log('Could not parse token');
-            }
-        }
-
-        // Auto-format code input
-        codeInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 6);
-            joinBtn.disabled = e.target.value.length !== 6;
-        });
-
-        // Join on Enter key
-        codeInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && codeInput.value.length === 6) {
-                joinMeeting();
-            }
-        });
-
-        // Join button click
-        joinBtn.addEventListener('click', joinMeeting);
-
-        function joinMeeting() {
-            const meetingCode = codeInput.value;
-
-            if (meetingCode.length !== 6) {
-                alert('Please enter a valid 6-digit code');
-                return;
-            }
-
-            // Hide join form, show loading
-            document.getElementById('joinContainer').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
-
-            // Use Jitsi Meet - works immediately on Render!
-            const roomId = 'MindWave' + meetingCode;
-            const iframeUrl = `https://meet.jit.si/${roomId}#config.prejoinPageEnabled=false&userInfo.displayName="${encodeURIComponent(userName)}"`;
-
-            console.log('Jitsi Room:', roomId);
-
-            // Load iframe
-            const iframe = document.getElementById('meeting-frame');
-            iframe.src = iframeUrl;
-
-            iframe.onload = () => {
-                document.getElementById('loading').style.display = 'none';
-                iframe.style.display = 'block';
-            };
-
-            // Log meeting info
-            console.log('Joining Meeting Code:', meetingCode);
-            console.log('Room ID:', roomId);
-            console.log('Student:', userName);
-        }
-
-        // Focus on input
-        codeInput.focus();
-    </script>
+    <script src="student-live-meeting.js"></script>
 </body>
 
 </html>
