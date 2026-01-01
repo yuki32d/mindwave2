@@ -1,1 +1,0 @@
-import { PeerProducersInfo } from '../types';
