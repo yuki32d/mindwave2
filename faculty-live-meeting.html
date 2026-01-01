@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindWave Meet</title>
+    <title>Starting Meeting - MindWave</title>
     <style>
         * {
             margin: 0;
@@ -17,406 +17,70 @@
             font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
             background: #202124;
             color: #e8eaed;
-            overflow: hidden;
-        }
-
-        /* Meeting Room */
-        .meeting-room {
-            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             height: 100vh;
-            position: relative;
-            background: #202124;
         }
 
-        /* Top Bar */
-        .top-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
+        .loading {
+            text-align: center;
         }
 
-        .meeting-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #3c4043;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 400;
             color: #e8eaed;
-            font-size: 14px;
-        }
-
-        .participant-count {
-            background: #3c4043;
-            padding: 4px 12px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .profile-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #667eea;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 500;
-        }
-
-        /* Meeting Ready Card */
-        .ready-card {
-            position: absolute;
-            top: 50%;
-            left: 50px;
-            transform: translateY(-50%);
-            background: white;
-            border-radius: 8px;
-            padding: 24px;
-            width: 320px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            z-index: 50;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            font-size: 16px;
-            color: #202124;
-            font-weight: 500;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            color: #5f6368;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        .add-others-btn {
-            background: #1a73e8;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .share-text {
-            font-size: 13px;
-            color: #5f6368;
-            margin-bottom: 12px;
-        }
-
-        .meeting-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #f1f3f4;
-            padding: 10px 12px;
-            border-radius: 4px;
-            margin-bottom: 16px;
-        }
-
-        .link-text {
-            flex: 1;
-            font-size: 13px;
-            color: #202124;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .copy-icon {
-            cursor: pointer;
-            color: #5f6368;
-        }
-
-        .info-box {
-            display: flex;
-            gap: 8px;
-            padding: 12px;
-            background: #e8f0fe;
-            border-radius: 4px;
-            margin-bottom: 12px;
-        }
-
-        .info-icon {
-            color: #1a73e8;
-            font-size: 18px;
-        }
-
-        .info-text {
-            font-size: 12px;
-            color: #202124;
-        }
-
-        .joined-as {
-            font-size: 12px;
-            color: #5f6368;
-        }
-
-        /* Bottom Controls */
-        .controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
-            z-index: 100;
-        }
-
-        .left-controls {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .center-controls {
-            display: flex;
-            gap: 12px;
-        }
-
-        .right-controls {
-            display: flex;
-            gap: 12px;
-        }
-
-        .control-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #3c4043;
-            border: none;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-            font-size: 20px;
-        }
-
-        .control-btn:hover {
-            background: #5f6368;
-        }
-
-        .control-btn.active {
-            background: #ea4335;
-        }
-
-        .end-call-btn {
-            background: #ea4335;
-            width: 56px;
-            height: 56px;
-        }
-
-        .end-call-btn:hover {
-            background: #d33426;
-        }
-
-        /* Video Preview */
-        .video-preview {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #292a2d;
-        }
-
-        .preview-placeholder {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: #667eea;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 80px;
-            font-weight: 500;
         }
     </style>
 </head>
 
 <body>
-    <div class="meeting-room">
-        <!-- Top Bar -->
-        <div class="top-bar">
-            <div class="meeting-info">
-                <span id="meetingTime">11:14 AM</span>
-                <span>|</span>
-                <span id="meetingCode">Loading...</span>
-            </div>
-            <div class="participant-count">
-                <span>👤</span>
-                <span id="participantCount">1</span>
-            </div>
-        </div>
-
-        <!-- Video Preview -->
-        <div class="video-preview">
-            <div class="preview-placeholder" id="userInitial">M</div>
-        </div>
-
-        <!-- Meeting Ready Card -->
-        <div class="ready-card" id="readyCard">
-            <div class="card-header">
-                <div class="card-title">Your meeting's ready</div>
-                <button class="close-btn" onclick="closeCard()">×</button>
-            </div>
-
-            <button class="add-others-btn">
-                <span>👥</span>
-                <span>Add others</span>
-            </button>
-
-            <div class="share-text">Or share this meeting link with others you want in the meeting</div>
-
-            <div class="meeting-link">
-                <div class="link-text" id="meetingLink">Loading...</div>
-                <span class="copy-icon" onclick="copyLink()" title="Copy link">📋</span>
-            </div>
-
-            <div class="info-box">
-                <div class="info-icon">🔒</div>
-                <div class="info-text">People who use this meeting link must get your permission before they can join.
-                </div>
-            </div>
-
-            <div class="joined-as" id="joinedAs">Joined as faculty@mindwave.com</div>
-        </div>
-
-        <!-- Bottom Controls -->
-        <div class="controls">
-            <div class="left-controls">
-                <div class="meeting-info">
-                    <span id="bottomTime">11:14 AM</span>
-                    <span>|</span>
-                    <span id="bottomCode">doc-vmmm-imz</span>
-                </div>
-            </div>
-
-            <div class="center-controls">
-                <button class="control-btn" id="moreBtn" title="More options">⋯</button>
-                <button class="control-btn" id="micBtn" title="Mute">🎤</button>
-                <button class="control-btn" id="camBtn" title="Turn off camera">📹</button>
-                <button class="control-btn" id="shareBtn" title="Present now">🖥️</button>
-                <button class="control-btn" id="reactBtn" title="Reactions">😊</button>
-                <button class="control-btn" id="ccBtn" title="Captions">💬</button>
-                <button class="control-btn" id="handBtn" title="Raise hand">✋</button>
-                <button class="control-btn" id="menuBtn" title="More">⋮</button>
-                <button class="control-btn end-call-btn" onclick="endCall()" title="Leave call">📞</button>
-            </div>
-
-            <div class="right-controls">
-                <button class="control-btn" title="Meeting details">ℹ️</button>
-                <button class="control-btn" title="Show everyone">👥</button>
-                <button class="control-btn" title="Activities">🎮</button>
-                <button class="control-btn" title="Settings">⚙️</button>
-            </div>
-        </div>
+    <div class="loading">
+        <div class="spinner"></div>
+        <h2>Starting your meeting...</h2>
     </div>
 
     <script>
         // Get user info
         const token = localStorage.getItem('token');
         let userName = 'Faculty';
-        let userEmail = 'faculty@mindwave.com';
 
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 userName = payload.name || 'Faculty';
-                userEmail = payload.email || 'faculty@mindwave.com';
-                document.getElementById('userInitial').textContent = userName.charAt(0).toUpperCase();
-                document.getElementById('joinedAs').textContent = `Joined as ${userEmail}`;
             } catch (e) {
                 console.log('Could not parse token');
             }
         }
 
-        // Generate meeting code
+        // Generate meeting code and redirect immediately
         const meetingCode = Math.floor(100000 + Math.random() * 900000).toString();
         const roomName = 'MindWave' + meetingCode;
         const meetingUrl = `https://meet.jit.si/${roomName}`;
 
-        document.getElementById('meetingCode').textContent = roomName;
-        document.getElementById('bottomCode').textContent = roomName;
-        document.getElementById('meetingLink').textContent = meetingUrl;
+        console.log('Meeting Code:', meetingCode);
+        console.log('Meeting URL:', meetingUrl);
 
-        // Update time
-        function updateTime() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            });
-            document.getElementById('meetingTime').textContent = timeStr;
-            document.getElementById('bottomTime').textContent = timeStr;
-        }
-        updateTime();
-        setInterval(updateTime, 1000);
-
-        // Copy link
-        function copyLink() {
-            navigator.clipboard.writeText(meetingUrl);
-            alert('Meeting link copied!');
-        }
-
-        // Close card
-        function closeCard() {
-            document.getElementById('readyCard').style.display = 'none';
-        }
-
-        // End call
-        function endCall() {
-            if (confirm('Leave meeting?')) {
-                window.location.href = 'admin.html';
-            }
-        }
-
-        // Control buttons
-        document.getElementById('micBtn').addEventListener('click', function () {
-            this.classList.toggle('active');
-            this.textContent = this.classList.contains('active') ? '🔇' : '🎤';
-        });
-
-        document.getElementById('camBtn').addEventListener('click', function () {
-            this.classList.toggle('active');
-            this.textContent = this.classList.contains('active') ? '📷' : '📹';
-        });
-
-        // Auto-join Jitsi after 3 seconds
-        setTimeout(() => {
-            // Simple Jitsi URL that works on Render
-            window.location.href = `${meetingUrl}`;
-        }, 3000);
+        // Redirect immediately to Jitsi
+        window.location.href = meetingUrl;
     </script>
 </body>
 
