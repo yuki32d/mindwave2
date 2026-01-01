@@ -21,7 +21,7 @@ if (token) {
 async function loadPerformanceData() {
     try {
         // Fetch student stats from leaderboard endpoint
-        const response = await fetch(`${API_BASE}/api/student/leaderboard?time=all&game=all`, {
+        const response = await fetch(`${API_BASE}/api/leaderboard?timeFilter=all&gameType=all`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
