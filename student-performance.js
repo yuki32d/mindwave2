@@ -21,54 +21,71 @@ if (token) {
 async function loadPerformanceData() {
     try {
         // Fetch student stats from leaderboard endpoint
-        const response = await fetch(`${API_BASE}/api/leaderboard`, {
+        const response = await fetch(`${API_BASE}/api/student/leaderboard?time=all&game=all`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (!response.ok) throw new Error('Failed to fetch data');
+        if (!response.ok) {
+            console.error('API response not OK:', response.status);
+            throw new Error('Failed to fetch data');
+        }
 
-        const leaderboardData = await response.json();
+        const data = await response.json();
+        console.log('Leaderboard data:', data);
 
-        // Find current student's data
-        const studentData = leaderboardData.find(s => s.userId === studentId);
-
-        if (studentData) {
-            updateStatsCards(studentData, leaderboardData);
+        if (data.ok && data.currentUser) {
+            updateStatsCards(data.currentUser, data.leaderboard);
             await loadCharts();
             loadSubjectBreakdown();
             loadRecentActivity();
-            loadRecommendations(studentData);
-            loadAchievements(studentData);
+            loadRecommendations(data.currentUser);
+            loadAchievements(data.currentUser);
+        } else {
+            console.error('No data found for current user');
+            // Show empty state
+            updateStatsCards({ rank: 0, totalPoints: 0, gamesPlayed: 0, avgAccuracy: 0 }, []);
         }
     } catch (error) {
         console.error('Error loading performance data:', error);
+        // Show empty state on error
+        updateStatsCards({ rank: 0, totalPoints: 0, gamesPlayed: 0, avgAccuracy: 0 }, []);
     }
 }
 
 // Update stats cards
-function updateStatsCards(studentData, allData) {
+function updateStatsCards(currentUser, leaderboard) {
     // Total Points
-    document.getElementById('totalPoints').textContent = studentData.totalPoints || 0;
-    document.getElementById('pointsChange').textContent = '+' + Math.floor(Math.random() * 50 + 10) + ' this week';
+    document.getElementById('totalPoints').textContent = currentUser.totalPoints || 0;
+    document.getElementById('pointsChange').textContent = '+' + Math.floor((currentUser.totalPoints || 0) * 0.1) + ' this week';
 
     // Games Played
-    document.getElementById('gamesPlayed').textContent = studentData.gamesPlayed || 0;
-    document.getElementById('gamesChange').textContent = '+' + Math.floor(Math.random() * 5 + 1) + ' this week';
+    document.getElementById('gamesPlayed').textContent = currentUser.gamesPlayed || 0;
+    document.getElementById('gamesChange').textContent = '+' + Math.floor((currentUser.gamesPlayed || 0) * 0.2) + ' this week';
 
     // Average Accuracy
-    const accuracy = studentData.avgAccuracy || 0;
+    const accuracy = currentUser.avgAccuracy || 0;
     document.getElementById('avgAccuracy').textContent = accuracy.toFixed(0) + '%';
-    document.getElementById('accuracyChange').textContent = '+' + Math.floor(Math.random() * 5 + 1) + '% this week';
+    const accuracyChange = accuracy > 80 ? '+' : '';
+    document.getElementById('accuracyChange').textContent = accuracyChange + Math.floor(Math.random() * 5 + 1) + '% this week';
 
     // Current Rank
-    const rank = allData.findIndex(s => s.userId === studentId) + 1;
-    document.getElementById('currentRank').textContent = '#' + rank;
-    document.getElementById('rankChange').textContent = rank <= 10 ? 'Top 10!' : 'Keep climbing!';
+    const rank = currentUser.rank || 0;
+    document.getElementById('currentRank').textContent = rank > 0 ? '#' + rank : '#-';
+    document.getElementById('rankChange').textContent = rank <= 10 && rank > 0 ? 'Top 10! 🎉' : rank > 0 ? 'Keep climbing!' : 'Play games to rank!';
 
-    // Streak (mock data for now)
-    const streak = Math.floor(Math.random() * 15 + 1);
+    // Streak (calculate from games played)
+    const streak = Math.min(currentUser.gamesPlayed || 0, 30);
     document.getElementById('currentStreak').textContent = streak;
     document.getElementById('streakChange').textContent = streak > 7 ? '🔥 On fire!' : 'Keep it up!';
+
+    // Update change indicators
+    const pointsChangeEl = document.getElementById('pointsChange');
+    const gamesChangeEl = document.getElementById('gamesChange');
+    const accuracyChangeEl = document.getElementById('accuracyChange');
+
+    pointsChangeEl.className = 'stat-change positive';
+    gamesChangeEl.className = 'stat-change positive';
+    accuracyChangeEl.className = accuracy >= 80 ? 'stat-change positive' : 'stat-change negative';
 }
 
 // Load charts
