@@ -209,8 +209,12 @@
             const meetingCode = await generateMeetingCode();
             const roomName = 'MindWave' + meetingCode;
 
-            // Faculty joins as moderator with special URL parameter
-            const meetingUrl = `https://meet.jit.si/${roomName}#config.startWithAudioMuted=false&userInfo.displayName=${encodeURIComponent(userName)}&config.prejoinPageEnabled=false`;
+            // Faculty joins as moderator with full permissions
+            // Key configurations:
+            // - userInfo.moderator=true: Explicitly mark as moderator
+            // - config.disableModeratorIndicator=false: Show moderator badge
+            // Faculty will have full control: kick, mute, end meeting, etc.
+            const meetingUrl = `https://meet.jit.si/${roomName}#config.startWithAudioMuted=false&userInfo.displayName=${encodeURIComponent(userName)}&config.prejoinPageEnabled=false&userInfo.moderator=true&config.disableModeratorIndicator=false`;
 
             document.getElementById('meetingCode').textContent = meetingCode;
             document.getElementById('meetingLink').textContent = meetingUrl;
