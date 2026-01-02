@@ -160,15 +160,8 @@
                     clearInterval(checkInterval);
 
                     setTimeout(() => {
-                        const roomId = 'MindWave' + meetingCode;
-                        // Students join as regular participants with restricted permissions
-                        // Key configurations:
-                        // - userInfo.moderator=false: Explicitly mark as non-moderator
-                        // - config.disableRemoteMute=true: Prevent students from muting others
-                        // - config.disableKick=true: Prevent students from kicking participants
-                        // - config.enableLobby=false: Disable lobby for students (faculty controls this)
-                        const meetingUrl = `https://meet.jit.si/${roomId}#config.startWithAudioMuted=true&userInfo.displayName=${encodeURIComponent(userName)}&config.prejoinPageEnabled=false&userInfo.moderator=false&config.disableModeratorIndicator=false&config.disableRemoteMute=true&config.disableKick=true&config.enableLobby=false`;
-                        window.location.href = meetingUrl;
+                        // Redirect to embedded Jitsi meeting page
+                        window.location.href = `student-jitsi-meeting.html?code=${meetingCode}&name=${encodeURIComponent(userName)}`;
                     }, 2000);
                 } else {
                     document.getElementById('statusMessage').textContent = `Waiting for Faculty to join...`;
