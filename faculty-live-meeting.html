@@ -207,7 +207,9 @@
         async function init() {
             const meetingCode = await generateMeetingCode();
             const roomName = 'MindWave' + meetingCode;
-            const meetingUrl = `https://meet.jit.si/${roomName}`;
+
+            // Faculty joins as moderator with special URL parameter
+            const meetingUrl = `https://meet.jit.si/${roomName}#config.startWithAudioMuted=false&userInfo.displayName=${encodeURIComponent(userName)}&config.prejoinPageEnabled=false`;
 
             document.getElementById('meetingCode').textContent = meetingCode;
             document.getElementById('meetingLink').textContent = meetingUrl;

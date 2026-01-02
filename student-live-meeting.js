@@ -68,7 +68,10 @@ async function joinMeeting() {
 
         // Valid code - redirect to Jitsi Meet
         const roomId = 'MindWave' + meetingCode;
-        const meetingUrl = `https://meet.jit.si/${roomId}`;
+
+        // Students join with lobby enabled and as participants only
+        // This prevents them from becoming moderators if they join first
+        const meetingUrl = `https://meet.jit.si/${roomId}#config.startWithAudioMuted=true&userInfo.displayName=${encodeURIComponent(userName)}&config.prejoinPageEnabled=false&config.requireDisplayName=true`;
 
         console.log('Joining Meeting Code:', meetingCode);
         console.log('Room ID:', roomId);
