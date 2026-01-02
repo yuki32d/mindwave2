@@ -1,5 +1,21 @@
 // Universal Code Practice - Works with ALL programming languages
+// Updated to work with free-form textarea editor
+
 document.addEventListener('DOMContentLoaded', function () {
+    // Wait for free-code-editor to initialize
+    setTimeout(initializeCodePractice, 100);
+});
+
+function initializeCodePractice() {
+    // Get the textarea (created by free-code-editor.js)
+    const codeTextarea = document.getElementById('codeTextarea');
+
+    if (!codeTextarea) {
+        console.error('Code textarea not found - retrying...');
+        setTimeout(initializeCodePractice, 100);
+        return;
+    }
+
     // Dynamic Angel Speech Messages
     const angelMessages = [
         "Hi! I'm your AI coding assistant! 🤖",
@@ -66,90 +82,34 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Language selector change
-    document.getElementById('languageSelector').addEventListener('change', function (e) {
-        currentLanguage = e.target.value;
-        updateLanguage();
-        clearCode();
-        hintLevel = 0;
-    });
+    const languageSelector = document.getElementById('languageSelector');
+    if (languageSelector) {
+        languageSelector.addEventListener('change', function (e) {
+            currentLanguage = e.target.value;
+            updateLanguage();
+            clearCode();
+            hintLevel = 0;
+        });
+    }
 
     function updateLanguage() {
         const config = languageConfig[currentLanguage] || languageConfig.python;
         document.getElementById('languageBadge').textContent = `${config.icon} ${config.name}`;
         document.getElementById('challengeTitle').textContent = `📝 Challenge 1: ${config.challenge}`;
         document.getElementById('challengeDescription').textContent = config.description;
-        document.getElementById('line1').placeholder = config.placeholder;
+        codeTextarea.placeholder = config.placeholder;
         showMessage(`Great! Let's learn ${config.name}! Start typing and I'll help you! 🚀`);
-    }
-
-    // Real-time code analysis
-    document.getElementById('line1').addEventListener('input', function (e) {
-        const code = e.target.value.trim();
-        if (code) {
-            analyzeCode(code, e.target);
-        } else {
-            e.target.classList.remove('error', 'correct');
-        }
-    });
-
-    async function analyzeCode(code, input) {
-        try {
-            const response = await fetch('/api/analyze-code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, language: currentLanguage, hintLevel })
-            });
-
-            const data = await response.json();
-
-            if (data.ok) {
-                if (data.isCorrect) {
-                    input.classList.remove('error');
-                    input.classList.add('correct');
-                    correctCount++;
-                    document.getElementById('correctCount').textContent = correctCount;
-                    celebrate();
-                    showMessage(data.feedback);
-                } else if (data.hasErrors) {
-                    input.classList.add('error');
-                    input.classList.remove('correct');
-                    showMessage(data.feedback);
-                } else {
-                    input.classList.remove('error', 'correct');
-                    showMessage(data.feedback);
-                }
-            }
-        } catch (error) {
-            console.error('Code analysis error:', error);
-            analyzeCodeSimple(code, input);
-        }
-    }
-
-    function analyzeCodeSimple(code, input) {
-        const config = languageConfig[currentLanguage];
-        if (!config) return;
-
-        if (config.correctAnswer.includes(code)) {
-            input.classList.remove('error');
-            input.classList.add('correct');
-            correctCount++;
-            document.getElementById('correctCount').textContent = correctCount;
-            celebrate();
-            showMessage("Perfect! You're a natural! 🌟✨");
-        } else {
-            input.classList.add('error');
-            input.classList.remove('correct');
-            showMessage(`Keep trying! Check the syntax for ${config.name}. 💡`);
-        }
     }
 
     function showMessage(message) {
         const messageEl = document.getElementById('assistantMessage');
-        messageEl.textContent = message;
-        messageEl.style.animation = 'none';
-        setTimeout(() => {
-            messageEl.style.animation = 'slideIn 0.5s ease-out';
-        }, 10);
+        if (messageEl) {
+            messageEl.textContent = message;
+            messageEl.style.animation = 'none';
+            setTimeout(() => {
+                messageEl.style.animation = 'slideIn 0.5s ease-out';
+            }, 10);
+        }
     }
 
     function celebrate() {
@@ -161,97 +121,102 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Hint button
-    document.getElementById('hintBtn').addEventListener('click', function () {
-        const config = languageConfig[currentLanguage];
-        const hints = [
-            `Think about the syntax for ${config.name}... 🤔`,
-            `How do you output text in ${config.name}? 💡`,
-            `The answer is: ${config.correctAnswer[0]} ✨`
-        ];
+    const hintBtn = document.getElementById('hintBtn');
+    if (hintBtn) {
+        hintBtn.addEventListener('click', function () {
+            const config = languageConfig[currentLanguage];
+            const hints = [
+                `Think about the syntax for ${config.name}... 🤔`,
+                `How do you output text in ${config.name}? 💡`,
+                `The answer is: ${config.correctAnswer[0]} ✨`
+            ];
 
-        if (hintLevel < hints.length) {
-            showMessage(hints[hintLevel]);
-            hintLevel++;
-            hintCount++;
-            document.getElementById('hintCount').textContent = hintCount;
-        } else {
-            showMessage("You've got all the hints! Give it a try! 💪");
-        }
-    });
+            if (hintLevel < hints.length) {
+                showMessage(hints[hintLevel]);
+                hintLevel++;
+                hintCount++;
+                const hintCountEl = document.getElementById('hintCount');
+                if (hintCountEl) {
+                    hintCountEl.textContent = hintCount;
+                }
+            } else {
+                showMessage("You've got all the hints! Give it a try! 💪");
+            }
+        });
+    }
 
     // Run code button
-    document.getElementById('runBtn').addEventListener('click', function () {
-        const code = document.getElementById('line1').value.trim();
-        const config = languageConfig[currentLanguage];
+    const runBtn = document.getElementById('runBtn');
+    if (runBtn) {
+        runBtn.addEventListener('click', function () {
+            const code = codeTextarea.value.trim();
+            const config = languageConfig[currentLanguage];
 
-        if (config.correctAnswer.includes(code)) {
-            showMessage(`✅ Output: Hello World\n\nPerfect execution! 🎯`);
-        } else if (code) {
-            showMessage("Let's fix the code first! Check the hints if you need help. 🔧");
-        } else {
-            showMessage("Write some code first! 📝");
-        }
-    });
+            if (config.correctAnswer.some(answer => code.includes(answer))) {
+                showMessage(`✅ Output: Hello World\n\nPerfect execution! 🎯`);
+                celebrate();
+            } else if (code) {
+                showMessage("Let's fix the code first! Check the hints if you need help. 🔧");
+            } else {
+                showMessage("Write some code first! 📝");
+            }
+        });
+    }
 
     // Submit button
-    document.getElementById('submitBtn').addEventListener('click', function () {
-        const code = document.getElementById('line1').value.trim();
-        const config = languageConfig[currentLanguage];
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function () {
+            const code = codeTextarea.value.trim();
+            const config = languageConfig[currentLanguage];
 
-        if (config.correctAnswer.includes(code)) {
-            celebrate();
-            showMessage("🏆 Challenge Complete! Ready for the next one! 🚀");
-        } else {
-            showMessage("Not quite right yet. Keep trying or use a hint! 💪");
-        }
-    });
+            if (config.correctAnswer.some(answer => code.includes(answer))) {
+                celebrate();
+                showMessage("🏆 Challenge Complete! Ready for the next one! 🚀");
+                correctCount++;
+                const correctCountEl = document.getElementById('correctCount');
+                if (correctCountEl) {
+                    correctCountEl.textContent = correctCount;
+                }
+            } else {
+                showMessage("Not quite right yet. Keep trying or use a hint! 💪");
+            }
+        });
+    }
 
     // Clear button
-    document.getElementById('clearBtn').addEventListener('click', clearCode);
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearCode);
+    }
 
     function clearCode() {
-        for (let i = 1; i <= 8; i++) {
-            const input = document.getElementById(`line${i}`);
-            if (input) {
-                input.value = '';
-                input.classList.remove('error', 'correct');
-            }
+        codeTextarea.value = '';
+        if (window.updateLineNumbers) {
+            window.updateLineNumbers();
         }
         showMessage("Code cleared! Start fresh! 🆕");
     }
 
     // Question input
-    document.getElementById('questionInput').addEventListener('keypress', async function (e) {
-        if (e.key === 'Enter' && e.target.value.trim()) {
-            const question = e.target.value;
-            showMessage(`Great question! Let me think... 🤔`);
+    const questionInput = document.getElementById('questionInput');
+    if (questionInput) {
+        questionInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                const question = e.target.value;
+                showMessage(`Great question! Let me think... 🤔`);
 
-            try {
-                const response = await fetch('/api/analyze-code', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        question,
-                        code: document.getElementById('line1').value,
-                        language: currentLanguage
-                    })
-                });
-
-                const data = await response.json();
-                if (data.ok) {
-                    setTimeout(() => showMessage(data.feedback), 1000);
-                }
-            } catch (error) {
                 const config = languageConfig[currentLanguage];
                 setTimeout(() => {
                     showMessage(`For ${config.name}, try: ${config.correctAnswer[0]} 💡`);
                 }, 1000);
-            }
 
-            e.target.value = '';
-        }
-    });
+                e.target.value = '';
+            }
+        });
+    }
 
     // Initialize
     updateLanguage();
-});
+    console.log('Universal code practice initialized with free-form editor');
+}

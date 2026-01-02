@@ -114,5 +114,40 @@ document.addEventListener('DOMContentLoaded', function () {
             textarea.value = code;
             updateLineNumbers();
         };
+
+        // COMPATIBILITY LAYER: Make textarea work with existing button handlers
+        // Create a proxy element that acts like the old 'line1' input
+        const proxyElement = document.createElement('input');
+        proxyElement.id = 'line1';
+        proxyElement.style.display = 'none';
+
+        // Sync proxy with textarea
+        Object.defineProperty(proxyElement, 'value', {
+            get: () => textarea.value,
+            set: (val) => {
+                textarea.value = val;
+                updateLineNumbers();
+            }
+        });
+
+        Object.defineProperty(proxyElement, 'placeholder', {
+            get: () => textarea.placeholder,
+            set: (val) => { textarea.placeholder = val; }
+        });
+
+        // Forward events from proxy to textarea
+        const originalAddEventListener = proxyElement.addEventListener.bind(proxyElement);
+        proxyElement.addEventListener = function (event, handler, options) {
+            textarea.addEventListener(event, handler, options);
+            originalAddEventListener(event, handler, options);
+        };
+
+        // Share classList
+        proxyElement.classList = textarea.classList;
+
+        // Add proxy to DOM
+        document.body.appendChild(proxyElement);
+
+        console.log('Free-form code editor initialized with compatibility layer');
     }
 });
