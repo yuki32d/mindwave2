@@ -202,10 +202,7 @@
                     statusMessage.style.display = 'block';
                     readyBtn.textContent = '✅ Students Notified!';
 
-                    // Optionally redirect back to Jitsi after 3 seconds
-                    setTimeout(() => {
-                        window.location.href = decodeURIComponent(meetingUrl);
-                    }, 3000);
+                    // Don't redirect - faculty already has Jitsi open in another tab
                 } else {
                     throw new Error('Failed to notify');
                 }

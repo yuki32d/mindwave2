@@ -154,7 +154,7 @@
 
                 if (data.facultyJoined) {
                     // Faculty has joined! Redirect to meeting
-                    document.getElementById('statusMessage').textContent = `✅ ${data.createdBy} has joined! Redirecting you now...`;
+                    document.getElementById('statusMessage').textContent = `✅ Faculty has joined! Redirecting you now...`;
                     document.getElementById('statusMessage').style.background = 'rgba(52, 199, 89, 0.2)';
 
                     clearInterval(checkInterval);
@@ -165,7 +165,7 @@
                         window.location.href = meetingUrl;
                     }, 2000);
                 } else {
-                    document.getElementById('statusMessage').textContent = `Waiting for ${data.createdBy || 'faculty'} to join...`;
+                    document.getElementById('statusMessage').textContent = `Waiting for Faculty to join...`;
                 }
 
             } catch (error) {
