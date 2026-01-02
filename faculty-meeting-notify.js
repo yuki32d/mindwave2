@@ -7,22 +7,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://mindwave2.onrender.com';
 
     if (joinBtn) {
-        // Store original href
-        const originalHref = joinBtn.href;
-
         // Add click handler
         joinBtn.addEventListener('click', async function (event) {
             event.preventDefault();
 
-            // Get meeting code from the page
+            // Get meeting code and URL from the page
             const meetingCodeElement = document.getElementById('meetingCode');
-            if (!meetingCodeElement) {
-                console.error('Meeting code element not found');
-                window.location.href = originalHref;
+            const meetingLinkElement = document.getElementById('meetingLink');
+
+            if (!meetingCodeElement || !meetingLinkElement) {
+                console.error('Meeting elements not found');
                 return;
             }
 
             const meetingCode = meetingCodeElement.textContent.trim();
+            const meetingUrl = meetingLinkElement.textContent.trim();
 
             try {
                 // Notify backend that faculty has joined
@@ -42,8 +41,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Continue anyway - don't block faculty from joining
             }
 
-            // Proceed to join meeting
-            window.location.href = originalHref;
+            // Proceed to join meeting using the actual meeting URL
+            console.log('Redirecting to:', meetingUrl);
+            window.location.href = meetingUrl;
         });
     }
 });
