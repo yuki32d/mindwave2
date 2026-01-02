@@ -650,7 +650,20 @@ const projectSubmissionSchema = new mongoose.Schema({
   reviewedAt: { type: Date }
 }, { timestamps: true });
 
+
 const ProjectSubmission = mongoose.model("ProjectSubmission", projectSubmissionSchema);
+
+// Schema for live meeting codes
+const meetingSchema = new mongoose.Schema({
+  code: { type: String, required: true, unique: true, length: 6 },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  createdByName: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+  expiresAt: { type: Date },
+  isActive: { type: Boolean, default: true }
+});
+
+const Meeting = mongoose.model('Meeting', meetingSchema);
 
 // CONFIGURABLE: Super Admin Email (can be changed for different HODs)
 const SUPER_ADMIN_EMAIL = "rajkumarw88d@gmail.com"; // Change this to the HOD's email
@@ -9580,9 +9593,117 @@ app.post('/api/notifications', authMiddleware, async (req, res) => {
 });
 
 // ============================================
-// LIVE MEETING API ROUTES - REMOVED
-// Now using Jitsi Meet instead of custom WebRTC
+// LIVE MEETING API ROUTES
 // ============================================
+
+// Create a new meeting code (Faculty only)
+app.post('/api/meetings/create', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ ok: false, message: 'User not found' });
+    }
+
+    // Generate 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Create meeting record
+    const meeting = new Meeting({
+      code: code,
+      createdBy: userId,
+      createdByName: user.name || user.displayName || 'Faculty',
+      isActive: true
+    });
+
+    await meeting.save();
+
+    res.json({
+      ok: true,
+      code: code,
+      message: 'Meeting code created successfully'
+    });
+
+  } catch (error) {
+    console.error('Error creating meeting:', error);
+    res.status(500).json({ ok: false, message: 'Failed to create meeting code' });
+  }
+});
+
+// Validate meeting code (Students)
+app.get('/api/meetings/validate/:code', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    // Check if meeting code exists and is active
+    const meeting = await Meeting.findOne({ code: code, isActive: true });
+
+    if (!meeting) {
+      return res.json({ ok: false, valid: false, message: 'Invalid meeting code' });
+    }
+
+    // Check if meeting has expired
+    if (meeting.expiresAt && meeting.expiresAt < new Date()) {
+      return res.json({ ok: false, valid: false, message: 'Meeting code has expired' });
+    }
+
+    res.json({
+      ok: true,
+      valid: true,
+      meeting: {
+        code: meeting.code,
+        createdBy: meeting.createdByName,
+        createdAt: meeting.createdAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Error validating meeting:', error);
+    res.status(500).json({ ok: false, valid: false, message: 'Server error' });
+  }
+});
+
+// Get all active meetings (Faculty only)
+app.get('/api/meetings/active', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+
+    const meetings = await Meeting.find({
+      createdBy: userId,
+      isActive: true
+    }).sort({ createdAt: -1 });
+
+    res.json({ ok: true, meetings });
+
+  } catch (error) {
+    console.error('Error fetching meetings:', error);
+    res.status(500).json({ ok: false, message: 'Failed to fetch meetings' });
+  }
+});
+
+// End/deactivate a meeting
+app.post('/api/meetings/:code/end', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.params;
+    const userId = req.user.sub;
+
+    const meeting = await Meeting.findOne({ code: code, createdBy: userId });
+
+    if (!meeting) {
+      return res.status(404).json({ ok: false, message: 'Meeting not found' });
+    }
+
+    meeting.isActive = false;
+    await meeting.save();
+
+    res.json({ ok: true, message: 'Meeting ended successfully' });
+
+  } catch (error) {
+    console.error('Error ending meeting:', error);
+    res.status(500).json({ ok: false, message: 'Failed to end meeting' });
+  }
+});
 
 app.get('/health', (req, res) => {
   res.json({

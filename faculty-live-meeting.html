@@ -178,20 +178,50 @@
             }
         }
 
-        // Generate meeting code
-        const meetingCode = Math.floor(100000 + Math.random() * 900000).toString();
-        const roomName = 'MindWave' + meetingCode;
-        const meetingUrl = `https://meet.jit.si/${roomName}`;
+        // Generate meeting code and save to database
+        async function generateMeetingCode() {
+            try {
+                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://mindwave2.onrender.com';
 
-        document.getElementById('meetingCode').textContent = meetingCode;
-        document.getElementById('meetingLink').textContent = meetingUrl;
-        document.getElementById('joinBtn').href = meetingUrl;
+                const response = await fetch(`${API_BASE}/api/meetings/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-        console.log('Meeting Code:', meetingCode);
-        console.log('Meeting URL:', meetingUrl);
+                const data = await response.json();
+                if (data.ok) {
+                    return data.code;
+                }
+            } catch (error) {
+                console.error('Error creating meeting code:', error);
+            }
+
+            // Fallback to local generation
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // Initialize meeting
+        async function init() {
+            const meetingCode = await generateMeetingCode();
+            const roomName = 'MindWave' + meetingCode;
+            const meetingUrl = `https://meet.jit.si/${roomName}`;
+
+            document.getElementById('meetingCode').textContent = meetingCode;
+            document.getElementById('meetingLink').textContent = meetingUrl;
+            document.getElementById('joinBtn').href = meetingUrl;
+
+            console.log('Meeting Code:', meetingCode);
+            console.log('Meeting URL:', meetingUrl);
+        }
+
+        init();
 
         // Copy link function
         function copyLink() {
+            const meetingUrl = document.getElementById('meetingLink').textContent;
             navigator.clipboard.writeText(meetingUrl);
             const btn = event.target;
             const originalText = btn.textContent;
