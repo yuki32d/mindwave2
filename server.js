@@ -660,7 +660,9 @@ const meetingSchema = new mongoose.Schema({
   createdByName: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   expiresAt: { type: Date },
-  isActive: { type: Boolean, default: true }
+  isActive: { type: Boolean, default: true },
+  facultyJoined: { type: Boolean, default: false }, // Track if faculty has joined
+  facultyJoinedAt: { type: Date } // When faculty joined
 });
 
 const Meeting = mongoose.model('Meeting', meetingSchema);
@@ -9702,6 +9704,53 @@ app.post('/api/meetings/:code/end', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error ending meeting:', error);
     res.status(500).json({ ok: false, message: 'Failed to end meeting' });
+  }
+});
+
+// Mark that faculty has joined the meeting
+app.post('/api/meetings/:code/faculty-joined', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.params;
+    const userId = req.user.sub;
+
+    const meeting = await Meeting.findOne({ code: code, createdBy: userId });
+
+    if (!meeting) {
+      return res.status(404).json({ ok: false, message: 'Meeting not found' });
+    }
+
+    meeting.facultyJoined = true;
+    meeting.facultyJoinedAt = new Date();
+    await meeting.save();
+
+    res.json({ ok: true, message: 'Faculty join status updated' });
+
+  } catch (error) {
+    console.error('Error updating faculty join status:', error);
+    res.status(500).json({ ok: false, message: 'Failed to update status' });
+  }
+});
+
+// Check if faculty has joined (for student waiting room)
+app.get('/api/meetings/:code/status', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    const meeting = await Meeting.findOne({ code: code, isActive: true });
+
+    if (!meeting) {
+      return res.json({ ok: false, facultyJoined: false, message: 'Meeting not found' });
+    }
+
+    res.json({
+      ok: true,
+      facultyJoined: meeting.facultyJoined || false,
+      createdBy: meeting.createdByName
+    });
+
+  } catch (error) {
+    console.error('Error checking meeting status:', error);
+    res.status(500).json({ ok: false, facultyJoined: false, message: 'Server error' });
   }
 });
 

@@ -39,5 +39,16 @@
   "devDependencies": {
     "http-server": "^14.1.1",
     "nodemon": "^3.0.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuki32d/mindwave2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yuki32d/mindwave2/issues"
+  },
+  "homepage": "https://github.com/yuki32d/mindwave2#readme"
 }
