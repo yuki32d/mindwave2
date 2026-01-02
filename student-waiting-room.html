@@ -160,8 +160,9 @@
                     clearInterval(checkInterval);
 
                     setTimeout(() => {
-                        // Redirect to embedded Jitsi meeting page
-                        window.location.href = `student-jitsi-meeting.html?code=${meetingCode}&name=${encodeURIComponent(userName)}`;
+                        const roomId = 'MindWave' + meetingCode;
+                        const meetingUrl = `https://meet.jit.si/${roomId}#config.startWithAudioMuted=true&userInfo.displayName=${encodeURIComponent(userName)}&config.prejoinPageEnabled=false`;
+                        window.location.href = meetingUrl;
                     }, 2000);
                 } else {
                     document.getElementById('statusMessage').textContent = `Waiting for Faculty to join...`;

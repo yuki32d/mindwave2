@@ -166,18 +166,16 @@
         // Get meeting code from URL
         const urlParams = new URLSearchParams(window.location.search);
         const meetingCode = urlParams.get('code');
+        const meetingUrl = urlParams.get('url');
 
-        if (!meetingCode) {
+        if (!meetingCode || !meetingUrl) {
             alert('Missing meeting information');
             window.location.href = 'faculty-live-meeting.html';
         }
 
-        // Use embedded meeting page
-        const meetingUrl = `faculty-jitsi-meeting.html?code=${meetingCode}`;
-
         document.getElementById('meetingCode').textContent = meetingCode;
         document.getElementById('codeDisplay').textContent = meetingCode;
-        document.getElementById('jitsiLink').href = meetingUrl;
+        document.getElementById('jitsiLink').href = decodeURIComponent(meetingUrl);
 
         const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://mindwave2.onrender.com';
         const token = localStorage.getItem('token');
