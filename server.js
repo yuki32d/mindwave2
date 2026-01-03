@@ -9799,9 +9799,19 @@ app.post('/api/meetings/create-jitsi', authMiddleware, async (req, res) => {
     const { meetingCode, facultyName, facultyEmail } = req.body;
     const userId = req.user.userId;
 
+    console.log('=== Jitsi Meeting Creation Debug ===');
+    console.log('userId from token:', userId);
+    console.log('req.user full object:', JSON.stringify(req.user));
+
     // Verify user is faculty/admin/owner
     const user = await User.findById(userId);
+    console.log('User found in DB:', !!user);
+    if (user) {
+      console.log('User details - role:', user.role, 'orgRole:', user.orgRole);
+    }
+
     if (!user) {
+      console.error('User not found for userId:', userId);
       return res.status(404).json({ error: 'User not found' });
     }
 
