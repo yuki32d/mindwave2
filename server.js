@@ -288,8 +288,14 @@ function generateJitsiToken(userName, userEmail, isModerator, roomName) {
         name: userName,
         email: userEmail,
         affiliation: isModerator ? 'owner' : 'member'  // owner = moderator, member = participant
+      },
+      features: {
+        livestreaming: isModerator,  // Only moderators can livestream
+        recording: isModerator,      // Only moderators can record
+        transcription: isModerator   // Only moderators can enable transcription
       }
     },
+    moderator: isModerator,  // CRITICAL: This field determines moderator privileges
     aud: 'jitsi',
     iss: JITSI_APP_ID,
     sub: JITSI_DOMAIN,
