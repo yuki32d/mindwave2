@@ -284,14 +284,14 @@ function generateJitsiToken(userName, userEmail, isModerator, roomName) {
     context: {
       user: {
         name: userName,
-        email: userEmail,
-        moderator: isModerator ? 'true' : 'false'
+        email: userEmail
       }
     },
+    moderator: isModerator,  // Boolean, not string
     aud: 'jitsi',
     iss: JITSI_APP_ID,
     sub: JITSI_DOMAIN,
-    room: roomName
+    room: '*'  // Allow access to any room
   };
 
   const token = jwt.sign(payload, JITSI_APP_SECRET, {
