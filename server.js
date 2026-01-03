@@ -369,7 +369,52 @@ if (!mailer) {
   })();
 }
 
+// ============================================
+// JITSI JWT TOKEN GENERATION
+// ============================================
+function generateJitsiToken(userName, userEmail, isModerator, roomName) {
+  const now = Math.floor(Date.now() / 1000);
+
+  const payload = {
+    context: {
+      user: {
+        name: userName,
+        email: userEmail,
+        affiliation: isModerator ? 'owner' : 'member'
+      },
+      features: {
+        livestreaming: isModerator,
+        recording: isModerator,
+        transcription: isModerator
+      }
+    },
+    moderator: isModerator, // CRITICAL: This field determines moderator privileges
+    aud: 'jitsi',
+    iss: JITSI_APP_ID,
+    sub: JITSI_DOMAIN,
+    room: roomName,
+    iat: now,
+    exp: now + (2 * 60 * 60), // 2 hours
+    nbf: now - 10
+  };
+
+  // DEBUG: Log the payload to verify moderator field
+  console.log('🔍 JWT Token Generation:');
+  console.log('  User:', userName);
+  console.log('  isModerator:', isModerator);
+  console.log('  moderator field:', payload.moderator);
+  console.log('  affiliation:', payload.context.user.affiliation);
+  console.log('  room:', roomName);
+
+  const token = jwt.sign(payload, JITSI_APP_SECRET, {
+    algorithm: 'HS256'
+  });
+
+  return token;
+}
+
 mongoose.set("strictQuery", true);
+
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
@@ -9841,22 +9886,28 @@ app.post('/api/meetings/create-jitsi', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Only faculty, admins, and owners can create meetings' });
     }
 
+    // IMPORTANT: Prepend "MindWave" to match the student's room name format
+    // Both faculty and students must use the same room name: MindWave123456
+    const roomName = 'MindWave' + meetingCode;
+
     // Generate JWT token with moderator privileges
     const token = generateJitsiToken(
       facultyName || user.name,
       facultyEmail || user.email,
       true, // isModerator = true for faculty
-      meetingCode
+      roomName  // Use full room name with "MindWave" prefix
     );
 
+
     // Construct Jitsi URL with token
-    const jitsiUrl = `https://${JITSI_DOMAIN}/${meetingCode}?jwt=${token}`;
+    const jitsiUrl = `https://${JITSI_DOMAIN}/${roomName}?jwt=${token}`;
 
     res.json({
       success: true,
       jitsiUrl,
       meetingCode
     });
+
   } catch (error) {
     console.error('Error creating Jitsi meeting:', error);
     console.error('Error message:', error.message);
