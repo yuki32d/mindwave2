@@ -9797,7 +9797,8 @@ app.get('/api/meetings/:code/status', authMiddleware, async (req, res) => {
 app.post('/api/meetings/create-jitsi', authMiddleware, async (req, res) => {
   try {
     const { meetingCode, facultyName, facultyEmail } = req.body;
-    const userId = req.user.userId;
+    // Try both possible field names for user ID
+    const userId = req.user.userId || req.user.id;
 
     console.log('=== Jitsi Meeting Creation Debug ===');
     console.log('userId from token:', userId);
@@ -9854,7 +9855,8 @@ app.post('/api/meetings/:code/join-jitsi', authMiddleware, async (req, res) => {
   try {
     const { code } = req.params;
     const { studentName, studentEmail } = req.body;
-    const userId = req.user.userId;
+    // Try both possible field names for user ID
+    const userId = req.user.userId || req.user.id;
 
     // Get user info
     const user = await User.findById(userId);
