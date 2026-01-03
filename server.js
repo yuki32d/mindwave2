@@ -305,6 +305,14 @@ function generateJitsiToken(userName, userEmail, isModerator, roomName) {
     nbf: now - 10  // Valid from 10 seconds ago (clock skew)
   };
 
+  // DEBUG: Log the payload to verify moderator field
+  console.log('🔍 JWT Token Generation:');
+  console.log('  User:', userName);
+  console.log('  isModerator:', isModerator);
+  console.log('  moderator field:', payload.moderator);
+  console.log('  affiliation:', payload.context.user.affiliation);
+  console.log('  room:', roomName);
+
   const token = jwt.sign(payload, JITSI_APP_SECRET, {
     algorithm: 'HS256'
   });
