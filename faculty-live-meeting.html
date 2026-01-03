@@ -210,10 +210,11 @@
         async function init() {
             const meetingCode = await generateMeetingCode();
             const roomName = 'MindWave' + meetingCode;
+            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://mindwave2.onrender.com';
 
             try {
                 // Call backend API to get Jitsi URL with JWT token
-                const response = await fetch('/api/meetings/create-jitsi', {
+                const response = await fetch(`${API_BASE}/api/meetings/create-jitsi`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
