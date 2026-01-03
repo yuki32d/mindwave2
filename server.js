@@ -333,7 +333,7 @@ function generateJitsiToken(userName, userEmail, isModerator, roomName) {
       user: {
         name: userName,
         email: userEmail,
-        affiliation: isModerator ? 'owner' : 'member'
+        affiliation: isModerator ? 'owner' : 'none' // 'none' prevents auto-moderator promotion
       },
       features: {
         livestreaming: isModerator,
