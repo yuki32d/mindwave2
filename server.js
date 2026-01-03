@@ -406,12 +406,19 @@ function generateJitsiToken(userName, userEmail, isModerator, roomName) {
   console.log('  affiliation:', payload.context.user.affiliation);
   console.log('  room:', roomName);
 
+  // Validate JITSI_APP_SECRET exists
+  if (!JITSI_APP_SECRET) {
+    console.error('❌ JITSI_APP_SECRET is not configured! JWT signing will fail.');
+    throw new Error('JITSI_APP_SECRET environment variable is required for JWT authentication');
+  }
+
   const token = jwt.sign(payload, JITSI_APP_SECRET, {
     algorithm: 'HS256'
   });
 
   return token;
 }
+
 
 mongoose.set("strictQuery", true);
 
