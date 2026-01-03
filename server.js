@@ -280,23 +280,26 @@ function generateJitsiToken(userName, userEmail, isModerator, roomName) {
     throw new Error('JITSI_APP_SECRET is not configured');
   }
 
+  const now = Math.floor(Date.now() / 1000);
+
   const payload = {
     context: {
       user: {
         name: userName,
-        email: userEmail
+        email: userEmail,
+        affiliation: isModerator ? 'owner' : 'member'  // owner = moderator, member = participant
       }
     },
-    moderator: isModerator,  // Boolean, not string
     aud: 'jitsi',
     iss: JITSI_APP_ID,
     sub: JITSI_DOMAIN,
-    room: '*'  // Allow access to any room
+    room: '*',  // Allow access to any room
+    exp: now + (2 * 60 * 60),  // 2 hours from now
+    nbf: now - 10  // Valid from 10 seconds ago (clock skew)
   };
 
   const token = jwt.sign(payload, JITSI_APP_SECRET, {
-    algorithm: 'HS256',
-    expiresIn: '2h'
+    algorithm: 'HS256'
   });
 
   return token;
