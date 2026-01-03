@@ -186,8 +186,13 @@
 
                         const jitsiData = await jitsiResponse.json();
 
+                        // DEBUG: Log the response to verify JWT is in URL
+                        console.log('🔍 Jitsi API Response:', jitsiData);
+                        console.log('🔍 Jitsi URL:', jitsiData.jitsiUrl);
+
                         if (jitsiData.success) {
                             setTimeout(() => {
+                                console.log('🚀 Redirecting to:', jitsiData.jitsiUrl);
                                 window.location.href = jitsiData.jitsiUrl;
                             }, 2000);
                         } else {
