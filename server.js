@@ -294,6 +294,7 @@ function generateJitsiToken(userName, userEmail, isModerator, roomName) {
     iss: JITSI_APP_ID,
     sub: JITSI_DOMAIN,
     room: '*',  // Allow access to any room
+    iat: now,  // Issued at timestamp
     exp: now + (2 * 60 * 60),  // 2 hours from now
     nbf: now - 10  // Valid from 10 seconds ago (clock skew)
   };
