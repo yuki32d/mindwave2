@@ -169,11 +169,13 @@
         // Get user info
         const token = localStorage.getItem('token');
         let userName = 'Faculty';
+        let userEmail = '';
 
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 userName = payload.name || 'Faculty';
+                userEmail = payload.email || '';
             } catch (e) {
                 console.log('Could not parse token');
             }
