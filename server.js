@@ -272,56 +272,9 @@ function checkLimit(subscriptionTier, limitName, currentUsage) {
   return currentUsage < limit;
 }
 
-// ============================================
-// JITSI JWT TOKEN GENERATION
-// ============================================
-function generateJitsiToken(userName, userEmail, isModerator, roomName) {
-  if (!JITSI_APP_SECRET) {
-    throw new Error('JITSI_APP_SECRET is not configured');
-  }
-
-  const now = Math.floor(Date.now() / 1000);
-
-  const payload = {
-    context: {
-      user: {
-        name: userName,
-        email: userEmail,
-        affiliation: isModerator ? 'owner' : 'member'  // owner = moderator, member = participant
-      },
-      features: {
-        livestreaming: isModerator,  // Only moderators can livestream
-        recording: isModerator,      // Only moderators can record
-        transcription: isModerator   // Only moderators can enable transcription
-      }
-    },
-    moderator: isModerator,  // CRITICAL: This field determines moderator privileges
-    aud: 'jitsi',
-    iss: JITSI_APP_ID,
-    sub: JITSI_DOMAIN,
-    room: roomName,  // Use actual room name instead of wildcard
-    iat: now,  // Issued at timestamp
-    exp: now + (2 * 60 * 60),  // 2 hours from now
-    nbf: now - 10  // Valid from 10 seconds ago (clock skew)
-  };
-
-  // DEBUG: Log the payload to verify moderator field
-  console.log('🔍 JWT Token Generation:');
-  console.log('  User:', userName);
-  console.log('  isModerator:', isModerator);
-  console.log('  moderator field:', payload.moderator);
-  console.log('  affiliation:', payload.context.user.affiliation);
-  console.log('  room:', roomName);
-
-  const token = jwt.sign(payload, JITSI_APP_SECRET, {
-    algorithm: 'HS256'
-  });
-
-  return token;
-}
-
 
 let mailer = null;
+
 if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
   mailer = nodemailer.createTransport({
     host: SMTP_HOST,
