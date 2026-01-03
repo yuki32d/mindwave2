@@ -9799,10 +9799,17 @@ app.post('/api/meetings/create-jitsi', authMiddleware, async (req, res) => {
     const { meetingCode, facultyName, facultyEmail } = req.body;
     const userId = req.user.userId;
 
-    // Verify user is faculty/admin
+    // Verify user is faculty/admin/owner
     const user = await User.findById(userId);
-    if (!user || (user.role !== 'admin' && user.orgRole !== 'faculty')) {
-      return res.status(403).json({ error: 'Only faculty can create meetings' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Allow organization owners, admins, and faculty to create meetings
+    const canCreateMeeting = user.role === 'admin' || user.orgRole === 'owner' || user.orgRole === 'admin' || user.orgRole === 'faculty';
+
+    if (!canCreateMeeting) {
+      return res.status(403).json({ error: 'Only faculty, admins, and owners can create meetings' });
     }
 
     // Generate JWT token with moderator privileges
