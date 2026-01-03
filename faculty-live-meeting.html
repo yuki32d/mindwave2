@@ -209,14 +209,40 @@
             const meetingCode = await generateMeetingCode();
             const roomName = 'MindWave' + meetingCode;
 
-            const meetingUrl = `https://meet.jit.si/${roomName}#config.startWithAudioMuted=false&userInfo.displayName=${encodeURIComponent(userName)}&config.prejoinPageEnabled=false`;
+            try {
+                // Call backend API to get Jitsi URL with JWT token
+                const response = await fetch('/api/meetings/create-jitsi', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        meetingCode: roomName,
+                        facultyName: userName,
+                        facultyEmail: userEmail || `${userName}@mindwave.local`
+                    })
+                });
 
-            document.getElementById('meetingCode').textContent = meetingCode;
-            document.getElementById('meetingLink').textContent = meetingUrl;
-            document.getElementById('joinBtn').href = meetingUrl;
+                const data = await response.json();
 
-            console.log('Meeting Code:', meetingCode);
-            console.log('Meeting URL:', meetingUrl);
+                if (data.success) {
+                    const meetingUrl = data.jitsiUrl;
+
+                    document.getElementById('meetingCode').textContent = meetingCode;
+                    document.getElementById('meetingLink').textContent = meetingUrl;
+                    document.getElementById('joinBtn').href = meetingUrl;
+
+                    console.log('Meeting Code:', meetingCode);
+                    console.log('Meeting URL:', meetingUrl);
+                } else {
+                    console.error('Failed to create Jitsi meeting:', data.error);
+                    alert('Failed to create meeting. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error creating Jitsi meeting:', error);
+                alert('Failed to create meeting. Please try again.');
+            }
         }
 
         init();

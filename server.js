@@ -51,6 +51,10 @@ const {
   ZOOM_CLIENT_ID,
   ZOOM_CLIENT_SECRET,
   ZOOM_REDIRECT_URI = "http://localhost:8081/auth/zoom/callback",
+  // Jitsi Configuration
+  JITSI_DOMAIN = "mindwave-meet.duckdns.org",
+  JITSI_APP_ID = "mindwave",
+  JITSI_APP_SECRET,
   // Auto-cleanup settings
   AUTO_DELETE_DAYS = "20",
   CLEANUP_ENABLED = "true",
@@ -267,6 +271,37 @@ function checkLimit(subscriptionTier, limitName, currentUsage) {
 
   return currentUsage < limit;
 }
+
+// ============================================
+// JITSI JWT TOKEN GENERATION
+// ============================================
+function generateJitsiToken(userName, userEmail, isModerator, roomName) {
+  if (!JITSI_APP_SECRET) {
+    throw new Error('JITSI_APP_SECRET is not configured');
+  }
+
+  const payload = {
+    context: {
+      user: {
+        name: userName,
+        email: userEmail,
+        moderator: isModerator ? 'true' : 'false'
+      }
+    },
+    aud: 'jitsi',
+    iss: JITSI_APP_ID,
+    sub: JITSI_DOMAIN,
+    room: roomName
+  };
+
+  const token = jwt.sign(payload, JITSI_APP_SECRET, {
+    algorithm: 'HS256',
+    expiresIn: '2h'
+  });
+
+  return token;
+}
+
 
 let mailer = null;
 if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
@@ -9753,6 +9788,79 @@ app.get('/api/meetings/:code/status', authMiddleware, async (req, res) => {
     res.status(500).json({ ok: false, facultyJoined: false, message: 'Server error' });
   }
 });
+
+// ============================================
+// JITSI MEETING ENDPOINTS
+// ============================================
+
+// Faculty creates a Jitsi meeting - gets moderator token
+app.post('/api/meetings/create-jitsi', authMiddleware, async (req, res) => {
+  try {
+    const { meetingCode, facultyName, facultyEmail } = req.body;
+    const userId = req.user.userId;
+
+    // Verify user is faculty/admin
+    const user = await User.findById(userId);
+    if (!user || (user.role !== 'admin' && user.orgRole !== 'faculty')) {
+      return res.status(403).json({ error: 'Only faculty can create meetings' });
+    }
+
+    // Generate JWT token with moderator privileges
+    const token = generateJitsiToken(
+      facultyName || user.name,
+      facultyEmail || user.email,
+      true, // isModerator = true for faculty
+      meetingCode
+    );
+
+    // Construct Jitsi URL with token
+    const jitsiUrl = `https://${JITSI_DOMAIN}/${meetingCode}?jwt=${token}`;
+
+    res.json({
+      success: true,
+      jitsiUrl,
+      meetingCode
+    });
+  } catch (error) {
+    console.error('Error creating Jitsi meeting:', error);
+    res.status(500).json({ error: 'Failed to create meeting' });
+  }
+});
+
+// Student joins a Jitsi meeting - gets participant token
+app.post('/api/meetings/:code/join-jitsi', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.params;
+    const { studentName, studentEmail } = req.body;
+    const userId = req.user.userId;
+
+    // Get user info
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Generate JWT token WITHOUT moderator privileges
+    const token = generateJitsiToken(
+      studentName || user.name,
+      studentEmail || user.email,
+      false, // isModerator = false for students
+      code
+    );
+
+    // Construct Jitsi URL with token
+    const jitsiUrl = `https://${JITSI_DOMAIN}/${code}?jwt=${token}`;
+
+    res.json({
+      success: true,
+      jitsiUrl
+    });
+  } catch (error) {
+    console.error('Error joining Jitsi meeting:', error);
+    res.status(500).json({ error: 'Failed to join meeting' });
+  }
+});
+
 
 app.get('/health', (req, res) => {
   res.json({
