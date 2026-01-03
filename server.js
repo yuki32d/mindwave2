@@ -9823,7 +9823,12 @@ app.post('/api/meetings/create-jitsi', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating Jitsi meeting:', error);
-    res.status(500).json({ error: 'Failed to create meeting' });
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    console.error('JITSI_APP_SECRET exists:', !!JITSI_APP_SECRET);
+    console.error('JITSI_DOMAIN:', JITSI_DOMAIN);
+    console.error('JITSI_APP_ID:', JITSI_APP_ID);
+    res.status(500).json({ error: 'Failed to create meeting', details: error.message });
   }
 });
 
@@ -9857,7 +9862,8 @@ app.post('/api/meetings/:code/join-jitsi', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('Error joining Jitsi meeting:', error);
-    res.status(500).json({ error: 'Failed to join meeting' });
+    console.error('Error message:', error.message);
+    res.status(500).json({ error: 'Failed to join meeting', details: error.message });
   }
 });
 
