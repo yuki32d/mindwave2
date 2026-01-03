@@ -9868,16 +9868,20 @@ app.post('/api/meetings/:code/join-jitsi', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // IMPORTANT: Prepend "MindWave" to match the faculty's room name format
+    // Faculty creates: MindWave123456, Student must join: MindWave123456
+    const roomName = 'MindWave' + code;
+
     // Generate JWT token WITHOUT moderator privileges
     const token = generateJitsiToken(
       studentName || user.name,
       studentEmail || user.email,
       false, // isModerator = false for students
-      code
+      roomName  // Use full room name with "MindWave" prefix
     );
 
     // Construct Jitsi URL with token
-    const jitsiUrl = `https://${JITSI_DOMAIN}/${code}?jwt=${token}`;
+    const jitsiUrl = `https://${JITSI_DOMAIN}/${roomName}?jwt=${token}`;
 
     res.json({
       success: true,
