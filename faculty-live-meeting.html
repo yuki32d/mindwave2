@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="styles.css">
     <!-- Agora Web SDK -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -646,6 +647,11 @@
         </div>
         <div class="chat-input-container">
             <input type="text" class="chat-input" placeholder="Type a message..." id="chatInput">
+            <button class="chat-send-btn" id="chatSendBtn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+            </button>
         </div>
     </div>
 
@@ -744,6 +750,91 @@
             });
         }
 
+        // Socket.IO Chat System
+        const API_BASE = window.location.hostname === 'localhost'
+            ? 'http://localhost:8081'
+            : 'https://mindwave2.onrender.com';
+
+        let socket = null;
+        let currentMeetingCode = null;
+
+        function initializeSocket(meetingCode) {
+            currentMeetingCode = meetingCode;
+            socket = io(API_BASE);
+
+            socket.on('connect', () => {
+                console.log('💬 Socket.IO connected');
+
+                // Join meeting room
+                socket.emit('join-meeting', {
+                    meetingCode,
+                    userName,
+                    userRole: 'faculty'
+                });
+            });
+
+            // Listen for new messages
+            socket.on('new-message', ({ userName: senderName, message, timestamp }) => {
+                addMessageToChat(senderName, message, timestamp);
+            });
+
+            // Listen for meeting ended (shouldn't happen for faculty, but handle it)
+            socket.on('meeting-ended', () => {
+                showToast('Meeting has been ended', 'info');
+            });
+
+            socket.on('disconnect', () => {
+                console.log('💬 Socket.IO disconnected');
+            });
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message || !socket || !currentMeetingCode) return;
+
+            socket.emit('send-message', {
+                meetingCode: currentMeetingCode,
+                userName,
+                message,
+                timestamp: new Date().toISOString()
+            });
+
+            input.value = '';
+        }
+
+        function addMessageToChat(senderName, message, timestamp) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+
+            const time = new Date(timestamp).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            messageDiv.innerHTML = `
+                <div class="chat-sender">${senderName} <span style="font-size: 11px; color: #888;">${time}</span></div>
+                <div class="chat-text">${message}</div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Handle Enter key in chat input
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendChatMessage();
+                    }
+                });
+            }
+        });
+
         // Generate meeting code
         async function generateMeetingCode() {
             const API_BASE = window.location.hostname === 'localhost'
@@ -799,6 +890,9 @@
 
                     // Display meeting code
                     document.getElementById('meetingCodeDisplay').textContent = meetingCode;
+
+                    // Initialize Socket.IO for chat
+                    initializeSocket(meetingCode);
 
                     // Initialize Agora client
                     agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
@@ -974,6 +1068,11 @@
         async function leaveMeeting() {
             if (confirm('Are you sure you want to end the meeting for all participants?')) {
                 try {
+                    // Broadcast meeting ended to all participants
+                    if (socket && currentMeetingCode) {
+                        socket.emit('end-meeting', { meetingCode: currentMeetingCode });
+                    }
+
                     // Close local tracks
                     if (localAudioTrack) {
                         localAudioTrack.close();
@@ -987,11 +1086,16 @@
                         await agoraClient.leave();
                     }
 
+                    // Disconnect socket
+                    if (socket) {
+                        socket.disconnect();
+                    }
+
                     console.log('✅ Left meeting');
-                    window.location.href = 'faculty-dashboard.html';
+                    window.location.href = 'admin.html';
                 } catch (error) {
                     console.error('Error leaving meeting:', error);
-                    window.location.href = 'faculty-dashboard.html';
+                    window.location.href = 'admin.html';
                 }
             }
         }
