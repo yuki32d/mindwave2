@@ -170,39 +170,11 @@
 
                     clearInterval(checkInterval);
 
-                    // Call backend API to get Jitsi URL with JWT token (student/participant)
-                    try {
-                        const jitsiResponse = await fetch(`/api/meetings/${meetingCode}/join-jitsi`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            },
-                            body: JSON.stringify({
-                                studentName: userName,
-                                studentEmail: userEmail || `${userName}@mindwave.local`
-                            })
-                        });
-
-                        const jitsiData = await jitsiResponse.json();
-
-                        // DEBUG: Log the response to verify JWT is in URL
-                        console.log('🔍 Jitsi API Response:', jitsiData);
-                        console.log('🔍 Jitsi URL:', jitsiData.jitsiUrl);
-
-                        if (jitsiData.success) {
-                            setTimeout(() => {
-                                console.log('🚀 Redirecting to:', jitsiData.jitsiUrl);
-                                window.location.href = jitsiData.jitsiUrl;
-                            }, 2000);
-                        } else {
-                            console.error('Failed to join Jitsi meeting:', jitsiData.error);
-                            alert('Failed to join meeting. Please try again.');
-                        }
-                    } catch (error) {
-                        console.error('Error joining Jitsi meeting:', error);
-                        alert('Failed to join meeting. Please try again.');
-                    }
+                    // Redirect to Agora student meeting page with meeting code
+                    setTimeout(() => {
+                        console.log('🚀 Redirecting to Agora meeting:', meetingCode);
+                        window.location.href = `student-live-meeting.html?code=${meetingCode}`;
+                    }, 2000);
                 } else {
                     document.getElementById('statusMessage').textContent = `Waiting for Faculty to join...`;
                 }
