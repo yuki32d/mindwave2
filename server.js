@@ -9846,9 +9846,10 @@ app.post('/api/meetings/create-jitsi', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Only faculty, admins, and owners can create meetings' });
     }
 
-    // IMPORTANT: Prepend "MindWave" to match the student's room name format
-    // Both faculty and students must use the same room name: MindWave123456
-    const roomName = 'MindWave' + meetingCode;
+    // IMPORTANT: Prepend "mindwave" (lowercase) to match Prosody's room name format
+    // Prosody converts room names to lowercase, so we must use lowercase in JWT
+    // Both faculty and students must use the same room name: mindwave123456
+    const roomName = 'mindwave' + meetingCode.toLowerCase();
 
     // Generate JWT token with moderator privileges
     const token = generateJitsiToken(
@@ -9893,9 +9894,10 @@ app.post('/api/meetings/:code/join-jitsi', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // IMPORTANT: Add "MindWave" prefix to match the faculty's room name format
-    // Faculty creates: MindWave123456, Student must join: MindWave123456
-    const roomName = 'MindWave' + code;
+    // IMPORTANT: Add "mindwave" prefix (lowercase) to match the faculty's room name format
+    // Prosody converts room names to lowercase, so we must use lowercase in JWT
+    // Faculty creates: mindwave123456, Student must join: mindwave123456
+    const roomName = 'mindwave' + code.toLowerCase();
 
 
     // Generate JWT token WITHOUT moderator privileges
