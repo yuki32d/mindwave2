@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Timetable - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+
+    <style>
+        .timetable-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .toggle-btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            border-color: transparent;
+        }
+
+        /* Next Class Card */
+        .next-class-card {
+            background: linear-gradient(135deg, rgba(15, 98, 254, 0.1) 0%, rgba(138, 43, 226, 0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 32px;
+        }
+
+        .next-class-header {
+            font-size: 14px;
+            color: #9ea4b6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .next-class-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .next-class-details {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #9ea4b6;
+        }
+
+        .countdown {
+            font-size: 48px;
+            font-weight: 700;
+            color: #4da0ff;
+            margin-bottom: 16px;
+        }
+
+        .join-btn {
+            padding: 14px 32px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .join-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(77, 160, 255, 0.4);
+        }
+
+        /* Weekly Timetable Grid */
+        .timetable-grid {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            overflow-x: auto;
+        }
+
+        .week-header {
+            display: grid;
+            grid-template-columns: 100px repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: 600;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .day-header.today {
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+        }
+
+        .time-slot {
+            display: grid;
+            grid-template-columns: 100px repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .time-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        .class-cell {
+            min-height: 80px;
+            border-radius: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .class-cell:hover {
+            background: rgba(77, 160, 255, 0.1);
+            border-color: rgba(77, 160, 255, 0.5);
+            transform: scale(1.02);
+        }
+
+        .class-cell.has-class {
+            background: linear-gradient(135deg, rgba(77, 160, 255, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+            border-color: rgba(77, 160, 255, 0.5);
+        }
+
+        .class-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .class-time {
+            font-size: 11px;
+            color: #9ea4b6;
+            margin-bottom: 4px;
+        }
+
+        .class-teacher {
+            font-size: 11px;
+            color: #9ea4b6;
+        }
+
+        @media (max-width: 768px) {
+            .timetable-grid {
+                overflow-x: scroll;
+            }
+
+            .week-header,
+            .time-slot {
+                min-width: 800px;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="student-performance.html">← Back to Performance</a>
+            <p class="eyebrow">SCHEDULE</p>
+            <h1>My Timetable</h1>
+            <p class="lede">Your class schedule and upcoming sessions</p>
+        </header>
+
+        <div class="timetable-container">
+            <!-- Next Class -->
+            <div class="next-class-card">
+                <div class="next-class-header">NEXT CLASS</div>
+                <div class="next-class-title" id="nextClassName">Mathematics</div>
+                <div class="next-class-details">
+                    <div class="detail-item">
+                        <span>🕐</span>
+                        <span id="nextClassTime">10:00 AM - 11:00 AM</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>👨‍🏫</span>
+                        <span id="nextClassTeacher">Prof. Smith</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>📍</span>
+                        <span>Room 101</span>
+                    </div>
+                </div>
+                <div class="countdown" id="countdown">Starting in 45 min</div>
+                <button class="join-btn" onclick="joinClass()">Join Live Meeting</button>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button class="toggle-btn active" onclick="changeView('week')">Week View</button>
+                <button class="toggle-btn" onclick="changeView('day')">Day View</button>
+            </div>
+
+            <!-- Weekly Timetable -->
+            <div class="timetable-grid">
+                <div class="week-header">
+                    <div class="day-header">Time</div>
+                    <div class="day-header">Monday</div>
+                    <div class="day-header today">Tuesday</div>
+                    <div class="day-header">Wednesday</div>
+                    <div class="day-header">Thursday</div>
+                    <div class="day-header">Friday</div>
+                </div>
+
+                <!-- 9:00 AM -->
+                <div class="time-slot">
+                    <div class="time-label">9:00 AM</div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">English</div>
+                        <div class="class-time">9:00 - 10:00 AM</div>
+                        <div class="class-teacher">Prof. Johnson</div>
+                    </div>
+                    <div class="class-cell"></div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">English</div>
+                        <div class="class-time">9:00 - 10:00 AM</div>
+                        <div class="class-teacher">Prof. Johnson</div>
+                    </div>
+                    <div class="class-cell"></div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">English</div>
+                        <div class="class-time">9:00 - 10:00 AM</div>
+                        <div class="class-teacher">Prof. Johnson</div>
+                    </div>
+                </div>
+
+                <!-- 10:00 AM -->
+                <div class="time-slot">
+                    <div class="time-label">10:00 AM</div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">Mathematics</div>
+                        <div class="class-time">10:00 - 11:00 AM</div>
+                        <div class="class-teacher">Prof. Smith</div>
+                    </div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">Mathematics</div>
+                        <div class="class-time">10:00 - 11:00 AM</div>
+                        <div class="class-teacher">Prof. Smith</div>
+                    </div>
+                    <div class="class-cell"></div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">Mathematics</div>
+                        <div class="class-time">10:00 - 11:00 AM</div>
+                        <div class="class-teacher">Prof. Smith</div>
+                    </div>
+                    <div class="class-cell"></div>
+                </div>
+
+                <!-- 11:00 AM -->
+                <div class="time-slot">
+                    <div class="time-label">11:00 AM</div>
+                    <div class="class-cell"></div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">Science</div>
+                        <div class="class-time">11:00 AM - 12:00 PM</div>
+                        <div class="class-teacher">Dr. Williams</div>
+                    </div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">Science</div>
+                        <div class="class-time">11:00 AM - 12:00 PM</div>
+                        <div class="class-teacher">Dr. Williams</div>
+                    </div>
+                    <div class="class-cell"></div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">Science</div>
+                        <div class="class-time">11:00 AM - 12:00 PM</div>
+                        <div class="class-teacher">Dr. Williams</div>
+                    </div>
+                </div>
+
+                <!-- 2:00 PM -->
+                <div class="time-slot">
+                    <div class="time-label">2:00 PM</div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">History</div>
+                        <div class="class-time">2:00 - 3:00 PM</div>
+                        <div class="class-teacher">Prof. Davis</div>
+                    </div>
+                    <div class="class-cell"></div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">History</div>
+                        <div class="class-time">2:00 - 3:00 PM</div>
+                        <div class="class-teacher">Prof. Davis</div>
+                    </div>
+                    <div class="class-cell has-class">
+                        <div class="class-name">Art</div>
+                        <div class="class-time">2:00 - 3:00 PM</div>
+                        <div class="class-teacher">Ms. Brown</div>
+                    </div>
+                    <div class="class-cell"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'student-login.html';
+        }
+
+        let currentView = 'week';
+
+        // Change view
+        function changeView(view) {
+            currentView = view;
+
+            // Update active button
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // TODO: Implement day view
+            console.log('Changed view to:', view);
+        }
+
+        // Join class
+        function joinClass() {
+            // TODO: Get meeting code and redirect
+            window.location.href = 'student-join-meeting.html';
+        }
+
+        // Update countdown
+        function updateCountdown() {
+            // TODO: Calculate actual time until next class
+            const countdown = document.getElementById('countdown');
+            // Placeholder countdown
+        }
+
+        // Load timetable data
+        async function loadTimetable() {
+            try {
+                const API_BASE = window.location.hostname === 'localhost'
+                    ? 'http://localhost:8081'
+                    : 'https://mindwave2.onrender.com';
+
+                const response = await fetch(`${API_BASE}/api/student/timetable`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update timetable with real data
+                    console.log('Timetable data:', data);
+                } else {
+                    console.log('Using placeholder timetable');
+                }
+            } catch (error) {
+                console.error('Error loading timetable:', error);
+            }
+        }
+
+        // Initialize
+        loadTimetable();
+        setInterval(updateCountdown, 60000); // Update every minute
+    </script>
+</body>
+
+</html>

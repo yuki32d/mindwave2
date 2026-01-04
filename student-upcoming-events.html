@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upcoming Events - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+
+    <style>
+        .events-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Filters */
+        .event-filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 10px 20px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .filter-chip:hover {
+            background: rgba(77, 160, 255, 0.2);
+            border-color: rgba(77, 160, 255, 0.5);
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            border-color: transparent;
+        }
+
+        /* Events Grid */
+        .events-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .event-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            gap: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .event-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+            border-color: rgba(77, 160, 255, 0.5);
+        }
+
+        .event-date {
+            min-width: 80px;
+            text-align: center;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(77, 160, 255, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+            border-radius: 12px;
+        }
+
+        .event-day {
+            font-size: 32px;
+            font-weight: 700;
+            color: #4da0ff;
+            line-height: 1;
+        }
+
+        .event-month {
+            font-size: 12px;
+            color: #9ea4b6;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .event-details {
+            flex: 1;
+        }
+
+        .event-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .event-type.assignment {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+        }
+
+        .event-type.quiz {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+        }
+
+        .event-type.exam {
+            background: rgba(138, 43, 226, 0.2);
+            color: #a78bfa;
+        }
+
+        .event-type.meeting {
+            background: rgba(77, 160, 255, 0.2);
+            color: #4da0ff;
+        }
+
+        .event-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .event-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #9ea4b6;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .event-countdown {
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .countdown-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4da0ff;
+        }
+
+        .countdown-label {
+            font-size: 11px;
+            color: #9ea4b6;
+            text-transform: uppercase;
+        }
+
+        .event-card.urgent {
+            border-color: rgba(255, 68, 68, 0.5);
+            background: rgba(255, 68, 68, 0.05);
+        }
+
+        .event-card.urgent .countdown-value {
+            color: #ff4444;
+        }
+
+        @media (max-width: 768px) {
+            .event-card {
+                flex-direction: column;
+            }
+
+            .event-countdown {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="student-performance.html">← Back to Performance</a>
+            <p class="eyebrow">CALENDAR</p>
+            <h1>Upcoming Events</h1>
+            <p class="lede">Track deadlines, quizzes, exams, and important dates</p>
+        </header>
+
+        <div class="events-container">
+            <!-- Filters -->
+            <div class="event-filters">
+                <div class="filter-chip active" onclick="filterEvents('all')">All Events</div>
+                <div class="filter-chip" onclick="filterEvents('assignment')">📝 Assignments</div>
+                <div class="filter-chip" onclick="filterEvents('quiz')">📊 Quizzes</div>
+                <div class="filter-chip" onclick="filterEvents('exam')">📚 Exams</div>
+                <div class="filter-chip" onclick="filterEvents('meeting')">🎥 Meetings</div>
+            </div>
+
+            <!-- Events List -->
+            <div class="events-grid" id="eventsGrid">
+                <!-- Urgent Event -->
+                <div class="event-card urgent" data-type="assignment">
+                    <div class="event-date">
+                        <div class="event-day">05</div>
+                        <div class="event-month">JAN</div>
+                    </div>
+                    <div class="event-details">
+                        <span class="event-type assignment">Assignment</span>
+                        <div class="event-title">Mathematics Homework - Chapter 5</div>
+                        <div class="event-meta">
+                            <div class="meta-item">
+                                <span>🕐</span>
+                                <span>Due: 11:59 PM</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📚</span>
+                                <span>Mathematics</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-countdown">
+                        <div class="countdown-value">2h</div>
+                        <div class="countdown-label">Remaining</div>
+                    </div>
+                </div>
+
+                <!-- Quiz Event -->
+                <div class="event-card" data-type="quiz">
+                    <div class="event-date">
+                        <div class="event-day">06</div>
+                        <div class="event-month">JAN</div>
+                    </div>
+                    <div class="event-details">
+                        <span class="event-type quiz">Quiz</span>
+                        <div class="event-title">Science Quiz - Photosynthesis</div>
+                        <div class="event-meta">
+                            <div class="meta-item">
+                                <span>🕐</span>
+                                <span>10:00 AM - 10:30 AM</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📚</span>
+                                <span>Science</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-countdown">
+                        <div class="countdown-value">1d</div>
+                        <div class="countdown-label">Remaining</div>
+                    </div>
+                </div>
+
+                <!-- Meeting Event -->
+                <div class="event-card" data-type="meeting">
+                    <div class="event-date">
+                        <div class="event-day">07</div>
+                        <div class="event-month">JAN</div>
+                    </div>
+                    <div class="event-details">
+                        <span class="event-type meeting">Live Meeting</span>
+                        <div class="event-title">English Literature Discussion</div>
+                        <div class="event-meta">
+                            <div class="meta-item">
+                                <span>🕐</span>
+                                <span>2:00 PM - 3:00 PM</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>👨‍🏫</span>
+                                <span>Prof. Johnson</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-countdown">
+                        <div class="countdown-value">2d</div>
+                        <div class="countdown-label">Remaining</div>
+                    </div>
+                </div>
+
+                <!-- Exam Event -->
+                <div class="event-card" data-type="exam">
+                    <div class="event-date">
+                        <div class="event-day">15</div>
+                        <div class="event-month">JAN</div>
+                    </div>
+                    <div class="event-details">
+                        <span class="event-type exam">Mid-Term Exam</span>
+                        <div class="event-title">Mathematics Mid-Term Examination</div>
+                        <div class="event-meta">
+                            <div class="meta-item">
+                                <span>🕐</span>
+                                <span>9:00 AM - 12:00 PM</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📍</span>
+                                <span>Exam Hall A</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-countdown">
+                        <div class="countdown-value">10d</div>
+                        <div class="countdown-label">Remaining</div>
+                    </div>
+                </div>
+
+                <!-- Assignment Event -->
+                <div class="event-card" data-type="assignment">
+                    <div class="event-date">
+                        <div class="event-day">20</div>
+                        <div class="event-month">JAN</div>
+                    </div>
+                    <div class="event-details">
+                        <span class="event-type assignment">Project</span>
+                        <div class="event-title">History Research Project - World War II</div>
+                        <div class="event-meta">
+                            <div class="meta-item">
+                                <span>🕐</span>
+                                <span>Due: 11:59 PM</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📚</span>
+                                <span>History</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-countdown">
+                        <div class="countdown-value">15d</div>
+                        <div class="countdown-label">Remaining</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'student-login.html';
+        }
+
+        let currentFilter = 'all';
+
+        // Filter events
+        function filterEvents(type) {
+            currentFilter = type;
+
+            // Update active filter
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Filter event cards
+            const cards = document.querySelectorAll('.event-card');
+            cards.forEach(card => {
+                if (type === 'all' || card.dataset.type === type) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Load events from API
+        async function loadEvents() {
+            try {
+                const API_BASE = window.location.hostname === 'localhost'
+                    ? 'http://localhost:8081'
+                    : 'https://mindwave2.onrender.com';
+
+                const response = await fetch(`${API_BASE}/api/student/events`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update events with real data
+                    console.log('Events data:', data);
+                } else {
+                    console.log('Using placeholder events');
+                }
+            } catch (error) {
+                console.error('Error loading events:', error);
+            }
+        }
+
+        // Initialize
+        loadEvents();
+    </script>
+</body>
+
+</html>
