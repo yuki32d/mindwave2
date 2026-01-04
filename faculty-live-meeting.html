@@ -187,19 +187,21 @@
         }
 
         .more-controls {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(30, 30, 30, 0.95);
+            position: fixed;
+            bottom: 100px;
+            right: 50%;
+            transform: translateX(50%);
+            background: rgba(30, 30, 30, 0.98);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 8px;
             display: none;
             flex-direction: column;
             gap: 4px;
-            min-width: 200px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            min-width: 220px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            z-index: 200;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .more-controls.show {
