@@ -27,6 +27,8 @@ import liveSessionsRouter from './routes/live-sessions.js';
 // Agora.io Video SDK
 import pkg from 'agora-access-token';
 const { RtcTokenBuilder, RtcRole } = pkg;
+// Socket.IO for real-time chat
+import { Server } from 'socket.io';
 // Meeting Server removed - using Jitsi Meet instead
 // pdf-parse will be imported dynamically in the endpoint
 // Stripe will be imported conditionally based on environment variable
@@ -7301,6 +7303,90 @@ function listenWithFallback(preferred) {
 
       // Setup WebSocket server for Live Quiz
       setupWebSocket(httpServer);
+
+      // Setup Socket.IO for meeting chat
+      const io = new Server(httpServer, {
+        cors: {
+          origin: "*",
+          methods: ["GET", "POST"]
+        }
+      });
+
+      // Store active meetings and their participants
+      const activeMeetings = new Map();
+
+      io.on('connection', (socket) => {
+        console.log('💬 Socket.IO client connected:', socket.id);
+
+        // Join meeting room
+        socket.on('join-meeting', ({ meetingCode, userName, userRole }) => {
+          socket.join(meetingCode);
+
+          // Track meeting participants
+          if (!activeMeetings.has(meetingCode)) {
+            activeMeetings.set(meetingCode, new Set());
+          }
+          activeMeetings.get(meetingCode).add({
+            socketId: socket.id,
+            userName,
+            userRole
+          });
+
+          console.log(`👤 ${userName} (${userRole}) joined meeting ${meetingCode}`);
+
+          // Notify others in the room
+          socket.to(meetingCode).emit('user-joined', { userName, userRole });
+        });
+
+        // Handle chat messages
+        socket.on('send-message', ({ meetingCode, userName, message, timestamp }) => {
+          console.log(`💬 Message in ${meetingCode} from ${userName}: ${message}`);
+
+          // Broadcast to all in the meeting including sender
+          io.to(meetingCode).emit('new-message', {
+            userName,
+            message,
+            timestamp
+          });
+        });
+
+        // Handle meeting end (faculty only)
+        socket.on('end-meeting', ({ meetingCode }) => {
+          console.log(`🔴 Meeting ${meetingCode} ended by host`);
+
+          // Broadcast to all participants
+          io.to(meetingCode).emit('meeting-ended', {
+            reason: 'host-ended'
+          });
+
+          // Clean up meeting
+          activeMeetings.delete(meetingCode);
+        });
+
+        // Handle disconnect
+        socket.on('disconnect', () => {
+          console.log('👋 Socket.IO client disconnected:', socket.id);
+
+          // Remove from all meetings
+          activeMeetings.forEach((participants, meetingCode) => {
+            participants.forEach(participant => {
+              if (participant.socketId === socket.id) {
+                participants.delete(participant);
+                socket.to(meetingCode).emit('user-left', {
+                  userName: participant.userName
+                });
+              }
+            });
+
+            // Clean up empty meetings
+            if (participants.size === 0) {
+              activeMeetings.delete(meetingCode);
+            }
+          });
+        });
+      });
+
+      console.log('💬 Socket.IO server initialized');
     });
 
     httpServer.on("error", (err) => {
