@@ -623,7 +623,7 @@
     <div class="side-panel" id="participantsPanel">
         <div class="panel-header">
             <h3>Participants (<span id="participantCount">1</span>)</h3>
-            <button class="panel-close" onclick="closePanel('participantsPanel')">×</button>
+            <button class="panel-close" id="closeParticipantsPanel">×</button>
         </div>
         <div class="panel-content" id="participantsList">
             <!-- Participants will be added dynamically -->
@@ -634,7 +634,7 @@
     <div class="side-panel" id="chatPanel">
         <div class="panel-header">
             <h3>Chat</h3>
-            <button class="panel-close" onclick="closePanel('chatPanel')">×</button>
+            <button class="panel-close" id="closeChatPanel">×</button>
         </div>
         <div class="panel-content">
             <div class="chat-messages" id="chatMessages">
@@ -1016,6 +1016,10 @@
         document.getElementById('whiteboardBtn').addEventListener('click', openWhiteboard);
         document.getElementById('chatBtn').addEventListener('click', toggleChat);
         document.getElementById('settingsBtn').addEventListener('click', openSettings);
+
+        // Panel close buttons
+        document.getElementById('closeParticipantsPanel').addEventListener('click', () => closePanel('participantsPanel'));
+        document.getElementById('closeChatPanel').addEventListener('click', () => closePanel('chatPanel'));
 
         // Host control functions
         let isScreenSharing = false;
