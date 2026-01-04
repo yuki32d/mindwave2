@@ -3,273 +3,513 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindWave Meet - Faculty</title>
+    <title>Live Meeting - Faculty | MindWave</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Agora Web SDK -->
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: white;
         }
 
-        body {
-            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
-            background: #202124;
-            color: #e8eaed;
+        .meeting-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            flex-direction: column;
-            gap: 30px;
+            z-index: 100;
         }
 
-        .container {
-            text-align: center;
-            max-width: 500px;
-            padding: 40px;
-        }
-
-        h1 {
-            font-size: 32px;
-            font-weight: 400;
-            margin-bottom: 16px;
-        }
-
-        .subtitle {
-            font-size: 16px;
-            color: #9aa0a6;
-            margin-bottom: 32px;
-        }
-
-        .meeting-info {
-            background: #292a2d;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .code-label {
-            font-size: 14px;
-            color: #9aa0a6;
-            margin-bottom: 8px;
+        .meeting-info h2 {
+            margin: 0;
+            font-size: 20px;
         }
 
         .meeting-code {
+            color: #00d4ff;
             font-size: 24px;
-            font-weight: 600;
-            color: #667eea;
-            letter-spacing: 2px;
-            margin-bottom: 16px;
+            font-weight: bold;
         }
 
-        .meeting-link {
-            font-size: 13px;
-            color: #9aa0a6;
-            word-break: break-all;
-            margin-bottom: 16px;
+        .meeting-container {
+            width: 100%;
+            height: 100vh;
+            background: #000;
+            position: relative;
+            padding-top: 70px;
         }
 
-        .btn {
-            padding: 14px 32px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-            display: inline-block;
-            text-decoration: none;
+        .local-video {
+            position: absolute;
+            top: 90px;
+            right: 20px;
+            width: 250px;
+            height: 180px;
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 10;
+            background: #1a1a1a;
+            border: 2px solid #00d4ff;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.3);
         }
 
-        .btn-primary {
-            background: #667eea;
-            color: white;
-            margin-right: 12px;
+        .local-video video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .btn-primary:hover {
-            background: #5568d3;
+        .remote-videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            height: calc(100vh - 200px);
+            overflow-y: auto;
         }
 
-        .btn-secondary {
-            background: #3c4043;
-            color: #e8eaed;
+        .remote-video {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #1a1a1a;
+            position: relative;
+            min-height: 300px;
+            border: 1px solid #333;
         }
 
-        .btn-secondary:hover {
-            background: #5f6368;
+        .remote-video video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .copy-btn {
-            background: #3c4043;
-            color: #e8eaed;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            border: none;
-            margin-top: 8px;
-        }
-
-        .copy-btn:hover {
-            background: #5f6368;
-        }
-
-        .instructions {
-            background: #292a2d;
-            border-radius: 8px;
-            padding: 16px;
-            text-align: left;
+        .participant-name {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 12px;
+            border-radius: 20px;
             font-size: 14px;
-            line-height: 1.6;
         }
 
-        .instructions ol {
-            margin-left: 20px;
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
         }
 
-        .instructions li {
-            margin-bottom: 8px;
+        .controls button {
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .controls button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .controls button.active {
+            background: #00d4ff;
+            color: #000;
+        }
+
+        .controls button.danger {
+            background: #ff4444;
+        }
+
+        .controls button.danger:hover {
+            background: #ff6666;
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #00d4ff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .participant-count {
+            background: rgba(0, 212, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Your Meeting is Ready!</h1>
-        <p class="subtitle">Share this code with your students to join</p>
-
+    <div class="meeting-header">
         <div class="meeting-info">
-            <div class="code-label">Meeting Code</div>
-            <div class="meeting-code" id="meetingCode">Loading...</div>
-            <div class="meeting-link" id="meetingLink">Loading...</div>
-            <button class="copy-btn" onclick="copyLink()">📋 Copy Link</button>
+            <h2>Live Meeting</h2>
+            <div class="meeting-code" id="meetingCodeDisplay">Loading...</div>
         </div>
-
-        <div>
-            <a href="#" class="btn btn-primary" id="joinBtn">Join Meeting</a>
-            <a href="admin.html" class="btn btn-secondary">Back to Dashboard</a>
-        </div>
-
-        <div class="instructions">
-            <strong>How to share:</strong>
-            <ol>
-                <li>Copy the meeting link above</li>
-                <li>Share it with your students via WhatsApp, email, or chat</li>
-                <li>Click "Join Meeting" to start</li>
-                <li>When done, close the Jitsi tab and click "Back to Dashboard"</li>
-            </ol>
+        <div class="participant-count" id="participantCount">
+            👥 1 participant
         </div>
     </div>
 
-    <script src="faculty-meeting-notify.js"></script>
-    <script>
-        // Get user info
-        const token = localStorage.getItem('token');
-        let userName = 'Faculty';
-        let userEmail = '';
+    <div class="loading" id="loadingScreen">
+        <div class="spinner"></div>
+        <p>Joining meeting...</p>
+    </div>
 
-        if (token) {
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                userName = payload.name || 'Faculty';
-                userEmail = payload.email || '';
-            } catch (e) {
-                console.log('Could not parse token');
-            }
+    <div class="meeting-container" id="meetingContainer" style="display: none;">
+        <div class="local-video" id="localVideo"></div>
+        <div class="remote-videos-grid" id="remoteVideos">
+            <div class="empty-state">
+                <h3>Waiting for students to join...</h3>
+                <p>Share the meeting code with your students</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="muteBtn" onclick="toggleMute()">
+                🎤 <span id="muteText">Mute</span>
+            </button>
+            <button id="videoBtn" onclick="toggleVideo()">
+                📹 <span id="videoText">Stop Video</span>
+            </button>
+            <button class="danger" onclick="leaveMeeting()">
+                📞 Leave Meeting
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Authentication
+        const token = localStorage.getItem('token');
+        const userName = localStorage.getItem('userName') || 'Faculty';
+        const userEmail = localStorage.getItem('userEmail') || '';
+
+        if (!token) {
+            window.location.href = 'admin-login.html';
         }
 
-        // Generate meeting code and save to database
-        async function generateMeetingCode() {
-            try {
-                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://mindwave2.onrender.com';
+        // Agora client and tracks
+        let agoraClient = null;
+        let localAudioTrack = null;
+        let localVideoTrack = null;
+        let remoteUsers = {};
+        let isMuted = false;
+        let isVideoOff = false;
 
-                const response = await fetch(`${API_BASE}/api/meetings/create`, {
+        // Generate meeting code
+        async function generateMeetingCode() {
+            const API_BASE = window.location.hostname === 'localhost'
+                ? 'http://localhost:8081'
+                : 'https://mindwave2.onrender.com';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/meetings/generate-code`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
-                const data = await response.json();
-                if (data.ok) {
+                if (response.ok) {
+                    const data = await response.json();
                     return data.code;
                 }
             } catch (error) {
-                console.error('Error creating meeting code:', error);
+                console.error('Error generating meeting code:', error);
             }
 
-            // Fallback to local generation
+            // Fallback
             return Math.floor(100000 + Math.random() * 900000).toString();
         }
 
-        // Initialize meeting
+        // Initialize and join meeting
         async function init() {
             const meetingCode = await generateMeetingCode();
-            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://mindwave2.onrender.com';
+            const API_BASE = window.location.hostname === 'localhost'
+                ? 'http://localhost:8081'
+                : 'https://mindwave2.onrender.com';
 
             try {
-                // Call backend API to get Jitsi URL with JWT token
-                const response = await fetch(`${API_BASE}/api/meetings/create-jitsi`, {
+                // Call backend to get Agora credentials
+                const response = await fetch(`${API_BASE}/api/meetings/create-agora`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        meetingCode: meetingCode,  // Send only numeric code, backend adds "MindWave" prefix
+                        meetingCode: meetingCode,
                         facultyName: userName,
-                        facultyEmail: userEmail || `${userName}@mindwave.local`
+                        facultyEmail: userEmail
                     })
                 });
 
                 const data = await response.json();
 
-                console.log('=== Backend Response Debug ===');
-                console.log('Full response:', data);
-                console.log('data.success:', data.success);
-                console.log('data.jitsiUrl:', data.jitsiUrl);
-                console.log('data.meetingCode:', data.meetingCode);
-
                 if (data.success) {
-                    const meetingUrl = data.jitsiUrl;
+                    console.log('✅ Agora credentials received:', data);
 
-                    document.getElementById('meetingCode').textContent = meetingCode;
-                    document.getElementById('meetingLink').textContent = meetingUrl;
-                    document.getElementById('joinBtn').href = meetingUrl;
+                    // Display meeting code
+                    document.getElementById('meetingCodeDisplay').textContent = meetingCode;
 
-                    console.log('=== URL Assignment ===');
-                    console.log('Meeting Code:', meetingCode);
-                    console.log('Meeting URL:', meetingUrl);
-                    console.log('Join Button href:', document.getElementById('joinBtn').href);
-                    console.log('URL includes JWT?', meetingUrl.includes('jwt='));
-                    console.log('URL includes #config?', meetingUrl.includes('#config'));
+                    // Initialize Agora client
+                    agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+
+                    // Set up event listeners
+                    agoraClient.on('user-published', handleUserPublished);
+                    agoraClient.on('user-unpublished', handleUserUnpublished);
+                    agoraClient.on('user-left', handleUserLeft);
+
+                    // Join channel
+                    await agoraClient.join(
+                        data.appId,
+                        data.channelName,
+                        data.token,
+                        data.uid
+                    );
+
+                    console.log('✅ Joined Agora channel as HOST');
+
+                    // Create local tracks
+                    localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                    localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+
+                    // Play local video
+                    localVideoTrack.play('localVideo');
+
+                    // Publish tracks
+                    await agoraClient.publish([localAudioTrack, localVideoTrack]);
+
+                    console.log('✅ Published local tracks');
+
+                    // Hide loading, show meeting
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    document.getElementById('meetingContainer').style.display = 'block';
+
                 } else {
-                    console.error('Failed to create Jitsi meeting:', data.error);
+                    console.error('Failed to create Agora meeting:', data.error);
                     alert('Failed to create meeting. Please try again.');
+                    window.location.href = 'faculty-dashboard.html';
                 }
             } catch (error) {
-                console.error('Error creating Jitsi meeting:', error);
+                console.error('Error creating Agora meeting:', error);
                 alert('Failed to create meeting. Please try again.');
+                window.location.href = 'faculty-dashboard.html';
             }
         }
 
-        init();
+        // Handle remote user published
+        async function handleUserPublished(user, mediaType) {
+            console.log('👤 User published:', user.uid, mediaType);
 
-        // Copy link function
-        function copyLink() {
-            const meetingUrl = document.getElementById('meetingLink').textContent;
-            navigator.clipboard.writeText(meetingUrl);
-            const btn = event.target;
-            const originalText = btn.textContent;
-            btn.textContent = '✓ Copied!';
-            setTimeout(() => {
-                btn.textContent = originalText;
-            }, 2000);
+            await agoraClient.subscribe(user, mediaType);
+
+            if (mediaType === 'video') {
+                const remoteVideoTrack = user.videoTrack;
+
+                // Create container for remote video
+                let playerContainer = document.getElementById(`player-${user.uid}`);
+                if (!playerContainer) {
+                    // Remove empty state
+                    const emptyState = document.querySelector('.empty-state');
+                    if (emptyState) emptyState.remove();
+
+                    playerContainer = document.createElement('div');
+                    playerContainer.id = `player-${user.uid}`;
+                    playerContainer.className = 'remote-video';
+
+                    const nameTag = document.createElement('div');
+                    nameTag.className = 'participant-name';
+                    nameTag.textContent = `Student ${user.uid}`;
+                    playerContainer.appendChild(nameTag);
+
+                    document.getElementById('remoteVideos').appendChild(playerContainer);
+                }
+
+                remoteVideoTrack.play(playerContainer);
+                remoteUsers[user.uid] = user;
+                updateParticipantCount();
+            }
+
+            if (mediaType === 'audio') {
+                const remoteAudioTrack = user.audioTrack;
+                remoteAudioTrack.play();
+            }
         }
+
+        // Handle remote user unpublished
+        function handleUserUnpublished(user, mediaType) {
+            console.log('👤 User unpublished:', user.uid, mediaType);
+
+            if (mediaType === 'video') {
+                const playerContainer = document.getElementById(`player-${user.uid}`);
+                if (playerContainer) {
+                    playerContainer.remove();
+                }
+            }
+        }
+
+        // Handle user left
+        function handleUserLeft(user) {
+            console.log('👤 User left:', user.uid);
+
+            const playerContainer = document.getElementById(`player-${user.uid}`);
+            if (playerContainer) {
+                playerContainer.remove();
+            }
+
+            delete remoteUsers[user.uid];
+            updateParticipantCount();
+
+            // Show empty state if no students
+            if (Object.keys(remoteUsers).length === 0) {
+                const remoteVideos = document.getElementById('remoteVideos');
+                if (!document.querySelector('.empty-state')) {
+                    remoteVideos.innerHTML = `
+                        <div class="empty-state">
+                            <h3>Waiting for students to join...</h3>
+                            <p>Share the meeting code with your students</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Update participant count
+        function updateParticipantCount() {
+            const count = Object.keys(remoteUsers).length + 1; // +1 for faculty
+            document.getElementById('participantCount').textContent = `👥 ${count} participant${count > 1 ? 's' : ''}`;
+        }
+
+        // Toggle mute
+        async function toggleMute() {
+            if (!localAudioTrack) return;
+
+            isMuted = !isMuted;
+            await localAudioTrack.setEnabled(!isMuted);
+
+            const muteBtn = document.getElementById('muteBtn');
+            const muteText = document.getElementById('muteText');
+
+            if (isMuted) {
+                muteBtn.classList.add('active');
+                muteText.textContent = 'Unmute';
+            } else {
+                muteBtn.classList.remove('active');
+                muteText.textContent = 'Mute';
+            }
+        }
+
+        // Toggle video
+        async function toggleVideo() {
+            if (!localVideoTrack) return;
+
+            isVideoOff = !isVideoOff;
+            await localVideoTrack.setEnabled(!isVideoOff);
+
+            const videoBtn = document.getElementById('videoBtn');
+            const videoText = document.getElementById('videoText');
+
+            if (isVideoOff) {
+                videoBtn.classList.add('active');
+                videoText.textContent = 'Start Video';
+            } else {
+                videoBtn.classList.remove('active');
+                videoText.textContent = 'Stop Video';
+            }
+        }
+
+        // Leave meeting
+        async function leaveMeeting() {
+            if (confirm('Are you sure you want to end the meeting for all participants?')) {
+                try {
+                    // Close local tracks
+                    if (localAudioTrack) {
+                        localAudioTrack.close();
+                    }
+                    if (localVideoTrack) {
+                        localVideoTrack.close();
+                    }
+
+                    // Leave channel
+                    if (agoraClient) {
+                        await agoraClient.leave();
+                    }
+
+                    console.log('✅ Left meeting');
+                    window.location.href = 'faculty-dashboard.html';
+                } catch (error) {
+                    console.error('Error leaving meeting:', error);
+                    window.location.href = 'faculty-dashboard.html';
+                }
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', init);
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', async () => {
+            if (localAudioTrack) localAudioTrack.close();
+            if (localVideoTrack) localVideoTrack.close();
+            if (agoraClient) await agoraClient.leave();
+        });
     </script>
 </body>
 
