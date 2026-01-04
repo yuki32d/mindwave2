@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achievements - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+
+    <style>
+        .achievements-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Player Stats */
+        .player-stats {
+            background: linear-gradient(135deg, rgba(15, 98, 254, 0.1) 0%, rgba(138, 43, 226, 0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .player-level {
+            font-size: 64px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .level-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #9ea4b6;
+        }
+
+        .xp-bar-container {
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+
+        .xp-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .xp-bar {
+            width: 100%;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4da0ff 0%, #a78bfa 100%);
+            border-radius: 999px;
+            transition: width 0.6s ease;
+            position: relative;
+        }
+
+        .xp-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .stat-box {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #4da0ff;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #9ea4b6;
+            text-transform: uppercase;
+        }
+
+        /* Badges Grid */
+        .badges-section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            margin-bottom: 24px;
+        }
+
+        .section-header h3 {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+
+        .badge-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .badge-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .badge-card.locked {
+            opacity: 0.4;
+            filter: grayscale(1);
+        }
+
+        .badge-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .badge-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .badge-description {
+            font-size: 11px;
+            color: #9ea4b6;
+            line-height: 1.4;
+        }
+
+        .badge-xp {
+            margin-top: 8px;
+            padding: 4px 10px;
+            background: rgba(77, 160, 255, 0.2);
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4da0ff;
+            display: inline-block;
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .leaderboard h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .leaderboard-item.current-user {
+            border: 1px solid rgba(77, 160, 255, 0.5);
+            background: rgba(77, 160, 255, 0.05);
+        }
+
+        .rank {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .rank.gold {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #000;
+        }
+
+        .rank.silver {
+            background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+            color: #000;
+        }
+
+        .rank.bronze {
+            background: linear-gradient(135deg, #cd7f32 0%, #e8a87c 100%);
+            color: #000;
+        }
+
+        .rank.other {
+            background: rgba(255, 255, 255, 0.1);
+            color: #9ea4b6;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .player-level-badge {
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        .player-xp {
+            font-weight: 700;
+            color: #4da0ff;
+        }
+
+        @media (max-width: 768px) {
+            .badges-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="student-performance.html">← Back to Performance</a>
+            <p class="eyebrow">GAMIFICATION</p>
+            <h1>Achievements</h1>
+            <p class="lede">Track your badges, XP, and level progress</p>
+        </header>
+
+        <div class="achievements-container">
+            <!-- Player Stats -->
+            <div class="player-stats">
+                <div class="player-level">Level 12</div>
+                <div class="level-title">Academic Explorer</div>
+
+                <div class="xp-bar-container">
+                    <div class="xp-info">
+                        <span>2,450 / 3,000 XP</span>
+                        <span>550 XP to Level 13</span>
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-fill" style="width: 82%"></div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value">2,450</div>
+                        <div class="stat-label">Total XP</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">18</div>
+                        <div class="stat-label">Badges Earned</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">7</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">#5</div>
+                        <div class="stat-label">Class Rank</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unlocked Badges -->
+            <div class="badges-section">
+                <div class="section-header">
+                    <h3>🏆 Unlocked Badges (18/30)</h3>
+                </div>
+                <div class="badges-grid">
+                    <div class="badge-card">
+                        <span class="badge-icon">🎯</span>
+                        <div class="badge-name">Perfect Score</div>
+                        <div class="badge-description">Achieved 100% on a quiz</div>
+                        <div class="badge-xp">+100 XP</div>
+                    </div>
+
+                    <div class="badge-card">
+                        <span class="badge-icon">🔥</span>
+                        <div class="badge-name">7-Day Streak</div>
+                        <div class="badge-description">Logged in 7 days in a row</div>
+                        <div class="badge-xp">+150 XP</div>
+                    </div>
+
+                    <div class="badge-card">
+                        <span class="badge-icon">📚</span>
+                        <div class="badge-name">Bookworm</div>
+                        <div class="badge-description">Completed 10 reading assignments</div>
+                        <div class="badge-xp">+200 XP</div>
+                    </div>
+
+                    <div class="badge-card">
+                        <span class="badge-icon">⚡</span>
+                        <div class="badge-name">Quick Learner</div>
+                        <div class="badge-description">Finished quiz in under 5 minutes</div>
+                        <div class="badge-xp">+75 XP</div>
+                    </div>
+
+                    <div class="badge-card">
+                        <span class="badge-icon">🎓</span>
+                        <div class="badge-name">Honor Roll</div>
+                        <div class="badge-description">Maintained 90%+ average</div>
+                        <div class="badge-xp">+250 XP</div>
+                    </div>
+
+                    <div class="badge-card">
+                        <span class="badge-icon">👥</span>
+                        <div class="badge-name">Team Player</div>
+                        <div class="badge-description">Participated in 5 study groups</div>
+                        <div class="badge-xp">+100 XP</div>
+                    </div>
+
+                    <div class="badge-card">
+                        <span class="badge-icon">📈</span>
+                        <div class="badge-name">Improvement Star</div>
+                        <div class="badge-description">Improved grade by 15%</div>
+                        <div class="badge-xp">+200 XP</div>
+                    </div>
+
+                    <div class="badge-card">
+                        <span class="badge-icon">✅</span>
+                        <div class="badge-name">Completionist</div>
+                        <div class="badge-description">100% assignment completion</div>
+                        <div class="badge-xp">+300 XP</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Locked Badges -->
+            <div class="badges-section">
+                <div class="section-header">
+                    <h3>🔒 Locked Badges (12/30)</h3>
+                </div>
+                <div class="badges-grid">
+                    <div class="badge-card locked">
+                        <span class="badge-icon">🌟</span>
+                        <div class="badge-name">Perfectionist</div>
+                        <div class="badge-description">Get 100% on 5 quizzes</div>
+                        <div class="badge-xp">+500 XP</div>
+                    </div>
+
+                    <div class="badge-card locked">
+                        <span class="badge-icon">🚀</span>
+                        <div class="badge-name">Overachiever</div>
+                        <div class="badge-description">Score above 95% in all subjects</div>
+                        <div class="badge-xp">+750 XP</div>
+                    </div>
+
+                    <div class="badge-card locked">
+                        <span class="badge-icon">💎</span>
+                        <div class="badge-name">30-Day Streak</div>
+                        <div class="badge-description">Login for 30 consecutive days</div>
+                        <div class="badge-xp">+1000 XP</div>
+                    </div>
+
+                    <div class="badge-card locked">
+                        <span class="badge-icon">🏅</span>
+                        <div class="badge-name">Top of Class</div>
+                        <div class="badge-description">Reach #1 on leaderboard</div>
+                        <div class="badge-xp">+500 XP</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="leaderboard">
+                <h3>🏆 Class Leaderboard</h3>
+
+                <div class="leaderboard-item">
+                    <div class="rank gold">1</div>
+                    <div class="player-info">
+                        <div class="player-name">Student A</div>
+                        <div class="player-level-badge">Level 15 • Scholar</div>
+                    </div>
+                    <div class="player-xp">3,850 XP</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="rank silver">2</div>
+                    <div class="player-info">
+                        <div class="player-name">Student B</div>
+                        <div class="player-level-badge">Level 14 • Explorer</div>
+                    </div>
+                    <div class="player-xp">3,200 XP</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="rank bronze">3</div>
+                    <div class="player-info">
+                        <div class="player-name">Student C</div>
+                        <div class="player-level-badge">Level 13 • Learner</div>
+                    </div>
+                    <div class="player-xp">2,900 XP</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="rank other">4</div>
+                    <div class="player-info">
+                        <div class="player-name">Student D</div>
+                        <div class="player-level-badge">Level 12 • Explorer</div>
+                    </div>
+                    <div class="player-xp">2,600 XP</div>
+                </div>
+
+                <div class="leaderboard-item current-user">
+                    <div class="rank other">5</div>
+                    <div class="player-info">
+                        <div class="player-name">You</div>
+                        <div class="player-level-badge">Level 12 • Explorer</div>
+                    </div>
+                    <div class="player-xp">2,450 XP</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="rank other">6</div>
+                    <div class="player-info">
+                        <div class="player-name">Student E</div>
+                        <div class="player-level-badge">Level 11 • Learner</div>
+                    </div>
+                    <div class="player-xp">2,100 XP</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'student-login.html';
+        }
+
+        // Load achievements data
+        async function loadAchievements() {
+            try {
+                const API_BASE = window.location.hostname === 'localhost'
+                    ? 'http://localhost:8081'
+                    : 'https://mindwave2.onrender.com';
+
+                const response = await fetch(`${API_BASE}/api/student/achievements`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update achievements with real data
+                    console.log('Achievements data:', data);
+                } else {
+                    console.log('Using placeholder achievements');
+                }
+            } catch (error) {
+                console.error('Error loading achievements:', error);
+            }
+        }
+
+        // Initialize
+        loadAchievements();
+    </script>
+</body>
+
+</html>
