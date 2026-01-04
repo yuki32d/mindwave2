@@ -221,7 +221,7 @@
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        meetingCode: roomName,
+                        meetingCode: meetingCode,  // Send only numeric code, backend adds "MindWave" prefix
                         facultyName: userName,
                         facultyEmail: userEmail || `${userName}@mindwave.local`
                     })
