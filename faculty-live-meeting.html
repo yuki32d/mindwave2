@@ -222,13 +222,13 @@
         </div>
 
         <div class="controls">
-            <button id="muteBtn" onclick="toggleMute()">
+            <button id="muteBtn">
                 🎤 <span id="muteText">Mute</span>
             </button>
-            <button id="videoBtn" onclick="toggleVideo()">
+            <button id="videoBtn">
                 📹 <span id="videoText">Stop Video</span>
             </button>
-            <button class="danger" onclick="leaveMeeting()">
+            <button class="danger" id="leaveBtn">
                 📞 Leave Meeting
             </button>
         </div>
@@ -506,6 +506,11 @@
 
         // Initialize on page load
         window.addEventListener('load', init);
+
+        // Add event listeners for controls
+        document.getElementById('muteBtn').addEventListener('click', toggleMute);
+        document.getElementById('videoBtn').addEventListener('click', toggleVideo);
+        document.getElementById('leaveBtn').addEventListener('click', leaveMeeting);
 
         // Clean up on page unload
         window.addEventListener('beforeunload', async () => {
