@@ -233,6 +233,204 @@
             fill: currentColor;
         }
 
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid #00d4ff;
+        }
+
+        .toast.success {
+            border-left-color: #4caf50;
+        }
+
+        .toast.error {
+            border-left-color: #ff4444;
+        }
+
+        .toast.warning {
+            border-left-color: #ff9800;
+        }
+
+        .toast-icon {
+            font-size: 24px;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Side Panels */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: rgba(20, 20, 20, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: -4px 0 32px rgba(0, 0, 0, 0.5);
+            transition: right 0.3s ease;
+            z-index: 150;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-panel.open {
+            right: 0;
+        }
+
+        .panel-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: white;
+        }
+
+        .panel-close {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .panel-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .participant-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .participant-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .participant-info {
+            flex: 1;
+        }
+
+        .participant-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .participant-role {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-message {
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-sender {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .chat-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 14px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
         .loading {
             position: fixed;
             top: 50%;
@@ -418,6 +616,39 @@
         </div>
     </div>
 
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Participants Side Panel -->
+    <div class="side-panel" id="participantsPanel">
+        <div class="panel-header">
+            <h3>Participants (<span id="participantCount">1</span>)</h3>
+            <button class="panel-close" onclick="closePanel('participantsPanel')">×</button>
+        </div>
+        <div class="panel-content" id="participantsList">
+            <!-- Participants will be added dynamically -->
+        </div>
+    </div>
+
+    <!-- Chat Side Panel -->
+    <div class="side-panel" id="chatPanel">
+        <div class="panel-header">
+            <h3>Chat</h3>
+            <button class="panel-close" onclick="closePanel('chatPanel')">×</button>
+        </div>
+        <div class="panel-content">
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message">
+                    <div class="chat-sender">System</div>
+                    <div class="chat-text">Chat feature coming soon! 💬</div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" placeholder="Type a message..." id="chatInput">
+        </div>
+    </div>
+
     <script>
         // Authentication
         const token = localStorage.getItem('token');
@@ -435,6 +666,83 @@
         let remoteUsers = {};
         let isMuted = false;
         let isVideoOff = false;
+
+        // Toast Notification System
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type] || icons.info}</div>
+                <div class="toast-message">${message}</div>
+            `;
+
+            container.appendChild(toast);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Side Panel Management
+        function openPanel(panelId) {
+            // Close all panels first
+            document.querySelectorAll('.side-panel').forEach(panel => {
+                panel.classList.remove('open');
+            });
+
+            // Open requested panel
+            const panel = document.getElementById(panelId);
+            if (panel) {
+                panel.classList.add('open');
+            }
+        }
+
+        function closePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            if (panel) {
+                panel.classList.remove('open');
+            }
+        }
+
+        function updateParticipantsList() {
+            const list = document.getElementById('participantsList');
+            const count = Object.keys(remoteUsers).length + 1;
+
+            document.getElementById('participantCount').textContent = count;
+
+            list.innerHTML = `
+                <div class="participant-item">
+                    <div class="participant-avatar">${userName.charAt(0).toUpperCase()}</div>
+                    <div class="participant-info">
+                        <div class="participant-name">${userName} (You)</div>
+                        <div class="participant-role">Host</div>
+                    </div>
+                </div>
+            `;
+
+            Object.keys(remoteUsers).forEach((uid, index) => {
+                list.innerHTML += `
+                    <div class="participant-item">
+                        <div class="participant-avatar">S${index + 1}</div>
+                        <div class="participant-info">
+                            <div class="participant-name">Student ${index + 1}</div>
+                            <div class="participant-role">Participant</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
 
         // Generate meeting code
         async function generateMeetingCode() {
