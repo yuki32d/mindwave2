@@ -9969,6 +9969,18 @@ app.post('/api/meetings/:code/join-jitsi', authMiddleware, async (req, res) => {
 // AGORA.IO VIDEO CONFERENCING ENDPOINTS
 // ============================================
 
+// Generate meeting code
+app.post('/api/meetings/generate-code', authMiddleware, async (req, res) => {
+  try {
+    // Generate 6-digit meeting code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    res.json({ success: true, code });
+  } catch (error) {
+    console.error('Error generating meeting code:', error);
+    res.status(500).json({ error: 'Failed to generate meeting code' });
+  }
+});
+
 // Faculty creates an Agora meeting - gets host token
 app.post('/api/meetings/create-agora', authMiddleware, async (req, res) => {
   try {
