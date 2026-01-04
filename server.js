@@ -25,7 +25,8 @@ import paymentRoutes from './payment-routes.js';
 import activitiesRouter from './routes/activities.js';
 import liveSessionsRouter from './routes/live-sessions.js';
 // Agora.io Video SDK
-import { RtcTokenBuilder, RtcRole } from 'agora-access-token';
+import pkg from 'agora-access-token';
+const { RtcTokenBuilder, RtcRole } = pkg;
 // Meeting Server removed - using Jitsi Meet instead
 // pdf-parse will be imported dynamically in the endpoint
 // Stripe will be imported conditionally based on environment variable
