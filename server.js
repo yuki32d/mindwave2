@@ -21,6 +21,8 @@ import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
 import { WebSocketServer } from 'ws';
 import paymentRoutes from './payment-routes.js';
+// Student Performance Analytics
+import studentPerformanceRoutes from './student-performance-routes.js';
 // Live Activity System
 import activitiesRouter from './routes/activities.js';
 import liveSessionsRouter from './routes/live-sessions.js';
@@ -1178,6 +1180,8 @@ app.use(express.static(__dirname, {
 // ============================================
 app.use('/api/activities', activitiesRouter);
 app.use('/api/live-sessions', liveSessionsRouter);
+// Student Performance Analytics Routes
+app.use('/api/student', authMiddleware, studentPerformanceRoutes);
 
 const authLimiter = rateLimit({
   windowMs: 60 * 1000,
