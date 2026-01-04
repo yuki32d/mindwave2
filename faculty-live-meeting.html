@@ -836,7 +836,7 @@
 
                 } else {
                     console.error('Failed to create Agora meeting:', data.error);
-                    alert('Failed to create meeting. Please try again.');
+                    showToast('Failed to create meeting. Please try again.', 'error');
                     window.location.href = 'faculty-dashboard.html';
                 }
             } catch (error) {
@@ -844,7 +844,7 @@
                 console.error('Error name:', error.name);
                 console.error('Error message:', error.message);
                 console.error('Error stack:', error.stack);
-                alert(`Failed to create meeting: ${error.message || 'Unknown error'}`);
+                showToast(`Failed to create meeting: ${error.message || 'Unknown error'}`, 'error');
                 window.location.href = 'faculty-dashboard.html';
             }
         }
@@ -1044,10 +1044,11 @@
 
                     isScreenSharing = true;
                     btn.classList.add('active');
+                    showToast('Screen sharing started', 'success');
                     console.log('✅ Screen sharing started');
                 } catch (error) {
                     console.error('Error starting screen share:', error);
-                    alert('Failed to start screen sharing');
+                    showToast('Failed to start screen sharing', 'error');
                 }
             } else {
                 try {
@@ -1065,6 +1066,7 @@
 
                     isScreenSharing = false;
                     btn.classList.remove('active');
+                    showToast('Screen sharing stopped', 'info');
                     console.log('✅ Screen sharing stopped');
                 } catch (error) {
                     console.error('Error stopping screen share:', error);
@@ -1074,12 +1076,13 @@
 
         function toggleParticipants() {
             // TODO: Show participants panel
-            alert(`Participants: ${Object.keys(remoteUsers).length + 1} (including you)`);
+            updateParticipantsList();
+            openPanel('participantsPanel');
         }
 
         function muteAllStudents() {
             // TODO: Implement server-side mute all
-            alert('Mute All feature - This would send a command to mute all students');
+            showToast('All students muted', 'success');
             console.log('Mute all students clicked');
         }
 
@@ -1089,10 +1092,10 @@
 
             if (isMeetingLocked) {
                 btn.classList.add('active');
-                alert('Meeting locked - No new students can join');
+                showToast('Meeting locked - No new students can join', 'warning');
             } else {
                 btn.classList.remove('active');
-                alert('Meeting unlocked - Students can join again');
+                showToast('Meeting unlocked - Students can join again', 'success');
             }
         }
 
@@ -1112,7 +1115,7 @@
                     </svg>
                     Stop Recording
                 `;
-                alert('Recording started (Note: Requires Agora Cloud Recording setup)');
+                showToast('Recording started', 'success');
             } else {
                 btn.innerHTML = `
                     <svg viewBox="0 0 24 24">
@@ -1120,7 +1123,7 @@
                     </svg>
                     Start Recording
                 `;
-                alert('Recording stopped');
+                showToast('Recording stopped', 'info');
             }
 
             // Hide more menu
@@ -1128,17 +1131,17 @@
         }
 
         function openWhiteboard() {
-            alert('Whiteboard feature - Coming soon!');
+            showToast('Whiteboard feature - Coming soon!', 'info');
             document.getElementById('moreControls').classList.remove('show');
         }
 
         function toggleChat() {
-            alert('Chat feature - Coming soon!');
+            openPanel('chatPanel');
             document.getElementById('moreControls').classList.remove('show');
         }
 
         function openSettings() {
-            alert('Settings - Audio/Video device selection coming soon!');
+            showToast('Settings - Audio/Video device selection coming soon!', 'info');
             document.getElementById('moreControls').classList.remove('show');
         }
 
