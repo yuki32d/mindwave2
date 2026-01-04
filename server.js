@@ -24,6 +24,8 @@ import paymentRoutes from './payment-routes.js';
 // Live Activity System
 import activitiesRouter from './routes/activities.js';
 import liveSessionsRouter from './routes/live-sessions.js';
+// Agora.io Video SDK
+import { RtcTokenBuilder, RtcRole } from 'agora-access-token';
 // Meeting Server removed - using Jitsi Meet instead
 // pdf-parse will be imported dynamically in the endpoint
 // Stripe will be imported conditionally based on environment variable
@@ -55,6 +57,9 @@ const {
   JITSI_DOMAIN = "mindwave-meet.duckdns.org",
   JITSI_APP_ID = "mindwave",
   JITSI_APP_SECRET,
+  // Agora.io Configuration
+  AGORA_APP_ID = "6db6c898f5f8477b9daee4f15b3c6157",
+  AGORA_APP_CERTIFICATE = "98222a4dc3614beab274dce13f04e997",
   // Auto-cleanup settings
   AUTO_DELETE_DAYS = "20",
   CLEANUP_ENABLED = "true",
@@ -368,6 +373,41 @@ function generateJitsiToken(userName, userEmail, isModerator, roomName) {
   const token = jwt.sign(payload, JITSI_APP_SECRET, {
     algorithm: 'HS256'
   });
+
+  return token;
+}
+
+// ============================================
+// AGORA.IO TOKEN GENERATION
+// ============================================
+function generateAgoraToken(channelName, uid, role) {
+  // Validate Agora credentials
+  if (!AGORA_APP_ID || !AGORA_APP_CERTIFICATE) {
+    console.error('❌ AGORA_APP_ID or AGORA_APP_CERTIFICATE is not configured!');
+    throw new Error('Agora credentials are required for video conferencing');
+  }
+
+  // Token expires in 24 hours
+  const expirationTimeInSeconds = 86400;
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+
+  // role: 'host' for faculty (can publish), 'audience' for students (can subscribe)
+  const agoraRole = role === 'host' ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
+
+  console.log('🎥 Agora Token Generation:');
+  console.log('  Channel:', channelName);
+  console.log('  UID:', uid);
+  console.log('  Role:', role, '→', agoraRole === RtcRole.PUBLISHER ? 'PUBLISHER' : 'SUBSCRIBER');
+
+  const token = RtcTokenBuilder.buildTokenWithUid(
+    AGORA_APP_ID,
+    AGORA_APP_CERTIFICATE,
+    channelName,
+    uid,
+    agoraRole,
+    privilegeExpiredTs
+  );
 
   return token;
 }
@@ -9920,6 +9960,94 @@ app.post('/api/meetings/:code/join-jitsi', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error joining Jitsi meeting:', error);
     console.error('Error message:', error.message);
+    res.status(500).json({ error: 'Failed to join meeting', details: error.message });
+  }
+});
+
+// ============================================
+// AGORA.IO VIDEO CONFERENCING ENDPOINTS
+// ============================================
+
+// Faculty creates an Agora meeting - gets host token
+app.post('/api/meetings/create-agora', authMiddleware, async (req, res) => {
+  try {
+    const { meetingCode, facultyName, facultyEmail } = req.body;
+    const userId = req.user.sub || req.user.userId || req.user.id;
+
+    // Find user to verify permissions
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Allow organization owners, admins, and faculty to create meetings
+    const canCreateMeeting = user.role === 'admin' || user.orgRole === 'owner' || user.orgRole === 'admin' || user.orgRole === 'faculty';
+
+    if (!canCreateMeeting) {
+      return res.status(403).json({ error: 'Only faculty, admins, and owners can create meetings' });
+    }
+
+    // Channel name = mindwave + meeting code (lowercase)
+    const channelName = 'mindwave' + meetingCode.toLowerCase();
+
+    // Generate UID for faculty (convert user ID to number)
+    // Take last 8 characters of user ID and convert to hex number
+    const uid = parseInt(userId.slice(-8), 16) || Math.floor(Math.random() * 1000000);
+
+    // Generate Agora token with HOST role
+    const token = generateAgoraToken(channelName, uid, 'host');
+
+    res.json({
+      success: true,
+      appId: AGORA_APP_ID,
+      channelName: channelName,
+      token: token,
+      uid: uid,
+      meetingCode: meetingCode,
+      role: 'host'
+    });
+
+  } catch (error) {
+    console.error('Error creating Agora meeting:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Failed to create meeting', details: error.message });
+  }
+});
+
+// Student joins an Agora meeting - gets audience token
+app.post('/api/meetings/:code/join-agora', authMiddleware, async (req, res) => {
+  try {
+    const { code } = req.params;
+    const { studentName, studentEmail } = req.body;
+    const userId = req.user.sub || req.user.userId || req.user.id;
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Channel name must match faculty's channel
+    const channelName = 'mindwave' + code.toLowerCase();
+
+    // Generate UID for student
+    const uid = parseInt(userId.slice(-8), 16) || Math.floor(Math.random() * 1000000);
+
+    // Generate Agora token with AUDIENCE role
+    const token = generateAgoraToken(channelName, uid, 'audience');
+
+    res.json({
+      success: true,
+      appId: AGORA_APP_ID,
+      channelName: channelName,
+      token: token,
+      uid: uid,
+      role: 'audience'
+    });
+
+  } catch (error) {
+    console.error('Error joining Agora meeting:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ error: 'Failed to join meeting', details: error.message });
   }
 });
