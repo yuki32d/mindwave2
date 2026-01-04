@@ -348,8 +348,11 @@
                     window.location.href = 'faculty-dashboard.html';
                 }
             } catch (error) {
-                console.error('Error creating Agora meeting:', error);
-                alert('Failed to create meeting. Please try again.');
+                console.error('❌ Error creating Agora meeting:', error);
+                console.error('Error name:', error.name);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                alert(`Failed to create meeting: ${error.message || 'Unknown error'}`);
                 window.location.href = 'faculty-dashboard.html';
             }
         }
