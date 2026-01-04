@@ -810,15 +810,15 @@
                             <div class="participant-role">Participant</div>
                         </div>
                         <div class="participant-menu">
-                            <button class="participant-menu-btn" onclick="toggleParticipantMenu('${uid}')">⋮</button>
+                            <button class="participant-menu-btn" data-uid="${uid}">⋮</button>
                             <div class="participant-menu-dropdown" id="menu-${uid}">
-                                <div class="participant-menu-item" onclick="requestMuteParticipant('${uid}')">
+                                <div class="participant-menu-item" data-action="mute" data-uid="${uid}">
                                     🔇 Request Mute
                                 </div>
-                                <div class="participant-menu-item" onclick="requestUnmuteParticipant('${uid}')">
+                                <div class="participant-menu-item" data-action="unmute" data-uid="${uid}">
                                     🔊 Request Unmute
                                 </div>
-                                <div class="participant-menu-item danger" onclick="kickParticipant('${uid}')">
+                                <div class="participant-menu-item danger" data-action="kick" data-uid="${uid}">
                                     🚫 Remove from Meeting
                                 </div>
                             </div>
@@ -826,6 +826,32 @@
                     </div>
                 `;
             });
+
+            // Add event listeners for participant menu buttons
+            setTimeout(() => {
+                document.querySelectorAll('.participant-menu-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleParticipantMenu(btn.dataset.uid);
+                    });
+                });
+
+                document.querySelectorAll('.participant-menu-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const action = item.dataset.action;
+                        const uid = item.dataset.uid;
+
+                        if (action === 'kick') {
+                            kickParticipant(uid);
+                        } else if (action === 'mute') {
+                            requestMuteParticipant(uid);
+                        } else if (action === 'unmute') {
+                            requestUnmuteParticipant(uid);
+                        }
+                    });
+                });
+            }, 0);
         }
 
         // Socket.IO Chat System
