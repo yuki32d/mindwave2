@@ -389,6 +389,70 @@
             color: #888;
         }
 
+        .participant-menu {
+            position: relative;
+        }
+
+        .participant-menu-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+            font-size: 18px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .participant-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .participant-menu-dropdown {
+            position: absolute;
+            right: 0;
+            top: 40px;
+            background: rgba(40, 40, 40, 0.98);
+            border-radius: 8px;
+            padding: 8px;
+            min-width: 180px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            display: none;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .participant-menu-dropdown.show {
+            display: block;
+        }
+
+        .participant-menu-item {
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: white;
+        }
+
+        .participant-menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .participant-menu-item.danger:hover {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+        }
+
         .chat-messages {
             display: flex;
             flex-direction: column;
@@ -744,6 +808,20 @@
                         <div class="participant-info">
                             <div class="participant-name">Student ${index + 1}</div>
                             <div class="participant-role">Participant</div>
+                        </div>
+                        <div class="participant-menu">
+                            <button class="participant-menu-btn" onclick="toggleParticipantMenu('${uid}')">⋮</button>
+                            <div class="participant-menu-dropdown" id="menu-${uid}">
+                                <div class="participant-menu-item" onclick="requestMuteParticipant('${uid}')">
+                                    🔇 Request Mute
+                                </div>
+                                <div class="participant-menu-item" onclick="requestUnmuteParticipant('${uid}')">
+                                    🔊 Request Unmute
+                                </div>
+                                <div class="participant-menu-item danger" onclick="kickParticipant('${uid}')">
+                                    🚫 Remove from Meeting
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1135,6 +1213,66 @@
         // Panel close buttons
         document.getElementById('closeParticipantsPanel').addEventListener('click', () => closePanel('participantsPanel'));
         document.getElementById('closeChatPanel').addEventListener('click', () => closePanel('chatPanel'));
+
+        // Participant Management Functions
+        function toggleParticipantMenu(uid) {
+            // Close all other menus first
+            document.querySelectorAll('.participant-menu-dropdown').forEach(menu => {
+                if (menu.id !== `menu-${uid}`) {
+                    menu.classList.remove('show');
+                }
+            });
+
+            // Toggle this menu
+            const menu = document.getElementById(`menu-${uid}`);
+            if (menu) {
+                menu.classList.toggle('show');
+            }
+        }
+
+        function kickParticipant(uid) {
+            if (confirm('Remove this participant from the meeting?')) {
+                // TODO: Implement actual kick via Socket.IO
+                showToast('Participant removed from meeting', 'success');
+
+                // Close menu
+                const menu = document.getElementById(`menu-${uid}`);
+                if (menu) menu.classList.remove('show');
+
+                console.log('Kicked participant:', uid);
+            }
+        }
+
+        function requestMuteParticipant(uid) {
+            // TODO: Send mute request via Socket.IO
+            showToast('Mute request sent to participant', 'info');
+
+            // Close menu
+            const menu = document.getElementById(`menu-${uid}`);
+            if (menu) menu.classList.remove('show');
+
+            console.log('Mute request sent to:', uid);
+        }
+
+        function requestUnmuteParticipant(uid) {
+            // TODO: Send unmute request via Socket.IO
+            showToast('Unmute request sent to participant', 'info');
+
+            // Close menu
+            const menu = document.getElementById(`menu-${uid}`);
+            if (menu) menu.classList.remove('show');
+
+            console.log('Unmute request sent to:', uid);
+        }
+
+        // Close participant menus when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.participant-menu')) {
+                document.querySelectorAll('.participant-menu-dropdown').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
 
         // Host control functions
         let isScreenSharing = false;
