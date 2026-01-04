@@ -209,7 +209,6 @@
         // Initialize meeting
         async function init() {
             const meetingCode = await generateMeetingCode();
-            const roomName = 'MindWave' + meetingCode;
             const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://mindwave2.onrender.com';
 
             try {
@@ -229,6 +228,12 @@
 
                 const data = await response.json();
 
+                console.log('=== Backend Response Debug ===');
+                console.log('Full response:', data);
+                console.log('data.success:', data.success);
+                console.log('data.jitsiUrl:', data.jitsiUrl);
+                console.log('data.meetingCode:', data.meetingCode);
+
                 if (data.success) {
                     const meetingUrl = data.jitsiUrl;
 
@@ -236,8 +241,12 @@
                     document.getElementById('meetingLink').textContent = meetingUrl;
                     document.getElementById('joinBtn').href = meetingUrl;
 
+                    console.log('=== URL Assignment ===');
                     console.log('Meeting Code:', meetingCode);
                     console.log('Meeting URL:', meetingUrl);
+                    console.log('Join Button href:', document.getElementById('joinBtn').href);
+                    console.log('URL includes JWT?', meetingUrl.includes('jwt='));
+                    console.log('URL includes #config?', meetingUrl.includes('#config'));
                 } else {
                     console.error('Failed to create Jitsi meeting:', data.error);
                     alert('Failed to create meeting. Please try again.');
