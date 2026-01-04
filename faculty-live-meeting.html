@@ -106,46 +106,129 @@
 
         .controls {
             position: fixed;
-            bottom: 30px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 15px;
+            gap: 8px;
             z-index: 100;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 50px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
 
-        .controls button {
-            padding: 15px 30px;
-            border-radius: 50px;
+        .control-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
             border: none;
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
             color: white;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            font-size: 20px;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            position: relative;
         }
 
-        .controls button:hover {
+        .control-btn:hover {
             background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+            transform: scale(1.1);
         }
 
-        .controls button.active {
+        .control-btn.active {
             background: #00d4ff;
             color: #000;
         }
 
-        .controls button.danger {
+        .control-btn.danger {
             background: #ff4444;
         }
 
-        .controls button.danger:hover {
+        .control-btn.danger:hover {
             background: #ff6666;
+        }
+
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .control-separator {
+            width: 1px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 4px;
+        }
+
+        .control-tooltip {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .control-btn:hover .control-tooltip {
+            opacity: 1;
+        }
+
+        .more-controls {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 200px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .more-controls.show {
+            display: flex;
+        }
+
+        .more-controls button {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+
+        .more-controls button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .more-controls button svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
         }
 
         .loading {
@@ -222,14 +305,113 @@
         </div>
 
         <div class="controls">
-            <button id="muteBtn">
-                🎤 <span id="muteText">Mute</span>
+            <!-- Mute/Unmute -->
+            <button class="control-btn" id="muteBtn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                    <path
+                        d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                </svg>
+                <span class="control-tooltip">Mute</span>
             </button>
-            <button id="videoBtn">
-                📹 <span id="videoText">Stop Video</span>
+
+            <!-- Video On/Off -->
+            <button class="control-btn" id="videoBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
+                </svg>
+                <span class="control-tooltip">Stop Video</span>
             </button>
-            <button class="danger" id="leaveBtn">
-                📞 Leave Meeting
+
+            <div class="control-separator"></div>
+
+            <!-- Screen Share -->
+            <button class="control-btn" id="screenShareBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.11-.9-2-2-2H4c-1.11 0-2 .89-2 2v10c0 1.1.89 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z" />
+                </svg>
+                <span class="control-tooltip">Share Screen</span>
+            </button>
+
+            <!-- Participants -->
+            <button class="control-btn" id="participantsBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                </svg>
+                <span class="control-tooltip">Participants</span>
+            </button>
+
+            <div class="control-separator"></div>
+
+            <!-- Mute All -->
+            <button class="control-btn" id="muteAllBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z" />
+                </svg>
+                <span class="control-tooltip">Mute All</span>
+            </button>
+
+            <!-- Lock Meeting -->
+            <button class="control-btn" id="lockBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" />
+                </svg>
+                <span class="control-tooltip">Lock Meeting</span>
+            </button>
+
+            <div class="control-separator"></div>
+
+            <!-- More Options -->
+            <button class="control-btn" id="moreBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                </svg>
+                <span class="control-tooltip">More</span>
+            </button>
+
+            <div class="control-separator"></div>
+
+            <!-- Leave Meeting -->
+            <button class="control-btn danger" id="leaveBtn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z" />
+                </svg>
+                <span class="control-tooltip">Leave Meeting</span>
+            </button>
+        </div>
+
+        <!-- More Controls Menu -->
+        <div class="more-controls" id="moreControls">
+            <button id="recordBtn">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="8" />
+                </svg>
+                Start Recording
+            </button>
+            <button id="whiteboardBtn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM11 7h2v2h-2zm0 4h2v6h-2z" />
+                </svg>
+                Whiteboard
+            </button>
+            <button id="chatBtn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+                </svg>
+                Chat
+            </button>
+            <button id="settingsBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                </svg>
+                Settings
             </button>
         </div>
     </div>
@@ -512,10 +694,159 @@
         document.getElementById('videoBtn').addEventListener('click', toggleVideo);
         document.getElementById('leaveBtn').addEventListener('click', leaveMeeting);
 
+        // New control buttons
+        document.getElementById('screenShareBtn').addEventListener('click', toggleScreenShare);
+        document.getElementById('participantsBtn').addEventListener('click', toggleParticipants);
+        document.getElementById('muteAllBtn').addEventListener('click', muteAllStudents);
+        document.getElementById('lockBtn').addEventListener('click', toggleLockMeeting);
+        document.getElementById('moreBtn').addEventListener('click', toggleMoreMenu);
+
+        // More menu buttons
+        document.getElementById('recordBtn').addEventListener('click', toggleRecording);
+        document.getElementById('whiteboardBtn').addEventListener('click', openWhiteboard);
+        document.getElementById('chatBtn').addEventListener('click', toggleChat);
+        document.getElementById('settingsBtn').addEventListener('click', openSettings);
+
+        // Host control functions
+        let isScreenSharing = false;
+        let isMeetingLocked = false;
+        let isRecording = false;
+        let screenTrack = null;
+
+        async function toggleScreenShare() {
+            const btn = document.getElementById('screenShareBtn');
+
+            if (!isScreenSharing) {
+                try {
+                    // Create screen track
+                    screenTrack = await AgoraRTC.createScreenVideoTrack();
+
+                    // Unpublish camera video
+                    if (localVideoTrack) {
+                        await agoraClient.unpublish([localVideoTrack]);
+                    }
+
+                    // Publish screen track
+                    await agoraClient.publish([screenTrack]);
+
+                    // Play screen in local video
+                    screenTrack.play('localVideo');
+
+                    isScreenSharing = true;
+                    btn.classList.add('active');
+                    console.log('✅ Screen sharing started');
+                } catch (error) {
+                    console.error('Error starting screen share:', error);
+                    alert('Failed to start screen sharing');
+                }
+            } else {
+                try {
+                    // Stop screen track
+                    if (screenTrack) {
+                        screenTrack.close();
+                        await agoraClient.unpublish([screenTrack]);
+                    }
+
+                    // Publish camera video again
+                    if (localVideoTrack) {
+                        await agoraClient.publish([localVideoTrack]);
+                        localVideoTrack.play('localVideo');
+                    }
+
+                    isScreenSharing = false;
+                    btn.classList.remove('active');
+                    console.log('✅ Screen sharing stopped');
+                } catch (error) {
+                    console.error('Error stopping screen share:', error);
+                }
+            }
+        }
+
+        function toggleParticipants() {
+            // TODO: Show participants panel
+            alert(`Participants: ${Object.keys(remoteUsers).length + 1} (including you)`);
+        }
+
+        function muteAllStudents() {
+            // TODO: Implement server-side mute all
+            alert('Mute All feature - This would send a command to mute all students');
+            console.log('Mute all students clicked');
+        }
+
+        function toggleLockMeeting() {
+            const btn = document.getElementById('lockBtn');
+            isMeetingLocked = !isMeetingLocked;
+
+            if (isMeetingLocked) {
+                btn.classList.add('active');
+                alert('Meeting locked - No new students can join');
+            } else {
+                btn.classList.remove('active');
+                alert('Meeting unlocked - Students can join again');
+            }
+        }
+
+        function toggleMoreMenu() {
+            const menu = document.getElementById('moreControls');
+            menu.classList.toggle('show');
+        }
+
+        function toggleRecording() {
+            isRecording = !isRecording;
+            const btn = document.getElementById('recordBtn');
+
+            if (isRecording) {
+                btn.innerHTML = `
+                    <svg viewBox="0 0 24 24">
+                        <rect x="6" y="6" width="12" height="12"/>
+                    </svg>
+                    Stop Recording
+                `;
+                alert('Recording started (Note: Requires Agora Cloud Recording setup)');
+            } else {
+                btn.innerHTML = `
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8"/>
+                    </svg>
+                    Start Recording
+                `;
+                alert('Recording stopped');
+            }
+
+            // Hide more menu
+            document.getElementById('moreControls').classList.remove('show');
+        }
+
+        function openWhiteboard() {
+            alert('Whiteboard feature - Coming soon!');
+            document.getElementById('moreControls').classList.remove('show');
+        }
+
+        function toggleChat() {
+            alert('Chat feature - Coming soon!');
+            document.getElementById('moreControls').classList.remove('show');
+        }
+
+        function openSettings() {
+            alert('Settings - Audio/Video device selection coming soon!');
+            document.getElementById('moreControls').classList.remove('show');
+        }
+
+        // Close more menu when clicking outside
+        document.addEventListener('click', function (e) {
+            const moreBtn = document.getElementById('moreBtn');
+            const moreMenu = document.getElementById('moreControls');
+
+            if (!moreBtn.contains(e.target) && !moreMenu.contains(e.target)) {
+                moreMenu.classList.remove('show');
+            }
+        });
+
         // Clean up on page unload
         window.addEventListener('beforeunload', async () => {
             if (localAudioTrack) localAudioTrack.close();
             if (localVideoTrack) localVideoTrack.close();
+            if (screenTrack) screenTrack.close();
             if (agoraClient) await agoraClient.leave();
         });
     </script>
