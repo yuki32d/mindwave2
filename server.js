@@ -1130,11 +1130,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       "default-src": ["'self'"],
-      "script-src": ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net", "https://cdn.sheetjs.com", "https://unpkg.com", "https://*.lottiefiles.com", "https://checkout.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "http://localhost:8000", "http://localhost:9000"],
+      "script-src": ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net", "https://cdn.sheetjs.com", "https://unpkg.com", "https://*.lottiefiles.com", "https://checkout.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "https://download.agora.io", "http://localhost:8000", "http://localhost:9000"],
       "style-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net", "http://localhost:8000", "http://localhost:9000"],
       "img-src": ["'self'", "data:", "https:", "http:", "blob:"],
       "font-src": ["'self'", "data:", "https:", "http:"],
-      "connect-src": ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://api.razorpay.com", "https://checkout.razorpay.com", "https://lumberjack.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "wss://meet.jit.si", "wss://*.jitsi.net", "http://localhost:8000", "ws://localhost:8000", "http://localhost:9000", "ws://localhost:9000"],
+      "connect-src": ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://api.razorpay.com", "https://checkout.razorpay.com", "https://lumberjack.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "wss://meet.jit.si", "wss://*.jitsi.net", "https://*.agora.io", "wss://*.agora.io", "https://*.agoraio.cn", "wss://*.agoraio.cn", "http://localhost:8000", "ws://localhost:8000", "http://localhost:9000", "ws://localhost:9000"],
       "worker-src": ["'self'", "blob:"],
       "frame-src": ["'self'", "*", "https:", "http:", "https://*.youtube.com", "https://youtube.com", "https://*.youtube-nocookie.com", "https://youtube-nocookie.com", "https://player.vimeo.com", "https://vimeo.com", "https://*.vimeo.com", "https://scrimba.com", "https://*.scrimba.com", "https://*.vercel.app", "https://*.netlify.app", "https://*.github.io", "https://*.onrender.com", "https://*.herokuapp.com", "https://*.replit.dev", "https://*.glitch.me", "https://sketchfab.com", "https://*.sketchfab.com", "https://api.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "http://localhost:8000", "http://localhost:9000"],
       "object-src": ["'none'"],
