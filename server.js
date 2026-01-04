@@ -9860,8 +9860,9 @@ app.post('/api/meetings/create-jitsi', authMiddleware, async (req, res) => {
     );
 
 
-    // Construct Jitsi URL with token
-    const jitsiUrl = `https://${JITSI_DOMAIN}/${roomName}?jwt=${token}`;
+    // Construct Jitsi URL with token and force-disable prejoin page
+    // The #config parameter bypasses browser cache and forces Jitsi config
+    const jitsiUrl = `https://${JITSI_DOMAIN}/${roomName}?jwt=${token}#config.prejoinPageEnabled=false`;
 
     res.json({
       success: true,
@@ -9908,8 +9909,9 @@ app.post('/api/meetings/:code/join-jitsi', authMiddleware, async (req, res) => {
       roomName  // Use full room name with "MindWave" prefix
     );
 
-    // Construct Jitsi URL with token
-    const jitsiUrl = `https://${JITSI_DOMAIN}/${roomName}?jwt=${token}`;
+    // Construct Jitsi URL with token and force-disable prejoin page
+    // The #config parameter bypasses browser cache and forces Jitsi config
+    const jitsiUrl = `https://${JITSI_DOMAIN}/${roomName}?jwt=${token}#config.prejoinPageEnabled=false`;
 
     res.json({
       success: true,
