@@ -759,33 +759,44 @@
         let currentMeetingCode = null;
 
         function initializeSocket(meetingCode) {
-            currentMeetingCode = meetingCode;
-            socket = io(API_BASE);
+            // Check if Socket.IO is available
+            if (typeof io === 'undefined') {
+                console.warn('Socket.IO not loaded - chat will be unavailable');
+                return;
+            }
 
-            socket.on('connect', () => {
-                console.log('💬 Socket.IO connected');
+            try {
+                currentMeetingCode = meetingCode;
+                socket = io(API_BASE);
 
-                // Join meeting room
-                socket.emit('join-meeting', {
-                    meetingCode,
-                    userName,
-                    userRole: 'faculty'
+                socket.on('connect', () => {
+                    console.log('💬 Socket.IO connected');
+
+                    // Join meeting room
+                    socket.emit('join-meeting', {
+                        meetingCode,
+                        userName,
+                        userRole: 'faculty'
+                    });
                 });
-            });
 
-            // Listen for new messages
-            socket.on('new-message', ({ userName: senderName, message, timestamp }) => {
-                addMessageToChat(senderName, message, timestamp);
-            });
+                // Listen for new messages
+                socket.on('new-message', ({ userName: senderName, message, timestamp }) => {
+                    addMessageToChat(senderName, message, timestamp);
+                });
 
-            // Listen for meeting ended (shouldn't happen for faculty, but handle it)
-            socket.on('meeting-ended', () => {
-                showToast('Meeting has been ended', 'info');
-            });
+                // Listen for meeting ended (shouldn't happen for faculty, but handle it)
+                socket.on('meeting-ended', () => {
+                    showToast('Meeting has been ended', 'info');
+                });
 
-            socket.on('disconnect', () => {
-                console.log('💬 Socket.IO disconnected');
-            });
+                socket.on('disconnect', () => {
+                    console.log('💬 Socket.IO disconnected');
+                });
+            } catch (error) {
+                console.error('Error initializing Socket.IO:', error);
+                console.warn('Chat will be unavailable');
+            }
         }
 
         function sendChatMessage() {
