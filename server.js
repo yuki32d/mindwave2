@@ -23,6 +23,8 @@ import { WebSocketServer } from 'ws';
 import paymentRoutes from './payment-routes.js';
 // Student Performance Analytics
 import studentPerformanceRoutes from './student-performance-routes.js';
+// Peer Review System
+import { setupPeerReviewRoutes } from './peer-review-backend.js';
 // Live Activity System
 import activitiesRouter from './routes/activities.js';
 import liveSessionsRouter from './routes/live-sessions.js';
@@ -1182,6 +1184,8 @@ app.use('/api/activities', activitiesRouter);
 app.use('/api/live-sessions', liveSessionsRouter);
 // Student Performance Analytics Routes
 app.use('/api/student', authMiddleware, studentPerformanceRoutes);
+// Peer Review System Routes
+setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission);
 
 const authLimiter = rateLimit({
   windowMs: 60 * 1000,
