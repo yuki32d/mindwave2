@@ -366,5 +366,152 @@ function showError(message) {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeReviewModal();
+        closePeerReviewModal();
     }
 });
+
+// ============================================
+// PEER REVIEW FUNCTIONALITY
+// ============================================
+
+// Open peer review modal
+document.getElementById('peerReviewBtn')?.addEventListener('click', openPeerReviewModal);
+document.getElementById('closePeerReviewModalBtn')?.addEventListener('click', closePeerReviewModal);
+document.getElementById('cancelPeerReviewBtn')?.addEventListener('click', closePeerReviewModal);
+document.getElementById('savePeerReviewBtn')?.addEventListener('click', savePeerReviewSettings);
+
+// Enable/disable peer review settings
+document.getElementById('enablePeerReview')?.addEventListener('change', function () {
+    const settingsDiv = document.getElementById('peerReviewSettings');
+    if (this.checked) {
+        settingsDiv.style.display = 'grid';
+    } else {
+        settingsDiv.style.display = 'none';
+    }
+});
+
+// Update grade weight display
+document.getElementById('gradeWeight')?.addEventListener('input', function () {
+    const value = this.value;
+    document.getElementById('gradeWeightValue').textContent = value + '%';
+
+    // Update formula display
+    const facultyWeight = 100 - value;
+    const formula = document.querySelector('#peerReviewSettings .form-group:nth-child(4) p');
+    if (formula) {
+        formula.textContent = `Final Grade = Faculty Grade (${facultyWeight}%) + Peer Review Average (${value}%)`;
+    }
+});
+
+async function openPeerReviewModal() {
+    // Load existing settings if any
+    try {
+        const response = await fetch('/api/peer-review/settings', {
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.settings) {
+                // Populate form with existing settings
+                document.getElementById('enablePeerReview').checked = data.settings.enabled;
+                document.getElementById('reviewsPerStudent').value = data.settings.reviewsPerStudent || 3;
+                document.getElementById('anonymousReviews').checked = data.settings.isAnonymous !== false;
+                document.getElementById('gradeWeight').value = data.settings.gradeWeight || 20;
+
+                if (data.settings.deadline) {
+                    const deadline = new Date(data.settings.deadline);
+                    document.getElementById('reviewDeadline').value = deadline.toISOString().slice(0, 16);
+                }
+
+                // Show/hide settings based on enabled state
+                if (data.settings.enabled) {
+                    document.getElementById('peerReviewSettings').style.display = 'grid';
+                }
+
+                // Update weight display
+                document.getElementById('gradeWeightValue').textContent = (data.settings.gradeWeight || 20) + '%';
+            }
+        }
+    } catch (error) {
+        console.error('Error loading peer review settings:', error);
+    }
+
+    document.getElementById('peerReviewModal').style.display = 'flex';
+}
+
+function closePeerReviewModal() {
+    document.getElementById('peerReviewModal').style.display = 'none';
+}
+
+async function savePeerReviewSettings() {
+    const enabled = document.getElementById('enablePeerReview').checked;
+
+    if (!enabled) {
+        // Just disable peer review
+        try {
+            const response = await fetch('/api/peer-review/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ enabled: false })
+            });
+
+            if (response.ok) {
+                alert('✅ Peer review disabled successfully!');
+                closePeerReviewModal();
+            } else {
+                alert('❌ Failed to save settings');
+            }
+        } catch (error) {
+            console.error('Error saving settings:', error);
+            alert('❌ Network error');
+        }
+        return;
+    }
+
+    // Validate required fields
+    const deadline = document.getElementById('reviewDeadline').value;
+    if (!deadline) {
+        alert('⚠️ Please set a review deadline');
+        return;
+    }
+
+    const settings = {
+        enabled: true,
+        reviewsPerStudent: parseInt(document.getElementById('reviewsPerStudent').value),
+        deadline: new Date(deadline).toISOString(),
+        isAnonymous: document.getElementById('anonymousReviews').checked,
+        gradeWeight: parseInt(document.getElementById('gradeWeight').value)
+    };
+
+    try {
+        const response = await fetch('/api/peer-review/settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(settings)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('✅ Peer review settings saved! Students will be auto-assigned reviews.');
+            closePeerReviewModal();
+
+            // Show success message with details
+            if (data.assignmentsCreated) {
+                alert(`🎉 ${data.assignmentsCreated} peer review assignments created!`);
+            }
+        } else {
+            alert('❌ ' + (data.message || 'Failed to save settings'));
+        }
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        alert('❌ Network error. Please try again.');
+    }
+}
