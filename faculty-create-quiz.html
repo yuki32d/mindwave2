@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MINDWAVE – Create Quiz</title>
     <link rel="stylesheet" href="3d-depth-design.css">
+    <link rel="stylesheet" href="publish-modal.css">
     <style>
         .builder-container {
             max-width: 800px;
@@ -158,6 +159,41 @@
         </div>
     </div>
 
+    <!-- Publish Modal -->
+    <div id="publishModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📢 Publish Quiz</h2>
+                <button class="close-btn" onclick="closePublishModal()">×</button>
+            </div>
+
+            <div class="modal-body">
+                <p>Select which classes should have access to this quiz:</p>
+
+                <div class="form-group">
+                    <label for="modalTargetClasses">Target Classes *</label>
+                    <select id="modalTargetClasses" multiple style="height: 200px; width: 100%;">
+                        <!-- Populated dynamically from /api/faculty/classes -->
+                    </select>
+                    <small>Hold Ctrl/Cmd to select multiple classes</small>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>
+                        <input type="checkbox" id="modalIsPublic">
+                        Make available to all departments
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closePublishModal()">Cancel</button>
+                <button class="btn-primary" onclick="confirmPublish()">Publish Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="publish-modal.js"></script>
     <script src="faculty-create-quiz.js"></script>
 </body>
 

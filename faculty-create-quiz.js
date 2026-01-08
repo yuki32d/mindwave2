@@ -95,6 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Store quiz data globally for modal access
+    let quizDataToPublish = null;
+
     quizForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         console.log('=== QUIZ FORM SUBMITTED ===');
@@ -122,55 +125,69 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const activityData = {
+        // Store quiz data for modal
+        quizDataToPublish = {
             type: 'quiz',
             title: formData.get('title'),
             description: formData.get('description') || 'Multiple choice quiz',
-            content: {
-                questions: parsedQuestions,
-                duration: parseInt(formData.get('duration'))
-            },
-            settings: {
-                timeLimit: parseInt(formData.get('duration')) * 60,
-                showCorrectAnswers: true
-            }
+            duration: parseInt(formData.get('duration')),
+            questions: parsedQuestions,
+            totalPoints: parsedQuestions.reduce((sum, q) => sum + q.points, 0),
+            published: true
         };
 
-        console.log('=== ACTIVITY DATA PREPARED ===');
-        console.log('Full data:', JSON.stringify(activityData, null, 2));
-
-        try {
-            console.log('=== SENDING POST REQUEST TO /api/activities ===');
-            const response = await fetch('/api/activities', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(activityData)
-            });
-
-            console.log('=== RESPONSE RECEIVED ===');
-            console.log('Status:', response.status);
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log('=== SUCCESS ===');
-                showSuccessModal(result.activityId, activityData.title);
-            } else {
-                const error = await response.json();
-                console.error('=== ERROR RESPONSE ===', error);
-                alert('Failed to publish quiz: ' + (error.message || 'Unknown error'));
-            }
-        } catch (err) {
-            console.error('=== FETCH ERROR ===', err);
-            alert('Failed to publish quiz. Please check your connection.');
-        }
+        // Show publish modal instead of directly publishing
+        showPublishModal();
     });
 
     // Add first question by default
     addBtn.click();
 });
+
+// Function called by publish modal when confirmed
+async function publishGameWithClasses(targetClasses, isPublic) {
+    if (!quizDataToPublish) {
+        alert('Error: No quiz data to publish');
+        return;
+    }
+
+    const gameData = {
+        ...quizDataToPublish,
+        targetClasses,
+        isPublic
+    };
+
+    console.log('=== PUBLISHING QUIZ WITH CLASSES ===');
+    console.log('Full data:', JSON.stringify(gameData, null, 2));
+
+    try {
+        const response = await fetch('/api/games', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(gameData)
+        });
+
+        console.log('=== RESPONSE RECEIVED ===');
+        console.log('Status:', response.status);
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('=== SUCCESS ===');
+            alert('✅ Quiz published successfully!');
+            window.location.href = 'admin.html';
+        } else {
+            const error = await response.json();
+            console.error('=== ERROR RESPONSE ===', error);
+            alert('Failed to publish quiz: ' + (error.message || 'Unknown error'));
+        }
+    } catch (err) {
+        console.error('=== FETCH ERROR ===', err);
+        alert('Failed to publish quiz. Please check your connection.');
+    }
+}
 
 // Live Session Modal Functions
 function showSuccessModal(activityId, activityTitle) {

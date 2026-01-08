@@ -440,7 +440,11 @@ const userSchema = new mongoose.Schema(
     bio: { type: String }, // User bio/about me
     phone: { type: String }, // Phone number
     department: { type: String }, // Department/Program
-    yearSemester: { type: String }, // Year/Semester
+    yearSemester: { type: String }, // Year/Semester (legacy field)
+    // New student profile fields
+    rollNumber: { type: String }, // Student roll number (e.g., "STU998630")
+    batch: { type: String }, // Year/batch (e.g., "2024", "2023")
+    section: { type: String, enum: ['A', 'B', 'C', 'D', 'E', ''] }, // Student section
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["student", "admin"], default: "student" },
@@ -448,6 +452,10 @@ const userSchema = new mongoose.Schema(
     // Multi-tenant subscription fields
     organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
     orgRole: { type: String, enum: ['owner', 'admin', 'faculty', 'student'], default: 'student' },
+    // Alumni/Account Status
+    isActive: { type: Boolean, default: true }, // For deactivating alumni accounts
+    deactivatedAt: { type: Date }, // Timestamp when account was deactivated
+    deactivationReason: { type: String }, // e.g., "graduated", "transferred"
     // OAuth Authentication
     authProvider: { type: String, enum: ['google', 'linkedin', 'facebook', 'local'], default: 'local' },
     providerId: { type: String }, // OAuth provider's user ID
@@ -653,7 +661,11 @@ const gameSchema = new mongoose.Schema(
     distractors: { type: Array, default: [] }, // For SQL
     correctQuery: { type: String }, // For SQL
     lines: { type: Array, default: [] }, // For Unjumble
-    scenes: { type: Array, default: [] } // For Scenario
+    scenes: { type: Array, default: [] }, // For Scenario
+
+    // Section-based access control
+    targetClasses: { type: [String], default: [] }, // Array of class identifiers (e.g., ["MCA-2024-A", "MCA-2024-B"])
+    isPublic: { type: Boolean, default: false } // If true, visible to all students regardless of class
   },
   { timestamps: true }
 );
@@ -850,9 +862,13 @@ const LiveQuizSession = mongoose.model("LiveQuizSession", liveQuizSessionSchema)
 const announcementSchema = new mongoose.Schema({
   title: { type: String, required: true },
   body: { type: String, required: true },
-  audience: { type: String, default: 'All Students' },
+  audience: { type: String, default: 'All Students' }, // Legacy field
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+
+  // Section-based access control
+  targetClasses: { type: [String], default: [] }, // Array of class identifiers
+  isPublic: { type: Boolean, default: false } // If true, visible to all students
 }, { timestamps: true });
 
 const Announcement = mongoose.model("Announcement", announcementSchema);
@@ -2180,6 +2196,99 @@ app.get("/api/me", authMiddleware, async (req, res) => {
   res.json({ ok: true, user });
 });
 
+// Update user profile (student settings)
+app.put("/api/users/profile", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const { displayName, bio, rollNumber, phone, batch, department, section } = req.body;
+
+    // Validate required fields for students
+    const user = await User.findById(userId);
+    if (user.role === 'student') {
+      if (!rollNumber || !batch || !department || !section) {
+        return res.status(400).json({
+          ok: false,
+          message: "Roll number, batch, department, and section are required for students"
+        });
+      }
+    }
+
+    // Update user profile
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        displayName,
+        bio,
+        rollNumber,
+        phone,
+        batch,
+        department,
+        section
+      },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    res.json({ ok: true, user: updatedUser });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Get faculty's classes (based on department extracted from email)
+app.get("/api/faculty/classes", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub);
+
+    // Only faculty/admins can access this
+    if (user.role !== 'admin' && user.orgRole !== 'faculty') {
+      return res.status(403).json({ ok: false, message: "Faculty access required" });
+    }
+
+    // Extract department from email (e.g., mca@cmrit.ac.in → MCA)
+    const emailPrefix = user.email.split('@')[0].toUpperCase();
+    const facultyDepartment = emailPrefix; // e.g., "MCA", "MBA", "BTECH"
+
+    // Find all students in this department
+    const students = await User.find({
+      department: { $regex: new RegExp(`^${facultyDepartment}$`, 'i') },
+      role: 'student',
+      isActive: true
+    }).select('section batch department');
+
+    // Build unique class identifiers
+    const classSet = new Set();
+    students.forEach(student => {
+      if (student.department && student.batch && student.section) {
+        const classId = `${student.department}-${student.batch}-${student.section}`;
+        classSet.add(classId);
+      }
+    });
+
+    // Convert to array and sort
+    const classes = Array.from(classSet).sort();
+
+    res.json({
+      ok: true,
+      department: facultyDepartment,
+      classes: classes.map(classId => {
+        const [dept, batch, section] = classId.split('-');
+        return {
+          id: classId,
+          department: dept,
+          batch: batch,
+          section: section,
+          displayName: `${dept} ${batch} - Section ${section}`
+        };
+      })
+    });
+  } catch (error) {
+    console.error("Get faculty classes error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+
 // ===================================
 // ORGANIZATION MANAGEMENT API
 // ===================================
@@ -2993,6 +3102,8 @@ app.post("/api/games", authMiddleware, async (req, res) => {
       description: body.description || body.brief || 'No description',
       difficulty: body.difficulty || 'Normal',
       published: body.published || body.status === 'active' || false,
+      targetClasses: body.targetClasses || [], // Class identifiers (e.g., ["MCA-2024-A"])
+      isPublic: body.isPublic || false, // Public to all students
       createdBy: req.user.sub
     };
 
@@ -3064,9 +3175,28 @@ app.get("/api/games", authMiddleware, async (req, res) => {
   }
 });
 
-app.get("/api/games/published", async (req, res) => {
+app.get("/api/games/published", authMiddleware, async (req, res) => {
   try {
-    const games = await Game.find({ published: true }).populate('createdBy', 'name').sort({ createdAt: -1 });
+    const user = await User.findById(req.user.sub);
+
+    // If user is faculty/admin, show all published games
+    if (user.role === 'admin' || user.orgRole === 'faculty' || user.orgRole === 'owner') {
+      const games = await Game.find({ published: true }).populate('createdBy', 'name').sort({ createdAt: -1 });
+      return res.json({ ok: true, games });
+    }
+
+    // For students, filter by their class identifier
+    const studentClass = `${user.department}-${user.batch}-${user.section}`;
+
+    const games = await Game.find({
+      published: true,
+      $or: [
+        { targetClasses: studentClass }, // Exact match for student's class
+        { isPublic: true }, // Public to all students
+        { targetClasses: { $size: 0 } } // Backward compatibility - no classes assigned
+      ]
+    }).populate('createdBy', 'name').sort({ createdAt: -1 });
+
     res.json({ ok: true, games });
   } catch (error) {
     console.error("Get published games error:", error);
@@ -3274,7 +3404,7 @@ app.post("/api/announcements", authMiddleware, async (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ ok: false, message: "Only admins can create announcements" });
   }
-  const { title, body, audience } = req.body;
+  const { title, body, audience, targetClasses, isPublic } = req.body;
   if (!title || !body) {
     return res.status(400).json({ ok: false, message: "Title and body are required" });
   }
@@ -3282,7 +3412,9 @@ app.post("/api/announcements", authMiddleware, async (req, res) => {
     const announcement = await Announcement.create({
       title,
       body,
-      audience,
+      audience, // Legacy field
+      targetClasses: targetClasses || [], // Class identifiers (e.g., ["MCA-2024-A"])
+      isPublic: isPublic || false, // Public to all students
       createdBy: req.user.sub
     });
 
@@ -3302,9 +3434,28 @@ app.post("/api/announcements", authMiddleware, async (req, res) => {
   }
 });
 
-app.get("/api/announcements", async (req, res) => {
+app.get("/api/announcements", authMiddleware, async (req, res) => {
   try {
-    const announcements = await Announcement.find().sort({ createdAt: -1 }).limit(20);
+    const user = await User.findById(req.user.sub);
+
+    // Faculty/Admin see all their own announcements
+    if (user.role === 'admin' || user.orgRole === 'faculty' || user.orgRole === 'owner') {
+      const announcements = await Announcement.find({ createdBy: req.user.sub })
+        .sort({ createdAt: -1 })
+        .limit(20);
+      return res.json({ ok: true, announcements });
+    }
+
+    // Students see announcements for their class
+    const studentClass = `${user.department}-${user.batch}-${user.section}`;
+    const announcements = await Announcement.find({
+      $or: [
+        { targetClasses: studentClass }, // Exact match for student's class
+        { isPublic: true }, // Public to all students
+        { targetClasses: { $size: 0 } } // Backward compatibility
+      ]
+    }).sort({ createdAt: -1 }).limit(20);
+
     res.json({ ok: true, announcements });
   } catch (error) {
     console.error("Get announcements error:", error);

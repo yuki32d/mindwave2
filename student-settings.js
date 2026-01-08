@@ -5,25 +5,46 @@ function getInitials(name) {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
-function loadSettings() {
-    // Load saved settings from localStorage
-    const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+async function loadSettings() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+            return;
+        }
 
-    document.getElementById('displayName').value = settings.displayName || currentUserName;
-    document.getElementById('bio').value = settings.bio || '';
-    document.getElementById('studentId').value = settings.studentId || 'STU' + Date.now().toString().slice(-6);
-    document.getElementById('email').value = currentUserEmail;
-    document.getElementById('phone').value = settings.phone || '';
-    document.getElementById('department').value = settings.department || '';
-    document.getElementById('yearSemester').value = settings.yearSemester || '';
+        // Load user data from API
+        const response = await fetch(`${window.location.origin}/api/me`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
-    // Load profile photo
-    if (settings.profilePhoto) {
-        document.getElementById('photoImage').src = settings.profilePhoto;
-        document.getElementById('photoImage').style.display = 'block';
-        document.getElementById('photoInitials').style.display = 'none';
-    } else {
-        document.getElementById('photoInitials').textContent = getInitials(settings.displayName || currentUserName);
+        const data = await response.json();
+        if (data.ok && data.user) {
+            const user = data.user;
+
+            // Populate form fields
+            document.getElementById('displayName').value = user.displayName || user.name || '';
+            document.getElementById('bio').value = user.bio || '';
+            document.getElementById('rollNumber').value = user.rollNumber || '';
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('batch').value = user.batch || '';
+            document.getElementById('department').value = user.department || '';
+            document.getElementById('section').value = user.section || '';
+
+            // Load profile photo
+            if (user.profilePhoto) {
+                document.getElementById('photoImage').src = user.profilePhoto;
+                document.getElementById('photoImage').style.display = 'block';
+                document.getElementById('photoInitials').style.display = 'none';
+            } else {
+                document.getElementById('photoInitials').textContent = getInitials(user.displayName || user.name || 'Student');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading settings:', error);
     }
 
     // Load theme
@@ -37,14 +58,20 @@ function loadSettings() {
 async function saveSettings() {
     const displayName = document.getElementById('displayName').value;
     const bio = document.getElementById('bio').value;
+    const rollNumber = document.getElementById('rollNumber').value;
     const phone = document.getElementById('phone').value;
+    const batch = document.getElementById('batch').value;
     const department = document.getElementById('department').value;
-    const yearSemester = document.getElementById('yearSemester').value;
-    const studentId = document.getElementById('studentId').value;
+    const section = document.getElementById('section').value;
 
     // Validate required fields
     if (!displayName) {
         alert('Display name is required!');
+        return;
+    }
+
+    if (!rollNumber || !batch || !department || !section) {
+        alert('Please fill in all required fields: Roll Number, Batch, Department, and Section');
         return;
     }
 
@@ -78,8 +105,8 @@ async function saveSettings() {
             return;
         }
 
-        // Save profile to database
-        const response = await fetch(`${window.location.origin}/api/user/update-profile`, {
+        // Save profile to database using new endpoint
+        const response = await fetch(`${window.location.origin}/api/users/profile`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -88,9 +115,11 @@ async function saveSettings() {
             body: JSON.stringify({
                 displayName,
                 bio,
+                rollNumber,
                 phone,
+                batch,
                 department,
-                yearSemester
+                section
             })
         });
 
@@ -100,18 +129,7 @@ async function saveSettings() {
             throw new Error(data.message || 'Failed to save profile');
         }
 
-        // Save settings to localStorage for offline access
-        const settings = {
-            displayName,
-            bio,
-            phone,
-            department,
-            yearSemester,
-            studentId,
-            profilePhoto: document.getElementById('photoImage').src || null
-        };
-
-        localStorage.setItem('userSettings', JSON.stringify(settings));
+        // Update localStorage
         localStorage.setItem('firstName', displayName);
 
         // Show success message
@@ -125,6 +143,9 @@ async function saveSettings() {
         document.getElementById('currentPassword').value = '';
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmPassword').value = '';
+
+        // Reload settings to show saved data
+        await loadSettings();
 
     } catch (error) {
         console.error('Error saving settings:', error);
