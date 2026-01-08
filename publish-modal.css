@@ -101,17 +101,28 @@
 .modal-body select {
     width: 100%;
     padding: 12px;
-    background: var(--bg-secondary, #111319);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #2a2d3a;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
-    color: var(--text-primary, #f5f7ff);
+    color: #f5f7ff;
     font-size: 14px;
     font-family: inherit;
+}
+
+.modal-body select option {
+    background: #2a2d3a;
+    color: #f5f7ff;
+    padding: 10px;
+}
+
+.modal-body select option:hover {
+    background: #3a3d4a;
 }
 
 .modal-body select:focus {
     outline: none;
     border-color: #0f62fe;
+    box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.1);
 }
 
 .modal-body small {
