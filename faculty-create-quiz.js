@@ -95,9 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Store quiz data globally for modal access
-    let quizDataToPublish = null;
-
     quizForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         console.log('=== QUIZ FORM SUBMITTED ===');
@@ -125,8 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Store quiz data for modal
-        quizDataToPublish = {
+        // Store quiz data for modal (use global variable)
+        window.quizDataToPublish = {
             type: 'quiz',
             title: formData.get('title'),
             description: formData.get('description') || 'Multiple choice quiz',
@@ -144,15 +141,15 @@ document.addEventListener('DOMContentLoaded', () => {
     addBtn.click();
 });
 
-// Function called by publish modal when confirmed
+// Function called by publish modal when confirmed (MUST be global)
 async function publishGameWithClasses(targetClasses, isPublic) {
-    if (!quizDataToPublish) {
+    if (!window.quizDataToPublish) {
         alert('Error: No quiz data to publish');
         return;
     }
 
     const gameData = {
-        ...quizDataToPublish,
+        ...window.quizDataToPublish,
         targetClasses,
         isPublic
     };
