@@ -2245,9 +2245,21 @@ app.get("/api/faculty/classes", authMiddleware, async (req, res) => {
       return res.status(403).json({ ok: false, message: "Faculty access required" });
     }
 
-    // Extract department from email (e.g., mca@cmrit.ac.in → MCA)
-    const emailPrefix = user.email.split('@')[0].toUpperCase();
-    const facultyDepartment = emailPrefix; // e.g., "MCA", "MBA", "BTECH"
+    // Extract department from email
+    // Handles patterns like: mca@cmrit.ac.in, test.mca25@cmrit.ac.in, teflon.mca25@cmrit.ac.in
+    const emailPrefix = user.email.split('@')[0]; // e.g., "teflon.mca25" or "mca"
+    let facultyDepartment = emailPrefix.toUpperCase();
+
+    // If email has a dot, try to extract department from the last part
+    if (emailPrefix.includes('.')) {
+      const parts = emailPrefix.split('.');
+      const lastPart = parts[parts.length - 1]; // e.g., "mca25"
+      // Extract letters only (remove numbers)
+      facultyDepartment = lastPart.replace(/[0-9]/g, '').toUpperCase(); // e.g., "MCA"
+    }
+
+    console.log('Faculty email:', user.email);
+    console.log('Extracted department:', facultyDepartment);
 
     // Find all students in this department
     const students = await User.find({
@@ -2255,6 +2267,8 @@ app.get("/api/faculty/classes", authMiddleware, async (req, res) => {
       role: 'student',
       isActive: true
     }).select('section batch department');
+
+    console.log('Found students:', students.length);
 
     // Build unique class identifiers
     const classSet = new Set();
