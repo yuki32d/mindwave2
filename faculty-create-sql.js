@@ -40,7 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const blocks = query.split(/\s+/).filter(b => b.length > 0);
 
         const formData = new FormData(e.target);
-        const gameData = {
+
+        // Store game data for modal (use global variable)
+        window.gameDataToPublish = {
             type: 'sql-builder',
             title: formData.get('title'),
             brief: formData.get('description'),
@@ -49,29 +51,12 @@ document.addEventListener('DOMContentLoaded', () => {
             correctQuery: query,
             blocks: blocks,
             distractors: distractors,
-            totalPoints: 20, // Fixed points for SQL
-            published: true // Explicitly set published to true
+            totalPoints: 20,
+            published: true
         };
 
-        try {
-            const response = await fetch('/api/games', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(gameData)
-            });
-
-            const result = await response.json();
-
-            if (result.ok) {
-                alert('SQL Challenge published successfully!');
-                window.location.href = 'admin.html';
-            } else {
-                alert('Error: ' + (result.message || 'Failed to publish game'));
-            }
-        } catch (error) {
-            console.error('Error publishing SQL game:', error);
-            alert('Failed to publish game. Please try again.');
-        }
+        // Show publish modal instead of directly publishing
+        showPublishModal();
     });
 
     // Add distractor button
@@ -88,3 +73,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// Function called by publish modal when confirmed (MUST be global)
+async function publishGameWithClasses(targetClasses, isPublic) {
+    if (!window.gameDataToPublish) {
+        alert('Error: No game data to publish');
+        return;
+    }
+
+    const gameData = {
+        ...window.gameDataToPublish,
+        targetClasses,
+        isPublic
+    };
+
+    console.log('Publishing SQL Builder with classes:', gameData);
+
+    try {
+        const response = await fetch('/api/games', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(gameData)
+        });
+
+        if (response.ok) {
+            alert('✅ SQL Challenge published successfully!');
+            window.location.href = 'admin.html';
+        } else {
+            const error = await response.json();
+            alert('Failed to publish: ' + (error.message || 'Unknown error'));
+        }
+    } catch (err) {
+        console.error('Publish error:', err);
+        alert('Failed to publish. Please check your connection.');
+    }
+}
