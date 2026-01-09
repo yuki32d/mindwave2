@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINDWAVE Î“Ã‡Ã´ Faculty Settings</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – Faculty Settings</title>
     <link rel="stylesheet" href="3d-depth-design.css">
 
     <script src="theme-init.js"></script>
@@ -190,7 +191,7 @@
             <h1 id="pageTitle">Mission Control</h1>
             <p class="lede" id="pageSubtitle">Manage gamification, visuals, and platform security.</p>
             <div class="hero-actions">
-                <a class="ghost-link" href="admin.html">Î“Ã¥Ã‰ Back to Creator Hub</a>
+                <a class="ghost-link" href="admin.html">← Back to Creator Hub</a>
             </div>
         </header>
 
@@ -199,7 +200,7 @@
 
             <!-- 1. Gamification Control -->
             <div class="settings-card">
-                <h2>â‰¡Â« Gamification Control</h2>
+                <h2>🎮 Gamification Control</h2>
 
                 <div class="control-group">
                     <div class="control-label">
@@ -218,12 +219,12 @@
                         <span>Clear all student leaderboards.</span>
                     </div>
                 </div>
-                <button class="danger-btn">Î“ÃœÃ¡âˆ©â••Ã… Reset All Progress</button>
+                <button class="danger-btn">⚠️ Reset All Progress</button>
             </div>
 
             <!-- 2. Visual Command Center -->
             <div class="settings-card">
-                <h2>â‰¡Â¿ Visual Command</h2>
+                <h2>🎨 Visual Command</h2>
 
                 <div class="control-group">
                     <div class="control-label">
@@ -252,7 +253,7 @@
 
             <!-- 3. Security & Access -->
             <div class="settings-card">
-                <h2>â‰¡Æ’Ã¶Ã† Security & Access</h2>
+                <h2>🔒 Security & Access</h2>
 
                 <div class="control-group">
                     <div class="control-label">
@@ -279,7 +280,7 @@
 
             <!-- 4. Faculty Management (Super Admin Only) -->
             <div class="settings-card" id="facultyManagementSection" style="display: none;">
-                <h2>â‰¡ Faculty Management</h2>
+                <h2>🔐 Faculty Management</h2>
 
                 <div class="control-group">
                     <div class="control-label">
@@ -291,14 +292,14 @@
                 <a href="admin-approvals.html" style="text-decoration: none;">
                     <button class="primary-btn"
                         style="width: 100%; margin-top: 8px; background: linear-gradient(120deg, #0f62fe, #8a3ffc); color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600;">
-                        Î“Â£Ã  Open Admin Approvals
+                        ✅ Open Admin Approvals
                     </button>
                 </a>
             </div>
 
             <!-- 5. Student Management -->
             <div class="settings-card">
-                <h2>â‰¡Æ’Ã¦Ã‘ Student Management</h2>
+                <h2>👥 Student Management</h2>
 
                 <div class="control-group">
                     <div class="control-label">
@@ -310,14 +311,14 @@
                 <a href="manage-students.html" style="display: block; text-decoration: none; margin-top: 8px;">
                     <button class="primary-btn"
                         style="background: linear-gradient(120deg, #0f62fe, #8a3ffc); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; font-size: 14px;">
-                        â‰¡Æ’Ã´Ã¯ Open Student Management
+                        📋 Open Student Management
                     </button>
                 </a>
             </div>
 
-            <!-- 5. Game Management -->
+            <!-- 6. Game Management -->
             <div class="settings-card">
-                <h2>â‰¡Â« Game Management</h2>
+                <h2>🎮 Game Management</h2>
 
                 <div class="control-group">
                     <div class="control-label">
@@ -329,7 +330,7 @@
                 <a href="manage-games.html" style="display: block; text-decoration: none; margin-bottom: 16px;">
                     <button class="primary-btn"
                         style="background: linear-gradient(120deg, #0f62fe, #8a3ffc); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; font-size: 14px;">
-                        â‰¡Æ’Ã´Ã¯ Manage Games
+                        📋 Manage Games
                     </button>
                 </a>
 
@@ -339,7 +340,48 @@
                         <span>Remove all games from student dashboard.</span>
                     </div>
                 </div>
-                <button class="danger-btn" id="deleteAllGamesBtn">â‰¡Æ’Ã¹Ã¦âˆ©â••Ã… Delete All Games</button>
+                <button class="danger-btn" id="deleteAllGamesBtn">🗑️ Delete All Games</button>
+            </div>
+
+            <!-- 7. Alumni Batch Management -->
+            <div class="settings-card">
+                <h2>🎓 Alumni Batch Management</h2>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <strong>Block Graduated Batches</strong>
+                        <span>Disable login for entire batches by email pattern.</span>
+                    </div>
+                </div>
+
+                <!-- Add New Block Form -->
+                <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                    <label style="display: block; font-size: 13px; color: #9ea4b6; margin-bottom: 6px;">Email
+                        Pattern</label>
+                    <input type="text" id="emailPattern" placeholder=".mca25@cmrit.ac.in"
+                        style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; margin-bottom: 12px;">
+
+                    <label style="display: block; font-size: 13px; color: #9ea4b6; margin-bottom: 6px;">Reason</label>
+                    <input type="text" id="blockReason" placeholder="Graduated - Class of 2025"
+                        style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; margin-bottom: 12px;">
+
+                    <button id="blockPatternBtn"
+                        style="width: 100%; background: linear-gradient(120deg, #ff9f0a, #ff3b30); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                        🚫 Block Batch
+                    </button>
+                </div>
+
+                <!-- Blocked Patterns List -->
+                <div class="control-group">
+                    <div class="control-label">
+                        <strong>Currently Blocked Patterns</strong>
+                        <span id="blockedCount">Loading...</span>
+                    </div>
+                </div>
+
+                <div id="blockedPatternsList" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Populated dynamically -->
+                </div>
             </div>
 
         </div>
@@ -347,8 +389,7 @@
 
     <!-- We still include role-page.js for the header, but it won't find #panelGrid -->
     <script src="role-page.js"></script>
-
-    <script src="faculty-settings.js"></script></body>
+    <script src="faculty-settings.js"></script>
+</body>
 
 </html>
-
