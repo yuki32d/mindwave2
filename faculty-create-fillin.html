@@ -95,6 +95,38 @@
         </div>
     </div>
 
+
+    <!-- Publish Modal -->
+    <div id="publishModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📢 Publish Game</h2>
+                <button class="close-btn" id="modalCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Select which classes should have access to this game:</p>
+                <label for="modalTargetClasses">Target Classes *</label>
+                <select id="modalTargetClasses" multiple size="5">
+                    <!-- Populated dynamically -->
+                </select>
+                <p style="font-size: 12px; color: #9ea4b6; margin-top: 8px;">Hold Ctrl/Cmd to select multiple classes
+                </p>
+
+                <label style="display: flex; align-items: center; gap: 8px; margin-top: 16px;">
+                    <input type="checkbox" id="modalIsPublic">
+                    <span>Make available to all departments</span>
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="modalCancelBtn">Cancel</button>
+                <button class="btn-primary" id="modalConfirmBtn">Publish Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Publish Modal Scripts -->
+    <link rel="stylesheet" href="publish-modal.css">
+    <script src="publish-modal.js"></script>
     <script src="faculty-create-fillin.js"></script>
 </body>
 

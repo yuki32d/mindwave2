@@ -113,7 +113,9 @@ document.getElementById('sorterForm').addEventListener('submit', async (e) => {
     }
 
     const formData = new FormData(e.target);
-    const gameData = {
+
+    // Store game data for modal (use global variable)
+    window.gameDataToPublish = {
         type: 'tech-sorter',
         title: formData.get('title'),
         duration: parseInt(formData.get('duration')),
@@ -124,24 +126,44 @@ document.getElementById('sorterForm').addEventListener('submit', async (e) => {
         published: true
     };
 
+    // Show publish modal instead of directly publishing
+    showPublishModal();
+});
+
+// Function called by publish modal when confirmed (MUST be global)
+async function publishGameWithClasses(targetClasses, isPublic) {
+    if (!window.gameDataToPublish) {
+        alert('Error: No game data to publish');
+        return;
+    }
+
+    const gameData = {
+        ...window.gameDataToPublish,
+        targetClasses,
+        isPublic
+    };
+
+    console.log('Publishing Tech Sorter with classes:', gameData);
+
     try {
         const response = await fetch('/api/games', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify(gameData)
         });
 
         if (response.ok) {
-            alert('Sorter Game published successfully!');
+            alert('✅ Sorter Game published successfully!');
             window.location.href = 'admin.html';
         } else {
             const error = await response.json();
-            alert('Failed to publish game: ' + (error.message || 'Unknown error'));
+            alert('Failed to publish: ' + (error.message || 'Unknown error'));
         }
     } catch (err) {
-        console.error('Error publishing game:', err);
-        alert('Failed to publish game. Please check your connection.');
+        console.error('Publish error:', err);
+        alert('Failed to publish. Please check your connection.');
     }
-});
+}

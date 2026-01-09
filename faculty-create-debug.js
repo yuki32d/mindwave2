@@ -68,9 +68,8 @@ async function publishGame() {
     const bugCount = parseInt(document.getElementById('bugCount').value);
     const result = injectBugs(perfectCode, bugCount);
 
-    // CRITICAL: Verify that bugs were actually injected
     if (result.buggyCode === perfectCode) {
-        alert('⚠️ Bug injection failed! The code is too simple or doesn\'t have enough lines to inject bugs. Please add more code or reduce the number of bugs.');
+        alert('⚠️ Bug injection failed! The code is too simple or doesn\'t have enough lines to inject bugs.');
         return;
     }
 
@@ -79,7 +78,8 @@ async function publishGame() {
         return;
     }
 
-    const game = {
+    // Store game data for modal (use global variable)
+    window.gameDataToPublish = {
         type: 'bug-hunt',
         title: title,
         description: description,
@@ -96,13 +96,33 @@ async function publishGame() {
         published: true
     };
 
+    // Show publish modal instead of directly publishing
+    showPublishModal();
+}
+
+// Function called by publish modal when confirmed (MUST be global)
+async function publishGameWithClasses(targetClasses, isPublic) {
+    if (!window.gameDataToPublish) {
+        alert('Error: No game data to publish');
+        return;
+    }
+
+    const gameData = {
+        ...window.gameDataToPublish,
+        targetClasses,
+        isPublic
+    };
+
+    console.log('Publishing Bug Hunt with classes:', gameData);
+
     try {
         const response = await fetch('/api/games', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify(game)
+            body: JSON.stringify(gameData)
         });
 
         if (response.ok) {
@@ -110,10 +130,10 @@ async function publishGame() {
             window.location.href = 'admin.html';
         } else {
             const error = await response.json();
-            alert('Failed to publish game: ' + (error.message || 'Unknown error'));
+            alert('Failed to publish: ' + (error.message || 'Unknown error'));
         }
     } catch (err) {
-        console.error('Error publishing game:', err);
-        alert('Failed to publish game. Please check your connection.');
+        console.error('Publish error:', err);
+        alert('Failed to publish. Please check your connection.');
     }
 }

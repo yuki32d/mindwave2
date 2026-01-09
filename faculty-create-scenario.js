@@ -253,7 +253,8 @@ function previewScenario() {
 async function publishScenario() {
     if (!validateScenario()) return;
 
-    const payload = {
+    // Store game data for modal (use global variable)
+    window.gameDataToPublish = {
         title: gameTitle.value.trim(),
         type: 'scenario',
         difficulty: gameDifficulty.value,
@@ -266,12 +267,34 @@ async function publishScenario() {
         }, 0)
     };
 
+    // Show publish modal instead of directly publishing
+    showPublishModal();
+}
+
+// Function called by publish modal when confirmed (MUST be global)
+async function publishGameWithClasses(targetClasses, isPublic) {
+    if (!window.gameDataToPublish) {
+        alert('Error: No game data to publish');
+        return;
+    }
+
+    const gameData = {
+        ...window.gameDataToPublish,
+        targetClasses,
+        isPublic
+    };
+
+    console.log('Publishing Scenario with classes:', gameData);
+
     try {
         const res = await fetch(`${API_BASE}/api/games`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
             credentials: 'include',
-            body: JSON.stringify(payload)
+            body: JSON.stringify(gameData)
         });
 
         const data = await res.json();
