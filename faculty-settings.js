@@ -195,3 +195,148 @@ function rgbToHex(rgb) {
     }
     return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
 }
+
+// ===================================
+// ALUMNI BATCH MANAGEMENT
+// ===================================
+
+// Load blocked email patterns
+async function loadBlockedPatterns() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/admin/blocked-patterns', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.ok && data.patterns) {
+            renderBlockedPatterns(data.patterns);
+        } else {
+            console.error('Failed to load blocked patterns:', data.message);
+        }
+    } catch (error) {
+        console.error('Load blocked patterns error:', error);
+    }
+}
+
+// Render blocked patterns in the UI
+function renderBlockedPatterns(patterns) {
+    const container = document.getElementById('blockedPatternsList');
+    const countSpan = document.getElementById('blockedCount');
+
+    if (!container) return;
+
+    if (patterns.length === 0) {
+        container.innerHTML = '<p style="color: #9ea4b6; text-align: center; padding: 20px;">No blocked patterns yet.</p>';
+        if (countSpan) countSpan.textContent = '0 patterns blocked';
+        return;
+    }
+
+    if (countSpan) countSpan.textContent = `${patterns.length} pattern(s) blocked`;
+
+    container.innerHTML = patterns.map(pattern => `
+        <div class="student-item" style="margin-bottom: 12px;">
+            <div class="student-info">
+                <strong>${pattern.pattern}</strong>
+                <span>${pattern.reason}</span>
+                <span style="display: block; margin-top: 4px; font-size: 12px;">
+                    🚫 ${pattern.affectedCount} account(s) blocked • 
+                    ${new Date(pattern.blockedAt).toLocaleDateString()}
+                </span>
+            </div>
+            <button class="delete-student-btn" onclick="unblockPattern('${pattern._id}')">
+                Unblock
+            </button>
+        </div>
+    `).join('');
+}
+
+// Block a new email pattern
+async function blockPattern() {
+    const patternInput = document.getElementById('emailPattern');
+    const reasonInput = document.getElementById('blockReason');
+
+    const pattern = patternInput.value.trim();
+    const reason = reasonInput.value.trim();
+
+    if (!pattern || !reason) {
+        alert('Please enter both email pattern and reason');
+        return;
+    }
+
+    if (!confirm(`Block all accounts matching "${pattern}"?\n\nThis will immediately disable login for all matching students.`)) {
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/admin/block-pattern', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ pattern, reason })
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+            alert(`✅ ${data.message}`);
+            patternInput.value = '';
+            reasonInput.value = '';
+            loadBlockedPatterns(); // Refresh list
+        } else {
+            alert(`❌ Failed: ${data.message}`);
+        }
+    } catch (error) {
+        console.error('Block pattern error:', error);
+        alert('❌ Failed to block pattern. Please try again.');
+    }
+}
+
+// Unblock an email pattern
+async function unblockPattern(id) {
+    if (!confirm('Unblock this pattern?\n\nThis will reactivate all matching student accounts.')) {
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/admin/blocked-patterns/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+            alert(`✅ ${data.message}`);
+            loadBlockedPatterns(); // Refresh list
+        } else {
+            alert(`❌ Failed: ${data.message}`);
+        }
+    } catch (error) {
+        console.error('Unblock pattern error:', error);
+        alert('❌ Failed to unblock pattern. Please try again.');
+    }
+}
+
+// Initialize alumni batch management
+document.addEventListener('DOMContentLoaded', () => {
+    // Load blocked patterns if the section exists
+    if (document.getElementById('blockedPatternsList')) {
+        loadBlockedPatterns();
+
+        // Add event listener to block button
+        const blockBtn = document.getElementById('blockPatternBtn');
+        if (blockBtn) {
+            blockBtn.addEventListener('click', blockPattern);
+        }
+    }
+});

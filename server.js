@@ -873,6 +873,34 @@ const announcementSchema = new mongoose.Schema({
 
 const Announcement = mongoose.model("Announcement", announcementSchema);
 
+// Blocked Email Pattern Schema for Alumni Batch Deactivation
+const blockedEmailPatternSchema = new mongoose.Schema({
+  pattern: {
+    type: String,
+    required: true,
+    unique: true
+  }, // e.g., ".mca25@cmrit.ac.in" or "mca25@cmrit.ac.in"
+  reason: {
+    type: String,
+    required: true
+  }, // e.g., "Graduated - Class of 2025"
+  blockedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  blockedAt: {
+    type: Date,
+    default: Date.now
+  },
+  affectedCount: {
+    type: Number,
+    default: 0
+  } // Number of users affected
+}, { timestamps: true });
+
+const BlockedEmailPattern = mongoose.model("BlockedEmailPattern", blockedEmailPatternSchema);
+
 // Community Feature Schemas
 const communityPostSchema = new mongoose.Schema({
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -1664,6 +1692,14 @@ app.post("/api/login", authLimiter, async (req, res) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ ok: false, message: "Invalid credentials" });
 
+    // Check if account is active (for alumni deactivation)
+    if (!user.isActive) {
+      return res.status(403).json({
+        ok: false,
+        message: "Your account has been deactivated. Please contact administration for assistance."
+      });
+    }
+
     const token = signToken(user);
     res
       .cookie("mindwave_token", token, {
@@ -2298,6 +2334,146 @@ app.get("/api/faculty/classes", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Get faculty classes error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// ===================================
+// ALUMNI BATCH DEACTIVATION API
+// ===================================
+
+// Get all blocked email patterns
+app.get("/api/admin/blocked-patterns", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub);
+
+    // Only admins can access
+    if (user.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const patterns = await BlockedEmailPattern.find()
+      .populate('blockedBy', 'name email')
+      .sort({ blockedAt: -1 });
+
+    res.json({ ok: true, patterns });
+  } catch (error) {
+    console.error("Get blocked patterns error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Block a new email pattern
+app.post("/api/admin/block-pattern", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub);
+
+    // Only admins can access
+    if (user.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const { pattern, reason } = req.body;
+
+    if (!pattern || !reason) {
+      return res.status(400).json({ ok: false, message: "Pattern and reason are required" });
+    }
+
+    // Check if pattern already exists
+    const existing = await BlockedEmailPattern.findOne({ pattern });
+    if (existing) {
+      return res.status(400).json({ ok: false, message: "This pattern is already blocked" });
+    }
+
+    // Find all users matching the pattern
+    const allUsers = await User.find({ role: 'student' });
+    const matchingUsers = allUsers.filter(u => {
+      if (pattern.startsWith('.')) {
+        return u.email.includes(pattern);
+      } else {
+        return u.email === pattern || u.email.endsWith('@' + pattern);
+      }
+    });
+
+    // Deactivate all matching users
+    const userIds = matchingUsers.map(u => u._id);
+    await User.updateMany(
+      { _id: { $in: userIds } },
+      {
+        $set: {
+          isActive: false,
+          deactivatedAt: new Date(),
+          deactivationReason: reason
+        }
+      }
+    );
+
+    // Save the blocked pattern
+    const blockedPattern = await BlockedEmailPattern.create({
+      pattern,
+      reason,
+      blockedBy: req.user.sub,
+      affectedCount: matchingUsers.length
+    });
+
+    res.json({
+      ok: true,
+      message: `Blocked ${matchingUsers.length} student account(s)`,
+      pattern: blockedPattern
+    });
+  } catch (error) {
+    console.error("Block pattern error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Unblock an email pattern
+app.delete("/api/admin/blocked-patterns/:id", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub);
+
+    // Only admins can access
+    if (user.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const blockedPattern = await BlockedEmailPattern.findById(req.params.id);
+    if (!blockedPattern) {
+      return res.status(404).json({ ok: false, message: "Pattern not found" });
+    }
+
+    // Find all users matching the pattern
+    const allUsers = await User.find({ role: 'student', isActive: false });
+    const matchingUsers = allUsers.filter(u => {
+      if (blockedPattern.pattern.startsWith('.')) {
+        return u.email.includes(blockedPattern.pattern);
+      } else {
+        return u.email === blockedPattern.pattern || u.email.endsWith('@' + blockedPattern.pattern);
+      }
+    });
+
+    // Reactivate all matching users
+    const userIds = matchingUsers.map(u => u._id);
+    await User.updateMany(
+      { _id: { $in: userIds } },
+      {
+        $set: {
+          isActive: true,
+          deactivatedAt: null,
+          deactivationReason: null
+        }
+      }
+    );
+
+    // Delete the blocked pattern
+    await BlockedEmailPattern.findByIdAndDelete(req.params.id);
+
+    res.json({
+      ok: true,
+      message: `Unblocked ${matchingUsers.length} student account(s)`
+    });
+  } catch (error) {
+    console.error("Unblock pattern error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });
