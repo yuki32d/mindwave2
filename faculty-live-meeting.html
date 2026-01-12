@@ -774,7 +774,6 @@
         .camera-off-avatar.hidden {
             display: none !important;
         }
-        }
 
         /* Participant count badge */
         .participant-count-badge {
@@ -1592,30 +1591,55 @@
 
             const videoBtn = document.getElementById('videoBtn');
             const videoText = document.getElementById('videoText');
-            const cameraOffAvatar = document.getElementById('localCameraOffAvatar');
+            const localVideoContainer = document.getElementById('localVideo');
 
-            console.log('Toggle video:', { isVideoOff, avatarElement: cameraOffAvatar });
+            console.log('Toggle video:', { isVideoOff });
 
             if (isVideoOff) {
                 videoBtn.classList.add('active');
                 videoText.textContent = 'Start Video';
-                // Show avatar when camera is off
-                if (cameraOffAvatar) {
-                    cameraOffAvatar.classList.remove('hidden');
-                    cameraOffAvatar.style.display = 'flex'; // Force display
-                    cameraOffAvatar.style.zIndex = '20'; // Ensure it's on top
-                    console.log('✅ Avatar shown', cameraOffAvatar.style.cssText);
-                } else {
-                    console.error('❌ Avatar element not found!');
+
+                // Remove old avatar if exists
+                const oldAvatar = document.getElementById('localCameraOffAvatar');
+                if (oldAvatar) {
+                    oldAvatar.remove();
                 }
+
+                // Create fresh avatar element
+                const avatar = document.createElement('div');
+                avatar.id = 'localCameraOffAvatar';
+                avatar.className = 'camera-off-avatar';
+
+                // Set content and style
+                const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                avatar.textContent = initials;
+                avatar.style.backgroundColor = getAvatarColor(userName);
+                avatar.style.display = 'flex';
+                avatar.style.position = 'absolute';
+                avatar.style.top = '50%';
+                avatar.style.left = '50%';
+                avatar.style.transform = 'translate(-50%, -50%)';
+                avatar.style.width = '80px';
+                avatar.style.height = '80px';
+                avatar.style.borderRadius = '50%';
+                avatar.style.alignItems = 'center';
+                avatar.style.justifyContent = 'center';
+                avatar.style.fontSize = '32px';
+                avatar.style.fontWeight = '700';
+                avatar.style.color = 'white';
+                avatar.style.zIndex = '999';
+
+                localVideoContainer.appendChild(avatar);
+                console.log('✅ Avatar created and shown:', avatar);
             } else {
                 videoBtn.classList.remove('active');
                 videoText.textContent = 'Stop Video';
-                // Hide avatar when camera is on
-                if (cameraOffAvatar) {
-                    cameraOffAvatar.classList.add('hidden');
-                    cameraOffAvatar.style.display = 'none'; // Force hide
-                    console.log('✅ Avatar hidden');
+
+                // Remove avatar when camera is on
+                const avatar = document.getElementById('localCameraOffAvatar');
+                if (avatar) {
+                    avatar.remove();
+                    console.log('✅ Avatar removed');
                 }
             }
         }
