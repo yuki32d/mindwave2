@@ -415,12 +415,19 @@
                     // Play local video
                     localVideoTrack.play('localVideo');
 
-                    // Set up local avatar
-                    const localAvatar = document.getElementById('localAvatar');
-                    if (localAvatar) {
-                        localAvatar.textContent = getInitials(userName);
-                        localAvatar.style.backgroundColor = getAvatarColor(userName);
+                    // Ensure avatar element exists after video plays (Agora may modify the container)
+                    let localAvatar = document.getElementById('localAvatar');
+                    if (!localAvatar) {
+                        // Create avatar if it doesn't exist
+                        localAvatar = document.createElement('div');
+                        localAvatar.id = 'localAvatar';
+                        localAvatar.className = 'avatar-initials hidden';
+                        document.getElementById('localVideo').appendChild(localAvatar);
                     }
+
+                    // Set up local avatar with initials and color
+                    localAvatar.textContent = getInitials(userName);
+                    localAvatar.style.backgroundColor = getAvatarColor(userName);
 
                     // Publish tracks (students can also publish in this setup)
                     await agoraClient.publish([localAudioTrack, localVideoTrack]);

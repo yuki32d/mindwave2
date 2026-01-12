@@ -1389,12 +1389,6 @@
                     const modal = document.getElementById('meetingCodeModal');
                     modal.classList.remove('hidden');
 
-                    // Setup camera-off avatar
-                    const localAvatar = document.getElementById('localCameraOffAvatar');
-                    const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-                    localAvatar.textContent = initials;
-                    localAvatar.style.backgroundColor = getAvatarColor(userName);
-
                     // Initialize Socket.IO for chat
                     initializeSocket(meetingCode);
 
@@ -1442,6 +1436,21 @@
 
                     // Play local video
                     localVideoTrack.play('localVideo');
+
+                    // Ensure avatar element exists after video plays (Agora may modify the container)
+                    let localAvatar = document.getElementById('localCameraOffAvatar');
+                    if (!localAvatar) {
+                        // Create avatar if it doesn't exist
+                        localAvatar = document.createElement('div');
+                        localAvatar.id = 'localCameraOffAvatar';
+                        localAvatar.className = 'camera-off-avatar hidden';
+                        document.getElementById('localVideo').appendChild(localAvatar);
+                    }
+
+                    // Set up avatar with initials and color
+                    const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                    localAvatar.textContent = initials;
+                    localAvatar.style.backgroundColor = getAvatarColor(userName);
 
                     // Publish tracks
                     await agoraClient.publish([localAudioTrack, localVideoTrack]);
