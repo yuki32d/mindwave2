@@ -1619,7 +1619,12 @@
             const videoText = document.getElementById('videoText');
             const localVideoContainer = document.getElementById('localVideo');
 
-            console.log('Toggle video:', { isVideoOff });
+            console.log('Toggle video:', { isVideoOff, localVideoContainer, containerExists: !!localVideoContainer });
+
+            if (!localVideoContainer) {
+                console.error('❌ Local video container not found!');
+                return;
+            }
 
             if (isVideoOff) {
                 videoBtn.classList.add('active');
@@ -1633,13 +1638,30 @@
 
                 // Create fresh avatar element
                 const avatar = document.createElement('div');
+                console.log('Created avatar element:', avatar);
+
+                if (!avatar) {
+                    console.error('❌ Failed to create avatar element!');
+                    return;
+                }
+
                 avatar.id = 'localCameraOffAvatar';
                 avatar.className = 'camera-off-avatar';
 
                 // Set content and style
                 const name = userName || localStorage.getItem('userName') || 'User';
+                console.log('Using name for avatar:', name);
+
                 const initials = name.split(' ').filter(n => n).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
-                avatar.textContent = initials;
+                console.log('Generated initials:', initials);
+
+                try {
+                    avatar.textContent = initials;
+                    console.log('Set textContent successfully');
+                } catch (error) {
+                    console.error('❌ Error setting textContent:', error);
+                    return;
+                }
                 avatar.style.backgroundColor = getAvatarColor(name);
                 avatar.style.display = 'flex';
                 avatar.style.position = 'absolute';
