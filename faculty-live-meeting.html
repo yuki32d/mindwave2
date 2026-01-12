@@ -1441,6 +1441,7 @@
                     let localAvatar = document.getElementById('localCameraOffAvatar');
                     if (!localAvatar) {
                         // Create avatar if it doesn't exist
+                        console.log('Creating avatar element...');
                         localAvatar = document.createElement('div');
                         localAvatar.id = 'localCameraOffAvatar';
                         localAvatar.className = 'camera-off-avatar hidden';
@@ -1451,6 +1452,7 @@
                     const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
                     localAvatar.textContent = initials;
                     localAvatar.style.backgroundColor = getAvatarColor(userName);
+                    console.log('✅ Avatar setup complete:', { initials, color: getAvatarColor(userName), element: localAvatar });
 
                     // Publish tracks
                     await agoraClient.publish([localAudioTrack, localVideoTrack]);
@@ -1591,12 +1593,17 @@
             const videoText = document.getElementById('videoText');
             const cameraOffAvatar = document.getElementById('localCameraOffAvatar');
 
+            console.log('Toggle video:', { isVideoOff, avatarElement: cameraOffAvatar });
+
             if (isVideoOff) {
                 videoBtn.classList.add('active');
                 videoText.textContent = 'Start Video';
                 // Show avatar when camera is off
                 if (cameraOffAvatar) {
                     cameraOffAvatar.classList.remove('hidden');
+                    console.log('✅ Avatar shown');
+                } else {
+                    console.error('❌ Avatar element not found!');
                 }
             } else {
                 videoBtn.classList.remove('active');
@@ -1604,6 +1611,7 @@
                 // Hide avatar when camera is on
                 if (cameraOffAvatar) {
                     cameraOffAvatar.classList.add('hidden');
+                    console.log('✅ Avatar hidden');
                 }
             }
         }
