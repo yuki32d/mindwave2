@@ -1058,12 +1058,38 @@
     <script>
         // Authentication
         const token = localStorage.getItem('token');
-        const userName = localStorage.getItem('userName') || 'Faculty';
+        let userName = localStorage.getItem('userName') || 'Faculty';
         const userEmail = localStorage.getItem('userEmail') || '';
 
         if (!token) {
             window.location.href = 'admin-login.html';
         }
+
+        // Fetch user data from API
+        async function fetchUserData() {
+            const API_BASE = window.location.hostname === 'localhost'
+                ? 'http://localhost:8081'
+                : 'https://mindwave2.onrender.com';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    userName = data.name || userName;
+                    console.log('✅ User data loaded:', { name: userName });
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        }
+
+        // Fetch user data on load
+        fetchUserData();
 
         // Agora client and tracks
         let agoraClient = null;
@@ -1611,9 +1637,10 @@
                 avatar.className = 'camera-off-avatar';
 
                 // Set content and style
-                const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                const name = userName || localStorage.getItem('userName') || 'User';
+                const initials = name.split(' ').filter(n => n).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
                 avatar.textContent = initials;
-                avatar.style.backgroundColor = getAvatarColor(userName);
+                avatar.style.backgroundColor = getAvatarColor(name);
                 avatar.style.display = 'flex';
                 avatar.style.position = 'absolute';
                 avatar.style.top = '50%';
@@ -1630,7 +1657,7 @@
                 avatar.style.zIndex = '999';
 
                 localVideoContainer.appendChild(avatar);
-                console.log('✅ Avatar created and shown:', avatar);
+                console.log('✅ Avatar created and shown:', { initials, name, avatar });
             } else {
                 videoBtn.classList.remove('active');
                 videoText.textContent = 'Stop Video';
