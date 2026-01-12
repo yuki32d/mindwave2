@@ -761,8 +761,8 @@
             font-size: 48px;
             font-weight: 700;
             color: white;
-            z-index: 15;
-            /* Higher than video */
+            z-index: 20;
+            pointer-events: none;
         }
 
         .local-video .camera-off-avatar {
@@ -772,7 +772,8 @@
         }
 
         .camera-off-avatar.hidden {
-            display: none;
+            display: none !important;
+        }
         }
 
         /* Participant count badge */
@@ -1601,7 +1602,9 @@
                 // Show avatar when camera is off
                 if (cameraOffAvatar) {
                     cameraOffAvatar.classList.remove('hidden');
-                    console.log('✅ Avatar shown');
+                    cameraOffAvatar.style.display = 'flex'; // Force display
+                    cameraOffAvatar.style.zIndex = '20'; // Ensure it's on top
+                    console.log('✅ Avatar shown', cameraOffAvatar.style.cssText);
                 } else {
                     console.error('❌ Avatar element not found!');
                 }
@@ -1611,6 +1614,7 @@
                 // Hide avatar when camera is on
                 if (cameraOffAvatar) {
                     cameraOffAvatar.classList.add('hidden');
+                    cameraOffAvatar.style.display = 'none'; // Force hide
                     console.log('✅ Avatar hidden');
                 }
             }
