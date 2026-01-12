@@ -68,14 +68,16 @@
         .remote-videos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 15px;
-            padding: 20px;
+            gap: 20px;
+            padding: 40px 60px;
             height: calc(100vh - 200px);
             overflow-y: auto;
+            max-width: 1600px;
+            margin: 0 auto;
         }
 
         .remote-video {
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             background: #1a1a1a;
             position: relative;
@@ -84,6 +86,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            aspect-ratio: 16 / 9;
+            max-height: 600px;
         }
 
         .participant-name {

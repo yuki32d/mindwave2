@@ -74,19 +74,23 @@
         .remote-videos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 15px;
-            padding: 20px;
+            gap: 20px;
+            padding: 40px 60px;
             height: calc(100vh - 200px);
             overflow-y: auto;
+            max-width: 1600px;
+            margin: 0 auto;
         }
 
         .remote-video {
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             background: #1a1a1a;
             position: relative;
             min-height: 300px;
             border: 1px solid #333;
+            aspect-ratio: 16 / 9;
+            max-height: 600px;
         }
 
         .remote-video video {
