@@ -476,13 +476,17 @@
             line-height: 1.4;
         }
 
+
         .chat-input-container {
             padding: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
 
         .chat-input {
-            width: 100%;
+            flex: 1;
             padding: 12px;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -495,6 +499,31 @@
             outline: none;
             border-color: #00d4ff;
         }
+
+        .chat-send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #00d4ff;
+            color: #000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chat-send-btn:hover {
+            background: #00b8e6;
+            transform: scale(1.1);
+        }
+
+        .chat-send-btn:active {
+            transform: scale(0.95);
+        }
+
 
         .loading {
             position: fixed;
@@ -1239,6 +1268,9 @@
         // Panel close buttons
         document.getElementById('closeParticipantsPanel').addEventListener('click', () => closePanel('participantsPanel'));
         document.getElementById('closeChatPanel').addEventListener('click', () => closePanel('chatPanel'));
+
+        // Chat send button
+        document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
 
         // Participant Management Functions
         function toggleParticipantMenu(uid) {
