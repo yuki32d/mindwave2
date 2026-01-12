@@ -18,18 +18,10 @@
             color: white;
         }
 
+
         .meeting-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
+            display: none;
+            /* Hidden - using modal instead */
         }
 
         .meeting-info h2 {
@@ -48,12 +40,13 @@
             height: 100vh;
             background: #000;
             position: relative;
-            padding-top: 70px;
+            padding-top: 0;
+            /* Removed top padding since header is hidden */
         }
 
         .local-video {
             position: absolute;
-            top: 90px;
+            top: 20px;
             right: 20px;
             width: 250px;
             height: 180px;
@@ -76,10 +69,19 @@
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 20px;
             padding: 40px 60px;
-            height: calc(100vh - 200px);
+            height: 100vh;
             overflow-y: auto;
             max-width: 1600px;
             margin: 0 auto;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+        }
+
+        .remote-videos-grid::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
         }
 
         .remote-video {
@@ -641,6 +643,152 @@
         #applyVideoSettings:active {
             transform: translateY(0);
         }
+
+        /* Meeting Code Modal */
+        .meeting-code-modal {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            color: #000;
+            padding: 32px 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            min-width: 480px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .meeting-code-modal.hidden {
+            display: none;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #5f6368;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .meeting-code-box {
+            background: #f1f3f4;
+            padding: 16px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .meeting-code-text {
+            font-size: 18px;
+            font-weight: 500;
+            color: #202124;
+            letter-spacing: 2px;
+        }
+
+        .copy-code-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .copy-code-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .modal-info {
+            font-size: 14px;
+            color: #5f6368;
+            margin-top: 12px;
+        }
+
+        /* Camera Off Avatar */
+        .camera-off-avatar {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            z-index: 5;
+        }
+
+        .local-video .camera-off-avatar {
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+        }
+
+        .camera-off-avatar.hidden {
+            display: none;
+        }
+
+        /* Participant count badge */
+        .participant-count-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
     </style>
 </head>
 
@@ -660,8 +808,36 @@
         <p>Joining meeting...</p>
     </div>
 
+    <!-- Meeting Code Modal -->
+    <div class="meeting-code-modal" id="meetingCodeModal">
+        <div class="modal-header">
+            <h3>Your meeting's ready</h3>
+            <button class="modal-close" id="closeMeetingModal">×</button>
+        </div>
+        <p style="color: #5f6368; margin-bottom: 16px;">Share this meeting code with your students</p>
+        <div class="meeting-code-box">
+            <div class="meeting-code-text" id="modalMeetingCode">Loading...</div>
+            <button class="copy-code-btn" id="copyCodeBtn" title="Copy code">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"
+                        fill="#5f6368" />
+                </svg>
+            </button>
+        </div>
+        <p class="modal-info">💡 Students can join using this code from their dashboard</p>
+    </div>
+
+    <!-- Participant Count Badge -->
+    <div class="participant-count-badge" id="participantCountBadge">
+        <span>👥</span>
+        <span id="participantCountText">1 participant</span>
+    </div>
+
     <div class="meeting-container" id="meetingContainer" style="display: none;">
-        <div class="local-video" id="localVideo"></div>
+        <div class="local-video" id="localVideo">
+            <div class="camera-off-avatar hidden" id="localCameraOffAvatar"></div>
+        </div>
         <div class="remote-videos-grid" id="remoteVideos">
             <div class="empty-state">
                 <h3>Waiting for students to join...</h3>
@@ -1107,7 +1283,49 @@
                     }
                 });
             }
+
+            // Meeting code modal close button
+            document.getElementById('closeMeetingModal').addEventListener('click', () => {
+                document.getElementById('meetingCodeModal').classList.add('hidden');
+            });
+
+            // Copy meeting code button
+            document.getElementById('copyCodeBtn').addEventListener('click', () => {
+                const code = document.getElementById('modalMeetingCode').textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    showToast('Meeting code copied to clipboard!', 'success');
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    showToast('Failed to copy code', 'error');
+                });
+            });
         });
+
+        // Helper function to generate consistent color from name
+        function getAvatarColor(name) {
+            const colors = [
+                '#FF6B6B', // Red
+                '#4ECDC4', // Teal
+                '#45B7D1', // Blue
+                '#FFA07A', // Light Salmon
+                '#98D8C8', // Mint
+                '#F7DC6F', // Yellow
+                '#BB8FCE', // Purple
+                '#85C1E2', // Sky Blue
+                '#F8B739', // Orange
+                '#52B788', // Green
+                '#E76F51', // Burnt Orange
+                '#8E7CC3', // Lavender
+            ];
+
+            // Generate consistent color based on name
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+
+            return colors[Math.abs(hash) % colors.length];
+        }
 
         // Generate meeting code
         async function generateMeetingCode() {
@@ -1164,6 +1382,17 @@
 
                     // Display meeting code
                     document.getElementById('meetingCodeDisplay').textContent = meetingCode;
+                    document.getElementById('modalMeetingCode').textContent = meetingCode;
+
+                    // Show meeting code modal
+                    const modal = document.getElementById('meetingCodeModal');
+                    modal.classList.remove('hidden');
+
+                    // Setup camera-off avatar
+                    const localAvatar = document.getElementById('localCameraOffAvatar');
+                    const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                    localAvatar.textContent = initials;
+                    localAvatar.style.backgroundColor = getAvatarColor(userName);
 
                     // Initialize Socket.IO for chat
                     initializeSocket(meetingCode);
@@ -1317,7 +1546,9 @@
         // Update participant count
         function updateParticipantCount() {
             const count = Object.keys(remoteUsers).length + 1; // +1 for faculty
-            document.getElementById('participantCount').textContent = `👥 ${count} participant${count > 1 ? 's' : ''}`;
+            const text = `${count} participant${count > 1 ? 's' : ''}`;
+            document.getElementById('participantCount').textContent = `👥 ${text}`;
+            document.getElementById('participantCountText').textContent = text;
         }
 
         // Toggle mute
@@ -1348,13 +1579,22 @@
 
             const videoBtn = document.getElementById('videoBtn');
             const videoText = document.getElementById('videoText');
+            const cameraOffAvatar = document.getElementById('localCameraOffAvatar');
 
             if (isVideoOff) {
                 videoBtn.classList.add('active');
                 videoText.textContent = 'Start Video';
+                // Show avatar when camera is off
+                if (cameraOffAvatar) {
+                    cameraOffAvatar.classList.remove('hidden');
+                }
             } else {
                 videoBtn.classList.remove('active');
                 videoText.textContent = 'Stop Video';
+                // Hide avatar when camera is on
+                if (cameraOffAvatar) {
+                    cameraOffAvatar.classList.add('hidden');
+                }
             }
         }
 

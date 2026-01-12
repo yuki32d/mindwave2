@@ -18,17 +18,8 @@
         }
 
         .meeting-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
+            display: none;
+            /* Hidden - using modal instead */
         }
 
         .meeting-info h2 {
@@ -46,12 +37,13 @@
             height: 100vh;
             background: #000;
             position: relative;
-            padding-top: 70px;
+            padding-top: 0;
+            /* Removed top padding since header is hidden */
         }
 
         .local-video {
             position: absolute;
-            top: 90px;
+            top: 20px;
             right: 20px;
             width: 200px;
             height: 150px;
@@ -70,10 +62,19 @@
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
             padding: 40px 60px;
-            height: calc(100vh - 200px);
+            height: 100vh;
             overflow-y: auto;
             max-width: 1600px;
             margin: 0 auto;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+        }
+
+        .remote-videos-grid::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
         }
 
         .remote-video {
@@ -200,6 +201,34 @@
         .avatar-initials.hidden {
             display: none;
         }
+
+        /* Meeting Code Badge */
+        .meeting-code-badge {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+        }
+
+        .meeting-code-label {
+            color: #9ea4b6;
+            font-size: 12px;
+        }
+
+        .meeting-code-value {
+            color: #00d4ff;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 
@@ -214,6 +243,12 @@
     <div class="loading" id="loadingScreen">
         <div class="spinner"></div>
         <p>Joining meeting...</p>
+    </div>
+
+    <!-- Meeting Code Badge -->
+    <div class="meeting-code-badge" id="meetingCodeBadge">
+        <span class="meeting-code-label">Meeting Code:</span>
+        <span class="meeting-code-value" id="badgeMeetingCode"></span>
     </div>
 
     <div class="meeting-container" id="meetingContainer" style="display: none;">
@@ -329,6 +364,10 @@
 
                 if (data.success) {
                     console.log('✅ Agora credentials received:', data);
+
+                    // Display meeting code
+                    document.getElementById('meetingCodeDisplay').textContent = meetingCode;
+                    document.getElementById('badgeMeetingCode').textContent = meetingCode;
 
                     // Initialize Agora client
                     agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
