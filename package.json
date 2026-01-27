@@ -22,7 +22,7 @@
     "express": "^4.22.1",
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^6.10.0",
-    "googleapis": "^166.0.0",
+    "googleapis": "^118.0.0",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^6.12.0",
