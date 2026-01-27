@@ -1292,7 +1292,7 @@ function signToken(user) {
 }
 
 function authMiddleware(req, res, next) {
-  const token = req.cookies?.mindwave_token;
+  const token = req.cookies && req.cookies.mindwave_token;
   if (!token) return res.status(401).json({ ok: false, message: "Unauthorized" });
   try {
     req.user = jwt.verify(token, JWT_SECRET);
@@ -3122,7 +3122,7 @@ app.post("/api/auth/oauth/token", async (req, res) => {
         console.error('Facebook token exchange error:', errorData);
         return res.status(400).json({
           ok: false,
-          message: errorData.error?.message || 'Failed to exchange token'
+          message: (errorData.error && errorData.error.message) || 'Failed to exchange token'
         });
       }
 
@@ -9965,9 +9965,9 @@ app.get('/api/organizations/billing-info', authMiddleware, async (req, res) => {
         id: event._id,
         type: event.eventType,
         date: event.createdAt,
-        amount: event.data?.amount || 0,
+        amount: (event.data && event.data.amount) || 0,
         status: event.eventType.includes('succeeded') ? 'paid' : 'failed',
-        description: event.data?.description || event.eventType.replace(/_/g, ' ')
+        description: (event.data && event.data.description) || event.eventType.replace(/_/g, ' ')
       }))
     });
   } catch (error) {
