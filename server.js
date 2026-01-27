@@ -77,17 +77,19 @@ const {
 
 // Initialize Stripe (dynamic import to prevent deployment failures)
 let stripe = null;
-if (STRIPE_SECRET_KEY) {
-  try {
-    const { default: Stripe } = await import('stripe');
-    stripe = new Stripe(STRIPE_SECRET_KEY);
-    console.log('✓ Stripe initialized');
-  } catch (error) {
-    console.warn('⚠️  Stripe package not available - subscription features will be disabled');
+(async () => {
+  if (STRIPE_SECRET_KEY) {
+    try {
+      const { default: Stripe } = await import('stripe');
+      stripe = new Stripe(STRIPE_SECRET_KEY);
+      console.log('✓ Stripe initialized');
+    } catch (error) {
+      console.warn('⚠️  Stripe package not available - subscription features will be disabled');
+    }
+  } else {
+    console.warn('⚠️  Stripe not configured - subscription features will be disabled');
   }
-} else {
-  console.warn('⚠️  Stripe not configured - subscription features will be disabled');
-}
+})();
 
 // ============================================
 // SUBSCRIPTION TIER CONFIGURATION
