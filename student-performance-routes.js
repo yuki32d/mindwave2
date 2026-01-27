@@ -198,7 +198,7 @@ router.get('/timetable', async (req, res) => {
             nextClass: nextClass ? {
                 name: nextClass.subject,
                 time: `${nextClass.startTime} - ${nextClass.endTime}`,
-                teacher: nextClass.teacher?.name || 'TBA',
+                teacher: (nextClass.teacher && nextClass.teacher.name) || 'TBA',
                 room: nextClass.room,
                 meetingCode: nextClass.meetingCode
             } : null,
@@ -206,7 +206,7 @@ router.get('/timetable', async (req, res) => {
                 day: s.dayOfWeek,
                 time: `${s.startTime} - ${s.endTime}`,
                 subject: s.subject,
-                teacher: s.teacher?.name || 'TBA',
+                teacher: (s.teacher && s.teacher.name) || 'TBA',
                 room: s.room
             }))
         });
@@ -240,7 +240,7 @@ router.get('/events', async (req, res) => {
             date: e.date,
             time: e.startTime && e.endTime ? `${e.startTime} - ${e.endTime}` : null,
             subject: e.subject,
-            teacher: e.teacher?.name,
+            teacher: e.teacher && e.teacher.name,
             urgent: e.urgent
         })));
     } catch (error) {
@@ -270,7 +270,7 @@ router.get('/updates', async (req, res) => {
             read: u.read,
             meta: {
                 subject: u.subject,
-                teacher: u.teacher?.name
+                teacher: u.teacher && u.teacher.name
             }
         })));
     } catch (error) {
@@ -526,10 +526,10 @@ router.get('/achievements', async (req, res) => {
             badges,
             leaderboard: leaderboard.map((entry, index) => ({
                 rank: index + 1,
-                name: entry.studentId?.name || 'Anonymous',
+                name: (entry.studentId && entry.studentId.name) || 'Anonymous',
                 level: entry.level,
                 xp: entry.totalXP,
-                isCurrentUser: entry.studentId?._id.toString() === studentId.toString()
+                isCurrentUser: (entry.studentId && entry.studentId._id.toString() === studentId.toString())
             }))
         });
     } catch (error) {
