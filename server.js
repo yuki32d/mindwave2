@@ -3887,7 +3887,7 @@ Remember: You're here to support student learning and make education engaging!`
       },
       ...history.map(msg => ({
         role: msg.role === 'model' ? 'assistant' : 'user',
-        content: msg.parts?.[0]?.text || msg.content || ''
+        content: (msg.parts && msg.parts[0] && msg.parts[0].text) || msg.content || ''
       })),
       {
         role: "user",
@@ -3915,7 +3915,7 @@ Remember: You're here to support student learning and make education engaging!`
     }
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || "I'm having trouble responding right now.";
+    const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "I'm having trouble responding right now.";
 
     res.json({ ok: true, reply: reply.trim() });
 
@@ -4086,7 +4086,7 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
       },
       { $count: 'total' }
     ]);
-    const gamesPlayed = gamesPlayedData[0]?.total || 0;
+    const gamesPlayed = (gamesPlayedData[0] && gamesPlayedData[0].total) || 0;
 
     // Get active students (those who submitted games, excluding admin)
     const activeStudentsData = await GameSubmission.aggregate([
@@ -4327,12 +4327,12 @@ app.get("/api/analytics/students/:studentId/activities", authMiddleware, async (
       .select('gameId score startedAt completedAt durationSeconds submittedAt');
 
     const formattedActivities = activities.map(activity => {
-      const totalPoints = activity.gameId?.totalPoints || 100;
+      const totalPoints = (activity.gameId && activity.gameId.totalPoints) || 100;
       const earnedPoints = Math.round((activity.score / 100) * totalPoints);
 
       return {
-        gameName: activity.gameId?.title || 'Unknown Game',
-        gameType: activity.gameId?.type || 'unknown',
+        gameName: (activity.gameId && activity.gameId.title) || 'Unknown Game',
+        gameType: (activity.gameId && activity.gameId.type) || 'unknown',
         score: activity.score || 0,
         earnedPoints: earnedPoints,
         totalPoints: totalPoints,
@@ -4452,9 +4452,9 @@ app.get("/api/games/:gameId/leaderboard", authMiddleware, async (req, res) => {
           questions: game.questions.map(q => ({
             questionText: q.question,
             studentAnswer: 'Not recorded',
-            correctAnswer: q.correctAnswer || q.options?.find(o => o.isCorrect)?.text || 'N/A',
+            correctAnswer: q.correctAnswer || (q.options && q.options.find(o => o.isCorrect) && q.options.find(o => o.isCorrect).text) || 'N/A',
             isCorrect: false,
-            options: q.options?.map(o => o.text) || []
+            options: (q.options && q.options.map(o => o.text)) || []
           }))
         };
       }
@@ -7447,7 +7447,7 @@ Be conversational, helpful, and generate high-quality educational content. Alway
 
         if (hfResponse.ok) {
           const data = await hfResponse.json();
-          reply = data.choices[0]?.message?.content || '';
+          reply = (data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
         } else {
           throw new Error('Hugging Face failed');
         }
@@ -7842,7 +7842,7 @@ function setupWebSocket(server) {
               }
 
               // Get participant count for percentage calculation
-              const participantCount = quizConnections.get(currentSessionCode)?.size || 0;
+              const participantCount = (quizConnections.get(currentSessionCode) && quizConnections.get(currentSessionCode).size) || 0;
 
               // Broadcast updated distribution to all participants
               broadcastToSession(currentSessionCode, {
@@ -9828,10 +9828,10 @@ app.get('/api/organizations/dashboard-stats', authMiddleware, async (req, res) =
         trialDaysRemaining,
         subscriptionTier: organization.subscriptionTier,
         subscriptionStatus: organization.subscriptionStatus,
-        aiCallsUsed: organization.analytics?.aiCallsThisMonth || 0,
-        aiCallsLimit: SUBSCRIPTION_TIERS[organization.subscriptionTier]?.limits?.aiCallsPerMonth || 50,
-        storageUsed: organization.usage?.storageUsed || 0,
-        storageLimit: SUBSCRIPTION_TIERS[organization.subscriptionTier]?.limits?.maxStorage || 100
+        aiCallsUsed: (organization.analytics && organization.analytics.aiCallsThisMonth) || 0,
+        aiCallsLimit: (SUBSCRIPTION_TIERS[organization.subscriptionTier] && SUBSCRIPTION_TIERS[organization.subscriptionTier].limits && SUBSCRIPTION_TIERS[organization.subscriptionTier].limits.aiCallsPerMonth) || 50,
+        storageUsed: (organization.usage && organization.usage.storageUsed) || 0,
+        storageLimit: (SUBSCRIPTION_TIERS[organization.subscriptionTier] && SUBSCRIPTION_TIERS[organization.subscriptionTier].limits && SUBSCRIPTION_TIERS[organization.subscriptionTier].limits.maxStorage) || 100
       },
       recentActivity
     });
@@ -9955,10 +9955,10 @@ app.get('/api/organizations/billing-info', authMiddleware, async (req, res) => {
         features: tierDetails.features,
         limits: tierDetails.limits,
         usage: {
-          students: organization.usage?.studentCount || 0,
-          courses: organization.usage?.courseCount || 0,
-          storage: organization.usage?.storageUsed || 0,
-          aiCalls: organization.analytics?.aiCallsThisMonth || 0
+          students: (organization.usage && organization.usage.studentCount) || 0,
+          courses: (organization.usage && organization.usage.courseCount) || 0,
+          storage: (organization.usage && organization.usage.storageUsed) || 0,
+          aiCalls: (organization.analytics && organization.analytics.aiCallsThisMonth) || 0
         }
       },
       paymentHistory: billingEvents.map(event => ({
