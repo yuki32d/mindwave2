@@ -308,9 +308,9 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission) {
                 status: 'submitted',
                 isHidden: false
             })
-                .populate('reviewerId', settings?.isAnonymous ? '' : 'name');
+                .populate('reviewerId', (settings && settings.isAnonymous) ? '' : 'name');
 
-            res.json({ reviews, isAnonymous: settings?.isAnonymous });
+            res.json({ reviews, isAnonymous: settings && settings.isAnonymous });
         } catch (error) {
             console.error('Error fetching feedback:', error);
             res.status(500).json({ error: 'Failed to fetch feedback' });
