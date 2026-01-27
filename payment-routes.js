@@ -4,15 +4,25 @@ import crypto from 'crypto';
 
 const router = express.Router();
 
-// Initialize Razorpay instance
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+// Initialize Razorpay instance (only if credentials are provided)
+let razorpay = null;
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+}
 
 // Create order endpoint
 router.post('/create-order', async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(503).json({
+                success: false,
+                message: 'Payment service not configured'
+            });
+        }
+
         const { amount, currency, plan, userId } = req.body;
 
         const options = {
@@ -186,6 +196,13 @@ router.post('/verify-payment', async (req, res) => {
 // Get payment status
 router.get('/payment-status/:paymentId', async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(503).json({
+                success: false,
+                message: 'Payment service not configured'
+            });
+        }
+
         const payment = await razorpay.payments.fetch(req.params.paymentId);
 
         res.json({
@@ -208,6 +225,13 @@ router.get('/payment-status/:paymentId', async (req, res) => {
 // Create subscription endpoint
 router.post('/create-subscription', async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(503).json({
+                success: false,
+                message: 'Payment service not configured'
+            });
+        }
+
         const { planId, customerId, totalCount } = req.body;
 
         const subscription = await razorpay.subscriptions.create({
