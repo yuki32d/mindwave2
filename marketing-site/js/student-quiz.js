@@ -5,7 +5,7 @@ let socket;
 let currentQuestion = null;
 let timeRemaining = 0;
 let timerInterval = null;
-let score = 0;
+let score = 0; // Will be initialized from localStorage
 let correctAnswers = 0;
 let totalQuestions = 0;
 let hasAnswered = false;
@@ -21,6 +21,18 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('No quiz code provided');
         window.location.href = 'student-community.html';
         return;
+    }
+
+    // Initialize or reset score for this quiz session
+    const storedScore = localStorage.getItem(`quizScore_${quizCode}`);
+    if (storedScore) {
+        score = parseInt(storedScore);
+        console.log('📊 Restored score from localStorage:', score);
+    } else {
+        // Reset score for new quiz
+        score = 0;
+        localStorage.setItem(`quizScore_${quizCode}`, '0');
+        console.log('📊 Initialized new quiz score:', score);
     }
 
     initializeWebSocket();
@@ -226,13 +238,22 @@ async function submitAnswer(answerIndex) {
 
         const data = await response.json();
 
+        console.log('✅ Server response:', data);
+
         if (data.ok) {
             const isCorrect = data.isCorrect;
             const points = data.pointsEarned;
 
+            console.log(`${isCorrect ? '✅ CORRECT' : '❌ INCORRECT'} - Points: ${points}`);
+
             if (isCorrect) {
+                const oldScore = score;
                 score += points;
                 correctAnswers++;
+
+                // Save to localStorage immediately
+                localStorage.setItem(`quizScore_${quizCode}`, score.toString());
+                console.log(`💰 Score updated: ${oldScore} → ${score} (+${points})`);
             }
 
             // Visual feedback
