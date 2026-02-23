@@ -3,507 +3,1223 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports - MindWave</title>
-    <link rel="stylesheet" href="3d-depth-design.css">
-    <script src="theme-init.js"></script>
+    <title>Reports – MindWave</title>
+    <meta name="description" content="Generate and download your academic and activity reports on MindWave.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="auth-guard.js"></script>
+    <script>
+        if (!checkStudentAuth()) { /* redirects */ }
+    </script>
+    <script>
+        (function () {
+            const t = localStorage.getItem('mw_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
 
     <style>
-        .reports-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        /* ── PAGE LAYOUT ── */
+        .rp-content {
+            padding: 28px 32px;
+            max-width: 1100px;
         }
 
-        /* Report Types Grid */
-        .report-types-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
+        /* ── PAGE HEADER ── */
+        .rp-header {
+            margin-bottom: 28px;
         }
 
-        .report-type-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 28px;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .report-type-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-            border-color: rgba(77, 160, 255, 0.5);
-        }
-
-        .report-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .report-title {
-            font-size: 20px;
+        .rp-eyebrow {
+            font-size: 10px;
             font-weight: 700;
-            margin-bottom: 12px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 6px;
         }
 
-        .report-description {
-            font-size: 14px;
-            color: #9ea4b6;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .report-meta {
-            display: flex;
-            gap: 16px;
-            font-size: 12px;
-            color: #9ea4b6;
-            margin-bottom: 20px;
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .generate-btn {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .generate-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 24px rgba(77, 160, 255, 0.4);
-        }
-
-        /* Recent Reports */
-        .recent-reports {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 28px;
-            margin-bottom: 40px;
-        }
-
-        .recent-reports h3 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 24px;
-            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .report-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            transition: all 0.2s;
-        }
-
-        .report-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .report-info {
-            flex: 1;
-        }
-
-        .report-name {
-            font-weight: 600;
+        .rp-title {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text);
             margin-bottom: 4px;
         }
 
-        .report-date {
-            font-size: 12px;
-            color: #9ea4b6;
-        }
-
-        .report-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .action-btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
+        .rp-subtitle {
             font-size: 13px;
+            color: var(--muted);
         }
 
-        .action-btn:hover {
-            background: rgba(77, 160, 255, 0.2);
-            border-color: rgba(77, 160, 255, 0.5);
-        }
-
-        .action-btn.primary {
-            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
-            border: none;
-        }
-
-        /* Custom Report Builder */
-        .custom-report-builder {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 28px;
-        }
-
-        .custom-report-builder h3 {
-            font-size: 22px;
+        /* ── SECTION LABEL ── */
+        .rp-section-label {
+            font-size: 11px;
             font-weight: 700;
-            margin-bottom: 24px;
-            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .form-input,
-        .form-select {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            font-size: 14px;
-        }
-
-        .form-input:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: rgba(77, 160, 255, 0.5);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-        }
-
-        .checkbox-item {
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--muted);
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .checkbox-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+        .rp-section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
         }
 
-        .checkbox-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
+        /* ── REPORT CARDS GRID ── */
+        .rp-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
         }
 
-        @media (max-width: 768px) {
-            .report-types-grid {
+        @media (max-width: 900px) {
+            .rp-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .rp-grid {
                 grid-template-columns: 1fr;
             }
+        }
 
-            .report-item {
-                flex-direction: column;
-                gap: 12px;
-                align-items: start;
+        .rp-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .rp-card:hover {
+            border-color: var(--border-2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .rp-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .rp-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .rp-card-icon [data-lucide] {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* icon colour variants */
+        .icon-indigo {
+            background: rgba(99, 102, 241, 0.12);
+            color: #818cf8;
+        }
+
+        .icon-green {
+            background: rgba(34, 211, 165, 0.12);
+            color: #22d3a5;
+        }
+
+        .icon-orange {
+            background: rgba(245, 158, 11, 0.12);
+            color: #f59e0b;
+        }
+
+        .icon-cyan {
+            background: rgba(34, 211, 238, 0.12);
+            color: #22d3ee;
+        }
+
+        .icon-pink {
+            background: rgba(236, 72, 153, 0.12);
+            color: #ec4899;
+        }
+
+        .icon-purple {
+            background: rgba(167, 139, 250, 0.12);
+            color: #a78bfa;
+        }
+
+        .rp-card-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            border: 1px solid var(--border-2);
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .rp-card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        .rp-card-desc {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .rp-card-meta {
+            display: flex;
+            gap: 14px;
+        }
+
+        .rp-meta-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .rp-meta-chip [data-lucide] {
+            width: 11px;
+            height: 11px;
+        }
+
+        .rp-gen-btn {
+            width: 100%;
+            padding: 9px 14px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+
+        .rp-gen-btn:hover {
+            background: var(--accent-2);
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+        }
+
+        .rp-gen-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .rp-gen-btn [data-lucide] {
+            width: 13px;
+            height: 13px;
+        }
+
+        .rp-gen-btn.loading::after {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-left: 6px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── RECENT REPORTS ── */
+        .rp-recent-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .rp-recent-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .rp-recent-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rp-recent-title [data-lucide] {
+            width: 15px;
+            height: 15px;
+            color: var(--accent);
+        }
+
+        .rp-clear-btn {
+            font-size: 11px;
+            color: var(--muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.15s;
+        }
+
+        .rp-clear-btn:hover {
+            color: var(--red);
+        }
+
+        .rp-clear-btn [data-lucide] {
+            width: 12px;
+            height: 12px;
+        }
+
+        .rp-recent-list {
+            padding: 8px 0;
+        }
+
+        .rp-recent-empty {
+            padding: 28px 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .rp-recent-empty [data-lucide] {
+            width: 32px;
+            height: 32px;
+            display: block;
+            margin: 0 auto 10px;
+            opacity: 0.35;
+        }
+
+        .rp-recent-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 20px;
+            transition: background 0.12s;
+        }
+
+        .rp-recent-row:hover {
+            background: var(--surface-2);
+        }
+
+        .rp-recent-row-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .rp-recent-row-icon [data-lucide] {
+            width: 15px;
+            height: 15px;
+        }
+
+        .rp-recent-row-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .rp-recent-row-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rp-recent-row-date {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .rp-recent-row-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .rp-dl-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 7px;
+            border: 1px solid var(--border-2);
+            background: none;
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.12s;
+        }
+
+        .rp-dl-btn:hover {
+            background: var(--surface-2);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .rp-dl-btn [data-lucide] {
+            width: 12px;
+            height: 12px;
+        }
+
+        /* ── TOAST ── */
+        .rp-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--surface);
+            border: 1px solid var(--border-2);
+            border-radius: 10px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 500;
+            z-index: 9999;
+            transform: translateY(80px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .rp-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .rp-toast [data-lucide] {
+            width: 16px;
+            height: 16px;
+            color: var(--green);
+        }
+
+        .rp-toast.error [data-lucide] {
+            color: var(--red);
+        }
+
+        /* ── SKELETON ROWS ── */
+        .rp-skeleton {
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
             }
 
-            .report-actions {
-                width: 100%;
+            50% {
+                opacity: 0.4;
             }
+        }
 
-            .action-btn {
-                flex: 1;
-            }
+        .rp-skel-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+        }
+
+        .rp-skel-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: var(--surface-2);
+            flex-shrink: 0;
+        }
+
+        .rp-skel-lines {
+            flex: 1;
+        }
+
+        .rp-skel-line {
+            height: 10px;
+            border-radius: 4px;
+            background: var(--surface-2);
+            margin-bottom: 6px;
         }
     </style>
 </head>
 
-<body data-theme="dark">
-    <div class="page-shell">
-        <header class="hero">
-            <a class="ghost-link" href="student-performance.html">? Back to Performance</a>
-            <p class="eyebrow">DOCUMENTS</p>
-            <h1>Reports</h1>
-            <p class="lede">Generate and download performance reports</p>
-        </header>
+<body>
+    <div class="mw-app" id="mwApp">
 
-        <div class="reports-container">
-            <!-- Report Types -->
-            <div class="report-types-grid">
-                <div class="report-type-card" onclick="generateReport('weekly')">
-                    <div class="report-icon">??</div>
-                    <div class="report-title">Weekly Summary</div>
-                    <div class="report-description">
-                        Quick overview of your performance for the past week including grades, attendance, and
-                        activities.
-                    </div>
-                    <div class="report-meta">
-                        <div class="meta-item">
-                            <span>??</span>
-                            <span>2 pages</span>
-                        </div>
-                        <div class="meta-item">
-                            <span>??</span>
-                            <span>Instant</span>
-                        </div>
-                    </div>
-                    <button class="generate-btn">Generate Report</button>
-                </div>
-
-                <div class="report-type-card" onclick="generateReport('monthly')">
-                    <div class="report-icon">??</div>
-                    <div class="report-title">Monthly Report</div>
-                    <div class="report-description">
-                        Comprehensive monthly analysis with trends, comparisons, and detailed subject breakdowns.
-                    </div>
-                    <div class="report-meta">
-                        <div class="meta-item">
-                            <span>??</span>
-                            <span>5 pages</span>
-                        </div>
-                        <div class="meta-item">
-                            <span>??</span>
-                            <span>~30 sec</span>
-                        </div>
-                    </div>
-                    <button class="generate-btn">Generate Report</button>
-                </div>
-
-                <div class="report-type-card" onclick="generateReport('semester')">
-                    <div class="report-icon">??</div>
-                    <div class="report-title">Semester Summary</div>
-                    <div class="report-description">
-                        Complete semester overview with final grades, attendance records, and achievement highlights.
-                    </div>
-                    <div class="report-meta">
-                        <div class="meta-item">
-                            <span>??</span>
-                            <span>8 pages</span>
-                        </div>
-                        <div class="meta-item">
-                            <span>??</span>
-                            <span>~1 min</span>
-                        </div>
-                    </div>
-                    <button class="generate-btn">Generate Report</button>
-                </div>
-
-                <div class="report-type-card" onclick="generateReport('certificate')">
-                    <div class="report-icon">??</div>
-                    <div class="report-title">Progress Certificate</div>
-                    <div class="report-description">
-                        Official certificate showcasing your achievements, grades, and participation for sharing.
-                    </div>
-                    <div class="report-meta">
-                        <div class="meta-item">
-                            <span>??</span>
-                            <span>1 page</span>
-                        </div>
-                        <div class="meta-item">
-                            <span>??</span>
-                            <span>Instant</span>
-                        </div>
-                    </div>
-                    <button class="generate-btn">Generate Certificate</button>
-                </div>
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
             </div>
 
-            <!-- Recent Reports -->
-            <div class="recent-reports">
-                <h3>?? Recent Reports</h3>
-                <div class="report-item">
-                    <div class="report-info">
-                        <div class="report-name">December 2025 - Monthly Report</div>
-                        <div class="report-date">Generated on Jan 1, 2026</div>
-                    </div>
-                    <div class="report-actions">
-                        <button class="action-btn primary" onclick="downloadReport('dec-monthly')">Download PDF</button>
-                        <button class="action-btn" onclick="shareReport('dec-monthly')">Share</button>
-                    </div>
-                </div>
+            <div class="mw-sidebar-nav">
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+                    </a>
+                    <a href="student-courses.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
+                    </a>
+                    <a href="student-timetable.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
+                    </a>
+                    <a href="student-performance.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
+                    </a>
+                    <a href="student-leaderboard.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="trophy"></i></span> Leaderboard
+                        <span class="mw-nav-badge" style="font-size:10px;">HOT</span>
+                    </a>
+                </nav>
 
-                <div class="report-item">
-                    <div class="report-info">
-                        <div class="report-name">Week 52 - Weekly Summary</div>
-                        <div class="report-date">Generated on Dec 29, 2025</div>
-                    </div>
-                    <div class="report-actions">
-                        <button class="action-btn primary" onclick="downloadReport('week52')">Download PDF</button>
-                        <button class="action-btn" onclick="shareReport('week52')">Share</button>
-                    </div>
-                </div>
+                <div class="mw-divider"></div>
 
-                <div class="report-item">
-                    <div class="report-info">
-                        <div class="report-name">Fall 2025 - Semester Summary</div>
-                        <div class="report-date">Generated on Dec 20, 2025</div>
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="gamepad-2"></i></span> Play Games
+                    </a>
+                    <a href="student-community.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Community
+                    </a>
+                    <a href="student-achievements.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="award"></i></span> Achievements
+                    </a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="megaphone"></i></span> Events
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
+                    </a>
+                    <a href="student-ai-tutor.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
+                    </a>
+                    <a href="student-reports.html" class="mw-nav-item active">
+                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
+                    </a>
+                    <a href="student-settings.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
+            </div>
+
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
                     </div>
-                    <div class="report-actions">
-                        <button class="action-btn primary" onclick="downloadReport('fall-semester')">Download
-                            PDF</button>
-                        <button class="action-btn" onclick="shareReport('fall-semester')">Share</button>
+                    <span class="mw-user-more">⋯</span>
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
+                        </div>
+                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
+                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
                     </div>
                 </div>
             </div>
+        </aside>
 
-            <!-- Custom Report Builder -->
-            <div class="custom-report-builder">
-                <h3>??? Custom Report Builder</h3>
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
 
-                <div class="form-group">
-                    <label class="form-label">Report Title</label>
-                    <input type="text" class="form-input" placeholder="Enter report title" id="customTitle">
+            <!-- TOPBAR -->
+            <header class="mw-topbar">
+                <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="mw-breadcrumb">Dashboard / <span>Reports</span></div>
+                <div class="mw-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search reports…" id="globalSearch">
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">Date Range</label>
-                    <select class="form-select" id="dateRange">
-                        <option>Last 7 days</option>
-                        <option>Last 30 days</option>
-                        <option>This semester</option>
-                        <option>Custom range</option>
-                    </select>
+                <div class="mw-topbar-actions">
+                    <button class="mw-icon-btn" id="themeToggleBtn" title="Toggle theme" onclick="toggleTheme()">
+                        <i data-lucide="moon" id="themeIcon"></i>
+                    </button>
                 </div>
+            </header>
 
-                <div class="form-group">
-                    <label class="form-label">Include Sections</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item">
-                            <input type="checkbox" checked>
-                            <span>Grade Summary</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" checked>
-                            <span>Attendance Records</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" checked>
-                            <span>Subject Breakdown</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox">
-                            <span>Performance Charts</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox">
-                            <span>Achievements</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox">
-                            <span>Recommendations</span>
-                        </label>
+            <!-- PAGE CONTENT -->
+            <div class="mw-page-content">
+                <div class="rp-content">
+
+                    <!-- Header -->
+                    <div class="rp-header">
+                        <div class="rp-eyebrow">Documents</div>
+                        <h1 class="rp-title">Reports</h1>
+                        <p class="rp-subtitle">Generate and download your academic and activity reports as PDFs</p>
                     </div>
-                </div>
 
-                <button class="generate-btn" onclick="generateCustomReport()">Generate Custom Report</button>
-            </div>
-        </div>
+                    <!-- Report Cards -->
+                    <div class="rp-section-label">Generate a Report</div>
+                    <div class="rp-grid">
+
+                        <!-- 1. Activity & Engagement -->
+                        <div class="rp-card" id="card-engagement">
+                            <div class="rp-card-head">
+                                <div class="rp-card-icon icon-indigo"><i data-lucide="zap"></i></div>
+                                <span class="rp-card-badge">Live data</span>
+                            </div>
+                            <div class="rp-card-title">Activity & Engagement</div>
+                            <div class="rp-card-desc">Games played, quiz scores, Time Attack sessions, and overall
+                                platform engagement stats.</div>
+                            <div class="rp-card-meta">
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 2–3 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="clock"></i> Instant</div>
+                            </div>
+                            <button class="rp-gen-btn" onclick="generateReport('engagement')">
+                                <i data-lucide="download"></i> Generate Report
+                            </button>
+                        </div>
+
+                        <!-- 2. Project Submissions -->
+                        <div class="rp-card" id="card-projects">
+                            <div class="rp-card-head">
+                                <div class="rp-card-icon icon-green"><i data-lucide="folder-git-2"></i></div>
+                                <span class="rp-card-badge">Live data</span>
+                            </div>
+                            <div class="rp-card-title">Project Submissions</div>
+                            <div class="rp-card-desc">All submitted projects with grades, faculty feedback, and review
+                                status from MongoDB.</div>
+                            <div class="rp-card-meta">
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 1–2 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="clock"></i> Instant</div>
+                            </div>
+                            <button class="rp-gen-btn" onclick="generateReport('projects')">
+                                <i data-lucide="download"></i> Generate Report
+                            </button>
+                        </div>
+
+                        <!-- 3. Platform Performance -->
+                        <div class="rp-card" id="card-platform">
+                            <div class="rp-card-head">
+                                <div class="rp-card-icon icon-orange"><i data-lucide="trophy"></i></div>
+                                <span class="rp-card-badge">Live data</span>
+                            </div>
+                            <div class="rp-card-title">Platform Performance</div>
+                            <div class="rp-card-desc">Leaderboard rank, XP earned, code challenges solved, and quiz
+                                participation metrics.</div>
+                            <div class="rp-card-meta">
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 1–2 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="clock"></i> Instant</div>
+                            </div>
+                            <button class="rp-gen-btn" onclick="generateReport('platform')">
+                                <i data-lucide="download"></i> Generate Report
+                            </button>
+                        </div>
+
+                        <!-- 4. IAT / Exam Marks -->
+                        <div class="rp-card" id="card-iat">
+                            <div class="rp-card-head">
+                                <div class="rp-card-icon icon-cyan"><i data-lucide="clipboard-list"></i></div>
+                                <span class="rp-card-badge">Faculty data</span>
+                            </div>
+                            <div class="rp-card-title">IAT & Exam Marks</div>
+                            <div class="rp-card-desc">IAT 1, IAT 2, and semester exam marks per subject, entered by your
+                                faculty.</div>
+                            <div class="rp-card-meta">
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 2–3 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="clock"></i> ~5 sec</div>
+                            </div>
+                            <button class="rp-gen-btn" onclick="generateReport('iat')">
+                                <i data-lucide="download"></i> Generate Report
+                            </button>
+                        </div>
+
+                        <!-- 5. Attendance -->
+                        <div class="rp-card" id="card-attendance">
+                            <div class="rp-card-head">
+                                <div class="rp-card-icon icon-pink"><i data-lucide="calendar-check"></i></div>
+                                <span class="rp-card-badge">Faculty data</span>
+                            </div>
+                            <div class="rp-card-title">Attendance Report</div>
+                            <div class="rp-card-desc">Subject-wise attendance percentages with danger alerts for
+                                subjects below 75%.</div>
+                            <div class="rp-card-meta">
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 1–2 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="clock"></i> ~5 sec</div>
+                            </div>
+                            <button class="rp-gen-btn" onclick="generateReport('attendance')">
+                                <i data-lucide="download"></i> Generate Report
+                            </button>
+                        </div>
+
+                        <!-- 6. Semester Summary -->
+                        <div class="rp-card" id="card-semester">
+                            <div class="rp-card-head">
+                                <div class="rp-card-icon icon-purple"><i data-lucide="book-open"></i></div>
+                                <span class="rp-card-badge">Combined</span>
+                            </div>
+                            <div class="rp-card-title">Semester Summary</div>
+                            <div class="rp-card-desc">Full semester rollup — marks, attendance, projects, and platform
+                                activity in one PDF.</div>
+                            <div class="rp-card-meta">
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 6–8 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="clock"></i> ~10 sec</div>
+                            </div>
+                            <button class="rp-gen-btn" onclick="generateReport('semester')">
+                                <i data-lucide="download"></i> Generate Report
+                            </button>
+                        </div>
+
+                    </div><!-- end grid -->
+
+                    <!-- Recent Reports -->
+                    <div class="rp-section-label">Recent Reports</div>
+                    <div class="rp-recent-panel">
+                        <div class="rp-recent-header">
+                            <div class="rp-recent-title"><i data-lucide="history"></i> Previously Generated</div>
+                            <button class="rp-clear-btn" onclick="clearRecent()">
+                                <i data-lucide="trash-2"></i> Clear all
+                            </button>
+                        </div>
+                        <div class="rp-recent-list" id="recentList">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                </div><!-- end rp-content -->
+            </div><!-- end mw-page-content -->
+        </div><!-- end mw-main -->
+    </div><!-- end mw-app -->
+
+    <!-- Toast -->
+    <div class="rp-toast" id="rpToast">
+        <i data-lucide="check-circle"></i>
+        <span id="rpToastMsg">Report generated!</span>
     </div>
 
+    <script src="homepage.js"></script>
     <script>
-        // Authentication check
+        // ── CONSTANTS ──
+        const API_BASE = window.location.hostname === 'localhost'
+            ? 'http://localhost:8081'
+            : 'https://mindwave2.onrender.com';
         const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = 'marketing-site/student-login.html';
+
+        // ── REPORT META ──
+        const REPORT_META = {
+            engagement: { label: 'Activity & Engagement', icon: 'zap', color: 'icon-indigo' },
+            projects: { label: 'Project Submissions', icon: 'folder-git-2', color: 'icon-green' },
+            platform: { label: 'Platform Performance', icon: 'trophy', color: 'icon-orange' },
+            iat: { label: 'IAT & Exam Marks', icon: 'clipboard-list', color: 'icon-cyan' },
+            attendance: { label: 'Attendance Report', icon: 'calendar-check', color: 'icon-pink' },
+            semester: { label: 'Semester Summary', icon: 'book-open', color: 'icon-purple' },
+        };
+
+        // ── TOAST ──
+        function showToast(msg, isError = false) {
+            const el = document.getElementById('rpToast');
+            const icon = el.querySelector('[data-lucide]');
+            document.getElementById('rpToastMsg').textContent = msg;
+            el.classList.toggle('error', isError);
+            icon.setAttribute('data-lucide', isError ? 'x-circle' : 'check-circle');
+            lucide.createIcons();
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 3500);
         }
 
-        // Generate report
-        function generateReport(type) {
-            console.log('Generating report:', type);
-            // TODO: Call API to generate report
-            alert(`Generating ${type} report... This will download as PDF.`);
-        }
-
-        // Download report
-        function downloadReport(reportId) {
-            console.log('Downloading report:', reportId);
-            // TODO: Download PDF
-        }
-
-        // Share report
-        function shareReport(reportId) {
-            console.log('Sharing report:', reportId);
-            // TODO: Show share modal
-            alert('Share report via email or link - Coming soon!');
-        }
-
-        // Generate custom report
-        function generateCustomReport() {
-            const title = document.getElementById('customTitle').value;
-            const dateRange = document.getElementById('dateRange').value;
-
-            console.log('Generating custom report:', { title, dateRange });
-            // TODO: Call API with custom parameters
-            alert('Generating custom report... This will download as PDF.');
-        }
-
-        // Load recent reports
-        async function loadRecentReports() {
+        // ── API HELPERS (with graceful fallback) ──
+        async function fetchWithFallback(url, fallback) {
             try {
-                const API_BASE = window.location.hostname === 'localhost'
-                    ? 'http://localhost:8081'
-                    : 'https://mindwave2.onrender.com';
+                const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) return fallback;
+                return await res.json();
+            } catch { return fallback; }
+        }
 
-                const response = await fetch(`${API_BASE}/api/student/reports`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+        async function fetchEngagementData() {
+            const submissions = await fetchWithFallback(`${API_BASE}/api/student/game-submissions`, []);
+            const profile = await fetchWithFallback(`${API_BASE}/api/student/profile`, {});
+            return { submissions, profile };
+        }
 
-                if (response.ok) {
-                    const data = await response.json();
-                    // Update reports list with real data
-                    console.log('Reports data:', data);
-                } else {
-                    console.log('Using placeholder reports');
+        async function fetchProjectData() {
+            return await fetchWithFallback(`${API_BASE}/api/student/projects`, []);
+        }
+
+        async function fetchIATData() {
+            return await fetchWithFallback(`${API_BASE}/api/student/marks`, null);
+        }
+
+        async function fetchAttendanceData() {
+            return await fetchWithFallback(`${API_BASE}/api/student/attendance`, null);
+        }
+
+        // ── GET USER INFO ──
+        function getUserInfo() {
+            const name = document.getElementById('sidebarUserName')?.textContent || 'Student';
+            const roll = localStorage.getItem('mw_roll') || '—';
+            const dept = localStorage.getItem('mw_dept') || '—';
+            return { name, roll, dept };
+        }
+
+        // ── jsPDF HELPERS ──
+        function makePDF() {
+            const { jsPDF } = window.jspdf;
+            return new jsPDF({ unit: 'mm', format: 'a4' });
+        }
+
+        function addHeader(doc, title) {
+            const user = getUserInfo();
+            const now = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+            // Purple header bar
+            doc.setFillColor(99, 102, 241);
+            doc.rect(0, 0, 210, 22, 'F');
+            doc.setFontSize(14);
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            doc.text('MindWave', 14, 10);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Student Report — ${title}`, 14, 16);
+            doc.text(`Generated: ${now}`, 196, 16, { align: 'right' });
+
+            // Student info row
+            doc.setTextColor(60, 60, 80);
+            doc.setFontSize(9);
+            doc.text(`Student: ${user.name}   Roll: ${user.roll}   Dept: ${user.dept}`, 14, 30);
+
+            // Divider
+            doc.setDrawColor(220, 220, 235);
+            doc.line(14, 33, 196, 33);
+
+            return 40; // Y cursor after header
+        }
+
+        function addSectionTitle(doc, title, y) {
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(99, 102, 241);
+            doc.text(title, 14, y);
+            doc.setDrawColor(99, 102, 241);
+            doc.setLineWidth(0.3);
+            doc.line(14, y + 2, 196, y + 2);
+            return y + 8;
+        }
+
+        function addTable(doc, headers, rows, y) {
+            const colX = [14, 70, 120, 160];
+            const rowH = 8;
+
+            // Header row bg
+            doc.setFillColor(240, 240, 250);
+            doc.rect(14, y - 5, 182, rowH, 'F');
+
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(60, 60, 80);
+            headers.forEach((h, i) => doc.text(h, colX[i] || (14 + i * 40), y));
+            y += rowH;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(50, 50, 70);
+            rows.forEach((row, ri) => {
+                if (ri % 2 === 0) {
+                    doc.setFillColor(250, 250, 255);
+                    doc.rect(14, y - 5, 182, rowH, 'F');
                 }
-            } catch (error) {
-                console.error('Error loading reports:', error);
+                row.forEach((cell, i) => doc.text(String(cell ?? '—'), colX[i] || (14 + i * 40), y));
+                y += rowH;
+                if (y > 270) { doc.addPage(); y = 20; }
+            });
+            return y + 4;
+        }
+
+        function addNotice(doc, msg, y, color = [245, 158, 11]) {
+            doc.setFillColor(...color, 0.1);
+            doc.setDrawColor(...color);
+            doc.roundedRect(14, y, 182, 12, 2, 2, 'FD');
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'italic');
+            doc.setTextColor(...color);
+            doc.text(msg, 18, y + 7.5);
+            return y + 18;
+        }
+
+        // ── PDF BUILDERS ──
+        async function buildEngagementPDF() {
+            const { submissions, profile } = await fetchEngagementData();
+            const doc = makePDF();
+            let y = addHeader(doc, 'Activity & Engagement');
+
+            // Platform stats from localStorage
+            const cpSolved = parseInt(localStorage.getItem('cp_solved') || '0');
+            const xp = parseInt(localStorage.getItem('mw_xp') || '0');
+
+            y = addSectionTitle(doc, 'Platform Overview', y);
+            y = addTable(doc,
+                ['Metric', 'Value'],
+                [
+                    ['Code Challenges Solved', cpSolved],
+                    ['XP Earned (platform)', xp],
+                    ['Games Attempted', submissions.length],
+                    ['Avg Game Score (%)', submissions.length
+                        ? Math.round(submissions.reduce((s, g) => s + (g.score || 0), 0) / submissions.length)
+                        : '—'],
+                ],
+                y
+            );
+
+            if (submissions.length) {
+                y = addSectionTitle(doc, 'Game Submission History', y);
+                y = addTable(doc,
+                    ['Game Type', 'Score (%)', 'Time Taken', 'Date'],
+                    submissions.slice(0, 20).map(s => [
+                        s.gameType || s.type || 'Quiz',
+                        s.score ?? '—',
+                        s.durationSeconds ? `${Math.round(s.durationSeconds / 60)}m ${s.durationSeconds % 60}s` : '—',
+                        s.submittedAt ? new Date(s.submittedAt).toLocaleDateString('en-IN') : '—'
+                    ]),
+                    y
+                );
+            } else {
+                y = addNotice(doc, 'No game submissions found yet. Start playing games to see your activity here.', y);
+            }
+
+            return doc;
+        }
+
+        async function buildProjectsPDF() {
+            const projects = await fetchProjectData();
+            const doc = makePDF();
+            let y = addHeader(doc, 'Project Submissions');
+
+            if (Array.isArray(projects) && projects.length) {
+                y = addSectionTitle(doc, 'Submitted Projects', y);
+                y = addTable(doc,
+                    ['Project Name', 'Status', 'Grade (/100)', 'Submitted'],
+                    projects.map(p => [
+                        p.projectName || '—',
+                        p.status || '—',
+                        p.grade ?? 'Not graded',
+                        p.submittedAt ? new Date(p.submittedAt).toLocaleDateString('en-IN') : '—'
+                    ]),
+                    y
+                );
+            } else {
+                y = addNotice(doc, 'No project submissions found. Submit your first project from the courses page.', y);
+            }
+
+            return doc;
+        }
+
+        async function buildPlatformPDF() {
+            const doc = makePDF();
+            let y = addHeader(doc, 'Platform Performance');
+
+            const cpSolved = parseInt(localStorage.getItem('cp_solved') || '0');
+            const xp = parseInt(localStorage.getItem('mw_xp') || '0');
+            const rank = localStorage.getItem('mw_rank') || '—';
+            const atSessions = parseInt(localStorage.getItem('at_session_count') || '0');
+
+            y = addSectionTitle(doc, 'Performance Summary', y);
+            y = addTable(doc,
+                ['Category', 'Value'],
+                [
+                    ['Leaderboard Rank', rank],
+                    ['Total XP', xp],
+                    ['Code Challenges Solved', cpSolved],
+                    ['AI Tutor Sessions', atSessions],
+                ],
+                y
+            );
+
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'italic');
+            doc.setTextColor(140, 140, 160);
+            doc.text('Platform stats are based on your activity recorded in this browser.', 14, y);
+
+            return doc;
+        }
+
+        async function buildIATPDF() {
+            const marks = await fetchIATData();
+            const doc = makePDF();
+            let y = addHeader(doc, 'IAT & Exam Marks');
+
+            if (marks && Array.isArray(marks.subjects) && marks.subjects.length) {
+                y = addSectionTitle(doc, `IAT Results — ${marks.semester || 'Current Semester'}`, y);
+                y = addTable(doc,
+                    ['Subject', 'IAT 1 (/30)', 'IAT 2 (/30)', 'Max Marks'],
+                    marks.subjects.map(s => [s.name, s.iat1 ?? '—', s.iat2 ?? '—', s.maxMarks ?? 30]),
+                    y
+                );
+            } else {
+                y = addNotice(doc,
+                    'Academic marks have not been entered by your faculty yet. Check back later.',
+                    y, [34, 211, 165]);
+            }
+
+            return doc;
+        }
+
+        async function buildAttendancePDF() {
+            const data = await fetchAttendanceData();
+            const doc = makePDF();
+            let y = addHeader(doc, 'Attendance Report');
+
+            if (data && Array.isArray(data.subjects) && data.subjects.length) {
+                y = addSectionTitle(doc, 'Subject-wise Attendance', y);
+                y = addTable(doc,
+                    ['Subject', 'Classes Held', 'Attended', 'Percentage'],
+                    data.subjects.map(s => [
+                        s.name,
+                        s.total ?? '—',
+                        s.attended ?? '—',
+                        s.total ? `${Math.round((s.attended / s.total) * 100)}%` : '—'
+                    ]),
+                    y
+                );
+
+                const danger = data.subjects.filter(s => s.total && (s.attended / s.total) < 0.75);
+                if (danger.length) {
+                    y = addNotice(doc,
+                        `⚠ ${danger.map(s => s.name).join(', ')} — below 75% attendance. Immediate attention required.`,
+                        y, [244, 63, 94]);
+                }
+            } else {
+                y = addNotice(doc,
+                    'Attendance records have not been entered by your faculty yet. Check back later.',
+                    y, [34, 211, 165]);
+            }
+
+            return doc;
+        }
+
+        async function buildSemesterPDF() {
+            const [{ submissions }, projects, marks, attendance] = await Promise.all([
+                fetchEngagementData(),
+                fetchProjectData(),
+                fetchIATData(),
+                fetchAttendanceData()
+            ]);
+            const doc = makePDF();
+            let y = addHeader(doc, 'Semester Summary');
+
+            // IAT section
+            y = addSectionTitle(doc, '1. IAT & Exam Marks', y);
+            if (marks && Array.isArray(marks.subjects) && marks.subjects.length) {
+                y = addTable(doc, ['Subject', 'IAT 1', 'IAT 2'],
+                    marks.subjects.map(s => [s.name, s.iat1 ?? '—', s.iat2 ?? '—']), y);
+            } else {
+                y = addNotice(doc, 'IAT marks not yet entered by faculty.', y, [34, 211, 165]);
+            }
+
+            // Attendance section
+            y = addSectionTitle(doc, '2. Attendance', y);
+            if (attendance && Array.isArray(attendance.subjects) && attendance.subjects.length) {
+                y = addTable(doc, ['Subject', 'Attended', 'Total', '%'],
+                    attendance.subjects.map(s => [s.name, s.attended ?? '—', s.total ?? '—',
+                    s.total ? `${Math.round((s.attended / s.total) * 100)}%` : '—']), y);
+            } else {
+                y = addNotice(doc, 'Attendance records not yet entered by faculty.', y, [34, 211, 165]);
+            }
+
+            // Projects
+            doc.addPage(); y = 20;
+            y = addSectionTitle(doc, '3. Project Submissions', y);
+            if (Array.isArray(projects) && projects.length) {
+                y = addTable(doc, ['Project', 'Status', 'Grade'],
+                    projects.map(p => [p.projectName || '—', p.status || '—', p.grade ?? 'Not graded']), y);
+            } else {
+                y = addNotice(doc, 'No project submissions found.', y);
+            }
+
+            // Platform
+            y = addSectionTitle(doc, '4. Platform & Engagement', y);
+            const cpSolved = parseInt(localStorage.getItem('cp_solved') || '0');
+            const xp = parseInt(localStorage.getItem('mw_xp') || '0');
+            y = addTable(doc, ['Metric', 'Value'], [
+                ['Games Attempted', submissions.length],
+                ['Code Challenges Solved', cpSolved],
+                ['XP Earned', xp],
+            ], y);
+
+            return doc;
+        }
+
+        // ── GENERATE REPORT ──
+        async function generateReport(type) {
+            const meta = REPORT_META[type];
+            const card = document.getElementById(`card-${type}`);
+            const btn = card?.querySelector('.rp-gen-btn');
+            if (!btn) return;
+
+            btn.disabled = true;
+            btn.classList.add('loading');
+            btn.innerHTML = `<i data-lucide="loader"></i> Generating…`;
+            lucide.createIcons();
+
+            try {
+                let doc;
+                if (type === 'engagement') doc = await buildEngagementPDF();
+                else if (type === 'projects') doc = await buildProjectsPDF();
+                else if (type === 'platform') doc = await buildPlatformPDF();
+                else if (type === 'iat') doc = await buildIATPDF();
+                else if (type === 'attendance') doc = await buildAttendancePDF();
+                else if (type === 'semester') doc = await buildSemesterPDF();
+
+                const filename = `${meta.label.replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.pdf`;
+                doc.save(filename);
+
+                // Save to recent reports
+                saveToRecent({ type, label: meta.label, icon: meta.icon, color: meta.color, filename, date: Date.now() });
+                renderRecentReports();
+
+                showToast(`${meta.label} report downloaded successfully!`);
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to generate report. Please try again.', true);
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                btn.innerHTML = `<i data-lucide="download"></i> Generate Report`;
+                lucide.createIcons();
             }
         }
 
-        // Initialize
-        loadRecentReports();
+        // ── RECENT REPORTS (localStorage) ──
+        const RECENT_KEY = 'mw_reports';
+
+        function saveToRecent(entry) {
+            const list = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+            list.unshift(entry);
+            localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, 20))); // cap at 20
+        }
+
+        function clearRecent() {
+            localStorage.removeItem(RECENT_KEY);
+            renderRecentReports();
+            showToast('Recent reports cleared.');
+        }
+
+        function renderRecentReports() {
+            const list = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+            const el = document.getElementById('recentList');
+
+            if (!list.length) {
+                el.innerHTML = `<div class="rp-recent-empty">
+                    <i data-lucide="inbox"></i>
+                    <div>No reports generated yet</div>
+                    <div style="margin-top:4px;font-size:11px;">Generate a report above to see it here</div>
+                </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            el.innerHTML = list.map((r, i) => `
+                <div class="rp-recent-row">
+                    <div class="rp-recent-row-icon ${r.color || 'icon-indigo'}">
+                        <i data-lucide="${r.icon || 'file-text'}"></i>
+                    </div>
+                    <div class="rp-recent-row-info">
+                        <div class="rp-recent-row-name">${r.label}</div>
+                        <div class="rp-recent-row-date">${new Date(r.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+                    <div class="rp-recent-row-actions">
+                        <button class="rp-dl-btn" onclick="generateReport('${r.type}')">
+                            <i data-lucide="download"></i> Download again
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // ── THEME TOGGLE ──
+        function toggleTheme() {
+            const root = document.documentElement;
+            const cur = root.getAttribute('data-theme') || 'dark';
+            const next = cur === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            localStorage.setItem('mw_theme', next);
+            const icon = document.getElementById('themeIcon');
+            if (icon) { icon.setAttribute('data-lucide', next === 'dark' ? 'moon' : 'sun'); lucide.createIcons(); }
+        }
+
+        // ── INIT ──
+        lucide.createIcons();
+        renderRecentReports();
+
+        // Reflect saved theme on icon
+        const savedTheme = localStorage.getItem('mw_theme') || 'dark';
+        const themeIcon = document.getElementById('themeIcon');
+        if (themeIcon) { themeIcon.setAttribute('data-lucide', savedTheme === 'dark' ? 'moon' : 'sun'); lucide.createIcons(); }
     </script>
 </body>
 
