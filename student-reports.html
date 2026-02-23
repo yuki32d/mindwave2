@@ -12,7 +12,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="student-theme.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="auth-guard.js"></script>
     <script>
         if (!checkStudentAuth()) { /* redirects */ }
@@ -601,19 +601,38 @@
                     <span></span><span></span><span></span>
                 </button>
                 <div class="mw-breadcrumb">Dashboard / <span>Reports</span></div>
+
                 <div class="mw-search">
                     <i data-lucide="search"></i>
                     <input type="text" placeholder="Search reports…" id="globalSearch">
                 </div>
+
                 <div class="mw-topbar-actions">
-                    <button class="mw-icon-btn" id="themeToggleBtn" title="Toggle theme" onclick="toggleTheme()">
-                        <i data-lucide="moon" id="themeIcon"></i>
+                    <!-- Notification bell — IDs required by homepage.js -->
+                    <div class="mw-notif-wrap">
+                        <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="mw-notif-dot hidden" id="notificationBadge"></span>
+                        </div>
+                        <div class="mw-notif-dropdown" id="notificationDropdown"></div>
+                    </div>
+
+                    <!-- settingsBtn required by homepage.js -->
+                    <div class="mw-icon-btn" id="settingsBtn" title="Settings">
+                        <i data-lucide="settings"></i>
+                    </div>
+
+                    <!-- Theme toggle — IDs required by homepage.js -->
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle light/dark mode"
+                        aria-label="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
                     </button>
                 </div>
             </header>
 
             <!-- PAGE CONTENT -->
-            <div class="mw-page-content">
+            <div class="mw-content">
                 <div class="rp-content">
 
                     <!-- Header -->
@@ -752,7 +771,7 @@
                     </div>
 
                 </div><!-- end rp-content -->
-            </div><!-- end mw-page-content -->
+            </div><!-- end mw-content -->
         </div><!-- end mw-main -->
     </div><!-- end mw-app -->
 
@@ -764,8 +783,8 @@
 
     <script src="homepage.js"></script>
     <script>
-        // ── CONSTANTS ──
-        const API_BASE = window.location.hostname === 'localhost'
+        // ── CONSTANTS ── (prefixed to avoid conflict with homepage.js's API_BASE)
+        const RP_API_BASE = window.location.hostname === 'localhost'
             ? 'http://localhost:8081'
             : 'https://mindwave2.onrender.com';
         const token = localStorage.getItem('token');
@@ -795,28 +814,28 @@
         // ── API HELPERS (with graceful fallback) ──
         async function fetchWithFallback(url, fallback) {
             try {
-                const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token || ''}` } });
                 if (!res.ok) return fallback;
                 return await res.json();
             } catch { return fallback; }
         }
 
         async function fetchEngagementData() {
-            const submissions = await fetchWithFallback(`${API_BASE}/api/student/game-submissions`, []);
-            const profile = await fetchWithFallback(`${API_BASE}/api/student/profile`, {});
+            const submissions = await fetchWithFallback(`${RP_API_BASE}/api/student/game-submissions`, []);
+            const profile = await fetchWithFallback(`${RP_API_BASE}/api/student/profile`, {});
             return { submissions, profile };
         }
 
         async function fetchProjectData() {
-            return await fetchWithFallback(`${API_BASE}/api/student/projects`, []);
+            return await fetchWithFallback(`${RP_API_BASE}/api/student/projects`, []);
         }
 
         async function fetchIATData() {
-            return await fetchWithFallback(`${API_BASE}/api/student/marks`, null);
+            return await fetchWithFallback(`${RP_API_BASE}/api/student/marks`, null);
         }
 
         async function fetchAttendanceData() {
-            return await fetchWithFallback(`${API_BASE}/api/student/attendance`, null);
+            return await fetchWithFallback(`${RP_API_BASE}/api/student/attendance`, null);
         }
 
         // ── GET USER INFO ──
@@ -1201,25 +1220,9 @@
             lucide.createIcons();
         }
 
-        // ── THEME TOGGLE ──
-        function toggleTheme() {
-            const root = document.documentElement;
-            const cur = root.getAttribute('data-theme') || 'dark';
-            const next = cur === 'dark' ? 'light' : 'dark';
-            root.setAttribute('data-theme', next);
-            localStorage.setItem('mw_theme', next);
-            const icon = document.getElementById('themeIcon');
-            if (icon) { icon.setAttribute('data-lucide', next === 'dark' ? 'moon' : 'sun'); lucide.createIcons(); }
-        }
-
         // ── INIT ──
         lucide.createIcons();
         renderRecentReports();
-
-        // Reflect saved theme on icon
-        const savedTheme = localStorage.getItem('mw_theme') || 'dark';
-        const themeIcon = document.getElementById('themeIcon');
-        if (themeIcon) { themeIcon.setAttribute('data-lucide', savedTheme === 'dark' ? 'moon' : 'sun'); lucide.createIcons(); }
     </script>
 </body>
 
