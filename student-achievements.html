@@ -574,20 +574,22 @@
                         <div class="mw-user-name" id="sidebarUserName">Loading…</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <i data-lucide="chevron-up" class="mw-user-more"></i>
+                    <span class="mw-user-more">⋯</span>
                     <!-- Profile dropdown -->
-                    <div class="mw-profile-dropdown" id="profileDropdown" style="display:none;">
-                        <a href="student-profile.html" class="mw-profile-link">
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
+                        </div>
+                        <a href="student-profile.html">
                             <i data-lucide="user"></i> My Profile
                         </a>
-                        <a href="student-settings.html" class="mw-profile-link">
+                        <a href="student-settings.html">
                             <i data-lucide="settings"></i> Settings
                         </a>
-                        <hr style="border:none;border-top:1px solid var(--border);margin:6px 0;">
-                        <button class="mw-profile-link" id="dropdownSignOut"
-                            style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red);">
-                            <i data-lucide="log-out"></i> Sign Out
-                        </button>
+                        <a href="student-notifications.html">
+                            <i data-lucide="bell"></i> Notifications
+                        </a>
                     </div>
                 </div>
             </div>
