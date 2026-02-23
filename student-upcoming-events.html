@@ -666,159 +666,170 @@
                                 data-lucide="settings"></i></span> Settings</a>
                 </nav>
             </div>
-            <div class="mw-sidebar-footer">
-                <div id="profileToggle" class="mw-user-card" style="position:relative;">
-                    <div class="mw-avatar" id="avatarInitials">--</div>
+            <div class="mw-divider"></div>
+            <nav class="mw-nav-section">
+                <button id="signOutBtn" class="mw-nav-item"
+                    style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                    <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                </button>
+            </nav>
+    </div>
+    <div class="mw-sidebar-footer">
+        <div id="profileToggle" class="mw-user-card" style="position:relative;">
+            <div class="mw-avatar" id="avatarInitials">--</div>
+            <div>
+                <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                <div class="mw-user-role">Student</div>
+            </div>
+            <span class="mw-user-more">⋯</span>
+            <div id="profileDropdown" class="mw-profile-dropdown">
+                <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
+                <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
+                <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+                <button id="dropdownSignOut"><i data-lucide="log-out"></i> Sign Out</button>
+            </div>
+        </div>
+    </div>
+    </aside>
+
+
+    <!-- ── MAIN ── -->
+    <div class="mw-main">
+        <header class="mw-topbar">
+            <button class="mw-hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="mw-breadcrumb">Dashboard / <span>Events</span></div>
+            <div class="mw-search">
+                <i data-lucide="search" style="width:16px;height:16px;"></i>
+                <input type="text" placeholder="Search events…" id="evtSearch">
+            </div>
+            <div class="mw-topbar-actions">
+                <div class="mw-icon-btn" title="Notifications"><i data-lucide="bell"></i></div>
+                <div class="mw-icon-btn" title="Settings" onclick="location.href='student-settings.html'"><i
+                        data-lucide="settings"></i></div>
+                <button class="mw-theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <span class="mw-toggle-moon"><i data-lucide="moon" style="width:16px;height:16px;"></i></span>
+                    <span class="mw-toggle-sun"><i data-lucide="sun" style="width:16px;height:16px;"></i></span>
+                </button>
+            </div>
+        </header>
+
+        <div class="mw-content">
+            <!-- Header -->
+            <div
+                style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
+                <div>
+                    <h1
+                        style="font-size:22px;font-weight:800;letter-spacing:-0.02em;display:flex;align-items:center;gap:8px;">
+                        <i data-lucide="calendar-days" style="width:24px;height:24px;color:var(--accent-2);"></i>
+                        Events
+                    </h1>
+                    <p style="font-size:13px;color:var(--muted);margin-top:2px;">Assignments, quizzes, exams, and
+                        meetings — all in one place</p>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="evt-stats" id="evtStats">
+                <div class="evt-stat-card">
+                    <div class="evt-stat-icon" style="background:rgba(239,68,68,.12);color:#ef4444;"><i
+                            data-lucide="flame" style="width:22px;height:22px;"></i></div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
-                        <div class="mw-user-role">Student</div>
+                        <div class="evt-stat-val" style="color:#ef4444;" id="statToday">—</div>
+                        <div class="evt-stat-lbl">Due Today</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
-                    <div id="profileDropdown" class="mw-profile-dropdown">
-                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
-                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
-                        <div style="height:1px;background:var(--border);margin:4px 0;"></div>
-                        <button id="signOutBtn"><i data-lucide="log-out"></i> Sign Out</button>
+                </div>
+                <div class="evt-stat-card">
+                    <div class="evt-stat-icon" style="background:rgba(245,158,11,.12);color:var(--orange);"><i
+                            data-lucide="calendar-range" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="evt-stat-val" style="color:var(--orange);" id="statWeek">—</div>
+                        <div class="evt-stat-lbl">This Week</div>
+                    </div>
+                </div>
+                <div class="evt-stat-card">
+                    <div class="evt-stat-icon" style="background:rgba(99,102,241,.12);color:var(--accent-2);"><i
+                            data-lucide="clipboard-list" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="evt-stat-val" style="color:var(--accent-2);" id="statAssign">—</div>
+                        <div class="evt-stat-lbl">Assignments</div>
+                    </div>
+                </div>
+                <div class="evt-stat-card">
+                    <div class="evt-stat-icon" style="background:rgba(34,197,94,.12);color:#22c55e;"><i
+                            data-lucide="check-circle-2" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="evt-stat-val" style="color:#22c55e;" id="statTotal">—</div>
+                        <div class="evt-stat-lbl">Total Events</div>
                     </div>
                 </div>
             </div>
-        </aside>
 
-        <!-- ── MAIN ── -->
-        <div class="mw-main">
-            <header class="mw-topbar">
-                <div class="mw-breadcrumb">Dashboard / <span>Events</span></div>
-                <div class="mw-search">
-                    <i data-lucide="search" style="width:16px;height:16px;"></i>
-                    <input type="text" placeholder="Search events…" id="evtSearch">
+            <!-- Filters -->
+            <div class="evt-toolbar" id="evtToolbar">
+                <div class="evt-chip active" data-type="all"><i data-lucide="layers"
+                        style="width:14px;height:14px;"></i> All <span class="chip-count" id="countAll">—</span>
                 </div>
-                <div class="mw-topbar-actions">
-                    <div class="mw-icon-btn" title="Notifications"><i data-lucide="bell"></i></div>
-                    <div class="mw-icon-btn" title="Settings" onclick="location.href='student-settings.html'"><i
-                            data-lucide="settings"></i></div>
-                    <button class="mw-theme-toggle" id="themeToggle" aria-label="Toggle theme">
-                        <span class="mw-toggle-moon"><i data-lucide="moon" style="width:16px;height:16px;"></i></span>
-                        <span class="mw-toggle-sun"><i data-lucide="sun" style="width:16px;height:16px;"></i></span>
-                    </button>
+                <div class="evt-chip" data-type="assignment"><i data-lucide="file-edit"
+                        style="width:14px;height:14px;"></i> Assignments <span class="chip-count"
+                        id="countAssign">—</span></div>
+                <div class="evt-chip" data-type="quiz"><i data-lucide="brain" style="width:14px;height:14px;"></i>
+                    Quizzes <span class="chip-count" id="countQuiz">—</span></div>
+                <div class="evt-chip" data-type="exam"><i data-lucide="book-open-check"
+                        style="width:14px;height:14px;"></i> Exams <span class="chip-count" id="countExam">—</span>
                 </div>
-            </header>
+                <div class="evt-chip" data-type="meeting"><i data-lucide="video" style="width:14px;height:14px;"></i>
+                    Meetings <span class="chip-count" id="countMeet">—</span></div>
+                <div class="evt-chip" data-type="announcement"><i data-lucide="megaphone"
+                        style="width:14px;height:14px;"></i> Announcements <span class="chip-count"
+                        id="countAnn">—</span></div>
+                <div class="evt-range-toggle">
+                    <button class="evt-range-btn" data-range="today">Today</button>
+                    <button class="evt-range-btn" data-range="week">This Week</button>
+                    <button class="evt-range-btn" data-range="month">Month</button>
+                    <button class="evt-range-btn active" data-range="all">All</button>
+                </div>
+            </div>
 
-            <div class="mw-content">
-                <!-- Header -->
-                <div
-                    style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
-                    <div>
-                        <h1
-                            style="font-size:22px;font-weight:800;letter-spacing:-0.02em;display:flex;align-items:center;gap:8px;">
-                            <i data-lucide="calendar-days" style="width:24px;height:24px;color:var(--accent-2);"></i>
-                            Events
-                        </h1>
-                        <p style="font-size:13px;color:var(--muted);margin-top:2px;">Assignments, quizzes, exams, and
-                            meetings — all in one place</p>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="evt-stats" id="evtStats">
-                    <div class="evt-stat-card">
-                        <div class="evt-stat-icon" style="background:rgba(239,68,68,.12);color:#ef4444;"><i
-                                data-lucide="flame" style="width:22px;height:22px;"></i></div>
-                        <div>
-                            <div class="evt-stat-val" style="color:#ef4444;" id="statToday">—</div>
-                            <div class="evt-stat-lbl">Due Today</div>
-                        </div>
-                    </div>
-                    <div class="evt-stat-card">
-                        <div class="evt-stat-icon" style="background:rgba(245,158,11,.12);color:var(--orange);"><i
-                                data-lucide="calendar-range" style="width:22px;height:22px;"></i></div>
-                        <div>
-                            <div class="evt-stat-val" style="color:var(--orange);" id="statWeek">—</div>
-                            <div class="evt-stat-lbl">This Week</div>
-                        </div>
-                    </div>
-                    <div class="evt-stat-card">
-                        <div class="evt-stat-icon" style="background:rgba(99,102,241,.12);color:var(--accent-2);"><i
-                                data-lucide="clipboard-list" style="width:22px;height:22px;"></i></div>
-                        <div>
-                            <div class="evt-stat-val" style="color:var(--accent-2);" id="statAssign">—</div>
-                            <div class="evt-stat-lbl">Assignments</div>
-                        </div>
-                    </div>
-                    <div class="evt-stat-card">
-                        <div class="evt-stat-icon" style="background:rgba(34,197,94,.12);color:#22c55e;"><i
-                                data-lucide="check-circle-2" style="width:22px;height:22px;"></i></div>
-                        <div>
-                            <div class="evt-stat-val" style="color:#22c55e;" id="statTotal">—</div>
-                            <div class="evt-stat-lbl">Total Events</div>
+            <!-- Two-column grid -->
+            <div class="evt-grid">
+                <!-- LEFT: Event list -->
+                <div>
+                    <div class="evt-hero" id="evtHero"></div>
+                    <div id="evtList">
+                        <!-- Skeleton loaders -->
+                        <div style="display:flex;flex-direction:column;gap:12px;">
+                            <div class="skel" style="height:90px;"></div>
+                            <div class="skel" style="height:90px;"></div>
+                            <div class="skel" style="height:90px;"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Filters -->
-                <div class="evt-toolbar" id="evtToolbar">
-                    <div class="evt-chip active" data-type="all"><i data-lucide="layers"
-                            style="width:14px;height:14px;"></i> All <span class="chip-count" id="countAll">—</span>
-                    </div>
-                    <div class="evt-chip" data-type="assignment"><i data-lucide="file-edit"
-                            style="width:14px;height:14px;"></i> Assignments <span class="chip-count"
-                            id="countAssign">—</span></div>
-                    <div class="evt-chip" data-type="quiz"><i data-lucide="brain" style="width:14px;height:14px;"></i>
-                        Quizzes <span class="chip-count" id="countQuiz">—</span></div>
-                    <div class="evt-chip" data-type="exam"><i data-lucide="book-open-check"
-                            style="width:14px;height:14px;"></i> Exams <span class="chip-count" id="countExam">—</span>
-                    </div>
-                    <div class="evt-chip" data-type="meeting"><i data-lucide="video"
-                            style="width:14px;height:14px;"></i> Meetings <span class="chip-count"
-                            id="countMeet">—</span></div>
-                    <div class="evt-chip" data-type="announcement"><i data-lucide="megaphone"
-                            style="width:14px;height:14px;"></i> Announcements <span class="chip-count"
-                            id="countAnn">—</span></div>
-                    <div class="evt-range-toggle">
-                        <button class="evt-range-btn" data-range="today">Today</button>
-                        <button class="evt-range-btn" data-range="week">This Week</button>
-                        <button class="evt-range-btn" data-range="month">Month</button>
-                        <button class="evt-range-btn active" data-range="all">All</button>
-                    </div>
-                </div>
-
-                <!-- Two-column grid -->
-                <div class="evt-grid">
-                    <!-- LEFT: Event list -->
-                    <div>
-                        <div class="evt-hero" id="evtHero"></div>
-                        <div id="evtList">
-                            <!-- Skeleton loaders -->
-                            <div style="display:flex;flex-direction:column;gap:12px;">
-                                <div class="skel" style="height:90px;"></div>
-                                <div class="skel" style="height:90px;"></div>
-                                <div class="skel" style="height:90px;"></div>
-                            </div>
+                <!-- RIGHT: Calendar + Agenda -->
+                <div>
+                    <div class="mw-panel" id="calendarPanel">
+                        <div class="mw-panel-header">
+                            <div class="mw-panel-title" style="display:flex;align-items:center;gap:6px;"><i
+                                    data-lucide="calendar" style="width:16px;height:16px;"></i> Calendar</div>
                         </div>
+                        <div class="mw-panel-body" id="calendarBody"></div>
                     </div>
-
-                    <!-- RIGHT: Calendar + Agenda -->
-                    <div>
-                        <div class="mw-panel" id="calendarPanel">
-                            <div class="mw-panel-header">
-                                <div class="mw-panel-title" style="display:flex;align-items:center;gap:6px;"><i
-                                        data-lucide="calendar" style="width:16px;height:16px;"></i> Calendar</div>
-                            </div>
-                            <div class="mw-panel-body" id="calendarBody"></div>
+                    <div class="mw-panel" style="margin-top:14px;" id="agendaPanel">
+                        <div class="mw-panel-header">
+                            <div class="mw-panel-title" style="display:flex;align-items:center;gap:6px;"><i
+                                    data-lucide="clock" style="width:16px;height:16px;"></i> Today's Agenda</div>
                         </div>
-                        <div class="mw-panel" style="margin-top:14px;" id="agendaPanel">
-                            <div class="mw-panel-header">
-                                <div class="mw-panel-title" style="display:flex;align-items:center;gap:6px;"><i
-                                        data-lucide="clock" style="width:16px;height:16px;"></i> Today's Agenda</div>
-                            </div>
-                            <div class="mw-panel-body" id="agendaBody">
-                                <div style="padding:16px 0;text-align:center;color:var(--muted);font-size:13px;">
-                                    Loading…</div>
-                            </div>
+                        <div class="mw-panel-body" id="agendaBody">
+                            <div style="padding:16px 0;text-align:center;color:var(--muted);font-size:13px;">
+                                Loading…</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Toast container -->
@@ -853,12 +864,21 @@
         }
 
         /* ── Sign Out ── */
+        function doLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.replace('marketing-site/student-login.html');
+        }
         const signOutBtn = document.getElementById('signOutBtn');
         if (signOutBtn) {
             signOutBtn.addEventListener('click', () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'marketing-site/student-login.html';
+                document.getElementById('logoutModal').classList.add('active');
+            });
+        }
+        const dropdownSignOut = document.getElementById('dropdownSignOut');
+        if (dropdownSignOut) {
+            dropdownSignOut.addEventListener('click', () => {
+                document.getElementById('logoutModal').classList.add('active');
             });
         }
 
