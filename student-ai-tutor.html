@@ -546,6 +546,14 @@
             cursor: pointer;
             font-family: inherit;
             transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .at-starter-chip [data-lucide] {
+            width: 13px;
+            height: 13px;
         }
 
         .at-starter-chip:hover {
@@ -891,6 +899,14 @@
             cursor: pointer;
             font-family: inherit;
             transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .at-input-chip [data-lucide] {
+            width: 12px;
+            height: 12px;
         }
 
         .at-input-chip:hover {
@@ -943,7 +959,7 @@
 <body>
     <!-- TOP BAR -->
     <div class="at-topbar">
-        <a href="student-dashboard.html" class="at-back-btn">
+        <a href="homepage.html" class="at-back-btn">
             <i data-lucide="arrow-left"></i> Back
         </a>
 
@@ -956,16 +972,16 @@
 
         <!-- Subject Picker -->
         <select class="at-subject-select" id="subjectSelect" onchange="onSubjectChange()">
-            <option value="">📚 All Subjects</option>
-            <option value="Mathematics">📐 Mathematics</option>
-            <option value="Science">🔬 Science</option>
-            <option value="Physics">⚡ Physics</option>
-            <option value="Chemistry">🧪 Chemistry</option>
-            <option value="Biology">🧬 Biology</option>
-            <option value="English">📖 English</option>
-            <option value="History">🏛️ History</option>
-            <option value="Computer Science">💻 Computer Science</option>
-            <option value="Economics">📊 Economics</option>
+            <option value="">All Subjects</option>
+            <option value="Mathematics">Mathematics</option>
+            <option value="Science">Science</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Biology">Biology</option>
+            <option value="English">English</option>
+            <option value="History">History</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Economics">Economics</option>
         </select>
 
         <!-- Mode Pills -->
@@ -1056,26 +1072,26 @@
                     <div class="at-welcome-avatar">
                         <i data-lucide="bot"></i>
                     </div>
-                    <div class="at-welcome-title">Hi! I'm <span>Sage</span> 👋</div>
+                    <div class="at-welcome-title">Hi! I'm <span>Sage</span></div>
                     <div class="at-welcome-sub">Your personal AI tutor. Pick a subject, ask a question, and I'll guide
                         you — no cheating, just real understanding.</div>
                     <div class="at-starter-chips">
                         <button class="at-starter-chip"
-                            onclick="quickPrompt('Explain photosynthesis in simple terms')">🌱 Explain
-                            photosynthesis</button>
+                            onclick="quickPrompt('Explain photosynthesis in simple terms')"><i data-lucide="leaf"></i>
+                            Explain photosynthesis</button>
                         <button class="at-starter-chip"
-                            onclick="quickPrompt('Help me understand quadratic equations')">📐 Quadratic
-                            equations</button>
+                            onclick="quickPrompt('Help me understand quadratic equations')"><i data-lucide="sigma"></i>
+                            Quadratic equations</button>
                         <button class="at-starter-chip"
-                            onclick="quickPrompt('What is the difference between speed and velocity?')">⚡ Speed vs
-                            Velocity</button>
+                            onclick="quickPrompt('What is the difference between speed and velocity?')"><i
+                                data-lucide="zap"></i> Speed vs Velocity</button>
                         <button class="at-starter-chip"
-                            onclick="quickPrompt('How do I write a good essay introduction?')">📝 Essay intro
-                            tips</button>
-                        <button class="at-starter-chip" onclick="quickPrompt('Explain World War II causes briefly')">🏛️
-                            WWII causes</button>
-                        <button class="at-starter-chip" onclick="quickPrompt('What is recursion in programming?')">💻
-                            What is recursion?</button>
+                            onclick="quickPrompt('How do I write a good essay introduction?')"><i
+                                data-lucide="pen-line"></i> Essay intro tips</button>
+                        <button class="at-starter-chip" onclick="quickPrompt('Explain World War II causes briefly')"><i
+                                data-lucide="landmark"></i> WWII causes</button>
+                        <button class="at-starter-chip" onclick="quickPrompt('What is recursion in programming?')"><i
+                                data-lucide="terminal"></i> What is recursion?</button>
                     </div>
                 </div>
             </div>
@@ -1090,14 +1106,14 @@
 
                 <!-- Quick chips -->
                 <div class="at-input-hints">
-                    <button class="at-input-chip" onclick="quickPrompt('I don\'t understand this at all')">😕 I\'m
-                        confused</button>
-                    <button class="at-input-chip" onclick="quickPrompt('Can you give me a hint?')">💡 Give a
-                        hint</button>
-                    <button class="at-input-chip" onclick="quickPrompt('Give me a real-world example')">🌍 Real-world
-                        example</button>
-                    <button class="at-input-chip" onclick="quickPrompt('Can you make this simpler?')">🎯
-                        Simplify</button>
+                    <button class="at-input-chip" onclick="quickPrompt('I don\'t understand this at all')"><i
+                            data-lucide="circle-help"></i> I'm confused</button>
+                    <button class="at-input-chip" onclick="quickPrompt('Can you give me a hint?')"><i
+                            data-lucide="lightbulb"></i> Give a hint</button>
+                    <button class="at-input-chip" onclick="quickPrompt('Give me a real-world example')"><i
+                            data-lucide="globe"></i> Real-world example</button>
+                    <button class="at-input-chip" onclick="quickPrompt('Can you make this simpler?')"><i
+                            data-lucide="layers"></i> Simplify</button>
                 </div>
 
                 <!-- Input box -->
