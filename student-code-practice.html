@@ -1446,8 +1446,8 @@
                 constraints: ['Use a print/console.log statement'],
                 testCases: [{ input: '', expected: 'Hello, World!' }],
                 starterCode: {
-                    python: '# Write your solution\nprint("Hello, World!")',
-                    javascript: '// Write your solution\nconsole.log("Hello, World!");'
+                    python: '# Write your solution here\n# Hint: use print() to output text\n',
+                    javascript: '// Write your solution here\n// Hint: use console.log() to output text\n'
                 }
             },
             {
@@ -1461,8 +1461,8 @@
                     { input: '1000000\n-999999', expected: '1' }
                 ],
                 starterCode: {
-                    python: 'a = int(input())\nb = int(input())\nprint(a + b)',
-                    javascript: 'const [a,b] = input.trim().split("\\n").map(Number);\nconsole.log(a+b);'
+                    python: 'a = int(input())\nb = int(input())\n# Write your solution here\n',
+                    javascript: 'const [a, b] = input.trim().split("\\n").map(Number);\n// Write your solution here\n'
                 }
             },
             {
@@ -1478,8 +1478,8 @@
                     { input: 'world', expected: 'NO' }
                 ],
                 starterCode: {
-                    python: 's = input().lower()\nprint("YES" if s == s[::-1] else "NO")',
-                    javascript: 'const s = input.trim().toLowerCase();\nconsole.log(s === s.split("").reverse().join("") ? "YES" : "NO");'
+                    python: 's = input().lower()\n# Write your solution here\n# Hint: compare s with its reverse\n',
+                    javascript: 'const s = input.trim().toLowerCase();\n// Write your solution here\n// Hint: compare s with s.split("").reverse().join("")\n'
                 }
             },
             {
@@ -1493,8 +1493,8 @@
                     { input: '1', expected: '1' }
                 ],
                 starterCode: {
-                    python: 'n = int(input())\nfor i in range(1,n+1):\n    if i%15==0: print("FizzBuzz")\n    elif i%3==0: print("Fizz")\n    elif i%5==0: print("Buzz")\n    else: print(i)',
-                    javascript: 'const n=parseInt(input.trim());\nfor(let i=1;i<=n;i++){\n  if(i%15===0)console.log("FizzBuzz");\n  else if(i%3===0)console.log("Fizz");\n  else if(i%5===0)console.log("Buzz");\n  else console.log(i);\n}'
+                    python: 'n = int(input())\nfor i in range(1, n + 1):\n    # Write your logic here\n    pass\n',
+                    javascript: 'const n = parseInt(input.trim());\nfor (let i = 1; i <= n; i++) {\n    // Write your logic here\n}\n'
                 }
             },
             {
@@ -1508,8 +1508,8 @@
                     { input: '10', expected: '0 1 1 2 3 5 8 13 21 34' }
                 ],
                 starterCode: {
-                    python: 'n=int(input())\na,b=0,1\nres=[]\nfor _ in range(n):\n    res.append(str(a))\n    a,b=b,a+b\nprint(" ".join(res))',
-                    javascript: 'const n=parseInt(input.trim());let a=0,b=1,res=[];\nfor(let i=0;i<n;i++){res.push(a);[a,b]=[b,a+b];}\nconsole.log(res.join(" "));'
+                    python: 'n = int(input())\n# Write your solution here\n# Hint: use two variables a, b and a loop\n',
+                    javascript: 'const n = parseInt(input.trim());\n// Write your solution here\n// Hint: use two variables a, b and a loop\n'
                 }
             },
             {
@@ -1523,8 +1523,8 @@
                     { input: '1\n42\n42', expected: '0' }
                 ],
                 starterCode: {
-                    python: 'data=input().split()\nn=int(data[0])\nnums=list(map(int,input().split()))\ntarget=int(input())\nlo,hi=0,n-1\nans=-1\nwhile lo<=hi:\n    mid=(lo+hi)//2\n    if nums[mid]==target:\n        ans=mid; break\n    elif nums[mid]<target: lo=mid+1\n    else: hi=mid-1\nprint(ans)',
-                    javascript: 'const lines=input.trim().split("\\n");\nconst nums=lines[1].split(" ").map(Number);\nconst target=parseInt(lines[2]);\nlet lo=0,hi=nums.length-1,ans=-1;\nwhile(lo<=hi){const mid=(lo+hi)>>1;\nif(nums[mid]===target){ans=mid;break;}\nelse if(nums[mid]<target)lo=mid+1;\nelse hi=mid-1;}\nconsole.log(ans);'
+                    python: 'n = int(input())\nnums = list(map(int, input().split()))\ntarget = int(input())\n# Write your binary search here\n# Use lo, hi pointers and a while loop\n',
+                    javascript: 'const lines = input.trim().split("\\n");\nconst nums = lines[1].split(" ").map(Number);\nconst target = parseInt(lines[2]);\n// Write your binary search here\n// Use lo, hi pointers and a while loop\n'
                 }
             },
             {
@@ -1540,8 +1540,8 @@
                     { input: '', expected: 'YES' }
                 ],
                 starterCode: {
-                    python: 's=input()\nstack=[]\npairs={")":"(","]":"[","}":"{"}\nfor c in s:\n    if c in "([{": stack.append(c)\n    elif not stack or stack[-1]!=pairs[c]: print("NO"); exit()\n    else: stack.pop()\nprint("YES" if not stack else "NO")',
-                    javascript: 'const s=input.trim();\nconst stack=[];\nconst pairs={")":"(","]":"[","}":"{"};\nfor(const c of s){\n  if("([{".includes(c))stack.push(c);\n  else if(!stack.length||stack[stack.length-1]!==pairs[c]){console.log("NO");process.exit?.(0)||eval("throw 0");}\n  else stack.pop();\n}\nconsole.log(stack.length?"NO":"YES");'
+                    python: 's = input()\n# Write your solution here\n# Hint: use a stack and a dictionary for matching pairs\n',
+                    javascript: 'const s = input.trim();\n// Write your solution here\n// Hint: use a stack and an object for matching pairs\n'
                 }
             },
             {
@@ -1555,8 +1555,8 @@
                     { input: '4\n1 2 3 4', expected: '10' }
                 ],
                 starterCode: {
-                    python: 'n=int(input())\nnums=list(map(int,input().split()))\ncur=best=nums[0]\nfor x in nums[1:]:\n    cur=max(x,cur+x)\n    best=max(best,cur)\nprint(best)',
-                    javascript: 'const lines=input.trim().split("\\n");\nconst nums=lines[1].split(" ").map(Number);\nlet cur=nums[0],best=nums[0];\nfor(let i=1;i<nums.length;i++){cur=Math.max(nums[i],cur+nums[i]);best=Math.max(best,cur);}\nconsole.log(best);'
+                    python: 'n = int(input())\nnums = list(map(int, input().split()))\n# Write your solution here (Kadane\'s algorithm)\n# Hint: track current_sum and best_sum as you iterate\n',
+                    javascript: 'const lines = input.trim().split("\\n");\nconst nums = lines[1].split(" ").map(Number);\n// Write your solution here (Kadane\'s algorithm)\n// Hint: track cur and best as you iterate\n'
                 }
             },
             {
@@ -1570,8 +1570,8 @@
                     { input: '2\n3 3\n6', expected: '0 1' }
                 ],
                 starterCode: {
-                    python: 'lines=__import__("sys").stdin.read().split("\\n")\nn=int(lines[0])\nnums=list(map(int,lines[1].split()))\ntarget=int(lines[2])\nseen={}\nfor i,v in enumerate(nums):\n    if target-v in seen:\n        print(seen[target-v],i); break\n    seen[v]=i',
-                    javascript: 'const lines=input.trim().split("\\n");\nconst nums=lines[1].split(" ").map(Number);\nconst target=parseInt(lines[2]);\nconst seen={};\nfor(let i=0;i<nums.length;i++){\n  const c=target-nums[i];\n  if(c in seen){console.log(seen[c]+" "+i);break;}\n  seen[nums[i]]=i;\n}'
+                    python: 'n = int(input())\nnums = list(map(int, input().split()))\ntarget = int(input())\n# Write your solution here\n# Hint: use a dictionary to store seen values and their indices\n',
+                    javascript: 'const lines = input.trim().split("\\n");\nconst nums = lines[1].split(" ").map(Number);\nconst target = parseInt(lines[2]);\n// Write your solution here\n// Hint: use an object to store seen values and their indices\n'
                 }
             },
             {
@@ -1585,8 +1585,8 @@
                     { input: 'a b c a b a', expected: 'a 3\nb 2\nc 1' }
                 ],
                 starterCode: {
-                    python: 'from collections import Counter\nwords=input().split()\nc=Counter(words)\nfor w,n in sorted(c.items(),key=lambda x:(-x[1],x[0])):\n    print(f"{w} {n}")',
-                    javascript: 'const words=input.trim().split(/\\s+/);\nconst c={};\nfor(const w of words)c[w]=(c[w]||0)+1;\nObject.entries(c).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))\n.forEach(([w,n])=>console.log(w+" "+n));'
+                    python: 'words = input().split()\n# Write your solution here\n# Hint: use a dictionary to count frequencies, then sort\n',
+                    javascript: 'const words = input.trim().split(/\\s+/);\n// Write your solution here\n// Hint: use an object to count frequencies, then sort\n'
                 }
             }
         ];
