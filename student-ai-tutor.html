@@ -204,48 +204,50 @@
 
         /* ── LEFT PANEL — Sage profile ── */
         .at-sage-panel {
-            width: 260px;
+            width: 240px;
             flex-shrink: 0;
             border-right: 1px solid var(--border);
             background: var(--surface);
             display: flex;
             flex-direction: column;
-            padding: 24px 16px;
-            gap: 20px;
-            overflow-y: auto;
+            padding: 16px 14px;
+            gap: 14px;
+            overflow: hidden;
+            /* no scroll */
         }
 
+        /* Profile card — horizontal compact strip */
         .at-sage-profile {
             display: flex;
-            flex-direction: column;
             align-items: center;
             gap: 12px;
-            padding: 20px 16px;
+            padding: 12px 14px;
             background: var(--surface-2);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 12px;
         }
 
         .at-sage-avatar-large {
-            width: 72px;
-            height: 72px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: linear-gradient(135deg, #7c3aed, #4f46e5);
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            flex-shrink: 0;
         }
 
         .at-sage-avatar-large [data-lucide] {
-            width: 32px;
-            height: 32px;
+            width: 20px;
+            height: 20px;
             color: #fff;
         }
 
         .at-sage-avatar-large .at-sage-ring {
             position: absolute;
-            inset: -5px;
+            inset: -4px;
             border-radius: 50%;
             border: 2px solid transparent;
             background: linear-gradient(135deg, #7c3aed, #06b6d4) border-box;
@@ -253,53 +255,41 @@
             -webkit-mask-composite: destination-out;
             mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
             mask-composite: exclude;
-            animation: ringPulse 2.5s ease-in-out infinite;
         }
 
-        @keyframes ringPulse {
-
-            0%,
-            100% {
-                opacity: 0.4;
-                transform: scale(1);
-            }
-
-            50% {
-                opacity: 1;
-                transform: scale(1.05);
-            }
+        .at-sage-info {
+            flex: 1;
+            min-width: 0;
         }
 
         .at-sage-name {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 800;
             background: linear-gradient(135deg, #a78bfa, #06b6d4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            line-height: 1.2;
         }
 
         .at-sage-desc {
-            font-size: 11px;
-            color: var(--muted);
-            text-align: center;
-            line-height: 1.5;
+            display: none;
         }
 
-        /* Mood indicator */
+        /* removed to save space */
+
+        /* Mood indicator — now inline under name */
         .at-mood-display {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: var(--bg);
-            border-radius: 20px;
-            width: 100%;
+            gap: 5px;
+            margin-top: 3px;
         }
 
+
         .at-mood-dot {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: var(--green);
             transition: background 0.4s;
@@ -332,80 +322,95 @@
         }
 
         .at-mood-label {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--muted);
             font-weight: 600;
         }
 
-        /* Session info */
-        .at-sidebar-section-label {
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .8px;
-            padding: 0 2px;
+
+        /* Divider */
+        .at-panel-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0 -2px;
         }
 
+        /* Session info — compact 2-col grid */
         .at-session-info {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
         }
 
         .at-session-row {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: var(--muted);
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
         }
 
-        .at-session-row [data-lucide] {
-            width: 13px;
-            height: 13px;
+        .at-session-row-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .at-session-row-label [data-lucide] {
+            width: 10px;
+            height: 10px;
             color: var(--accent);
         }
 
-        .at-session-row span {
+        .at-session-row-val {
+            font-size: 12px;
+            font-weight: 700;
             color: var(--text);
-            font-weight: 600;
         }
+
 
         /* Quick actions */
         .at-actions {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 3px;
+            flex: 1;
         }
 
         .at-action-btn {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: none;
             background: none;
             color: var(--text);
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             font-family: inherit;
-            transition: all 0.15s;
+            transition: background 0.12s;
             width: 100%;
             text-align: left;
         }
 
         .at-action-btn:hover {
             background: var(--surface-2);
-            border-color: var(--border-2);
         }
 
         .at-action-btn [data-lucide] {
             width: 14px;
             height: 14px;
             color: var(--accent);
+            flex-shrink: 0;
         }
 
         .at-action-btn.danger [data-lucide] {
@@ -413,8 +418,18 @@
         }
 
         .at-action-btn.danger:hover {
-            border-color: var(--red);
             color: var(--red);
+        }
+
+        /* Actions label */
+        .at-actions-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: var(--muted);
+            padding: 0 2px;
+            margin-bottom: 2px;
         }
 
         /* ── CHAT AREA ── */
@@ -1115,65 +1130,68 @@
 
         <!-- LEFT PANEL — Sage profile -->
         <aside class="at-sage-panel">
-            <!-- Profile card -->
+
+            <!-- Compact horizontal profile strip -->
             <div class="at-sage-profile">
                 <div class="at-sage-avatar-large">
                     <i data-lucide="bot"></i>
                     <div class="at-sage-ring"></div>
                 </div>
-                <div class="at-sage-name">Sage</div>
-                <div class="at-sage-desc">Your personal AI tutor. Ask me anything — I'm here to guide, not just give
-                    answers.</div>
-                <div class="at-mood-display">
-                    <div class="at-mood-dot" id="moodDot"></div>
-                    <div class="at-mood-label" id="moodLabel">Ready to help</div>
-                </div>
-            </div>
-
-            <!-- Session info -->
-            <div>
-                <div class="at-sidebar-section-label">Session</div>
-                <div class="at-session-info" style="margin-top:10px">
-                    <div class="at-session-row">
-                        <i data-lucide="book-open"></i>
-                        Subject: <span id="sessionSubject">All</span>
-                    </div>
-                    <div class="at-session-row">
-                        <i data-lucide="layers"></i>
-                        Mode: <span id="sessionMode">Chat</span>
-                    </div>
-                    <div class="at-session-row">
-                        <i data-lucide="message-circle"></i>
-                        Messages: <span id="sessionMsgCount">0</span>
-                    </div>
-                    <div class="at-session-row">
-                        <i data-lucide="clock"></i>
-                        Time: <span id="sessionTimer">0:00</span>
+                <div class="at-sage-info">
+                    <div class="at-sage-name">Sage</div>
+                    <div class="at-mood-display">
+                        <div class="at-mood-dot" id="moodDot"></div>
+                        <div class="at-mood-label" id="moodLabel">Ready to help</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Quick actions -->
-            <div>
-                <div class="at-sidebar-section-label">Quick Actions</div>
-                <div class="at-actions" style="margin-top:10px">
-                    <button class="at-action-btn" onclick="quickPrompt('Explain this topic step by step')">
-                        <i data-lucide="list-ordered"></i> Step-by-step
-                    </button>
-                    <button class="at-action-btn" onclick="quickPrompt('Give me a practice problem on this topic')">
-                        <i data-lucide="pencil"></i> Practice problem
-                    </button>
-                    <button class="at-action-btn" onclick="quickPrompt('Give me a quick summary of what we covered')">
-                        <i data-lucide="file-text"></i> Summarize session
-                    </button>
-                    <button class="at-action-btn" onclick="quickPrompt('What should I study next?')">
-                        <i data-lucide="compass"></i> What next?
-                    </button>
-                    <button class="at-action-btn danger" onclick="clearChat()">
-                        <i data-lucide="trash-2"></i> Clear chat
-                    </button>
+            <!-- Divider -->
+            <div class="at-panel-divider"></div>
+
+            <!-- Session stats — 2-col grid cards -->
+            <div class="at-session-info">
+                <div class="at-session-row">
+                    <div class="at-session-row-label"><i data-lucide="book-open"></i> Subject</div>
+                    <div class="at-session-row-val" id="sessionSubject">All</div>
+                </div>
+                <div class="at-session-row">
+                    <div class="at-session-row-label"><i data-lucide="layers"></i> Mode</div>
+                    <div class="at-session-row-val" id="sessionMode">Chat</div>
+                </div>
+                <div class="at-session-row">
+                    <div class="at-session-row-label"><i data-lucide="message-circle"></i> Msgs</div>
+                    <div class="at-session-row-val" id="sessionMsgCount">0</div>
+                </div>
+                <div class="at-session-row">
+                    <div class="at-session-row-label"><i data-lucide="clock"></i> Time</div>
+                    <div class="at-session-row-val" id="sessionTimer">0:00</div>
                 </div>
             </div>
+
+            <!-- Divider -->
+            <div class="at-panel-divider"></div>
+
+            <!-- Quick actions — slim borderless rows -->
+            <div class="at-actions-label">Quick Actions</div>
+            <div class="at-actions">
+                <button class="at-action-btn" onclick="quickPrompt('Explain this topic step by step')">
+                    <i data-lucide="list-ordered"></i> Step-by-step
+                </button>
+                <button class="at-action-btn" onclick="quickPrompt('Give me a practice problem on this topic')">
+                    <i data-lucide="pencil"></i> Practice problem
+                </button>
+                <button class="at-action-btn" onclick="quickPrompt('Give me a quick summary of what we covered')">
+                    <i data-lucide="file-text"></i> Summarize session
+                </button>
+                <button class="at-action-btn" onclick="quickPrompt('What should I study next?')">
+                    <i data-lucide="compass"></i> What next?
+                </button>
+                <button class="at-action-btn danger" onclick="clearChat()">
+                    <i data-lucide="trash-2"></i> Clear chat
+                </button>
+            </div>
+
         </aside>
 
         <!-- CHAT AREA -->
