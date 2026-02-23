@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -691,7 +691,7 @@
     <script>
         /* ═══════════════════ AUTH ═══════════════════ */
         const token = localStorage.getItem('token');
-        if (!token) window.location.href = 'student-login.html';
+        if (!token) window.location.href = 'marketing-site/student-login.html';
 
         const API = window.location.origin;
         const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -943,7 +943,7 @@
         /* ═══════════════════ SIGN-OUT ═══════════════════ */
         function signOut() {
             localStorage.clear();
-            window.location.href = 'student-login.html';
+            window.location.href = 'marketing-site/student-login.html';
         }
         document.getElementById('signOutBtn').addEventListener('click', signOut);
         document.getElementById('dropdownSignOut')?.addEventListener('click', signOut);

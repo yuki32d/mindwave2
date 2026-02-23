@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -1076,7 +1076,7 @@
 
     <script>
         // Auth guard
-        if (!localStorage.getItem('token')) window.location.href = 'student-login.html';
+        if (!localStorage.getItem('token')) window.location.href = 'marketing-site/student-login.html';
     </script>
 
     <script src="anti-cheat.js"></script>
@@ -1116,7 +1116,7 @@
             const signOutBtn = document.getElementById('signOutBtn');
             if (signOutBtn) signOutBtn.addEventListener('click', () => {
                 ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role'].forEach(k => localStorage.removeItem(k));
-                window.location.replace('student-login.html');
+                window.location.replace('marketing-site/student-login.html');
             });
 
             // Theme toggle
