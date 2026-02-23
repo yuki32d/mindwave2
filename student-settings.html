@@ -1,465 +1,1429 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINDWAVE – Settings</title>
-    <link rel="stylesheet" href="3d-depth-design.css">
+    <title>Settings — MindWave</title>
+    <meta name="description" content="Manage your MindWave profile and preferences.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="auth-guard.js"></script>
+    <script>if (!checkStudentAuth()) { }</script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script>
+        (function () {
+            const t = localStorage.getItem('mw_theme') || localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+
     <style>
-        :root {
-            --bg-primary: #0b0b0f;
-            --bg-secondary: #111319;
-            --bg-card: rgba(255, 255, 255, 0.03);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --text-primary: #f5f7ff;
-            --text-secondary: #9ea4b6;
+        /* ── SETTINGS LAYOUT ── */
+        .st-body {
+            display: flex;
+            gap: 0;
+            min-height: 100%;
         }
 
-        body.light-theme {
-            --bg-primary: #f5f7ff;
-            --bg-secondary: #ffffff;
-            --bg-card: rgba(0, 0, 0, 0.03);
-            --border-color: rgba(0, 0, 0, 0.1);
-            --text-primary: #0b0b0f;
-            --text-secondary: #5a5f6f;
-        }
-
-        body.light-theme {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-        }
-
-        .settings-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .settings-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-
-        .settings-section h2 {
-            margin: 0 0 24px;
-            font-size: 24px;
-            color: var(--text-primary);
-        }
-
-        .form-grid {
-            display: grid;
-            gap: 24px;
-        }
-
-        .form-group {
+        /* LEFT TAB NAV */
+        .st-tab-nav {
+            width: 220px;
+            flex-shrink: 0;
+            padding: 28px 16px;
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
+            gap: 4px;
+            position: sticky;
+            top: 0;
+            height: calc(100vh - 56px);
+        }
+
+        .st-tab-nav-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            padding: 0 12px;
+            margin: 12px 0 6px;
+        }
+
+        .st-tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            transition: background .15s, color .15s;
+        }
+
+        .st-tab-btn:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+        }
+
+        .st-tab-btn.active {
+            background: var(--accent-subtle);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .st-tab-btn svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        /* RIGHT CONTENT */
+        .st-content {
+            flex: 1;
+            padding: 32px 40px;
+            min-width: 0;
+            overflow-y: auto;
+        }
+
+        .st-panel {
+            display: none;
+            max-width: 700px;
+        }
+
+        .st-panel.active {
+            display: block;
+        }
+
+        .st-panel-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 4px;
+        }
+
+        .st-panel-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0 0 28px;
+        }
+
+        /* SECTION CARDS */
+        .st-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .st-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 20px;
+            display: flex;
+            align-items: center;
             gap: 8px;
         }
 
-        .form-group label {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-secondary);
+        .st-card-title svg {
+            color: var(--accent);
         }
 
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            padding: 12px 16px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #0f62fe;
-        }
-
-        .form-group input:read-only {
-            background: rgba(255, 255, 255, 0.02);
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .photo-upload-section {
+        /* PHOTO SECTION */
+        .st-photo-row {
             display: flex;
             align-items: center;
-            gap: 24px;
-            padding: 24px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            margin-bottom: 24px;
+            gap: 20px;
         }
 
-        .photo-preview {
-            width: 120px;
-            height: 120px;
+        .st-avatar {
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
+            font-size: 28px;
             font-weight: 700;
             color: white;
             overflow: hidden;
+            flex-shrink: 0;
             position: relative;
         }
 
-        .photo-preview img {
+        .st-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-        }
-
-        .photo-upload-info {
-            flex: 1;
-        }
-
-        .photo-upload-info h3 {
-            margin: 0 0 8px;
-            font-size: 16px;
-        }
-
-        .photo-upload-info p {
-            margin: 0 0 16px;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .upload-btn {
-            padding: 10px 20px;
-            background: #0f62fe;
-            border: none;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        .upload-btn:hover {
-            background: #0353e9;
-        }
-
-        .upload-btn.secondary {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-        }
-
-        .upload-btn.secondary:hover {
-            background: var(--bg-card);
-        }
-
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-
-        .theme-toggle-section {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
-        }
-
-        .theme-toggle-info h3 {
-            margin: 0 0 4px;
-            font-size: 16px;
-        }
-
-        .theme-toggle-info p {
-            margin: 0;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 60px;
-            height: 32px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 999px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .toggle-switch.active {
-            background: #0f62fe;
-        }
-
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            transition: transform 0.3s;
-        }
-
-        .toggle-switch.active::after {
-            transform: translateX(28px);
-        }
-
-        .toggle-switch::before {
-            content: '🌙';
-            position: absolute;
-            left: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 14px;
-            z-index: 0;
-        }
-
-        .toggle-switch.active::before {
-            content: '☀️';
-            left: auto;
-            right: 8px;
-        }
-
-        .save-section {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            padding-top: 24px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .save-btn {
-            padding: 12px 32px;
-            background: #0f62fe;
-            border: none;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        .save-btn:hover {
-            background: #0353e9;
-        }
-
-        .cancel-btn {
-            padding: 12px 32px;
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .cancel-btn:hover {
-            background: var(--bg-card);
-        }
-
-        .password-requirements {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 8px;
-            line-height: 1.6;
-        }
-
-        .success-message {
-            padding: 16px;
-            background: rgba(52, 199, 89, 0.1);
-            border: 1px solid rgba(52, 199, 89, 0.3);
-            border-radius: 8px;
-            color: #34c759;
-            margin-bottom: 24px;
             display: none;
         }
 
-        @media (max-width: 768px) {
-            .two-column {
+        .st-photo-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 4px;
+        }
+
+        .st-photo-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 0 0 12px;
+        }
+
+        .st-photo-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* FORM ELEMENTS */
+        .st-form-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .st-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .st-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .st-field label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .st-field input,
+        .st-field textarea,
+        .st-field select {
+            padding: 10px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color .15s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .st-field input:focus,
+        .st-field textarea:focus,
+        .st-field select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-subtle);
+        }
+
+        .st-field input:disabled,
+        .st-field input[readonly] {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+        .st-field textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .st-field select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ea4b6' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+
+        .st-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* TOGGLE ROWS */
+        .st-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .st-toggle-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .st-toggle-row:first-child {
+            padding-top: 0;
+        }
+
+        .st-toggle-info h4 {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin: 0 0 2px;
+        }
+
+        .st-toggle-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Toggle switch */
+        .st-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .st-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .st-switch-track {
+            position: absolute;
+            inset: 0;
+            background: var(--border);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .st-switch-track::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            transition: transform .2s;
+        }
+
+        .st-switch input:checked+.st-switch-track {
+            background: var(--accent);
+        }
+
+        .st-switch input:checked+.st-switch-track::after {
+            transform: translateX(20px);
+        }
+
+        /* ACCENT COLOUR PICKER */
+        .st-accent-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .st-accent-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: border-color .15s, transform .15s;
+        }
+
+        .st-accent-swatch:hover {
+            transform: scale(1.15);
+        }
+
+        .st-accent-swatch.selected {
+            border-color: var(--text-primary);
+        }
+
+        /* THEME TOGGLE CARDS */
+        .st-theme-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 4px;
+        }
+
+        .st-theme-card {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: border-color .2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .st-theme-card.selected {
+            border-color: var(--accent);
+        }
+
+        .st-theme-preview {
+            width: 44px;
+            height: 32px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .st-theme-preview.dark-prev {
+            background: #0f111a;
+            border: 1px solid #2a2f45;
+        }
+
+        .st-theme-preview.light-prev {
+            background: #f0f2ff;
+            border: 1px solid #d8ddf0;
+        }
+
+        .st-theme-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .st-theme-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* PASSWORD STRENGTH */
+        .st-pw-strength {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border);
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .st-pw-strength-bar {
+            height: 100%;
+            border-radius: 2px;
+            width: 0%;
+            transition: width .3s, background .3s;
+        }
+
+        .st-pw-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* SAVE BAR */
+        .st-save-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            margin-top: 8px;
+        }
+
+        /* TOAST */
+        .st-toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 14px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .3);
+            z-index: 9999;
+            transition: transform .3s ease;
+            white-space: nowrap;
+        }
+
+        .st-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .st-toast svg {
+            color: var(--green);
+        }
+
+        .st-toast.error svg {
+            color: var(--red);
+        }
+
+        /* BUTTONS */
+        .st-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            border-radius: 9px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .15s, background .15s;
+        }
+
+        .st-btn:hover {
+            opacity: .85;
+        }
+
+        .st-btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .st-btn-ghost {
+            background: var(--surface-hover);
+            color: var(--text-secondary);
+        }
+
+        .st-btn-danger {
+            background: rgba(255, 59, 48, .12);
+            color: var(--red, #ff3b30);
+            border: 1px solid rgba(255, 59, 48, .25);
+        }
+
+        .st-btn-sm {
+            padding: 7px 14px;
+            font-size: 12px;
+        }
+
+        /* BADGE */
+        .st-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: var(--accent-subtle);
+            color: var(--accent);
+        }
+
+        /* READ-ONLY TAG */
+        .st-readonly-tag {
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 5px;
+            background: var(--surface-hover);
+            color: var(--text-muted);
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+
+        @media (max-width: 900px) {
+            .st-tab-nav {
+                display: none;
+            }
+
+            .st-content {
+                padding: 20px;
+            }
+
+            .st-two-col {
                 grid-template-columns: 1fr;
             }
 
-            .photo-upload-section {
-                flex-direction: column;
-                text-align: center;
+            .st-theme-cards {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 
-<body data-theme="dark">
-    <div class="page-shell">
-        <header class="hero">
-            <a class="ghost-link" href="homepage.html">← Back to Dashboard</a>
-            <p class="eyebrow">Account</p>
-            <h1>Settings</h1>
-            <p class="lede">Manage your profile and preferences</p>
-        </header>
+<body>
+    <div class="mw-app" id="mwApp">
 
-        <div class="settings-container">
-            <div class="success-message" id="successMessage">
-                ✓ Settings saved successfully!
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar" id="mwSidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
             </div>
 
-            <!-- Profile Photo -->
-            <div class="settings-section">
-                <h2>Profile Photo</h2>
-                <div class="photo-upload-section">
-                    <div class="photo-preview" id="photoPreview">
-                        <span id="photoInitials">ST</span>
-                        <img id="photoImage" style="display: none;">
+            <div class="mw-sidebar-nav">
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+                    </a>
+                    <a href="student-courses.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
+                    </a>
+                    <a href="student-timetable.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
+                    </a>
+                    <a href="student-performance.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
+                    </a>
+                    <a href="student-leaderboard.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="trophy"></i></span> Leaderboard
+                        <span class="mw-nav-badge" style="font-size:10px;">HOT</span>
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="gamepad-2"></i></span> Play Games
+                    </a>
+                    <a href="student-community.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Community
+                    </a>
+                    <a href="student-achievements.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="award"></i></span> Achievements
+                    </a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="megaphone"></i></span> Events
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="terminal-square"></i></span> Code Practice
+                    </a>
+                    <a href="student-ai-tutor.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
+                    </a>
+                    <a href="student-reports.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
+                    </a>
+                    <a href="student-settings.html" class="mw-nav-item active">
+                        <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
+                    </a>
+                </nav>
+            </div>
+
+            <div class="mw-sidebar-footer">
+                <div class="mw-user-card" id="profileToggle">
+                    <div class="mw-user-avatar" id="avatarInitials">--</div>
+                    <div class="mw-user-info">
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
                     </div>
-                    <div class="photo-upload-info">
-                        <h3>Upload Profile Picture</h3>
-                        <p>JPG, PNG or GIF. Max size 2MB.</p>
-                        <div style="display: flex; gap: 12px;">
-                            <input type="file" id="photoInput" accept="image/*" style="display: none;">
-                            <button class="upload-btn" onclick="document.getElementById('photoInput').click()">
-                                📷 Upload Photo
-                            </button>
-                            <button class="upload-btn secondary" onclick="removePhoto()">
-                                🗑️ Remove
-                            </button>
+                    <span class="mw-user-more">⋯</span>
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
                         </div>
+                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
+                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
+                        <a href="student-notifications.html"><i data-lucide="bell"></i> Notifications</a>
+                        <a id="signOutBtn" style="cursor:pointer;color:var(--red,#ff3b30);">
+                            <i data-lucide="log-out"></i> Logout
+                        </a>
                     </div>
                 </div>
             </div>
+        </aside>
 
-            <!-- Personal Information -->
-            <div class="settings-section">
-                <h2>Personal Information</h2>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Display Name *</label>
-                        <input type="text" id="displayName" placeholder="Enter your display name" required>
-                    </div>
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
 
-                    <div class="form-group">
-                        <label>Bio / About Me</label>
-                        <textarea id="bio" placeholder="Tell us about yourself..."></textarea>
-                    </div>
-
-                    <div class="two-column">
-                        <div class="form-group">
-                            <label>Student Roll No *</label>
-                            <input type="text" id="rollNumber" placeholder="e.g., STU998630" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Email Address</label>
-                            <input type="email" id="email" readonly>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="tel" id="phone" placeholder="+1 (555) 123-4567">
-                    </div>
-
-                    <div class="two-column">
-                        <div class="form-group">
-                            <label>Batch *</label>
-                            <input type="text" id="batch" placeholder="e.g., 2024" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Department *</label>
-                            <select id="department" required>
-                                <option value="">Select Department</option>
-                                <option value="MCA">MCA (Master of Computer Applications)</option>
-                                <option value="MBA">MBA (Master of Business Administration)</option>
-                                <option value="BTECH">BTech (Bachelor of Technology)</option>
-                                <option value="MTECH">MTech (Master of Technology)</option>
-                                <option value="CS">Computer Science</option>
-                                <option value="IT">Information Technology</option>
-                                <option value="ECE">Electronics & Communication</option>
-                                <option value="EE">Electrical Engineering</option>
-                                <option value="ME">Mechanical Engineering</option>
-                                <option value="CE">Civil Engineering</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Section *</label>
-                        <select id="section" required>
-                            <option value="">Select Section</option>
-                            <option value="A">Section A</option>
-                            <option value="B">Section B</option>
-                            <option value="C">Section C</option>
-                            <option value="D">Section D</option>
-                            <option value="E">Section E</option>
-                        </select>
-                    </div>
+            <!-- TOPBAR -->
+            <header class="mw-topbar">
+                <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="mw-breadcrumb">Dashboard / <span>Settings</span></div>
+                <div class="mw-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search settings…" id="settingsSearch">
                 </div>
-            </div>
-
-            <!-- Change Password -->
-            <div class="settings-section">
-                <h2>Change Password</h2>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Current Password</label>
-                        <input type="password" id="currentPassword" placeholder="Enter current password">
-                    </div>
-                    <div class="form-group">
-                        <label>New Password</label>
-                        <input type="password" id="newPassword" placeholder="Enter new password">
-                        <div class="password-requirements">
-                            Password must be at least 8 characters long and contain uppercase, lowercase, number, and
-                            special character.
+                <div class="mw-topbar-actions">
+                    <div class="mw-notif-wrap">
+                        <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="mw-notif-dot hidden" id="notificationBadge"></span>
                         </div>
+                        <div class="mw-notif-dropdown" id="notificationDropdown"></div>
                     </div>
-                    <div class="form-group">
-                        <label>Confirm New Password</label>
-                        <input type="password" id="confirmPassword" placeholder="Confirm new password">
-                    </div>
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle light/dark"
+                        aria-label="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
+                    </button>
                 </div>
-            </div>
+            </header>
 
-            <!-- Appearance -->
-            <div class="settings-section">
-                <h2>Appearance</h2>
-                <div class="theme-toggle-section">
-                    <div class="theme-toggle-info">
-                        <h3>Theme</h3>
-                        <p>Switch between light and dark mode</p>
-                    </div>
-                    <div class="toggle-switch" id="themeToggle"></div>
-                </div>
-            </div>
+            <!-- CONTENT -->
+            <div class="mw-content">
+                <div class="st-body">
 
-            <!-- Save/Cancel -->
-            <div class="save-section">
-                <button class="cancel-btn" onclick="window.location.href='homepage.html'">Cancel</button>
-                <button class="save-btn" onclick="saveSettings()">Save Changes</button>
-            </div>
-        </div>
+                    <!-- LEFT TAB NAV -->
+                    <nav class="st-tab-nav">
+                        <div class="st-tab-nav-label">Settings</div>
+                        <button class="st-tab-btn active" data-tab="profile">
+                            <i data-lucide="user"></i> Profile
+                        </button>
+                        <button class="st-tab-btn" data-tab="security">
+                            <i data-lucide="shield"></i> Account &amp; Security
+                        </button>
+                        <button class="st-tab-btn" data-tab="notifications">
+                            <i data-lucide="bell"></i> Notifications
+                        </button>
+                        <button class="st-tab-btn" data-tab="ai">
+                            <i data-lucide="bot"></i> AI Tutor
+                        </button>
+                        <button class="st-tab-btn" data-tab="appearance">
+                            <i data-lucide="palette"></i> Appearance
+                        </button>
+                    </nav>
+
+                    <!-- RIGHT PANELS -->
+                    <div class="st-content">
+
+                        <!-- ── PROFILE ── -->
+                        <div class="st-panel active" id="tab-profile">
+                            <div class="st-panel-title">Profile</div>
+                            <div class="st-panel-sub">Your public identity on MindWave</div>
+
+                            <!-- Photo -->
+                            <div class="st-card">
+                                <div class="st-card-title"><i data-lucide="camera"></i> Profile Photo</div>
+                                <div class="st-photo-row">
+                                    <div class="st-avatar" id="stAvatarPreview">
+                                        <span id="stAvatarInitials">ST</span>
+                                        <img id="stAvatarImg" alt="Profile">
+                                    </div>
+                                    <div class="st-photo-info">
+                                        <h4>Profile Picture</h4>
+                                        <p>JPG, PNG or GIF — max 2 MB</p>
+                                        <div class="st-photo-btns">
+                                            <input type="file" id="photoInput" accept="image/*" style="display:none;">
+                                            <button class="st-btn st-btn-ghost st-btn-sm"
+                                                onclick="document.getElementById('photoInput').click()">
+                                                <i data-lucide="upload"></i> Upload
+                                            </button>
+                                            <button class="st-btn st-btn-danger st-btn-sm" id="removePhotoBtn">
+                                                <i data-lucide="trash-2"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Personal info -->
+                            <div class="st-card">
+                                <div class="st-card-title"><i data-lucide="id-card"></i> Personal Information</div>
+                                <div class="st-form-grid">
+                                    <div class="st-field">
+                                        <label>Display Name *</label>
+                                        <input type="text" id="displayName" placeholder="Your full name">
+                                    </div>
+                                    <div class="st-field">
+                                        <label>Bio / About Me</label>
+                                        <textarea id="bio"
+                                            placeholder="Tell your classmates something about yourself…"></textarea>
+                                    </div>
+                                    <div class="st-two-col">
+                                        <div class="st-field">
+                                            <label>Roll Number *</label>
+                                            <input type="text" id="rollNumber" placeholder="e.g. STU998630">
+                                        </div>
+                                        <div class="st-field">
+                                            <label>Email Address <span class="st-readonly-tag">read-only</span></label>
+                                            <input type="email" id="email" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="st-field">
+                                        <label>Phone Number</label>
+                                        <input type="tel" id="phone" placeholder="+91 9876543210">
+                                    </div>
+                                    <div class="st-two-col">
+                                        <div class="st-field">
+                                            <label>Batch *</label>
+                                            <input type="text" id="batch" placeholder="e.g. 2025">
+                                        </div>
+                                        <div class="st-field">
+                                            <label>Department *</label>
+                                            <select id="department">
+                                                <option value="">Select Department</option>
+                                                <option value="MCA">MCA (Master of Computer Applications)</option>
+                                                <option value="MBA">MBA (Master of Business Administration)</option>
+                                                <option value="BTECH">BTech (Bachelor of Technology)</option>
+                                                <option value="MTECH">MTech (Master of Technology)</option>
+                                                <option value="CS">Computer Science</option>
+                                                <option value="IT">Information Technology</option>
+                                                <option value="ECE">Electronics &amp; Communication</option>
+                                                <option value="EE">Electrical Engineering</option>
+                                                <option value="ME">Mechanical Engineering</option>
+                                                <option value="CE">Civil Engineering</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="st-field">
+                                        <label>Section *</label>
+                                        <select id="section">
+                                            <option value="">Select Section</option>
+                                            <option value="A">Section A</option>
+                                            <option value="B">Section B</option>
+                                            <option value="C">Section C</option>
+                                            <option value="D">Section D</option>
+                                            <option value="E">Section E</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="st-save-bar">
+                                    <button class="st-btn st-btn-primary" id="saveProfileBtn">
+                                        <i data-lucide="save"></i> Save Profile
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── ACCOUNT & SECURITY ── -->
+                        <div class="st-panel" id="tab-security">
+                            <div class="st-panel-title">Account &amp; Security</div>
+                            <div class="st-panel-sub">Manage your password and account security</div>
+
+                            <div class="st-card">
+                                <div class="st-card-title"><i data-lucide="lock"></i> Change Password</div>
+                                <div class="st-form-grid">
+                                    <div class="st-field">
+                                        <label>Current Password</label>
+                                        <input type="password" id="currentPassword"
+                                            placeholder="Enter current password">
+                                    </div>
+                                    <div class="st-field">
+                                        <label>New Password</label>
+                                        <input type="password" id="newPassword" placeholder="At least 8 characters"
+                                            id="newPassword">
+                                        <div class="st-pw-strength">
+                                            <div class="st-pw-strength-bar" id="pwStrengthBar"></div>
+                                        </div>
+                                        <div class="st-pw-label" id="pwStrengthLabel"></div>
+                                    </div>
+                                    <div class="st-field">
+                                        <label>Confirm New Password</label>
+                                        <input type="password" id="confirmPassword" placeholder="Repeat new password">
+                                    </div>
+                                </div>
+                                <div class="st-save-bar">
+                                    <button class="st-btn st-btn-primary" id="savePasswordBtn">
+                                        <i data-lucide="shield-check"></i> Update Password
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="st-card">
+                                <div class="st-card-title"><i data-lucide="info"></i> Account Info</div>
+                                <div class="st-toggle-row" style="border-bottom:none;">
+                                    <div class="st-toggle-info">
+                                        <h4>Account Type</h4>
+                                        <p>You are registered as a <strong>Student</strong> on MindWave</p>
+                                    </div>
+                                    <span class="st-badge">Student</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── NOTIFICATIONS ── -->
+                        <div class="st-panel" id="tab-notifications">
+                            <div class="st-panel-title">Notifications</div>
+                            <div class="st-panel-sub">Choose what alerts you'd like to receive</div>
+
+                            <div class="st-card">
+                                <div class="st-card-title"><i data-lucide="megaphone"></i> Platform Notifications</div>
+                                <div class="st-toggle-row">
+                                    <div class="st-toggle-info">
+                                        <h4>Announcements</h4>
+                                        <p>Important messages from your faculty and admin</p>
+                                    </div>
+                                    <label class="st-switch">
+                                        <input type="checkbox" id="notifAnnouncements" checked>
+                                        <span class="st-switch-track"></span>
+                                    </label>
+                                </div>
+                                <div class="st-toggle-row">
+                                    <div class="st-toggle-info">
+                                        <h4>Live Quiz Invites</h4>
+                                        <p>Get notified when a faculty starts a live quiz</p>
+                                    </div>
+                                    <label class="st-switch">
+                                        <input type="checkbox" id="notifQuiz" checked>
+                                        <span class="st-switch-track"></span>
+                                    </label>
+                                </div>
+                                <div class="st-toggle-row">
+                                    <div class="st-toggle-info">
+                                        <h4>Leaderboard Updates</h4>
+                                        <p>When your rank changes or someone overtakes you</p>
+                                    </div>
+                                    <label class="st-switch">
+                                        <input type="checkbox" id="notifLeaderboard">
+                                        <span class="st-switch-track"></span>
+                                    </label>
+                                </div>
+                                <div class="st-toggle-row">
+                                    <div class="st-toggle-info">
+                                        <h4>New Materials Uploaded</h4>
+                                        <p>When faculty uploads new study material to your courses</p>
+                                    </div>
+                                    <label class="st-switch">
+                                        <input type="checkbox" id="notifMaterials" checked>
+                                        <span class="st-switch-track"></span>
+                                    </label>
+                                </div>
+                                <div class="st-toggle-row">
+                                    <div class="st-toggle-info">
+                                        <h4>New Events</h4>
+                                        <p>College events and activity reminders</p>
+                                    </div>
+                                    <label class="st-switch">
+                                        <input type="checkbox" id="notifEvents" checked>
+                                        <span class="st-switch-track"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="st-save-bar" style="border-top:none;padding-top:0;">
+                                <button class="st-btn st-btn-primary" id="saveNotifBtn">
+                                    <i data-lucide="save"></i> Save Preferences
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ── AI TUTOR ── -->
+                        <div class="st-panel" id="tab-ai">
+                            <div class="st-panel-title">AI Tutor</div>
+                            <div class="st-panel-sub">Personalise how your AI Tutor behaves</div>
+
+                            <div class="st-card">
+                                <div class="st-card-title"><i data-lucide="bot"></i> Default Session Settings</div>
+                                <div class="st-form-grid">
+                                    <div class="st-field">
+                                        <label>Default Subject</label>
+                                        <input type="text" id="aiDefaultSubject" placeholder="e.g. Data Structures">
+                                        <span class="st-hint">Auto-selected when you open the AI Tutor</span>
+                                    </div>
+                                    <div class="st-field">
+                                        <label>Default Mode</label>
+                                        <select id="aiDefaultMode">
+                                            <option value="tutor">Tutor — explain concepts step-by-step</option>
+                                            <option value="quiz">Quiz — test my knowledge</option>
+                                            <option value="socratic">Socratic — guide me with questions</option>
+                                            <option value="practice">Practice — give me problems to solve</option>
+                                        </select>
+                                    </div>
+                                    <div class="st-field">
+                                        <label>Tutor Name / Persona</label>
+                                        <input type="text" id="aiPersonaName" placeholder="e.g. Sage, Nova, Max…">
+                                        <span class="st-hint">Give your AI Tutor a custom name</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="st-card">
+                                <div class="st-card-title"><i data-lucide="sliders-horizontal"></i> Behaviour</div>
+                                <div class="st-toggle-row">
+                                    <div class="st-toggle-info">
+                                        <h4>Auto-start timer</h4>
+                                        <p>Automatically start the session timer when you open AI Tutor</p>
+                                    </div>
+                                    <label class="st-switch">
+                                        <input type="checkbox" id="aiAutoTimer" checked>
+                                        <span class="st-switch-track"></span>
+                                    </label>
+                                </div>
+                                <div class="st-toggle-row">
+                                    <div class="st-toggle-info">
+                                        <h4>Show typing indicator</h4>
+                                        <p>Show animated dots while the AI is thinking</p>
+                                    </div>
+                                    <label class="st-switch">
+                                        <input type="checkbox" id="aiTypingIndicator" checked>
+                                        <span class="st-switch-track"></span>
+                                    </label>
+                                </div>
+                                <div class="st-toggle-row">
+                                    <div class="st-toggle-info">
+                                        <h4>Save session history</h4>
+                                        <p>Keep a record of your AI Tutor conversations</p>
+                                    </div>
+                                    <label class="st-switch">
+                                        <input type="checkbox" id="aiSaveHistory" checked>
+                                        <span class="st-switch-track"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="st-save-bar" style="border-top:none;padding-top:0;">
+                                <button class="st-btn st-btn-primary" id="saveAiBtn">
+                                    <i data-lucide="save"></i> Save AI Preferences
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ── APPEARANCE ── -->
+                        <div class="st-panel" id="tab-appearance">
+                            <div class="st-panel-title">Appearance</div>
+                            <div class="st-panel-sub">Customise the look of MindWave</div>
+
+                            <!-- Theme -->
+                            <div class="st-card">
+                                <div class="st-card-title"><i data-lucide="sun-moon"></i> Theme</div>
+                                <div class="st-theme-cards">
+                                    <div class="st-theme-card selected" id="themeCardDark"
+                                        onclick="selectTheme('dark')">
+                                        <div class="st-theme-preview dark-prev"></div>
+                                        <div>
+                                            <div class="st-theme-label">Dark</div>
+                                            <div class="st-theme-sub">Easy on the eyes</div>
+                                        </div>
+                                    </div>
+                                    <div class="st-theme-card" id="themeCardLight" onclick="selectTheme('light')">
+                                        <div class="st-theme-preview light-prev"></div>
+                                        <div>
+                                            <div class="st-theme-label">Light</div>
+                                            <div class="st-theme-sub">Clean and bright</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Accent colour -->
+                            <div class="st-card">
+                                <div class="st-card-title"><i data-lucide="palette"></i> Accent Colour</div>
+                                <p style="font-size:13px;color:var(--text-muted);margin:0 0 8px;">
+                                    Pick a highlight colour used across buttons, active states and badges
+                                </p>
+                                <div class="st-accent-grid" id="accentGrid">
+                                    <div class="st-accent-swatch selected" data-color="#5865f2"
+                                        style="background:#5865f2;" title="Indigo"></div>
+                                    <div class="st-accent-swatch" data-color="#06b6d4" style="background:#06b6d4;"
+                                        title="Cyan"></div>
+                                    <div class="st-accent-swatch" data-color="#10b981" style="background:#10b981;"
+                                        title="Emerald"></div>
+                                    <div class="st-accent-swatch" data-color="#f59e0b" style="background:#f59e0b;"
+                                        title="Amber"></div>
+                                    <div class="st-accent-swatch" data-color="#ef4444" style="background:#ef4444;"
+                                        title="Red"></div>
+                                    <div class="st-accent-swatch" data-color="#ec4899" style="background:#ec4899;"
+                                        title="Pink"></div>
+                                    <div class="st-accent-swatch" data-color="#8b5cf6" style="background:#8b5cf6;"
+                                        title="Violet"></div>
+                                    <div class="st-accent-swatch" data-color="#f97316" style="background:#f97316;"
+                                        title="Orange"></div>
+                                </div>
+                            </div>
+
+                            <!-- Font size -->
+                            <div class="st-card">
+                                <div class="st-card-title"><i data-lucide="type"></i> Font Size</div>
+                                <div class="st-toggle-row">
+                                    <div class="st-toggle-info">
+                                        <h4>Compact text</h4>
+                                        <p>Slightly smaller font size — fits more content on screen</p>
+                                    </div>
+                                    <label class="st-switch">
+                                        <input type="checkbox" id="compactMode">
+                                        <span class="st-switch-track"></span>
+                                    </label>
+                                </div>
+                                <div class="st-toggle-row">
+                                    <div class="st-toggle-info">
+                                        <h4>Reduce animations</h4>
+                                        <p>Turn off transitions and hover effects</p>
+                                    </div>
+                                    <label class="st-switch">
+                                        <input type="checkbox" id="reduceMotion">
+                                        <span class="st-switch-track"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- end st-content -->
+                </div><!-- end st-body -->
+            </div><!-- end mw-content -->
+        </div><!-- end mw-main -->
+    </div><!-- end mw-app -->
+
+    <!-- TOAST -->
+    <div class="st-toast" id="stToast">
+        <i data-lucide="check-circle"></i>
+        <span id="stToastMsg">Saved!</span>
     </div>
-    <script src="student-settings.js"></script>
-    <script src="chatbot.js"></script>
+
+    <script src="theme-init.js"></script>
+    <script src="sidebar.js"></script>
+    <script>
+        // ━━━━━━━━━━━━━━━━━━ HELPERS ━━━━━━━━━━━━━━━━━━
+        const token = localStorage.getItem('token');
+
+        function getInitials(name) {
+            return (name || 'ST').trim().split(' ').map(w => w[0] || '').join('').toUpperCase().slice(0, 2);
+        }
+
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('stToast');
+            const m = document.getElementById('stToastMsg');
+            m.textContent = msg;
+            t.classList.toggle('error', isError);
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━ TAB NAV ━━━━━━━━━━━━━━━━━━
+        document.querySelectorAll('.st-tab-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.st-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.st-panel').forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ━━━━━━━━━━━━━━━━━━ LOAD USER DATA ━━━━━━━━━━━━━━━━━━
+        async function loadProfile() {
+            try {
+                const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                if (!data.ok || !data.user) return;
+                const u = data.user;
+
+                // Form fields
+                const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+                set('displayName', u.displayName || u.name);
+                set('bio', u.bio);
+                set('rollNumber', u.rollNumber);
+                set('email', u.email);
+                set('phone', u.phone);
+                set('batch', u.batch);
+                set('department', u.department);
+                set('section', u.section);
+
+                // Avatar
+                const initials = getInitials(u.displayName || u.name || 'ST');
+                document.getElementById('stAvatarInitials').textContent = initials;
+                if (u.profilePhoto) {
+                    const img = document.getElementById('stAvatarImg');
+                    img.src = u.profilePhoto;
+                    img.style.display = 'block';
+                    document.getElementById('stAvatarInitials').style.display = 'none';
+                }
+
+                // Notification prefs (stored in user.notifPrefs if server supports it, else defaults)
+                const np = u.notifPrefs || {};
+                setCheck('notifAnnouncements', np.announcements !== false);
+                setCheck('notifQuiz', np.quiz !== false);
+                setCheck('notifLeaderboard', np.leaderboard !== false);
+                setCheck('notifMaterials', np.materials !== false);
+                setCheck('notifEvents', np.events !== false);
+
+                // AI prefs
+                const ai = u.aiPrefs || {};
+                set('aiDefaultSubject', ai.defaultSubject);
+                set('aiDefaultMode', ai.defaultMode || 'tutor');
+                set('aiPersonaName', ai.personaName);
+                setCheck('aiAutoTimer', ai.autoTimer !== false);
+                setCheck('aiTypingIndicator', ai.typingIndicator !== false);
+                setCheck('aiSaveHistory', ai.saveHistory !== false);
+
+            } catch (e) {
+                console.error('Load profile error:', e);
+            }
+
+            // Load appearance from localStorage
+            const accent = localStorage.getItem('accentColor') || '#5865f2';
+            applyAccent(accent, false);
+            setCheck('compactMode', localStorage.getItem('compactMode') === '1');
+            setCheck('reduceMotion', localStorage.getItem('reduceMotion') === '1');
+
+            // Reflect current theme on cards
+            const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+            updateThemeCards(theme);
+        }
+
+        function setCheck(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.checked = !!val;
+        }
+
+        // ━━━━━━━━━━━━━━━━━━ SAVE PROFILE ━━━━━━━━━━━━━━━━━━
+        document.getElementById('saveProfileBtn').addEventListener('click', async function () {
+            const displayName = document.getElementById('displayName').value.trim();
+            if (!displayName) { showToast('Display name is required', true); return; }
+
+            const body = {
+                displayName,
+                bio: document.getElementById('bio').value,
+                rollNumber: document.getElementById('rollNumber').value,
+                phone: document.getElementById('phone').value,
+                batch: document.getElementById('batch').value,
+                department: document.getElementById('department').value,
+                section: document.getElementById('section').value
+            };
+
+            try {
+                const res = await fetch('/api/users/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.message || 'Save failed');
+                localStorage.setItem('firstName', displayName);
+                localStorage.setItem('mw_displayName', displayName);
+                showToast('Profile saved successfully');
+            } catch (e) {
+                showToast(e.message, true);
+            }
+        });
+
+        // ━━━━━━━━━━━━━━━━━━ SAVE PASSWORD ━━━━━━━━━━━━━━━━━━
+        document.getElementById('savePasswordBtn').addEventListener('click', async function () {
+            const cur = document.getElementById('currentPassword').value;
+            const nw = document.getElementById('newPassword').value;
+            const cf = document.getElementById('confirmPassword').value;
+
+            if (!cur) { showToast('Enter current password', true); return; }
+            if (nw.length < 8) { showToast('New password must be 8+ characters', true); return; }
+            if (nw !== cf) { showToast('Passwords do not match', true); return; }
+
+            try {
+                const res = await fetch('/api/users/password', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ currentPassword: cur, newPassword: nw })
+                });
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.message || 'Failed');
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+                showToast('Password updated');
+            } catch (e) {
+                showToast(e.message, true);
+            }
+        });
+
+        // Password strength meter
+        document.getElementById('newPassword').addEventListener('input', function () {
+            const v = this.value;
+            const bar = document.getElementById('pwStrengthBar');
+            const lbl = document.getElementById('pwStrengthLabel');
+            let score = 0;
+            if (v.length >= 8) score++;
+            if (/[A-Z]/.test(v)) score++;
+            if (/[0-9]/.test(v)) score++;
+            if (/[^A-Za-z0-9]/.test(v)) score++;
+            const map = { 0: ['0%', '#ef4444', ''], 1: ['25%', '#ef4444', 'Weak'], 2: ['50%', '#f59e0b', 'Fair'], 3: ['75%', '#10b981', 'Good'], 4: ['100%', '#10b981', 'Strong'] };
+            const [w, c, t] = map[score];
+            bar.style.width = w; bar.style.background = c; lbl.textContent = t;
+            lbl.style.color = c;
+        });
+
+        // ━━━━━━━━━━━━━━━━━━ SAVE NOTIFICATIONS ━━━━━━━━━━━━━━━━━━
+        document.getElementById('saveNotifBtn').addEventListener('click', async function () {
+            const notifPrefs = {
+                announcements: document.getElementById('notifAnnouncements').checked,
+                quiz: document.getElementById('notifQuiz').checked,
+                leaderboard: document.getElementById('notifLeaderboard').checked,
+                materials: document.getElementById('notifMaterials').checked,
+                events: document.getElementById('notifEvents').checked
+            };
+
+            try {
+                const res = await fetch('/api/users/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ notifPrefs })
+                });
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.message || 'Failed');
+                showToast('Notification preferences saved');
+            } catch (e) {
+                // Graceful fallback — store in localStorage if API doesn't support field yet
+                localStorage.setItem('notifPrefs', JSON.stringify(notifPrefs));
+                showToast('Preferences saved locally');
+            }
+        });
+
+        // ━━━━━━━━━━━━━━━━━━ SAVE AI PREFS ━━━━━━━━━━━━━━━━━━
+        document.getElementById('saveAiBtn').addEventListener('click', async function () {
+            const aiPrefs = {
+                defaultSubject: document.getElementById('aiDefaultSubject').value,
+                defaultMode: document.getElementById('aiDefaultMode').value,
+                personaName: document.getElementById('aiPersonaName').value,
+                autoTimer: document.getElementById('aiAutoTimer').checked,
+                typingIndicator: document.getElementById('aiTypingIndicator').checked,
+                saveHistory: document.getElementById('aiSaveHistory').checked
+            };
+
+            try {
+                const res = await fetch('/api/users/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ aiPrefs })
+                });
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.message || 'Failed');
+                showToast('AI Tutor preferences saved');
+            } catch (e) {
+                localStorage.setItem('aiPrefs', JSON.stringify(aiPrefs));
+                showToast('Preferences saved locally');
+            }
+        });
+
+        // ━━━━━━━━━━━━━━━━━━ THEME ━━━━━━━━━━━━━━━━━━
+        function updateThemeCards(theme) {
+            document.getElementById('themeCardDark').classList.toggle('selected', theme === 'dark');
+            document.getElementById('themeCardLight').classList.toggle('selected', theme === 'light');
+        }
+
+        function selectTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('mw_theme', theme);
+            localStorage.setItem('theme', theme);
+            updateThemeCards(theme);
+        }
+
+        // Topbar theme toggle
+        const topbarToggle = document.getElementById('themeToggle');
+        if (topbarToggle) {
+            topbarToggle.addEventListener('click', function () {
+                const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+                selectTheme(cur === 'dark' ? 'light' : 'dark');
+            });
+        }
+
+        // ━━━━━━━━━━━━━━━━━━ ACCENT COLOUR ━━━━━━━━━━━━━━━━━━
+        function applyAccent(color, save = true) {
+            document.documentElement.style.setProperty('--accent', color);
+            document.documentElement.style.setProperty('--blue', color);
+            document.documentElement.style.setProperty('--primary', color);
+            document.querySelectorAll('.st-accent-swatch').forEach(s => {
+                s.classList.toggle('selected', s.dataset.color === color);
+            });
+            if (save) {
+                localStorage.setItem('accentColor', color);
+                showToast('Accent colour updated');
+            }
+        }
+
+        document.getElementById('accentGrid').addEventListener('click', function (e) {
+            const swatch = e.target.closest('.st-accent-swatch');
+            if (swatch) applyAccent(swatch.dataset.color);
+        });
+
+        // ━━━━━━━━━━━━━━━━━━ COMPACT / REDUCE MOTION ━━━━━━━━━━━━━━━━━━
+        document.getElementById('compactMode').addEventListener('change', function () {
+            localStorage.setItem('compactMode', this.checked ? '1' : '0');
+            document.documentElement.style.fontSize = this.checked ? '13px' : '';
+            showToast(this.checked ? 'Compact mode on' : 'Compact mode off');
+        });
+
+        document.getElementById('reduceMotion').addEventListener('change', function () {
+            localStorage.setItem('reduceMotion', this.checked ? '1' : '0');
+            document.documentElement.style.setProperty('--transition', this.checked ? 'none' : '');
+            showToast(this.checked ? 'Animations reduced' : 'Animations restored');
+        });
+
+        // ━━━━━━━━━━━━━━━━━━ PHOTO UPLOAD ━━━━━━━━━━━━━━━━━━
+        document.getElementById('photoInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) { showToast('File must be under 2 MB', true); return; }
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const img = document.getElementById('stAvatarImg');
+                img.src = ev.target.result;
+                img.style.display = 'block';
+                document.getElementById('stAvatarInitials').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('removePhotoBtn').addEventListener('click', function () {
+            const img = document.getElementById('stAvatarImg');
+            img.src = '';
+            img.style.display = 'none';
+            document.getElementById('stAvatarInitials').style.display = '';
+            document.getElementById('photoInput').value = '';
+        });
+
+        // ━━━━━━━━━━━━━━━━━━ SIDEBAR LOGOUT / DROPDOWN ━━━━━━━━━━━━━━━━━━
+        document.addEventListener('DOMContentLoaded', function () {
+            lucide.createIcons();
+            loadProfile();
+
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('mw_displayName');
+                window.location.href = 'login.html';
+            });
+
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', e => {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('show');
+                });
+                document.addEventListener('click', () => profileDropdown.classList.remove('show'));
+            }
+
+            // Settings search — highlight matching tab
+            document.getElementById('settingsSearch').addEventListener('input', function () {
+                const q = this.value.toLowerCase();
+                if (!q) return;
+                const tabMap = {
+                    'photo': 'profile', 'name': 'profile', 'bio': 'profile', 'roll': 'profile', 'batch': 'profile', 'dept': 'profile', 'section': 'profile',
+                    'password': 'security', 'password': 'security',
+                    'notif': 'notifications', 'announce': 'notifications', 'quiz': 'notifications',
+                    'ai': 'ai', 'tutor': 'ai', 'subject': 'ai',
+                    'theme': 'appearance', 'dark': 'appearance', 'light': 'appearance', 'colour': 'appearance', 'color': 'appearance'
+                };
+                for (const [key, tab] of Object.entries(tabMap)) {
+                    if (key.includes(q) || q.includes(key)) {
+                        document.querySelector(`[data-tab="${tab}"]`)?.click();
+                        break;
+                    }
+                }
+            });
+
+            // Reflect compact / reduce-motion prefs
+            if (localStorage.getItem('compactMode') === '1') document.documentElement.style.fontSize = '13px';
+        });
+    </script>
 </body>
 
 </html>
