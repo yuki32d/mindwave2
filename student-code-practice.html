@@ -711,6 +711,506 @@
             font-size: 14px;
             color: var(--muted);
         }
+
+        /* ── XP BADGE ── */
+        .cp-xp {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, .12);
+            border: 1px solid rgba(99, 102, 241, .25);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .cp-xp [data-lucide] {
+            width: 12px;
+            height: 12px;
+        }
+
+        .cp-xp-pop {
+            animation: xpPop .4s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        @keyframes xpPop {
+            0% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.3)
+            }
+
+            100% {
+                transform: scale(1)
+            }
+        }
+
+        /* ── HINTS ── */
+        .cp-hints {
+            border-top: 1px solid var(--border);
+            padding: 14px 16px;
+        }
+
+        .cp-hint-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+        .cp-hint-header [data-lucide] {
+            width: 13px;
+            height: 13px;
+        }
+
+        .cp-hint-list {
+            display: none;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cp-hint-item {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .cp-hint-trigger {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .cp-hint-trigger [data-lucide] {
+            width: 12px;
+            height: 12px;
+            color: var(--muted);
+        }
+
+        .cp-hint-body {
+            display: none;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.6;
+            border-top: 1px solid var(--border);
+        }
+
+        .cp-hint-body.open {
+            display: block;
+        }
+
+        /* ── REFERENCE PANEL ── */
+        .cp-ref {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cp-ref-lang {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .cp-ref-lang-btn {
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: none;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .cp-ref-lang-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .cp-ref-section {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .cp-ref-section-header {
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cp-ref-item {
+            display: flex;
+            gap: 8px;
+            padding: 7px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            align-items: flex-start;
+        }
+
+        .cp-ref-item:last-child {
+            border-bottom: none;
+        }
+
+        .cp-ref-code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: var(--surface);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--accent);
+            font-size: 11px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .cp-ref-desc {
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* ── AI PANEL ── */
+        .cp-ai-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .cp-ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cp-ai-msg {
+            max-width: 90%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .cp-ai-msg.assistant {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            align-self: flex-start;
+        }
+
+        .cp-ai-msg.user {
+            background: rgba(99, 102, 241, .15);
+            border: 1px solid rgba(99, 102, 241, .25);
+            color: var(--text);
+            align-self: flex-end;
+        }
+
+        .cp-ai-input-row {
+            display: flex;
+            gap: 6px;
+            padding: 10px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .cp-ai-input {
+            flex: 1;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 7px 10px;
+            color: var(--text);
+            font-size: 12px;
+            outline: none;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .cp-ai-input:focus {
+            border-color: var(--accent);
+        }
+
+        .cp-ai-send {
+            padding: 7px 12px;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .cp-ai-send [data-lucide] {
+            width: 13px;
+            height: 13px;
+        }
+
+        .cp-ai-quick {
+            display: flex;
+            gap: 5px;
+            padding: 0 10px 8px;
+            flex-wrap: wrap;
+        }
+
+        .cp-ai-quick-btn {
+            padding: 4px 8px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: none;
+            color: var(--muted);
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .cp-ai-quick-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .cp-ai-typing {
+            display: flex;
+            gap: 3px;
+            padding: 4px 2px;
+            align-items: center;
+        }
+
+        .cp-ai-typing span {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--muted);
+            animation: aiDot 1.2s ease-in-out infinite;
+        }
+
+        .cp-ai-typing span:nth-child(2) {
+            animation-delay: .2s
+        }
+
+        .cp-ai-typing span:nth-child(3) {
+            animation-delay: .4s
+        }
+
+        @keyframes aiDot {
+
+            0%,
+            100% {
+                opacity: .3;
+                transform: translateY(0)
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateY(-3px)
+            }
+        }
+
+        /* ── VISUALIZER MODAL ── */
+        .cp-viz-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            backdrop-filter: blur(4px);
+            z-index: 9998;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cp-viz-overlay.open {
+            display: flex;
+        }
+
+        .cp-viz-modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 700px;
+            max-width: 95vw;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+        }
+
+        .cp-viz-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cp-viz-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cp-viz-title [data-lucide] {
+            width: 15px;
+            height: 15px;
+            color: var(--accent);
+        }
+
+        .cp-viz-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        .cp-viz-close:hover {
+            color: var(--text);
+            background: var(--surface-2);
+        }
+
+        .cp-viz-close [data-lucide] {
+            width: 16px;
+            height: 16px;
+        }
+
+        .cp-viz-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .cp-viz-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 0 0 4px;
+        }
+
+        .cp-viz-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .cp-viz-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .cp-viz-btn [data-lucide] {
+            width: 12px;
+            height: 12px;
+        }
+
+        .cp-viz-step-info {
+            font-size: 12px;
+            color: var(--muted);
+            margin-left: auto;
+        }
+
+        .cp-viz-code {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 12px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .cp-viz-line {
+            padding: 1px 8px;
+            border-radius: 4px;
+            color: #d4d4d4;
+        }
+
+        .cp-viz-line.current {
+            background: rgba(99, 102, 241, .25);
+            color: #fff;
+        }
+
+        .cp-viz-vars {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .cp-viz-vars-header {
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cp-viz-var-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+        }
+
+        .cp-viz-var-row:last-child {
+            border-bottom: none;
+        }
+
+        .cp-viz-var-name {
+            color: var(--cyan);
+            font-family: monospace;
+        }
+
+        .cp-viz-var-val {
+            color: var(--orange);
+            font-family: monospace;
+        }
     </style>
 </head>
 
@@ -736,9 +1236,12 @@
         <span class="cp-challenge-title" id="topbarTitle">Select a challenge</span>
         <span class="cp-diff-badge" id="topbarDiff"></span>
         <div class="cp-spacer"></div>
+        <div class="cp-xp" id="xpBadge"><i data-lucide="zap"></i> <span id="xpVal">0</span> XP</div>
         <select class="cp-lang-select" id="langSelect" onchange="onLangChange()">
             <option value="python">Python 3</option>
             <option value="javascript">JavaScript</option>
+            <option value="java" disabled>Java (soon)</option>
+            <option value="cpp" disabled>C++ (soon)</option>
         </select>
         <button class="cp-btn cp-btn-run" id="runBtn" onclick="runCode(false)">
             <i data-lucide="play"></i> Run
@@ -760,6 +1263,9 @@
                 <button class="cp-tab" onclick="switchLeftTab('problem',this)">
                     <i data-lucide="file-text"></i> Problem
                 </button>
+                <button class="cp-tab" onclick="switchLeftTab('ref',this)">
+                    <i data-lucide="book-open"></i> Ref
+                </button>
             </div>
             <!-- Challenge list tab -->
             <div class="cp-tab-panel active" id="tab-list">
@@ -771,6 +1277,16 @@
                     <p style="color:var(--muted);font-size:13px;">Select a challenge from the list.</p>
                 </div>
             </div>
+            <!-- Reference tab -->
+            <div class="cp-tab-panel" id="tab-ref">
+                <div class="cp-ref">
+                    <div class="cp-ref-lang">
+                        <button class="cp-ref-lang-btn active" onclick="switchRef('python',this)">Python</button>
+                        <button class="cp-ref-lang-btn" onclick="switchRef('javascript',this)">JavaScript</button>
+                    </div>
+                    <div id="refContent"></div>
+                </div>
+            </div>
         </div>
 
         <!-- CENTER: Monaco Editor -->
@@ -779,9 +1295,14 @@
                 <span class="cp-editor-label">
                     <i data-lucide="code-2"></i> Solution
                 </span>
-                <button class="cp-btn" style="padding:4px 10px;font-size:12px;" onclick="resetCode()">
-                    <i data-lucide="rotate-ccw"></i> Reset
-                </button>
+                <div style="display:flex;gap:6px;">
+                    <button class="cp-btn" style="padding:4px 10px;font-size:12px;" onclick="openVisualizer()">
+                        <i data-lucide="eye"></i> Visualize
+                    </button>
+                    <button class="cp-btn" style="padding:4px 10px;font-size:12px;" onclick="resetCode()">
+                        <i data-lucide="rotate-ccw"></i> Reset
+                    </button>
+                </div>
             </div>
             <div id="monacoContainer"></div>
         </div>
@@ -797,6 +1318,9 @@
                 </button>
                 <button class="cp-tab" onclick="switchRightTab('stats',this)">
                     <i data-lucide="bar-chart-2"></i> Stats
+                </button>
+                <button class="cp-tab" onclick="switchRightTab('ai',this)">
+                    <i data-lucide="bot"></i> AI
                 </button>
             </div>
             <div class="cp-output-panel active" id="tab-tests">
@@ -829,6 +1353,53 @@
                     <div class="cp-stat-card">
                         <div class="cp-stat-val" id="statStreak">0</div>
                         <div class="cp-stat-label">Streak</div>
+                    </div>
+                </div>
+            </div>
+            <!-- AI Assistant tab -->
+            <div class="cp-output-panel" id="tab-ai">
+                <div class="cp-ai-panel">
+                    <div class="cp-ai-messages" id="aiMessages">
+                        <div class="cp-ai-msg assistant">Hi! I'm your AI coding assistant. Ask me to explain your error,
+                            give a hint, or walk through the algorithm.</div>
+                    </div>
+                    <div class="cp-ai-quick">
+                        <button class="cp-ai-quick-btn" onclick="aiQuick('Explain my error')">Explain error</button>
+                        <button class="cp-ai-quick-btn" onclick="aiQuick('Give me a hint')">Hint</button>
+                        <button class="cp-ai-quick-btn" onclick="aiQuick('Explain the algorithm')">Algorithm</button>
+                        <button class="cp-ai-quick-btn" onclick="aiQuick('Review my code')">Review code</button>
+                    </div>
+                    <div class="cp-ai-input-row">
+                        <textarea class="cp-ai-input" id="aiInput" rows="2"
+                            placeholder="Ask anything about this challenge…"
+                            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAiMessage();}"></textarea>
+                        <button class="cp-ai-send" onclick="sendAiMessage()"><i data-lucide="send"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISUALIZER MODAL -->
+    <div class="cp-viz-overlay" id="vizOverlay" onclick="if(event.target===this)closeVisualizer()">
+        <div class="cp-viz-modal">
+            <div class="cp-viz-header">
+                <div class="cp-viz-title"><i data-lucide="eye"></i> Logic Visualizer</div>
+                <button class="cp-viz-close" onclick="closeVisualizer()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="cp-viz-body">
+                <div class="cp-viz-controls">
+                    <button class="cp-viz-btn" onclick="vizStep(-1)"><i data-lucide="skip-back"></i> Prev</button>
+                    <button class="cp-viz-btn" onclick="vizStep(1)"><i data-lucide="skip-forward"></i> Next</button>
+                    <button class="cp-viz-btn" onclick="vizRun()"><i data-lucide="play"></i> Auto</button>
+                    <span class="cp-viz-step-info" id="vizStepInfo">Step 0 / 0</span>
+                </div>
+                <div class="cp-viz-code" id="vizCode"></div>
+                <div class="cp-viz-vars">
+                    <div class="cp-viz-vars-header">Variables</div>
+                    <div id="vizVars">
+                        <div class="cp-viz-var-row" style="color:var(--muted);font-size:12px;padding:12px">Run to see
+                            variable state</div>
                     </div>
                 </div>
             </div>
@@ -1343,6 +1914,329 @@ _out.getvalue()
             if (l) { l.style.opacity = '0'; setTimeout(() => l.remove(), 300); }
         }
 
+        // ── XP SYSTEM ──
+        let xp = parseInt(localStorage.getItem('cp_xp') || '0');
+        const XP_EASY = 10, XP_MED = 25, XP_HARD = 50;
+        function awardXP(challenge) {
+            const gain = challenge.difficulty === 'easy' ? XP_EASY : challenge.difficulty === 'medium' ? XP_MED : XP_HARD;
+            xp += gain;
+            localStorage.setItem('cp_xp', xp);
+            const el = document.getElementById('xpVal');
+            el.textContent = xp;
+            const badge = document.getElementById('xpBadge');
+            badge.classList.remove('cp-xp-pop');
+            void badge.offsetWidth;
+            badge.classList.add('cp-xp-pop');
+        }
+        function initXP() { document.getElementById('xpVal').textContent = xp; }
+
+        // Override runCode to award XP on first solve
+        const _origRunCode = runCode;
+        async function runCode(isSubmit) {
+            await _origRunCode(isSubmit);
+            // XP awarded in renderResults if solved for first time
+        }
+
+        // Patch renderResults to award XP
+        const _origRender = renderResults;
+        function renderResults(results, isSubmit) {
+            _origRender(results, isSubmit);
+            if (isSubmit && results.every(r => r.pass) && currentChallenge && !solved[currentChallenge.id]) {
+                awardXP(currentChallenge);
+            }
+        }
+
+        // ── PROGRESSIVE HINTS ──
+        const HINTS = {
+            1: { hints: ['Print a string using print() or console.log()', 'The exact string is "Hello, World!"', 'print("Hello, World!")'] },
+            2: { hints: ['Read two integers from separate lines', 'Use int(input()) for Python or parseInt() for JS', 'print(a + b)'] },
+            3: { hints: ['A palindrome reads the same forwards and backwards', 'Convert to lowercase first, then compare with reverse', 'In Python: s == s[::-1]'] },
+            4: { hints: ['Check divisibility using the modulo % operator', 'Check for both Fizz AND Buzz first (i%15)', 'Loop from 1 to n inclusive with range(1, n+1)'] },
+            5: { hints: ['Start with a=0, b=1 and iterate', 'Each step: new_a=b, new_b=a+b', 'Collect values before updating: append a, then update'] },
+            6: { hints: ['Use two pointers: lo=0, hi=n-1, mid=(lo+hi)//2', 'If nums[mid] < target, move lo up; else move hi down', 'Return index when nums[mid] == target, else -1'] },
+            7: { hints: ['Use a stack — push opening brackets', 'For closing brackets, check if top of stack matches', 'If stack is empty at end, it is valid'] },
+            8: { hints: ['This is Kadane\'s algorithm', 'Track current_sum = max(num, current_sum + num)', 'Track best = max(best, current_sum) at each step'] },
+            9: { hints: ['Use a hash map to store seen values and their indices', 'For each number, check if (target - num) is in the map', 'If found, print the stored index and current index'] },
+            10: { hints: ['Use a frequency counter (dictionary/object)', 'Sort by frequency descending, breaks ties alphabetically', 'In Python: sorted(items, key=lambda x: (-x[1], x[0]))'] }
+        };
+
+        let hintsShown = {};
+        function renderHints() {
+            if (!currentChallenge) return;
+            const hData = HINTS[currentChallenge.id];
+            if (!hData) return;
+            const el = document.getElementById('hintsSection');
+            if (!el) return;
+            el.innerHTML = `
+                <div class="cp-hint-list">
+                    ${hData.hints.map((h, i) => `
+                    <div class="cp-hint-item">
+                        <button class="cp-hint-trigger" onclick="toggleHint(this,${i})">
+                            <span><i data-lucide="lightbulb" style="width:12px;height:12px;color:var(--orange);margin-right:5px"></i>Hint ${i + 1}</span>
+                            <i data-lucide="chevron-right"></i>
+                        </button>
+                        <div class="cp-hint-body" id="hint-${i}">${h}</div>
+                    </div>`).join('')}
+                </div>`;
+            lucide.createIcons();
+        }
+        function toggleHint(btn, idx) {
+            const body = document.getElementById('hint-' + idx);
+            body?.classList.toggle('open');
+        }
+
+        // Patch renderProblem to append hints
+        const _origRenderProblem = renderProblem;
+        function renderProblem() {
+            _origRenderProblem();
+            const detail = document.getElementById('problemDetail');
+            const hintsDiv = document.createElement('div');
+            hintsDiv.className = 'cp-hints';
+            hintsDiv.innerHTML = '<div class="cp-hint-header"><i data-lucide="lightbulb"></i> Hints</div><div id="hintsSection"></div>';
+            detail.appendChild(hintsDiv);
+            lucide.createIcons();
+            renderHints();
+        }
+
+        // ── LANGUAGE REFERENCE ──
+        const REF = {
+            python: [
+                {
+                    section: 'I/O', items: [
+                        { code: 'input()', desc: 'Read a line from stdin as string' },
+                        { code: 'int(input())', desc: 'Read integer from stdin' },
+                        { code: 'print(x)', desc: 'Print value with newline' },
+                        { code: 'print(a, b)', desc: 'Print multiple values space-separated' },
+                    ]
+                },
+                {
+                    section: 'Strings', items: [
+                        { code: 's.lower()', desc: 'Lowercase string' },
+                        { code: 's.split()', desc: 'Split by whitespace → list' },
+                        { code: 's[::-1]', desc: 'Reverse a string' },
+                        { code: 'len(s)', desc: 'Length of string' },
+                        { code: '" ".join(lst)', desc: 'Join list with separator' },
+                    ]
+                },
+                {
+                    section: 'Lists', items: [
+                        { code: 'lst.append(x)', desc: 'Add to end' },
+                        { code: 'lst.pop()', desc: 'Remove and return last' },
+                        { code: 'sorted(lst)', desc: 'Return sorted copy' },
+                        { code: 'lst.sort()', desc: 'Sort in-place' },
+                        { code: 'max(lst)', desc: 'Maximum value' },
+                    ]
+                },
+                {
+                    section: 'Algorithms', items: [
+                        { code: 'O(1)', desc: 'Constant — hash map lookup' },
+                        { code: 'O(log n)', desc: 'Logarithmic — binary search' },
+                        { code: 'O(n)', desc: 'Linear — single loop' },
+                        { code: 'O(n²)', desc: 'Quadratic — nested loops' },
+                    ]
+                }
+            ],
+            javascript: [
+                {
+                    section: 'I/O', items: [
+                        { code: 'input', desc: 'Variable holding stdin (string)' },
+                        { code: 'input.trim()', desc: 'Remove whitespace' },
+                        { code: 'console.log(x)', desc: 'Print to output' },
+                        { code: 'input.split("\\n")', desc: 'Split into lines' },
+                    ]
+                },
+                {
+                    section: 'Strings', items: [
+                        { code: 's.toLowerCase()', desc: 'Lowercase string' },
+                        { code: 's.split(" ")', desc: 'Split by space → array' },
+                        { code: 's.split("").reverse().join("")', desc: 'Reverse string' },
+                        { code: 's.length', desc: 'Length of string' },
+                        { code: 'arr.join(", ")', desc: 'Join array to string' },
+                    ]
+                },
+                {
+                    section: 'Arrays', items: [
+                        { code: '.push(x)', desc: 'Add to end' },
+                        { code: '.pop()', desc: 'Remove and return last' },
+                        { code: '.map(Number)', desc: 'Convert to numbers' },
+                        { code: '.sort((a,b)=>a-b)', desc: 'Sort ascending' },
+                        { code: 'Math.max(...arr)', desc: 'Maximum value' },
+                    ]
+                },
+                {
+                    section: 'Algorithms', items: [
+                        { code: 'O(1)', desc: 'Constant — object/map lookup' },
+                        { code: 'O(log n)', desc: 'Logarithmic — binary search' },
+                        { code: 'O(n)', desc: 'Linear — single loop' },
+                        { code: 'O(n²)', desc: 'Quadratic — nested loops' },
+                    ]
+                }
+            ]
+        };
+
+        function renderRef(lang) {
+            const data = REF[lang] || REF.python;
+            document.getElementById('refContent').innerHTML = data.map(sec => `
+                <div class="cp-ref-section">
+                    <div class="cp-ref-section-header">${sec.section}</div>
+                    ${sec.items.map(it => `
+                    <div class="cp-ref-item">
+                        <span class="cp-ref-code">${escapeHtml(it.code)}</span>
+                        <span class="cp-ref-desc">${it.desc}</span>
+                    </div>`).join('')}
+                </div>`).join('');
+        }
+        function switchRef(lang, btn) {
+            document.querySelectorAll('.cp-ref-lang-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderRef(lang);
+        }
+
+        // ── AI ASSISTANT ──
+        let lastError = '';
+        function aiQuick(text) { document.getElementById('aiInput').value = text; sendAiMessage(); }
+        async function sendAiMessage() {
+            const input = document.getElementById('aiInput');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            addAiMsg('user', text);
+            const typingId = addAiTyping();
+            switchRightTab('ai', document.querySelectorAll('.cp-output-tabs .cp-tab')[3]);
+
+            const context = currentChallenge ? `Challenge: "${currentChallenge.title}" (${currentChallenge.difficulty})\nProblem: ${currentChallenge.description}\nUser code:\n${editor?.getValue() || ''}` : '';
+            const prompt = context + '\n\nUser question: ' + text;
+
+            try {
+                const res = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') },
+                    body: JSON.stringify({ message: prompt, context: 'code_practice' })
+                });
+                removeTyping(typingId);
+                if (res.ok) {
+                    const data = await res.json();
+                    addAiMsg('assistant', data.reply || data.message || data.response || 'Sorry, I could not get a response.');
+                } else {
+                    addAiMsg('assistant', getFallbackAI(text));
+                }
+            } catch {
+                removeTyping(typingId);
+                addAiMsg('assistant', getFallbackAI(text));
+            }
+        }
+
+        function getFallbackAI(text) {
+            const t = text.toLowerCase();
+            if (!currentChallenge) return 'Please select a challenge first, then I can help you better!';
+            if (t.includes('hint')) return `Here\'s a hint for "${currentChallenge.title}": ${HINTS[currentChallenge.id]?.hints[0] || 'Think about the data structure that gives O(1) lookup.'}`;
+            if (t.includes('error')) return 'Check your input parsing — make sure you are reading the right number of lines and converting types correctly (int/float vs string).';
+            if (t.includes('algorithm')) return `For "${currentChallenge.title}", focus on the category: ${currentChallenge.category}. Think about what data structure best fits the problem.`;
+            return 'Break the problem into small steps: 1) Parse input, 2) Apply the algorithm, 3) Print output. Which step is causing issues?';
+        }
+
+        let aiMsgId = 0;
+        function addAiMsg(role, text) {
+            const el = document.getElementById('aiMessages');
+            const id = 'aim-' + (++aiMsgId);
+            el.insertAdjacentHTML('beforeend', `<div class="cp-ai-msg ${role}" id="${id}">${escapeHtml(text)}</div>`);
+            el.scrollTop = el.scrollHeight;
+            return id;
+        }
+        function addAiTyping() {
+            const el = document.getElementById('aiMessages');
+            const id = 'aim-' + (++aiMsgId);
+            el.insertAdjacentHTML('beforeend', `<div class="cp-ai-msg assistant" id="${id}"><div class="cp-ai-typing"><span></span><span></span><span></span></div></div>`);
+            el.scrollTop = el.scrollHeight;
+            return id;
+        }
+        function removeTyping(id) { document.getElementById(id)?.remove(); }
+
+        // ── VISUALIZER ──
+        let vizSteps = [], vizIdx = 0, vizTimer = null;
+        async function openVisualizer() {
+            if (!currentChallenge || !editor) return;
+            document.getElementById('vizOverlay').classList.add('open');
+            lucide.createIcons();
+            const lang = document.getElementById('langSelect').value;
+            if (lang !== 'python') {
+                document.getElementById('vizCode').textContent = 'Visualizer supports Python only. Switch to Python 3.';
+                document.getElementById('vizVars').innerHTML = '<div style="padding:12px;font-size:12px;color:var(--muted)">Switch to Python to visualize.</div>';
+                return;
+            }
+            await ensurePyodide();
+            const code = editor.getValue();
+            const input = currentChallenge.testCases[0]?.input || '';
+            await buildVizSteps(code, input);
+            vizIdx = 0;
+            renderVizStep();
+        }
+        function closeVisualizer() {
+            document.getElementById('vizOverlay').classList.remove('open');
+            clearInterval(vizTimer);
+        }
+        async function buildVizSteps(code, input) {
+            vizSteps = [];
+            try {
+                const lines = code.split('\n');
+                // Inject tracer
+                const tracer = `
+import sys, io, json as _json
+_trace_steps = []
+_vars_snap = {}
+def _tracer(frame, event, arg):
+    if event == 'line':
+        snap = {k:repr(v) for k,v in frame.f_locals.items() if not k.startswith('_')}
+        _trace_steps.append({'line': frame.f_lineno - _offset, 'vars': snap})
+    return _tracer
+_offset = ${tracer.split('\n').length}
+_user_code = ${JSON.stringify(code)}
+_out = io.StringIO()
+_in = io.StringIO(${JSON.stringify(input + '\n')})
+sys.stdout = _out; sys.stdin = _in
+_ns = {'__builtins__': __builtins__}
+try:
+    sys.settrace(_tracer)
+    exec(_user_code, _ns)
+except: pass
+finally: sys.settrace(None); sys.stdout = sys.__stdout__; sys.stdin = sys.__stdin__
+_json.dumps({'steps': _trace_steps, 'lines': _user_code.split('\\n')})
+`;
+                const result = await pyodide.runPythonAsync(tracer);
+                const data = JSON.parse(String(result));
+                vizSteps = data.steps || [];
+                window._vizLines = data.lines || code.split('\n');
+            } catch (e) {
+                vizSteps = [{ line: 0, vars: { error: String(e) } }];
+                window._vizLines = code.split('\n');
+            }
+        }
+        function renderVizStep() {
+            const step = vizSteps[vizIdx];
+            const lines = window._vizLines || [];
+            document.getElementById('vizStepInfo').textContent = `Step ${vizIdx + 1} / ${vizSteps.length}`;
+            document.getElementById('vizCode').innerHTML = lines.map((l, i) => {
+                const active = step && i === step.line - 1;
+                return `<div class="cp-viz-line ${active ? 'current' : ''}">${escapeHtml(l || ' ')}</div>`;
+            }).join('');
+            const varsEl = document.getElementById('vizVars');
+            if (step && Object.keys(step.vars).length > 0) {
+                varsEl.innerHTML = Object.entries(step.vars).map(([k, v]) =>
+                    `<div class="cp-viz-var-row"><span class="cp-viz-var-name">${escapeHtml(k)}</span><span class="cp-viz-var-val">${escapeHtml(v)}</span></div>`
+                ).join('');
+            } else {
+                varsEl.innerHTML = '<div class="cp-viz-var-row" style="color:var(--muted);font-size:12px;">No variables yet</div>';
+            }
+        }
+        function vizStep(dir) { clearInterval(vizTimer); vizIdx = Math.max(0, Math.min(vizSteps.length - 1, vizIdx + dir)); renderVizStep(); }
+        function vizRun() {
+            clearInterval(vizTimer);
+            vizTimer = setInterval(() => {
+                if (vizIdx >= vizSteps.length - 1) { clearInterval(vizTimer); return; }
+                vizIdx++; renderVizStep();
+            }, 500);
+        }
+
         // ── PYODIDE SCRIPT ──
         (function () {
             const s = document.createElement('script');
@@ -1351,6 +2245,8 @@ _out.getvalue()
         })();
 
         // ── START ──
+        initXP();
+        renderRef('python');
         init();
     </script>
 </body>
