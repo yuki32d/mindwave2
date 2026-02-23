@@ -1212,7 +1212,7 @@ app.use(helmet({
       "default-src": ["'self'"],
       "script-src": ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net", "https://cdn.sheetjs.com", "https://unpkg.com", "https://*.lottiefiles.com", "https://checkout.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "https://download.agora.io", "http://localhost:8000", "http://localhost:9000"],
       "script-src-attr": ["'unsafe-inline'"],
-      "style-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net", "http://localhost:8000", "http://localhost:9000"],
+      "style-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "http://localhost:8000", "http://localhost:9000"],
       "img-src": ["'self'", "data:", "https:", "http:", "blob:"],
       "font-src": ["'self'", "data:", "https:", "http:"],
       "connect-src": ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://api.razorpay.com", "https://checkout.razorpay.com", "https://lumberjack.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "wss://meet.jit.si", "wss://*.jitsi.net", "https://*.agora.io", "wss://*.agora.io", "https://*.agoraio.cn", "wss://*.agoraio.cn", "http://localhost:8000", "ws://localhost:8000", "http://localhost:9000", "ws://localhost:9000"],
