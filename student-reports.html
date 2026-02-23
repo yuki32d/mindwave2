@@ -813,6 +813,20 @@
             // Notification button → notifications page
             const notifBtn = document.getElementById('notificationBtn');
             if (notifBtn) notifBtn.addEventListener('click', () => window.location.href = 'student-notifications.html');
+
+            // ── THEME TOGGLE ──
+            const themeToggleBtn = document.getElementById('themeToggle');
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', function () {
+                    const root = document.documentElement;
+                    const current = root.getAttribute('data-theme') || 'dark';
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    root.setAttribute('data-theme', next);
+                    // Save to both keys so all pages stay in sync
+                    localStorage.setItem('mw_theme', next);
+                    localStorage.setItem('theme', next);
+                });
+            }
         });
     </script>
     <script>
