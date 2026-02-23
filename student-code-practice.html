@@ -1649,6 +1649,15 @@
       <div class="cp-section-label">Constraints</div>
       ${c.constraints.map(con => `<div class="cp-constraint">${con}</div>`).join('')}
     </div>`;
+            // Append hints section inline
+            const detail = document.getElementById('problemDetail');
+            const hintsDiv = document.createElement('div');
+            hintsDiv.className = 'cp-hints';
+            hintsDiv.innerHTML = '<div class="cp-hint-header"><i data-lucide="lightbulb"></i> Hints</div><div id="hintsSection"></div>';
+            detail.appendChild(hintsDiv);
+            lucide.createIcons();
+            // renderHints() is defined later; call deferred so HINTS is ready
+            setTimeout(renderHints, 0);
         }
 
         // ── MONACO EDITOR ──
@@ -1755,6 +1764,8 @@
                         solved[currentChallenge.id] = true;
                         localStorage.setItem('cp_solved', JSON.stringify(solved));
                         renderChallengeList();
+                        // Award XP on first solve
+                        if (typeof awardXP === 'function') awardXP(currentChallenge);
                     }
                 }
                 localStorage.setItem('cp_stats', JSON.stringify(stats));
@@ -1930,21 +1941,7 @@ _out.getvalue()
         }
         function initXP() { document.getElementById('xpVal').textContent = xp; }
 
-        // Override runCode to award XP on first solve
-        const _origRunCode = runCode;
-        async function runCode(isSubmit) {
-            await _origRunCode(isSubmit);
-            // XP awarded in renderResults if solved for first time
-        }
-
-        // Patch renderResults to award XP
-        const _origRender = renderResults;
-        function renderResults(results, isSubmit) {
-            _origRender(results, isSubmit);
-            if (isSubmit && results.every(r => r.pass) && currentChallenge && !solved[currentChallenge.id]) {
-                awardXP(currentChallenge);
-            }
-        }
+        // (XP is awarded directly in runCode submit block below — no patch needed)
 
         // ── PROGRESSIVE HINTS ──
         const HINTS = {
@@ -1985,18 +1982,7 @@ _out.getvalue()
             body?.classList.toggle('open');
         }
 
-        // Patch renderProblem to append hints
-        const _origRenderProblem = renderProblem;
-        function renderProblem() {
-            _origRenderProblem();
-            const detail = document.getElementById('problemDetail');
-            const hintsDiv = document.createElement('div');
-            hintsDiv.className = 'cp-hints';
-            hintsDiv.innerHTML = '<div class="cp-hint-header"><i data-lucide="lightbulb"></i> Hints</div><div id="hintsSection"></div>';
-            detail.appendChild(hintsDiv);
-            lucide.createIcons();
-            renderHints();
-        }
+        // (Hints are rendered directly inside renderProblem — no patch needed)
 
         // ── LANGUAGE REFERENCE ──
         const REF = {
