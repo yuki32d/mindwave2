@@ -10884,6 +10884,114 @@ app.post('/api/meetings/:code/join-agora', authMiddleware, async (req, res) => {
 });
 
 
+// ── GROQ AI CODE PRACTICE ENDPOINT ──
+const CODE_AI_SYSTEM_PROMPT = `You are an expert programming tutor integrated into MindWave, an educational platform. Your role is to help students learn programming by explaining concepts clearly, debugging code, and providing hints without giving away complete solutions directly.
+
+## Programming Languages you are trained on:
+### General Purpose
+- **Python** – scripting, data science, ML, web backends (Django/Flask); syntax: indentation, list comprehensions, generators
+- **JavaScript** – web frontends, Node.js backends; async/await, closures, prototypes, ES6+
+- **TypeScript** – typed superset of JS; interfaces, generics, type inference
+- **Java** – OOP, JVM, enterprise; static typing, garbage collection, streams API
+- **C** – systems, embedded; pointers, manual memory, structs, compilation
+- **C++** – systems + OOP; STL, RAII, templates, move semantics
+- **C#** – .NET, Unity; LINQ, async tasks, properties, delegates
+- **Go (Golang)** – concurrency, cloud; goroutines, channels, interfaces, compilation speed
+- **Rust** – memory safety without GC; ownership, borrowing, lifetimes
+- **Swift** – Apple ecosystem; optionals, protocols, SwiftUI
+- **Kotlin** – JVM + Android; null safety, data classes, coroutines
+- **Ruby** – rapid dev; convention over configuration, blocks, mixins
+- **PHP** – web backends; templating, WordPress ecosystem
+- **R** – statistics, data analysis; vectors, data frames, ggplot2
+- **Dart** – Flutter cross-platform; null safety, async streams
+- **Scala** – functional + OOP on JVM; case classes, pattern matching
+- **Haskell** – purely functional; monads, lazy evaluation, type classes
+
+### Scripting & Shell
+- **Bash/Shell** – Unix scripting; pipes, redirects, variables, loops
+- **PowerShell** – Windows automation; cmdlets, pipelines, objects
+
+### Query & Data
+- **SQL** – relational DBs; SELECT, JOIN, GROUP BY, indexes, transactions
+- **GraphQL** – API query language; schemas, resolvers, mutations
+
+### Markup & Styling
+- **HTML5** – semantic elements, forms, accessibility (ARIA), meta tags, SEO
+- **CSS3** – selectors, flexbox, grid, animations, custom properties (variables), media queries
+- **SCSS/Sass** – CSS preprocessor; nesting, mixins, extends, functions
+- **XML** – data interchange, configuration; namespaces, schemas (XSD)
+- **JSON** – universal data format; parsing, stringify, nested structures
+- **YAML** – human-readable config; indentation rules, anchors, multi-line strings
+- **Markdown** – documentation; headings, tables, code blocks, links
+- **SVG** – vector graphics in HTML; paths, transforms, animations
+- **LaTeX** – academic typesetting; equations, bibliography
+
+### Web Frameworks & Tools
+- **React/JSX** – component model, hooks, virtual DOM
+- **Vue.js/Nuxt** – reactivity, composition API
+- **Angular/TypeScript** – modules, decorators, RxJS
+- **Node.js** – event loop, streams, npm ecosystem
+- **Express.js** – routing, middleware, REST APIs
+- **Django/Flask** – Python web frameworks, ORM, routing
+
+## Teaching Style:
+- Be concise and beginner-friendly
+- Use code examples when helpful (use backticks)
+- For hints: give the concept/approach, not the full solution
+- When explaining errors: identify the root cause clearly
+- Never be dismissive; always encourage the student
+- Keep responses under 150 words unless the student asks for a detailed explanation
+`;
+
+app.post('/api/code-ai/chat', async (req, res) => {
+  try {
+    const { message, challengeTitle, challengeDifficulty, language, userCode } = req.body;
+    const groqApiKey = process.env.GROQ_API_KEY;
+
+    if (!groqApiKey) {
+      return res.status(503).json({ error: 'Groq API key not configured', reply: 'AI assistant is not configured on this server. Please add GROQ_API_KEY to your .env file.' });
+    }
+
+    const userMessage = [
+      challengeTitle ? `Challenge: "${challengeTitle}" (${challengeDifficulty || 'unknown'} difficulty, language: ${language || 'python'})` : '',
+      userCode ? `\nStudent's current code:\n\`\`\`${language || 'python'}\n${userCode}\n\`\`\`` : '',
+      `\nStudent's question: ${message}`
+    ].filter(Boolean).join('');
+
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${groqApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: CODE_AI_SYSTEM_PROMPT },
+          { role: 'user', content: userMessage }
+        ],
+        max_tokens: 512,
+        temperature: 0.5,
+        stream: false
+      })
+    });
+
+    if (!groqRes.ok) {
+      const err = await groqRes.text();
+      console.error('Groq API error:', err);
+      return res.status(502).json({ error: 'Groq API error', reply: 'AI service is temporarily unavailable. Please try again.' });
+    }
+
+    const data = await groqRes.json();
+    const reply = data.choices?.[0]?.message?.content || 'No response generated.';
+    res.json({ reply });
+
+  } catch (error) {
+    console.error('Code AI error:', error);
+    res.status(500).json({ error: error.message, reply: 'An error occurred while processing your request.' });
+  }
+});
+
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',

@@ -1035,7 +1035,37 @@
             }
         }
 
-        /* ── VISUALIZER MODAL ── */
+        /* ── AI MARKDOWN CODE RENDERING ── */
+        .cp-ai-code {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin: 6px 0;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 11px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--accent);
+            line-height: 1.6;
+        }
+
+        .cp-ai-inline {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            background: var(--surface);
+            color: var(--accent);
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .cp-ai-msg strong {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+
         .cp-viz-overlay {
             display: none;
             position: fixed;
@@ -2078,54 +2108,77 @@ _out.getvalue()
             renderRef(lang);
         }
 
-        // ── AI ASSISTANT ──
+        // ── AI ASSISTANT (Groq) ──
         let lastError = '';
         function aiQuick(text) { document.getElementById('aiInput').value = text; sendAiMessage(); }
+
+        function renderAiMarkdown(text) {
+            // Code blocks ```...```
+            text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+                `<pre class="cp-ai-code"><code>${escapeHtml(code.trim())}</code></pre>`);
+            // Inline code `...`
+            text = text.replace(/`([^`]+)`/g, '<code class="cp-ai-inline">$1</code>');
+            // Bold **...**
+            text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            // Newlines
+            text = text.replace(/\n/g, '<br>');
+            return text;
+        }
+
         async function sendAiMessage() {
             const input = document.getElementById('aiInput');
             const text = input.value.trim();
             if (!text) return;
             input.value = '';
-            addAiMsg('user', text);
+            addAiMsg('user', escapeHtml(text));
             const typingId = addAiTyping();
             switchRightTab('ai', document.querySelectorAll('.cp-output-tabs .cp-tab')[3]);
 
-            const context = currentChallenge ? `Challenge: "${currentChallenge.title}" (${currentChallenge.difficulty})\nProblem: ${currentChallenge.description}\nUser code:\n${editor?.getValue() || ''}` : '';
-            const prompt = context + '\n\nUser question: ' + text;
+            const lang = document.getElementById('langSelect')?.value || 'python';
+            const payload = {
+                message: text,
+                challengeTitle: currentChallenge?.title || null,
+                challengeDifficulty: currentChallenge?.difficulty || null,
+                language: lang,
+                userCode: editor?.getValue() || ''
+            };
 
             try {
-                const res = await fetch('/api/ai/chat', {
+                const res = await fetch('/api/code-ai/chat', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') },
-                    body: JSON.stringify({ message: prompt, context: 'code_practice' })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                    },
+                    body: JSON.stringify(payload)
                 });
                 removeTyping(typingId);
-                if (res.ok) {
-                    const data = await res.json();
-                    addAiMsg('assistant', data.reply || data.message || data.response || 'Sorry, I could not get a response.');
-                } else {
-                    addAiMsg('assistant', getFallbackAI(text));
-                }
-            } catch {
+                const data = await res.json();
+                const reply = data.reply || 'Sorry, no response received.';
+                addAiMsgHtml('assistant', renderAiMarkdown(reply));
+            } catch (err) {
                 removeTyping(typingId);
-                addAiMsg('assistant', getFallbackAI(text));
+                addAiMsg('assistant', escapeHtml(getFallbackAI(text)));
             }
         }
 
         function getFallbackAI(text) {
             const t = text.toLowerCase();
             if (!currentChallenge) return 'Please select a challenge first, then I can help you better!';
-            if (t.includes('hint')) return `Here\'s a hint for "${currentChallenge.title}": ${HINTS[currentChallenge.id]?.hints[0] || 'Think about the data structure that gives O(1) lookup.'}`;
+            if (t.includes('hint')) return `Here's a hint for "${currentChallenge.title}": ${HINTS[currentChallenge.id]?.hints[0] || 'Think about the data structure that gives O(1) lookup.'}`;
             if (t.includes('error')) return 'Check your input parsing — make sure you are reading the right number of lines and converting types correctly (int/float vs string).';
             if (t.includes('algorithm')) return `For "${currentChallenge.title}", focus on the category: ${currentChallenge.category}. Think about what data structure best fits the problem.`;
             return 'Break the problem into small steps: 1) Parse input, 2) Apply the algorithm, 3) Print output. Which step is causing issues?';
         }
 
         let aiMsgId = 0;
-        function addAiMsg(role, text) {
+        function addAiMsg(role, safeHtmlOrText) {
+            return addAiMsgHtml(role, safeHtmlOrText);
+        }
+        function addAiMsgHtml(role, html) {
             const el = document.getElementById('aiMessages');
             const id = 'aim-' + (++aiMsgId);
-            el.insertAdjacentHTML('beforeend', `<div class="cp-ai-msg ${role}" id="${id}">${escapeHtml(text)}</div>`);
+            el.insertAdjacentHTML('beforeend', `<div class="cp-ai-msg ${role}" id="${id}">${html}</div>`);
             el.scrollTop = el.scrollHeight;
             return id;
         }
