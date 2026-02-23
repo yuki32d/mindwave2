@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -543,11 +543,11 @@
 
         <!-- Reactions Menu -->
         <div class="reactions-menu" id="reactionsMenu">
-            <button class="reaction-btn" data-reaction="👍">👍</button>
-            <button class="reaction-btn" data-reaction="❤️">❤️</button>
-            <button class="reaction-btn" data-reaction="😂">😂</button>
-            <button class="reaction-btn" data-reaction="👏">👏</button>
-            <button class="reaction-btn" data-reaction="🤔">🤔</button>
+            <button class="reaction-btn" data-reaction="??">??</button>
+            <button class="reaction-btn" data-reaction="??">??</button>
+            <button class="reaction-btn" data-reaction="??">??</button>
+            <button class="reaction-btn" data-reaction="??">??</button>
+            <button class="reaction-btn" data-reaction="??">??</button>
         </div>
     </div>
 
@@ -559,7 +559,7 @@
     <div class="side-panel" id="participantsPanel">
         <div class="panel-header">
             <h3>Participants (<span id="participantCount">1</span>)</h3>
-            <button class="panel-close" id="closeParticipantsPanel">×</button>
+            <button class="panel-close" id="closeParticipantsPanel">�</button>
         </div>
         <div class="panel-content" id="participantsList">
             <!-- Participants will be added dynamically -->
@@ -570,13 +570,13 @@
     <div class="side-panel" id="chatPanel">
         <div class="panel-header">
             <h3>Chat</h3>
-            <button class="panel-close" id="closeChatPanel">×</button>
+            <button class="panel-close" id="closeChatPanel">�</button>
         </div>
         <div class="panel-content">
             <div class="chat-messages" id="chatMessages">
                 <div class="chat-message">
                     <div class="chat-sender">System</div>
-                    <div class="chat-text">Welcome to the meeting! 💬</div>
+                    <div class="chat-text">Welcome to the meeting! ??</div>
                 </div>
             </div>
         </div>
@@ -618,10 +618,10 @@
             toast.className = `toast ${type}`;
 
             const icons = {
-                success: '✓',
-                error: '✕',
-                warning: '⚠',
-                info: 'ℹ'
+                success: '?',
+                error: '?',
+                warning: '?',
+                info: '?'
             };
 
             toast.innerHTML = `
@@ -709,7 +709,7 @@
                 socket = io(API_BASE);
 
                 socket.on('connect', () => {
-                    console.log('💬 Socket.IO connected');
+                    console.log('?? Socket.IO connected');
 
                     // Join meeting room
                     socket.emit('join-meeting', {
@@ -745,7 +745,7 @@
                 });
 
                 socket.on('disconnect', () => {
-                    console.log('💬 Socket.IO disconnected');
+                    console.log('?? Socket.IO disconnected');
                 });
             } catch (error) {
                 console.error('Error initializing Socket.IO:', error);
@@ -835,7 +835,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    console.log('✅ Agora credentials received:', data);
+                    console.log('? Agora credentials received:', data);
 
                     // Initialize Agora client
                     agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
@@ -853,7 +853,7 @@
                         data.uid
                     );
 
-                    console.log('✅ Joined Agora channel as AUDIENCE');
+                    console.log('? Joined Agora channel as AUDIENCE');
 
                     // Create local tracks
                     localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
@@ -865,7 +865,7 @@
                     // Publish tracks (students can also publish in this setup)
                     await agoraClient.publish([localAudioTrack, localVideoTrack]);
 
-                    console.log('✅ Published local tracks');
+                    console.log('? Published local tracks');
 
                     // Hide loading, show meeting
                     document.getElementById('loadingScreen').style.display = 'none';
@@ -885,7 +885,7 @@
 
         // Handle remote user published
         async function handleUserPublished(user, mediaType) {
-            console.log('👤 User published:', user.uid, mediaType);
+            console.log('?? User published:', user.uid, mediaType);
 
             await agoraClient.subscribe(user, mediaType);
 
@@ -923,7 +923,7 @@
 
         // Handle remote user unpublished
         function handleUserUnpublished(user, mediaType) {
-            console.log('👤 User unpublished:', user.uid, mediaType);
+            console.log('?? User unpublished:', user.uid, mediaType);
 
             if (mediaType === 'video') {
                 const playerContainer = document.getElementById(`player-${user.uid}`);
@@ -935,7 +935,7 @@
 
         // Handle user left
         function handleUserLeft(user) {
-            console.log('👤 User left:', user.uid);
+            console.log('?? User left:', user.uid);
 
             const playerContainer = document.getElementById(`player-${user.uid}`);
             if (playerContainer) {
@@ -999,7 +999,7 @@
                     await agoraClient.leave();
                 }
 
-                console.log('✅ Left meeting');
+                console.log('? Left meeting');
                 window.location.href = 'student-community.html';
             } catch (error) {
                 console.error('Error leaving meeting:', error);
@@ -1037,10 +1037,10 @@
             if (isHandRaised) {
                 btn.classList.add('active');
                 // TODO: Send raise hand signal to faculty
-                console.log('✋ Hand raised');
+                console.log('? Hand raised');
             } else {
                 btn.classList.remove('active');
-                console.log('✋ Hand lowered');
+                console.log('? Hand lowered');
             }
         }
 

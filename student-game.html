@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Center – MindWave</title>
+    <title>Game Center � MindWave</title>
     <meta name="description" content="Play your assigned quizzes and challenges, earn XP, and climb the leaderboard.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -65,7 +65,7 @@
     </script>
 
     <style>
-        /* ── XP Hero Strip ── */
+        /* -- XP Hero Strip -- */
         .gc-hero {
             background: linear-gradient(135deg, rgba(99, 102, 241, .12) 0%, rgba(168, 85, 247, .10) 100%);
             border: 1px solid rgba(99, 102, 241, .25);
@@ -154,7 +154,7 @@
             margin-top: 4px;
         }
 
-        /* ── Filter Pills ── */
+        /* -- Filter Pills -- */
         .gc-filter-bar {
             display: flex;
             gap: 10px;
@@ -181,7 +181,7 @@
             color: #818cf8;
         }
 
-        /* ── Game Cards ── */
+        /* -- Game Cards -- */
         .gc-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -279,7 +279,7 @@
             border: 1px solid var(--border);
         }
 
-        /* ── Game Preview Screen ── */
+        /* -- Game Preview Screen -- */
         .gc-preview {
             max-width: 640px;
             margin: 0 auto;
@@ -412,7 +412,7 @@
             transform: translateY(-1px);
         }
 
-        /* ── In-Game Interface ── */
+        /* -- In-Game Interface -- */
         .gp-wrap {
             max-width: 800px;
             margin: 0 auto;
@@ -910,7 +910,7 @@
 
 <body>
     <div class="mw-app" id="mwApp">
-        <!-- ── Sidebar ── -->
+        <!-- -- Sidebar -- -->
         <aside class="mw-sidebar" id="sidebar">
             <div class="mw-logo">
                 <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
@@ -964,7 +964,7 @@
                     <a href="student-code-practice.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
                     </a>
-                    <a href="student-study-recommendations.html" class="mw-nav-item">
+                    <a href="student-ai-tutor.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
                     </a>
                     <a href="student-reports.html" class="mw-nav-item">
@@ -989,14 +989,14 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">ST</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -1006,7 +1006,7 @@
             </div>
         </aside>
 
-        <!-- ── Main ── -->
+        <!-- -- Main -- -->
         <div class="mw-main" id="mwMain">
 
             <!-- Topbar -->
@@ -1018,7 +1018,7 @@
 
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" id="gcSearch" placeholder="Search games…" autocomplete="off">
+                    <input type="text" id="gcSearch" placeholder="Search games�" autocomplete="off">
                 </div>
 
                 <div class="mw-topbar-actions">
@@ -1059,11 +1059,11 @@
                     </div>
                     <div class="gc-stat-row">
                         <div class="gc-stat">
-                            <div class="gc-stat-val">🔥 <span id="streakCount">0</span></div>
+                            <div class="gc-stat-val">?? <span id="streakCount">0</span></div>
                             <div class="gc-stat-lbl">Streak</div>
                         </div>
                         <div class="gc-stat">
-                            <div class="gc-stat-val">🏆 <span id="totalWins">0</span></div>
+                            <div class="gc-stat-val">?? <span id="totalWins">0</span></div>
                             <div class="gc-stat-lbl">Wins</div>
                         </div>
                     </div>
@@ -1084,17 +1084,17 @@
         </div><!-- end mw-main -->
     </div><!-- end mw-app -->
 
-    <!-- ── Scoreboard Modal ── -->
+    <!-- -- Scoreboard Modal -- -->
     <div id="scoreboardModal" class="modal" style="display:none;">
         <div class="modal-content scoreboard-content">
-            <h2 style="text-align:center; margin-bottom:20px;">🎯 Game Complete!</h2>
+            <h2 style="text-align:center; margin-bottom:20px;">?? Game Complete!</h2>
             <div class="student-score-card" id="studentScoreCard"></div>
             <div class="answer-review-section" id="answerReviewSection" style="display:none;">
-                <h3 style="margin-bottom:12px;">📝 Answer Review</h3>
+                <h3 style="margin-bottom:12px;">?? Answer Review</h3>
                 <div id="answerReviewList" class="answer-review-list"></div>
             </div>
             <div class="leaderboard-section">
-                <h3 style="margin-bottom:12px;">🏆 Leaderboard</h3>
+                <h3 style="margin-bottom:12px;">?? Leaderboard</h3>
                 <table class="leaderboard-table">
                     <thead>
                         <tr>
@@ -1109,8 +1109,8 @@
                 </table>
             </div>
             <div class="scoreboard-actions">
-                <button id="playAgainBtn" class="secondary-btn">🔄 Play Again</button>
-                <button id="backToGamesBtn" class="primary-btn">← Back to Games</button>
+                <button id="playAgainBtn" class="secondary-btn">?? Play Again</button>
+                <button id="backToGamesBtn" class="primary-btn">? Back to Games</button>
             </div>
         </div>
     </div>
@@ -1190,7 +1190,7 @@
                 });
             }
 
-            // Sign out — direct logout, no modal
+            // Sign out � direct logout, no modal
             const signOutBtn = document.getElementById('signOutBtn');
             if (signOutBtn) signOutBtn.addEventListener('click', () => { document.getElementById('logoutModal').classList.add('active'); });
 
@@ -1207,7 +1207,7 @@
             const settingsBtn = document.getElementById('settingsBtn');
             if (settingsBtn) settingsBtn.addEventListener('click', () => window.location.href = 'student-settings.html');
 
-            // Search bar — live filter games
+            // Search bar � live filter games
             const searchInput = document.getElementById('gcSearch');
             if (searchInput) {
                 searchInput.addEventListener('input', e => {
@@ -1238,7 +1238,7 @@
         }
     </script>
 
-    <!--  Logout Confirmation Modal ── -->
+    <!--  Logout Confirmation Modal -- -->
     <div id="logoutModal" class="mw-logout-overlay">
         <div class="mw-logout-modal">
             <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>

@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community — MindWave</title>
+    <title>Community � MindWave</title>
     <meta name="description" content="Share projects, collaborate, and connect with fellow students on MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -31,7 +31,7 @@
     </script>
 
     <style>
-        /* ── Community-specific tokens ── */
+        /* -- Community-specific tokens -- */
         .cm-tabs {
             display: flex;
             gap: 8px;
@@ -76,10 +76,10 @@
             opacity: .9;
         }
 
-        /* ── Light mode: dark pills need light text & icons ── */
+        /* -- Light mode: dark pills need light text & icons -- */
         [data-theme="light"] .cm-tab {
             color: #c8ccee;
-            /* light lavender — readable on dark pill */
+            /* light lavender � readable on dark pill */
         }
 
         [data-theme="light"] .cm-tab:hover {
@@ -92,7 +92,7 @@
             color: #fff;
         }
 
-        /* Sort buttons also have dark bg — same fix */
+        /* Sort buttons also have dark bg � same fix */
         [data-theme="light"] .cm-sort-btn {
             color: #c8ccee;
         }
@@ -114,7 +114,7 @@
             color: #9ea4b6;
         }
 
-        /* ── Section wiring ── */
+        /* -- Section wiring -- */
         .cm-section {
             display: none;
         }
@@ -123,7 +123,7 @@
             display: block;
         }
 
-        /* ── Search + filter row ── */
+        /* -- Search + filter row -- */
         .cm-toolbar {
             display: flex;
             align-items: center;
@@ -194,7 +194,7 @@
             color: #fff;
         }
 
-        /* ── Trending tags ── */
+        /* -- Trending tags -- */
         .cm-tags-bar {
             background: var(--card, #161b2e);
             border: 1px solid var(--border, rgba(255, 255, 255, .08));
@@ -238,14 +238,14 @@
             background: rgba(99, 102, 241, .25);
         }
 
-        /* ── Posts feed ── */
+        /* -- Posts feed -- */
         #postsContainer {
             display: flex;
             flex-direction: column;
             gap: 16px;
         }
 
-        /* Post cards rendered by JS — also make them look premium */
+        /* Post cards rendered by JS � also make them look premium */
         #postsContainer .post-card,
         .post-card {
             background: var(--card, #161b2e);
@@ -260,7 +260,7 @@
             box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
         }
 
-        /* ── Empty state ── */
+        /* -- Empty state -- */
         .cm-empty {
             text-align: center;
             padding: 72px 24px;
@@ -283,7 +283,7 @@
             font-size: .9rem;
         }
 
-        /* ── Feature cards (poll / feedback / quiz) ── */
+        /* -- Feature cards (poll / feedback / quiz) -- */
         .cm-feature-card {
             background: var(--card, #161b2e);
             border: 1px solid var(--border, rgba(255, 255, 255, .08));
@@ -417,7 +417,7 @@
             border-color: var(--accent);
         }
 
-        /* ── Primary + ghost buttons (override theme defaults for community) ── */
+        /* -- Primary + ghost buttons (override theme defaults for community) -- */
         .cm-btn-primary {
             display: inline-flex;
             align-items: center;
@@ -447,7 +447,7 @@
             transform: none;
         }
 
-        /* ── Load more ── */
+        /* -- Load more -- */
         #loadMoreContainer {
             text-align: center;
             margin-top: 20px;
@@ -469,7 +469,7 @@
             color: var(--text);
         }
 
-        /* ── Modal ── */
+        /* -- Modal -- */
         .cm-modal-overlay {
             position: fixed;
             inset: 0;
@@ -641,7 +641,7 @@
 <body>
     <div class="mw-app" id="mwApp">
 
-        <!-- ── SIDEBAR ── -->
+        <!-- -- SIDEBAR -- -->
         <aside class="mw-sidebar">
             <div class="mw-logo">
                 <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
@@ -695,7 +695,7 @@
                     <a href="student-code-practice.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
                     </a>
-                    <a href="student-study-recommendations.html" class="mw-nav-item">
+                    <a href="student-ai-tutor.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
                     </a>
                     <a href="student-reports.html" class="mw-nav-item">
@@ -720,14 +720,14 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -737,7 +737,7 @@
             </div>
         </aside>
 
-        <!-- ── MAIN ── -->
+        <!-- -- MAIN -- -->
         <div class="mw-main" id="mwMain">
 
             <!-- Topbar -->
@@ -748,7 +748,7 @@
                 <div class="mw-breadcrumb">Dashboard / <span>Community</span></div>
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" id="searchInput" placeholder="Search posts…" autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Search posts�" autocomplete="off">
                 </div>
                 <div class="mw-topbar-actions">
                     <div class="mw-notif-wrap">
@@ -780,7 +780,7 @@
                     </div>
                 </div>
 
-                <!-- ── Tab bar ── -->
+                <!-- -- Tab bar -- -->
                 <div class="cm-tabs">
                     <button class="cm-tab cm-tab-create" id="createPostBtn">
                         <i data-lucide="plus-circle"></i> Create Post
@@ -802,7 +802,7 @@
                     </button>
                 </div>
 
-                <!-- ═══════════════════ FEED SECTION ═══════════════════ -->
+                <!-- ------------------- FEED SECTION ------------------- -->
                 <div id="communitySection" class="cm-section active">
 
                     <!-- Search + sort -->
@@ -810,7 +810,7 @@
                         <div class="cm-search">
                             <i data-lucide="search"></i>
                             <!-- NOTE: reusing the topbar #searchInput via JS; this is a visual duplicate handled by student-community.js -->
-                            <input type="text" id="searchInputAlt" placeholder="Search posts…" autocomplete="off">
+                            <input type="text" id="searchInputAlt" placeholder="Search posts�" autocomplete="off">
                         </div>
                         <div class="cm-sort-group" id="sortBtns">
                             <button class="cm-sort-btn active" data-sort="recent"><i data-lucide="clock-4"></i>
@@ -833,7 +833,7 @@
                     <div id="postsContainer">
                         <!-- Default empty state; replaced by JS -->
                         <div class="cm-empty">
-                            <div class="cm-empty-icon">📬</div>
+                            <div class="cm-empty-icon">??</div>
                             <h3>No posts yet</h3>
                             <p>Be the first to share something with the community!</p>
                         </div>
@@ -845,10 +845,10 @@
                     </div>
                 </div>
 
-                <!-- ═══════════════════ POLL SECTION ═══════════════════ -->
+                <!-- ------------------- POLL SECTION ------------------- -->
                 <div id="pollSection" class="cm-section">
                     <div class="cm-feature-card">
-                        <div class="cf-icon" style="background:rgba(99,102,241,.12);">⏳</div>
+                        <div class="cf-icon" style="background:rgba(99,102,241,.12);">?</div>
                         <h2>Waiting for Poll</h2>
                         <p>Your instructor will launch a poll soon. Stay tuned!</p>
                         <div class="pulse-indicator">
@@ -857,32 +857,32 @@
                     </div>
                 </div>
 
-                <!-- ═══════════════════ FEEDBACK SECTION ═══════════════════ -->
+                <!-- ------------------- FEEDBACK SECTION ------------------- -->
                 <div id="feedbackSection" class="cm-section">
                     <div class="cm-feature-card">
-                        <div class="cf-icon" style="background:rgba(168,85,247,.12);">💬</div>
+                        <div class="cf-icon" style="background:rgba(168,85,247,.12);">??</div>
                         <h2>How are you feeling?</h2>
                         <p>Your feedback is anonymous and helps improve the lesson.</p>
                         <div class="confidence-selector">
                             <div class="emoji-options">
                                 <button class="emoji-btn" data-value="1">
-                                    <span class="emoji">😟</span>
+                                    <span class="emoji">??</span>
                                     <span class="label">Very Confused</span>
                                 </button>
                                 <button class="emoji-btn" data-value="2">
-                                    <span class="emoji">😕</span>
+                                    <span class="emoji">??</span>
                                     <span class="label">Confused</span>
                                 </button>
                                 <button class="emoji-btn" data-value="3">
-                                    <span class="emoji">😐</span>
+                                    <span class="emoji">??</span>
                                     <span class="label">Neutral</span>
                                 </button>
                                 <button class="emoji-btn" data-value="4">
-                                    <span class="emoji">🙂</span>
+                                    <span class="emoji">??</span>
                                     <span class="label">Confident</span>
                                 </button>
                                 <button class="emoji-btn" data-value="5">
-                                    <span class="emoji">😄</span>
+                                    <span class="emoji">??</span>
                                     <span class="label">Very Confident</span>
                                 </button>
                             </div>
@@ -893,10 +893,10 @@
                     </div>
                 </div>
 
-                <!-- ═══════════════════ QUIZ SECTION ═══════════════════ -->
+                <!-- ------------------- QUIZ SECTION ------------------- -->
                 <div id="quizSection" class="cm-section">
                     <div class="cm-feature-card">
-                        <div class="cf-icon" style="background:rgba(251,191,36,.12);font-size:2rem;">🏆</div>
+                        <div class="cf-icon" style="background:rgba(251,191,36,.12);font-size:2rem;">??</div>
                         <h2>Join Live Quiz</h2>
                         <p>Enter the 6-letter code from your instructor to join instantly.</p>
                         <input type="text" id="quizCodeInput" class="quiz-code-input" placeholder="ABCDEF"
@@ -912,32 +912,32 @@
         </div><!-- end mw-main -->
     </div><!-- end mw-app -->
 
-    <!-- ══════════════════ CREATE POST MODAL ══════════════════ -->
+    <!-- ------------------ CREATE POST MODAL ------------------ -->
     <div class="cm-modal-overlay" id="createPostModal">
         <div class="cm-modal">
             <div class="cm-modal-header">
-                <h2>✨ Create New Post</h2>
-                <button class="cm-modal-close" id="closeModalBtn">✕</button>
+                <h2>? Create New Post</h2>
+                <button class="cm-modal-close" id="closeModalBtn">?</button>
             </div>
             <div class="cm-modal-body">
                 <form id="createPostForm">
                     <div class="cm-form-group">
                         <label for="postTitle">Title *</label>
                         <input type="text" id="postTitle" maxlength="300" required
-                            placeholder="Give your post a catchy title…">
+                            placeholder="Give your post a catchy title�">
                     </div>
                     <div class="cm-form-group">
                         <label for="postContent">Content *</label>
                         <textarea id="postContent" rows="6" maxlength="5000" required
-                            placeholder="Share your thoughts, project details, or ask a question…"></textarea>
+                            placeholder="Share your thoughts, project details, or ask a question�"></textarea>
                     </div>
                     <div class="cm-form-group">
                         <label for="postType">Post Type</label>
                         <select id="postType">
-                            <option value="text">📝 Text Post</option>
-                            <option value="image">🖼️ Image Post</option>
-                            <option value="video">🎥 Video Post</option>
-                            <option value="project">🚀 Project Showcase</option>
+                            <option value="text">?? Text Post</option>
+                            <option value="image">??? Image Post</option>
+                            <option value="video">?? Video Post</option>
+                            <option value="project">?? Project Showcase</option>
                         </select>
                     </div>
                     <div class="cm-form-group" id="mediaUploadGroup" style="display:none;">
@@ -965,12 +965,12 @@
         </div>
     </div>
 
-    <!-- ══════════════════ POST DETAIL MODAL ══════════════════ -->
+    <!-- ------------------ POST DETAIL MODAL ------------------ -->
     <div class="cm-modal-overlay" id="postDetailModal">
         <div class="cm-modal cm-modal-large">
             <div class="cm-modal-header">
                 <h2>Post Details</h2>
-                <button class="cm-modal-close" id="closeDetailModalBtn">✕</button>
+                <button class="cm-modal-close" id="closeDetailModalBtn">?</button>
             </div>
             <div class="cm-modal-body" id="postDetailContent">
                 <!-- Loaded by JS -->
@@ -978,7 +978,7 @@
         </div>
     </div>
 
-    <!-- ══════════════════ SCRIPTS ══════════════════ -->
+    <!-- ------------------ SCRIPTS ------------------ -->
     <script>
         // Auth guard
         if (!localStorage.getItem('token')) window.location.href = 'marketing-site/student-login.html';
@@ -994,7 +994,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
 
-            // ── User info ──
+            // -- User info --
             const firstName = localStorage.getItem('firstName') || '';
             const lastName = localStorage.getItem('lastName') || '';
             const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Student';
@@ -1005,7 +1005,7 @@
             if (el('dropdownUserName')) el('dropdownUserName').textContent = fullName;
             if (el('avatarInitials')) el('avatarInitials').textContent = initials.toUpperCase();
 
-            // ── Profile dropdown ──
+            // -- Profile dropdown --
             const profileToggle = el('profileToggle');
             const profileDropdown = el('profileDropdown');
             if (profileToggle && profileDropdown) {
@@ -1016,11 +1016,11 @@
                 document.addEventListener('click', () => profileDropdown.classList.remove('active'));
             }
 
-            // ── Sign out ──
+            // -- Sign out --
             const signOutBtn = el('signOutBtn');
             if (signOutBtn) signOutBtn.addEventListener('click', () => { document.getElementById('logoutModal').classList.add('active'); });
 
-            // ── Theme toggle ──
+            // -- Theme toggle --
             const themeBtn = el('themeToggle');
             if (themeBtn) themeBtn.addEventListener('click', () => {
                 const cur = document.documentElement.getAttribute('data-theme');
@@ -1028,7 +1028,7 @@
                 localStorage.setItem('mw_theme', cur === 'light' ? 'dark' : 'light');
             });
 
-            // ── Section tabs ──
+            // -- Section tabs --
             const sections = ['communitySection', 'pollSection', 'feedbackSection', 'quizSection'];
             document.querySelectorAll('.cm-tab[data-section]').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1046,7 +1046,7 @@
                 });
             });
 
-            // ── Sort buttons ──
+            // -- Sort buttons --
             document.querySelectorAll('.cm-sort-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.cm-sort-btn').forEach(b => b.classList.remove('active'));
@@ -1054,7 +1054,7 @@
                 });
             });
 
-            // ── Sync topbar search → community search ──
+            // -- Sync topbar search ? community search --
             const topSearch = el('searchInput');
             const altSearch = el('searchInputAlt');
             if (topSearch && altSearch) {
@@ -1062,7 +1062,7 @@
                 altSearch.addEventListener('input', e => { topSearch.value = e.target.value; });
             }
 
-            // ── Modal helpers ──
+            // -- Modal helpers --
             // The existing student-community.js opens/closes via class .active on .modal
             // We need to bridge the old .modal class to new .cm-modal-overlay
             window.openCreatePostModal = () => el('createPostModal')?.classList.add('active');
@@ -1078,7 +1078,7 @@
             el('createPostModal')?.addEventListener('click', e => { if (e.target === el('createPostModal')) window.closeCreatePostModal(); });
             el('postDetailModal')?.addEventListener('click', e => { if (e.target === el('postDetailModal')) window.closePostDetailModal(); });
 
-            // ── Feedback emoji buttons ──
+            // -- Feedback emoji buttons --
             let selectedConfidence = null;
             document.querySelectorAll('.emoji-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1115,7 +1115,7 @@
         }
     </script>
 
-    <!--  Logout Confirmation Modal ── -->
+    <!--  Logout Confirmation Modal -- -->
     <div id="logoutModal" class="mw-logout-overlay">
         <div class="mw-logout-modal">
             <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>

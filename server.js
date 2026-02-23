@@ -10992,6 +10992,119 @@ app.post('/api/code-ai/chat', async (req, res) => {
   }
 });
 
+// ── SAGE AI TUTOR ENDPOINT ──
+const SAGE_SYSTEM_PROMPT = `You are Sage, a warm and brilliant AI tutor built into MindWave, an educational platform for students.
+
+## Your Personality:
+- Warm, encouraging, and patient — like the best teacher a student ever had
+- You NEVER make students feel stupid for not understanding
+- You celebrate progress, no matter how small
+- You use analogies and relatable examples to make things click
+- You adapt your language to the student's level
+
+## Your Teaching Modes:
+### CHAT mode (default):
+- Answer questions clearly and thoroughly
+- Use structured explanations with steps when helpful
+- Provide examples, analogies, and relatable comparisons
+- Keep explanations focused — don't overwhelm
+
+### SOCRATIC mode:
+- NEVER give the direct answer first
+- Ask one guiding question to steer the student's thinking
+- After their response, build on what they said
+- Example: if asked "what is photosynthesis?", respond with "Great question! Before I explain, what do you think plants might need to make their own food?"
+
+### ELI5 mode (Explain Like I'm 5):
+- Use the simplest possible language — no jargon whatsoever
+- Always use a concrete analogy (e.g., "think of it like...")
+- Short sentences, relatable comparisons
+- Maximum 3-4 sentences
+
+## Mood-Aware Responses:
+When you detect frustration or confusion (keywords: "give up", "don't get", "confused", "stuck", "impossible"):
+- Start with GENUINE encouragement — not generic "great job!" but something real
+- Then guide them through the concept
+- Break it into the smallest possible pieces
+
+## Formatting Rules:
+- Use **bold** for key terms
+- Use code blocks with triple backticks for code/formulas
+- Use numbered lists for steps
+- Keep responses under 200 words unless a detailed explanation is explicitly needed
+- End with a short follow-up question to check understanding (in CHAT mode)
+
+## Context awareness:
+- If a subject is provided, stay focused on it
+- Remember the conversation history provided and build on it
+- Never repeat what you already explained unless the student asks you to
+`;
+
+app.post('/api/ai-tutor/chat', async (req, res) => {
+  try {
+    const { message, subject, mode, mood, history = [] } = req.body;
+    const groqApiKey = process.env.GROQ_API_KEY;
+
+    if (!groqApiKey) {
+      return res.status(503).json({ reply: 'Sage is not configured on this server. Please add GROQ_API_KEY to your .env file.', mood: 'ready' });
+    }
+
+    // Build mode instruction
+    let modeInstruction = '';
+    if (mode === 'socratic') modeInstruction = '\n[MODE: SOCRATIC — guide with questions, do NOT give direct answers]';
+    else if (mode === 'eli5') modeInstruction = '\n[MODE: ELI5 — explain like the student is 5 years old, use simple analogy]';
+    else modeInstruction = '\n[MODE: CHAT — explain clearly with examples and a follow-up question at the end]';
+
+    const subjectCtx = subject ? `\n[SUBJECT CONTEXT: ${subject} — keep your response focused on this subject]` : '';
+    const moodCtx = mood === 'encouraging' ? '\n[STUDENT MOOD: frustrated/confused — start with genuine encouragement before explaining]' : '';
+
+    const systemContent = SAGE_SYSTEM_PROMPT + modeInstruction + subjectCtx + moodCtx;
+
+    // Build messages array with conversation history for multi-turn context
+    const messages = [
+      { role: 'system', content: systemContent },
+      ...history.slice(-8).map(h => ({ role: h.role === 'assistant' ? 'assistant' : 'user', content: h.content })),
+      { role: 'user', content: message }
+    ];
+
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${groqApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages,
+        max_tokens: 600,
+        temperature: 0.65,
+        stream: false
+      })
+    });
+
+    if (!groqRes.ok) {
+      const err = await groqRes.text();
+      console.error('Sage Groq error:', err);
+      return res.status(502).json({ reply: 'Sage is temporarily unavailable. Please try again in a moment.', mood: 'ready' });
+    }
+
+    const data = await groqRes.json();
+    const reply = data.choices?.[0]?.message?.content || 'I seem to be lost in thought — could you try asking again?';
+
+    // Detect mood from assistant reply for frontend colour cues
+    const replyLower = reply.toLowerCase();
+    let resMood = 'ready';
+    if (replyLower.includes('you can do') || replyLower.includes('don\'t worry') || replyLower.includes('great job') || replyLower.includes('you\'re doing')) resMood = 'encouraging';
+    else if (replyLower.includes('what do you think') || replyLower.includes('before i explain') || replyLower.includes('what would you say')) resMood = 'socratic';
+
+    res.json({ reply, mood: resMood });
+
+  } catch (error) {
+    console.error('Sage AI Tutor error:', error);
+    res.status(500).json({ error: error.message, reply: 'Something went wrong with Sage. Please try again.', mood: 'ready' });
+  }
+});
+
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',

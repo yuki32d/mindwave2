@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Achievements — MindWave</title>
+    <title>Achievements � MindWave</title>
     <meta name="description" content="Track your badges, XP, level, and class rank on MindWave.">
     <link rel="stylesheet" href="student-theme.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
@@ -31,7 +31,7 @@
     </script>
 
     <style>
-        /* ── Page layout (scrollable wrapper via mw-main override) ── */
+        /* -- Page layout (scrollable wrapper via mw-main override) -- */
         .mw-main {
             overflow-y: auto !important;
         }
@@ -56,7 +56,7 @@
             font-size: .875rem;
         }
 
-        /* ── Hero card ── */
+        /* -- Hero card -- */
         .ach-hero {
             background: linear-gradient(135deg, rgba(99, 102, 241, .12), rgba(168, 85, 247, .10));
             border: 1px solid var(--border-2);
@@ -171,7 +171,7 @@
             font-weight: 600;
         }
 
-        /* ── Section headings ── */
+        /* -- Section headings -- */
         .ach-section {
             margin-bottom: 36px;
         }
@@ -199,7 +199,7 @@
             border: 1px solid var(--border);
         }
 
-        /* ── Badge grid ── */
+        /* -- Badge grid -- */
         .ach-badge-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -272,7 +272,7 @@
             background: rgba(99, 102, 241, .25);
         }
 
-        /* ── Leaderboard ── */
+        /* -- Leaderboard -- */
         .ach-lb-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -360,7 +360,7 @@
             white-space: nowrap;
         }
 
-        /* ── Badge icon wrap ── */
+        /* -- Badge icon wrap -- */
         .ach-badge-icon-wrap {
             width: 56px;
             height: 56px;
@@ -391,12 +391,12 @@
             color: var(--muted);
         }
 
-        /* ── Topbar icon buttons — ensure visible in both modes ── */
+        /* -- Topbar icon buttons � ensure visible in both modes -- */
         .mw-icon-btn {
             color: var(--text);
         }
 
-        /* ── Theme toggle pill (moon / sun slider) ── */
+        /* -- Theme toggle pill (moon / sun slider) -- */
         .theme-pill {
             display: flex;
             align-items: center;
@@ -450,7 +450,7 @@
             color: #fff;
         }
 
-        /* ── Loading skeleton ── */
+        /* -- Loading skeleton -- */
         .ach-skeleton {
             background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
             background-size: 200% 100%;
@@ -468,7 +468,7 @@
             }
         }
 
-        /* ── Empty state ── */
+        /* -- Empty state -- */
         .ach-empty {
             text-align: center;
             padding: 32px;
@@ -476,7 +476,7 @@
             font-size: .875rem;
         }
 
-        /* ── Responsive ── */
+        /* -- Responsive -- */
         @media (max-width: 640px) {
             .ach-stats-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -492,7 +492,7 @@
 <body>
     <div class="mw-app" id="mwApp">
 
-        <!-- ── SIDEBAR ── -->
+        <!-- -- SIDEBAR -- -->
         <aside class="mw-sidebar">
             <div class="mw-logo">
                 <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
@@ -546,7 +546,7 @@
                     <a href="student-code-practice.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
                     </a>
-                    <a href="student-study-recommendations.html" class="mw-nav-item">
+                    <a href="student-ai-tutor.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
                     </a>
                     <a href="student-reports.html" class="mw-nav-item">
@@ -571,15 +571,15 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
                     <!-- Profile dropdown -->
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html">
                             <i data-lucide="user"></i> My Profile
@@ -595,7 +595,7 @@
             </div>
         </aside>
 
-        <!-- ── MAIN ── -->
+        <!-- -- MAIN -- -->
         <div class="mw-main">
 
             <!-- Top bar -->
@@ -606,7 +606,7 @@
                 <div class="mw-breadcrumb">Dashboard / <span>Achievements</span></div>
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" id="topbarSearch" placeholder="Search…" aria-label="Search">
+                    <input type="text" id="topbarSearch" placeholder="Search�" aria-label="Search">
                 </div>
                 <div class="mw-topbar-actions">
                     <button class="mw-icon-btn" id="notifBtn" aria-label="Notifications">
@@ -629,18 +629,18 @@
 
                 <div class="ach-page-header">
                     <h1>Achievements</h1>
-                    <p>Your badges, XP, and class standing — updated in real time.</p>
+                    <p>Your badges, XP, and class standing � updated in real time.</p>
                 </div>
 
                 <!-- Hero / Player card -->
                 <div class="ach-hero">
-                    <div class="ach-level-num" id="achLevel">—</div>
-                    <div class="ach-level-title" id="achLevelTitle">Loading…</div>
+                    <div class="ach-level-num" id="achLevel">�</div>
+                    <div class="ach-level-title" id="achLevelTitle">Loading�</div>
 
                     <div class="ach-xp-wrap">
                         <div class="ach-xp-labels">
-                            <span id="xpCurrent">…</span>
-                            <span id="xpToNext">…</span>
+                            <span id="xpCurrent">�</span>
+                            <span id="xpToNext">�</span>
                         </div>
                         <div class="ach-xp-track">
                             <div class="ach-xp-fill" id="xpFill" style="width:0%"></div>
@@ -649,19 +649,19 @@
 
                     <div class="ach-stats-grid">
                         <div class="ach-stat">
-                            <div class="ach-stat-val" id="statXp">—</div>
+                            <div class="ach-stat-val" id="statXp">�</div>
                             <div class="ach-stat-label">Total XP</div>
                         </div>
                         <div class="ach-stat">
-                            <div class="ach-stat-val" id="statBadges">—</div>
+                            <div class="ach-stat-val" id="statBadges">�</div>
                             <div class="ach-stat-label">Badges Earned</div>
                         </div>
                         <div class="ach-stat">
-                            <div class="ach-stat-val" id="statGames">—</div>
+                            <div class="ach-stat-val" id="statGames">�</div>
                             <div class="ach-stat-label">Games Played</div>
                         </div>
                         <div class="ach-stat">
-                            <div class="ach-stat-val" id="statRank">—</div>
+                            <div class="ach-stat-val" id="statRank">�</div>
                             <div class="ach-stat-label">Class Rank</div>
                         </div>
                     </div>
@@ -672,7 +672,7 @@
                     <div class="ach-section-head">
                         <i data-lucide="unlock" style="color:var(--accent)"></i>
                         <h2>Unlocked Badges</h2>
-                        <span class="ach-count" id="unlockedCount">…</span>
+                        <span class="ach-count" id="unlockedCount">�</span>
                     </div>
                     <div class="ach-badge-grid" id="unlockedGrid">
                         <!-- rendered by JS -->
@@ -684,7 +684,7 @@
                     <div class="ach-section-head">
                         <i data-lucide="lock" style="color:var(--muted)"></i>
                         <h2>Locked Badges</h2>
-                        <span class="ach-count" id="lockedCount">…</span>
+                        <span class="ach-count" id="lockedCount">�</span>
                     </div>
                     <div class="ach-badge-grid" id="lockedGrid">
                         <!-- rendered by JS -->
@@ -699,7 +699,7 @@
                     </div>
                     <div class="ach-lb-card">
                         <div id="lbList">
-                            <div class="ach-empty">Loading leaderboard…</div>
+                            <div class="ach-empty">Loading leaderboard�</div>
                         </div>
                     </div>
                 </div>
@@ -709,14 +709,14 @@
     </div><!-- /mw-app -->
 
     <script>
-        /* ═══════════════════ AUTH ═══════════════════ */
+        /* ------------------- AUTH ------------------- */
         const token = localStorage.getItem('token');
         if (!token) window.location.href = 'marketing-site/student-login.html';
 
         const API = window.location.origin;
         const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-        /* ═══════════════════ LEVEL SYSTEM ═══════════════════ */
+        /* ------------------- LEVEL SYSTEM ------------------- */
         // XP thresholds per level (level n needs thresholds[n-1] cumulative XP)
         const LEVEL_THRESHOLDS = [
             0, 500, 1200, 2100, 3200, 4500, 6000, 7700, 9600, 11700, 14000,  // 0-10
@@ -746,10 +746,10 @@
             return { level, thisFloor, nextCeil, progress: Math.min(progress, 100) };
         }
 
-        /* ═══════════════════ BADGE DEFINITIONS ═══════════════════ */
-        // Each badge has: id, icon, name, desc, xp, check(stats)→boolean
+        /* ------------------- BADGE DEFINITIONS ------------------- */
+        // Each badge has: id, icon, name, desc, xp, check(stats)?boolean
         const BADGE_DEFS = [
-            // — Easy —
+            // � Easy �
             {
                 id: 'first_game', lucide: 'gamepad-2', name: 'First Game', xp: 50,
                 desc: 'Complete your first game', check: s => s.gamesPlayed >= 1
@@ -766,7 +766,7 @@
                 id: 'five_games', lucide: 'layers', name: 'Game Veteran', xp: 100,
                 desc: 'Play 5 or more games', check: s => s.gamesPlayed >= 5
             },
-            // — Medium —
+            // � Medium �
             {
                 id: 'bookworm', lucide: 'book-open', name: 'Bookworm', xp: 200,
                 desc: 'Play 10+ games across all types', check: s => s.gamesPlayed >= 10
@@ -813,7 +813,7 @@
             },
         ];
 
-        /* ═══════════════════ RENDER ═══════════════════ */
+        /* ------------------- RENDER ------------------- */
         function renderBadge(badge, unlocked) {
             return `
             <div class="ach-badge ${unlocked ? 'unlocked' : 'locked'}" title="${badge.desc}">
@@ -838,14 +838,14 @@
             <div class="ach-lb-row ${isMe(p) ? 'me' : ''}">
                 <div class="ach-rank ${rankClass(i)}">${i + 1}</div>
                 <div class="ach-lb-info">
-                    <div class="ach-lb-name">${isMe(p) ? '⭐ You' : (p.name || 'Student')}</div>
-                    <div class="ach-lb-meta">Level ${getLevel(p.totalPoints)} · ${p.gamesPlayed} game${p.gamesPlayed !== 1 ? 's' : ''} · ${p.avgAccuracy}% accuracy</div>
+                    <div class="ach-lb-name">${isMe(p) ? '? You' : (p.name || 'Student')}</div>
+                    <div class="ach-lb-meta">Level ${getLevel(p.totalPoints)} � ${p.gamesPlayed} game${p.gamesPlayed !== 1 ? 's' : ''} � ${p.avgAccuracy}% accuracy</div>
                 </div>
                 <div class="ach-lb-pts">${p.totalPoints.toLocaleString()} XP</div>
             </div>`).join('');
         }
 
-        /* ═══════════════════ MAIN LOAD ═══════════════════ */
+        /* ------------------- MAIN LOAD ------------------- */
         async function loadAll() {
             try {
                 const [meRes, lbRes, gamesRes] = await Promise.all([
@@ -854,7 +854,7 @@
                     fetch(`${API}/api/game-results/my-results`, { headers })
                 ]);
 
-                // — Profile —
+                // � Profile �
                 const meData = meRes.ok ? await meRes.json() : {};
                 const lbData = lbRes.ok ? await lbRes.json() : {};
                 const gmsData = gamesRes.ok ? await gamesRes.json() : {};
@@ -872,7 +872,7 @@
                 document.querySelectorAll('#sidebarUserName').forEach(el => el.textContent = trimmed);
                 document.querySelectorAll('#avatarInitials, #topbarAvatar').forEach(el => el.textContent = initials);
 
-                // — Compute stats for badge checks —
+                // � Compute stats for badge checks �
                 const perfectScores = results.filter(r => r.score >= 100).length;
                 const fastGames = results.filter(r => r.timeTaken > 0 && r.timeTaken < 180).length;
                 const uniqueGameTypes = new Set(results.map(r => r.gameType)).size;
@@ -891,7 +891,7 @@
                     hasImprovement
                 };
 
-                // — Level —
+                // � Level �
                 const { level, thisFloor, nextCeil, progress } = getLevelProgress(stats.totalXP);
                 const levelTitle = LEVEL_TITLES[Math.min(level - 1, LEVEL_TITLES.length - 1)];
 
@@ -901,14 +901,14 @@
                 document.getElementById('xpToNext').textContent = `${(nextCeil - stats.totalXP).toLocaleString()} XP to Level ${level + 1}`;
                 setTimeout(() => document.getElementById('xpFill').style.width = progress + '%', 100);
 
-                // — Stats grid —
+                // � Stats grid �
                 const earnedBadges = BADGE_DEFS.filter(b => b.check(stats)).length;
                 document.getElementById('statXp').textContent = stats.totalXP.toLocaleString();
                 document.getElementById('statBadges').textContent = earnedBadges;
                 document.getElementById('statGames').textContent = stats.gamesPlayed;
                 document.getElementById('statRank').textContent = stats.classRank ? `#${stats.classRank}` : 'Unranked';
 
-                // — Badges —
+                // � Badges �
                 const unlocked = BADGE_DEFS.filter(b => b.check(stats));
                 const locked = BADGE_DEFS.filter(b => !b.check(stats));
 
@@ -923,7 +923,7 @@
                 document.getElementById('lockedGrid').innerHTML =
                     locked.map(b => renderBadge(b, false)).join('');
 
-                // — Leaderboard —
+                // � Leaderboard �
                 const currentEmail = user.email || localStorage.getItem('email') || '';
                 document.getElementById('lbList').innerHTML = renderLeaderboard(leaderboard, currentEmail);
 
@@ -935,7 +935,7 @@
             }
         }
 
-        /* ═══════════════════ THEME ═══════════════════ */
+        /* ------------------- THEME ------------------- */
         function applyTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             document.body.setAttribute('data-theme', theme);
@@ -960,7 +960,7 @@
             applyTheme(current === 'dark' ? 'light' : 'dark');
         });
 
-        /* ═══════════════════ SIGN-OUT ═══════════════════ */
+        /* ------------------- SIGN-OUT ------------------- */
         function signOut() {
             document.getElementById('logoutModal').classList.add('active');
         }
@@ -971,7 +971,7 @@
         document.getElementById('signOutBtn').addEventListener('click', signOut);
         document.getElementById('dropdownSignOut')?.addEventListener('click', signOut);
 
-        /* ═══════════════════ PROFILE DROPDOWN ═══════════════════ */
+        /* ------------------- PROFILE DROPDOWN ------------------- */
         const profileToggle = document.getElementById('profileToggle');
         const profileDropdown = document.getElementById('profileDropdown');
         profileToggle.addEventListener('click', (e) => {
@@ -980,7 +980,7 @@
         });
         document.addEventListener('click', () => { profileDropdown.style.display = 'none'; });
 
-        /* ═══════════════════ BOOT ═══════════════════ */
+        /* ------------------- BOOT ------------------- */
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             applyTheme(savedTheme);
@@ -994,7 +994,7 @@
 
     </script>
 
-    <!--  Logout Confirmation Modal ── -->
+    <!--  Logout Confirmation Modal -- -->
     <div id="logoutModal" class="mw-logout-overlay">
         <div class="mw-logout-modal">
             <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>

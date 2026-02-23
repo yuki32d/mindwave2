@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sage – AI Tutor | MindWave</title>
+    <link rel="stylesheet" href="student-theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        /* ── BASE ── */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        /* ── TOP BAR ── */
+        .at-topbar {
+            height: 56px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 20px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .at-back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: none;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+            text-decoration: none;
+        }
+
+        .at-back-btn:hover {
+            color: var(--text);
+            border-color: var(--border-2);
+            background: var(--surface-2);
+        }
+
+        .at-back-btn [data-lucide] {
+            width: 13px;
+            height: 13px;
+        }
+
+        .at-topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-right: auto;
+        }
+
+        .at-sage-avatar-top {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .at-sage-avatar-top [data-lucide] {
+            width: 16px;
+            height: 16px;
+            color: #fff;
+        }
+
+        .at-sage-avatar-top::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed44, #4f46e544);
+            animation: sageGlow 2.5s ease-in-out infinite;
+        }
+
+        @keyframes sageGlow {
+
+            0%,
+            100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.12);
+            }
+        }
+
+        .at-brand-text {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .at-brand-text span {
+            color: #7c3aed;
+        }
+
+        /* Subject select */
+        .at-subject-select {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-2);
+            background: var(--surface-2);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .at-subject-select:focus {
+            border-color: #7c3aed;
+        }
+
+        /* Mode toggles */
+        .at-modes {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .at-mode-pill {
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: none;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+            letter-spacing: .3px;
+        }
+
+        .at-mode-pill.active {
+            background: #7c3aed22;
+            border-color: #7c3aed;
+            color: #a78bfa;
+        }
+
+        .at-mode-pill:hover:not(.active) {
+            border-color: var(--border-2);
+            color: var(--text);
+        }
+
+        /* Theme toggle */
+        .at-theme-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: none;
+            color: var(--muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .at-theme-btn:hover {
+            background: var(--surface-2);
+            color: var(--text);
+        }
+
+        .at-theme-btn [data-lucide] {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ── MAIN LAYOUT ── */
+        .at-layout {
+            display: flex;
+            height: calc(100vh - 56px);
+        }
+
+        /* ── LEFT PANEL — Sage profile ── */
+        .at-sage-panel {
+            width: 260px;
+            flex-shrink: 0;
+            border-right: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .at-sage-profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 16px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .at-sage-avatar-large {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .at-sage-avatar-large [data-lucide] {
+            width: 32px;
+            height: 32px;
+            color: #fff;
+        }
+
+        .at-sage-avatar-large .at-sage-ring {
+            position: absolute;
+            inset: -5px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            background: linear-gradient(135deg, #7c3aed, #06b6d4) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            animation: ringPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes ringPulse {
+
+            0%,
+            100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
+        .at-sage-name {
+            font-size: 18px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a78bfa, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .at-sage-desc {
+            font-size: 11px;
+            color: var(--muted);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* Mood indicator */
+        .at-mood-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg);
+            border-radius: 20px;
+            width: 100%;
+        }
+
+        .at-mood-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            transition: background 0.4s;
+            flex-shrink: 0;
+        }
+
+        .at-mood-dot.thinking {
+            background: var(--accent);
+            animation: blink 1s ease-in-out infinite;
+        }
+
+        .at-mood-dot.encouraging {
+            background: var(--orange);
+        }
+
+        .at-mood-dot.explaining {
+            background: var(--cyan);
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .at-mood-label {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        /* Session info */
+        .at-sidebar-section-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            padding: 0 2px;
+        }
+
+        .at-session-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .at-session-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .at-session-row [data-lucide] {
+            width: 13px;
+            height: 13px;
+            color: var(--accent);
+        }
+
+        .at-session-row span {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Quick actions */
+        .at-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .at-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: none;
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+            width: 100%;
+            text-align: left;
+        }
+
+        .at-action-btn:hover {
+            background: var(--surface-2);
+            border-color: var(--border-2);
+        }
+
+        .at-action-btn [data-lucide] {
+            width: 14px;
+            height: 14px;
+            color: var(--accent);
+        }
+
+        .at-action-btn.danger [data-lucide] {
+            color: var(--red);
+        }
+
+        .at-action-btn.danger:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        /* ── CHAT AREA ── */
+        .at-chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background gradient */
+        .at-chat-area::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(ellipse, #7c3aed11 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .at-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+            position: relative;
+            z-index: 1;
+        }
+
+        .at-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .at-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .at-messages::-webkit-scrollbar-thumb {
+            background: var(--border-2);
+            border-radius: 2px;
+        }
+
+        /* Welcome screen */
+        .at-welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex: 1;
+            text-align: center;
+            padding: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .at-welcome-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 40px #7c3aed44;
+        }
+
+        .at-welcome-avatar [data-lucide] {
+            width: 38px;
+            height: 38px;
+            color: #fff;
+        }
+
+        .at-welcome-title {
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .at-welcome-title span {
+            background: linear-gradient(135deg, #a78bfa, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .at-welcome-sub {
+            font-size: 14px;
+            color: var(--muted);
+            max-width: 380px;
+            line-height: 1.7;
+        }
+
+        .at-starter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .at-starter-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border-2);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .at-starter-chip:hover {
+            border-color: #7c3aed;
+            background: #7c3aed15;
+            color: #a78bfa;
+        }
+
+        /* Message bubbles */
+        .at-msg {
+            display: flex;
+            gap: 10px;
+            max-width: 78%;
+            animation: msgSlide 0.25s ease;
+        }
+
+        @keyframes msgSlide {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .at-msg.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .at-msg-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .at-msg.sage .at-msg-avatar {
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        }
+
+        .at-msg.sage .at-msg-avatar [data-lucide] {
+            width: 15px;
+            height: 15px;
+            color: #fff;
+        }
+
+        .at-msg.user .at-msg-avatar {
+            background: linear-gradient(135deg, #0891b2, #06b6d4);
+            color: #fff;
+        }
+
+        .at-msg-body {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .at-bubble {
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 13.5px;
+            line-height: 1.65;
+            position: relative;
+        }
+
+        .at-msg.sage .at-bubble {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-top-left-radius: 4px;
+        }
+
+        /* Mood tinting */
+        .at-bubble.mood-encouraging {
+            border-color: rgba(245, 158, 11, 0.35);
+            background: linear-gradient(135deg, #f59e0b08, var(--surface));
+        }
+
+        .at-bubble.mood-socratic {
+            border-color: rgba(6, 182, 212, 0.3);
+            background: linear-gradient(135deg, #06b6d408, var(--surface));
+        }
+
+        .at-msg.user .at-bubble {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none;
+            color: #fff;
+            border-top-right-radius: 4px;
+        }
+
+        /* Mood header on sage bubbles */
+        .at-mood-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+            letter-spacing: .3px;
+            width: fit-content;
+        }
+
+        .at-mood-tag.encouraging {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--orange);
+        }
+
+        .at-mood-tag.socratic {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--cyan);
+        }
+
+        .at-mood-tag.eli5 {
+            background: rgba(34, 211, 165, 0.15);
+            color: var(--green);
+        }
+
+        /* ELI5 button on sage messages */
+        .at-eli5-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px dashed var(--border-2);
+            background: none;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+            margin-top: 4px;
+            width: fit-content;
+        }
+
+        .at-eli5-btn:hover {
+            border-color: var(--green);
+            color: var(--green);
+            background: rgba(34, 211, 165, 0.08);
+        }
+
+        .at-eli5-btn [data-lucide] {
+            width: 10px;
+            height: 10px;
+        }
+
+        /* ELI5 expansion */
+        .at-eli5-panel {
+            margin-top: 8px;
+            padding: 10px 14px;
+            background: rgba(34, 211, 165, 0.06);
+            border: 1px solid rgba(34, 211, 165, 0.2);
+            border-radius: 10px;
+            font-size: 12.5px;
+            line-height: 1.6;
+            color: var(--text);
+            animation: fadeIn 0.25s ease;
+        }
+
+        .at-eli5-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--green);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 6px;
+        }
+
+        /* Code in chat */
+        .at-msg-code {
+            background: #0d0e14;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 12px;
+            color: #a78bfa;
+            overflow-x: auto;
+            margin: 6px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .at-msg-inline-code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            background: rgba(124, 58, 237, 0.12);
+            color: #a78bfa;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .at-bubble strong {
+            font-weight: 700;
+        }
+
+        /* Typing indicator */
+        .at-typing-dots {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 4px 2px;
+        }
+
+        .at-typing-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #7c3aed;
+            animation: typingDot 1.2s ease-in-out infinite;
+        }
+
+        .at-typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .at-typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingDot {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateY(-4px);
+            }
+        }
+
+        /* Timestamp */
+        .at-timestamp {
+            font-size: 10px;
+            color: var(--muted);
+            padding: 0 2px;
+        }
+
+        /* ── INPUT AREA ── */
+        .at-input-area {
+            padding: 16px 32px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .at-input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border-2);
+            border-radius: 16px;
+            padding: 10px 14px;
+            transition: border-color 0.15s;
+        }
+
+        .at-input-wrapper:focus-within {
+            border-color: #7c3aed88;
+            box-shadow: 0 0 0 3px #7c3aed15;
+        }
+
+        .at-input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', inherit;
+            font-size: 14px;
+            resize: none;
+            max-height: 140px;
+            line-height: 1.5;
+            padding: 2px 0;
+        }
+
+        .at-input::placeholder {
+            color: var(--muted);
+        }
+
+        .at-send-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+
+        .at-send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px #7c3aed44;
+        }
+
+        .at-send-btn:active {
+            transform: scale(0.97);
+        }
+
+        .at-send-btn [data-lucide] {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Input hint row */
+        .at-input-hints {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .at-input-chip {
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .at-input-chip:hover {
+            border-color: #7c3aed;
+            color: #a78bfa;
+            background: #7c3aed12;
+        }
+
+        /* Socratic banner */
+        .at-socratic-banner {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: rgba(6, 182, 212, 0.08);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 10px;
+            font-size: 11px;
+            color: var(--cyan);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .at-socratic-banner.visible {
+            display: flex;
+        }
+
+        .at-socratic-banner [data-lucide] {
+            width: 13px;
+            height: 13px;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 700px) {
+            .at-sage-panel {
+                display: none;
+            }
+
+            .at-messages {
+                padding: 16px;
+            }
+
+            .at-input-area {
+                padding: 12px 16px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- TOP BAR -->
+    <div class="at-topbar">
+        <a href="student-dashboard.html" class="at-back-btn">
+            <i data-lucide="arrow-left"></i> Back
+        </a>
+
+        <div class="at-topbar-brand">
+            <div class="at-sage-avatar-top">
+                <i data-lucide="bot"></i>
+            </div>
+            <div class="at-brand-text"><span>Sage</span> — AI Tutor</div>
+        </div>
+
+        <!-- Subject Picker -->
+        <select class="at-subject-select" id="subjectSelect" onchange="onSubjectChange()">
+            <option value="">📚 All Subjects</option>
+            <option value="Mathematics">📐 Mathematics</option>
+            <option value="Science">🔬 Science</option>
+            <option value="Physics">⚡ Physics</option>
+            <option value="Chemistry">🧪 Chemistry</option>
+            <option value="Biology">🧬 Biology</option>
+            <option value="English">📖 English</option>
+            <option value="History">🏛️ History</option>
+            <option value="Computer Science">💻 Computer Science</option>
+            <option value="Economics">📊 Economics</option>
+        </select>
+
+        <!-- Mode Pills -->
+        <div class="at-modes">
+            <button class="at-mode-pill active" id="pillChat" onclick="setMode('chat')">Chat</button>
+            <button class="at-mode-pill" id="pillSocratic" onclick="setMode('socratic')">
+                <i data-lucide="help-circle" style="width:11px;height:11px;margin-right:3px"></i>Socratic
+            </button>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="at-theme-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle theme">
+            <i data-lucide="moon" id="themeIcon"></i>
+        </button>
+    </div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="at-layout">
+
+        <!-- LEFT PANEL — Sage profile -->
+        <aside class="at-sage-panel">
+            <!-- Profile card -->
+            <div class="at-sage-profile">
+                <div class="at-sage-avatar-large">
+                    <i data-lucide="bot"></i>
+                    <div class="at-sage-ring"></div>
+                </div>
+                <div class="at-sage-name">Sage</div>
+                <div class="at-sage-desc">Your personal AI tutor. Ask me anything — I'm here to guide, not just give
+                    answers.</div>
+                <div class="at-mood-display">
+                    <div class="at-mood-dot" id="moodDot"></div>
+                    <div class="at-mood-label" id="moodLabel">Ready to help</div>
+                </div>
+            </div>
+
+            <!-- Session info -->
+            <div>
+                <div class="at-sidebar-section-label">Session</div>
+                <div class="at-session-info" style="margin-top:10px">
+                    <div class="at-session-row">
+                        <i data-lucide="book-open"></i>
+                        Subject: <span id="sessionSubject">All</span>
+                    </div>
+                    <div class="at-session-row">
+                        <i data-lucide="layers"></i>
+                        Mode: <span id="sessionMode">Chat</span>
+                    </div>
+                    <div class="at-session-row">
+                        <i data-lucide="message-circle"></i>
+                        Messages: <span id="sessionMsgCount">0</span>
+                    </div>
+                    <div class="at-session-row">
+                        <i data-lucide="clock"></i>
+                        Time: <span id="sessionTimer">0:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick actions -->
+            <div>
+                <div class="at-sidebar-section-label">Quick Actions</div>
+                <div class="at-actions" style="margin-top:10px">
+                    <button class="at-action-btn" onclick="quickPrompt('Explain this topic step by step')">
+                        <i data-lucide="list-ordered"></i> Step-by-step
+                    </button>
+                    <button class="at-action-btn" onclick="quickPrompt('Give me a practice problem on this topic')">
+                        <i data-lucide="pencil"></i> Practice problem
+                    </button>
+                    <button class="at-action-btn" onclick="quickPrompt('Give me a quick summary of what we covered')">
+                        <i data-lucide="file-text"></i> Summarize session
+                    </button>
+                    <button class="at-action-btn" onclick="quickPrompt('What should I study next?')">
+                        <i data-lucide="compass"></i> What next?
+                    </button>
+                    <button class="at-action-btn danger" onclick="clearChat()">
+                        <i data-lucide="trash-2"></i> Clear chat
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CHAT AREA -->
+        <main class="at-chat-area">
+            <div class="at-messages" id="messages">
+                <!-- Welcome screen shown initially -->
+                <div class="at-welcome" id="welcomeScreen">
+                    <div class="at-welcome-avatar">
+                        <i data-lucide="bot"></i>
+                    </div>
+                    <div class="at-welcome-title">Hi! I'm <span>Sage</span> 👋</div>
+                    <div class="at-welcome-sub">Your personal AI tutor. Pick a subject, ask a question, and I'll guide
+                        you — no cheating, just real understanding.</div>
+                    <div class="at-starter-chips">
+                        <button class="at-starter-chip"
+                            onclick="quickPrompt('Explain photosynthesis in simple terms')">🌱 Explain
+                            photosynthesis</button>
+                        <button class="at-starter-chip"
+                            onclick="quickPrompt('Help me understand quadratic equations')">📐 Quadratic
+                            equations</button>
+                        <button class="at-starter-chip"
+                            onclick="quickPrompt('What is the difference between speed and velocity?')">⚡ Speed vs
+                            Velocity</button>
+                        <button class="at-starter-chip"
+                            onclick="quickPrompt('How do I write a good essay introduction?')">📝 Essay intro
+                            tips</button>
+                        <button class="at-starter-chip" onclick="quickPrompt('Explain World War II causes briefly')">🏛️
+                            WWII causes</button>
+                        <button class="at-starter-chip" onclick="quickPrompt('What is recursion in programming?')">💻
+                            What is recursion?</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input area -->
+            <div class="at-input-area">
+                <!-- Socratic mode banner -->
+                <div class="at-socratic-banner" id="socraticBanner">
+                    <i data-lucide="help-circle"></i>
+                    Socratic mode is ON — Sage will guide you with questions rather than direct answers.
+                </div>
+
+                <!-- Quick chips -->
+                <div class="at-input-hints">
+                    <button class="at-input-chip" onclick="quickPrompt('I don\'t understand this at all')">😕 I\'m
+                        confused</button>
+                    <button class="at-input-chip" onclick="quickPrompt('Can you give me a hint?')">💡 Give a
+                        hint</button>
+                    <button class="at-input-chip" onclick="quickPrompt('Give me a real-world example')">🌍 Real-world
+                        example</button>
+                    <button class="at-input-chip" onclick="quickPrompt('Can you make this simpler?')">🎯
+                        Simplify</button>
+                </div>
+
+                <!-- Input box -->
+                <div class="at-input-wrapper">
+                    <textarea class="at-input" id="chatInput" rows="1" placeholder="Ask Sage anything…"
+                        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+                    <button class="at-send-btn" onclick="sendMessage()" id="sendBtn">
+                        <i data-lucide="send"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ── STATE ──
+        let currentMode = 'chat';      // 'chat' | 'socratic'
+        let currentSubject = '';
+        let msgCount = 0;
+        let sessionStart = Date.now();
+        let timerInterval = null;
+        let conversationHistory = [];  // [{role, content}] for multi-turn context
+
+        // ── INIT ──
+        lucide.createIcons();
+        startTimer();
+        applyTheme();
+
+        // ── THEME ──
+        function applyTheme() {
+            const t = localStorage.getItem('mw_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+            document.getElementById('themeIcon').setAttribute('data-lucide', t === 'dark' ? 'moon' : 'sun');
+            lucide.createIcons();
+        }
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('mw_theme', next);
+            applyTheme();
+        }
+
+        // ── SESSION TIMER ──
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+                const m = Math.floor(elapsed / 60);
+                const s = elapsed % 60;
+                document.getElementById('sessionTimer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // ── MODE ──
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('pillChat').classList.toggle('active', mode === 'chat');
+            document.getElementById('pillSocratic').classList.toggle('active', mode === 'socratic');
+            document.getElementById('sessionMode').textContent = mode === 'socratic' ? 'Socratic' : 'Chat';
+            document.getElementById('socraticBanner').classList.toggle('visible', mode === 'socratic');
+        }
+
+        // ── SUBJECT ──
+        function onSubjectChange() {
+            currentSubject = document.getElementById('subjectSelect').value;
+            document.getElementById('sessionSubject').textContent = currentSubject || 'All';
+        }
+
+        // ── MOOD ──
+        function setMood(mood) {
+            const dot = document.getElementById('moodDot');
+            const label = document.getElementById('moodLabel');
+            dot.className = 'at-mood-dot';
+            const moods = {
+                ready: { cls: '', text: 'Ready to help' },
+                thinking: { cls: 'thinking', text: 'Thinking…' },
+                encouraging: { cls: 'encouraging', text: 'Cheering you on!' },
+                explaining: { cls: 'explaining', text: 'Explaining…' }
+            };
+            const m = moods[mood] || moods.ready;
+            if (m.cls) dot.classList.add(m.cls);
+            label.textContent = m.text;
+        }
+
+        // Detect mood from user message
+        function detectMood(text) {
+            const t = text.toLowerCase();
+            const frustrated = ['give up', 'don\'t get it', 'don\'t understand', 'confused', 'lost', 'stuck', 'hate', 'impossible', 'can\'t', 'hard', 'difficult', 'frustrated', 'help me'];
+            if (frustrated.some(w => t.includes(w))) return 'encouraging';
+            return 'explaining';
+        }
+
+        // ── INPUT AUTO-RESIZE ──
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+        }
+
+        // ── KEY HANDLER ──
+        function handleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        }
+
+        // ── QUICK PROMPT ──
+        function quickPrompt(text) {
+            document.getElementById('chatInput').value = text;
+            sendMessage();
+        }
+
+        // ── SEND MESSAGE ──
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            input.style.height = 'auto';
+
+            // Hide welcome screen
+            const welcome = document.getElementById('welcomeScreen');
+            if (welcome) welcome.remove();
+
+            // Render user message
+            addMessage('user', text);
+            msgCount++;
+            document.getElementById('sessionMsgCount').textContent = msgCount;
+
+            // Add to history
+            conversationHistory.push({ role: 'user', content: text });
+
+            // Detect mood
+            const mood = detectMood(text);
+            setMood('thinking');
+
+            // Show typing indicator
+            const typingId = addTyping();
+
+            try {
+                const payload = {
+                    message: text,
+                    subject: currentSubject,
+                    mode: currentMode,
+                    mood: mood,
+                    history: conversationHistory.slice(-10) // last 10 turns for context
+                };
+
+                const res = await fetch('/api/ai-tutor/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                removeTyping(typingId);
+
+                const data = await res.json();
+                const reply = data.reply || 'Sorry, I couldn\'t get a response. Please try again.';
+                const detectedMood = data.mood || mood;
+
+                // Add to history
+                conversationHistory.push({ role: 'assistant', content: reply });
+                msgCount++;
+                document.getElementById('sessionMsgCount').textContent = msgCount;
+
+                addMessage('sage', reply, detectedMood);
+                setMood(detectedMood === 'encouraging' ? 'encouraging' : 'ready');
+
+            } catch (err) {
+                removeTyping(typingId);
+                addMessage('sage', getFallback(text, mood), mood);
+                setMood('ready');
+            }
+        }
+
+        // ── FALLBACK ──
+        function getFallback(text, mood) {
+            if (mood === 'encouraging') {
+                return `Hey, don't worry — it's completely normal to feel stuck! 💪\n\nLet's break this down together. Can you tell me specifically which part is confusing you? Is it the concept itself, the way it's explained, or applying it to problems?`;
+            }
+            const t = text.toLowerCase();
+            if (t.includes('example')) return `Great question! A real-world example often makes things click. Could you first tell me what you already know about the topic? That way I can tailor the example to your level.`;
+            if (currentMode === 'socratic') return `That's an interesting question! Before I answer — what do you already think the answer might be? Even a rough guess gives us a great starting point. 🤔`;
+            return `I'd love to help with that! The AI service seems to be having a moment — but let me ask: what specifically would you like to understand better? The more precise your question, the better I can guide you.`;
+        }
+
+        // ── RENDER MARKDOWN ──
+        function renderMarkdown(text) {
+            // Code blocks
+            text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+                `<div class="at-msg-code">${escapeHtml(code.trim())}</div>`);
+            // Inline code
+            text = text.replace(/`([^`]+)`/g, `<span class="at-msg-inline-code">$1</span>`);
+            // Bold
+            text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            // Numbered list
+            text = text.replace(/^\d+\.\s+(.+)$/gm, '<div style="padding-left:8px;margin:3px 0">$&</div>');
+            // Bullet list
+            text = text.replace(/^[-•]\s+(.+)$/gm, '<div style="padding-left:8px;margin:3px 0">• $1</div>');
+            // Line breaks
+            text = text.replace(/\n/g, '<br>');
+            return text;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // ── ADD MESSAGE ──
+        let msgId = 0;
+        function addMessage(role, text, mood) {
+            const container = document.getElementById('messages');
+            const id = 'msg-' + (++msgId);
+            const isSage = role === 'sage';
+            const isEncouraging = mood === 'encouraging';
+            const isSocratic = currentMode === 'socratic' && isSage;
+
+            // User initials for avatar
+            const displayName = localStorage.getItem('mw_displayName') || 'S';
+            const initials = displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+            let moodTag = '';
+            let bubbleExtra = '';
+            if (isSage) {
+                if (isEncouraging) {
+                    moodTag = `<div class="at-mood-tag encouraging">💪 Encouraging</div>`;
+                    bubbleExtra = 'mood-encouraging';
+                } else if (isSocratic) {
+                    moodTag = `<div class="at-mood-tag socratic">🤔 Socratic</div>`;
+                    bubbleExtra = 'mood-socratic';
+                }
+            }
+
+            const eli5 = isSage ? `<button class="at-eli5-btn" onclick="requestELI5(this,'${id}')"><i data-lucide="zap"></i> ELI5 this</button>` : '';
+
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const html = `
+                <div class="at-msg ${isSage ? 'sage' : 'user'}" id="${id}">
+                    <div class="at-msg-avatar">
+                        ${isSage ? '<i data-lucide="bot"></i>' : initials}
+                    </div>
+                    <div class="at-msg-body">
+                        <div class="at-bubble ${bubbleExtra}">
+                            ${moodTag}
+                            <div class="at-bubble-text">${isSage ? renderMarkdown(text) : escapeHtml(text)}</div>
+                        </div>
+                        ${isSage ? eli5 : ''}
+                        <div class="at-timestamp">${time}</div>
+                    </div>
+                </div>`;
+
+            container.insertAdjacentHTML('beforeend', html);
+            lucide.createIcons();
+            container.scrollTop = container.scrollHeight;
+            return id;
+        }
+
+        // ── ELI5 ──
+        async function requestELI5(btn, msgId) {
+            const bubbleText = document.querySelector(`#${msgId} .at-bubble-text`)?.innerText;
+            if (!bubbleText) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Simplifying…';
+
+            // Check if panel already exists
+            const existing = document.querySelector(`#${msgId} .at-eli5-panel`);
+            if (existing) { existing.remove(); btn.disabled = false; btn.innerHTML = '<i data-lucide="zap"></i> ELI5 this'; lucide.createIcons(); return; }
+
+            try {
+                const res = await fetch('/api/ai-tutor/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') },
+                    body: JSON.stringify({ message: `Explain this in the simplest possible way, like I'm 5 years old — no jargon, use an analogy:\n\n${bubbleText.substring(0, 500)}`, subject: currentSubject, mode: 'eli5', history: [] })
+                });
+                const data = await res.json();
+                const simple = data.reply || 'Let me think of a simpler way to put it...';
+
+                const panel = document.createElement('div');
+                panel.className = 'at-eli5-panel';
+                panel.innerHTML = `<div class="at-eli5-label">⚡ ELI5 — Simplified</div>${renderMarkdown(simple)}`;
+                btn.parentNode.insertBefore(panel, btn.nextSibling);
+            } catch {
+                const panel = document.createElement('div');
+                panel.className = 'at-eli5-panel';
+                panel.innerHTML = `<div class="at-eli5-label">⚡ ELI5</div>Think of it like explaining to a friend over lunch — no textbook language, just the core idea in everyday words.`;
+                btn.parentNode.insertBefore(panel, btn.nextSibling);
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="zap"></i> Hide ELI5';
+            lucide.createIcons();
+        }
+
+        // ── TYPING INDICATOR ──
+        function addTyping() {
+            const container = document.getElementById('messages');
+            const id = 'typing-' + Date.now();
+            container.insertAdjacentHTML('beforeend', `
+                <div class="at-msg sage" id="${id}">
+                    <div class="at-msg-avatar"><i data-lucide="bot"></i></div>
+                    <div class="at-msg-body">
+                        <div class="at-bubble">
+                            <div class="at-typing-dots"><span></span><span></span><span></span></div>
+                        </div>
+                    </div>
+                </div>`);
+            lucide.createIcons();
+            container.scrollTop = container.scrollHeight;
+            return id;
+        }
+        function removeTyping(id) { document.getElementById(id)?.remove(); }
+
+        // ── CLEAR CHAT ──
+        function clearChat() {
+            if (!confirm('Clear the chat? This will also reset the conversation history.')) return;
+            conversationHistory = [];
+            msgCount = 0;
+            document.getElementById('sessionMsgCount').textContent = '0';
+            const container = document.getElementById('messages');
+            container.innerHTML = `
+                <div class="at-welcome" id="welcomeScreen">
+                    <div class="at-welcome-avatar"><i data-lucide="bot"></i></div>
+                    <div class="at-welcome-title">Hi! I'm <span>Sage</span> 👋</div>
+                    <div class="at-welcome-sub">Chat cleared. Ready for a fresh start — what shall we explore?</div>
+                    <div class="at-starter-chips">
+                        <button class="at-starter-chip" onclick="quickPrompt('Explain photosynthesis in simple terms')">🌱 Explain photosynthesis</button>
+                        <button class="at-starter-chip" onclick="quickPrompt('Help me understand quadratic equations')">📐 Quadratic equations</button>
+                        <button class="at-starter-chip" onclick="quickPrompt('What is recursion in programming?')">💻 What is recursion?</button>
+                    </div>
+                </div>`;
+            lucide.createIcons();
+            setMood('ready');
+        }
+    </script>
+</body>
+
+</html>

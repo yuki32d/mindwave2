@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -260,13 +260,13 @@
 
         <div class="controls">
             <button id="muteBtn" onclick="toggleMute()">
-                🎤 <span id="muteText">Mute</span>
+                ?? <span id="muteText">Mute</span>
             </button>
             <button id="videoBtn" onclick="toggleVideo()">
-                📹 <span id="videoText">Stop Video</span>
+                ?? <span id="videoText">Stop Video</span>
             </button>
             <button class="danger" onclick="leaveMeeting()">
-                📞 Leave
+                ?? Leave
             </button>
         </div>
     </div>
@@ -364,7 +364,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    console.log('✅ Agora credentials received:', data);
+                    console.log('? Agora credentials received:', data);
 
                     // Display meeting code
                     document.getElementById('meetingCodeDisplay').textContent = meetingCode;
@@ -386,7 +386,7 @@
                         data.uid
                     );
 
-                    console.log('✅ Joined Agora channel as AUDIENCE');
+                    console.log('? Joined Agora channel as AUDIENCE');
 
                     // Video resolution configurations (16:9 aspect ratio)
                     const videoResolution = localStorage.getItem('videoResolution') || '720p';
@@ -432,7 +432,7 @@
                     // Publish tracks (students can also publish in this setup)
                     await agoraClient.publish([localAudioTrack, localVideoTrack]);
 
-                    console.log('✅ Published local tracks');
+                    console.log('? Published local tracks');
 
                     // Hide loading, show meeting
                     document.getElementById('loadingScreen').style.display = 'none';
@@ -452,7 +452,7 @@
 
         // Handle remote user published
         async function handleUserPublished(user, mediaType) {
-            console.log('👤 User published:', user.uid, mediaType);
+            console.log('?? User published:', user.uid, mediaType);
 
             await agoraClient.subscribe(user, mediaType);
 
@@ -490,7 +490,7 @@
 
         // Handle remote user unpublished
         function handleUserUnpublished(user, mediaType) {
-            console.log('👤 User unpublished:', user.uid, mediaType);
+            console.log('?? User unpublished:', user.uid, mediaType);
 
             if (mediaType === 'video') {
                 const playerContainer = document.getElementById(`player-${user.uid}`);
@@ -502,7 +502,7 @@
 
         // Handle user left
         function handleUserLeft(user) {
-            console.log('👤 User left:', user.uid);
+            console.log('?? User left:', user.uid);
 
             const playerContainer = document.getElementById(`player-${user.uid}`);
             if (playerContainer) {
@@ -575,7 +575,7 @@
                     await agoraClient.leave();
                 }
 
-                console.log('✅ Left meeting');
+                console.log('? Left meeting');
                 window.location.href = 'student-community.html';
             } catch (error) {
                 console.error('Error leaving meeting:', error);
