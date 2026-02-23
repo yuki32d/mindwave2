@@ -8,9 +8,27 @@
     <title>Achievements — MindWave</title>
     <meta name="description" content="Track your badges, XP, level, and class rank on MindWave.">
     <link rel="stylesheet" href="student-theme.css">
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    <script src="theme-init.js"></script>
-    <script src="sidebar.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
+        function doLogout() {
+            ['token','mindwave_token','firstName','lastName','email','role']
+                .forEach(k => localStorage.removeItem(k));
+            window.location.replace('marketing-site/student-login.html');
+        }
+    </script>
+    <script src="theme-init.js">
+        function doLogout() {
+            ['token','mindwave_token','firstName','lastName','email','role']
+                .forEach(k => localStorage.removeItem(k));
+            window.location.replace('marketing-site/student-login.html');
+        }
+    </script>
+    <script src="sidebar.js">
+        function doLogout() {
+            ['token','mindwave_token','firstName','lastName','email','role']
+                .forEach(k => localStorage.removeItem(k));
+            window.location.replace('marketing-site/student-login.html');
+        }
+    </script>
 
     <style>
         /* ── Page layout (scrollable wrapper via mw-main override) ── */
@@ -967,7 +985,42 @@
             // Refresh every 60 s so data stays live
             setInterval(loadAll, 60_000);
         });
+    
+        function doLogout() {
+            ['token','mindwave_token','firstName','lastName','email','role']
+                .forEach(k => localStorage.removeItem(k));
+            window.location.replace('marketing-site/student-login.html');
+        }
     </script>
+
+    <!--  Logout Confirmation Modal ── -->
+    <div id="logoutModal" class="mw-logout-overlay">
+        <div class="mw-logout-modal">
+            <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
+            <h3 class="mw-logout-title">Sign out?</h3>
+            <p class="mw-logout-sub">You'll need to log back in to access your dashboard.</p>
+            <div class="mw-logout-actions">
+                <button class="mw-logout-cancel" onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
+                <button class="mw-logout-confirm" onclick="doLogout()"><i data-lucide="log-out"></i> Sign Out</button>
+            </div>
+        </div>
+    </div>
+    <style>
+        .mw-logout-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center}
+        .mw-logout-overlay.active{display:flex;animation:mwFadeIn .18s ease}
+        @keyframes mwFadeIn{from{opacity:0}to{opacity:1}}
+        .mw-logout-modal{background:var(--surface,#1e1e2e);border:1px solid var(--border,rgba(255,255,255,.1));border-radius:20px;padding:2.4rem 2rem 2rem;width:340px;max-width:90vw;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);animation:mwPopUp .22s cubic-bezier(.34,1.56,.64,1)}
+        @keyframes mwPopUp{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+        .mw-logout-icon{width:64px;height:64px;border-radius:50%;background:rgba(255,92,92,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;color:#ff5c5c}
+        .mw-logout-icon svg{width:28px;height:28px}
+        .mw-logout-title{font-size:1.25rem;font-weight:700;margin:0 0 .5rem;color:var(--text,#fff)}
+        .mw-logout-sub{font-size:.875rem;color:var(--text-muted,#aaa);margin:0 0 2rem;line-height:1.5}
+        .mw-logout-actions{display:flex;gap:.75rem}
+        .mw-logout-cancel,.mw-logout-confirm{flex:1;padding:.75rem 1rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;transition:opacity .15s,transform .15s}
+        .mw-logout-cancel{background:var(--surface-2,#2a2a3e);color:var(--text,#fff)}
+        .mw-logout-confirm{background:linear-gradient(135deg,#ff5c5c,#ff2d2d);color:#fff;display:flex;align-items:center;justify-content:center;gap:.4rem}
+        .mw-logout-cancel:hover,.mw-logout-confirm:hover{opacity:.85;transform:translateY(-1px)}
+    </style>
 </body>
 
 </html>
