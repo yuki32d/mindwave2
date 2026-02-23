@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Puzzle Match – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        if (!checkAdminAuth()) {
+            // Will redirect if not authenticated
+        }
+    </script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <!-- Back Button -->
+                <div style="margin-bottom: 32px;">
+                    <button class="secondary-btn" id="backBtn"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
+                        Back</button>
+                </div>
+
+                <!-- Page Header -->
+                <div style="text-align: center; margin-bottom: 48px;">
+                    <div
+                        style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-bottom: 12px;">
+                        <h1 style="font-size: 36px; font-weight: 700; color: #f5f7ff; margin: 0;">🧩 Create Puzzle Match
+                        </h1>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Puzzle</button>
+                    </div>
+                    <p style="color: #9ea4b6; font-size: 16px; margin: 0;">Drag & drop matching pairs or sequence
+                        ordering</p>
+                </div>
+
+                <!-- Puzzle Configuration -->
+                <div class="grid two">
+                    <section class="panel">
+                        <h2>⚙️ Puzzle Settings</h2>
+                        <form id="puzzleForm">
+                            <div>
+                                <label for="puzzleTitle">Puzzle Title</label>
+                                <input type="text" id="puzzleTitle" placeholder="e.g., Match Countries & Capitals"
+                                    required>
+                            </div>
+
+                            <div>
+                                <label for="puzzleMode">Puzzle Mode</label>
+                                <select id="puzzleMode">
+                                    <option value="match">Match Pairs</option>
+                                    <option value="sequence">Sequence Order</option>
+                                </select>
+                                <small style="color: #9ea4b6; display: block; margin-top: 4px;">Match: Connect related
+                                    items | Sequence: Arrange in correct order</small>
+                            </div>
+
+                            <div id="matchPairsSection">
+                                <label>Add Matching Pairs</label>
+                                <div
+                                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                    <input type="text" id="leftItem" placeholder="Left item (e.g., France)">
+                                    <input type="text" id="rightItem" placeholder="Right item (e.g., Paris)">
+                                </div>
+                                <button type="button" class="secondary-btn" id="addPairBtn" style="width: 100%;">+ Add
+                                    Pair</button>
+                            </div>
+
+                            <div id="sequenceSection" style="display: none;">
+                                <label>Add Items to Sequence</label>
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <input type="text" id="sequenceItem" placeholder="Item (e.g., Step 1)"
+                                        style="flex: 1;">
+                                    <button type="button" class="secondary-btn" id="addSequenceBtn">+ Add</button>
+                                </div>
+                                <small style="color: #9ea4b6;">Items will be shuffled for students</small>
+                            </div>
+
+                            <div>
+                                <label>Items List</label>
+                                <div id="itemsList"
+                                    style="min-height: 200px; background: var(--card-darker); border-radius: 12px; padding: 16px;">
+                                    <p style="color: #9ea4b6; text-align: center; margin-top: 60px;">No items added yet
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 16px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="shuffleItems" checked>
+                                    <span>Shuffle items for students</span>
+                                </label>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Live Preview -->
+                    <section class="panel">
+                        <h2>👁️ Student View Preview</h2>
+                        <div id="previewContainer"
+                            style="background: var(--card-darker); border-radius: 20px; padding: 40px; min-height: 500px;">
+                            <h3 id="previewTitle"
+                                style="font-size: 24px; margin-bottom: 32px; color: #f5f7ff; text-align: center;">
+                                Your puzzle will appear here</h3>
+
+                            <div id="matchPreview" style="display: none;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                                    <div id="leftColumn"></div>
+                                    <div id="rightColumn"></div>
+                                </div>
+                            </div>
+
+                            <div id="sequencePreview" style="display: none;">
+                                <div id="sequenceColumn"></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="loading-spinner.js"></script>
+    <script src="faculty-create-puzzle.js"></script>
+</body>
+
+</html>

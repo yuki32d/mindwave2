@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable — MindWave</title>
+    <meta name="description" content="View your personal, semester, class, and exam timetables in MindWave.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="theme-init.js"></script>
+    <script src="sidebar.js"></script>
+</head>
+
+<body>
+    <div class="mw-app" id="mwApp">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
+            </div>
+
+            <div class="mw-sidebar-nav">
+
+                <!-- Main Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+                    </a>
+                    <a href="student-courses.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
+                    </a>
+                    <a href="student-timetable.html" class="mw-nav-item active">
+                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
+                    </a>
+                    <a href="student-performance.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
+                    </a>
+                    <a href="student-leaderboard.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="trophy"></i></span> Leaderboard
+                        <span class="mw-nav-badge" style="font-size:10px;">HOT</span>
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Engage Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="gamepad-2"></i></span> Play Games
+                    </a>
+                    <a href="student-community.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Community
+                    </a>
+                    <a href="student-achievements.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="award"></i></span> Achievements
+                    </a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="megaphone"></i></span> Events
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Tools Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
+                    </a>
+                    <a href="student-study-recommendations.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
+                    </a>
+                    <a href="student-reports.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
+                    </a>
+                    <a href="student-settings.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Logout -->
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
+
+            </div><!-- end mw-sidebar-nav -->
+
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                    <span class="mw-user-more">⋯</span>
+
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
+                        </div>
+                        <a href="student-profile.html">
+                            <i data-lucide="user"></i> My Profile
+                        </a>
+                        <a href="student-settings.html">
+                            <i data-lucide="settings"></i> Settings
+                        </a>
+                        <a href="student-notifications.html">
+                            <i data-lucide="bell"></i> Notifications
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
+
+            <!-- TOPBAR -->
+            <header class="mw-topbar">
+                <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+
+                <div class="mw-breadcrumb">Dashboard / <span>Timetable</span></div>
+
+                <div class="mw-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search timetable…" id="ttSearch">
+                </div>
+
+                <div class="mw-topbar-actions">
+                    <div class="mw-notif-wrap">
+                        <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="mw-notif-dot hidden" id="notificationBadge"></span>
+                        </div>
+                        <div class="mw-notif-dropdown" id="notificationDropdown"></div>
+                    </div>
+                    <div class="mw-icon-btn" id="settingsBtn" title="Settings">
+                        <i data-lucide="settings"></i>
+                    </div>
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle light/dark"
+                        aria-label="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <div class="mw-content">
+
+                <!-- Page header -->
+                <div class="greeting-row" style="margin-bottom:28px;">
+                    <div>
+                        <div class="greeting-name" style="font-size:1.6rem;">Timetable</div>
+                        <div class="greeting-date">Schedules · personal, class &amp; exams</div>
+                    </div>
+                </div>
+
+                <!-- ── TAB BAR ── -->
+                <div class="tt-tab-bar">
+                    <button class="tt-tab active" data-tab="my">
+                        <i data-lucide="user-check"></i> My Timetable
+                    </button>
+                    <button class="tt-tab" data-tab="semester">
+                        <i data-lucide="calendar-range"></i> Semester
+                    </button>
+                    <button class="tt-tab" data-tab="class">
+                        <i data-lucide="users"></i> Class
+                    </button>
+                    <button class="tt-tab" data-tab="exam">
+                        <i data-lucide="clipboard-list"></i> Exam
+                    </button>
+                </div>
+
+                <!-- ── TAB PANELS ── -->
+
+                <!-- MY TIMETABLE -->
+                <div class="tt-panel" id="tab-my">
+                    <div class="tt-panel-top">
+                        <div>
+                            <div style="font-size:.9rem;color:var(--muted);margin-bottom:4px;">Week View</div>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <button class="mw-btn mw-btn-ghost" id="myTTViewWeek" onclick="setMyView('week')">
+                                <i data-lucide="layout-grid"></i> Week
+                            </button>
+                            <button class="mw-btn mw-btn-ghost" id="myTTViewDay" onclick="setMyView('day')">
+                                <i data-lucide="calendar"></i> Day
+                            </button>
+                            <button class="mw-btn mw-btn-primary" id="addSlotBtn">
+                                <i data-lucide="plus"></i> Add Slot
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Week grid -->
+                    <div class="tt-grid-wrap" id="myWeekGrid">
+                        <div class="tt-grid">
+                            <div class="tt-col tt-time-col">
+                                <div class="tt-day-head"></div>
+                                <div id="timeLabels"></div>
+                            </div>
+                            <div class="tt-col" id="colMon">
+                                <div class="tt-day-head" id="headMon">Mon</div>
+                            </div>
+                            <div class="tt-col" id="colTue">
+                                <div class="tt-day-head" id="headTue">Tue</div>
+                            </div>
+                            <div class="tt-col" id="colWed">
+                                <div class="tt-day-head" id="headWed">Wed</div>
+                            </div>
+                            <div class="tt-col" id="colThu">
+                                <div class="tt-day-head" id="headThu">Thu</div>
+                            </div>
+                            <div class="tt-col" id="colFri">
+                                <div class="tt-day-head" id="headFri">Fri</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEMESTER TIMETABLE -->
+                <div class="tt-panel hidden" id="tab-semester">
+                    <div class="tt-teacher-panel" id="semesterContent">
+                        <div class="tt-uploaded-empty">
+                            <div class="tt-empty-icon"
+                                style="background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(168,85,247,.2));border:1px solid rgba(99,102,241,.3);">
+                                <i data-lucide="calendar-range"></i>
+                            </div>
+                            <h3>No Semester Timetable Yet</h3>
+                            <p>Your teacher hasn't uploaded the semester timetable yet. Check back soon.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CLASS TIMETABLE -->
+                <div class="tt-panel hidden" id="tab-class">
+                    <div class="tt-teacher-panel" id="classContent">
+                        <div class="tt-uploaded-empty">
+                            <div class="tt-empty-icon"
+                                style="background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(59,130,246,.15));border:1px solid rgba(34,197,94,.25);">
+                                <i data-lucide="users" style="color:#22c55e;"></i>
+                            </div>
+                            <h3>No Class Timetable Yet</h3>
+                            <p>Your teacher hasn't uploaded the class timetable yet. Check back soon.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EXAM TIMETABLE -->
+                <div class="tt-panel hidden" id="tab-exam">
+                    <div class="tt-teacher-panel" id="examContent">
+                        <div class="tt-uploaded-empty">
+                            <div class="tt-empty-icon"
+                                style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(251,146,60,.15));border:1px solid rgba(239,68,68,.25);">
+                                <i data-lucide="clipboard-list" style="color:#ef4444;"></i>
+                            </div>
+                            <h3>No Exam Timetable Yet</h3>
+                            <p>Your teacher hasn't uploaded the exam schedule yet. Check back soon.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- end mw-content -->
+        </div><!-- end mw-main -->
+    </div><!-- end mw-app -->
+
+    <!-- ── ADD SLOT MODAL ── -->
+    <div id="addSlotModal" class="mw-logout-overlay">
+        <div class="mw-logout-modal" style="max-width:440px;text-align:left;gap:0;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+                <div
+                    style="width:42px;height:42px;border-radius:12px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;color:#6366f1;flex-shrink:0;">
+                    <i data-lucide="calendar-plus" style="width:20px;height:20px;"></i>
+                </div>
+                <div>
+                    <div style="font-weight:700;font-size:1.05rem;">Add Class Slot</div>
+                    <div style="font-size:.82rem;color:var(--muted);">Add to your personal timetable</div>
+                </div>
+                <button onclick="closeAddSlot()"
+                    style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.2rem;">✕</button>
+            </div>
+
+            <div class="tt-form-group">
+                <label>Subject / Class Name</label>
+                <input id="slotSubject" type="text" placeholder="e.g. Mathematics" class="tt-input">
+            </div>
+            <div class="tt-form-row">
+                <div class="tt-form-group">
+                    <label>Day</label>
+                    <select id="slotDay" class="tt-input">
+                        <option value="Mon">Monday</option>
+                        <option value="Tue">Tuesday</option>
+                        <option value="Wed">Wednesday</option>
+                        <option value="Thu">Thursday</option>
+                        <option value="Fri">Friday</option>
+                    </select>
+                </div>
+                <div class="tt-form-group">
+                    <label>Start Time</label>
+                    <input id="slotStart" type="time" class="tt-input" value="09:00">
+                </div>
+                <div class="tt-form-group">
+                    <label>End Time</label>
+                    <input id="slotEnd" type="time" class="tt-input" value="10:00">
+                </div>
+            </div>
+            <div class="tt-form-row">
+                <div class="tt-form-group">
+                    <label>Teacher / Professor</label>
+                    <input id="slotTeacher" type="text" placeholder="e.g. Prof. Smith" class="tt-input">
+                </div>
+                <div class="tt-form-group">
+                    <label>Room</label>
+                    <input id="slotRoom" type="text" placeholder="e.g. Room 101" class="tt-input">
+                </div>
+            </div>
+            <div class="tt-form-group">
+                <label>Color</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;" id="colorPicker">
+                    <span class="tt-color-swatch active" data-color="#6366f1" style="background:#6366f1;"></span>
+                    <span class="tt-color-swatch" data-color="#22c55e" style="background:#22c55e;"></span>
+                    <span class="tt-color-swatch" data-color="#f59e0b" style="background:#f59e0b;"></span>
+                    <span class="tt-color-swatch" data-color="#ef4444" style="background:#ef4444;"></span>
+                    <span class="tt-color-swatch" data-color="#06b6d4" style="background:#06b6d4;"></span>
+                    <span class="tt-color-swatch" data-color="#a855f7" style="background:#a855f7;"></span>
+                    <span class="tt-color-swatch" data-color="#f43f5e" style="background:#f43f5e;"></span>
+                    <span class="tt-color-swatch" data-color="#10b981" style="background:#10b981;"></span>
+                </div>
+            </div>
+
+            <div class="mw-logout-actions" style="margin-top:20px;">
+                <button class="mw-logout-cancel" onclick="closeAddSlot()">Cancel</button>
+                <button class="mw-logout-confirm" onclick="saveSlot()" style="background:#6366f1;">
+                    <i data-lucide="check"></i> Save Slot
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── LOGOUT MODAL ── -->
+    <div id="logoutModal" class="mw-logout-overlay">
+        <div class="mw-logout-modal">
+            <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
+            <h3 class="mw-logout-title">Sign out?</h3>
+            <p class="mw-logout-sub">You'll need to log back in to access your dashboard.</p>
+            <div class="mw-logout-actions">
+                <button class="mw-logout-cancel"
+                    onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
+                <button class="mw-logout-confirm" onclick="doLogout()">
+                    <i data-lucide="log-out"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* ── Timetable page-specific styles ── */
+
+        /* Tab bar */
+        .tt-tab-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+            flex-wrap: wrap;
+        }
+
+        .tt-tab {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 18px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            border-radius: 0;
+            color: var(--muted);
+            font-size: .9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .2s;
+            margin-bottom: -1px;
+        }
+
+        .tt-tab svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .tt-tab:hover {
+            color: var(--text);
+        }
+
+        .tt-tab.active {
+            color: #6366f1;
+            border-bottom-color: #6366f1;
+        }
+
+        /* Panels */
+        .tt-panel {
+            animation: mwFadeIn .2s ease;
+        }
+
+        .tt-panel.hidden {
+            display: none;
+        }
+
+        /* Panel top bar */
+        .tt-panel-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* ── My Timetable Grid ── */
+        .tt-grid-wrap {
+            background: var(--surface, rgba(255, 255, 255, .03));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .tt-grid {
+            display: flex;
+            min-width: 700px;
+            overflow-x: auto;
+        }
+
+        .tt-col {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+        }
+
+        .tt-col:last-child {
+            border-right: none;
+        }
+
+        .tt-time-col {
+            flex: 0 0 72px;
+            min-width: 72px;
+        }
+
+        .tt-day-head {
+            padding: 12px 8px;
+            text-align: center;
+            font-size: .78rem;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            background: var(--surface-alt, rgba(255, 255, 255, .02));
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .tt-day-head.today {
+            color: #6366f1;
+        }
+
+        .tt-day-head .tt-date-num {
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .tt-slots-wrap {
+            flex: 1;
+            position: relative;
+        }
+
+        .tt-hour-row {
+            height: 64px;
+            border-bottom: 1px solid var(--border);
+            box-sizing: border-box;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tt-time-col .tt-hour-row {
+            font-size: .72rem;
+            color: var(--muted);
+            padding: 0 6px;
+            justify-content: flex-end;
+        }
+
+        .tt-slot-card {
+            position: absolute;
+            left: 4px;
+            right: 4px;
+            border-radius: 8px;
+            padding: 6px 8px;
+            font-size: .75rem;
+            line-height: 1.4;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+            transition: transform .15s, box-shadow .15s;
+            z-index: 1;
+        }
+
+        .tt-slot-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+        }
+
+        .tt-slot-name {
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tt-slot-meta {
+            opacity: .85;
+            font-size: .7rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tt-slot-del {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            background: rgba(0, 0, 0, .3);
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            width: 16px;
+            height: 16px;
+            font-size: 9px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tt-slot-card:hover .tt-slot-del {
+            display: flex;
+        }
+
+        /* Teacher-uploaded panels (empty state) */
+        .tt-teacher-panel {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .tt-uploaded-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 24px;
+            background: var(--surface, rgba(255, 255, 255, .02));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            text-align: center;
+            gap: 12px;
+        }
+
+        .tt-empty-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .tt-empty-icon svg {
+            width: 32px;
+            height: 32px;
+            color: #6366f1;
+        }
+
+        .tt-uploaded-empty h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .tt-uploaded-empty p {
+            color: var(--muted);
+            max-width: 340px;
+            line-height: 1.65;
+            font-size: .88rem;
+            margin: 0;
+        }
+
+        /* Teacher-uploaded image/PDF view */
+        .tt-image-view {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            background: var(--surface);
+        }
+
+        .tt-image-view img {
+            width: 100%;
+            display: block;
+            object-fit: contain;
+            max-height: 70vh;
+        }
+
+        /* Add slot form */
+        .tt-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .tt-form-group label {
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .tt-form-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .tt-form-row .tt-form-group {
+            flex: 1;
+        }
+
+        .tt-input {
+            background: var(--surface-alt, rgba(255, 255, 255, .05));
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            padding: 9px 12px;
+            font-size: .88rem;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .tt-input:focus {
+            border-color: #6366f1;
+        }
+
+        /* Color swatches */
+        .tt-color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform .15s, border-color .15s;
+        }
+
+        .tt-color-swatch:hover {
+            transform: scale(1.15);
+        }
+
+        .tt-color-swatch.active {
+            border-color: var(--text, #fff);
+            transform: scale(1.15);
+        }
+
+        /* Logout modal (reuse existing classes) */
+        .mw-logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mw-logout-overlay.active {
+            display: flex;
+            animation: mwFadeIn .18s ease;
+        }
+
+        @keyframes mwFadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .mw-logout-modal {
+            background: var(--card, #1c1c2e);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: .75rem;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, .5);
+        }
+
+        .mw-logout-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 92, 92, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            color: #ff5c5c;
+        }
+
+        .mw-logout-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .mw-logout-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 .5rem;
+            color: var(--text, #fff);
+        }
+
+        .mw-logout-sub {
+            font-size: .875rem;
+            color: var(--text-muted, #aaa);
+            margin: 0 0 2rem;
+            line-height: 1.5;
+        }
+
+        .mw-logout-actions {
+            display: flex;
+            gap: .75rem;
+            width: 100%;
+        }
+
+        .mw-logout-cancel,
+        .mw-logout-confirm {
+            flex: 1;
+            padding: .75rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: .9rem;
+            cursor: pointer;
+            border: none;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .mw-logout-cancel {
+            background: var(--surface-alt, rgba(255, 255, 255, .06));
+            color: var(--text, #fff);
+        }
+
+        .mw-logout-cancel:hover {
+            background: rgba(255, 255, 255, .12);
+        }
+
+        .mw-logout-confirm {
+            background: #ff5c5c;
+            color: #fff;
+        }
+
+        .mw-logout-confirm:hover {
+            background: #ff3333;
+        }
+
+        /* Responsive scroll */
+        @media (max-width: 768px) {
+            .tt-grid {
+                overflow-x: auto;
+            }
+
+            .tt-form-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+    <script>
+        // ── Auth ─────────────────────────────────────────────────────────────
+        function clearAuthAndCache() {
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role'].forEach(k => localStorage.removeItem(k));
+        }
+        function doLogout() { clearAuthAndCache(); window.location.replace('marketing-site/student-login.html'); }
+        function performLogout() {
+            const modal = document.getElementById('logoutModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        // ── Profile init ─────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstName = localStorage.getItem('firstName') || '';
+            const lastName = localStorage.getItem('lastName') || '';
+            const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Student';
+            const initials = (firstName[0] || '') + (lastName[0] || '') || 'ST';
+
+            document.querySelectorAll('#sidebarUserName, #dropdownUserName').forEach(el => {
+                if (el) el.textContent = firstName || fullName;
+            });
+            const avatarEl = document.getElementById('avatarInitials');
+            if (avatarEl) avatarEl.textContent = initials.toUpperCase();
+
+            // Profile dropdown
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', () => {
+                    const open = profileDropdown.style.display === 'flex';
+                    profileDropdown.style.display = open ? 'none' : 'flex';
+                });
+                document.addEventListener('click', e => {
+                    if (!profileToggle.contains(e.target) && !profileDropdown.contains(e.target))
+                        profileDropdown.style.display = 'none';
+                });
+            }
+
+            // Logout
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', performLogout);
+
+            // Theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    const html = document.documentElement;
+                    const isDark = html.getAttribute('data-theme') === 'dark';
+                    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+                    localStorage.setItem('mw_theme', isDark ? 'light' : 'dark');
+                });
+            }
+
+            // Tabs
+            document.querySelectorAll('.tt-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tt-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tt-panel').forEach(p => p.classList.add('hidden'));
+                    btn.classList.add('active');
+                    document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
+                });
+            });
+
+            // Add slot button
+            document.getElementById('addSlotBtn').addEventListener('click', openAddSlot);
+
+            // Color swatches
+            document.querySelectorAll('.tt-color-swatch').forEach(sw => {
+                sw.addEventListener('click', () => {
+                    document.querySelectorAll('.tt-color-swatch').forEach(s => s.classList.remove('active'));
+                    sw.classList.add('active');
+                });
+            });
+
+            // Build grid
+            buildMyTimetable();
+            fetchTeacherTimetables();
+
+            if (window.lucide) lucide.createIcons();
+        });
+
+        // ── MY TIMETABLE ──────────────────────────────────────────────────────
+        const HOURS_START = 8;   // 8 AM
+        const HOURS_END = 18;  // 6 PM
+        const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        const STORAGE_KEY_TT = 'mw_my_timetable';
+
+        let mySlots = JSON.parse(localStorage.getItem(STORAGE_KEY_TT) || '[]');
+
+        function fmt12(h) {
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 || 12;
+            return `${h12}:00 ${ampm}`;
+        }
+
+        function buildMyTimetable() {
+            // Day headers with today highlight
+            const today = new Date();
+            const dayIdx = today.getDay(); // 0=Sun, 1=Mon…
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            DAYS.forEach((d, i) => {
+                const head = document.getElementById('head' + d);
+                if (!head) return;
+                // calculate date for this column
+                const diff = (i + 1) - (dayIdx === 0 ? 7 : dayIdx);
+                const colDate = new Date(today);
+                colDate.setDate(today.getDate() + diff);
+                const isToday = colDate.toDateString() === today.toDateString();
+                head.textContent = '';
+                head.insertAdjacentHTML('beforeend', `<span style="font-size:.78rem;letter-spacing:.05em;">${d.toUpperCase()}</span><span class="tt-date-num">${colDate.getDate()}</span>`);
+                if (isToday) head.classList.add('today');
+            });
+
+            // Time labels + empty rows
+            const timeLabels = document.getElementById('timeLabels');
+            timeLabels.innerHTML = '';
+            for (let h = HOURS_START; h < HOURS_END; h++) {
+                const row = document.createElement('div');
+                row.className = 'tt-hour-row';
+                row.textContent = fmt12(h);
+                timeLabels.appendChild(row);
+            }
+
+            // Each day column
+            DAYS.forEach(d => {
+                const col = document.getElementById('col' + d);
+                // Remove old slots-wrap
+                const old = col.querySelector('.tt-slots-wrap');
+                if (old) old.remove();
+                const wrap = document.createElement('div');
+                wrap.className = 'tt-slots-wrap';
+                // Hour rows (empty separators)
+                for (let h = HOURS_START; h < HOURS_END; h++) {
+                    const row = document.createElement('div');
+                    row.className = 'tt-hour-row';
+                    wrap.appendChild(row);
+                }
+                col.appendChild(wrap);
+            });
+
+            renderMySlots();
+        }
+
+        function renderMySlots() {
+            // Clear existing cards
+            document.querySelectorAll('.tt-slot-card').forEach(c => c.remove());
+
+            mySlots.forEach((slot, idx) => {
+                const col = document.getElementById('col' + slot.day);
+                if (!col) return;
+                const wrap = col.querySelector('.tt-slots-wrap');
+                if (!wrap) return;
+
+                const [sh, sm] = slot.start.split(':').map(Number);
+                const [eh, em] = slot.end.split(':').map(Number);
+                const totalHours = HOURS_END - HOURS_START;
+                const rowH = 64; // px per hour
+
+                const top = ((sh - HOURS_START) + sm / 60) * rowH;
+                const height = Math.max(((eh - sh) + (em - sm) / 60) * rowH - 4, 24);
+
+                const card = document.createElement('div');
+                card.className = 'tt-slot-card';
+                card.style.cssText = `top:${top}px;height:${height}px;background:${slot.color}22;border-left:3px solid ${slot.color};color:${slot.color};`;
+                card.innerHTML = `
+                    <div class="tt-slot-name">${slot.subject}</div>
+                    <div class="tt-slot-meta">${fmtTime(slot.start)}–${fmtTime(slot.end)}${slot.teacher ? ' · ' + slot.teacher : ''}${slot.room ? ' · ' + slot.room : ''}</div>
+                    <button class="tt-slot-del" onclick="deleteSlot(${idx},event)" title="Delete">✕</button>
+                `;
+                wrap.appendChild(card);
+            });
+        }
+
+        function fmtTime(t) {
+            const [h, m] = t.split(':').map(Number);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 || 12;
+            return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+        }
+
+        function deleteSlot(idx, e) {
+            e.stopPropagation();
+            mySlots.splice(idx, 1);
+            localStorage.setItem(STORAGE_KEY_TT, JSON.stringify(mySlots));
+            renderMySlots();
+        }
+
+        function setMyView(v) {
+            // TODO: Day view — for now just highlight button
+            document.getElementById('myTTViewWeek').classList.toggle('mw-btn-primary', v === 'week');
+            document.getElementById('myTTViewWeek').classList.toggle('mw-btn-ghost', v !== 'week');
+            document.getElementById('myTTViewDay').classList.toggle('mw-btn-primary', v === 'day');
+            document.getElementById('myTTViewDay').classList.toggle('mw-btn-ghost', v !== 'day');
+        }
+
+        // Slot modal
+        function openAddSlot() {
+            document.getElementById('addSlotModal').classList.add('active');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function closeAddSlot() {
+            document.getElementById('addSlotModal').classList.remove('active');
+        }
+
+        function saveSlot() {
+            const subject = document.getElementById('slotSubject').value.trim();
+            const day = document.getElementById('slotDay').value;
+            const start = document.getElementById('slotStart').value;
+            const end = document.getElementById('slotEnd').value;
+            const teacher = document.getElementById('slotTeacher').value.trim();
+            const room = document.getElementById('slotRoom').value.trim();
+            const color = document.querySelector('.tt-color-swatch.active')?.dataset.color || '#6366f1';
+
+            if (!subject || !start || !end) {
+                alert('Please fill in subject, start, and end time.');
+                return;
+            }
+            if (start >= end) {
+                alert('End time must be after start time.');
+                return;
+            }
+
+            mySlots.push({ subject, day, start, end, teacher, room, color });
+            localStorage.setItem(STORAGE_KEY_TT, JSON.stringify(mySlots));
+            renderMySlots();
+            closeAddSlot();
+
+            // Reset form
+            document.getElementById('slotSubject').value = '';
+            document.getElementById('slotTeacher').value = '';
+            document.getElementById('slotRoom').value = '';
+        }
+
+        // ── TEACHER TIMETABLES ──────────────────────────────────────────────
+        async function fetchTeacherTimetables() {
+            const token = localStorage.getItem('token') || localStorage.getItem('mindwave_token');
+            if (!token) return;
+
+            const types = [
+                { key: 'semester', id: 'semesterContent' },
+                { key: 'class', id: 'classContent' },
+                { key: 'exam', id: 'examContent' },
+            ];
+
+            for (const t of types) {
+                try {
+                    const res = await fetch(`/api/timetables/${t.key}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    if (data.ok && data.imageUrl) {
+                        renderUploadedTimetable(t.id, data.imageUrl, data.updatedAt);
+                    }
+                } catch (_) { /* no endpoint yet — empty state shown */ }
+            }
+        }
+
+        function renderUploadedTimetable(containerId, imageUrl, updatedAt) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const date = updatedAt ? new Date(updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+            container.innerHTML = `
+                <div class="tt-image-view">
+                    <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+                        <span style="font-size:.82rem;color:var(--muted);">Updated${date ? ' · ' + date : ''}</span>
+                        <a href="${imageUrl}" target="_blank" class="mw-btn mw-btn-ghost" style="padding:6px 14px;font-size:.8rem;">
+                            <i data-lucide="external-link" style="width:13px;height:13px;"></i> Open
+                        </a>
+                    </div>
+                    <img src="${imageUrl}" alt="Timetable">
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+        }
+    </script>
+
+    <script src="auth-guard.js"></script>
+</body>
+
+</html>

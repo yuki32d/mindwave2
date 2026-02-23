@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Poll - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <!-- Header -->
+        <header class="topbar">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button id="backBtn" class="back-btn"
+                    style="padding: 8px 16px; margin-top: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                    ← Back
+                </button>
+            </div>
+        </header>
+
+        <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
+            <div class="main-header">
+                <div>
+                    <h1>📊 Create Poll</h1>
+                    <p>Collect opinions from students with real-time results</p>
+                </div>
+                <div class="header-actions">
+                    <button class="secondary-btn" id="previewBtn">👁️ Preview</button>
+                    <button class="primary-btn" id="saveBtn">💾 Save & Publish</button>
+                </div>
+            </div>
+
+            <div class="grid two">
+                <!-- Poll Configuration -->
+                <section class="panel">
+                    <h2>Poll Configuration</h2>
+                    <form id="pollForm">
+                        <div>
+                            <label for="pollQuestion">Question *</label>
+                            <input type="text" id="pollQuestion"
+                                placeholder="e.g., What's your favorite programming language?" required>
+                        </div>
+
+                        <div>
+                            <label for="pollDescription">Description (Optional)</label>
+                            <textarea id="pollDescription" rows="2"
+                                placeholder="Add context or instructions..."></textarea>
+                        </div>
+
+                        <div>
+                            <label>Poll Options *</label>
+                            <div id="pollOptions">
+                                <div class="option-row">
+                                    <input type="text" placeholder="Option 1" class="poll-option" required>
+                                    <button type="button" class="btn-icon remove-option">🗑️</button>
+                                </div>
+                                <div class="option-row">
+                                    <input type="text" placeholder="Option 2" class="poll-option" required>
+                                    <button type="button" class="btn-icon" onclick="removeOption(this)">🗑️</button>
+                                </div>
+                            </div>
+                            <button type="button" class="secondary-btn" id="addOptionBtn">+ Add Option</button>
+                        </div>
+
+                        <div>
+                            <label>Settings</label>
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="allowMultiple">
+                                    <span>Allow multiple selections</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="showResults" checked>
+                                    <span>Show real-time results to students</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="anonymousVoting" checked>
+                                    <span>Anonymous voting</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="timeLimit">Time Limit (Optional)</label>
+                            <select id="timeLimit">
+                                <option value="">No time limit</option>
+                                <option value="30">30 seconds</option>
+                                <option value="60">1 minute</option>
+                                <option value="120">2 minutes</option>
+                                <option value="300">5 minutes</option>
+                            </select>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Preview -->
+                <section class="panel">
+                    <h2>Student Preview</h2>
+                    <div id="pollPreview"
+                        style="background: rgba(255,255,255,0.03); padding: 24px; border-radius: 12px; min-height: 300px;">
+                        <div style="text-align: center; color: #9ea4b6; padding: 60px 20px;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                            <p>Configure your poll to see preview</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .option-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .option-row input {
+            flex: 1;
+        }
+
+        .poll-option-preview {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .poll-option-preview:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #0f62fe;
+        }
+
+        .poll-option-preview.selected {
+            background: rgba(15, 98, 254, 0.2);
+            border-color: #0f62fe;
+        }
+    </style>
+
+    <script>
+        let optionCount = 2;
+
+        function addOption() {
+            optionCount++;
+            const container = document.getElementById('pollOptions');
+            const optionRow = document.createElement('div');
+            optionRow.className = 'option-row';
+            optionRow.innerHTML = `
+                <input type="text" placeholder="Option ${optionCount}" class="poll-option" required>
+                <button type="button" class="btn-icon remove-option">🗑️</button>
+            `;
+            container.appendChild(optionRow);
+            updatePreview();
+        }
+
+        function removeOption(btn) {
+            if (document.querySelectorAll('.option-row').length > 2) {
+                btn.parentElement.remove();
+                updatePreview();
+            } else {
+                alert('Poll must have at least 2 options');
+            }
+        }
+
+        function updatePreview() {
+            const question = document.getElementById('pollQuestion').value;
+            const description = document.getElementById('pollDescription').value;
+            const options = Array.from(document.querySelectorAll('.poll-option')).map(input => input.value).filter(v => v);
+            const preview = document.getElementById('pollPreview');
+
+            if (!question || options.length < 2) {
+                preview.innerHTML = `
+                    <div style="text-align: center; color: #9ea4b6; padding: 60px 20px;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                        <p>Configure your poll to see preview</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div style="margin-bottom: 24px;">
+                    <h3 style="color: #f5f7ff; margin-bottom: 8px;">${question}</h3>
+                    ${description ? `<p style="color: #9ea4b6; font-size: 14px;">${description}</p>` : ''}
+                </div>
+                <div>
+            `;
+
+            options.forEach((option, index) => {
+                html += `
+                    <div class="poll-option-preview">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;"></div>
+                            <span style="color: #f5f7ff;">${option}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            preview.innerHTML = html;
+        }
+
+        function previewPoll() {
+            updatePreview();
+            alert('Preview updated! This is how students will see the poll.');
+        }
+
+        async function savePoll() {
+            const question = document.getElementById('pollQuestion').value;
+            const description = document.getElementById('pollDescription').value;
+            const options = Array.from(document.querySelectorAll('.poll-option')).map(input => input.value).filter(v => v);
+            const allowMultiple = document.getElementById('allowMultiple').checked;
+            const showResults = document.getElementById('showResults').checked;
+            const anonymousVoting = document.getElementById('anonymousVoting').checked;
+            const timeLimit = document.getElementById('timeLimit').value;
+
+            if (!question || options.length < 2) {
+                alert('Please enter a question and at least 2 options');
+                return;
+            }
+
+            const pollData = {
+                type: 'poll',
+                question,
+                description,
+                options,
+                settings: {
+                    allowMultiple,
+                    showResults,
+                    anonymousVoting,
+                    timeLimit: timeLimit ? parseInt(timeLimit) : null
+                },
+                createdBy: localStorage.getItem('user_name'),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('/api/games/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    },
+                    body: JSON.stringify(pollData)
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    alert('✅ Poll created successfully! Students can now access it.');
+                    window.location.href = 'admin.html';
+                } else {
+                    alert('❌ Error: ' + (data.message || 'Failed to create poll'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Failed to save poll. Please try again.');
+            }
+        }
+
+        // Live preview updates
+        document.getElementById('pollQuestion').addEventListener('input', updatePreview);
+        document.getElementById('pollDescription').addEventListener('input', updatePreview);
+        document.getElementById('pollOptions').addEventListener('input', updatePreview);
+
+        // Button handlers
+        document.getElementById('previewBtn').addEventListener('click', previewPoll);
+        document.getElementById('saveBtn').addEventListener('click', savePoll);
+        document.getElementById('addOptionBtn').addEventListener('click', addOption);
+
+        // Event delegation for remove buttons
+        document.getElementById('pollOptions').addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-option') || e.target.closest('.remove-option')) {
+                const btn = e.target.classList.contains('remove-option') ? e.target : e.target.closest('.remove-option');
+                removeOption(btn);
+            }
+        });
+
+        // Event delegation for preview options
+        document.getElementById('pollPreview').addEventListener('click', function (e) {
+            const option = e.target.closest('.poll-option-preview');
+            if (option) {
+                option.classList.toggle('selected');
+            }
+        });
+
+        // Back button handler
+        document.getElementById('backBtn').addEventListener('click', function () {
+            window.location.href = 'interactive-tools-selector.html';
+        });
+    </script>
+</body>
+
+</html>

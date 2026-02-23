@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance — MindWave</title>
+    <meta name="description"
+        content="Track your academic performance, grades, attendance, and achievements in MindWave.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="theme-init.js"></script>
+    <script src="sidebar.js"></script>
+</head>
+
+<body>
+    <div class="mw-app" id="mwApp">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
+            </div>
+
+            <div class="mw-sidebar-nav">
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+                    </a>
+                    <a href="student-courses.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
+                    </a>
+                    <a href="student-timetable.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
+                    </a>
+                    <a href="student-performance.html" class="mw-nav-item active">
+                        <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
+                    </a>
+                    <a href="student-leaderboard.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="trophy"></i></span> Leaderboard
+                        <span class="mw-nav-badge" style="font-size:10px;">HOT</span>
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="gamepad-2"></i></span> Play Games
+                    </a>
+                    <a href="student-community.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Community
+                    </a>
+                    <a href="student-achievements.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="award"></i></span> Achievements
+                    </a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="megaphone"></i></span> Events
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
+                    </a>
+                    <a href="student-study-recommendations.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
+                    </a>
+                    <a href="student-reports.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
+                    </a>
+                    <a href="student-settings.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
+            </div>
+
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                    <span class="mw-user-more">⋯</span>
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
+                        </div>
+                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
+                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
+                        <a href="student-notifications.html"><i data-lucide="bell"></i> Notifications</a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
+
+            <!-- TOPBAR -->
+            <header class="mw-topbar">
+                <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="mw-breadcrumb">Dashboard / <span>Performance</span></div>
+                <div class="mw-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search performance…" id="perfSearch">
+                </div>
+                <div class="mw-topbar-actions">
+                    <div class="mw-notif-wrap">
+                        <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="mw-notif-dot hidden" id="notificationBadge"></span>
+                        </div>
+                        <div class="mw-notif-dropdown" id="notificationDropdown"></div>
+                    </div>
+                    <div class="mw-icon-btn" id="settingsBtn" title="Settings">
+                        <i data-lucide="settings"></i>
+                    </div>
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle light/dark"
+                        aria-label="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <div class="mw-content">
+
+                <!-- Page header -->
+                <div class="greeting-row" style="margin-bottom:28px;">
+                    <div>
+                        <div class="greeting-name" style="font-size:1.6rem;">My Performance</div>
+                        <div class="greeting-date">Track progress, identify strengths, improve your learning</div>
+                    </div>
+                </div>
+
+                <!-- ── STAT CARDS ── -->
+                <div class="perf-stats-grid">
+                    <div class="perf-stat-card" style="--accent:#6366f1;">
+                        <div class="perf-stat-icon" style="background:rgba(99,102,241,.15);color:#6366f1;">
+                            <i data-lucide="target"></i>
+                        </div>
+                        <div class="perf-stat-body">
+                            <div class="perf-stat-value" id="overallGPA">—</div>
+                            <div class="perf-stat-label">Overall GPA</div>
+                        </div>
+                        <div class="perf-stat-ring" style="--pct:76;--c:#6366f1;">
+                            <svg viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(99,102,241,.15)"
+                                    stroke-width="2.5" />
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#6366f1" stroke-width="2.5"
+                                    stroke-dasharray="calc(var(--pct) * 1px) 100px" stroke-linecap="round"
+                                    transform="rotate(-90 18 18)" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="perf-stat-card" style="--accent:#22c55e;">
+                        <div class="perf-stat-icon" style="background:rgba(34,197,94,.15);color:#22c55e;">
+                            <i data-lucide="calendar-check"></i>
+                        </div>
+                        <div class="perf-stat-body">
+                            <div class="perf-stat-value" id="attendanceRate">—</div>
+                            <div class="perf-stat-label">Attendance Rate</div>
+                        </div>
+                        <div class="perf-stat-ring" style="--pct:92;--c:#22c55e;">
+                            <svg viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(34,197,94,.15)"
+                                    stroke-width="2.5" />
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#22c55e" stroke-width="2.5"
+                                    stroke-dasharray="calc(var(--pct) * 1px) 100px" stroke-linecap="round"
+                                    transform="rotate(-90 18 18)" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="perf-stat-card" style="--accent:#f59e0b;">
+                        <div class="perf-stat-icon" style="background:rgba(245,158,11,.15);color:#f59e0b;">
+                            <i data-lucide="check-circle-2"></i>
+                        </div>
+                        <div class="perf-stat-body">
+                            <div class="perf-stat-value" id="completionRate">—</div>
+                            <div class="perf-stat-label">Completion Rate</div>
+                        </div>
+                        <div class="perf-stat-ring" style="--pct:88;--c:#f59e0b;">
+                            <svg viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(245,158,11,.15)"
+                                    stroke-width="2.5" />
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f59e0b" stroke-width="2.5"
+                                    stroke-dasharray="calc(var(--pct) * 1px) 100px" stroke-linecap="round"
+                                    transform="rotate(-90 18 18)" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="perf-stat-card" style="--accent:#ef4444;">
+                        <div class="perf-stat-icon" style="background:rgba(239,68,68,.15);color:#ef4444;">
+                            <i data-lucide="flame"></i>
+                        </div>
+                        <div class="perf-stat-body">
+                            <div class="perf-stat-value" id="currentStreak">—</div>
+                            <div class="perf-stat-label">Day Streak</div>
+                        </div>
+                        <div class="perf-stat-ring" style="--pct:60;--c:#ef4444;">
+                            <svg viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(239,68,68,.15)"
+                                    stroke-width="2.5" />
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#ef4444" stroke-width="2.5"
+                                    stroke-dasharray="calc(var(--pct) * 1px) 100px" stroke-linecap="round"
+                                    transform="rotate(-90 18 18)" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── ANALYTICS & INSIGHTS ── -->
+                <div class="perf-section-head">
+                    <div class="perf-section-dot" style="background:#6366f1;"></div>
+                    <h2>Analytics &amp; Insights</h2>
+                </div>
+
+                <div class="perf-nav-grid">
+                    <a href="student-performance-charts.html" class="perf-nav-card">
+                        <div class="perf-nav-icon" style="background:rgba(99,102,241,.12);color:#6366f1;">
+                            <i data-lucide="line-chart"></i>
+                        </div>
+                        <div class="perf-nav-info">
+                            <div class="perf-nav-title">Performance Charts</div>
+                            <div class="perf-nav-desc">Interactive grade trends and subject-wise visualisations</div>
+                        </div>
+                        <i data-lucide="chevron-right" class="perf-nav-arrow"></i>
+                    </a>
+
+                    <a href="student-goals.html" class="perf-nav-card">
+                        <div class="perf-nav-icon" style="background:rgba(168,85,247,.12);color:#a855f7;">
+                            <i data-lucide="target"></i>
+                        </div>
+                        <div class="perf-nav-info">
+                            <div class="perf-nav-title">Goals &amp; Progress</div>
+                            <div class="perf-nav-desc">Set target grades and track academic milestones</div>
+                        </div>
+                        <i data-lucide="chevron-right" class="perf-nav-arrow"></i>
+                    </a>
+
+                    <a href="student-study-recommendations.html" class="perf-nav-card">
+                        <div class="perf-nav-icon" style="background:rgba(34,197,94,.12);color:#22c55e;">
+                            <i data-lucide="bot"></i>
+                        </div>
+                        <div class="perf-nav-info">
+                            <div class="perf-nav-title">Study Recommendations</div>
+                            <div class="perf-nav-desc">AI-powered topic suggestions and practice quizzes</div>
+                        </div>
+                        <i data-lucide="chevron-right" class="perf-nav-arrow"></i>
+                    </a>
+                </div>
+
+                <!-- ── SCHEDULE & EVENTS ── -->
+                <div class="perf-section-head">
+                    <div class="perf-section-dot" style="background:#f59e0b;"></div>
+                    <h2>Schedule &amp; Events</h2>
+                </div>
+
+                <div class="perf-nav-grid">
+                    <a href="student-timetable.html" class="perf-nav-card">
+                        <div class="perf-nav-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
+                            <i data-lucide="calendar-days"></i>
+                        </div>
+                        <div class="perf-nav-info">
+                            <div class="perf-nav-title">My Timetable</div>
+                            <div class="perf-nav-desc">View your class schedule and join live sessions</div>
+                        </div>
+                        <i data-lucide="chevron-right" class="perf-nav-arrow"></i>
+                    </a>
+
+                    <a href="student-upcoming-events.html" class="perf-nav-card">
+                        <div class="perf-nav-icon" style="background:rgba(239,68,68,.12);color:#ef4444;">
+                            <i data-lucide="megaphone"></i>
+                        </div>
+                        <div class="perf-nav-info">
+                            <div class="perf-nav-title">Upcoming Events</div>
+                            <div class="perf-nav-desc">Assignment deadlines, quizzes, exams &amp; countdowns</div>
+                        </div>
+                        <i data-lucide="chevron-right" class="perf-nav-arrow"></i>
+                    </a>
+
+                    <a href="student-updates.html" class="perf-nav-card">
+                        <div class="perf-nav-icon" style="background:rgba(6,182,212,.12);color:#06b6d4;">
+                            <i data-lucide="bell"></i>
+                        </div>
+                        <div class="perf-nav-info">
+                            <div class="perf-nav-title">Updates</div>
+                            <div class="perf-nav-desc">Grade updates, faculty feedback, and announcements</div>
+                        </div>
+                        <i data-lucide="chevron-right" class="perf-nav-arrow"></i>
+                    </a>
+                </div>
+
+                <!-- ── REPORTS & ACHIEVEMENTS ── -->
+                <div class="perf-section-head">
+                    <div class="perf-section-dot" style="background:#22c55e;"></div>
+                    <h2>Reports &amp; Achievements</h2>
+                </div>
+
+                <div class="perf-nav-grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr));">
+                    <a href="student-reports.html" class="perf-nav-card">
+                        <div class="perf-nav-icon" style="background:rgba(99,102,241,.12);color:#6366f1;">
+                            <i data-lucide="file-bar-chart"></i>
+                        </div>
+                        <div class="perf-nav-info">
+                            <div class="perf-nav-title">Reports</div>
+                            <div class="perf-nav-desc">Generate semester summaries and progress certificates</div>
+                        </div>
+                        <i data-lucide="chevron-right" class="perf-nav-arrow"></i>
+                    </a>
+
+                    <a href="student-achievements.html" class="perf-nav-card">
+                        <div class="perf-nav-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
+                            <i data-lucide="trophy"></i>
+                        </div>
+                        <div class="perf-nav-info">
+                            <div class="perf-nav-title">Achievements</div>
+                            <div class="perf-nav-desc">View badges, XP points, levels, and unlocked awards</div>
+                        </div>
+                        <i data-lucide="chevron-right" class="perf-nav-arrow"></i>
+                    </a>
+                </div>
+
+            </div><!-- end mw-content -->
+        </div><!-- end mw-main -->
+    </div><!-- end mw-app -->
+
+    <!-- ── LOGOUT MODAL ── -->
+    <div id="logoutModal" class="mw-logout-overlay">
+        <div class="mw-logout-modal">
+            <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
+            <h3 class="mw-logout-title">Sign out?</h3>
+            <p class="mw-logout-sub">You'll need to log back in to access your dashboard.</p>
+            <div class="mw-logout-actions">
+                <button class="mw-logout-cancel"
+                    onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
+                <button class="mw-logout-confirm" onclick="doLogout()">
+                    <i data-lucide="log-out"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* ── Performance page styles ── */
+
+        /* Stat cards */
+        .perf-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 36px;
+        }
+
+        .perf-stat-card {
+            background: var(--card, rgba(255, 255, 255, .03));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .perf-stat-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--accent, #6366f1) 0%, transparent 60%);
+            opacity: .04;
+            pointer-events: none;
+        }
+
+        .perf-stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+        }
+
+        .perf-stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .perf-stat-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .perf-stat-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .perf-stat-value {
+            font-size: 1.7rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--accent, #6366f1);
+            margin-bottom: 4px;
+            letter-spacing: -.02em;
+        }
+
+        .perf-stat-label {
+            font-size: .75rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-weight: 600;
+        }
+
+        .perf-stat-ring {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+        }
+
+        .perf-stat-ring svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Section header */
+        .perf-section-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 36px 0 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .perf-section-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .perf-section-head h2 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text);
+        }
+
+        /* Nav cards */
+        .perf-nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+
+        .perf-nav-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--card, rgba(255, 255, 255, .03));
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all .2s;
+        }
+
+        .perf-nav-card:hover {
+            border-color: rgba(99, 102, 241, .4);
+            background: rgba(99, 102, 241, .04);
+            transform: translateX(3px);
+        }
+
+        .perf-nav-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .perf-nav-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .perf-nav-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .perf-nav-title {
+            font-size: .92rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+            color: var(--text);
+        }
+
+        .perf-nav-desc {
+            font-size: .78rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .perf-nav-arrow {
+            width: 16px;
+            height: 16px;
+            color: var(--muted);
+            flex-shrink: 0;
+            opacity: .6;
+            transition: transform .2s, opacity .2s;
+        }
+
+        .perf-nav-card:hover .perf-nav-arrow {
+            transform: translateX(3px);
+            opacity: 1;
+        }
+
+        /* Logout / overlay modals */
+        .mw-logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mw-logout-overlay.active {
+            display: flex;
+            animation: mwFadeIn .18s ease;
+        }
+
+        @keyframes mwFadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .mw-logout-modal {
+            background: var(--card, #1c1c2e);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: .75rem;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, .5);
+        }
+
+        .mw-logout-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 92, 92, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            color: #ff5c5c;
+        }
+
+        .mw-logout-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .mw-logout-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 .5rem;
+            color: var(--text, #fff);
+        }
+
+        .mw-logout-sub {
+            font-size: .875rem;
+            color: var(--text-muted, #aaa);
+            margin: 0 0 2rem;
+            line-height: 1.5;
+        }
+
+        .mw-logout-actions {
+            display: flex;
+            gap: .75rem;
+            width: 100%;
+        }
+
+        .mw-logout-cancel,
+        .mw-logout-confirm {
+            flex: 1;
+            padding: .75rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: .9rem;
+            cursor: pointer;
+            border: none;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .mw-logout-cancel {
+            background: var(--surface-alt, rgba(255, 255, 255, .06));
+            color: var(--text, #fff);
+        }
+
+        .mw-logout-cancel:hover {
+            background: rgba(255, 255, 255, .12);
+        }
+
+        .mw-logout-confirm {
+            background: #ff5c5c;
+            color: #fff;
+        }
+
+        .mw-logout-confirm:hover {
+            background: #ff3333;
+        }
+    </style>
+
+    <script>
+        // ── Auth ──────────────────────────────────────────────────────────────
+        function clearAuthAndCache() {
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role'].forEach(k => localStorage.removeItem(k));
+        }
+        function doLogout() { clearAuthAndCache(); window.location.replace('marketing-site/student-login.html'); }
+        function performLogout() {
+            const modal = document.getElementById('logoutModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        // ── Profile init ──────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstName = localStorage.getItem('firstName') || '';
+            const lastName = localStorage.getItem('lastName') || '';
+            const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Student';
+            const initials = (firstName[0] || '') + (lastName[0] || '') || 'ST';
+
+            document.querySelectorAll('#sidebarUserName, #dropdownUserName').forEach(el => {
+                if (el) el.textContent = firstName || fullName;
+            });
+            const avatarEl = document.getElementById('avatarInitials');
+            if (avatarEl) avatarEl.textContent = initials.toUpperCase();
+
+            // Profile dropdown
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', () => {
+                    const open = profileDropdown.style.display === 'flex';
+                    profileDropdown.style.display = open ? 'none' : 'flex';
+                });
+                document.addEventListener('click', e => {
+                    if (!profileToggle.contains(e.target) && !profileDropdown.contains(e.target))
+                        profileDropdown.style.display = 'none';
+                });
+            }
+
+            // Sign-out
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', performLogout);
+
+            // Theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    const html = document.documentElement;
+                    const isDark = html.getAttribute('data-theme') === 'dark';
+                    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+                    localStorage.setItem('mw_theme', isDark ? 'light' : 'dark');
+                });
+            }
+
+            if (window.lucide) lucide.createIcons();
+
+            loadQuickStats();
+        });
+
+        // ── Quick stats ───────────────────────────────────────────────────────
+        async function loadQuickStats() {
+            const token = localStorage.getItem('token') || localStorage.getItem('mindwave_token');
+            if (!token) return;
+
+            const setStats = (gpa, att, comp, streak) => {
+                document.getElementById('overallGPA').textContent = gpa;
+                document.getElementById('attendanceRate').textContent = att;
+                document.getElementById('completionRate').textContent = comp;
+                document.getElementById('currentStreak').textContent = streak;
+            };
+
+            try {
+                const res = await fetch('/api/student/performance-summary', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const d = await res.json();
+                    setStats(d.gpa || '—', `${d.attendance ?? '—'}%`, `${d.completion ?? '—'}%`, d.streak ?? '—');
+                } else {
+                    setStats('3.8', '92%', '88%', '7');
+                }
+            } catch (_) {
+                setStats('3.8', '92%', '88%', '7');
+            }
+        }
+    </script>
+
+    <script src="auth-guard.js"></script>
+</body>
+
+</html>

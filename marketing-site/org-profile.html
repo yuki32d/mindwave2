@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - MindWave Dashboard</title>
+    <link rel="stylesheet" href="css/modern-dashboard.css">
+    <link rel="stylesheet" href="css/profile-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body data-theme="light">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span>MindWave</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <span class="nav-section-title">MAIN MENU</span>
+                <a href="modern-dashboard.html" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="org-analytics.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="org-billing.html" class="nav-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Billing</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">MANAGEMENT</span>
+                <a href="org-team.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Team Members</span>
+                </a>
+                <a href="org-students.html" class="nav-item">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Students</span>
+                </a>
+                <a href="org-games.html" class="nav-item">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Games</span>
+                </a>
+                <a href="org-settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">SUPPORT</span>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Help Center</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search Anything here ...">
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon" title="Export">
+                    <i class="fas fa-download"></i>
+                    <span>Export</span>
+                </button>
+                <button class="btn-primary" id="createBtn">
+                    <i class="fas fa-plus"></i>
+                    <span>Create</span>
+                </button>
+                <button class="btn-icon" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <div class="profile-dropdown">
+                    <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="profile-avatar">
+                    <div class="dropdown-menu">
+                        <a href="org-profile.html" class="dropdown-item active">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a href="org-settings.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <hr>
+                        <a href="#" class="dropdown-item" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Profile Content -->
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1>Profile Settings</h1>
+                <p>Manage your account information and preferences</p>
+            </div>
+
+            <div class="profile-layout">
+                <!-- Profile Sidebar -->
+                <div class="profile-sidebar">
+                    <div class="profile-card">
+                        <div class="profile-avatar-large">
+                            <img src="https://i.pravatar.cc/150?img=12" alt="Profile" id="profileImage">
+                            <button class="avatar-upload-btn" id="uploadAvatarBtn">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                        </div>
+                        <h2 id="profileName">Loading...</h2>
+                        <p class="profile-role" id="profileRole">Loading...</p>
+                        <p class="profile-email" id="profileEmail">Loading...</p>
+
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <span class="stat-value" id="memberSince">--</span>
+                                <span class="stat-label">Member Since</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="lastLogin">--</span>
+                                <span class="stat-label">Last Login</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Main Content -->
+                <div class="profile-main">
+                    <!-- Personal Information -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-user"></i> Personal Information</h3>
+                            <button class="btn-text" id="editPersonalBtn">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="fullName" value="Loading..." readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email Address</label>
+                                    <input type="email" id="emailAddress" value="Loading..." readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone Number</label>
+                                    <input type="tel" id="phoneNumber" placeholder="Not set" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Job Title</label>
+                                    <input type="text" id="jobTitle" placeholder="Not set" readonly>
+                                </div>
+                            </div>
+                            <div class="form-actions" style="display: none;" id="personalActions">
+                                <button class="btn-secondary" id="cancelPersonalBtn">Cancel</button>
+                                <button class="btn-primary" id="savePersonalBtn">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Organization Information -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-building"></i> Organization Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Organization Name</span>
+                                    <span class="info-value" id="orgName">Loading...</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Your Role</span>
+                                    <span class="info-value">
+                                        <span class="role-badge admin" id="userRole">Loading...</span>
+                                    </span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Subscription Plan</span>
+                                    <span class="info-value" id="subscriptionPlan">Loading...</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Team Size</span>
+                                    <span class="info-value" id="teamSize">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-shield-alt"></i> Security</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="security-item">
+                                <div class="security-info">
+                                    <h4>Password</h4>
+                                    <p>Last changed 3 months ago</p>
+                                </div>
+                                <button class="btn-secondary" id="changePasswordBtn">
+                                    <i class="fas fa-key"></i> Change Password
+                                </button>
+                            </div>
+                            <div class="security-item">
+                                <div class="security-info">
+                                    <h4>Two-Factor Authentication</h4>
+                                    <p>Add an extra layer of security to your account</p>
+                                </div>
+                                <button class="btn-secondary" id="enable2FABtn">
+                                    <i class="fas fa-mobile-alt"></i> Enable 2FA
+                                </button>
+                            </div>
+                            <div class="security-item">
+                                <div class="security-info">
+                                    <h4>Connected Accounts</h4>
+                                    <p>Manage your connected social accounts</p>
+                                </div>
+                                <div class="connected-accounts">
+                                    <span class="account-badge google">
+                                        <i class="fab fa-google"></i> Google
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Log -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="activity-list" id="activityList">
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-sign-in-alt"></i>
+                                    </div>
+                                    <div class="activity-details">
+                                        <p class="activity-title">Logged in from new device</p>
+                                        <p class="activity-time">2 hours ago</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="activity-details">
+                                        <p class="activity-title">Updated profile information</p>
+                                        <p class="activity-time">1 day ago</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                    <div class="activity-details">
+                                        <p class="activity-title">Invited team member</p>
+                                        <p class="activity-time">3 days ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/org-user-service.js"></script>
+    <script src="js/org-profile.js"></script>
+</body>
+
+</html>

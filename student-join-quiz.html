@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Live Quiz - MindWave</title>
+    <link rel="stylesheet" href="marketing-site/css/live-quiz-student.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body data-theme="dark">
+    <!-- Join Screen -->
+    <div id="joinScreen" class="screen active">
+        <div class="join-container">
+            <div class="quiz-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h1>Join Live Quiz</h1>
+            <p class="subtitle">Enter the quiz code from your instructor</p>
+
+            <div class="code-input-container">
+                <input type="text" id="quizCode" class="code-input" placeholder="ENTER CODE" maxlength="6" />
+            </div>
+
+            <button class="join-btn" id="joinBtn">
+                <i class="fas fa-sign-in-alt"></i> Join Quiz
+            </button>
+
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+    </div>
+
+    <!-- Lobby Screen -->
+    <div id="lobbyScreen" class="screen">
+        <div class="lobby-container">
+            <div class="quiz-info">
+                <h1 id="quizTitle">Quiz Title</h1>
+                <div class="session-code">
+                    Code: <span id="lobbyCode"></span>
+                </div>
+            </div>
+
+            <div class="waiting-animation">
+                <div class="spinner"></div>
+                <h2>Waiting for quiz to start...</h2>
+            </div>
+
+            <div class="participants-info">
+                <i class="fas fa-users"></i>
+                <span id="lobbyParticipantCount">0</span> participants
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Screen -->
+    <div id="questionScreen" class="screen">
+        <div class="question-container">
+            <div class="question-header">
+                <div class="question-number" id="questionNumber">Question 1</div>
+                <div class="timer-circle" id="timerCircle">
+                    <span id="timerValue">15</span>
+                </div>
+            </div>
+
+            <div class="question-text" id="questionText">
+                What is the capital of France?
+            </div>
+
+            <div class="answers-grid" id="answersGrid">
+                <!-- Kahoot-style colored answer buttons -->
+                <button class="answer-btn red" data-index="0">
+                    <div class="answer-shape triangle"></div>
+                    <span class="answer-text">Option A</span>
+                </button>
+                <button class="answer-btn blue" data-index="1">
+                    <div class="answer-shape diamond"></div>
+                    <span class="answer-text">Option B</span>
+                </button>
+                <button class="answer-btn yellow" data-index="2">
+                    <div class="answer-shape circle"></div>
+                    <span class="answer-text">Option C</span>
+                </button>
+                <button class="answer-btn green" data-index="3">
+                    <div class="answer-shape square"></div>
+                    <span class="answer-text">Option D</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="resultScreen" class="screen">
+        <div class="result-container">
+            <div class="result-icon" id="resultIcon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1 id="resultTitle">Correct!</h1>
+            <div class="points-earned" id="pointsEarned">+1000 points</div>
+            <div class="total-score">
+                Total Score: <span id="totalScore">1000</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Screen -->
+    <div id="leaderboardScreen" class="screen">
+        <div class="leaderboard-container">
+            <h1>🏆 Leaderboard</h1>
+            <div class="leaderboard-list" id="leaderboardList">
+                <!-- Leaderboard items will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Podium Screen (Final) -->
+    <div id="podiumScreen" class="screen">
+        <div class="podium-container">
+            <h1>🎉 Quiz Complete!</h1>
+            <div class="podium">
+                <div class="podium-place second">
+                    <div class="crown">🥈</div>
+                    <div class="player-name" id="second-place-name">Player 2</div>
+                    <div class="player-score" id="second-place-score">800</div>
+                    <div class="podium-block">2</div>
+                </div>
+                <div class="podium-place first">
+                    <div class="crown">👑</div>
+                    <div class="player-name" id="first-place-name">Player 1</div>
+                    <div class="player-score" id="first-place-score">1000</div>
+                    <div class="podium-block">1</div>
+                </div>
+                <div class="podium-place third">
+                    <div class="crown">🥉</div>
+                    <div class="player-name" id="third-place-name">Player 3</div>
+                    <div class="player-score" id="third-place-score">600</div>
+                    <div class="podium-block">3</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="marketing-site/js/live-quiz-student.js"></script></body>
+
+</html>

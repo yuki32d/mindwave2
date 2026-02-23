@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create NPS Scale - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <header class="topbar">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button id="backBtn" class="back-btn"
+                    style="padding: 8px 16px; margin-top: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                    ← Back
+                </button>
+            </div>
+        </header>
+
+        <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
+            <div class="main-header">
+                <div>
+                    <h1>⭐ Create NPS Scale</h1>
+                    <p>Net Promoter Score - Measure student satisfaction (0-10)</p>
+                </div>
+                <div class="header-actions">
+                    <button class="primary-btn" id="saveBtn">💾 Save & Publish</button>
+                </div>
+            </div>
+
+            <div class="grid two">
+                <section class="panel">
+                    <h2>NPS Configuration</h2>
+                    <form id="npsForm">
+                        <div>
+                            <label for="npsQuestion">Question *</label>
+                            <input type="text" id="npsQuestion"
+                                placeholder="How likely are you to recommend this course?" required
+                                value="How likely are you to recommend this course to a friend?">
+                        </div>
+
+                        <div>
+                            <label for="npsContext">Additional Context (Optional)</label>
+                            <textarea id="npsContext" rows="2" placeholder="Provide more details..."></textarea>
+                        </div>
+
+                        <div>
+                            <label>Settings</label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="showNPSScore" checked>
+                                <span>Show NPS score to students after submission</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                                <input type="checkbox" id="askFollowUp" checked>
+                                <span>Ask for follow-up comment</span>
+                            </label>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <h2>Student Preview</h2>
+                    <div style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 12px;">
+                        <h3 style="color: #f5f7ff; margin-bottom: 24px; text-align: center;" id="previewQ">How likely
+                            are you to recommend this course to a friend?</h3>
+                        <div style="margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="color: #ff3b30; font-size: 12px;">Not likely</span>
+                                <span style="color: #34c759; font-size: 12px;">Very likely</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(11, 1fr); gap: 8px;"
+                                id="npsButtons">
+                                <button data-score="0"
+                                    style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">0</button>
+                                <button data-score="1"
+                                    style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">1</button>
+                                <button data-score="2"
+                                    style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">2</button>
+                                <button data-score="3"
+                                    style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">3</button>
+                                <button data-score="4"
+                                    style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">4</button>
+                                <button data-score="5"
+                                    style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">5</button>
+                                <button data-score="6"
+                                    style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">6</button>
+                                <button data-score="7"
+                                    style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">7</button>
+                                <button data-score="8"
+                                    style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">8</button>
+                                <button data-score="9"
+                                    style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">9</button>
+                                <button data-score="10"
+                                    style="padding: 12px 8px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600; transition: all 0.2s;">10</button>
+                            </div>
+                        </div>
+                        <div
+                            style="margin-top: 24px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                            <div style="font-size: 12px; color: #9ea4b6; margin-bottom: 4px;">Score interpretation:
+                            </div>
+                            <div style="font-size: 11px; color: #9ea4b6;">
+                                0-6: Detractors | 7-8: Passives | 9-10: Promoters
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectNPS(score, btn) {
+            document.querySelectorAll('#npsButtons button').forEach(b => {
+                b.style.background = 'rgba(255,255,255,0.05)';
+                b.style.borderColor = 'rgba(255,255,255,0.1)';
+            });
+
+            let color = score <= 6 ? '#ff3b30' : score <= 8 ? '#ff9f0a' : '#34c759';
+            btn.style.background = color + '33';
+            btn.style.borderColor = color;
+        }
+
+        document.getElementById('npsQuestion').addEventListener('input', function () {
+            document.getElementById('previewQ').textContent = this.value;
+        });
+
+        async function saveNPS() {
+            const question = document.getElementById('npsQuestion').value;
+            const context = document.getElementById('npsContext').value;
+            const showNPSScore = document.getElementById('showNPSScore').checked;
+            const askFollowUp = document.getElementById('askFollowUp').checked;
+
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            const npsData = {
+                type: 'nps',
+                question,
+                context,
+                settings: { showNPSScore, askFollowUp },
+                createdBy: localStorage.getItem('user_name'),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('/api/games/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    },
+                    body: JSON.stringify(npsData)
+                });
+
+                const data = await response.json();
+                if (data.ok) {
+                    alert('✅ NPS Scale created successfully!');
+                    window.location.href = 'admin.html';
+                } else {
+                    alert('❌ Error: ' + (data.message || 'Failed to create NPS'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Failed to save NPS. Please try again.');
+            }
+        }
+
+        // Event delegation for NPS buttons
+        document.getElementById('npsButtons').addEventListener('click', function (e) {
+            if (e.target.tagName === 'BUTTON' && e.target.dataset.score !== undefined) {
+                const score = parseInt(e.target.dataset.score);
+                selectNPS(score, e.target);
+            }
+        });
+
+        // Save button handler
+        document.getElementById('saveBtn').addEventListener('click', saveNPS);
+
+        // Back button handler
+        document.getElementById('backBtn').addEventListener('click', function () {
+            window.location.href = 'interactive-tools-selector.html';
+        });
+    </script>
+</body>
+
+</html>

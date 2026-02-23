@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave – Scenario Builder</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <style>
+        .scenario-builder {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .builder-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .builder-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .builder-panel h3 {
+            margin: 0 0 16px;
+            color: #f5f7ff;
+            font-size: 18px;
+        }
+
+        .scene-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .scene-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .scene-card:hover {
+            border-color: #0f62fe;
+            transform: translateX(4px);
+        }
+
+        .scene-card.active {
+            border-color: #0f62fe;
+            background: rgba(15, 98, 254, 0.1);
+        }
+
+        .scene-card h4 {
+            margin: 0 0 8px;
+            color: #f5f7ff;
+            font-size: 14px;
+        }
+
+        .scene-card p {
+            margin: 0;
+            color: #9ea4b6;
+            font-size: 13px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .scene-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .choice-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .choice-item input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 13px;
+        }
+
+        .choice-item select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 13px;
+        }
+
+        .choice-points {
+            width: 80px;
+        }
+
+        .delete-choice-btn {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: #ef4444;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .add-choice-btn {
+            width: 100%;
+            padding: 10px;
+            background: rgba(52, 199, 89, 0.1);
+            border: 2px dashed rgba(52, 199, 89, 0.3);
+            border-radius: 8px;
+            color: #34c759;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .add-scene-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(15, 98, 254, 0.1);
+            border: 2px dashed rgba(15, 98, 254, 0.3);
+            border-radius: 12px;
+            color: #0f62fe;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .action-buttons button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preview-btn {
+            background: rgba(255, 159, 10, 0.2);
+            color: #ff9f0a;
+            border: 1px solid rgba(255, 159, 10, 0.3);
+        }
+
+        .publish-btn {
+            background: #34c759;
+            color: white;
+        }
+
+        .publish-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ea4b6;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 1024px) {
+            .builder-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="ai-game-builder.html" style="margin-bottom: 24px;">← Back to AI Game Builder</a>
+            <p class="eyebrow">MindWave Theater</p>
+            <h1>🎭 Scenario Builder</h1>
+            <p class="lede">Create interactive branching storylines where students make decisions and see consequences.
+                Perfect for simulations, case studies, and decision-making practice!</p>
+        </header>
+
+        <div class="scenario-builder">
+            <!-- Game Info -->
+            <section class="panel">
+                <h2>Game Information</h2>
+                <div style="display: grid; gap: 16px;">
+                    <div>
+                        <label for="gameTitle">Game Title</label>
+                        <input id="gameTitle" type="text" required placeholder="e.g., Tech Interview Simulation">
+                    </div>
+                    <div>
+                        <label for="gameDescription">Description</label>
+                        <textarea id="gameDescription" rows="3" required
+                            placeholder="Describe the scenario and what students will learn..."></textarea>
+                    </div>
+                    <div>
+                        <label for="gameDifficulty">Difficulty</label>
+                        <select id="gameDifficulty">
+                            <option value="Easy">Easy</option>
+                            <option value="Normal" selected>Normal</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Builder Grid -->
+            <div class="builder-grid">
+                <!-- Scene List -->
+                <div class="builder-panel">
+                    <h3>📋 Scenes</h3>
+                    <div class="scene-list" id="sceneList">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                            </svg>
+                            <p>No scenes yet. Click "Add Scene" to start!</p>
+                        </div>
+                    </div>
+                    <button class="add-scene-btn" id="addSceneBtn">+ Add Scene</button>
+                </div>
+
+                <!-- Scene Editor -->
+                <div class="builder-panel">
+                    <h3>✏️ Edit Scene</h3>
+                    <div id="sceneEditor">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                            </svg>
+                            <p>Select a scene to edit</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="preview-btn" id="previewBtn">👁️ Preview</button>
+                <button class="publish-btn" id="publishBtn">🚀 Publish Scenario</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="faculty-create-scenario.js"></script></body>
+
+</html>

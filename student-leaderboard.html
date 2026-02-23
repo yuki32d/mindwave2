@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard — MindWave</title>
+    <meta name="description" content="See where you rank among your peers in MindWave.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="theme-init.js"></script>
+    <script src="sidebar.js"></script>
+</head>
+
+<body>
+    <div class="mw-app" id="mwApp">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
+            </div>
+
+            <div class="mw-sidebar-nav">
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+                    </a>
+                    <a href="student-courses.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
+                    </a>
+                    <a href="student-timetable.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
+                    </a>
+                    <a href="student-performance.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
+                    </a>
+                    <a href="student-leaderboard.html" class="mw-nav-item active">
+                        <span class="mw-nav-icon"><i data-lucide="trophy"></i></span> Leaderboard
+                        <span class="mw-nav-badge" style="font-size:10px;">HOT</span>
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="gamepad-2"></i></span> Play Games
+                    </a>
+                    <a href="student-community.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Community
+                    </a>
+                    <a href="student-achievements.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="award"></i></span> Achievements
+                    </a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="megaphone"></i></span> Events
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
+                    </a>
+                    <a href="student-study-recommendations.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
+                    </a>
+                    <a href="student-reports.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
+                    </a>
+                    <a href="student-settings.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
+            </div>
+
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                    <span class="mw-user-more">⋯</span>
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
+                        </div>
+                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
+                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
+                        <a href="student-notifications.html"><i data-lucide="bell"></i> Notifications</a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
+
+            <!-- TOPBAR -->
+            <header class="mw-topbar">
+                <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="mw-breadcrumb">Dashboard / <span>Leaderboard</span></div>
+                <div class="mw-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search players…" id="lbSearch">
+                </div>
+                <div class="mw-topbar-actions">
+                    <div class="mw-notif-wrap">
+                        <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="mw-notif-dot hidden" id="notificationBadge"></span>
+                        </div>
+                        <div class="mw-notif-dropdown" id="notificationDropdown"></div>
+                    </div>
+                    <div class="mw-icon-btn" id="settingsBtn" title="Settings">
+                        <i data-lucide="settings"></i>
+                    </div>
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle light/dark"
+                        aria-label="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <div class="mw-content">
+
+                <!-- Page header -->
+                <div class="greeting-row" style="margin-bottom:24px;">
+                    <div>
+                        <div class="greeting-name" style="font-size:1.6rem;">Leaderboard</div>
+                        <div class="greeting-date">Rankings · games &amp; academic performance</div>
+                    </div>
+                </div>
+
+                <!-- ── MY STATS BANNER ── -->
+                <div class="lb-banner">
+                    <div class="lb-banner-stat">
+                        <div class="lb-banner-val" id="myRank">#—</div>
+                        <div class="lb-banner-lbl">Your Rank</div>
+                    </div>
+                    <div class="lb-banner-divider"></div>
+                    <div class="lb-banner-stat">
+                        <div class="lb-banner-val" id="myPoints">—</div>
+                        <div class="lb-banner-lbl">Total Points</div>
+                    </div>
+                    <div class="lb-banner-divider"></div>
+                    <div class="lb-banner-stat">
+                        <div class="lb-banner-val" id="myGames">—</div>
+                        <div class="lb-banner-lbl">Games Played</div>
+                    </div>
+                    <div class="lb-banner-divider"></div>
+                    <div class="lb-banner-stat">
+                        <div class="lb-banner-val" id="myAccuracy">—</div>
+                        <div class="lb-banner-lbl">Avg Accuracy</div>
+                    </div>
+                </div>
+
+                <!-- ── FILTER BAR ── -->
+                <div class="lb-filter-bar">
+                    <div class="lb-filter-group" id="timeFilters">
+                        <button class="lb-filter-btn active" data-time="all">All Time</button>
+                        <button class="lb-filter-btn" data-time="month">This Month</button>
+                        <button class="lb-filter-btn" data-time="week">This Week</button>
+                        <button class="lb-filter-btn" data-time="today">Today</button>
+                    </div>
+                    <div class="lb-filter-group" id="gameFilters">
+                        <button class="lb-filter-btn active" data-game="all">All Games</button>
+                        <button class="lb-filter-btn" data-game="quiz">Quiz</button>
+                        <button class="lb-filter-btn" data-game="unjumble">Unjumble</button>
+                        <button class="lb-filter-btn" data-game="sorter">Sorter</button>
+                        <button class="lb-filter-btn" data-game="fillin">Fill-in</button>
+                        <button class="lb-filter-btn" data-game="sql">SQL</button>
+                    </div>
+                </div>
+
+                <!-- ── PODIUM ── -->
+                <div class="lb-podium" id="lbPodium">
+                    <!-- Filled by JS -->
+                </div>
+
+                <!-- ── RANKINGS TABLE ── -->
+                <div class="lb-table-wrap">
+                    <div class="lb-table-head">
+                        <span>Rank</span>
+                        <span>Player</span>
+                        <span>Points</span>
+                        <span>Games</span>
+                        <span>Accuracy</span>
+                    </div>
+                    <div id="lbTableBody">
+                        <!-- Rows filled by JS -->
+                    </div>
+                </div>
+
+            </div><!-- end mw-content -->
+        </div><!-- end mw-main -->
+    </div><!-- end mw-app -->
+
+    <!-- ── LOGOUT MODAL ── -->
+    <div id="logoutModal" class="mw-logout-overlay">
+        <div class="mw-logout-modal">
+            <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
+            <h3 class="mw-logout-title">Sign out?</h3>
+            <p class="mw-logout-sub">You'll need to log back in to access your dashboard.</p>
+            <div class="mw-logout-actions">
+                <button class="mw-logout-cancel"
+                    onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
+                <button class="mw-logout-confirm" onclick="doLogout()">
+                    <i data-lucide="log-out"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─────────────────────────────── STYLES ─────────────────────────────── -->
+    <style>
+        /* Banner */
+        .lb-banner {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            background: linear-gradient(135deg,
+                    rgba(99, 102, 241, .18) 0%,
+                    rgba(168, 85, 247, .18) 100%);
+            border: 1px solid rgba(99, 102, 241, .3);
+            border-radius: 18px;
+            padding: 24px 36px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .lb-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 80% 50%, rgba(168, 85, 247, .08), transparent 60%);
+            pointer-events: none;
+        }
+
+        .lb-banner-stat {
+            flex: 1;
+            text-align: center;
+        }
+
+        .lb-banner-val {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a5b4fc, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -.03em;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .lb-banner-lbl {
+            font-size: .75rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-weight: 600;
+        }
+
+        .lb-banner-divider {
+            width: 1px;
+            height: 40px;
+            background: var(--border);
+            flex-shrink: 0;
+        }
+
+        /* Filter Bar */
+        .lb-filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .lb-filter-group {
+            display: flex;
+            gap: 4px;
+            background: var(--surface, rgba(255, 255, 255, .03));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 5px;
+        }
+
+        .lb-filter-btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--muted);
+            font-size: .82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .18s;
+            white-space: nowrap;
+        }
+
+        .lb-filter-btn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, .05);
+        }
+
+        .lb-filter-btn.active {
+            background: #6366f1;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* ── Podium ── */
+        .lb-podium-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 0;
+            margin: 0 auto 36px;
+            padding: 0 8px;
+            max-width: 680px;
+        }
+
+        /* Each lane = card on top + step platform below */
+        .lb-podium-lane {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            max-width: 220px;
+            min-width: 140px;
+        }
+
+        .lb-podium-lane.rank-1 {
+            order: 2;
+        }
+
+        .lb-podium-lane.rank-2 {
+            order: 1;
+        }
+
+        .lb-podium-lane.rank-3 {
+            order: 3;
+        }
+
+        /* The card sitting above the step */
+        .lb-podium-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 18px 12px 14px;
+            border-radius: 16px 16px 0 0;
+            background: var(--card, rgba(255, 255, 255, .03));
+            border: 1px solid var(--border);
+            border-bottom: none;
+            position: relative;
+            transition: transform .2s;
+        }
+
+        .lb-podium-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .lb-podium-lane.rank-1 .lb-podium-card {
+            border-color: rgba(251, 191, 36, .45);
+            background: linear-gradient(160deg, rgba(251, 191, 36, .09) 0%, var(--card, rgba(255, 255, 255, .03)) 55%);
+            box-shadow: 0 0 30px rgba(251, 191, 36, .15);
+        }
+
+        .lb-podium-lane.rank-2 .lb-podium-card {
+            border-color: rgba(148, 163, 184, .35);
+        }
+
+        .lb-podium-lane.rank-3 .lb-podium-card {
+            border-color: rgba(180, 120, 80, .35);
+        }
+
+        /* Crown above rank-1 */
+        .lb-crown {
+            font-size: 1.5rem;
+            line-height: 1;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 6px rgba(251, 191, 36, .7));
+            animation: crownFloat 2.8s ease-in-out infinite;
+        }
+
+        @keyframes crownFloat {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Avatar circle */
+        .lb-podium-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .lb-podium-lane.rank-1 .lb-podium-avatar {
+            width: 68px;
+            height: 68px;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, .5), 0 0 20px rgba(251, 191, 36, .3);
+        }
+
+        .lb-podium-lane.rank-2 .lb-podium-avatar {
+            box-shadow: 0 0 0 2px rgba(148, 163, 184, .4);
+        }
+
+        .lb-podium-lane.rank-3 .lb-podium-avatar {
+            box-shadow: 0 0 0 2px rgba(180, 120, 80, .4);
+        }
+
+        .lb-podium-name {
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--text);
+            max-width: 130px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-bottom: 2px;
+            text-align: center;
+        }
+
+        .lb-podium-you {
+            font-size: .68rem;
+            color: #6366f1;
+            background: rgba(99, 102, 241, .12);
+            border-radius: 20px;
+            padding: 2px 8px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .lb-podium-pts {
+            font-size: 1.6rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 10px;
+            letter-spacing: -.03em;
+        }
+
+        .lb-podium-lane.rank-1 .lb-podium-pts {
+            color: #fbbf24;
+        }
+
+        .lb-podium-lane.rank-2 .lb-podium-pts {
+            color: #94a3b8;
+        }
+
+        .lb-podium-lane.rank-3 .lb-podium-pts {
+            color: #cd7f32;
+        }
+
+        .lb-podium-meta {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+        }
+
+        .lb-podium-meta-item {
+            text-align: center;
+        }
+
+        .lb-podium-meta-val {
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .lb-podium-meta-lbl {
+            font-size: .65rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        /* The step/platform below each card */
+        .lb-podium-step {
+            width: 100%;
+            border-radius: 0 0 4px 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 900;
+            color: rgba(255, 255, 255, .9);
+            letter-spacing: .02em;
+        }
+
+        .lb-podium-lane.rank-1 .lb-podium-step {
+            height: 70px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            box-shadow: 0 8px 24px rgba(251, 191, 36, .35);
+        }
+
+        .lb-podium-lane.rank-2 .lb-podium-step {
+            height: 48px;
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+            box-shadow: 0 4px 14px rgba(100, 116, 139, .25);
+        }
+
+        .lb-podium-lane.rank-3 .lb-podium-step {
+            height: 36px;
+            background: linear-gradient(135deg, #cd7f32, #a0522d);
+            box-shadow: 0 4px 14px rgba(160, 82, 45, .22);
+        }
+
+        /* Shimmer on #1 step */
+        .lb-podium-lane.rank-1 .lb-podium-step::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 30%, rgba(255, 255, 255, .18) 50%, transparent 70%);
+            border-radius: inherit;
+            animation: shimmer 2.4s ease-in-out infinite;
+        }
+
+        .lb-podium-step {
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* Table */
+        .lb-table-wrap {
+            background: var(--card, rgba(255, 255, 255, .02));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .lb-table-head {
+            display: grid;
+            grid-template-columns: 70px 1fr 130px 90px 100px;
+            padding: 12px 20px;
+            background: var(--surface-alt, rgba(255, 255, 255, .03));
+            border-bottom: 1px solid var(--border);
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: var(--muted);
+        }
+
+        .lb-row {
+            display: grid;
+            grid-template-columns: 70px 1fr 130px 90px 100px;
+            align-items: center;
+            padding: 13px 20px;
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+        .lb-row:last-child {
+            border-bottom: none;
+        }
+
+        .lb-row:hover {
+            background: rgba(255, 255, 255, .025);
+        }
+
+        .lb-row.is-me {
+            background: rgba(99, 102, 241, .07);
+            border-left: 3px solid #6366f1;
+            padding-left: 17px;
+        }
+
+        .lb-row-rank {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lb-rank-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .82rem;
+            font-weight: 800;
+            color: var(--muted);
+            background: var(--surface, rgba(255, 255, 255, .05));
+            border: 1px solid var(--border);
+        }
+
+        .lb-rank-badge.gold {
+            background: rgba(251, 191, 36, .15);
+            border-color: rgba(251, 191, 36, .3);
+            color: #fbbf24;
+        }
+
+        .lb-rank-badge.silver {
+            background: rgba(148, 163, 184, .12);
+            border-color: rgba(148, 163, 184, .25);
+            color: #94a3b8;
+        }
+
+        .lb-rank-badge.bronze {
+            background: rgba(180, 120, 80, .12);
+            border-color: rgba(180, 120, 80, .25);
+            color: #cd7f32;
+        }
+
+        .lb-row-player {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .lb-row-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: .85rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .lb-row-name {
+            font-size: .88rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .lb-row-you {
+            font-size: .7rem;
+            color: #6366f1;
+            font-weight: 600;
+            margin-left: 6px;
+            background: rgba(99, 102, 241, .12);
+            padding: 2px 7px;
+            border-radius: 20px;
+        }
+
+        .lb-row-pts {
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .lb-pts-bar-wrap {
+            height: 3px;
+            border-radius: 2px;
+            background: var(--border);
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .lb-pts-bar {
+            height: 100%;
+            border-radius: 2px;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+        }
+
+        .lb-row-games {
+            font-size: .88rem;
+            color: var(--muted);
+        }
+
+        .lb-row-acc {
+            font-size: .88rem;
+            font-weight: 700;
+        }
+
+        .lb-acc-hi {
+            color: #22c55e;
+        }
+
+        .lb-acc-mid {
+            color: #f59e0b;
+        }
+
+        .lb-acc-lo {
+            color: #ef4444;
+        }
+
+        /* Empty state */
+        .lb-empty {
+            padding: 60px 24px;
+            text-align: center;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+
+        /* Logout modal */
+        .mw-logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mw-logout-overlay.active {
+            display: flex;
+            animation: mwFadeIn .18s ease;
+        }
+
+        @keyframes mwFadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .mw-logout-modal {
+            background: var(--card, #1c1c2e);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: .75rem;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, .5);
+        }
+
+        .mw-logout-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 92, 92, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            color: #ff5c5c;
+        }
+
+        .mw-logout-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .mw-logout-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 .5rem;
+            color: var(--text, #fff);
+        }
+
+        .mw-logout-sub {
+            font-size: .875rem;
+            color: var(--text-muted, #aaa);
+            margin: 0 0 2rem;
+            line-height: 1.5;
+        }
+
+        .mw-logout-actions {
+            display: flex;
+            gap: .75rem;
+            width: 100%;
+        }
+
+        .mw-logout-cancel,
+        .mw-logout-confirm {
+            flex: 1;
+            padding: .75rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: .9rem;
+            cursor: pointer;
+            border: none;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .mw-logout-cancel {
+            background: var(--surface-alt, rgba(255, 255, 255, .06));
+            color: var(--text, #fff);
+        }
+
+        .mw-logout-cancel:hover {
+            background: rgba(255, 255, 255, .12);
+        }
+
+        .mw-logout-confirm {
+            background: #ff5c5c;
+            color: #fff;
+        }
+
+        .mw-logout-confirm:hover {
+            background: #ff3333;
+        }
+
+        @media (max-width:768px) {
+            .lb-banner {
+                flex-wrap: wrap;
+                padding: 20px;
+            }
+
+            .lb-banner-divider {
+                display: none;
+            }
+
+            .lb-table-head,
+            .lb-row {
+                grid-template-columns: 50px 1fr 90px 70px 80px;
+            }
+        }
+    </style>
+
+    <script>
+        // ── Auth ─────────────────────────────────────────────────────────────────
+        function clearAuthAndCache() {
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role'].forEach(k => localStorage.removeItem(k));
+        }
+        function doLogout() { clearAuthAndCache(); window.location.replace('marketing-site/student-login.html'); }
+        function performLogout() { document.getElementById('logoutModal').classList.add('active'); }
+
+        // ── Avatar colour palette ───────────────────────────────────────────────
+        const AVATAR_COLORS = ['#6366f1', '#a855f7', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#f43f5e', '#10b981', '#3b82f6'];
+        function avatarColor(name) {
+            let h = 0;
+            for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+            return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+        }
+        function initials(name) {
+            const p = name.trim().split(/\s+/);
+            return (p[0]?.[0] || '') + (p[1]?.[0] || '');
+        }
+
+        // ── Leaderboard data ────────────────────────────────────────────────────
+        let allData = [];
+        let myId = null;
+        let activeTime = 'all';
+        let activeGame = 'all';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Profile
+            const firstName = localStorage.getItem('firstName') || '';
+            const lastName = localStorage.getItem('lastName') || '';
+            const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Student';
+            const ini = (firstName[0] || '') + (lastName[0] || '') || 'ST';
+
+            document.querySelectorAll('#sidebarUserName,#dropdownUserName').forEach(el => el.textContent = firstName || fullName);
+            const avatarEl = document.getElementById('avatarInitials');
+            if (avatarEl) avatarEl.textContent = ini.toUpperCase();
+
+            // Profile dropdown
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', () => {
+                    const open = profileDropdown.style.display === 'flex';
+                    profileDropdown.style.display = open ? 'none' : 'flex';
+                });
+                document.addEventListener('click', e => {
+                    if (!profileToggle.contains(e.target) && !profileDropdown.contains(e.target))
+                        profileDropdown.style.display = 'none';
+                });
+            }
+
+            document.getElementById('signOutBtn').addEventListener('click', performLogout);
+
+            // Theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    const html = document.documentElement;
+                    const isDark = html.getAttribute('data-theme') === 'dark';
+                    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+                    localStorage.setItem('mw_theme', isDark ? 'light' : 'dark');
+                });
+            }
+
+            // Filter buttons
+            document.querySelectorAll('#timeFilters .lb-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#timeFilters .lb-filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeTime = btn.dataset.time;
+                    renderLeaderboard();
+                });
+            });
+            document.querySelectorAll('#gameFilters .lb-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#gameFilters .lb-filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeGame = btn.dataset.game;
+                    renderLeaderboard();
+                });
+            });
+
+            // Search
+            document.getElementById('lbSearch').addEventListener('input', e => {
+                const q = e.target.value.trim().toLowerCase();
+                renderLeaderboard(q);
+            });
+
+            if (window.lucide) lucide.createIcons();
+
+            await loadLeaderboard();
+        });
+
+        async function loadLeaderboard() {
+            const token = localStorage.getItem('token') || localStorage.getItem('mindwave_token');
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/student/leaderboard', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const d = await res.json();
+                    allData = d.leaderboard || d.data || [];
+                    myId = d.myId || d.userId || null;
+
+                    // Personal stats from me entry
+                    const me = myId
+                        ? allData.find(x => String(x._id || x.id) === String(myId))
+                        : allData.find(x => x.isMe);
+
+                    if (me) {
+                        const myRankIdx = allData.findIndex(x => (x._id || x.id) === (me._id || me.id));
+                        document.getElementById('myRank').textContent = `#${myRankIdx + 1}`;
+                        document.getElementById('myPoints').textContent = (me.points ?? me.totalPoints ?? 0).toLocaleString();
+                        document.getElementById('myGames').textContent = me.games ?? me.gamesPlayed ?? 0;
+                        document.getElementById('myAccuracy').textContent = `${me.accuracy ?? me.avgAccuracy ?? 0}%`;
+                    }
+                } else {
+                    useFallbackData();
+                }
+            } catch (_) {
+                useFallbackData();
+            }
+
+            renderLeaderboard();
+        }
+
+        function useFallbackData() {
+            const firstName = localStorage.getItem('firstName') || 'You';
+            const lastName = localStorage.getItem('lastName') || '';
+            const myName = [firstName, lastName].filter(Boolean).join(' ');
+            allData = [
+                { id: 'me', name: myName, points: 836, games: 24, accuracy: 35, isMe: true },
+                { id: '2', name: 'Jeeba', points: 100, games: 1, accuracy: 100 },
+            ];
+            myId = 'me';
+            document.getElementById('myRank').textContent = '#1';
+            document.getElementById('myPoints').textContent = '836';
+            document.getElementById('myGames').textContent = '24';
+            document.getElementById('myAccuracy').textContent = '35%';
+        }
+
+        function renderLeaderboard(searchQuery = '') {
+            let data = [...allData];
+
+            // Filter by search
+            if (searchQuery) {
+                data = data.filter(p => (p.name || '').toLowerCase().includes(searchQuery));
+            }
+
+            // Sort by points desc
+            data.sort((a, b) => (b.points ?? b.totalPoints ?? 0) - (a.points ?? a.totalPoints ?? 0));
+
+            const maxPts = data[0] ? (data[0].points ?? data[0].totalPoints ?? 1) : 1;
+
+            renderPodium(data.slice(0, 3), maxPts);
+            renderTable(data, maxPts);
+        }
+
+        function renderPodium(top3, maxPts) {
+            const el = document.getElementById('lbPodium');
+            if (!top3.length) { el.innerHTML = ''; el.className = 'lb-podium'; return; }
+
+            el.className = 'lb-podium-wrap';
+
+            // Visual order: 2nd | 1st | 3rd
+            const slots = top3.length === 1 ? [top3[0]]
+                : top3.length === 2 ? [top3[1], top3[0]]
+                    : [top3[1], top3[0], top3[2]];
+
+            const stepLabels = ['#2', '#1', '#3'];
+
+            el.innerHTML = slots.map((p) => {
+                const origIdx = top3.indexOf(p);  // 0=1st, 1=2nd, 2=3rd
+                const rankNum = origIdx + 1;
+                const pts = p.points ?? p.totalPoints ?? 0;
+                const games = p.games ?? p.gamesPlayed ?? 0;
+                const acc = p.accuracy ?? p.avgAccuracy ?? 0;
+                const ini = initials(p.name || '?');
+                const col = avatarColor(p.name || '?');
+                const isMe = p.isMe || String(p.id || p._id) === String(myId);
+                const accCol = acc >= 80 ? '#22c55e' : acc >= 50 ? '#f59e0b' : '#ef4444';
+                const crown = rankNum === 1 ? '<div class="lb-crown">👑</div>' : '';
+                return `
+<div class="lb-podium-lane rank-${rankNum}">
+    <div class="lb-podium-card">
+        ${crown}
+        <div class="lb-podium-avatar" style="background:${col}">${ini.toUpperCase()}</div>
+        <div class="lb-podium-name">${p.name}</div>
+        ${isMe ? '<div class="lb-podium-you">You</div>' : ''}
+        <div class="lb-podium-pts">${pts.toLocaleString()}</div>
+        <div class="lb-podium-meta">
+            <div class="lb-podium-meta-item">
+                <div class="lb-podium-meta-val">${games}</div>
+                <div class="lb-podium-meta-lbl">Games</div>
+            </div>
+            <div class="lb-podium-meta-item">
+                <div class="lb-podium-meta-val" style="color:${accCol}">${acc}%</div>
+                <div class="lb-podium-meta-lbl">Accuracy</div>
+            </div>
+        </div>
+    </div>
+    <div class="lb-podium-step">#${rankNum}</div>
+</div>`;
+            }).join('');
+        }
+
+        function renderTable(data, maxPts) {
+            const body = document.getElementById('lbTableBody');
+            if (!data.length) {
+                body.innerHTML = '<div class="lb-empty">No players found.</div>';
+                return;
+            }
+
+            body.innerHTML = data.map((p, i) => {
+                const rank = i + 1;
+                const pts = p.points ?? p.totalPoints ?? 0;
+                const games = p.games ?? p.gamesPlayed ?? 0;
+                const acc = p.accuracy ?? p.avgAccuracy ?? 0;
+                const ini = initials(p.name || '?');
+                const col = avatarColor(p.name || '?');
+                const isMe = p.isMe || String(p.id || p._id) === String(myId);
+                const pct = Math.round((pts / maxPts) * 100);
+                const badgeClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+                const accClass = acc >= 80 ? 'lb-acc-hi' : acc >= 50 ? 'lb-acc-mid' : 'lb-acc-lo';
+
+                return `
+            <div class="lb-row${isMe ? ' is-me' : ''}">
+                <div class="lb-row-rank">
+                    <div class="lb-rank-badge ${badgeClass}">${rank}</div>
+                </div>
+                <div class="lb-row-player">
+                    <div class="lb-row-avatar" style="background:${col};">${ini.toUpperCase()}</div>
+                    <div>
+                        <span class="lb-row-name">${p.name}</span>
+                        ${isMe ? '<span class="lb-row-you">You</span>' : ''}
+                    </div>
+                </div>
+                <div>
+                    <div class="lb-row-pts">${pts.toLocaleString()}</div>
+                    <div class="lb-pts-bar-wrap"><div class="lb-pts-bar" style="width:${pct}%;"></div></div>
+                </div>
+                <div class="lb-row-games">${games}</div>
+                <div class="lb-row-acc ${accClass}">${acc}%</div>
+            </div>`;
+            }).join('');
+        }
+    </script>
+
+    <script src="auth-guard.js"></script>
+</body>
+
+</html>

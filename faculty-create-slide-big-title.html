@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Big Title Slide – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <!-- Back Button -->
+                <div style="margin-bottom: 32px;">
+                    <button class="secondary-btn" id="backBtn"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
+                        Back</button>
+                </div>
+
+                <!-- Page Header -->
+                <div style="text-align: center; margin-bottom: 48px;">
+                    <div
+                        style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-bottom: 12px;">
+                        <h1 style="font-size: 36px; font-weight: 700; color: #f5f7ff; margin: 0;">📰 Create Big Title
+                            Slide</h1>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Slide</button>
+                    </div>
+                    <p style="color: #9ea4b6; font-size: 16px; margin: 0;">Large, impactful title slide for section
+                        breaks</p>
+                </div>
+
+                <div class="grid two">
+                    <section class="panel">
+                        <h2>📝 Slide Content</h2>
+                        <form id="slideForm">
+                            <div><label for="mainTitle">Main Title</label><input type="text" id="mainTitle"
+                                    placeholder="e.g., Chapter 3" required></div>
+                            <div><label for="subtitle">Subtitle (Optional)</label><input type="text" id="subtitle"
+                                    placeholder="e.g., Advanced Concepts"></div>
+                            <div><label for="backgroundColor">Background Color</label>
+                                <select id="backgroundColor">
+                                    <option value="dark">Dark</option>
+                                    <option value="light">Light</option>
+                                    <option value="blue">Blue</option>
+                                    <option value="green">Green</option>
+                                    <option value="purple">Purple</option>
+                                </select>
+                            </div>
+                            <div><label for="displayDuration">Display Duration (seconds)</label><input type="number"
+                                    id="displayDuration" value="10" min="5" max="300"></div>
+                        </form>
+                    </section>
+                    <section class="panel">
+                        <h2>👁️ Live Preview</h2>
+                        <div id="slidePreview"
+                            style="aspect-ratio: 16/9; background: #1E2433; border-radius: 16px; padding: 48px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
+                            <h1 id="previewTitle"
+                                style="font-size: 72px; font-weight: 900; color: #f5f7ff; margin-bottom: 16px; line-height: 1.1;">
+                                Your Title</h1>
+                            <p id="previewSubtitle" style="font-size: 24px; color: #9ea4b6;"></p>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="loading-spinner.js"></script>
+    <script>
+        const bgColors = { dark: '#1E2433', light: '#F5F7FF', blue: '#0F62FE', green: '#10B981', purple: '#8B5CF6' };
+        const textColors = { dark: { title: '#f5f7ff', subtitle: '#9ea4b6' }, light: { title: '#1E2433', subtitle: '#6e6e73' }, blue: { title: '#FFFFFF', subtitle: '#E0E7FF' }, green: { title: '#FFFFFF', subtitle: '#D1FAE5' }, purple: { title: '#FFFFFF', subtitle: '#EDE9FE' } };
+        document.addEventListener('DOMContentLoaded', () => {
+            // Back button event listener
+            document.getElementById('backBtn').addEventListener('click', () => window.history.back());
+
+            ['mainTitle', 'subtitle', 'backgroundColor'].forEach(id => document.getElementById(id).addEventListener(id === 'backgroundColor' ? 'change' : 'input', updatePreview));
+            document.getElementById('publishBtn').addEventListener('click', publishSlide); updatePreview();
+        });
+        function updatePreview() {
+            const title = document.getElementById('mainTitle').value.trim() || 'Your Title';
+            const subtitle = document.getElementById('subtitle').value.trim();
+            const bgColor = document.getElementById('backgroundColor').value;
+            const preview = document.getElementById('slidePreview');
+            const previewTitle = document.getElementById('previewTitle');
+            const previewSubtitle = document.getElementById('previewSubtitle');
+            preview.style.background = bgColors[bgColor];
+            previewTitle.textContent = title; previewTitle.style.color = textColors[bgColor].title;
+            previewSubtitle.textContent = subtitle; previewSubtitle.style.color = textColors[bgColor].subtitle;
+        }
+        async function publishSlide() {
+            const title = document.getElementById('mainTitle').value.trim();
+            if (!title) { alert('Please enter a main title'); return; }
+            const slideData = { title, subtitle: document.getElementById('subtitle').value.trim(), backgroundColor: document.getElementById('backgroundColor').value, displayDuration: parseInt(document.getElementById('displayDuration').value), slideType: 'big-title', type: 'slide', createdAt: new Date().toISOString() };
+            try {
+                const response = await fetch('/api/games', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify(slideData) });
+                if (response.ok) { alert('✅ Slide published successfully!'); window.location.href = 'admin.html'; } else throw new Error('Failed to publish slide');
+            } catch (error) { console.error('Error publishing slide:', error); alert('❌ Error publishing slide. Please try again.'); }
+        }
+    </script>
+</body>
+
+</html>

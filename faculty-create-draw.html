@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Draw & Sketch – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        if (!checkAdminAuth()) {
+            // Will redirect if not authenticated
+        }
+    </script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <!-- Header -->
+        <header class="topbar">
+            <div class="topbar-brand">
+                <span>🌊</span>
+                <span>MindwaveIo</span>
+            </div>
+            <div class="topbar-search">
+                <span>🔍</span>
+                <input type="text" placeholder="Search...">
+            </div>
+            <div class="topbar-actions">
+                <span id="adminNotificationBtn" style="cursor: pointer;" title="Notifications">🔔</span>
+                <span id="adminSettingsBtn" style="cursor: pointer;" title="Settings">⚙️</span>
+                <div class="profile-toggle" id="profileToggle">
+                    <span>👤</span>
+                    <small>Account</small>
+                </div>
+            </div>
+        </header>
+
+
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <div class="main-header">
+                    <div>
+                        <h1>🎨 Create Draw & Sketch</h1>
+                        <p>Students draw, sketch, or annotate on a digital canvas</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="secondary-btn" onclick="window.history.back()">← Back</button>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Activity</button>
+                    </div>
+                </div>
+
+                <!-- Drawing Configuration -->
+                <div class="grid two">
+                    <section class="panel">
+                        <h2>⚙️ Activity Settings</h2>
+                        <form id="drawingForm">
+                            <div>
+                                <label for="activityTitle">Activity Title</label>
+                                <input type="text" id="activityTitle" placeholder="e.g., Draw a Cell Diagram" required>
+                            </div>
+
+                            <div>
+                                <label for="promptText">Prompt/Instructions</label>
+                                <textarea id="promptText" rows="3"
+                                    placeholder="e.g., Draw and label the parts of a plant cell" required></textarea>
+                            </div>
+
+                            <div>
+                                <label for="backgroundUpload">Background Image (Optional)</label>
+                                <input type="file" id="backgroundUpload" accept="image/*"
+                                    style="padding: 12px; background: var(--card-darker); border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; cursor: pointer;">
+                                <small style="color: #9ea4b6; display: block; margin-top: 8px;">Students can draw over
+                                    this image</small>
+                            </div>
+
+                            <div>
+                                <label for="canvasSize">Canvas Size</label>
+                                <select id="canvasSize">
+                                    <option value="800x600">Standard (800x600)</option>
+                                    <option value="1024x768">Large (1024x768)</option>
+                                    <option value="600x800">Portrait (600x800)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="timeLimit">Time Limit (minutes, optional)</label>
+                                <input type="number" id="timeLimit" placeholder="e.g., 10" min="1" max="120">
+                                <small style="color: #9ea4b6; display: block; margin-top: 4px;">Leave empty for no time
+                                    limit</small>
+                            </div>
+
+                            <div style="display: flex; gap: 16px; flex-direction: column;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="allowText" checked>
+                                    <span>Allow text labels</span>
+                                </label>
+
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="allowShapes" checked>
+                                    <span>Allow shapes (circles, rectangles)</span>
+                                </label>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Live Preview -->
+                    <section class="panel">
+                        <h2>👁️ Student View Preview</h2>
+                        <div id="previewContainer"
+                            style="background: var(--card-darker); border-radius: 20px; padding: 40px; min-height: 500px;">
+                            <h3 id="previewTitle"
+                                style="font-size: 24px; margin-bottom: 16px; color: #f5f7ff; text-align: center;">
+                                Your activity will appear here</h3>
+                            <p id="previewPrompt"
+                                style="color: #9ea4b6; text-align: center; margin-bottom: 24px; min-height: 24px;"></p>
+
+                            <div style="text-align: center; margin-bottom: 16px;">
+                                <div id="toolsPreview"
+                                    style="display: inline-flex; gap: 8px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">
+                                    <div
+                                        style="width: 40px; height: 40px; background: #00D9FF; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                        ✏️</div>
+                                    <div
+                                        style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                        🗑️</div>
+                                    <div
+                                        style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                        🎨</div>
+                                    <div id="textTool"
+                                        style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                        A</div>
+                                    <div id="shapesTool"
+                                        style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                        ⬜</div>
+                                </div>
+                            </div>
+
+                            <canvas id="previewCanvas"
+                                style="width: 100%; max-width: 600px; height: 400px; background: #FFFFFF; border-radius: 12px; display: block; margin: 0 auto; box-shadow: 0 8px 32px rgba(0,0,0,0.4);"></canvas>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="loading-spinner.js"></script>
+    <script src="faculty-create-draw.js"></script>
+</body>
+
+</html>

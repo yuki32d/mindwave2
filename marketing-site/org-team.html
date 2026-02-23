@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Members - MindWave</title>
+    <link rel="stylesheet" href="css/modern-dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🌊</span>
+                    <span class="logo-text">MindWave</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-label">MAIN MENU</span>
+                    <a href="modern-dashboard.html" class="nav-item">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="org-analytics.html" class="nav-item">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                    <a href="org-billing.html" class="nav-item">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Billing</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">MANAGEMENT</span>
+                    <a href="org-team.html" class="nav-item active">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Team Members</span>
+                    </a>
+                    <a href="org-students.html" class="nav-item">
+                        <span class="nav-icon">🎓</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a href="org-games.html" class="nav-item">
+                        <span class="nav-icon">🎮</span>
+                        <span class="nav-text">Games</span>
+                    </a>
+                    <a href="org-settings.html" class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">SUPPORT</span>
+                    <a href="#help" class="nav-item">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">Help Center</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="search-container">
+                    <input type="text" placeholder="Search team members..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-create">
+                        <span>➕</span>
+                        <span>Invite Member</span>
+                    </button>
+                    <button class="btn-icon">🔔</button>
+                    <div class="user-avatar">
+                        <img src="https://i.pravatar.cc/40?img=5" alt="User">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Title -->
+            <div class="page-header">
+                <h1>Team Members</h1>
+                <p>Manage your organization's faculty and administrators</p>
+            </div>
+
+            <!-- Team Stats -->
+            <div class="stats-row" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <div class="stat-label">Total Members</div>
+                    <div class="stat-value">5</div>
+                    <div class="stat-change positive">
+                        <span class="change-icon">↗</span>
+                        <span>2 added this month</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active Today</div>
+                    <div class="stat-value">4</div>
+                    <div class="stat-change positive">
+                        <span>80% activity rate</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Members List -->
+            <div class="settings-card">
+                <div class="settings-card-header">
+                    <h2>All Team Members</h2>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <select class="form-input" style="width: auto;">
+                            <option>All Roles</option>
+                            <option>Admin</option>
+                            <option>Faculty</option>
+                        </select>
+                        <select class="form-input" style="width: auto;">
+                            <option>All Status</option>
+                            <option>Active</option>
+                            <option>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="settings-card-body" style="padding: 0;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Role</th>
+                                <th>Email</th>
+                                <th>Joined</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <img src="https://i.pravatar.cc/40?img=1" alt="Member">
+                                        <div>
+                                            <div class="member-name">Sarah Johnson</div>
+                                            <div class="member-title">Lead Instructor</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="role-badge admin">Admin</span></td>
+                                <td>sarah.j@techedu.com</td>
+                                <td>Jan 15, 2024</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>
+                                    <button class="action-btn-small">Edit</button>
+                                    <button class="action-btn-small danger">Remove</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <img src="https://i.pravatar.cc/40?img=2" alt="Member">
+                                        <div>
+                                            <div class="member-name">Michael Chen</div>
+                                            <div class="member-title">Math Teacher</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="role-badge faculty">Faculty</span></td>
+                                <td>michael.c@techedu.com</td>
+                                <td>Feb 20, 2024</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>
+                                    <button class="action-btn-small">Edit</button>
+                                    <button class="action-btn-small danger">Remove</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <img src="https://i.pravatar.cc/40?img=3" alt="Member">
+                                        <div>
+                                            <div class="member-name">Emily Rodriguez</div>
+                                            <div class="member-title">Science Teacher</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="role-badge faculty">Faculty</span></td>
+                                <td>emily.r@techedu.com</td>
+                                <td>Mar 10, 2024</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>
+                                    <button class="action-btn-small">Edit</button>
+                                    <button class="action-btn-small danger">Remove</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <img src="https://i.pravatar.cc/40?img=4" alt="Member">
+                                        <div>
+                                            <div class="member-name">David Kim</div>
+                                            <div class="member-title">English Teacher</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="role-badge faculty">Faculty</span></td>
+                                <td>david.k@techedu.com</td>
+                                <td>Apr 5, 2024</td>
+                                <td><span class="status-badge inactive">Inactive</span></td>
+                                <td>
+                                    <button class="action-btn-small">Edit</button>
+                                    <button class="action-btn-small danger">Remove</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <img src="https://i.pravatar.cc/40?img=5" alt="Member">
+                                        <div>
+                                            <div class="member-name">Alex Thompson</div>
+                                            <div class="member-title">Content Creator</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="role-badge admin">Admin</span></td>
+                                <td>alex.t@techedu.com</td>
+                                <td>May 12, 2024</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>
+                                    <button class="action-btn-small">Edit</button>
+                                    <button class="action-btn-small danger">Remove</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div></body>
+
+</html>

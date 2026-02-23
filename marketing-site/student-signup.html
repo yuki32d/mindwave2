@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Sign Up – Mindwave</title>
+    <style>
+        :root {
+            /* Student Theme Colors */
+            --cyan-bright: #00D9FF;
+            --purple-bright: #8B5CF6;
+            --student-cyan: #06B6D4;
+            --student-purple: #8B5CF6;
+            --bg-deep: #1A1F3A;
+            --card-dark: #1E2433;
+            --text-white: #FFFFFF;
+            --text-gray: #9CA3AF;
+            --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.35);
+            --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.45);
+            --shadow-glow: 0 0 40px rgba(6, 182, 212, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            color: var(--text-white);
+        }
+
+        /* Animated Background */
+        .background-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('../background.jpg') center/cover no-repeat fixed;
+            filter: brightness(0.4) blur(2px);
+            transform: scale(1.1);
+            animation: subtleZoom 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes subtleZoom {
+            0% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1.15);
+            }
+        }
+
+        .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                    rgba(6, 182, 212, 0.15) 0%,
+                    rgba(139, 92, 246, 0.15) 50%,
+                    rgba(26, 31, 58, 0.8) 100%);
+        }
+
+        /* Main Container */
+        .auth-container {
+            position: relative;
+            z-index: 1;
+            width: min(950px, 92%);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl), var(--shadow-glow);
+            backdrop-filter: blur(20px);
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Left Hero Section - Student Theme */
+        .auth-hero {
+            padding: 50px 40px;
+            background: linear-gradient(160deg,
+                    rgba(6, 182, 212, 0.2) 0%,
+                    rgba(139, 92, 246, 0.2) 100%);
+            backdrop-filter: blur(40px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .portal-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--cyan-bright);
+            margin-bottom: 24px;
+        }
+
+        .portal-badge::before {
+            content: '◆';
+            font-size: 10px;
+        }
+
+        .hero-title {
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .hero-title .highlight {
+            background: linear-gradient(135deg, var(--cyan-bright) 0%, var(--purple-bright) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 16px;
+            color: var(--text-gray);
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--cyan-bright), var(--purple-bright));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Right Form Section */
+        .auth-form-section {
+            padding: 50px 40px;
+            background: rgba(30, 36, 51, 0.95);
+            backdrop-filter: blur(40px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-header {
+            margin-bottom: 32px;
+        }
+
+        .form-header h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-white);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--cyan-bright);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--cyan-bright);
+        }
+
+        .checkbox-group label {
+            font-size: 13px;
+            color: var(--text-gray);
+            line-height: 1.5;
+        }
+
+        .checkbox-group a {
+            color: var(--cyan-bright);
+            text-decoration: none;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            padding: 12px 16px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            color: #FCA5A5;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--cyan-bright) 0%, var(--purple-bright) 100%);
+            border: none;
+            border-radius: 12px;
+            color: var(--text-white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 16px rgba(6, 182, 212, 0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(6, 182, 212, 0.4);
+        }
+
+        .auth-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .auth-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .auth-links a:hover {
+            color: var(--cyan-bright);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .back-link a {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: var(--text-white);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+                width: 95%;
+            }
+
+            .auth-hero {
+                display: none;
+            }
+
+            .auth-form-section {
+                padding: 40px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <!-- Background -->
+    <div class="background-wrapper">
+        <div class="background-image"></div>
+        <div class="gradient-overlay"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="auth-container">
+        <!-- Left Hero Section -->
+        <section class="auth-hero">
+            <div class="portal-badge">◆ STUDENT PORTAL</div>
+            <h1 class="hero-title">
+                Welcome, <span class="highlight">Student!</span>
+            </h1>
+            <p class="hero-subtitle">
+                Create your account and start your learning journey with AI-powered games and interactive courses.
+            </p>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Access all your courses instantly</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Play AI-powered learning games</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Track your progress & achievements</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Form Section -->
+        <section class="auth-form-section">
+            <div class="form-header">
+                <h2>Create Account</h2>
+                <p>Join thousands of students learning with MindWave.</p>
+            </div>
+
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" placeholder="John Doe" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="you@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Create a strong password" required>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">
+                        I agree to the <a href="terms.html" target="_blank">Terms</a> and
+                        <a href="privacy.html" target="_blank">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <div class="error-message" id="error-message"></div>
+
+                <button type="submit" class="login-btn">Create Account →</button>
+
+                <div class="auth-links">
+                    <a href="student-forgot-password.html">Forgot password?</a>
+                    <a href="admin-signup.html">Admin signup</a>
+                </div>
+
+                <div class="back-link">
+                    <a href="student-login.html">← Back to login</a>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, role: 'student' })
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    // Show success message
+                    alert('✅ Signup successful! You can now login with your credentials.');
+                    // Redirect to student login page
+                    window.location.href = 'student-login.html';
+                } else {
+                    errorMessage.textContent = data.message || 'Signup failed';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.style.display = 'block';
+            }
+        });
+    </script></body>
+
+</html>

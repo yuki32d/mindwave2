@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Charts - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <style>
+        .charts-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .chart-card h3 {
+            margin: 0 0 24px;
+            font-size: 20px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .filter-btn:hover {
+            background: rgba(77, 160, 255, 0.2);
+            border-color: rgba(77, 160, 255, 0.5);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            border-color: transparent;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="student-performance.html">← Back to Performance</a>
+            <p class="eyebrow">ANALYTICS</p>
+            <h1>Performance Charts</h1>
+            <p class="lede">Interactive visualizations of your academic progress</p>
+        </header>
+
+        <div class="charts-container">
+            <!-- Time Range Filters -->
+            <div class="filters">
+                <button class="filter-btn" onclick="changeTimeRange('7days')">Last 7 Days</button>
+                <button class="filter-btn active" onclick="changeTimeRange('30days')">Last 30 Days</button>
+                <button class="filter-btn" onclick="changeTimeRange('semester')">This Semester</button>
+                <button class="filter-btn" onclick="changeTimeRange('year')">This Year</button>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="charts-grid">
+                <!-- Grade Trends -->
+                <div class="chart-card">
+                    <h3>📈 Grade Trends Over Time</h3>
+                    <div class="chart-container">
+                        <canvas id="gradeTrendsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Subject Performance Radar -->
+                <div class="chart-card">
+                    <h3>🎯 Subject Performance</h3>
+                    <div class="chart-container">
+                        <canvas id="subjectRadarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Assignment Completion -->
+                <div class="chart-card">
+                    <h3>✅ Assignment Completion Rate</h3>
+                    <div class="chart-container">
+                        <canvas id="completionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Attendance Trend -->
+                <div class="chart-card">
+                    <h3>📊 Attendance Trend</h3>
+                    <div class="chart-container">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Subject-wise Grades (Bar Chart) -->
+                <div class="chart-card full-width">
+                    <h3>📚 Subject-wise Grade Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="subjectGradesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'student-login.html';
+        }
+
+        let currentTimeRange = '30days';
+        let charts = {};
+
+        // Chart.js default config
+        Chart.defaults.color = '#9ea4b6';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+        // Initialize all charts
+        function initializeCharts() {
+            // Grade Trends Line Chart
+            const gradeTrendsCtx = document.getElementById('gradeTrendsChart').getContext('2d');
+            charts.gradeTrends = new Chart(gradeTrendsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Average Grade',
+                        data: [85, 88, 87, 90],
+                        borderColor: '#4da0ff',
+                        backgroundColor: 'rgba(77, 160, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Subject Performance Radar Chart
+            const subjectRadarCtx = document.getElementById('subjectRadarChart').getContext('2d');
+            charts.subjectRadar = new Chart(subjectRadarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Math', 'Science', 'English', 'History', 'Art'],
+                    datasets: [{
+                        label: 'Performance',
+                        data: [92, 88, 85, 90, 87],
+                        borderColor: '#a78bfa',
+                        backgroundColor: 'rgba(167, 139, 250, 0.2)',
+                        pointBackgroundColor: '#a78bfa'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Assignment Completion Bar Chart
+            const completionCtx = document.getElementById('completionChart').getContext('2d');
+            charts.completion = new Chart(completionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Completion %',
+                        data: [95, 88, 92, 100],
+                        backgroundColor: '#00ff88',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Attendance Trend Line Chart
+            const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+            charts.attendance = new Chart(attendanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Attendance %',
+                        data: [100, 95, 100, 90],
+                        borderColor: '#ffaa00',
+                        backgroundColor: 'rgba(255, 170, 0, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Subject Grades Bar Chart
+            const subjectGradesCtx = document.getElementById('subjectGradesChart').getContext('2d');
+            charts.subjectGrades = new Chart(subjectGradesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mathematics', 'Science', 'English', 'History', 'Art', 'Physical Ed'],
+                    datasets: [{
+                        label: 'Current Grade',
+                        data: [92, 88, 85, 90, 87, 95],
+                        backgroundColor: [
+                            '#4da0ff',
+                            '#a78bfa',
+                            '#00ff88',
+                            '#ffaa00',
+                            '#ff4444',
+                            '#00d4ff'
+                        ],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Change time range filter
+        function changeTimeRange(range) {
+            currentTimeRange = range;
+
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // TODO: Fetch new data based on time range
+            console.log('Changed time range to:', range);
+        }
+
+        // Load data from API
+        async function loadChartData() {
+            try {
+                const API_BASE = window.location.hostname === 'localhost'
+                    ? 'http://localhost:8081'
+                    : 'https://mindwave2.onrender.com';
+
+                const response = await fetch(`${API_BASE}/api/student/performance-charts?range=${currentTimeRange}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update charts with real data
+                    updateChartsWithData(data);
+                } else {
+                    console.log('Using placeholder data');
+                }
+            } catch (error) {
+                console.error('Error loading chart data:', error);
+                console.log('Using placeholder data');
+            }
+        }
+
+        function updateChartsWithData(data) {
+            // TODO: Update charts with real data from API
+            console.log('Chart data:', data);
+        }
+
+        // Initialize on page load
+        initializeCharts();
+        loadChartData();
+    </script>
+</body>
+
+</html>

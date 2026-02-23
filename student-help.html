@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center – Mindwave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+    <style>
+        :root {
+            --blue: #0f62fe;
+            --purple: #8a3ffc;
+            --dark: #0b0b0f;
+            --gray-900: #111319;
+            --gray-800: #1c1f26;
+            --text-primary: #f5f7ff;
+            --text-muted: #9ea4b6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Inter", "Segoe UI", Arial, sans-serif;
+            background: radial-gradient(circle at top right, rgba(143, 115, 255, 0.25), transparent 50%),
+                radial-gradient(circle at bottom left, rgba(15, 98, 254, 0.25), transparent 50%),
+                #02030a;
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 32px 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 12px;
+            background: linear-gradient(120deg, var(--blue), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        .tour-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(120deg, var(--blue), var(--purple));
+            color: white;
+            border: none;
+            border-radius: 999px;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 24px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .tour-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(15, 98, 254, 0.4);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 32px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--blue);
+        }
+
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .help-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 32px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .help-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .help-card h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .help-card .icon {
+            font-size: 32px;
+        }
+
+        .faq-item {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .faq-answer {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .step-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step-list li {
+            counter-increment: step-counter;
+            margin-bottom: 16px;
+            padding-left: 40px;
+            position: relative;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: linear-gradient(120deg, var(--blue), var(--purple));
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .contact-info {
+            background: linear-gradient(135deg, rgba(15, 98, 254, 0.1), rgba(138, 63, 252, 0.1));
+            border: 1px solid rgba(15, 98, 254, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .contact-info h3 {
+            margin-bottom: 12px;
+        }
+
+        .contact-info p {
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .contact-info a {
+            color: var(--blue);
+            text-decoration: none;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 36px;
+            }
+
+            .help-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <!-- Intro.js for Website Tour -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/introjs.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/intro.min.js"></script>
+</head>
+
+<body data-theme="dark">
+    <div class="container">
+        <a href="homepage.html" class="back-link">← Back to Dashboard</a>
+
+        <div class="header">
+            <h1>Help Center</h1>
+            <p>Everything you need to get started and succeed on Mindwave</p>
+            <button class="tour-button" id="startTourBtn">
+                🎓 Take Website Tour
+            </button>
+        </div>
+
+        <div class="help-grid">
+            <!-- Getting Started -->
+            <div class="help-card">
+                <h2><span class="icon">🚀</span> Getting Started</h2>
+                <ol class="step-list">
+                    <li>Login with your campus email (@cmrit.ac.in)</li>
+                    <li>Explore the dashboard to see announcements and new games</li>
+                    <li>Click on "Games" in the sidebar to view all available games</li>
+                    <li>Play games to earn points and compete on the leaderboard</li>
+                    <li>Check your profile to track your progress</li>
+                </ol>
+            </div>
+
+            <!-- FAQs -->
+            <div class="help-card">
+                <h2><span class="icon">❓</span> Frequently Asked Questions</h2>
+                <div class="faq-item">
+                    <div class="faq-question">How do I play games?</div>
+                    <div class="faq-answer">Go to the Games section from the sidebar, click on any game card, then click
+                        the "Play" button.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Where can I see my scores?</div>
+                    <div class="faq-answer">Check the Leaderboard section to see your ranking and compare with
+                        classmates.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">How do I reset my password?</div>
+                    <div class="faq-answer">Click "Forgot Password" on the login page and enter your campus email to
+                        receive a reset code.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Can I access course materials?</div>
+                    <div class="faq-answer">Yes! Go to the Courses section to view notes, PDFs, and other materials
+                        uploaded by your instructors.</div>
+                </div>
+            </div>
+
+            <!-- Features Guide -->
+            <div class="help-card">
+                <h2><span class="icon">✨</span> Platform Features</h2>
+                <div class="faq-item">
+                    <div class="faq-question">🎮 Interactive Games</div>
+                    <div class="faq-answer">Play quizzes, SQL builders, code debuggers, and more to learn while having
+                        fun.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">🏆 Leaderboard</div>
+                    <div class="faq-answer">Compete with your classmates and track your progress over time.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">💬 AI Chatbot</div>
+                    <div class="faq-answer">Get instant help and answers to your questions from our AI assistant.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">👥 Community</div>
+                    <div class="faq-answer">Connect with peers, share projects, and collaborate on learning.</div>
+                </div>
+            </div>
+
+            <!-- Troubleshooting -->
+            <div class="help-card">
+                <h2><span class="icon">🔧</span> Troubleshooting</h2>
+                <div class="faq-item">
+                    <div class="faq-question">Game not loading?</div>
+                    <div class="faq-answer">Try refreshing the page (Ctrl+R or Cmd+R). If the issue persists, clear your
+                        browser cache.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Can't see new games?</div>
+                    <div class="faq-answer">Make sure the game is published by your instructor. Refresh the page to see
+                        the latest updates.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Login issues?</div>
+                    <div class="faq-answer">Ensure you're using your campus email (.mca25@cmrit.ac.in for students).
+                        Contact support if you still can't login.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Score not updating?</div>
+                    <div class="faq-answer">Scores update immediately after game submission. If you don't see your
+                        score, try logging out and back in.</div>
+                </div>
+            </div>
+
+            <!-- Tips & Tricks -->
+            <div class="help-card">
+                <h2><span class="icon">💡</span> Tips & Tricks</h2>
+                <div class="faq-item">
+                    <div class="faq-question">Maximize Your Learning</div>
+                    <div class="faq-answer">
+                        • Play games regularly to reinforce concepts<br>
+                        • Review incorrect answers to learn from mistakes<br>
+                        • Use the AI chatbot for quick clarifications<br>
+                        • Participate in the community to learn from peers
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Stay Organized</div>
+                    <div class="faq-answer">
+                        • Check announcements daily for important updates<br>
+                        • Download course materials for offline study<br>
+                        • Track your progress on the leaderboard<br>
+                        • Set goals and challenge yourself
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Support -->
+            <div class="help-card">
+                <h2><span class="icon">📞</span> Need More Help?</h2>
+                <p style="color: var(--text-muted); margin-bottom: 16px;">
+                    Can't find what you're looking for? Our support team is here to help!
+                </p>
+                <div class="contact-info">
+                    <h3>Contact Support</h3>
+                    <p><strong>Email:</strong> <a href="mailto:support@mindwave.edu">support@mindwave.edu</a></p>
+                    <p><strong>Response Time:</strong> Within 24 hours</p>
+                    <p><strong>Office Hours:</strong> Mon-Fri, 9 AM - 5 PM</p>
+                </div>
+                <div class="contact-info" style="margin-top: 16px;">
+                    <h3>Report a Bug</h3>
+                    <p>Found a technical issue? Let us know!</p>
+                    <p><strong>Email:</strong> <a href="mailto:bugs@mindwave.edu">bugs@mindwave.edu</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Student Tour Function
+        function startStudentTour() {
+            // Redirect to homepage and start tour there
+            localStorage.removeItem('mindwave_tour_student');
+            window.location.href = 'homepage.html';
+        }
+
+        // Add event listener for tour button
+        document.getElementById('startTourBtn').addEventListener('click', startStudentTour);
+    </script></body>
+
+</html>

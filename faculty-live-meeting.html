@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Meeting - Faculty | MindWave</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Agora Web SDK -->
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: white;
+        }
+
+
+        .meeting-header {
+            display: none;
+            /* Hidden - using modal instead */
+        }
+
+        .meeting-info h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .meeting-code {
+            color: #00d4ff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .meeting-container {
+            width: 100%;
+            height: 100vh;
+            background: #000;
+            position: relative;
+            padding-top: 0;
+            /* Removed top padding since header is hidden */
+        }
+
+        .local-video {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 250px;
+            height: 180px;
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 10;
+            background: #1a1a1a;
+            border: 2px solid #00d4ff;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.3);
+        }
+
+        .local-video video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remote-videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            padding: 40px 60px;
+            height: 100vh;
+            overflow-y: auto;
+            max-width: 1600px;
+            margin: 0 auto;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+        }
+
+        .remote-videos-grid::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
+        }
+
+        .remote-video {
+            border-radius: 16px;
+            overflow: hidden;
+            background: #1a1a1a;
+            position: relative;
+            min-height: 300px;
+            border: 1px solid #333;
+            aspect-ratio: 16 / 9;
+            max-height: 600px;
+        }
+
+        .remote-video video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .participant-name {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 50px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .control-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .control-btn.active {
+            background: #00d4ff;
+            color: #000;
+        }
+
+        .control-btn.danger {
+            background: #ff4444;
+        }
+
+        .control-btn.danger:hover {
+            background: #ff6666;
+        }
+
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .control-separator {
+            width: 1px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 4px;
+        }
+
+        .control-tooltip {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .control-btn:hover .control-tooltip {
+            opacity: 1;
+        }
+
+        .more-controls {
+            position: fixed;
+            bottom: 100px;
+            right: 50%;
+            transform: translateX(50%);
+            background: rgba(30, 30, 30, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 220px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            z-index: 200;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .more-controls.show {
+            display: flex;
+        }
+
+        .more-controls button {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+
+        .more-controls button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .more-controls button svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid #00d4ff;
+        }
+
+        .toast.success {
+            border-left-color: #4caf50;
+        }
+
+        .toast.error {
+            border-left-color: #ff4444;
+        }
+
+        .toast.warning {
+            border-left-color: #ff9800;
+        }
+
+        .toast-icon {
+            font-size: 24px;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Side Panels */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: rgba(20, 20, 20, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: -4px 0 32px rgba(0, 0, 0, 0.5);
+            transition: right 0.3s ease;
+            z-index: 150;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-panel.open {
+            right: 0;
+        }
+
+        .panel-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: white;
+        }
+
+        .panel-close {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .panel-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .participant-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .participant-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .participant-info {
+            flex: 1;
+        }
+
+        .participant-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .participant-role {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .participant-menu {
+            position: relative;
+        }
+
+        .participant-menu-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+            font-size: 18px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .participant-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .participant-menu-dropdown {
+            position: absolute;
+            right: 0;
+            top: 40px;
+            background: rgba(40, 40, 40, 0.98);
+            border-radius: 8px;
+            padding: 8px;
+            min-width: 180px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            display: none;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .participant-menu-dropdown.show {
+            display: block;
+        }
+
+        .participant-menu-item {
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: white;
+        }
+
+        .participant-menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .participant-menu-item.danger:hover {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-message {
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-sender {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .chat-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 14px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .chat-send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #00d4ff;
+            color: #000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chat-send-btn:hover {
+            background: #00b8e6;
+            transform: scale(1.1);
+        }
+
+        .chat-send-btn:active {
+            transform: scale(0.95);
+        }
+
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #00d4ff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .participant-count {
+            background: rgba(0, 212, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* Resolution Options */
+        .resolution-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .resolution-option:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .resolution-option input[type="radio"] {
+            margin-top: 2px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #00d4ff;
+        }
+
+        .resolution-option input[type="radio"]:checked~.resolution-info {
+            color: #00d4ff;
+        }
+
+        .resolution-option:has(input:checked) {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: #00d4ff;
+        }
+
+        .resolution-info {
+            flex: 1;
+        }
+
+        .resolution-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+
+        .resolution-details {
+            font-size: 13px;
+            color: #9ea4b6;
+            margin-bottom: 4px;
+        }
+
+        .resolution-note {
+            font-size: 12px;
+            color: #888;
+        }
+
+        #applyVideoSettings:hover {
+            background: #00b8e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+        }
+
+        #applyVideoSettings:active {
+            transform: translateY(0);
+        }
+
+        /* Meeting Code Modal */
+        .meeting-code-modal {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            color: #000;
+            padding: 32px 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            min-width: 480px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .meeting-code-modal.hidden {
+            display: none;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #5f6368;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .meeting-code-box {
+            background: #f1f3f4;
+            padding: 16px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .meeting-code-text {
+            font-size: 18px;
+            font-weight: 500;
+            color: #202124;
+            letter-spacing: 2px;
+        }
+
+        .copy-code-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .copy-code-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .modal-info {
+            font-size: 14px;
+            color: #5f6368;
+            margin-top: 12px;
+        }
+
+        /* Camera Off Avatar */
+        .camera-off-avatar {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .local-video .camera-off-avatar {
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+        }
+
+        .camera-off-avatar.hidden {
+            display: none !important;
+        }
+
+        /* Participant count badge */
+        .participant-count-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="meeting-header">
+        <div class="meeting-info">
+            <h2>Live Meeting</h2>
+            <div class="meeting-code" id="meetingCodeDisplay">Loading...</div>
+        </div>
+        <div class="participant-count" id="participantCount">
+            👥 1 participant
+        </div>
+    </div>
+
+    <div class="loading" id="loadingScreen">
+        <div class="spinner"></div>
+        <p>Joining meeting...</p>
+    </div>
+
+    <!-- Meeting Code Modal -->
+    <div class="meeting-code-modal" id="meetingCodeModal">
+        <div class="modal-header">
+            <h3>Your meeting's ready</h3>
+            <button class="modal-close" id="closeMeetingModal">×</button>
+        </div>
+        <p style="color: #5f6368; margin-bottom: 16px;">Share this meeting code with your students</p>
+        <div class="meeting-code-box">
+            <div class="meeting-code-text" id="modalMeetingCode">Loading...</div>
+            <button class="copy-code-btn" id="copyCodeBtn" title="Copy code">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"
+                        fill="#5f6368" />
+                </svg>
+            </button>
+        </div>
+        <p class="modal-info">💡 Students can join using this code from their dashboard</p>
+    </div>
+
+    <!-- Participant Count Badge -->
+    <div class="participant-count-badge" id="participantCountBadge">
+        <span>👥</span>
+        <span id="participantCountText">1 participant</span>
+    </div>
+
+    <div class="meeting-container" id="meetingContainer" style="display: none;">
+        <div class="local-video" id="localVideo">
+        </div>
+        <div class="remote-videos-grid" id="remoteVideos">
+            <div class="empty-state">
+                <h3>Waiting for students to join...</h3>
+                <p>Share the meeting code with your students</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <!-- Mute/Unmute -->
+            <button class="control-btn" id="muteBtn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                    <path
+                        d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                </svg>
+                <span class="control-tooltip">Mute</span>
+            </button>
+
+            <!-- Video On/Off -->
+            <button class="control-btn" id="videoBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
+                </svg>
+                <span class="control-tooltip">Stop Video</span>
+            </button>
+
+            <div class="control-separator"></div>
+
+            <!-- Screen Share -->
+            <button class="control-btn" id="screenShareBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.11-.9-2-2-2H4c-1.11 0-2 .89-2 2v10c0 1.1.89 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z" />
+                </svg>
+                <span class="control-tooltip">Share Screen</span>
+            </button>
+
+            <!-- Participants -->
+            <button class="control-btn" id="participantsBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                </svg>
+                <span class="control-tooltip">Participants</span>
+            </button>
+
+            <div class="control-separator"></div>
+
+            <!-- Mute All -->
+            <button class="control-btn" id="muteAllBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z" />
+                </svg>
+                <span class="control-tooltip">Mute All</span>
+            </button>
+
+            <!-- Lock Meeting -->
+            <button class="control-btn" id="lockBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" />
+                </svg>
+                <span class="control-tooltip">Lock Meeting</span>
+            </button>
+
+            <div class="control-separator"></div>
+
+            <!-- More Options -->
+            <button class="control-btn" id="moreBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                </svg>
+                <span class="control-tooltip">More</span>
+            </button>
+
+            <div class="control-separator"></div>
+
+            <!-- Leave Meeting -->
+            <button class="control-btn danger" id="leaveBtn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z" />
+                </svg>
+                <span class="control-tooltip">Leave Meeting</span>
+            </button>
+        </div>
+
+        <!-- More Controls Menu -->
+        <div class="more-controls" id="moreControls">
+            <button id="recordBtn">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="8" />
+                </svg>
+                Start Recording
+            </button>
+            <button id="whiteboardBtn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM11 7h2v2h-2zm0 4h2v6h-2z" />
+                </svg>
+                Whiteboard
+            </button>
+            <button id="chatBtn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+                </svg>
+                Chat
+            </button>
+            <button id="settingsBtn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                </svg>
+                Settings
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Participants Side Panel -->
+    <div class="side-panel" id="participantsPanel">
+        <div class="panel-header">
+            <h3>Participants (<span id="participantCount">1</span>)</h3>
+            <button class="panel-close" id="closeParticipantsPanel">×</button>
+        </div>
+        <div class="panel-content" id="participantsList">
+            <!-- Participants will be added dynamically -->
+        </div>
+    </div>
+
+    <!-- Chat Side Panel -->
+    <div class="side-panel" id="chatPanel">
+        <div class="panel-header">
+            <h3>Chat</h3>
+            <button class="panel-close" id="closeChatPanel">×</button>
+        </div>
+        <div class="panel-content">
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message">
+                    <div class="chat-sender">System</div>
+                    <div class="chat-text">Chat feature coming soon! 💬</div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" placeholder="Type a message..." id="chatInput">
+            <button class="chat-send-btn" id="chatSendBtn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Side Panel -->
+    <div class="side-panel" id="settingsPanel">
+        <div class="panel-header">
+            <h3>Settings</h3>
+            <button class="panel-close" id="closeSettingsPanel">×</button>
+        </div>
+        <div class="panel-content">
+            <div style="margin-bottom: 32px;">
+                <h4 style="margin-bottom: 16px; font-size: 16px; color: #fff;">Video Quality</h4>
+                <p style="color: #9ea4b6; font-size: 13px; margin-bottom: 16px;">
+                    Uses 16:9 aspect ratio for widescreen video. Adjust based on your hardware and bandwidth.
+                </p>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <label class="resolution-option">
+                        <input type="radio" name="videoResolution" value="1080p" id="res1080p">
+                        <div class="resolution-info">
+                            <div class="resolution-title">Full HD (1080p)</div>
+                            <div class="resolution-details">1920 x 1080 pixels</div>
+                            <div class="resolution-note">Requires 1080p-capable camera and good bandwidth</div>
+                        </div>
+                    </label>
+
+                    <label class="resolution-option">
+                        <input type="radio" name="videoResolution" value="720p" id="res720p" checked>
+                        <div class="resolution-info">
+                            <div class="resolution-title">High Definition (720p)</div>
+                            <div class="resolution-details">1280 x 720 pixels</div>
+                            <div class="resolution-note">Default high quality setting (Recommended)</div>
+                        </div>
+                    </label>
+
+                    <label class="resolution-option">
+                        <input type="radio" name="videoResolution" value="360p" id="res360p">
+                        <div class="resolution-info">
+                            <div class="resolution-title">Standard Definition (360p)</div>
+                            <div class="resolution-details">640 x 360 pixels</div>
+                            <div class="resolution-note">Lower quality, uses less bandwidth</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div
+                    style="margin-top: 20px; padding: 12px; background: rgba(0, 212, 255, 0.1); border-radius: 8px; border-left: 3px solid #00d4ff;">
+                    <p style="font-size: 12px; color: #9ea4b6; margin: 0;">
+                        💡 <strong>Note:</strong> Resolution will apply when you restart your camera. Meeting will
+                        automatically adjust quality if bandwidth is limited.
+                    </p>
+                </div>
+
+                <button id="applyVideoSettings"
+                    style="width: 100%; margin-top: 20px; padding: 12px; background: #00d4ff; color: #000; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    Apply Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Authentication
+        const token = localStorage.getItem('token');
+        let userName = localStorage.getItem('userName') || 'Faculty';
+        const userEmail = localStorage.getItem('userEmail') || '';
+
+        if (!token) {
+            window.location.href = 'admin-login.html';
+        }
+
+        // Fetch user data from API
+        async function fetchUserData() {
+            const API_BASE = window.location.hostname === 'localhost'
+                ? 'http://localhost:8081'
+                : 'https://mindwave2.onrender.com';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    userName = data.name || userName;
+                    console.log('✅ User data loaded:', { name: userName });
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        }
+
+        // Fetch user data on load
+        fetchUserData();
+
+        // Agora client and tracks
+        let agoraClient = null;
+        let localAudioTrack = null;
+        let localVideoTrack = null;
+        let remoteUsers = {};
+        let isMuted = false;
+        let isVideoOff = false;
+
+        // Toast Notification System
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type] || icons.info}</div>
+                <div class="toast-message">${message}</div>
+            `;
+
+            container.appendChild(toast);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Side Panel Management
+        function openPanel(panelId) {
+            // Close all panels first
+            document.querySelectorAll('.side-panel').forEach(panel => {
+                panel.classList.remove('open');
+            });
+
+            // Open requested panel
+            const panel = document.getElementById(panelId);
+            if (panel) {
+                panel.classList.add('open');
+            }
+        }
+
+        function closePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            if (panel) {
+                panel.classList.remove('open');
+            }
+        }
+
+        function updateParticipantsList() {
+            const list = document.getElementById('participantsList');
+            const count = Object.keys(remoteUsers).length + 1;
+
+            document.getElementById('participantCount').textContent = count;
+
+            list.innerHTML = `
+                <div class="participant-item">
+                    <div class="participant-avatar">${userName.charAt(0).toUpperCase()}</div>
+                    <div class="participant-info">
+                        <div class="participant-name">${userName} (You)</div>
+                        <div class="participant-role">Host</div>
+                    </div>
+                </div>
+            `;
+
+            Object.keys(remoteUsers).forEach((uid, index) => {
+                list.innerHTML += `
+                    <div class="participant-item">
+                        <div class="participant-avatar">S${index + 1}</div>
+                        <div class="participant-info">
+                            <div class="participant-name">Student ${index + 1}</div>
+                            <div class="participant-role">Participant</div>
+                        </div>
+                        <div class="participant-menu">
+                            <button class="participant-menu-btn" data-uid="${uid}">⋮</button>
+                            <div class="participant-menu-dropdown" id="menu-${uid}">
+                                <div class="participant-menu-item" data-action="mute" data-uid="${uid}">
+                                    🔇 Request Mute
+                                </div>
+                                <div class="participant-menu-item" data-action="unmute" data-uid="${uid}">
+                                    🔊 Request Unmute
+                                </div>
+                                <div class="participant-menu-item danger" data-action="kick" data-uid="${uid}">
+                                    🚫 Remove from Meeting
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Add event listeners for participant menu buttons
+            setTimeout(() => {
+                document.querySelectorAll('.participant-menu-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleParticipantMenu(btn.dataset.uid);
+                    });
+                });
+
+                document.querySelectorAll('.participant-menu-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const action = item.dataset.action;
+                        const uid = item.dataset.uid;
+
+                        if (action === 'kick') {
+                            kickParticipant(uid);
+                        } else if (action === 'mute') {
+                            requestMuteParticipant(uid);
+                        } else if (action === 'unmute') {
+                            requestUnmuteParticipant(uid);
+                        }
+                    });
+                });
+            }, 0);
+        }
+
+        // Socket.IO Chat System
+        const API_BASE = window.location.hostname === 'localhost'
+            ? 'http://localhost:8081'
+            : 'https://mindwave2.onrender.com';
+
+        let socket = null;
+        let currentMeetingCode = null;
+
+        function initializeSocket(meetingCode) {
+            // Check if Socket.IO is available
+            if (typeof io === 'undefined') {
+                console.warn('Socket.IO not loaded - chat will be unavailable');
+                return;
+            }
+
+            try {
+                currentMeetingCode = meetingCode;
+                socket = io(API_BASE);
+
+                socket.on('connect', () => {
+                    console.log('💬 Socket.IO connected');
+
+                    // Join meeting room
+                    socket.emit('join-meeting', {
+                        meetingCode,
+                        userName,
+                        userRole: 'faculty'
+                    });
+                });
+
+                // Listen for new messages
+                socket.on('new-message', ({ userName: senderName, message, timestamp }) => {
+                    addMessageToChat(senderName, message, timestamp);
+                });
+
+                // Listen for meeting ended (shouldn't happen for faculty, but handle it)
+                socket.on('meeting-ended', () => {
+                    showToast('Meeting has been ended', 'info');
+                });
+
+                socket.on('disconnect', () => {
+                    console.log('💬 Socket.IO disconnected');
+                });
+            } catch (error) {
+                console.error('Error initializing Socket.IO:', error);
+                console.warn('Chat will be unavailable');
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message || !socket || !currentMeetingCode) return;
+
+            socket.emit('send-message', {
+                meetingCode: currentMeetingCode,
+                userName,
+                message,
+                timestamp: new Date().toISOString()
+            });
+
+            input.value = '';
+        }
+
+        function addMessageToChat(senderName, message, timestamp) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+
+            const time = new Date(timestamp).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            messageDiv.innerHTML = `
+                <div class="chat-sender">${senderName} <span style="font-size: 11px; color: #888;">${time}</span></div>
+                <div class="chat-text">${message}</div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Handle Enter key in chat input
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendChatMessage();
+                    }
+                });
+            }
+
+            // Meeting code modal close button
+            document.getElementById('closeMeetingModal').addEventListener('click', () => {
+                document.getElementById('meetingCodeModal').classList.add('hidden');
+            });
+
+            // Copy meeting code button
+            document.getElementById('copyCodeBtn').addEventListener('click', () => {
+                const code = document.getElementById('modalMeetingCode').textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    showToast('Meeting code copied to clipboard!', 'success');
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    showToast('Failed to copy code', 'error');
+                });
+            });
+        });
+
+        // Helper function to generate consistent color from name
+        function getAvatarColor(name) {
+            const colors = [
+                '#FF6B6B', // Red
+                '#4ECDC4', // Teal
+                '#45B7D1', // Blue
+                '#FFA07A', // Light Salmon
+                '#98D8C8', // Mint
+                '#F7DC6F', // Yellow
+                '#BB8FCE', // Purple
+                '#85C1E2', // Sky Blue
+                '#F8B739', // Orange
+                '#52B788', // Green
+                '#E76F51', // Burnt Orange
+                '#8E7CC3', // Lavender
+            ];
+
+            // Generate consistent color based on name
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+        // Generate meeting code
+        async function generateMeetingCode() {
+            const API_BASE = window.location.hostname === 'localhost'
+                ? 'http://localhost:8081'
+                : 'https://mindwave2.onrender.com';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/meetings/generate-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.code;
+                }
+            } catch (error) {
+                console.error('Error generating meeting code:', error);
+            }
+
+            // Fallback
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // Initialize and join meeting
+        async function init() {
+            const meetingCode = await generateMeetingCode();
+            const API_BASE = window.location.hostname === 'localhost'
+                ? 'http://localhost:8081'
+                : 'https://mindwave2.onrender.com';
+
+            try {
+                // Call backend to get Agora credentials
+                const response = await fetch(`${API_BASE}/api/meetings/create-agora`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        meetingCode: meetingCode,
+                        facultyName: userName,
+                        facultyEmail: userEmail
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    console.log('✅ Agora credentials received:', data);
+
+                    // Display meeting code
+                    document.getElementById('meetingCodeDisplay').textContent = meetingCode;
+                    document.getElementById('modalMeetingCode').textContent = meetingCode;
+
+                    // Show meeting code modal
+                    const modal = document.getElementById('meetingCodeModal');
+                    modal.classList.remove('hidden');
+
+                    // Initialize Socket.IO for chat
+                    initializeSocket(meetingCode);
+
+                    // Initialize Agora client
+                    agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+
+                    // Set up event listeners
+                    agoraClient.on('user-published', handleUserPublished);
+                    agoraClient.on('user-unpublished', handleUserUnpublished);
+                    agoraClient.on('user-left', handleUserLeft);
+
+                    // Join channel
+                    await agoraClient.join(
+                        data.appId,
+                        data.channelName,
+                        data.token,
+                        data.uid
+                    );
+
+                    console.log('✅ Joined Agora channel as HOST');
+
+                    // Video resolution configurations (16:9 aspect ratio)
+                    const videoResolution = localStorage.getItem('videoResolution') || '720p';
+                    const videoConfigs = {
+                        '1080p': {
+                            width: { ideal: 1920, max: 1920 },
+                            height: { ideal: 1080, max: 1080 },
+                            frameRate: 30
+                        },
+                        '720p': {
+                            width: { ideal: 1280, max: 1280 },
+                            height: { ideal: 720, max: 720 },
+                            frameRate: 30
+                        },
+                        '360p': {
+                            width: { ideal: 640, max: 640 },
+                            height: { ideal: 360, max: 360 },
+                            frameRate: 24
+                        }
+                    };
+
+                    // Create local tracks with specified resolution
+                    localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                    localVideoTrack = await AgoraRTC.createCameraVideoTrack(videoConfigs[videoResolution]);
+
+                    // Play local video
+                    localVideoTrack.play('localVideo');
+
+                    // Ensure avatar element exists after video plays (Agora may modify the container)
+                    let localAvatar = document.getElementById('localCameraOffAvatar');
+                    if (!localAvatar) {
+                        // Create avatar if it doesn't exist
+                        console.log('Creating avatar element...');
+                        localAvatar = document.createElement('div');
+                        localAvatar.id = 'localCameraOffAvatar';
+                        localAvatar.className = 'camera-off-avatar hidden';
+                        document.getElementById('localVideo').appendChild(localAvatar);
+                    }
+
+                    // Set up avatar with initials and color
+                    const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                    localAvatar.textContent = initials;
+                    localAvatar.style.backgroundColor = getAvatarColor(userName);
+                    console.log('✅ Avatar setup complete:', { initials, color: getAvatarColor(userName), element: localAvatar });
+
+                    // Publish tracks
+                    await agoraClient.publish([localAudioTrack, localVideoTrack]);
+
+                    console.log('✅ Published local tracks');
+
+                    // Hide loading, show meeting
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    document.getElementById('meetingContainer').style.display = 'block';
+
+                } else {
+                    console.error('Failed to create Agora meeting:', data.error);
+                    showToast('Failed to create meeting. Please try again.', 'error');
+                    window.location.href = 'faculty-dashboard.html';
+                }
+            } catch (error) {
+                console.error('❌ Error creating Agora meeting:', error);
+                console.error('Error name:', error.name);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                showToast(`Failed to create meeting: ${error.message || 'Unknown error'}`, 'error');
+                window.location.href = 'faculty-dashboard.html';
+            }
+        }
+
+        // Handle remote user published
+        async function handleUserPublished(user, mediaType) {
+            console.log('👤 User published:', user.uid, mediaType);
+
+            await agoraClient.subscribe(user, mediaType);
+
+            if (mediaType === 'video') {
+                const remoteVideoTrack = user.videoTrack;
+
+                // Create container for remote video
+                let playerContainer = document.getElementById(`player-${user.uid}`);
+                if (!playerContainer) {
+                    // Remove empty state
+                    const emptyState = document.querySelector('.empty-state');
+                    if (emptyState) emptyState.remove();
+
+                    playerContainer = document.createElement('div');
+                    playerContainer.id = `player-${user.uid}`;
+                    playerContainer.className = 'remote-video';
+
+                    const nameTag = document.createElement('div');
+                    nameTag.className = 'participant-name';
+                    nameTag.textContent = `Student ${user.uid}`;
+                    playerContainer.appendChild(nameTag);
+
+                    document.getElementById('remoteVideos').appendChild(playerContainer);
+                }
+
+                remoteVideoTrack.play(playerContainer);
+                remoteUsers[user.uid] = user;
+                updateParticipantCount();
+            }
+
+            if (mediaType === 'audio') {
+                const remoteAudioTrack = user.audioTrack;
+                remoteAudioTrack.play();
+            }
+        }
+
+        // Handle remote user unpublished
+        function handleUserUnpublished(user, mediaType) {
+            console.log('👤 User unpublished:', user.uid, mediaType);
+
+            if (mediaType === 'video') {
+                const playerContainer = document.getElementById(`player-${user.uid}`);
+                if (playerContainer) {
+                    playerContainer.remove();
+                }
+            }
+        }
+
+        // Handle user left
+        function handleUserLeft(user) {
+            console.log('👤 User left:', user.uid);
+
+            const playerContainer = document.getElementById(`player-${user.uid}`);
+            if (playerContainer) {
+                playerContainer.remove();
+            }
+
+            delete remoteUsers[user.uid];
+            updateParticipantCount();
+
+            // Show empty state if no students
+            if (Object.keys(remoteUsers).length === 0) {
+                const remoteVideos = document.getElementById('remoteVideos');
+                if (!document.querySelector('.empty-state')) {
+                    remoteVideos.innerHTML = `
+                        <div class="empty-state">
+                            <h3>Waiting for students to join...</h3>
+                            <p>Share the meeting code with your students</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Update participant count
+        function updateParticipantCount() {
+            const count = Object.keys(remoteUsers).length + 1; // +1 for faculty
+            const text = `${count} participant${count > 1 ? 's' : ''}`;
+            document.getElementById('participantCount').textContent = `👥 ${text}`;
+            document.getElementById('participantCountText').textContent = text;
+        }
+
+        // Toggle mute
+        async function toggleMute() {
+            if (!localAudioTrack) return;
+
+            isMuted = !isMuted;
+            await localAudioTrack.setEnabled(!isMuted);
+
+            const muteBtn = document.getElementById('muteBtn');
+            const muteText = document.getElementById('muteText');
+
+            if (isMuted) {
+                muteBtn.classList.add('active');
+                muteText.textContent = 'Unmute';
+            } else {
+                muteBtn.classList.remove('active');
+                muteText.textContent = 'Mute';
+            }
+        }
+
+        // Toggle video
+        async function toggleVideo() {
+            if (!localVideoTrack) return;
+
+            isVideoOff = !isVideoOff;
+            await localVideoTrack.setEnabled(!isVideoOff);
+
+            const videoBtn = document.getElementById('videoBtn');
+            const videoText = document.getElementById('videoText');
+            const localVideoContainer = document.getElementById('localVideo');
+
+            console.log('Toggle video:', { isVideoOff, localVideoContainer, containerExists: !!localVideoContainer });
+
+            if (!localVideoContainer) {
+                console.error('❌ Local video container not found!');
+                return;
+            }
+
+            if (isVideoOff) {
+                videoBtn.classList.add('active');
+                videoText.textContent = 'Start Video';
+
+                // Remove old avatar if exists
+                const oldAvatar = document.getElementById('localCameraOffAvatar');
+                if (oldAvatar) {
+                    oldAvatar.remove();
+                }
+
+                // Create fresh avatar element
+                const avatar = document.createElement('div');
+                console.log('Created avatar element:', avatar);
+
+                if (!avatar) {
+                    console.error('❌ Failed to create avatar element!');
+                    return;
+                }
+
+                avatar.id = 'localCameraOffAvatar';
+                avatar.className = 'camera-off-avatar';
+
+                // Set content and style
+                const name = userName || localStorage.getItem('userName') || 'User';
+                console.log('Using name for avatar:', name);
+
+                const initials = name.split(' ').filter(n => n).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+                console.log('Generated initials:', initials);
+
+                try {
+                    avatar.textContent = initials;
+                    console.log('Set textContent successfully');
+                } catch (error) {
+                    console.error('❌ Error setting textContent:', error);
+                    return;
+                }
+                avatar.style.backgroundColor = getAvatarColor(name);
+                avatar.style.display = 'flex';
+                avatar.style.position = 'absolute';
+                avatar.style.top = '50%';
+                avatar.style.left = '50%';
+                avatar.style.transform = 'translate(-50%, -50%)';
+                avatar.style.width = '80px';
+                avatar.style.height = '80px';
+                avatar.style.borderRadius = '50%';
+                avatar.style.alignItems = 'center';
+                avatar.style.justifyContent = 'center';
+                avatar.style.fontSize = '32px';
+                avatar.style.fontWeight = '700';
+                avatar.style.color = 'white';
+                avatar.style.zIndex = '999';
+
+                localVideoContainer.appendChild(avatar);
+                console.log('✅ Avatar created and shown:', { initials, name, avatar });
+            } else {
+                videoBtn.classList.remove('active');
+                videoText.textContent = 'Stop Video';
+
+                // Remove avatar when camera is on
+                const avatar = document.getElementById('localCameraOffAvatar');
+                if (avatar) {
+                    avatar.remove();
+                    console.log('✅ Avatar removed');
+                }
+            }
+        }
+
+        // Leave meeting
+        async function leaveMeeting() {
+            if (confirm('Are you sure you want to end the meeting for all participants?')) {
+                try {
+                    // Broadcast meeting ended to all participants
+                    if (socket && currentMeetingCode) {
+                        socket.emit('end-meeting', { meetingCode: currentMeetingCode });
+                    }
+
+                    // Close local tracks
+                    if (localAudioTrack) {
+                        localAudioTrack.close();
+                    }
+                    if (localVideoTrack) {
+                        localVideoTrack.close();
+                    }
+
+                    // Leave channel
+                    if (agoraClient) {
+                        await agoraClient.leave();
+                    }
+
+                    // Disconnect socket
+                    if (socket) {
+                        socket.disconnect();
+                    }
+
+                    console.log('✅ Left meeting');
+                    window.location.href = 'admin.html';
+                } catch (error) {
+                    console.error('Error leaving meeting:', error);
+                    window.location.href = 'admin.html';
+                }
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', init);
+
+        // Add event listeners for controls
+        document.getElementById('muteBtn').addEventListener('click', toggleMute);
+        document.getElementById('videoBtn').addEventListener('click', toggleVideo);
+        document.getElementById('leaveBtn').addEventListener('click', leaveMeeting);
+
+        // New control buttons
+        document.getElementById('screenShareBtn').addEventListener('click', toggleScreenShare);
+        document.getElementById('participantsBtn').addEventListener('click', toggleParticipants);
+        document.getElementById('muteAllBtn').addEventListener('click', muteAllStudents);
+        document.getElementById('lockBtn').addEventListener('click', toggleLockMeeting);
+        document.getElementById('moreBtn').addEventListener('click', toggleMoreMenu);
+
+        // More menu buttons
+        document.getElementById('recordBtn').addEventListener('click', toggleRecording);
+        document.getElementById('whiteboardBtn').addEventListener('click', openWhiteboard);
+        document.getElementById('chatBtn').addEventListener('click', toggleChat);
+        document.getElementById('settingsBtn').addEventListener('click', openSettings);
+
+        // Panel close buttons
+        document.getElementById('closeParticipantsPanel').addEventListener('click', () => closePanel('participantsPanel'));
+        document.getElementById('closeChatPanel').addEventListener('click', () => closePanel('chatPanel'));
+
+        // Chat send button
+        document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
+
+        // Participant Management Functions
+        function toggleParticipantMenu(uid) {
+            // Close all other menus first
+            document.querySelectorAll('.participant-menu-dropdown').forEach(menu => {
+                if (menu.id !== `menu-${uid}`) {
+                    menu.classList.remove('show');
+                }
+            });
+
+            // Toggle this menu
+            const menu = document.getElementById(`menu-${uid}`);
+            if (menu) {
+                menu.classList.toggle('show');
+            }
+        }
+
+        function kickParticipant(uid) {
+            if (confirm('Remove this participant from the meeting?')) {
+                // TODO: Implement actual kick via Socket.IO
+                showToast('Participant removed from meeting', 'success');
+
+                // Close menu
+                const menu = document.getElementById(`menu-${uid}`);
+                if (menu) menu.classList.remove('show');
+
+                console.log('Kicked participant:', uid);
+            }
+        }
+
+        function requestMuteParticipant(uid) {
+            // TODO: Send mute request via Socket.IO
+            showToast('Mute request sent to participant', 'info');
+
+            // Close menu
+            const menu = document.getElementById(`menu-${uid}`);
+            if (menu) menu.classList.remove('show');
+
+            console.log('Mute request sent to:', uid);
+        }
+
+        function requestUnmuteParticipant(uid) {
+            // TODO: Send unmute request via Socket.IO
+            showToast('Unmute request sent to participant', 'info');
+
+            // Close menu
+            const menu = document.getElementById(`menu-${uid}`);
+            if (menu) menu.classList.remove('show');
+
+            console.log('Unmute request sent to:', uid);
+        }
+
+        // Close participant menus when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.participant-menu')) {
+                document.querySelectorAll('.participant-menu-dropdown').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+
+        // Host control functions
+        let isScreenSharing = false;
+        let isMeetingLocked = false;
+        let isRecording = false;
+        let screenTrack = null;
+
+        async function toggleScreenShare() {
+            const btn = document.getElementById('screenShareBtn');
+
+            if (!isScreenSharing) {
+                try {
+                    // Create screen track
+                    screenTrack = await AgoraRTC.createScreenVideoTrack();
+
+                    // Unpublish camera video
+                    if (localVideoTrack) {
+                        await agoraClient.unpublish([localVideoTrack]);
+                    }
+
+                    // Publish screen track
+                    await agoraClient.publish([screenTrack]);
+
+                    // Play screen in local video
+                    screenTrack.play('localVideo');
+
+                    isScreenSharing = true;
+                    btn.classList.add('active');
+                    showToast('Screen sharing started', 'success');
+                    console.log('✅ Screen sharing started');
+                } catch (error) {
+                    console.error('Error starting screen share:', error);
+                    showToast('Failed to start screen sharing', 'error');
+                }
+            } else {
+                try {
+                    // Stop screen track
+                    if (screenTrack) {
+                        screenTrack.close();
+                        await agoraClient.unpublish([screenTrack]);
+                    }
+
+                    // Publish camera video again
+                    if (localVideoTrack) {
+                        await agoraClient.publish([localVideoTrack]);
+                        localVideoTrack.play('localVideo');
+                    }
+
+                    isScreenSharing = false;
+                    btn.classList.remove('active');
+                    showToast('Screen sharing stopped', 'info');
+                    console.log('✅ Screen sharing stopped');
+                } catch (error) {
+                    console.error('Error stopping screen share:', error);
+                }
+            }
+        }
+
+        function toggleParticipants() {
+            // TODO: Show participants panel
+            updateParticipantsList();
+            openPanel('participantsPanel');
+        }
+
+        function muteAllStudents() {
+            // TODO: Implement server-side mute all
+            showToast('All students muted', 'success');
+            console.log('Mute all students clicked');
+        }
+
+        function toggleLockMeeting() {
+            const btn = document.getElementById('lockBtn');
+            isMeetingLocked = !isMeetingLocked;
+
+            if (isMeetingLocked) {
+                btn.classList.add('active');
+                showToast('Meeting locked - No new students can join', 'warning');
+            } else {
+                btn.classList.remove('active');
+                showToast('Meeting unlocked - Students can join again', 'success');
+            }
+        }
+
+        function toggleMoreMenu() {
+            const menu = document.getElementById('moreControls');
+            menu.classList.toggle('show');
+        }
+
+        function toggleRecording() {
+            isRecording = !isRecording;
+            const btn = document.getElementById('recordBtn');
+
+            if (isRecording) {
+                btn.innerHTML = `
+                    <svg viewBox="0 0 24 24">
+                        <rect x="6" y="6" width="12" height="12"/>
+                    </svg>
+                    Stop Recording
+                `;
+                showToast('Recording started', 'success');
+            } else {
+                btn.innerHTML = `
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8"/>
+                    </svg>
+                    Start Recording
+                `;
+                showToast('Recording stopped', 'info');
+            }
+
+            // Hide more menu
+            document.getElementById('moreControls').classList.remove('show');
+        }
+
+        function openWhiteboard() {
+            showToast('Whiteboard feature - Coming soon!', 'info');
+            document.getElementById('moreControls').classList.remove('show');
+        }
+
+        function toggleChat() {
+            openPanel('chatPanel');
+            document.getElementById('moreControls').classList.remove('show');
+        }
+
+        function openSettings() {
+            // Load current resolution setting
+            const currentResolution = localStorage.getItem('videoResolution') || '720p';
+            document.getElementById(`res${currentResolution}`).checked = true;
+
+            openPanel('settingsPanel');
+            document.getElementById('moreControls').classList.remove('show');
+        }
+
+        // Settings panel close button
+        document.getElementById('closeSettingsPanel').addEventListener('click', () => closePanel('settingsPanel'));
+
+        // Apply video settings
+        document.getElementById('applyVideoSettings').addEventListener('click', async () => {
+            const selectedResolution = document.querySelector('input[name="videoResolution"]:checked').value;
+            const previousResolution = localStorage.getItem('videoResolution') || '720p';
+
+            // Save to localStorage
+            localStorage.setItem('videoResolution', selectedResolution);
+
+            if (selectedResolution !== previousResolution) {
+                showToast(`Video quality set to ${selectedResolution}. Restarting camera...`, 'info');
+
+                try {
+                    // Stop current video track
+                    if (localVideoTrack) {
+                        localVideoTrack.close();
+                        await agoraClient.unpublish([localVideoTrack]);
+                    }
+
+                    // Create new video track with new resolution
+                    const videoConfigs = {
+                        '1080p': {
+                            width: { ideal: 1920, max: 1920 },
+                            height: { ideal: 1080, max: 1080 },
+                            frameRate: 30
+                        },
+                        '720p': {
+                            width: { ideal: 1280, max: 1280 },
+                            height: { ideal: 720, max: 720 },
+                            frameRate: 30
+                        },
+                        '360p': {
+                            width: { ideal: 640, max: 640 },
+                            height: { ideal: 360, max: 360 },
+                            frameRate: 24
+                        }
+                    };
+
+                    localVideoTrack = await AgoraRTC.createCameraVideoTrack(videoConfigs[selectedResolution]);
+
+                    // Play and publish new track
+                    localVideoTrack.play('localVideo');
+                    await agoraClient.publish([localVideoTrack]);
+
+                    showToast(`✅ Video quality changed to ${selectedResolution}`, 'success');
+                    closePanel('settingsPanel');
+                } catch (error) {
+                    console.error('Error changing video resolution:', error);
+                    showToast('Failed to change video quality. Please try again.', 'error');
+                }
+            } else {
+                showToast('Settings saved', 'success');
+                closePanel('settingsPanel');
+            }
+        });
+
+
+        // Close more menu when clicking outside
+        document.addEventListener('click', function (e) {
+            const moreBtn = document.getElementById('moreBtn');
+            const moreMenu = document.getElementById('moreControls');
+
+            if (!moreBtn.contains(e.target) && !moreMenu.contains(e.target)) {
+                moreMenu.classList.remove('show');
+            }
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', async () => {
+            if (localAudioTrack) localAudioTrack.close();
+            if (localVideoTrack) localVideoTrack.close();
+            if (screenTrack) screenTrack.close();
+            if (agoraClient) await agoraClient.leave();
+        });
+    </script>
+</body>
+
+</html>

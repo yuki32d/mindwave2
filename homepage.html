@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave – Student Dashboard</title>
+    <meta name="description" content="MindWave student home — your XP, courses, games and announcements in one place.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="auth-guard.js"></script>
+    <script>
+        if (!checkStudentAuth()) { /* redirects */ }
+        if (document.referrer.includes('login.html')) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+    <!-- Apply saved theme before paint to avoid flash -->
+    <script>
+        (function () {
+            const t = localStorage.getItem('mw_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <style>
+        /* Page-specific tweaks */
+        .greeting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .greeting-name {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .greeting-date {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .greeting-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Stats row under greeting */
+        .stats-pill-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .stat-pill-icon {
+            font-size: 16px;
+        }
+
+        .stat-pill-val {
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .stat-pill-lbl {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        /* Game grid overrides for the Games panel (dynamic) */
+        #gameFeed {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        /* Notification dropdown position */
+        .mw-notif-wrap {
+            position: relative;
+        }
+
+        /* Profile toggle in sidebar footer (used by homepage.js) */
+        #profileToggle {
+            cursor: pointer;
+            width: 100%;
+        }
+
+        #profileDropdown {
+            display: none;
+        }
+
+        #profileDropdown.show {
+            display: block;
+        }
+
+        /* ── SPARKLINE TOOLTIP ── */
+        .mw-sparkline {
+            position: relative;
+        }
+
+        .mw-spark-bar {
+            position: relative;
+        }
+
+        /* Highlight bar on hover */
+        .mw-spark-bar:hover {
+            filter: brightness(1.4);
+            transform: scaleX(1.15);
+        }
+
+        /* Floating tooltip */
+        #spark-tooltip {
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+            background: #1e2030;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 7px 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            font-family: 'Inter', sans-serif;
+            min-width: 90px;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.12s ease, transform 0.12s ease;
+        }
+
+        #spark-tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #spark-tooltip .tip-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.45);
+            margin-bottom: 2px;
+        }
+
+        #spark-tooltip .tip-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        /* Light mode tooltip */
+        [data-theme="light"] #spark-tooltip {
+            background: #1a1d2e;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mw-app" id="mwApp">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
+            </div>
+
+            <!-- Scrollable nav wrapper — footer stays OUTSIDE so dropdown can overflow -->
+            <div class="mw-sidebar-nav">
+
+                <!-- Main Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item active">
+                        <span class="mw-nav-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+                    </a>
+                    <a href="student-courses.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
+                    </a>
+                    <a href="student-timetable.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
+                    </a>
+                    <a href="student-performance.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
+                    </a>
+                    <a href="student-leaderboard.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="trophy"></i></span> Leaderboard
+                        <span class="mw-nav-badge" style="font-size:10px;">HOT</span>
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Engage Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="gamepad-2"></i></span> Play Games
+                    </a>
+                    <a href="student-community.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Community
+                    </a>
+                    <a href="student-achievements.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="award"></i></span> Achievements
+                    </a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="megaphone"></i></span> Events
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Tools Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
+                    </a>
+                    <a href="student-study-recommendations.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
+                    </a>
+                    <a href="student-reports.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
+                    </a>
+                    <a href="student-settings.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Logout -->
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
+
+            </div><!-- end mw-sidebar-nav -->
+
+
+            <div class="mw-sidebar-footer">
+                <!-- profileToggle and profileDropdown IDs required by homepage.js -->
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                    <span class="mw-user-more">⋯</span>
+
+                    <!-- profileDropdown required by homepage.js -->
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
+                        </div>
+                        <a href="student-profile.html">
+                            <i data-lucide="user"></i> My Profile
+                        </a>
+                        <a href="student-settings.html">
+                            <i data-lucide="settings"></i> Settings
+                        </a>
+                        <a href="student-notifications.html">
+                            <i data-lucide="bell"></i> Notifications
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
+
+            <!-- TOPBAR -->
+            <header class="mw-topbar">
+                <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="mw-breadcrumb">Dashboard / <span>Home</span></div>
+
+                <div class="mw-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search courses, games…" id="globalSearch">
+                </div>
+
+                <div class="mw-topbar-actions">
+                    <!-- Notification bell — notificationBtn & notificationBadge IDs required by homepage.js -->
+                    <div class="mw-notif-wrap">
+                        <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="mw-notif-dot hidden" id="notificationBadge"></span>
+                        </div>
+                        <!-- notificationDropdown required by homepage.js -->
+                        <div class="mw-notif-dropdown" id="notificationDropdown"></div>
+                    </div>
+
+                    <!-- settingsBtn required by homepage.js -->
+                    <div class="mw-icon-btn" id="settingsBtn" title="Settings"><i data-lucide="settings"></i></div>
+
+                    <!-- Theme toggle -->
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle light/dark mode"
+                        aria-label="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <div class="mw-content">
+
+                <!-- ── GREETING ROW ── -->
+                <div class="greeting-row">
+                    <div>
+                        <div class="greeting-name">Good evening, <span id="greetingName">Student</span> 👋</div>
+                        <div class="greeting-date" id="greetingDate"></div>
+                    </div>
+                    <div class="greeting-actions">
+                        <a class="mw-btn mw-btn-ghost" href="student-timetable.html"><i data-lucide="calendar-days"></i>
+                            Timetable</a>
+                        <a class="mw-btn mw-btn-primary" href="student-game.html"><i data-lucide="gamepad-2"></i> Play
+                            Games</a>
+                    </div>
+                </div>
+
+                <!-- ── KPI CARDS ── -->
+                <div class="mw-kpi-grid">
+                    <!-- XP -->
+                    <div class="mw-kpi-card">
+                        <div class="mw-kpi-header">
+                            <span class="mw-kpi-label">Total XP</span>
+                            <span class="mw-kpi-icon"><i data-lucide="zap"></i></span>
+                        </div>
+                        <div class="mw-kpi-value" style="color:var(--accent-2);" id="totalXP">4,820</div>
+                        <div class="mw-kpi-change up">▲ 12% <span class="mw-kpi-sub">vs last week</span></div>
+                        <div class="mw-sparkline">
+                            <div class="mw-spark-bar" style="height:40%" data-label="Mon" data-value="1,920 XP"></div>
+                            <div class="mw-spark-bar" style="height:55%" data-label="Tue" data-value="2,650 XP"></div>
+                            <div class="mw-spark-bar" style="height:45%" data-label="Wed" data-value="2,160 XP"></div>
+                            <div class="mw-spark-bar" style="height:70%" data-label="Thu" data-value="3,360 XP"></div>
+                            <div class="mw-spark-bar" style="height:60%" data-label="Fri" data-value="2,880 XP"></div>
+                            <div class="mw-spark-bar" style="height:85%" data-label="Sat" data-value="4,080 XP"></div>
+                            <div class="mw-spark-bar hi" style="height:100%" data-label="Today" data-value="4,820 XP">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Courses -->
+                    <div class="mw-kpi-card">
+                        <div class="mw-kpi-header">
+                            <span class="mw-kpi-label">Courses Enrolled</span>
+                            <span class="mw-kpi-icon"><i data-lucide="book-open"></i></span>
+                        </div>
+                        <div class="mw-kpi-value" style="color:var(--green);" id="courseCount">—</div>
+                        <div class="mw-kpi-change up">▲ Active this semester</div>
+                        <div class="mw-sparkline">
+                            <div class="mw-spark-bar" style="height:60%" data-label="Mon" data-value="5 courses"></div>
+                            <div class="mw-spark-bar" style="height:60%" data-label="Tue" data-value="5 courses"></div>
+                            <div class="mw-spark-bar" style="height:80%" data-label="Wed" data-value="6 courses"></div>
+                            <div class="mw-spark-bar" style="height:80%" data-label="Thu" data-value="6 courses"></div>
+                            <div class="mw-spark-bar" style="height:80%" data-label="Fri" data-value="6 courses"></div>
+                            <div class="mw-spark-bar" style="height:100%" data-label="Sat" data-value="8 courses"></div>
+                            <div class="mw-spark-bar hi" style="height:100%;background:var(--green)" data-label="Today"
+                                data-value="8 courses"></div>
+                        </div>
+                    </div>
+
+                    <!-- Games Played -->
+                    <div class="mw-kpi-card">
+                        <div class="mw-kpi-header">
+                            <span class="mw-kpi-label">Games Played</span>
+                            <span class="mw-kpi-icon"><i data-lucide="gamepad-2"></i></span>
+                        </div>
+                        <div class="mw-kpi-value" style="color:var(--orange);" id="gamesPlayed">—</div>
+                        <div class="mw-kpi-change up">▲ Keep it up!</div>
+                        <div class="mw-sparkline">
+                            <div class="mw-spark-bar" style="height:30%" data-label="Mon" data-value="7 games"></div>
+                            <div class="mw-spark-bar" style="height:50%" data-label="Tue" data-value="11 games"></div>
+                            <div class="mw-spark-bar" style="height:40%" data-label="Wed" data-value="9 games"></div>
+                            <div class="mw-spark-bar" style="height:70%" data-label="Thu" data-value="16 games"></div>
+                            <div class="mw-spark-bar" style="height:85%" data-label="Fri" data-value="19 games"></div>
+                            <div class="mw-spark-bar" style="height:75%" data-label="Sat" data-value="17 games"></div>
+                            <div class="mw-spark-bar hi" style="height:100%;background:var(--orange)" data-label="Today"
+                                data-value="23 games"></div>
+                        </div>
+                    </div>
+
+                    <!-- Rank -->
+                    <div class="mw-kpi-card">
+                        <div class="mw-kpi-header">
+                            <span class="mw-kpi-label">Class Rank</span>
+                            <span class="mw-kpi-icon"><i data-lucide="trophy"></i></span>
+                        </div>
+                        <div class="mw-kpi-value" style="color:var(--pink);" id="studentRank">#—</div>
+                        <div class="mw-kpi-change up">▲ Climbing!</div>
+                        <div class="mw-sparkline">
+                            <div class="mw-spark-bar" style="height:80%" data-label="Mon" data-value="Rank #4"></div>
+                            <div class="mw-spark-bar" style="height:70%" data-label="Tue" data-value="Rank #5"></div>
+                            <div class="mw-spark-bar" style="height:90%" data-label="Wed" data-value="Rank #3"></div>
+                            <div class="mw-spark-bar" style="height:75%" data-label="Thu" data-value="Rank #4"></div>
+                            <div class="mw-spark-bar" style="height:85%" data-label="Fri" data-value="Rank #3"></div>
+                            <div class="mw-spark-bar" style="height:80%" data-label="Sat" data-value="Rank #2"></div>
+                            <div class="mw-spark-bar hi" style="height:100%;background:var(--pink)" data-label="Today"
+                                data-value="Rank #1 🏆"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── MAIN DASH GRID ── -->
+                <div class="mw-dash-grid">
+
+                    <!-- LEFT COLUMN -->
+                    <div class="mw-dash-col">
+
+                        <!-- ANNOUNCEMENTS PANEL -->
+                        <div class="mw-panel">
+                            <div class="mw-panel-header">
+                                <div class="mw-panel-title"><i data-lucide="megaphone"></i> Announcements</div>
+                                <a href="student-notifications.html" class="mw-panel-action">View all →</a>
+                            </div>
+                            <!-- announcementFeed ID required by homepage.js -->
+                            <div class="mw-panel-body">
+                                <div id="announcementFeed" class="mw-feed-list">
+                                    <div class="empty-state">Loading announcements…</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GAMES PANEL -->
+                        <div class="mw-panel">
+                            <div class="mw-panel-header">
+                                <div class="mw-panel-title"><i data-lucide="gamepad-2"></i> Games Playground</div>
+                                <a href="student-game.html" class="mw-panel-action">All games →</a>
+                            </div>
+                            <!-- gameFeed ID required by homepage.js -->
+                            <div class="mw-panel-body">
+                                <div id="gameFeed">
+                                    <div class="empty-state">Loading games…</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN -->
+                    <div class="mw-dash-col">
+
+                        <!-- XP LEVEL RING -->
+                        <div class="mw-panel">
+                            <div class="mw-panel-header">
+                                <div class="mw-panel-title"><i data-lucide="zap"></i> XP Level</div>
+                            </div>
+                            <div class="mw-panel-body">
+                                <div style="text-align:center;margin-bottom:14px;">
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.07)"
+                                            stroke-width="10" />
+                                        <circle cx="60" cy="60" r="50" fill="none" stroke="url(#xpGrad)"
+                                            stroke-width="10" stroke-linecap="round" stroke-dasharray="314"
+                                            stroke-dashoffset="70" transform="rotate(-90 60 60)" />
+                                        <defs>
+                                            <linearGradient id="xpGrad" x1="0" y1="0" x2="1" y2="0">
+                                                <stop offset="0%" stop-color="#6366f1" />
+                                                <stop offset="100%" stop-color="#a78bfa" />
+                                            </linearGradient>
+                                        </defs>
+                                        <text x="60" y="54" text-anchor="middle" font-size="22" font-weight="800"
+                                            fill="currentColor">12</text>
+                                        <text x="60" y="70" text-anchor="middle" font-size="11"
+                                            fill="#8b90a8">Level</text>
+                                    </svg>
+                                </div>
+                                <div class="mw-xp-bar-wrap">
+                                    <div class="mw-xp-bar-labels">
+                                        <span>4,820 XP</span>
+                                        <span>5,000 XP</span>
+                                    </div>
+                                    <div class="mw-xp-track">
+                                        <div class="mw-xp-fill" style="width:78%"></div>
+                                    </div>
+                                    <div style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted);">180
+                                        XP to Level 13</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- UPDATES PANEL -->
+                        <div class="mw-panel" style="flex:1;">
+                            <div class="mw-panel-header">
+                                <div class="mw-panel-title"><i data-lucide="bell-ring"></i> Updates</div>
+                                <a href="student-updates.html" class="mw-panel-action">View all →</a>
+                            </div>
+                            <!-- updateFeed ID required by homepage.js -->
+                            <div class="mw-panel-body">
+                                <div id="updateFeed" class="mw-feed-list">
+                                    <div class="empty-state">Progress updates will appear here when your mentors post
+                                        them.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- UPCOMING EVENTS -->
+                        <div class="mw-panel">
+                            <div class="mw-panel-header">
+                                <div class="mw-panel-title"><i data-lucide="calendar-days"></i> Upcoming</div>
+                                <a href="student-upcoming-events.html" class="mw-panel-action">View all →</a>
+                            </div>
+                            <div class="mw-panel-body">
+                                <div class="mw-upcoming-list">
+                                    <div class="mw-upcoming-item">
+                                        <div class="mw-upcoming-date">
+                                            <div class="mw-upcoming-day" style="color:var(--red);">22</div>
+                                            <div class="mw-upcoming-mon">Feb</div>
+                                        </div>
+                                        <div>
+                                            <div class="mw-upcoming-title">Data Structures Quiz</div>
+                                            <div class="mw-upcoming-meta">
+                                                <i data-lucide="clock" style="width:12px;height:12px;"></i> 10:00 AM
+                                                <span class="mw-chip"
+                                                    style="background:rgba(244,63,94,0.15);color:var(--red);">Quiz</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mw-upcoming-item">
+                                        <div class="mw-upcoming-date">
+                                            <div class="mw-upcoming-day" style="color:var(--accent-2);">24</div>
+                                            <div class="mw-upcoming-mon">Feb</div>
+                                        </div>
+                                        <div>
+                                            <div class="mw-upcoming-title">Live Class — DBMS</div>
+                                            <div class="mw-upcoming-meta">
+                                                <i data-lucide="clock" style="width:12px;height:12px;"></i> 3:00 PM
+                                                <span class="mw-chip"
+                                                    style="background:rgba(99,102,241,0.15);color:var(--accent-2);">Live</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mw-upcoming-item">
+                                        <div class="mw-upcoming-date">
+                                            <div class="mw-upcoming-day" style="color:var(--orange);">28</div>
+                                            <div class="mw-upcoming-mon">Feb</div>
+                                        </div>
+                                        <div>
+                                            <div class="mw-upcoming-title">OS Assignment #3 Due</div>
+                                            <div class="mw-upcoming-meta">
+                                                <i data-lucide="clock" style="width:12px;height:12px;"></i> 11:59 PM
+                                                <span class="mw-chip"
+                                                    style="background:rgba(245,158,11,0.15);color:var(--orange);">Assignment</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- end mw-dash-grid -->
+
+            </div>
+            <!-- end mw-content -->
+        </div>
+        <!-- end mw-main -->
+    </div>
+    <!-- end mw-shell -->
+
+    <script>
+        // ── THEME TOGGLE ──
+        const _root = document.documentElement;
+        const _toggleBtn = document.getElementById('themeToggle');
+        const _saved = localStorage.getItem('mw_theme') || 'dark';
+        _root.setAttribute('data-theme', _saved);
+        _toggleBtn.addEventListener('click', () => {
+            const next = _root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            _root.setAttribute('data-theme', next);
+            localStorage.setItem('mw_theme', next);
+        });
+
+        // ── GREETING ──
+        (function () {
+            const name = localStorage.getItem('firstName') || 'Student';
+            document.getElementById('greetingName').textContent = name;
+            document.getElementById('sidebarUserName').textContent = name;
+            const _dun = document.getElementById('dropdownUserName');
+            if (_dun) _dun.textContent = name;
+
+            // Avatar initials
+            const parts = (localStorage.getItem('name') || name).trim().split(' ');
+            const initials = parts.length > 1
+                ? parts[0][0] + parts[parts.length - 1][0]
+                : name.substring(0, 2);
+            document.getElementById('avatarInitials').textContent = initials.toUpperCase();
+
+            // Date greeting
+            const now = new Date();
+            const h = now.getHours();
+            const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+            document.querySelector('.greeting-name').innerHTML =
+                `${greeting}, <span>${name}</span>`;
+
+            const dateStr = now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('greetingDate').textContent = dateStr;
+        })();
+
+        // ── ACTIVE NAV HIGHLIGHT ──
+        document.querySelectorAll('.mw-nav-item').forEach(item => {
+            if (item.getAttribute('href') === window.location.pathname.split('/').pop()) {
+                item.classList.add('active');
+            }
+        });
+    </script>
+
+    <script src="homepage.js"></script>
+    <script src="chatbot.js"></script>
+    <script>
+        // ── SPARKLINE BAR TOOLTIP ──
+        (function () {
+            // Create shared tooltip element
+            const tip = document.createElement('div');
+            tip.id = 'spark-tooltip';
+            tip.innerHTML = '<div class="tip-label"></div><div class="tip-value"></div>';
+            document.body.appendChild(tip);
+
+            const tipLabel = tip.querySelector('.tip-label');
+            const tipValue = tip.querySelector('.tip-value');
+            const OFFSET = 14; // px gap from cursor
+
+            function show(bar, x, y) {
+                const label = bar.dataset.label || '';
+                const value = bar.dataset.value || '';
+                if (!label && !value) return;
+                tipLabel.textContent = label;
+                tipValue.textContent = value;
+                tip.classList.add('visible');
+                position(x, y);
+            }
+
+            function position(x, y) {
+                // Position above-right the cursor; flip left if near right edge
+                const tw = tip.offsetWidth;
+                const th = tip.offsetHeight;
+                let left = x + OFFSET;
+                let top = y - th - OFFSET;
+                if (left + tw > window.innerWidth - 8) left = x - tw - OFFSET;
+                if (top < 8) top = y + OFFSET;
+                tip.style.left = left + 'px';
+                tip.style.top = top + 'px';
+            }
+
+            function hide() {
+                tip.classList.remove('visible');
+            }
+
+            // Event delegation — works for any spark bar on the page
+            document.addEventListener('mouseover', function (e) {
+                const bar = e.target.closest('.mw-spark-bar');
+                if (bar && bar.dataset.value) show(bar, e.clientX, e.clientY);
+            });
+
+            document.addEventListener('mousemove', function (e) {
+                if (tip.classList.contains('visible')) position(e.clientX, e.clientY);
+            });
+
+            document.addEventListener('mouseout', function (e) {
+                if (e.target.closest('.mw-spark-bar')) hide();
+            });
+        })();
+    </script>
+    <script>lucide.createIcons();</script>
+
+    <!-- ── LOGOUT CONFIRMATION MODAL ── -->
+    <div id="logoutModal" class="mw-logout-overlay">
+        <div class="mw-logout-modal">
+            <div class="mw-logout-icon">
+                <i data-lucide="log-out"></i>
+            </div>
+            <h3 class="mw-logout-title">Sign out?</h3>
+            <p class="mw-logout-sub">You'll need to log back in to access your dashboard.</p>
+            <div class="mw-logout-actions">
+                <button class="mw-logout-cancel"
+                    onclick="document.getElementById('logoutModal').classList.remove('active')">
+                    Cancel
+                </button>
+                <button class="mw-logout-confirm" onclick="doLogout()">
+                    <i data-lucide="log-out"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .mw-logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mw-logout-overlay.active {
+            display: flex;
+            animation: mwFadeIn .18s ease;
+        }
+
+        @keyframes mwFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .mw-logout-modal {
+            background: var(--surface, #1e1e2e);
+            border: 1px solid var(--border, rgba(255, 255, 255, .1));
+            border-radius: 20px;
+            padding: 2.4rem 2rem 2rem;
+            width: 340px;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+            animation: mwPopUp .22s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        @keyframes mwPopUp {
+            from {
+                transform: scale(.88);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .mw-logout-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 92, 92, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            color: #ff5c5c;
+        }
+
+        .mw-logout-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .mw-logout-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 .5rem;
+            color: var(--text, #fff);
+        }
+
+        .mw-logout-sub {
+            font-size: .875rem;
+            color: var(--text-muted, #aaa);
+            margin: 0 0 2rem;
+            line-height: 1.5;
+        }
+
+        .mw-logout-actions {
+            display: flex;
+            gap: .75rem;
+        }
+
+        .mw-logout-cancel,
+        .mw-logout-confirm {
+            flex: 1;
+            padding: .75rem 1rem;
+            border-radius: 12px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity .15s, transform .15s;
+        }
+
+        .mw-logout-cancel:hover {
+            opacity: .8;
+        }
+
+        .mw-logout-confirm:hover {
+            opacity: .85;
+            transform: translateY(-1px);
+        }
+
+        .mw-logout-cancel {
+            background: var(--surface-alt, rgba(255, 255, 255, .08));
+            color: var(--text-muted, #aaa);
+        }
+
+        .mw-logout-confirm {
+            background: #ff5c5c;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem;
+        }
+
+        .mw-logout-confirm svg {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+<script src="sidebar.js"></script>
+</body>
+
+</html>

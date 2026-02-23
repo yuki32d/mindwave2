@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Settings - MindWave</title>
+    <link rel="stylesheet" href="css/modern-dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🌊</span>
+                    <span class="logo-text">MindWave</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-label">MAIN MENU</span>
+                    <a href="modern-dashboard.html" class="nav-item">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="org-analytics.html" class="nav-item">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                    <a href="org-billing.html" class="nav-item">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Billing</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">MANAGEMENT</span>
+                    <a href="org-team.html" class="nav-item">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Team Members</span>
+                    </a>
+                    <a href="org-students.html" class="nav-item">
+                        <span class="nav-icon">🎓</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a href="org-games.html" class="nav-item">
+                        <span class="nav-icon">🎮</span>
+                        <span class="nav-text">Games</span>
+                    </a>
+                    <a href="org-settings.html" class="nav-item active">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">SUPPORT</span>
+                    <a href="#help" class="nav-item">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">Help Center</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="search-container">
+                    <input type="text" placeholder="Search settings..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon">🔔</button>
+                    <div class="user-avatar">
+                        <img src="https://i.pravatar.cc/40?img=5" alt="User">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Title -->
+            <div class="page-header">
+                <h1>Organization Settings</h1>
+                <p>Manage your organization profile and preferences</p>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="settings-container">
+                <!-- Organization Profile -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h2>Organization Profile</h2>
+                        <button class="btn-primary">Save Changes</button>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label>Organization Logo</label>
+                                <div class="logo-upload">
+                                    <div class="logo-preview">
+                                        <span class="logo-placeholder">🌊</span>
+                                    </div>
+                                    <div class="logo-upload-info">
+                                        <button class="btn-outline">Upload Logo</button>
+                                        <p>Recommended: 200x200px, PNG or JPG</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Organization Name</label>
+                                <input type="text" value="TechEdu Institute" class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Industry</label>
+                                <select class="form-input">
+                                    <option>Education</option>
+                                    <option>Corporate Training</option>
+                                    <option>Healthcare</option>
+                                    <option>Technology</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Organization Size</label>
+                                <select class="form-input">
+                                    <option>1-50 employees</option>
+                                    <option>51-200 employees</option>
+                                    <option>201-500 employees</option>
+                                    <option>500+ employees</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Country</label>
+                                <select class="form-input">
+                                    <option>United States</option>
+                                    <option>United Kingdom</option>
+                                    <option>Canada</option>
+                                    <option>Australia</option>
+                                    <option>India</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>Organization Website</label>
+                                <input type="url" placeholder="https://example.com" class="form-input">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>Description</label>
+                                <textarea class="form-input" rows="4"
+                                    placeholder="Tell us about your organization..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h2>Contact Information</h2>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Primary Contact Name</label>
+                                <input type="text" value="Alex Johnson" class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" value="alex@techedu.com" class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" value="+1 (555) 123-4567" class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Time Zone</label>
+                                <select class="form-input">
+                                    <option>UTC-08:00 (Pacific Time)</option>
+                                    <option>UTC-05:00 (Eastern Time)</option>
+                                    <option>UTC+00:00 (GMT)</option>
+                                    <option>UTC+05:30 (IST)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferences -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h2>Preferences</h2>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="preference-item">
+                            <div class="preference-info">
+                                <h3>Email Notifications</h3>
+                                <p>Receive email updates about your organization</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="preference-item">
+                            <div class="preference-info">
+                                <h3>Weekly Reports</h3>
+                                <p>Get weekly analytics reports via email</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="preference-item">
+                            <div class="preference-info">
+                                <h3>Usage Alerts</h3>
+                                <p>Notify when approaching usage limits</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="preference-item">
+                            <div class="preference-info">
+                                <h3>Team Activity Notifications</h3>
+                                <p>Get notified when team members join or leave</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="settings-card danger-card">
+                    <div class="settings-card-header">
+                        <h2>Danger Zone</h2>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="danger-item">
+                            <div>
+                                <h3>Cancel Subscription</h3>
+                                <p>Cancel your current subscription plan</p>
+                            </div>
+                            <button class="btn-danger-outline">Cancel Plan</button>
+                        </div>
+
+                        <div class="danger-item">
+                            <div>
+                                <h3>Delete Organization</h3>
+                                <p>Permanently delete your organization and all data</p>
+                            </div>
+                            <button class="btn-danger">Delete Organization</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div></body>
+
+</html>

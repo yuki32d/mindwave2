@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses — MindWave</title>
+    <meta name="description" content="View your Google Classroom courses, assignments, and materials in MindWave.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="theme-init.js"></script>
+    <script src="sidebar.js"></script>
+</head>
+
+<body>
+    <div class="mw-app" id="mwApp">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
+            </div>
+
+            <div class="mw-sidebar-nav">
+
+                <!-- Main Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+                    </a>
+                    <a href="student-courses.html" class="mw-nav-item active">
+                        <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
+                    </a>
+                    <a href="student-timetable.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
+                    </a>
+                    <a href="student-performance.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
+                    </a>
+                    <a href="student-leaderboard.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="trophy"></i></span> Leaderboard
+                        <span class="mw-nav-badge" style="font-size:10px;">HOT</span>
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Engage Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="gamepad-2"></i></span> Play Games
+                    </a>
+                    <a href="student-community.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Community
+                    </a>
+                    <a href="student-achievements.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="award"></i></span> Achievements
+                    </a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="megaphone"></i></span> Events
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Tools Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
+                    </a>
+                    <a href="student-study-recommendations.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
+                    </a>
+                    <a href="student-reports.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
+                    </a>
+                    <a href="student-settings.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Logout -->
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
+
+            </div><!-- end mw-sidebar-nav -->
+
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                    <span class="mw-user-more">⋯</span>
+
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
+                        </div>
+                        <a href="student-profile.html">
+                            <i data-lucide="user"></i> My Profile
+                        </a>
+                        <a href="student-settings.html">
+                            <i data-lucide="settings"></i> Settings
+                        </a>
+                        <a href="student-notifications.html">
+                            <i data-lucide="bell"></i> Notifications
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
+
+            <!-- TOPBAR -->
+            <header class="mw-topbar">
+                <!-- Hamburger -->
+                <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+
+                <div class="mw-breadcrumb">Dashboard / <span>My Courses</span></div>
+
+                <div class="mw-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search courses…" id="courseSearch">
+                </div>
+
+                <div class="mw-topbar-actions">
+                    <div class="mw-notif-wrap">
+                        <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="mw-notif-dot hidden" id="notificationBadge"></span>
+                        </div>
+                        <div class="mw-notif-dropdown" id="notificationDropdown"></div>
+                    </div>
+                    <div class="mw-icon-btn" id="settingsBtn" title="Settings">
+                        <i data-lucide="settings"></i>
+                    </div>
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle light/dark"
+                        aria-label="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <div class="mw-content">
+
+                <!-- Page header -->
+                <div class="greeting-row" style="margin-bottom:28px;">
+                    <div>
+                        <div class="greeting-name" style="font-size:1.6rem;">My Courses</div>
+                        <div class="greeting-date">Google Classroom · your enrolled subjects</div>
+                    </div>
+                </div>
+
+                <!-- Filter bar + Disconnect GCR -->
+                <div style="display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap;">
+                    <button class="mw-btn mw-btn-primary gcr-filter active" data-filter="all">All</button>
+                    <button class="mw-btn mw-btn-ghost gcr-filter" data-filter="ACTIVE">Active</button>
+                    <button class="mw-btn mw-btn-ghost gcr-filter" data-filter="ARCHIVED">Archived</button>
+                    <div style="flex:1;"></div>
+                    <button id="disconnectGcrBtn" class="mw-btn mw-btn-ghost"
+                        style="color:var(--red,#ff5c5c);border-color:rgba(255,92,92,.3);white-space:nowrap;">
+                        <i data-lucide="unlink"></i> Disconnect GCR
+                    </button>
+                </div>
+
+                <!-- Course grid injected by student-courses.js -->
+                <div class="mw-course-grid" id="panelGrid"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ── LOGOUT MODAL ── -->
+    <div id="logoutModal" class="mw-logout-overlay">
+        <div class="mw-logout-modal">
+            <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
+            <h3 class="mw-logout-title">Sign out?</h3>
+            <p class="mw-logout-sub">You'll need to log back in to access your dashboard.</p>
+            <div class="mw-logout-actions">
+                <button class="mw-logout-cancel"
+                    onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
+                <button class="mw-logout-confirm" onclick="doLogout()">
+                    <i data-lucide="log-out"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── DISCONNECT GCR MODAL ── -->
+    <div id="disconnectModal" class="mw-logout-overlay">
+        <div class="mw-logout-modal">
+            <div class="mw-logout-icon" style="background:rgba(255,92,92,.12);color:#ff5c5c;">
+                <i data-lucide="unlink"></i>
+            </div>
+            <h3 class="mw-logout-title">Disconnect GCR?</h3>
+            <p class="mw-logout-sub">Your Google Classroom account will be unlinked. You can reconnect anytime.</p>
+            <div class="mw-logout-actions">
+                <button class="mw-logout-cancel"
+                    onclick="document.getElementById('disconnectModal').classList.remove('active')">Cancel</button>
+                <button class="mw-logout-confirm" onclick="doDisconnectGcr()">
+                    <i data-lucide="unlink"></i> Disconnect
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* ── Logout modal (same as homepage) ── */
+        .mw-logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center
+        }
+
+        .mw-logout-overlay.active {
+            display: flex;
+            animation: mwFadeIn .18s ease
+        }
+
+        @keyframes mwFadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .mw-logout-modal {
+            background: var(--surface, #1e1e2e);
+            border: 1px solid var(--border, rgba(255, 255, 255, .1));
+            border-radius: 20px;
+            padding: 2.4rem 2rem 2rem;
+            width: 340px;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+            animation: mwPopUp .22s cubic-bezier(.34, 1.56, .64, 1)
+        }
+
+        @keyframes mwPopUp {
+            from {
+                transform: scale(.88);
+                opacity: 0
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+
+        .mw-logout-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 92, 92, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            color: #ff5c5c
+        }
+
+        .mw-logout-icon svg {
+            width: 28px;
+            height: 28px
+        }
+
+        .mw-logout-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 .5rem;
+            color: var(--text, #fff)
+        }
+
+        .mw-logout-sub {
+            font-size: .875rem;
+            color: var(--text-muted, #aaa);
+            margin: 0 0 2rem;
+            line-height: 1.5
+        }
+
+        .mw-logout-actions {
+            display: flex;
+            gap: .75rem
+        }
+
+        .mw-logout-cancel,
+        .mw-logout-confirm {
+            flex: 1;
+            padding: .75rem 1rem;
+            border-radius: 12px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity .15s, transform .15s
+        }
+
+        .mw-logout-cancel {
+            background: var(--surface-alt, rgba(255, 255, 255, .08));
+            color: var(--text-muted, #aaa)
+        }
+
+        .mw-logout-confirm {
+            background: #ff5c5c;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem
+        }
+
+        .mw-logout-confirm svg {
+            width: 16px;
+            height: 16px
+        }
+    </style>
+
+    <script>
+        // ── Auth utilities ──────────────────────────────────────────────
+        function clearAuthAndCache() {
+            const keys = ['token', 'mindwave_token', 'email', 'firstName', 'lastName', 'role', 'userId'];
+            keys.forEach(k => localStorage.removeItem(k));
+            sessionStorage.clear();
+        }
+        function doLogout() { clearAuthAndCache(); window.location.replace('marketing-site/student-login.html'); }
+        function performLogout() {
+            const modal = document.getElementById('logoutModal');
+            if (modal) modal.classList.add('active');
+        }
+        function getStudentEmail() { return localStorage.getItem('email') || ''; }
+
+        // ── Profile init ──────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            // Name / avatar
+            const firstName = localStorage.getItem('firstName') || '';
+            const lastName = localStorage.getItem('lastName') || '';
+            const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Student';
+            const initials = (firstName[0] || '') + (lastName[0] || '') || 'ST';
+
+            const nameEls = document.querySelectorAll('#sidebarUserName, #dropdownUserName, #greetingName');
+            nameEls.forEach(el => { if (el) el.textContent = firstName || fullName; });
+            const avatarEl = document.getElementById('avatarInitials');
+            if (avatarEl) avatarEl.textContent = initials.toUpperCase();
+
+            // Profile dropdown
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', () => {
+                    const open = profileDropdown.style.display === 'flex';
+                    profileDropdown.style.display = open ? 'none' : 'flex';
+                });
+                document.addEventListener('click', e => {
+                    if (!profileToggle.contains(e.target) && !profileDropdown.contains(e.target))
+                        profileDropdown.style.display = 'none';
+                });
+            }
+
+            // Logout
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', performLogout);
+
+            // Theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    const html = document.documentElement;
+                    const isDark = html.getAttribute('data-theme') === 'dark';
+                    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+                    localStorage.setItem('mw_theme', isDark ? 'light' : 'dark');
+                });
+            }
+
+            // GCR filter buttons
+            document.querySelectorAll('.gcr-filter').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.gcr-filter').forEach(b => b.classList.remove('active', 'mw-btn-primary'));
+                    document.querySelectorAll('.gcr-filter').forEach(b => b.classList.add('mw-btn-ghost'));
+                    btn.classList.remove('mw-btn-ghost');
+                    btn.classList.add('active', 'mw-btn-primary');
+                    currentFilter = btn.dataset.filter;
+                    renderCourses();
+                });
+            });
+
+            // Live course search
+            const searchInput = document.getElementById('courseSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    courseSearchQuery = searchInput.value.toLowerCase();
+                    renderCourses();
+                });
+            }
+
+            // Disconnect GCR button
+            const disconnectBtn = document.getElementById('disconnectGcrBtn');
+            if (disconnectBtn) {
+                disconnectBtn.addEventListener('click', () => {
+                    document.getElementById('disconnectModal').classList.add('active');
+                });
+            }
+        });
+
+        async function doDisconnectGcr() {
+            const btn = document.querySelector('#disconnectModal .mw-logout-confirm');
+            if (btn) { btn.textContent = 'Disconnecting…'; btn.disabled = true; }
+
+            const token = localStorage.getItem('token') || localStorage.getItem('mindwave_token');
+            try {
+                const res = await fetch('/api/classroom/disconnect', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.message || 'Server error');
+                // Success — close modal and reload to show the "Connect GCR" prompt
+                document.getElementById('disconnectModal').classList.remove('active');
+                window.location.reload();
+            } catch (e) {
+                alert('Could not disconnect: ' + e.message);
+                if (btn) { btn.innerHTML = '<i data-lucide="unlink"></i> Disconnect'; btn.disabled = false; lucide.createIcons(); }
+            }
+        }
+    </script>
+
+    <script src="student-courses.js?v=3"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

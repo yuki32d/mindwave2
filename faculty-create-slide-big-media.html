@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Big Media Slide – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <!-- Back Button -->
+                <div style="margin-bottom: 32px;">
+                    <button class="secondary-btn" id="backBtn"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
+                        Back</button>
+                </div>
+
+                <!-- Page Header -->
+                <div style="text-align: center; margin-bottom: 48px;">
+                    <div
+                        style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-bottom: 12px;">
+                        <h1 style="font-size: 36px; font-weight: 700; color: #f5f7ff; margin: 0;">🖼️ Create Big Media
+                            Slide</h1>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Slide</button>
+                    </div>
+                    <p style="color: #9ea4b6; font-size: 16px; margin: 0;">Full-screen image or video slide</p>
+                </div>
+
+                <div class="grid two">
+                    <section class="panel">
+                        <h2>📝 Slide Content</h2>
+                        <form id="slideForm">
+                            <div><label for="title">Caption (Optional)</label><input type="text" id="title"
+                                    placeholder="e.g., Beautiful Sunset"></div>
+                            <div><label for="mediaUpload">Upload Image</label>
+                                <input type="file" id="mediaUpload" accept="image/*" required
+                                    style="padding: 12px; background: var(--card-darker); border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; cursor: pointer;">
+                                <small style="color: #9ea4b6; display: block; margin-top: 8px;">Max 5MB</small>
+                            </div>
+                            <div><label for="displayDuration">Duration (seconds)</label><input type="number"
+                                    id="displayDuration" value="15" min="5" max="300"></div>
+                        </form>
+                    </section>
+                    <section class="panel">
+                        <h2>👁️ Live Preview</h2>
+                        <div id="slidePreview"
+                            style="aspect-ratio: 16/9; background: #1E2433; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 8px 32px rgba(0,0,0,0.4); overflow: hidden; position: relative;">
+                            <p id="uploadPrompt" style="color: #9ea4b6; font-size: 18px;">Upload an image to preview</p>
+                            <img id="previewImage" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                            <div id="captionOverlay"
+                                style="display: none; position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 32px; color: white; font-size: 24px; font-weight: 600;">
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="loading-spinner.js"></script>
+    <script>
+        let mediaData = null;
+        document.addEventListener('DOMContentLoaded', () => {
+            // Back button event listener
+            document.getElementById('backBtn')?.addEventListener('click', () => window.history.back());
+
+            document.getElementById('mediaUpload').addEventListener('change', handleMediaUpload);
+            document.getElementById('title').addEventListener('input', updateCaption);
+            document.getElementById('publishBtn').addEventListener('click', publishSlide);
+        });
+        function handleMediaUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) { alert('Image too large. Max 5MB.'); return; }
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                mediaData = event.target.result;
+                document.getElementById('uploadPrompt').style.display = 'none';
+                const img = document.getElementById('previewImage');
+                img.src = mediaData; img.style.display = 'block';
+                updateCaption();
+            };
+            reader.readAsDataURL(file);
+        }
+        function updateCaption() {
+            const caption = document.getElementById('title').value.trim();
+            const overlay = document.getElementById('captionOverlay');
+            if (caption && mediaData) { overlay.textContent = caption; overlay.style.display = 'block'; }
+            else overlay.style.display = 'none';
+        }
+        async function publishSlide() {
+            const title = document.getElementById('title').value.trim();
+            if (!mediaData) { alert('Please upload an image'); return; }
+            const slideData = { title, mediaData, displayDuration: parseInt(document.getElementById('displayDuration').value), slideType: 'big-media', type: 'slide', createdAt: new Date().toISOString() };
+            try {
+                const response = await fetch('/api/games', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify(slideData) });
+                if (response.ok) { alert('✅ Slide published!'); window.location.href = 'admin.html'; } else throw new Error('Failed');
+            } catch (error) { alert('❌ Error publishing slide.'); }
+        }
+    </script>
+</body>
+
+</html>

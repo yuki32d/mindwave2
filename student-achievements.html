@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achievements — MindWave</title>
+    <meta name="description" content="Track your badges, XP, level, and class rank on MindWave.">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="theme-init.js"></script>
+    <script src="sidebar.js"></script>
+
+    <style>
+        /* ── Page layout (scrollable wrapper via mw-main override) ── */
+        .mw-main {
+            overflow-y: auto !important;
+        }
+
+        .ach-main {
+            padding: 28px 32px;
+        }
+
+        .ach-page-header {
+            margin-bottom: 28px;
+        }
+
+        .ach-page-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .ach-page-header p {
+            color: var(--muted);
+            font-size: .875rem;
+        }
+
+        /* ── Hero card ── */
+        .ach-hero {
+            background: linear-gradient(135deg, rgba(99, 102, 241, .12), rgba(168, 85, 247, .10));
+            border: 1px solid var(--border-2);
+            border-radius: 20px;
+            padding: 36px 32px 28px;
+            text-align: center;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ach-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(99, 102, 241, .18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .ach-level-num {
+            font-size: 68px;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, #818cf8, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+        }
+
+        .ach-level-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+
+        .ach-xp-wrap {
+            max-width: 560px;
+            margin: 0 auto 28px;
+        }
+
+        .ach-xp-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: .8rem;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .ach-xp-track {
+            height: 14px;
+            background: var(--surface-2);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .ach-xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #a78bfa);
+            border-radius: 999px;
+            transition: width .8s cubic-bezier(.4, 0, .2, 1);
+            position: relative;
+        }
+
+        .ach-xp-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .25), transparent);
+            animation: shimmer 2.2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .ach-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-top: 4px;
+        }
+
+        .ach-stat {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 12px;
+            text-align: center;
+        }
+
+        .ach-stat-val {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .ach-stat-label {
+            font-size: .7rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-weight: 600;
+        }
+
+        /* ── Section headings ── */
+        .ach-section {
+            margin-bottom: 36px;
+        }
+
+        .ach-section-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .ach-section-head h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .ach-section-head .ach-count {
+            font-size: .78rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        /* ── Badge grid ── */
+        .ach-badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 14px;
+        }
+
+        .ach-badge {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 14px 16px;
+            text-align: center;
+            transition: transform .2s, box-shadow .2s, border-color .2s;
+            cursor: default;
+            position: relative;
+        }
+
+        .ach-badge:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, .28);
+            border-color: var(--border-2);
+        }
+
+        .ach-badge.unlocked {
+            border-color: rgba(99, 102, 241, .35);
+        }
+
+        .ach-badge.unlocked:hover {
+            border-color: var(--accent);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, .22);
+        }
+
+        .ach-badge.locked {
+            opacity: .45;
+            filter: grayscale(1);
+        }
+
+        .ach-badge-icon {
+            font-size: 44px;
+            line-height: 1;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .ach-badge-name {
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+
+        .ach-badge-desc {
+            font-size: .7rem;
+            color: var(--muted);
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .ach-badge-xp {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: .7rem;
+            font-weight: 700;
+            background: rgba(99, 102, 241, .15);
+            color: var(--accent);
+        }
+
+        .ach-badge.unlocked .ach-badge-xp {
+            background: rgba(99, 102, 241, .25);
+        }
+
+        /* ── Leaderboard ── */
+        .ach-lb-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px;
+        }
+
+        .ach-lb-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: var(--surface-2);
+            margin-bottom: 8px;
+            transition: background .15s;
+        }
+
+        .ach-lb-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .ach-lb-row:hover {
+            background: var(--border);
+        }
+
+        .ach-lb-row.me {
+            border: 1.5px solid rgba(99, 102, 241, .5);
+            background: rgba(99, 102, 241, .06);
+        }
+
+        .ach-rank {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .95rem;
+            flex-shrink: 0;
+        }
+
+        .ach-rank.gold {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+        }
+
+        .ach-rank.silver {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+            color: #000;
+        }
+
+        .ach-rank.bronze {
+            background: linear-gradient(135deg, #cd7f32, #e8a87c);
+            color: #000;
+        }
+
+        .ach-rank.other {
+            background: var(--surface);
+            color: var(--muted);
+            border: 1px solid var(--border-2);
+        }
+
+        .ach-lb-info {
+            flex: 1;
+        }
+
+        .ach-lb-name {
+            font-size: .88rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .ach-lb-meta {
+            font-size: .72rem;
+            color: var(--muted);
+        }
+
+        .ach-lb-pts {
+            font-weight: 700;
+            font-size: .9rem;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        /* ── Badge icon wrap ── */
+        .ach-badge-icon-wrap {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            background: rgba(99, 102, 241, .14);
+        }
+
+        .ach-badge.unlocked .ach-badge-icon-wrap {
+            background: linear-gradient(135deg, rgba(99, 102, 241, .25), rgba(168, 85, 247, .18));
+        }
+
+        .ach-badge.locked .ach-badge-icon-wrap {
+            background: rgba(255, 255, 255, .05);
+        }
+
+        .ach-badge-icon-wrap svg {
+            width: 26px;
+            height: 26px;
+            stroke-width: 1.75;
+            color: var(--accent);
+        }
+
+        .ach-badge.locked .ach-badge-icon-wrap svg {
+            color: var(--muted);
+        }
+
+        /* ── Topbar icon buttons — ensure visible in both modes ── */
+        .mw-icon-btn {
+            color: var(--text);
+        }
+
+        /* ── Theme toggle pill (moon / sun slider) ── */
+        .theme-pill {
+            display: flex;
+            align-items: center;
+            background: var(--surface-2);
+            border: 1px solid var(--border-2);
+            border-radius: 999px;
+            padding: 4px;
+            gap: 0;
+            cursor: pointer;
+            position: relative;
+            width: 72px;
+            height: 36px;
+            flex-shrink: 0;
+        }
+
+        .theme-pill-knob {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            top: 3px;
+            left: 3px;
+            transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+            z-index: 1;
+        }
+
+        .theme-pill.light .theme-pill-knob {
+            transform: translateX(36px);
+        }
+
+        .theme-pill-icon {
+            width: 32px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .theme-pill-icon svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2;
+            color: var(--muted);
+            transition: color .2s;
+        }
+
+        .theme-pill-icon.active svg {
+            color: #fff;
+        }
+
+        /* ── Loading skeleton ── */
+        .ach-skeleton {
+            background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+            background-size: 200% 100%;
+            animation: skel 1.4s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes skel {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* ── Empty state ── */
+        .ach-empty {
+            text-align: center;
+            padding: 32px;
+            color: var(--muted);
+            font-size: .875rem;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .ach-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .ach-main {
+                padding: 20px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mw-app" id="mwApp">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
+            </div>
+
+            <div class="mw-sidebar-nav">
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+                    </a>
+                    <a href="student-courses.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
+                    </a>
+                    <a href="student-timetable.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
+                    </a>
+                    <a href="student-performance.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
+                    </a>
+                    <a href="student-leaderboard.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="trophy"></i></span> Leaderboard
+                        <span class="mw-nav-badge" style="font-size:10px;">HOT</span>
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="gamepad-2"></i></span> Play Games
+                    </a>
+                    <a href="student-community.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Community
+                    </a>
+                    <a href="student-achievements.html" class="mw-nav-item active">
+                        <span class="mw-nav-icon"><i data-lucide="award"></i></span> Achievements
+                    </a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="megaphone"></i></span> Events
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
+                    </a>
+                    <a href="student-study-recommendations.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
+                    </a>
+                    <a href="student-reports.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
+                    </a>
+                    <a href="student-settings.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
+            </div>
+
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                    <i data-lucide="chevron-up" class="mw-user-more"></i>
+                    <!-- Profile dropdown -->
+                    <div class="mw-profile-dropdown" id="profileDropdown" style="display:none;">
+                        <a href="student-profile.html" class="mw-profile-link">
+                            <i data-lucide="user"></i> My Profile
+                        </a>
+                        <a href="student-settings.html" class="mw-profile-link">
+                            <i data-lucide="settings"></i> Settings
+                        </a>
+                        <hr style="border:none;border-top:1px solid var(--border);margin:6px 0;">
+                        <button class="mw-profile-link" id="dropdownSignOut"
+                            style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red);">
+                            <i data-lucide="log-out"></i> Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
+
+            <!-- Top bar -->
+            <header class="mw-topbar">
+                <button class="mw-hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="mw-breadcrumb">Dashboard / <span>Achievements</span></div>
+                <div class="mw-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="topbarSearch" placeholder="Search…" aria-label="Search">
+                </div>
+                <div class="mw-topbar-actions">
+                    <button class="mw-icon-btn" id="notifBtn" aria-label="Notifications">
+                        <i data-lucide="bell"></i>
+                    </button>
+                    <button class="mw-icon-btn" id="settingsBtn" aria-label="Settings"
+                        onclick="location.href='student-settings.html'">
+                        <i data-lucide="settings"></i>
+                    </button>
+                    <div class="theme-pill" id="themeToggle" title="Toggle theme">
+                        <div class="theme-pill-knob"></div>
+                        <span class="theme-pill-icon active" id="moonIcon"><i data-lucide="moon"></i></span>
+                        <span class="theme-pill-icon" id="sunIcon"><i data-lucide="sun"></i></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="ach-main">
+
+                <div class="ach-page-header">
+                    <h1>Achievements</h1>
+                    <p>Your badges, XP, and class standing — updated in real time.</p>
+                </div>
+
+                <!-- Hero / Player card -->
+                <div class="ach-hero">
+                    <div class="ach-level-num" id="achLevel">—</div>
+                    <div class="ach-level-title" id="achLevelTitle">Loading…</div>
+
+                    <div class="ach-xp-wrap">
+                        <div class="ach-xp-labels">
+                            <span id="xpCurrent">…</span>
+                            <span id="xpToNext">…</span>
+                        </div>
+                        <div class="ach-xp-track">
+                            <div class="ach-xp-fill" id="xpFill" style="width:0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="ach-stats-grid">
+                        <div class="ach-stat">
+                            <div class="ach-stat-val" id="statXp">—</div>
+                            <div class="ach-stat-label">Total XP</div>
+                        </div>
+                        <div class="ach-stat">
+                            <div class="ach-stat-val" id="statBadges">—</div>
+                            <div class="ach-stat-label">Badges Earned</div>
+                        </div>
+                        <div class="ach-stat">
+                            <div class="ach-stat-val" id="statGames">—</div>
+                            <div class="ach-stat-label">Games Played</div>
+                        </div>
+                        <div class="ach-stat">
+                            <div class="ach-stat-val" id="statRank">—</div>
+                            <div class="ach-stat-label">Class Rank</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unlocked Badges -->
+                <div class="ach-section">
+                    <div class="ach-section-head">
+                        <i data-lucide="unlock" style="color:var(--accent)"></i>
+                        <h2>Unlocked Badges</h2>
+                        <span class="ach-count" id="unlockedCount">…</span>
+                    </div>
+                    <div class="ach-badge-grid" id="unlockedGrid">
+                        <!-- rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Locked Badges -->
+                <div class="ach-section">
+                    <div class="ach-section-head">
+                        <i data-lucide="lock" style="color:var(--muted)"></i>
+                        <h2>Locked Badges</h2>
+                        <span class="ach-count" id="lockedCount">…</span>
+                    </div>
+                    <div class="ach-badge-grid" id="lockedGrid">
+                        <!-- rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Class Leaderboard -->
+                <div class="ach-section">
+                    <div class="ach-section-head">
+                        <i data-lucide="trophy" style="color:#f59e0b"></i>
+                        <h2>Class Leaderboard</h2>
+                    </div>
+                    <div class="ach-lb-card">
+                        <div id="lbList">
+                            <div class="ach-empty">Loading leaderboard…</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /ach-main -->
+        </div><!-- /mw-main -->
+    </div><!-- /mw-app -->
+
+    <script>
+        /* ═══════════════════ AUTH ═══════════════════ */
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'student-login.html';
+
+        const API = window.location.origin;
+        const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+        /* ═══════════════════ LEVEL SYSTEM ═══════════════════ */
+        // XP thresholds per level (level n needs thresholds[n-1] cumulative XP)
+        const LEVEL_THRESHOLDS = [
+            0, 500, 1200, 2100, 3200, 4500, 6000, 7700, 9600, 11700, 14000,  // 0-10
+            16500, 19200, 22100, 25200, 28500, 32000, 35700, 39600, 43700, 48000   // 11-20
+        ];
+        const LEVEL_TITLES = [
+            'Newcomer', 'Beginner', 'Learner', 'Explorer', 'Contributor',
+            'Achiever', 'Star', 'Expert', 'Scholar', 'Champion', 'Legend',
+            'Academic Explorer', 'Academic Pioneer', 'Knowledge Seeker', 'Innovator',
+            'Mastermind', 'Prodigy', 'Elite Scholar', 'Grand Master', 'Enlightened', 'MindWave Legend'
+        ];
+
+        function getLevel(xp) {
+            let level = 1;
+            for (let i = 1; i < LEVEL_THRESHOLDS.length; i++) {
+                if (xp >= LEVEL_THRESHOLDS[i]) level = i + 1;
+                else break;
+            }
+            return level;
+        }
+
+        function getLevelProgress(xp) {
+            const level = getLevel(xp);
+            const thisFloor = LEVEL_THRESHOLDS[level - 1] || 0;
+            const nextCeil = LEVEL_THRESHOLDS[level] || LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
+            const progress = ((xp - thisFloor) / (nextCeil - thisFloor)) * 100;
+            return { level, thisFloor, nextCeil, progress: Math.min(progress, 100) };
+        }
+
+        /* ═══════════════════ BADGE DEFINITIONS ═══════════════════ */
+        // Each badge has: id, icon, name, desc, xp, check(stats)→boolean
+        const BADGE_DEFS = [
+            // — Easy —
+            {
+                id: 'first_game', lucide: 'gamepad-2', name: 'First Game', xp: 50,
+                desc: 'Complete your first game', check: s => s.gamesPlayed >= 1
+            },
+            {
+                id: 'perfect_score', lucide: 'target', name: 'Perfect Score', xp: 100,
+                desc: 'Achieve 100% on any game', check: s => s.perfectScores >= 1
+            },
+            {
+                id: 'quick_learner', lucide: 'zap', name: 'Quick Learner', xp: 75,
+                desc: 'Finish a game in under 3 minutes', check: s => s.fastGames >= 1
+            },
+            {
+                id: 'five_games', lucide: 'layers', name: 'Game Veteran', xp: 100,
+                desc: 'Play 5 or more games', check: s => s.gamesPlayed >= 5
+            },
+            // — Medium —
+            {
+                id: 'bookworm', lucide: 'book-open', name: 'Bookworm', xp: 200,
+                desc: 'Play 10+ games across all types', check: s => s.gamesPlayed >= 10
+            },
+            {
+                id: 'high_accuracy', lucide: 'graduation-cap', name: 'Honor Roll', xp: 250,
+                desc: 'Maintain 85%+ average accuracy', check: s => s.avgAccuracy >= 85
+            },
+            {
+                id: 'team_player', lucide: 'users', name: 'Team Player', xp: 100,
+                desc: 'Complete 5+ different game types', check: s => s.uniqueGameTypes >= 5
+            },
+            {
+                id: 'improvement', lucide: 'trending-up', name: 'Improvement Star', xp: 200,
+                desc: 'Score higher than your first game', check: s => s.hasImprovement
+            },
+            {
+                id: 'completionist', lucide: 'check-circle-2', name: 'Completionist', xp: 300,
+                desc: 'Reach 20+ games played', check: s => s.gamesPlayed >= 20
+            },
+            {
+                id: 'top10', lucide: 'list-ordered', name: 'Top 10', xp: 300,
+                desc: 'Reach top 10 on the leaderboard', check: s => s.classRank > 0 && s.classRank <= 10
+            },
+            {
+                id: 'perfectionist', lucide: 'sparkles', name: 'Perfectionist', xp: 500,
+                desc: 'Score 100% on 5 different games', check: s => s.perfectScores >= 5
+            },
+            {
+                id: 'overachiever', lucide: 'rocket', name: 'Overachiever', xp: 750,
+                desc: 'Maintain 95%+ average accuracy', check: s => s.avgAccuracy >= 95
+            },
+            {
+                id: 'marathon', lucide: 'timer', name: 'Marathon Runner', xp: 500,
+                desc: 'Play 30+ games in total', check: s => s.gamesPlayed >= 30
+            },
+            {
+                id: 'top_of_class', lucide: 'medal', name: 'Top of Class', xp: 500,
+                desc: 'Reach #1 on the leaderboard', check: s => s.classRank === 1
+            },
+            {
+                id: 'legend', lucide: 'crown', name: 'MindWave Legend', xp: 1000,
+                desc: 'Play 50+ games and rank in top 5', check: s => s.gamesPlayed >= 50 && s.classRank > 0 && s.classRank <= 5
+            },
+        ];
+
+        /* ═══════════════════ RENDER ═══════════════════ */
+        function renderBadge(badge, unlocked) {
+            return `
+            <div class="ach-badge ${unlocked ? 'unlocked' : 'locked'}" title="${badge.desc}">
+                <div class="ach-badge-icon-wrap">
+                    <i data-lucide="${badge.lucide}"></i>
+                </div>
+                <div class="ach-badge-name">${badge.name}</div>
+                <div class="ach-badge-desc">${badge.desc}</div>
+                <span class="ach-badge-xp">+${badge.xp} XP</span>
+            </div>`;
+        }
+
+        function renderLeaderboard(leaderboard, currentUserEmail) {
+            if (!leaderboard || leaderboard.length === 0) {
+                return '<div class="ach-empty">No leaderboard data yet. Play some games!</div>';
+            }
+
+            const rankClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'other';
+            const isMe = p => p.email === currentUserEmail;
+
+            return leaderboard.slice(0, 10).map((p, i) => `
+            <div class="ach-lb-row ${isMe(p) ? 'me' : ''}">
+                <div class="ach-rank ${rankClass(i)}">${i + 1}</div>
+                <div class="ach-lb-info">
+                    <div class="ach-lb-name">${isMe(p) ? '⭐ You' : (p.name || 'Student')}</div>
+                    <div class="ach-lb-meta">Level ${getLevel(p.totalPoints)} · ${p.gamesPlayed} game${p.gamesPlayed !== 1 ? 's' : ''} · ${p.avgAccuracy}% accuracy</div>
+                </div>
+                <div class="ach-lb-pts">${p.totalPoints.toLocaleString()} XP</div>
+            </div>`).join('');
+        }
+
+        /* ═══════════════════ MAIN LOAD ═══════════════════ */
+        async function loadAll() {
+            try {
+                const [meRes, lbRes, gamesRes] = await Promise.all([
+                    fetch(`${API}/api/me`, { headers }),
+                    fetch(`${API}/api/leaderboard`, { headers }),
+                    fetch(`${API}/api/game-results/my-results`, { headers })
+                ]);
+
+                // — Profile —
+                const meData = meRes.ok ? await meRes.json() : {};
+                const lbData = lbRes.ok ? await lbRes.json() : {};
+                const gmsData = gamesRes.ok ? await gamesRes.json() : {};
+
+                const user = meData.user || {};
+                const leaderboard = lbData.leaderboard || [];
+                const curUser = lbData.currentUser || { rank: 0, totalPoints: 0, gamesPlayed: 0, avgAccuracy: 0 };
+                const results = gmsData.results || [];
+
+                // Populate sidebar name + avatar
+                const displayName = user.displayName || user.name ||
+                    (localStorage.getItem('firstName') || '') + ' ' + (localStorage.getItem('lastName') || '');
+                const trimmed = displayName.trim() || 'Student';
+                const initials = trimmed.split(' ').map(w => w[0] || '').join('').toUpperCase().slice(0, 2);
+                document.querySelectorAll('#sidebarUserName').forEach(el => el.textContent = trimmed);
+                document.querySelectorAll('#avatarInitials, #topbarAvatar').forEach(el => el.textContent = initials);
+
+                // — Compute stats for badge checks —
+                const perfectScores = results.filter(r => r.score >= 100).length;
+                const fastGames = results.filter(r => r.timeTaken > 0 && r.timeTaken < 180).length;
+                const uniqueGameTypes = new Set(results.map(r => r.gameType)).size;
+                const firstScore = results.length > 1 ? results[results.length - 1].score : 0;
+                const latestScore = results.length > 0 ? results[0].score : 0;
+                const hasImprovement = latestScore > firstScore && results.length >= 2;
+
+                const stats = {
+                    gamesPlayed: curUser.gamesPlayed,
+                    avgAccuracy: curUser.avgAccuracy,
+                    totalXP: curUser.totalPoints,
+                    classRank: curUser.rank,
+                    perfectScores,
+                    fastGames,
+                    uniqueGameTypes,
+                    hasImprovement
+                };
+
+                // — Level —
+                const { level, thisFloor, nextCeil, progress } = getLevelProgress(stats.totalXP);
+                const levelTitle = LEVEL_TITLES[Math.min(level - 1, LEVEL_TITLES.length - 1)];
+
+                document.getElementById('achLevel').textContent = `Level ${level}`;
+                document.getElementById('achLevelTitle').textContent = levelTitle;
+                document.getElementById('xpCurrent').textContent = `${stats.totalXP.toLocaleString()} / ${nextCeil.toLocaleString()} XP`;
+                document.getElementById('xpToNext').textContent = `${(nextCeil - stats.totalXP).toLocaleString()} XP to Level ${level + 1}`;
+                setTimeout(() => document.getElementById('xpFill').style.width = progress + '%', 100);
+
+                // — Stats grid —
+                const earnedBadges = BADGE_DEFS.filter(b => b.check(stats)).length;
+                document.getElementById('statXp').textContent = stats.totalXP.toLocaleString();
+                document.getElementById('statBadges').textContent = earnedBadges;
+                document.getElementById('statGames').textContent = stats.gamesPlayed;
+                document.getElementById('statRank').textContent = stats.classRank ? `#${stats.classRank}` : 'Unranked';
+
+                // — Badges —
+                const unlocked = BADGE_DEFS.filter(b => b.check(stats));
+                const locked = BADGE_DEFS.filter(b => !b.check(stats));
+
+                document.getElementById('unlockedCount').textContent = `${unlocked.length}/${BADGE_DEFS.length}`;
+                document.getElementById('lockedCount').textContent = `${locked.length}/${BADGE_DEFS.length}`;
+
+                document.getElementById('unlockedGrid').innerHTML =
+                    unlocked.length > 0
+                        ? unlocked.map(b => renderBadge(b, true)).join('')
+                        : '<div class="ach-empty">Play some games to earn your first badge!</div>';
+
+                document.getElementById('lockedGrid').innerHTML =
+                    locked.map(b => renderBadge(b, false)).join('');
+
+                // — Leaderboard —
+                const currentEmail = user.email || localStorage.getItem('email') || '';
+                document.getElementById('lbList').innerHTML = renderLeaderboard(leaderboard, currentEmail);
+
+                // Re-init Lucide icons for dynamically rendered badge cards
+                if (window.lucide) lucide.createIcons();
+
+            } catch (err) {
+                console.error('Achievements load error:', err);
+            }
+        }
+
+        /* ═══════════════════ THEME ═══════════════════ */
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+            const pill = document.getElementById('themeToggle');
+            const moonIcon = document.getElementById('moonIcon');
+            const sunIcon = document.getElementById('sunIcon');
+            if (theme === 'light') {
+                pill.classList.add('light');
+                moonIcon.classList.remove('active');
+                sunIcon.classList.add('active');
+            } else {
+                pill.classList.remove('light');
+                moonIcon.classList.add('active');
+                sunIcon.classList.remove('active');
+            }
+            if (window.lucide) lucide.createIcons();
+            localStorage.setItem('theme', theme);
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const current = document.body.getAttribute('data-theme') || 'dark';
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        /* ═══════════════════ SIGN-OUT ═══════════════════ */
+        function signOut() {
+            localStorage.clear();
+            window.location.href = 'student-login.html';
+        }
+        document.getElementById('signOutBtn').addEventListener('click', signOut);
+        document.getElementById('dropdownSignOut')?.addEventListener('click', signOut);
+
+        /* ═══════════════════ PROFILE DROPDOWN ═══════════════════ */
+        const profileToggle = document.getElementById('profileToggle');
+        const profileDropdown = document.getElementById('profileDropdown');
+        profileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', () => { profileDropdown.style.display = 'none'; });
+
+        /* ═══════════════════ BOOT ═══════════════════ */
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            applyTheme(savedTheme);
+            if (window.lucide) lucide.createIcons();
+            loadAll();
+
+            // Refresh every 60 s so data stays live
+            setInterval(loadAll, 60_000);
+        });
+    </script>
+</body>
+
+</html>

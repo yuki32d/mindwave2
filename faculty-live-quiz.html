@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Quiz - MindWave</title>
+    <link rel="stylesheet" href="../3d-depth-design.css">
+    <link rel="stylesheet" href="marketing-site/css/live-quiz.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+
+<body data-theme="dark">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-brain"></i>
+                <span>MindWave</span>
+            </div>
+            <div class="nav-links">
+                <a href="admin.html"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="faculty-quick-poll.html"><i class="fas fa-poll"></i> Quick Poll</a>
+                <a href="faculty-live-feedback.html"><i class="fas fa-comments"></i> Feedback</a>
+                <a href="faculty-live-quiz.html" class="active"><i class="fas fa-gamepad"></i> Live Quiz</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="quiz-container">
+        <!-- Header -->
+        <section class="section-header">
+            <div class="header-content">
+                <div class="icon-badge">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div>
+                    <h1>Live Quiz Competition</h1>
+                    <p>Create engaging Kahoot-style quizzes for your students</p>
+                </div>
+            </div>
+            <button class="btn-launch" id="launchQuizBtn" disabled>
+                <i class="fas fa-rocket"></i> Launch Quiz
+            </button>
+        </section>
+
+        <!-- Quiz Builder -->
+        <section class="quiz-builder">
+            <div class="builder-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-edit"></i> Quiz Details</h2>
+                </div>
+
+                <div class="form-group">
+                    <label>Quiz Title</label>
+                    <input type="text" id="quizTitle" placeholder="e.g., JavaScript Basics Quiz" class="input-field">
+                </div>
+
+                <div class="form-group">
+                    <label>Time per Question (seconds)</label>
+                    <input type="number" id="timeLimit" value="15" min="5" max="60" class="input-field">
+                </div>
+            </div>
+
+            <!-- Questions List -->
+            <div class="questions-section">
+                <div class="section-title">
+                    <h2><i class="fas fa-list"></i> Questions</h2>
+                    <button class="btn-add-question" id="addQuestionBtn">
+                        <i class="fas fa-plus"></i> Add Question
+                    </button>
+                </div>
+
+                <div id="questionsList" class="questions-list">
+                    <!-- Questions will be added here dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Results (Hidden until quiz starts) -->
+        <section class="live-results" id="liveResults" style="display: none;">
+            <div class="results-header">
+                <h2><i class="fas fa-chart-line"></i> Live Results</h2>
+                <button class="btn-end-quiz" id="endQuizBtn">
+                    <i class="fas fa-stop"></i> End Quiz
+                </button>
+            </div>
+
+            <div class="results-grid">
+                <!-- Current Question Results -->
+                <div class="result-card">
+                    <h3>Current Question</h3>
+                    <div id="currentQuestionDisplay"></div>
+                    <canvas id="resultsChart"></canvas>
+                </div>
+
+                <!-- Leaderboard -->
+                <div class="result-card leaderboard-card">
+                    <h3><i class="fas fa-trophy"></i> Leaderboard</h3>
+                    <div id="leaderboardList" class="leaderboard-list">
+                        <!-- Leaderboard entries -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Question Modal -->
+    <div class="modal" id="questionModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2><i class="fas fa-question-circle"></i> Add Question</h2>
+                <button class="btn-close" onclick="closeQuestionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Question</label>
+                    <textarea id="questionText" rows="3" class="input-field"
+                        placeholder="What is 2 + '2' in JavaScript?"></textarea>
+                </div>
+
+                <div class="answers-grid">
+                    <div class="answer-input red">
+                        <div class="answer-label">A</div>
+                        <input type="text" id="answerA" placeholder="Option A" class="input-field">
+                        <input type="radio" name="correctAnswer" value="0">
+                    </div>
+                    <div class="answer-input blue">
+                        <div class="answer-label">B</div>
+                        <input type="text" id="answerB" placeholder="Option B" class="input-field">
+                        <input type="radio" name="correctAnswer" value="1">
+                    </div>
+                    <div class="answer-input yellow">
+                        <div class="answer-label">C</div>
+                        <input type="text" id="answerC" placeholder="Option C" class="input-field">
+                        <input type="radio" name="correctAnswer" value="2">
+                    </div>
+                    <div class="answer-input green">
+                        <div class="answer-label">D</div>
+                        <input type="text" id="answerD" placeholder="Option D" class="input-field">
+                        <input type="radio" name="correctAnswer" value="3">
+                    </div>
+                </div>
+
+                <p class="hint-text">
+                    <i class="fas fa-info-circle"></i> Select the correct answer by clicking the radio button
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeQuestionModal()">Cancel</button>
+                <button class="btn-primary" id="saveQuestionBtn">
+                    <i class="fas fa-check"></i> Save Question
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="marketing-site/js/live-quiz.js"></script></body>
+
+</html>

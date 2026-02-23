@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – Faculty Profile</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+    <style>
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .profile-hero {
+            background: linear-gradient(135deg, rgba(15, 98, 254, 0.2) 0%, rgba(138, 43, 226, 0.2) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-info h1 {
+            margin: 0 0 8px;
+            font-size: 36px;
+        }
+
+        .profile-info p {
+            margin: 0;
+            color: #9ea4b6;
+            font-size: 16px;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #0f62fe 0%, #8a3ffc 100%);
+            color: white;
+            border-radius: 999px;
+            font-weight: 700;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .edit-profile-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .edit-profile-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #9ea4b6;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn:hover {
+            color: white;
+        }
+
+        .tab-btn.active {
+            color: white;
+            border-bottom-color: #0f62fe;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-4px);
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #9ea4b6;
+            font-size: 14px;
+        }
+
+        /* Classes List */
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .class-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .class-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-4px);
+        }
+
+        .class-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .class-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .class-code {
+            color: #9ea4b6;
+            font-size: 12px;
+        }
+
+        .class-stats {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .class-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #9ea4b6;
+        }
+
+        /* Activity List */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .activity-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .activity-icon {
+            font-size: 24px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(15, 98, 254, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .activity-info h4 {
+            margin: 0 0 4px;
+            font-size: 16px;
+        }
+
+        .activity-info p {
+            margin: 0;
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        /* Settings */
+        .settings-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .settings-section h3 {
+            margin: 0 0 24px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #9ea4b6;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0f62fe;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .switch.active {
+            background: #0f62fe;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .switch.active::after {
+            transform: translateX(24px);
+        }
+
+        .save-btn {
+            padding: 12px 32px;
+            background: #0f62fe;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .save-btn:hover {
+            background: #0353e9;
+        }
+
+        .danger-btn {
+            padding: 12px 32px;
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            color: #ff3b30;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .danger-btn:hover {
+            background: rgba(255, 59, 48, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .profile-hero {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .activity-item {
+                grid-template-columns: auto 1fr;
+            }
+
+            .activity-time {
+                grid-column: 2;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="admin.html">← Back to Creator Hub</a>
+            <p class="eyebrow">Your Profile</p>
+            <h1>Faculty Profile</h1>
+            <p class="lede">Manage your professional information and teaching statistics</p>
+        </header>
+
+        <div class="profile-container">
+            <!-- Hero Section -->
+            <div class="profile-hero">
+                <div class="profile-avatar" id="profileAvatar">
+                    <span id="avatarInitials">FA</span>
+                </div>
+                <div class="profile-info">
+                    <h1 id="profileName">Faculty Name</h1>
+                    <p id="profileEmail">faculty@example.com</p>
+                    <span class="role-badge" id="roleBadge">👨‍🏫 Faculty</span>
+                </div>
+                <button class="edit-profile-btn" data-tab="settings">⚙️ Edit Profile</button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="overview">Overview</button>
+                <button class="tab-btn" data-tab="classes">My Classes</button>
+                <button class="tab-btn" data-tab="activity">Recent Activity</button>
+                <button class="tab-btn" data-tab="settings">Settings</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div class="tab-content active" id="overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-icon">📚</span>
+                        <div class="stat-value" id="totalClasses">0</div>
+                        <div class="stat-label">Active Classes</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">👥</span>
+                        <div class="stat-value" id="totalStudents">0</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">🎮</span>
+                        <div class="stat-value" id="gamesCreated">0</div>
+                        <div class="stat-label">Games Created</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">📊</span>
+                        <div class="stat-value" id="avgEngagement">0%</div>
+                        <div class="stat-label">Avg Engagement</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">⏱️</span>
+                        <div class="stat-value" id="totalTeachingTime">0h</div>
+                        <div class="stat-label">Teaching Hours</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">🏆</span>
+                        <div class="stat-value" id="completionRate">0%</div>
+                        <div class="stat-label">Completion Rate</div>
+                    </div>
+                </div>
+
+                <h2 style="margin-bottom: 16px;">Department & Bio</h2>
+                <div class="settings-section">
+                    <p id="departmentInfo" style="color: #9ea4b6; margin-bottom: 12px;">Department: <span
+                            id="department">Not set</span></p>
+                    <p id="bioInfo" style="color: #9ea4b6; line-height: 1.6;">No bio available. Add one in settings!</p>
+                </div>
+            </div>
+
+            <!-- Classes Tab -->
+            <div class="tab-content" id="classes">
+                <h2 style="margin-bottom: 16px;">My Classes</h2>
+                <div class="classes-grid" id="classesGrid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Activity Tab -->
+            <div class="tab-content" id="activity">
+                <h2 style="margin-bottom: 16px;">Recent Activity</h2>
+                <div class="activity-list" id="activityList">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="settings">
+                <div class="settings-section">
+                    <h3>Profile Photo</h3>
+                    <div class="form-group">
+                        <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;">
+                        <button class="edit-profile-btn" id="uploadPhotoBtn">📷 Change Photo</button>
+                        <p style="margin-top: 8px; font-size: 12px; color: #9ea4b6;">Max size: 5MB. Supported formats:
+                            JPG, PNG, GIF</p>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Professional Information</h3>
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="displayName" placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="emailInput" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input type="text" id="departmentInput" placeholder="e.g., Computer Science">
+                    </div>
+                    <div class="form-group">
+                        <label>Bio</label>
+                        <textarea id="bioInput"
+                            placeholder="Tell students about yourself, your teaching philosophy, expertise, etc."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Office Hours</label>
+                        <input type="text" id="officeHours" placeholder="e.g., Mon-Fri 2:00 PM - 4:00 PM">
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Notifications</h3>
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <div class="switch active" id="emailNotifToggle"></div>
+                            <label style="margin: 0;">Email notifications for new student submissions</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <div class="switch active" id="classNotifToggle"></div>
+                            <label style="margin: 0;">Notify when students join classes</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Change Password</h3>
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="currentPassword" placeholder="Enter current password">
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="newPassword" placeholder="Enter new password">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                    </div>
+                    <button class="danger-btn" id="changePasswordBtn">🔒 Change Password</button>
+                </div>
+
+                <button class="save-btn" id="saveSettingsBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="faculty-profile.js"></script>
+</body>
+
+</html>

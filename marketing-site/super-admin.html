@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin - MindWave</title>
+    <link rel="stylesheet" href="css/super-admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">🌊</span>
+                <span class="logo-text">MindWave Admin</span>
+            </div>
+            <nav class="nav">
+                <a href="#users" class="nav-item active" data-tab="users">
+                    <i class="fas fa-users"></i> Users
+                </a>
+                <a href="#organizations" class="nav-item" data-tab="organizations">
+                    <i class="fas fa-building"></i> Organizations
+                </a>
+                <a href="#blocked" class="nav-item" data-tab="blocked">
+                    <i class="fas fa-ban"></i> Blocked Emails
+                </a>
+                <a href="#stats" class="nav-item" data-tab="stats">
+                    <i class="fas fa-chart-bar"></i> Statistics
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <h1>Super Admin Dashboard</h1>
+                <div class="header-actions">
+                    <span class="admin-badge">Super Admin</span>
+                    <span id="adminEmail">admin@mindwave.com</span>
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalUsers">0</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalOrgs">0</div>
+                        <div class="stat-label">Organizations</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalBlocked">0</div>
+                        <div class="stat-label">Blocked Emails</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="activeUsers">0</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Users Tab -->
+                <div class="tab-pane active" id="users-tab">
+                    <div class="section-header">
+                        <h2>User Management</h2>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="userSearch" placeholder="Search users...">
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Organization</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr>
+                                    <td colspan="7" class="loading">Loading users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Organizations Tab -->
+                <div class="tab-pane" id="organizations-tab">
+                    <div class="section-header">
+                        <h2>Organization Management</h2>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="orgSearch" placeholder="Search organizations...">
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Owner</th>
+                                    <th>Members</th>
+                                    <th>Plan</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orgsTableBody">
+                                <tr>
+                                    <td colspan="7" class="loading">Loading organizations...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Blocked Emails Tab -->
+                <div class="tab-pane" id="blocked-tab">
+                    <div class="section-header">
+                        <h2>Blocked Emails</h2>
+                        <button class="btn-primary" id="addBlockBtn">
+                            <i class="fas fa-plus"></i> Block Email
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Email/Domain</th>
+                                    <th>Reason</th>
+                                    <th>Blocked Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="blockedTableBody">
+                                <tr>
+                                    <td colspan="4" class="loading">Loading blocked emails...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Stats Tab -->
+                <div class="tab-pane" id="stats-tab">
+                    <div class="section-header">
+                        <h2>System Statistics</h2>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-detail-card">
+                            <h3>User Growth</h3>
+                            <canvas id="userGrowthChart"></canvas>
+                        </div>
+                        <div class="stat-detail-card">
+                            <h3>Organization Distribution</h3>
+                            <canvas id="orgDistChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Block Email Modal -->
+    <div class="modal" id="blockEmailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Block Email Address</h3>
+                <button class="modal-close" id="closeBlockModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Email or Domain</label>
+                    <input type="text" id="blockEmailInput" placeholder="user@example.com or @domain.com">
+                </div>
+                <div class="form-group">
+                    <label>Reason</label>
+                    <textarea id="blockReasonInput" placeholder="Reason for blocking..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelBlockBtn">Cancel</button>
+                <button class="btn-danger" id="confirmBlockBtn">Block</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Action</h3>
+                <button class="modal-close" id="closeConfirmModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure you want to proceed?</p>
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>This action cannot be undone!</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelConfirmBtn">Cancel</button>
+                <button class="btn-danger" id="confirmActionBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/super-admin.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account – Mindwave</title>
+    <style>
+        :root {
+            --cyan-bright: #00D9FF;
+            --purple-bright: #8B5CF6;
+            --bg-deep: #1A1F3A;
+            --text-white: #FFFFFF;
+            --text-gray: #9CA3AF;
+            --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.45);
+            --shadow-glow: 0 0 40px rgba(0, 217, 255, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+            color: var(--text-white);
+            padding: 32px 16px;
+        }
+
+        .background-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('background.jpg') center/cover no-repeat fixed;
+            filter: brightness(0.4) blur(2px);
+            transform: scale(1.1);
+            animation: subtleZoom 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes subtleZoom {
+            0% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1.15);
+            }
+        }
+
+        .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(26, 31, 58, 0.8) 100%);
+        }
+
+        .auth-container {
+            position: relative;
+            z-index: 1;
+            width: min(550px, 95%);
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl), var(--shadow-glow);
+            backdrop-filter: blur(20px);
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-card {
+            padding: 50px 40px;
+            background: rgba(30, 36, 51, 0.95);
+            backdrop-filter: blur(40px);
+        }
+
+        .brand-tag {
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            font-size: 11px;
+            color: var(--cyan-bright);
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: inline-block;
+        }
+
+        .auth-card h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--text-white) 0%, var(--cyan-bright) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-card p {
+            color: var(--text-gray);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .role-selection {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .role-selection label {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 14px 20px;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .role-selection label:hover {
+            border-color: var(--cyan-bright);
+            transform: translateY(-2px);
+        }
+
+        .role-selection input:checked+label {
+            border-color: var(--cyan-bright);
+            background: rgba(0, 217, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .role-selection input {
+            display: none;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-white);
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--cyan-bright);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .submit-btn {
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, var(--cyan-bright) 0%, var(--purple-bright) 100%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0, 217, 255, 0.3);
+            margin-bottom: 24px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 32px rgba(0, 217, 255, 0.4);
+        }
+
+        .back-link {
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .back-link a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: var(--cyan-bright);
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .auth-card {
+                padding: 40px 28px;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="background-wrapper">
+        <div class="background-image"></div>
+        <div class="gradient-overlay"></div>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <span class="brand-tag">🌊 MINDWAVE</span>
+            <h1>Create Account</h1>
+            <p>Join Mindwave and start your learning journey today.</p>
+
+            <form id="signup-form">
+                <!-- Role Selection -->
+                <div class="role-selection">
+                    <input type="radio" name="role" value="student" id="role-student" checked>
+                    <label for="role-student">👨‍🎓 Student</label>
+
+                    <input type="radio" name="role" value="admin" id="role-admin">
+                    <label for="role-admin">👨‍💼 Admin</label>
+                </div>
+
+                <!-- Name Fields -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" placeholder="John" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" placeholder="Doe" required>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="name.mca25@cmrit.ac.in" required>
+                </div>
+
+                <!-- Password Fields -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Min. 8 characters" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm</label>
+                        <input type="password" id="confirmPassword" placeholder="Re-enter password" required>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn">Create Account →</button>
+
+                <!-- Back Link -->
+                <div class="back-link">
+                    <a href="login.html">← Already have an account? Sign in</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="signup.js"></script>    <script src="loading-spinner.js"></script>
+</body>
+
+</html>

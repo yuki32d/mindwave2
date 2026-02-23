@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Poll - MindWave</title>
+    <link rel="stylesheet" href="../3d-depth-design.css">
+    <link rel="stylesheet" href="marketing-site/css/student-poll.css">
+    <link rel="stylesheet" href="marketing-site/css/student-nav.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+
+<body data-theme="dark">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-brain"></i>
+                <span>MindWave</span>
+            </div>
+            <div class="nav-actions">
+                <a href="student-community.html" class="nav-btn primary-nav-btn"><i class="fas fa-plus"></i> Create
+                    Post</a>
+                <a href="student-community.html" class="nav-btn"><i class="fas fa-file-alt"></i> My Posts</a>
+                <a href="student-poll-response.html" class="nav-btn active"><i class="fas fa-poll"></i> Quick Poll</a>
+                <a href="student-feedback.html" class="nav-btn"><i class="fas fa-comments"></i> Feedback</a>
+                <a href="student-live-quiz.html" class="nav-btn"><i class="fas fa-trophy"></i> Live Quiz</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="poll-response-container">
+        <!-- Waiting State -->
+        <section class="waiting-section" id="waitingSection">
+            <div class="waiting-card">
+                <div class="waiting-icon">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <h1>Waiting for Poll</h1>
+                <p>Your instructor will launch a poll soon...</p>
+                <div class="pulse-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Active Poll -->
+        <section class="active-poll-section" id="activePollSection" style="display: none;">
+            <div class="poll-header">
+                <div class="poll-badge">
+                    <i class="fas fa-poll"></i>
+                </div>
+                <h1 id="pollQuestion">Loading question...</h1>
+                <p class="poll-subtitle">Select your answer below</p>
+            </div>
+
+            <div class="options-grid" id="optionsGrid">
+                <!-- Options will be dynamically inserted -->
+            </div>
+
+            <div class="poll-footer">
+                <button class="btn-submit" id="submitBtn" disabled>
+                    <i class="fas fa-check-circle"></i> Submit Answer
+                </button>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results-section" id="resultsSection" style="display: none;">
+            <div class="results-header">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h1>Response Submitted!</h1>
+                <p>Here's how everyone answered:</p>
+            </div>
+
+            <div class="results-container" id="resultsContainer">
+                <!-- Results will be dynamically inserted -->
+            </div>
+
+            <div class="results-footer">
+                <button class="btn-back" onclick="location.href='homepage.html'">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script src="marketing-site/js/student-poll.js"></script></body>
+
+</html>

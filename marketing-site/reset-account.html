@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Account - MindWave</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card {
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0.5rem;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            display: none;
+            font-weight: 600;
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        .warning strong {
+            color: #92400e;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .warning ul {
+            margin-left: 1.5rem;
+            color: #78350f;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="icon">🔄</div>
+        <h1>Start Fresh</h1>
+        <p>Clear all your account data and start over with a clean slate.</p>
+
+        <div class="warning">
+            <strong>⚠️ This will clear:</strong>
+            <ul>
+                <li>All authentication tokens</li>
+                <li>User profile data</li>
+                <li>Organization information</li>
+                <li>All saved preferences</li>
+            </ul>
+        </div>
+
+        <button class="btn" id="resetBtn">🗑️ Clear Everything & Start Over</button>
+        <br>
+        <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+
+        <div class="success" id="success">
+            ✅ All data cleared!<br>Redirecting to signup...
+        </div>
+    </div>
+
+    <script src="js/reset-account.js"></script>
+</body>
+
+</html>

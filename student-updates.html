@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Updates - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+
+    <style>
+        .updates-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Filters */
+        .update-filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 10px 20px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .filter-chip:hover {
+            background: rgba(77, 160, 255, 0.2);
+            border-color: rgba(77, 160, 255, 0.5);
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            border-color: transparent;
+        }
+
+        /* Timeline */
+        .updates-timeline {
+            position: relative;
+        }
+
+        .updates-timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #4da0ff 0%, #a78bfa 100%);
+        }
+
+        .update-item {
+            position: relative;
+            padding-left: 60px;
+            margin-bottom: 32px;
+        }
+
+        .update-icon {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: rgba(20, 20, 20, 0.98);
+            border: 2px solid #4da0ff;
+            z-index: 1;
+        }
+
+        .update-icon.grade {
+            border-color: #00ff88;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 255, 136, 0.1) 100%);
+        }
+
+        .update-icon.feedback {
+            border-color: #ffaa00;
+            background: linear-gradient(135deg, rgba(255, 170, 0, 0.2) 0%, rgba(255, 170, 0, 0.1) 100%);
+        }
+
+        .update-icon.announcement {
+            border-color: #4da0ff;
+            background: linear-gradient(135deg, rgba(77, 160, 255, 0.2) 0%, rgba(77, 160, 255, 0.1) 100%);
+        }
+
+        .update-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .update-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(77, 160, 255, 0.5);
+            transform: translateX(4px);
+        }
+
+        .update-card.unread {
+            border-color: rgba(77, 160, 255, 0.5);
+            background: rgba(77, 160, 255, 0.05);
+        }
+
+        .update-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .update-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .update-type.grade {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .update-type.feedback {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+        }
+
+        .update-type.announcement {
+            background: rgba(77, 160, 255, 0.2);
+            color: #4da0ff;
+        }
+
+        .update-time {
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        .update-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .update-content {
+            font-size: 14px;
+            color: #9ea4b6;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .update-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .unread-badge {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4da0ff;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .updates-timeline::before {
+                left: 15px;
+            }
+
+            .update-item {
+                padding-left: 50px;
+            }
+
+            .update-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="student-performance.html">← Back to Performance</a>
+            <p class="eyebrow">NOTIFICATIONS</p>
+            <h1>Updates</h1>
+            <p class="lede">Stay informed with grade updates, feedback, and announcements</p>
+        </header>
+
+        <div class="updates-container">
+            <!-- Filters -->
+            <div class="update-filters">
+                <div class="filter-chip active" onclick="filterUpdates('all')">All Updates</div>
+                <div class="filter-chip" onclick="filterUpdates('grade')">📊 Grades</div>
+                <div class="filter-chip" onclick="filterUpdates('feedback')">💬 Feedback</div>
+                <div class="filter-chip" onclick="filterUpdates('announcement')">📢 Announcements</div>
+            </div>
+
+            <!-- Updates Timeline -->
+            <div class="updates-timeline" id="updatesTimeline">
+                <!-- Grade Update -->
+                <div class="update-item" data-type="grade">
+                    <div class="update-icon grade">📊</div>
+                    <div class="update-card unread">
+                        <div class="update-header">
+                            <span class="update-type grade">Grade Posted</span>
+                            <span class="update-time">2 hours ago</span>
+                        </div>
+                        <div class="update-title">Mathematics Quiz - Chapter 5 <span class="unread-badge"></span></div>
+                        <div class="update-content">
+                            Your grade has been posted: <strong style="color: #00ff88;">92/100</strong>
+                            <br>Great work! You scored above the class average of 85.
+                        </div>
+                        <div class="update-meta">
+                            <div class="meta-item">
+                                <span>📚</span>
+                                <span>Mathematics</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>👨‍🏫</span>
+                                <span>Prof. Smith</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback Update -->
+                <div class="update-item" data-type="feedback">
+                    <div class="update-icon feedback">💬</div>
+                    <div class="update-card unread">
+                        <div class="update-header">
+                            <span class="update-type feedback">Faculty Feedback</span>
+                            <span class="update-time">5 hours ago</span>
+                        </div>
+                        <div class="update-title">English Essay Feedback <span class="unread-badge"></span></div>
+                        <div class="update-content">
+                            "Excellent analysis of the themes! Your writing has improved significantly.
+                            Consider adding more supporting evidence in paragraph 3."
+                        </div>
+                        <div class="update-meta">
+                            <div class="meta-item">
+                                <span>📚</span>
+                                <span>English</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>👨‍🏫</span>
+                                <span>Prof. Johnson</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Announcement -->
+                <div class="update-item" data-type="announcement">
+                    <div class="update-icon announcement">📢</div>
+                    <div class="update-card">
+                        <div class="update-header">
+                            <span class="update-type announcement">Announcement</span>
+                            <span class="update-time">1 day ago</span>
+                        </div>
+                        <div class="update-title">Mid-Term Exam Schedule Released</div>
+                        <div class="update-content">
+                            The mid-term examination schedule has been published.
+                            Mathematics exam is scheduled for January 15th at 9:00 AM in Exam Hall A.
+                        </div>
+                        <div class="update-meta">
+                            <div class="meta-item">
+                                <span>📅</span>
+                                <span>January 15, 2026</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grade Update -->
+                <div class="update-item" data-type="grade">
+                    <div class="update-icon grade">📊</div>
+                    <div class="update-card">
+                        <div class="update-header">
+                            <span class="update-type grade">Grade Posted</span>
+                            <span class="update-time">2 days ago</span>
+                        </div>
+                        <div class="update-title">Science Lab Report</div>
+                        <div class="update-content">
+                            Your grade has been posted: <strong style="color: #00ff88;">88/100</strong>
+                            <br>Well done on the experimental design section!
+                        </div>
+                        <div class="update-meta">
+                            <div class="meta-item">
+                                <span>📚</span>
+                                <span>Science</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>👨‍🏫</span>
+                                <span>Dr. Williams</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback Update -->
+                <div class="update-item" data-type="feedback">
+                    <div class="update-icon feedback">💬</div>
+                    <div class="update-card">
+                        <div class="update-header">
+                            <span class="update-type feedback">Faculty Feedback</span>
+                            <span class="update-time">3 days ago</span>
+                        </div>
+                        <div class="update-title">History Presentation Feedback</div>
+                        <div class="update-content">
+                            "Great presentation on World War II! Your research was thorough and well-organized.
+                            Next time, try to engage more with the audience through questions."
+                        </div>
+                        <div class="update-meta">
+                            <div class="meta-item">
+                                <span>📚</span>
+                                <span>History</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>👨‍🏫</span>
+                                <span>Prof. Davis</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Announcement -->
+                <div class="update-item" data-type="announcement">
+                    <div class="update-icon announcement">📢</div>
+                    <div class="update-card">
+                        <div class="update-header">
+                            <span class="update-type announcement">System Update</span>
+                            <span class="update-time">1 week ago</span>
+                        </div>
+                        <div class="update-title">New Features Available</div>
+                        <div class="update-content">
+                            We've added new performance analytics and study recommendations!
+                            Check out your personalized dashboard to track your progress.
+                        </div>
+                        <div class="update-meta">
+                            <div class="meta-item">
+                                <span>🎉</span>
+                                <span>Platform Update</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'student-login.html';
+        }
+
+        let currentFilter = 'all';
+
+        // Filter updates
+        function filterUpdates(type) {
+            currentFilter = type;
+
+            // Update active filter
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Filter update items
+            const items = document.querySelectorAll('.update-item');
+            items.forEach(item => {
+                if (type === 'all' || item.dataset.type === type) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Mark as read
+        document.querySelectorAll('.update-card').forEach(card => {
+            card.addEventListener('click', function () {
+                this.classList.remove('unread');
+                const badge = this.querySelector('.unread-badge');
+                if (badge) badge.remove();
+            });
+        });
+
+        // Load updates from API
+        async function loadUpdates() {
+            try {
+                const API_BASE = window.location.hostname === 'localhost'
+                    ? 'http://localhost:8081'
+                    : 'https://mindwave2.onrender.com';
+
+                const response = await fetch(`${API_BASE}/api/student/updates`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update timeline with real data
+                    console.log('Updates data:', data);
+                } else {
+                    console.log('Using placeholder updates');
+                }
+            } catch (error) {
+                console.error('Error loading updates:', error);
+            }
+        }
+
+        // Initialize
+        loadUpdates();
+    </script>
+</body>
+
+</html>

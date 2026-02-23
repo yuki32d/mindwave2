@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scenario Preview</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <style>
+        .scenario-player {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 24px;
+        }
+
+        .scene-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .scene-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #f5f7ff;
+            margin-bottom: 24px;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .choice-btn {
+            background: rgba(15, 98, 254, 0.1);
+            border: 2px solid rgba(15, 98, 254, 0.3);
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: #f5f7ff;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+        }
+
+        .choice-btn:hover {
+            background: rgba(15, 98, 254, 0.2);
+            border-color: #0f62fe;
+            transform: translateX(4px);
+        }
+
+        .points-badge {
+            display: inline-block;
+            background: rgba(52, 199, 89, 0.2);
+            color: #34c759;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .points-badge.negative {
+            background: rgba(255, 59, 48, 0.2);
+            color: #ff3b30;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 24px;
+            color: #f5f7ff;
+            margin-bottom: 24px;
+        }
+
+        .ending-card {
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+            border: 2px solid rgba(52, 199, 89, 0.3);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .ending-card h2 {
+            margin: 0 0 16px;
+            color: #34c759;
+            font-size: 32px;
+        }
+
+        .ending-card p {
+            color: #9ea4b6;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <div class="scenario-player">
+            <div class="score-display">
+                Score: <strong id="scoreDisplay">0</strong> points
+            </div>
+            <div id="gameContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const scenario = JSON.parse(localStorage.getItem('scenario_preview') || '{}');
+        let currentSceneId = 1;
+        let totalScore = 0;
+
+        function renderScene() {
+            const scene = scenario.scenes.find(s => s.id === currentSceneId);
+            const gameContent = document.getElementById('gameContent');
+
+            if (!scene) {
+                // Game ended
+                gameContent.innerHTML = `
+                    <div class="ending-card">
+                        <h2>🎉 Scenario Complete!</h2>
+                        <p>You've reached the end of this scenario.</p>
+                        <div class="score-display">
+                            Final Score: <strong>${totalScore}</strong> points
+                        </div>
+                        <button class="primary-btn" onclick="window.close()">Close Preview</button>
+                    </div>
+                `;
+                return;
+            }
+
+            gameContent.innerHTML = `
+                <div class="scene-card">
+                    <div class="scene-text">${scene.text}</div>
+                    <div class="choices">
+                        ${scene.choices.map((choice, index) => `
+                            <button class="choice-btn" onclick="makeChoice(${index})">
+                                ${choice.text}
+                                <span class="points-badge ${choice.points < 0 ? 'negative' : ''}">
+                                    ${choice.points > 0 ? '+' : ''}${choice.points} pts
+                                </span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.makeChoice = function (choiceIndex) {
+            const scene = scenario.scenes.find(s => s.id === currentSceneId);
+            const choice = scene.choices[choiceIndex];
+
+            totalScore += choice.points;
+            document.getElementById('scoreDisplay').textContent = totalScore;
+
+            if (choice.nextSceneId === 'END') {
+                currentSceneId = null;
+            } else {
+                currentSceneId = parseInt(choice.nextSceneId);
+            }
+
+            renderScene();
+        };
+
+        // Initialize
+        if (!scenario.scenes || scenario.scenes.length === 0) {
+            document.getElementById('gameContent').innerHTML = `
+                <div class="ending-card">
+                    <h2>No Preview Available</h2>
+                    <p>Please create scenes in the scenario builder first.</p>
+                    <button class="primary-btn" onclick="window.close()">Close</button>
+                </div>
+            `;
+        } else {
+            renderScene();
+        }
+    </script></body>
+
+</html>

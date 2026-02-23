@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – Assignment Details</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+    <style>
+        .assignment-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .assignment-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 32px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .assignment-content {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 32px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .materials-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .material-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: rgba(255, 149, 0, 0.1);
+            color: #ff9500;
+        }
+
+        .status-submitted {
+            background: rgba(52, 199, 89, 0.1);
+            color: #34c759;
+        }
+
+        .status-graded {
+            background: rgba(15, 98, 254, 0.1);
+            color: #0f62fe;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 64px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body data-theme="dark" data-role="student" data-section="assignment">
+    <div class="page-shell">
+        <header class="hero">
+            <p class="eyebrow">Student Space</p>
+            <h1 id="assignmentTitle">Loading...</h1>
+            <p class="lede" id="assignmentSubtitle">Assignment Details</p>
+            <div class="hero-actions">
+                <a class="ghost-link" href="student-courses.html">← Back to Courses</a>
+            </div>
+        </header>
+
+        <div class="assignment-container">
+            <div id="assignmentContent">
+                <div class="loading">
+                    <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+                    <p>Loading assignment details...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="student-assignment.js"></script></body>
+
+</html>

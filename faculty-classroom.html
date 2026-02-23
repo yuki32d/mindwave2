@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – Google Classroom Manager</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+    <style>
+        .classroom-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .course-selector {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+
+        .course-selector select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 32px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .file-upload {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            padding: 32px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: #0f62fe;
+            background: rgba(15, 98, 254, 0.1);
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #0f62fe 0%, #0353e9 100%);
+            color: white;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(15, 98, 254, 0.3);
+        }
+
+        .upload-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .materials-list {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 24px;
+            border-radius: 12px;
+        }
+
+        .material-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .material-info h4 {
+            margin: 0 0 8px 0;
+            color: var(--text-primary);
+        }
+
+        .material-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 48px;
+            color: var(--text-muted);
+        }
+
+        .error-message {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid #ff3b30;
+            color: #ff3b30;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .success-message {
+            background: rgba(52, 199, 89, 0.1);
+            border: 1px solid #34c759;
+            color: #34c759;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #0f62fe;
+            border-bottom-color: #0f62fe;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body data-theme="dark" data-role="faculty" data-section="classroom">
+    <div class="page-shell">
+        <header class="hero">
+            <p class="eyebrow">Faculty Space</p>
+            <h1>Google Classroom Manager</h1>
+            <p class="lede">Upload materials and create assignments directly to Google Classroom</p>
+            <div class="hero-actions">
+                <a class="ghost-link" href="admin.html">← Back to Creator Hub</a>
+            </div>
+        </header>
+
+        <div class="classroom-container">
+            <!-- Course Selector -->
+            <div class="course-selector">
+                <h3>Select Course</h3>
+                <select id="courseSelect">
+                    <option value="">Loading courses...</option>
+                </select>
+            </div>
+
+            <div id="messageContainer"></div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" data-tab="upload">Upload Material</button>
+                <button class="tab" data-tab="materials">View Materials</button>
+                <button class="tab" data-tab="assignments">View Assignments</button>
+            </div>
+
+            <!-- Upload Material Tab -->
+            <div id="uploadTab" class="tab-content active">
+                <div class="upload-section">
+                    <h3>Upload New Material</h3>
+                    <form id="uploadForm">
+                        <div class="form-group">
+                            <label for="materialTitle">Title *</label>
+                            <input type="text" id="materialTitle" required placeholder="e.g., Chapter 5 Notes">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="materialDescription">Description</label>
+                            <textarea id="materialDescription"
+                                placeholder="Add a description for this material..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Upload File</label>
+                            <div class="file-upload" id="fileUpload">
+                                <input type="file" id="fileInput" accept=".pdf,.ppt,.pptx,.doc,.docx,.txt,.jpg,.png">
+                                <p>📁 Click to upload or drag and drop</p>
+                                <p style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">
+                                    Supported: PDF, PPT, DOC, TXT, Images
+                                </p>
+                                <p id="fileName" style="margin-top: 12px; color: #0f62fe;"></p>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="upload-btn" id="uploadBtn">
+                            🚀 Upload to Google Classroom
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Materials List Tab -->
+            <div id="materialsTab" class="tab-content">
+                <div class="materials-list">
+                    <h3>Course Materials</h3>
+                    <div id="materialsList">
+                        <div class="loading">Select a course to view materials</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assignments List Tab -->
+            <div id="assignmentsTab" class="tab-content">
+                <div class="materials-list">
+                    <h3>Course Assignments</h3>
+                    <div id="assignmentsList">
+                        <div class="loading">Select a course to view assignments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="faculty-classroom.js"></script></body>
+
+</html>

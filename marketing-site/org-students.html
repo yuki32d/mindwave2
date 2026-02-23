@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students - MindWave</title>
+    <link rel="stylesheet" href="css/modern-dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🌊</span>
+                    <span class="logo-text">MindWave</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-label">MAIN MENU</span>
+                    <a href="modern-dashboard.html" class="nav-item">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="org-analytics.html" class="nav-item">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                    <a href="org-billing.html" class="nav-item">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Billing</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">MANAGEMENT</span>
+                    <a href="org-team.html" class="nav-item">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Team Members</span>
+                    </a>
+                    <a href="org-students.html" class="nav-item active">
+                        <span class="nav-icon">🎓</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a href="org-games.html" class="nav-item">
+                        <span class="nav-icon">🎮</span>
+                        <span class="nav-text">Games</span>
+                    </a>
+                    <a href="org-settings.html" class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">SUPPORT</span>
+                    <a href="#help" class="nav-item">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">Help Center</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="search-container">
+                    <input type="text" placeholder="Search students..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-export">
+                        <span>📤</span>
+                        <span>Export CSV</span>
+                    </button>
+                    <button class="btn-create">
+                        <span>➕</span>
+                        <span>Add Students</span>
+                    </button>
+                    <button class="btn-icon">🔔</button>
+                    <div class="user-avatar">
+                        <img src="https://i.pravatar.cc/40?img=5" alt="User">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Title -->
+            <div class="page-header">
+                <h1>Students</h1>
+                <p>Manage and monitor your student accounts</p>
+            </div>
+
+            <!-- Student Stats -->
+            <div class="stats-row" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <div class="stat-label">Total Students</div>
+                    <div class="stat-value">243</div>
+                    <div class="stat-change positive">
+                        <span class="change-icon">↗</span>
+                        <span>18% increase this month</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active This Week</div>
+                    <div class="stat-value">198</div>
+                    <div class="stat-change positive">
+                        <span>81% engagement rate</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Average Progress</div>
+                    <div class="stat-value">67%</div>
+                    <div class="stat-change positive">
+                        <span class="change-icon">↗</span>
+                        <span>+5% from last week</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Upload Section -->
+            <div class="settings-card" style="margin-bottom: 1.5rem;">
+                <div class="settings-card-header">
+                    <h2>Bulk Upload Students</h2>
+                </div>
+                <div class="settings-card-body">
+                    <div class="upload-area">
+                        <div class="upload-icon">📁</div>
+                        <h3>Upload CSV File</h3>
+                        <p>Drag and drop your CSV file here, or click to browse</p>
+                        <button class="btn-primary" style="margin-top: 1rem;">Choose File</button>
+                        <a href="#"
+                            style="display: block; margin-top: 1rem; color: var(--purple-primary); font-size: 0.875rem;">Download
+                            CSV Template</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students List -->
+            <div class="settings-card">
+                <div class="settings-card-header">
+                    <h2>All Students</h2>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <select class="form-input" style="width: auto;">
+                            <option>All Grades</option>
+                            <option>Grade 9</option>
+                            <option>Grade 10</option>
+                            <option>Grade 11</option>
+                            <option>Grade 12</option>
+                        </select>
+                        <select class="form-input" style="width: auto;">
+                            <option>All Status</option>
+                            <option>Active</option>
+                            <option>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="settings-card-body" style="padding: 0;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Grade</th>
+                                <th>Email</th>
+                                <th>Games Played</th>
+                                <th>Progress</th>
+                                <th>Last Active</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <img src="https://i.pravatar.cc/40?img=11" alt="Student">
+                                        <div>
+                                            <div class="member-name">Emma Wilson</div>
+                                            <div class="member-title">ID: STU-001</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Grade 10</td>
+                                <td>emma.w@student.com</td>
+                                <td>12</td>
+                                <td>
+                                    <div class="progress-mini">
+                                        <div class="progress-mini-bar" style="width: 85%"></div>
+                                        <span>85%</span>
+                                    </div>
+                                </td>
+                                <td>2 hours ago</td>
+                                <td>
+                                    <button class="action-btn-small">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <img src="https://i.pravatar.cc/40?img=12" alt="Student">
+                                        <div>
+                                            <div class="member-name">James Martinez</div>
+                                            <div class="member-title">ID: STU-002</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Grade 11</td>
+                                <td>james.m@student.com</td>
+                                <td>8</td>
+                                <td>
+                                    <div class="progress-mini">
+                                        <div class="progress-mini-bar" style="width: 62%"></div>
+                                        <span>62%</span>
+                                    </div>
+                                </td>
+                                <td>1 day ago</td>
+                                <td>
+                                    <button class="action-btn-small">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <img src="https://i.pravatar.cc/40?img=13" alt="Student">
+                                        <div>
+                                            <div class="member-name">Sophia Lee</div>
+                                            <div class="member-title">ID: STU-003</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Grade 9</td>
+                                <td>sophia.l@student.com</td>
+                                <td>15</td>
+                                <td>
+                                    <div class="progress-mini">
+                                        <div class="progress-mini-bar" style="width: 92%"></div>
+                                        <span>92%</span>
+                                    </div>
+                                </td>
+                                <td>5 hours ago</td>
+                                <td>
+                                    <button class="action-btn-small">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <img src="https://i.pravatar.cc/40?img=14" alt="Student">
+                                        <div>
+                                            <div class="member-name">Oliver Brown</div>
+                                            <div class="member-title">ID: STU-004</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Grade 12</td>
+                                <td>oliver.b@student.com</td>
+                                <td>20</td>
+                                <td>
+                                    <div class="progress-mini">
+                                        <div class="progress-mini-bar" style="width: 78%"></div>
+                                        <span>78%</span>
+                                    </div>
+                                </td>
+                                <td>3 hours ago</td>
+                                <td>
+                                    <button class="action-btn-small">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="member-info">
+                                        <img src="https://i.pravatar.cc/40?img=15" alt="Student">
+                                        <div>
+                                            <div class="member-name">Ava Garcia</div>
+                                            <div class="member-title">ID: STU-005</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Grade 10</td>
+                                <td>ava.g@student.com</td>
+                                <td>10</td>
+                                <td>
+                                    <div class="progress-mini">
+                                        <div class="progress-mini-bar" style="width: 55%"></div>
+                                        <span>55%</span>
+                                    </div>
+                                </td>
+                                <td>1 week ago</td>
+                                <td>
+                                    <button class="action-btn-small">View</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div></body>
+
+</html>

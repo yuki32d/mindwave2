@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave – Creator Hub</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        // Check admin authentication on page load
+        if (!checkAdminAuth()) {
+            // Will redirect if not authenticated as admin
+        }
+
+        // Remove login page from history if we just came from there
+        if (document.referrer.includes('login.html')) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <!-- Card-Based Floating Header -->
+        <header class="topbar">
+            <!-- Logo Card -->
+            <div class="topbar-brand">
+                <span>🌊</span>
+                <span>MindwaveIo</span>
+            </div>
+
+            <!-- Search Card -->
+            <div class="topbar-search">
+                <span>🔍</span>
+                <input type="text" placeholder="Search courses, games, students...">
+            </div>
+
+            <!-- Actions Card -->
+            <div class="topbar-actions">
+                <span id="adminNotificationBtn" style="cursor: pointer;" title="Notifications">🔔</span>
+                <span id="adminSettingsBtn" style="cursor: pointer;" title="Settings">⚙️</span>
+                <div class="profile-toggle" id="profileToggle">
+                    <span>👤</span>
+                    <small>Account</small>
+                </div>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <a href="faculty-profile.html">Profile</a>
+                    <a href="marketing-site/admin-login.html">Sign out</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="layout">
+            <!-- 3D Floating Sidebar -->
+            <nav class="sidebar">
+                <ul class="menu">
+                    <li class="active"><a href="admin.html">⚡ Creator Tools</a></li>
+                    <li><a href="faculty-dashboard.html">🏠 Dashboard</a></li>
+                    <li><a href="faculty-dataanalytics.html">📈 Data Analytics</a></li>
+                    <li><a href="faculty-classroom.html">📚 Courses</a></li>
+                    <li><a href="faculty-community.html">👥 Community</a></li>
+                    <li><a href="faculty-live-meeting.html">🎥 Live Meeting</a></li>
+                    <li><a href="faculty-git-student.html">🐙 GitHub</a></li>
+                    <li><a href="faculty-settings.html">⚙️ Settings</a></li>
+                </ul>
+
+                <div class="sidebar-footer">
+                    <a class="ghost-btn" href="faculty-help.html">❔ Help Center</a>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main>
+                <!-- Header Section -->
+                <div class="main-header">
+                    <div>
+                        <h1>Creator Workspace</h1>
+                        <p>Plan announcements, updates, and playful learning tools.</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="secondary-btn" id="dataAnalyticsBtn">📊
+                            Data Analytics</button>
+                        <button class="primary-btn" id="previewStudentBtn">Preview Student
+                            View</button>
+                    </div>
+                </div>
+
+                <!-- Quick Action Cards -->
+                <div class="quick-actions">
+                    <button class="action-card" id="newGameBtn"
+                        style="background: linear-gradient(135deg, #FF375F 0%, #FF9F0A 100%);">
+                        <span>🎮</span>
+                        <span>Interactive Tools</span>
+                    </button>
+                    <button class="action-card" id="aiGameBuilderBtn"
+                        style="background: linear-gradient(135deg, #9F7AEA 0%, #6B46C1 100%);">
+                        <span>🤖</span>
+                        <span>AI Game Builder</span>
+                    </button>
+                    <button class="action-card" id="announceBtn"
+                        style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+                        <span>📢</span>
+                        <span>Announce</span>
+                    </button>
+                    <button class="action-card" id="updateBtn"
+                        style="background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);">
+                        <span>📝</span>
+                        <span>Update</span>
+                    </button>
+                    <button class="action-card" id="systemStatusBtn"
+                        style="background: linear-gradient(135deg, #374151 0%, #1F2937 100%);">
+                        <span>⚙️</span>
+                        <span>System Status</span>
+                    </button>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="pill-row">
+                    <div class="pill-stat">
+                        <h3>Active Campaigns</h3>
+                        <strong id="campaignCount">0</strong>
+                        <span class="tag green">Announcements</span>
+                    </div>
+                    <div class="pill-stat" id="engagementPulseCard" style="cursor: pointer;">
+                        <h3>Engagement Pulse</h3>
+                        <strong id="engagementPulse">0%</strong>
+                        <span class="tag orange">Last 7 days</span>
+                    </div>
+                    <div class="pill-stat">
+                        <h3>Games Published</h3>
+                        <strong id="gamesCount">0</strong>
+                        <span class="tag pink">Interactive</span>
+                    </div>
+                </div>
+
+                <!-- Content Grid -->
+                <div class="grid two">
+                    <!-- Publish Announcement -->
+                    <section class="panel">
+                        <h2>📢 Publish Announcement</h2>
+                        <p style="color: #9ea4b6; margin-bottom: 16px;">Share news, reminders, or course-wide updates
+                            with every learner. Students will be notified instantly!</p>
+                        <form id="announcementForm">
+                            <div>
+                                <label for="announcementTitle">Title</label>
+                                <input id="announcementTitle" name="announcementTitle" type="text" required
+                                    placeholder="e.g., Sprint Week Kickoff">
+                            </div>
+                            <div>
+                                <label for="announcementAudience">Audience</label>
+                                <select id="announcementAudience" name="announcementAudience" required>
+                                    <option value="All Students">All Students</option>
+                                    <option value="Cohort Alpha">Cohort Alpha</option>
+                                    <option value="Cohort Beta">Cohort Beta</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="announcementBody">Message</label>
+                                <textarea id="announcementBody" name="announcementBody" required
+                                    placeholder="Add context, timeline, and CTA..." rows="4"></textarea>
+                            </div>
+                            <button class="submit-btn" type="submit">📢 Publish Announcement</button>
+                        </form>
+                        <div class="list" id="announcementList" style="margin-top: 24px;"></div>
+                    </section>
+
+                    <!-- Post Update -->
+                    <section class="panel">
+                        <h2>📝 Post Update</h2>
+                        <p style="color: #9ea4b6; margin-bottom: 16px;">Log release notes, classroom reflections, or
+                            weekly digests. Students will be notified!</p>
+                        <form id="updateForm">
+                            <div>
+                                <label for="updateHeadline">Headline</label>
+                                <input id="updateHeadline" name="updateHeadline" type="text" required
+                                    placeholder="e.g., Week 4 Progress Snapshot">
+                            </div>
+                            <div>
+                                <label for="updateSummary">Summary</label>
+                                <textarea id="updateSummary" name="updateSummary" required
+                                    placeholder="Key highlights, blockers, next steps..." rows="4"></textarea>
+                            </div>
+                            <button class="submit-btn" type="submit">📝 Post Update</button>
+                        </form>
+                        <div class="list" id="updateList" style="margin-top: 24px;"></div>
+                    </section>
+                </div>
+
+                <!-- Advanced Game Tools -->
+                <section class="panel" style="margin-top: 24px;">
+                    <h2>⚙️ Advanced Game Tools</h2>
+                    <p>Attach supporting assets or embed external tools for richer interactions.</p>
+                    <form id="gameToolsForm">
+                        <div>
+                            <label for="assetLink">Asset or Deck URL</label>
+                            <input type="url" id="assetLink" placeholder="https://example.com/game-assets" required>
+                        </div>
+                        <div>
+                            <label for="instructions">Facilitator Notes</label>
+                            <textarea id="instructions"
+                                placeholder="Share timing, scoring rules, or facilitation tips..." rows="4"
+                                required></textarea>
+                        </div>
+                        <button class="submit-btn" type="submit">Attach Tool</button>
+                    </form>
+                    <div class="list" id="gameToolsList"></div>
+                </section>
+
+                <!-- Game Templates Gallery -->
+                <section class="panel" style="margin-top: 24px;">
+                    <h2>🎮 Game Templates Gallery</h2>
+                    <p>Quick-start templates for popular game types</p>
+                    <div id="gameTemplateGrid"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 24px;">
+                        <!-- Templates will be rendered here by admin.js -->
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Engagement Analytics Modal -->
+    <div id="engagementModal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s ease;">
+        <div
+            style="background: #1a1d2e; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 32px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="margin: 0; color: #f5f7ff;">📊 Engagement Analytics</h2>
+                <button id="closeEngagementModal"
+                    style="background: none; border: none; color: #9ea4b6; font-size: 28px; cursor: pointer; padding: 0; width: 32px; height: 32px;">×</button>
+            </div>
+
+            <!-- Student Activity -->
+            <div style="margin-bottom: 24px;">
+                <h3 style="color: #f5f7ff; font-size: 16px; margin-bottom: 16px;">👥 Student Activity</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                    <div
+                        style="background: rgba(52, 199, 89, 0.1); border: 1px solid rgba(52, 199, 89, 0.2); border-radius: 12px; padding: 16px;">
+                        <div style="color: #34c759; font-size: 24px; font-weight: bold;" id="modalActiveStudents">0
+                        </div>
+                        <div style="color: #9ea4b6; font-size: 13px; margin-top: 4px;">Active</div>
+                    </div>
+                    <div
+                        style="background: rgba(15, 98, 254, 0.1); border: 1px solid rgba(15, 98, 254, 0.2); border-radius: 12px; padding: 16px;">
+                        <div style="color: #0f62fe; font-size: 24px; font-weight: bold;" id="modalNewStudents">0</div>
+                        <div style="color: #9ea4b6; font-size: 13px; margin-top: 4px;">New</div>
+                    </div>
+                    <div
+                        style="background: rgba(255, 159, 10, 0.1); border: 1px solid rgba(255, 159, 10, 0.2); border-radius: 12px; padding: 16px;">
+                        <div style="color: #ff9f0a; font-size: 24px; font-weight: bold;" id="modalReturningStudents">0
+                        </div>
+                        <div style="color: #9ea4b6; font-size: 13px; margin-top: 4px;">Returning</div>
+                    </div>
+                    <div
+                        style="background: rgba(255, 59, 48, 0.1); border: 1px solid rgba(255, 59, 48, 0.2); border-radius: 12px; padding: 16px;">
+                        <div style="color: #ff3b30; font-size: 24px; font-weight: bold;" id="modalInactiveStudents">0
+                        </div>
+                        <div style="color: #9ea4b6; font-size: 13px; margin-top: 4px;">Inactive</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Statistics -->
+            <div style="margin-bottom: 24px;">
+                <h3 style="color: #f5f7ff; font-size: 16px; margin-bottom: 16px;">🎮 Game Statistics</h3>
+                <div
+                    style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 4px;">Total Plays</div>
+                            <div style="color: #f5f7ff; font-size: 20px; font-weight: bold;" id="modalTotalPlays">0
+                            </div>
+                        </div>
+                        <div>
+                            <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 4px;">Avg Completion</div>
+                            <div style="color: #f5f7ff; font-size: 20px; font-weight: bold;" id="modalAvgCompletion">0%
+                            </div>
+                        </div>
+                        <div>
+                            <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 4px;">Avg Score</div>
+                            <div style="color: #f5f7ff; font-size: 20px; font-weight: bold;" id="modalAvgScore">0%</div>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
+                        <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 8px;">Top Games</div>
+                        <div style="color: #f5f7ff; font-size: 14px; line-height: 1.6;" id="modalTopGames">No games
+                            played yet</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timing Data -->
+            <div>
+                <h3 style="color: #f5f7ff; font-size: 16px; margin-bottom: 16px;">⏰ Timing Data</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div
+                        style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px;">
+                        <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 4px;">Peak Hour</div>
+                        <div style="color: #f5f7ff; font-size: 18px; font-weight: bold;" id="modalPeakHour">N/A</div>
+                    </div>
+                    <div
+                        style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px;">
+                        <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 4px;">7-Day Trend</div>
+                        <div style="font-size: 18px; font-weight: bold;" id="modalTrend">N/A</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+    <script src="loading-spinner.js"></script>
+</body>
+
+</html>

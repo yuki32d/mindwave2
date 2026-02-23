@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Ready - MindWave</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+            background: #202124;
+            color: #e8eaed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+            background: #292a2d;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 400;
+            margin-bottom: 16px;
+            color: #4285f4;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #9aa0a6;
+            margin-bottom: 32px;
+        }
+
+        .instructions {
+            background: rgba(66, 133, 244, 0.1);
+            border-left: 4px solid #4285f4;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .ready-btn {
+            background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+            color: white;
+            border: none;
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+        }
+
+        .ready-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(66, 133, 244, 0.6);
+        }
+
+        .ready-btn:disabled {
+            background: #5f6368;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .meeting-code {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #4285f4;
+            margin: 20px 0;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .status-message.success {
+            background: rgba(52, 199, 89, 0.2);
+            color: #34c759;
+        }
+
+        .jitsi-link {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 12px 24px;
+            background: rgba(66, 133, 244, 0.2);
+            border: 1px solid #4285f4;
+            border-radius: 8px;
+            color: #8ab4f8;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .jitsi-link:hover {
+            background: rgba(66, 133, 244, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎥 Join Your Meeting First</h1>
+        <p class="subtitle">Before students can join, you need to be in the meeting room</p>
+
+        <div class="meeting-code" id="meetingCode"></div>
+
+        <div class="instructions">
+            <strong>📋 Instructions:</strong>
+            <ol>
+                <li><strong>Click the link below</strong> to open Jitsi in a new tab</li>
+                <li><strong>Join the meeting</strong> and make sure you're fully inside the room</li>
+                <li><strong>Come back to this tab</strong> and click "I'm Ready - Let Students In"</li>
+                <li>Students will then be automatically allowed to join!</li>
+            </ol>
+        </div>
+
+        <a id="jitsiLink" href="#" target="_blank" class="jitsi-link">
+            🚀 Open Jitsi Meeting (New Tab)
+        </a>
+
+        <br><br>
+
+        <button id="readyBtn" class="ready-btn">
+            ✅ I'm Ready - Let Students In
+        </button>
+
+        <div id="statusMessage" style="display: none;" class="status-message"></div>
+
+        <p style="color: #9aa0a6; font-size: 14px; margin-top: 30px;">
+            Meeting Code: <span id="codeDisplay"></span>
+        </p>
+    </div>
+
+    <script>
+        // Get meeting code from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const meetingCode = urlParams.get('code');
+        const meetingUrl = urlParams.get('url');
+
+        if (!meetingCode || !meetingUrl) {
+            alert('Missing meeting information');
+            window.location.href = 'faculty-live-meeting.html';
+        }
+
+        document.getElementById('meetingCode').textContent = meetingCode;
+        document.getElementById('codeDisplay').textContent = meetingCode;
+        document.getElementById('jitsiLink').href = decodeURIComponent(meetingUrl);
+
+        const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://mindwave2.onrender.com';
+        const token = localStorage.getItem('token');
+        const readyBtn = document.getElementById('readyBtn');
+        const statusMessage = document.getElementById('statusMessage');
+
+        readyBtn.addEventListener('click', async function () {
+            readyBtn.disabled = true;
+            readyBtn.textContent = 'Notifying students...';
+
+            try {
+                // Notify backend that faculty is ready
+                const response = await fetch(`${API_BASE}/api/meetings/${meetingCode}/faculty-joined`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    statusMessage.textContent = '✅ Students can now join! They will be automatically redirected to the meeting.';
+                    statusMessage.className = 'status-message success';
+                    statusMessage.style.display = 'block';
+                    readyBtn.textContent = '✅ Students Notified!';
+
+                    // Don't redirect - faculty already has Jitsi open in another tab
+                } else {
+                    throw new Error('Failed to notify');
+                }
+
+            } catch (error) {
+                console.error('Error notifying students:', error);
+                statusMessage.textContent = '❌ Error notifying students. Please try again.';
+                statusMessage.className = 'status-message';
+                statusMessage.style.display = 'block';
+                readyBtn.disabled = false;
+                readyBtn.textContent = '✅ I\'m Ready - Let Students In';
+            }
+        });
+    </script>
+</body>
+
+</html>

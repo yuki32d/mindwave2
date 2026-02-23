@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing - MindWave</title>
+    <link rel="stylesheet" href="css/modern-dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🌊</span>
+                    <span class="logo-text">MindWave</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-label">MAIN MENU</span>
+                    <a href="modern-dashboard.html" class="nav-item">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="org-analytics.html" class="nav-item">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                    <a href="org-billing.html" class="nav-item active">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Billing</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">MANAGEMENT</span>
+                    <a href="org-team.html" class="nav-item">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Team Members</span>
+                    </a>
+                    <a href="org-students.html" class="nav-item">
+                        <span class="nav-icon">🎓</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a href="org-games.html" class="nav-item">
+                        <span class="nav-icon">🎮</span>
+                        <span class="nav-text">Games</span>
+                    </a>
+                    <a href="org-settings.html" class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">SUPPORT</span>
+                    <a href="#help" class="nav-item">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">Help Center</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="search-container">
+                    <input type="text" placeholder="Search invoices..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon">🔔</button>
+                    <div class="user-avatar">
+                        <img src="https://i.pravatar.cc/40?img=5" alt="User">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Title -->
+            <div class="page-header">
+                <h1>Billing & Subscription</h1>
+                <p>Manage your subscription, payment methods, and invoices</p>
+            </div>
+
+            <!-- Current Plan -->
+            <div class="performance-card" style="margin-bottom: 2rem;">
+                <div class="performance-header">
+                    <div class="lecturer-info">
+                        <div class="subscription-icon">💎</div>
+                        <div>
+                            <div class="performance-score">Premium Plan</div>
+                            <div class="performance-label">$99/month • Renews Jan 25, 2026</div>
+                        </div>
+                    </div>
+                    <button class="see-more">Change Plan →</button>
+                </div>
+
+                <div class="performance-detail">
+                    <div class="detail-text">
+                        <h4 style="margin-bottom: 0.75rem;">Plan Includes:</h4>
+                        <ul
+                            style="list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <li>✓ Unlimited Students</li>
+                            <li>✓ Unlimited Games</li>
+                            <li>✓ 5,000 AI Calls/month</li>
+                            <li>✓ 10 GB Storage</li>
+                            <li>✓ Priority Support</li>
+                            <li>✓ Advanced Analytics</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="settings-card" style="margin-bottom: 2rem;">
+                <div class="settings-card-header">
+                    <h2>Payment Method</h2>
+                    <button class="btn-outline">Add Payment Method</button>
+                </div>
+                <div class="settings-card-body">
+                    <div class="payment-method-card">
+                        <div class="payment-card-icon">💳</div>
+                        <div class="payment-card-info">
+                            <div class="payment-card-type">Visa ending in 4242</div>
+                            <div class="payment-card-expiry">Expires 12/2025</div>
+                        </div>
+                        <div class="payment-card-actions">
+                            <button class="btn-outline">Edit</button>
+                            <button class="btn-danger-outline">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing History -->
+            <div class="settings-card">
+                <div class="settings-card-header">
+                    <h2>Billing History</h2>
+                    <button class="btn-export">
+                        <span>📤</span>
+                        <span>Export All</span>
+                    </button>
+                </div>
+                <div class="settings-card-body" style="padding: 0;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>INV-2024-12</strong></td>
+                                <td>Dec 25, 2024</td>
+                                <td>$99.00</td>
+                                <td><span class="status-badge active">Paid</span></td>
+                                <td>
+                                    <button class="action-btn-small">Download</button>
+                                    <button class="action-btn-small">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>INV-2024-11</strong></td>
+                                <td>Nov 25, 2024</td>
+                                <td>$99.00</td>
+                                <td><span class="status-badge active">Paid</span></td>
+                                <td>
+                                    <button class="action-btn-small">Download</button>
+                                    <button class="action-btn-small">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>INV-2024-10</strong></td>
+                                <td>Oct 25, 2024</td>
+                                <td>$99.00</td>
+                                <td><span class="status-badge active">Paid</span></td>
+                                <td>
+                                    <button class="action-btn-small">Download</button>
+                                    <button class="action-btn-small">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>INV-2024-09</strong></td>
+                                <td>Sep 25, 2024</td>
+                                <td>$99.00</td>
+                                <td><span class="status-badge active">Paid</span></td>
+                                <td>
+                                    <button class="action-btn-small">Download</button>
+                                    <button class="action-btn-small">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>INV-2024-08</strong></td>
+                                <td>Aug 25, 2024</td>
+                                <td>$99.00</td>
+                                <td><span class="status-badge active">Paid</span></td>
+                                <td>
+                                    <button class="action-btn-small">Download</button>
+                                    <button class="action-btn-small">View</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div></body>
+
+</html>

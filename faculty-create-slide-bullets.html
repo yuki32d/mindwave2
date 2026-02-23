@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Bullet Points Slide – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <!-- Back Button -->
+                <div style="margin-bottom: 32px;">
+                    <button class="secondary-btn" id="backBtn"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
+                        Back</button>
+                </div>
+
+                <!-- Page Header -->
+                <div style="text-align: center; margin-bottom: 48px;">
+                    <div
+                        style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-bottom: 12px;">
+                        <h1 style="font-size: 36px; font-weight: 700; color: #f5f7ff; margin: 0;">📋 Create Bullet
+                            Points Slide</h1>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Slide</button>
+                    </div>
+                    <p style="color: #9ea4b6; font-size: 16px; margin: 0;">List key points with bullets</p>
+                </div>
+
+                <div class="grid two">
+                    <section class="panel">
+                        <h2>📝 Slide Content</h2>
+                        <form id="slideForm">
+                            <div><label for="title">Title</label><input type="text" id="title"
+                                    placeholder="e.g., Main Points" required></div>
+                            <div><label for="bullets">Bullet Points (one per line)</label><textarea id="bullets"
+                                    rows="8" placeholder="Point 1&#10;Point 2&#10;Point 3" required></textarea></div>
+                            <div><label for="backgroundColor">Background</label>
+                                <select id="backgroundColor">
+                                    <option value="dark">Dark</option>
+                                    <option value="light">Light</option>
+                                    <option value="blue">Blue</option>
+                                    <option value="green">Green</option>
+                                    <option value="purple">Purple</option>
+                                </select>
+                            </div>
+                            <div><label for="displayDuration">Duration (seconds)</label><input type="number"
+                                    id="displayDuration" value="40" min="5" max="300"></div>
+                        </form>
+                    </section>
+                    <section class="panel">
+                        <h2>👁️ Live Preview</h2>
+                        <div id="slidePreview"
+                            style="aspect-ratio: 16/9; background: #1E2433; border-radius: 16px; padding: 48px; display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
+                            <h2 id="previewTitle"
+                                style="font-size: 36px; font-weight: 700; color: #f5f7ff; margin-bottom: 32px;">Your
+                                Title</h2>
+                            <ul id="previewBullets"
+                                style="font-size: 20px; line-height: 2; color: #9ea4b6; list-style: none; padding: 0;">
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="loading-spinner.js"></script>
+    <script>
+        const bgColors = { dark: '#1E2433', light: '#F5F7FF', blue: '#0F62FE', green: '#10B981', purple: '#8B5CF6' };
+        const textColors = { dark: { title: '#f5f7ff', content: '#9ea4b6' }, light: { title: '#1E2433', content: '#6e6e73' }, blue: { title: '#FFFFFF', content: '#E0E7FF' }, green: { title: '#FFFFFF', content: '#D1FAE5' }, purple: { title: '#FFFFFF', content: '#EDE9FE' } };
+        document.addEventListener('DOMContentLoaded', () => {
+            // Back button event listener
+            document.getElementById('backBtn')?.addEventListener('click', () => window.history.back());
+
+            ['title', 'bullets', 'backgroundColor'].forEach(id => document.getElementById(id).addEventListener(id === 'backgroundColor' ? 'change' : 'input', updatePreview));
+            document.getElementById('publishBtn').addEventListener('click', publishSlide); updatePreview();
+        });
+        function updatePreview() {
+            const title = document.getElementById('title').value.trim() || 'Your Title';
+            const bullets = document.getElementById('bullets').value.trim().split('\n').filter(b => b.trim());
+            const bgColor = document.getElementById('backgroundColor').value;
+            document.getElementById('slidePreview').style.background = bgColors[bgColor];
+            const previewTitle = document.getElementById('previewTitle');
+            previewTitle.textContent = title; previewTitle.style.color = textColors[bgColor].title;
+            const previewBullets = document.getElementById('previewBullets');
+            previewBullets.innerHTML = bullets.map(b => `<li style="margin-bottom: 12px;"><span style="color: #00D9FF; margin-right: 12px;">●</span>${b}</li>`).join('');
+            previewBullets.style.color = textColors[bgColor].content;
+        }
+        async function publishSlide() {
+            const title = document.getElementById('title').value.trim();
+            const bullets = document.getElementById('bullets').value.trim().split('\n').filter(b => b.trim());
+            if (!title || bullets.length === 0) { alert('Please enter title and at least one bullet point'); return; }
+            const slideData = { title, bullets, backgroundColor: document.getElementById('backgroundColor').value, displayDuration: parseInt(document.getElementById('displayDuration').value), slideType: 'bullets', type: 'slide', createdAt: new Date().toISOString() };
+            try {
+                const response = await fetch('/api/games', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify(slideData) });
+                if (response.ok) { alert('✅ Slide published!'); window.location.href = 'admin.html'; } else throw new Error('Failed');
+            } catch (error) { alert('❌ Error publishing slide.'); }
+        }
+    </script>
+</body>
+
+</html>

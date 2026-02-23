@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Poll - MindWave</title>
+    <link rel="stylesheet" href="../3d-depth-design.css">
+    <link rel="stylesheet" href="marketing-site/css/quick-poll.css?t=1234567890">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+
+<body data-theme="dark">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-brain"></i>
+                <span>MindWave</span>
+            </div>
+            <div class="nav-links">
+                <a href="admin.html"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="faculty-quick-poll.html" class="active"><i class="fas fa-poll"></i> Quick Poll</a>
+                <a href="faculty-live-feedback.html"><i class="fas fa-comments"></i> Live Feedback</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="poll-container">
+        <!-- Create Poll Section -->
+        <section class="create-poll-section" id="createSection">
+            <div class="section-header">
+                <div class="header-content">
+                    <div class="icon-badge">
+                        <i class="fas fa-poll"></i>
+                    </div>
+                    <div>
+                        <h1>Quick Poll</h1>
+                        <p>Check knowledge in an anonymous, stress-free way</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="poll-creator">
+                <div class="form-group">
+                    <label for="pollQuestion">
+                        <i class="fas fa-question-circle"></i> Poll Question
+                    </label>
+                    <textarea id="pollQuestion"
+                        placeholder="e.g., Which of these topics is the most difficult to understand?"
+                        rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-list"></i> Answer Options
+                    </label>
+                    <div class="options-container" id="optionsContainer">
+                        <div class="option-input">
+                            <span class="option-letter">A</span>
+                            <input type="text" placeholder="Option A" data-option="A">
+                            <button class="btn-remove" disabled><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="option-input">
+                            <span class="option-letter">B</span>
+                            <input type="text" placeholder="Option B" data-option="B">
+                            <button class="btn-remove" disabled><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                    <button class="btn-add-option" id="addOptionBtn">
+                        <i class="fas fa-plus"></i> Add Option
+                    </button>
+                </div>
+
+                <div class="poll-settings">
+                    <div class="setting-item">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="anonymousToggle" checked>
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-text">
+                                <i class="fas fa-user-secret"></i> Anonymous Responses
+                            </span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="showResultsToggle" checked>
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-text">
+                                <i class="fas fa-chart-bar"></i> Show Results to Students
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-secondary" id="saveDraftBtn">
+                        <i class="fas fa-save"></i> Save Draft
+                    </button>
+                    <button class="btn-primary" id="launchPollBtn">
+                        <i class="fas fa-rocket"></i> Launch Poll
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Results Section -->
+        <section class="live-results-section" id="resultsSection" style="display: none;">
+            <div class="section-header">
+                <div class="header-content">
+                    <div class="icon-badge success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <h1>Poll Active</h1>
+                        <p id="pollQuestionDisplay"></p>
+                    </div>
+                </div>
+                <button class="btn-end-poll" id="endPollBtn">
+                    <i class="fas fa-stop"></i> End Poll
+                </button>
+            </div>
+
+            <div class="results-grid">
+                <!-- Response Stats -->
+                <div class="stats-card">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="totalResponses">0</div>
+                            <div class="stat-label">Total Responses</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="responseRate">0%</div>
+                            <div class="stat-label">Response Rate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Chart -->
+                <div class="chart-card">
+                    <h3><i class="fas fa-chart-bar"></i> Live Results</h3>
+                    <canvas id="resultsChart"></canvas>
+                </div>
+
+                <!-- Detailed Results -->
+                <div class="detailed-results-card">
+                    <h3><i class="fas fa-list-ol"></i> Breakdown</h3>
+                    <div class="results-list" id="resultsList"></div>
+                </div>
+            </div>
+
+            <!-- Recent Responses Stream -->
+            <div class="response-stream">
+                <h3><i class="fas fa-stream"></i> Recent Responses</h3>
+                <div class="stream-container" id="responseStream">
+                    <div class="stream-placeholder">
+                        <i class="fas fa-hourglass-half"></i>
+                        <p>Waiting for responses...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Past Polls -->
+        <section class="past-polls-section">
+            <h2><i class="fas fa-history"></i> Recent Polls</h2>
+            <div class="polls-grid" id="pastPollsGrid">
+                <!-- Will be populated dynamically -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content success">
+            <div class="modal-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Poll Launched!</h2>
+            <p>Students can now respond to your poll.</p>
+            <button class="btn-primary" onclick="closeModal()">Got it!</button>
+        </div>
+    </div>
+
+    <script src="marketing-site/js/quick-poll.js"></script></body>
+
+</html>

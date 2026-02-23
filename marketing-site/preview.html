@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave - Premium 3D Background Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/premium-bg.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            font-weight: 900;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(14, 165, 233, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .features {
+            padding: 100px 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #c4b5fd 0%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature-card p {
+            color: rgba(255, 255, 255, 0.75);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 40px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <!-- Premium 3D Background Container -->
+    <div class="premium-bg">
+        <!-- 3D Geometric Cubes -->
+        <div class="cube-3d-1"></div>
+        <div class="cube-3d-2"></div>
+        <div class="cube-3d-3"></div>
+
+        <!-- Large glowing orbs for ambient lighting -->
+        <div class="glow-orb-large glow-orb-magenta"></div>
+        <div class="glow-orb-large glow-orb-blue"></div>
+        <div class="glow-orb-large glow-orb-purple"></div>
+
+        <!-- Glossy light reflections -->
+        <div class="light-reflection light-reflection-1"></div>
+        <div class="light-reflection light-reflection-2"></div>
+
+        <!-- Noise texture overlay -->
+        <div class="noise-texture"></div>
+
+        <!-- Depth gradient -->
+        <div class="depth-gradient"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Transform Learning into Epic Adventures</h1>
+            <p>
+                AI-powered gamification platform that makes education engaging, interactive,
+                and fun. Create immersive learning experiences with our intelligent game builder.
+            </p>
+            <div class="cta-buttons">
+                <a href="#" class="btn btn-primary">Get Started Free</a>
+                <a href="#" class="btn btn-secondary">Watch Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎮</div>
+                <h3>Interactive Games</h3>
+                <p>Create engaging quizzes, puzzles, and challenges that make learning fun and memorable.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI-Powered</h3>
+                <p>Leverage artificial intelligence to generate personalized learning content automatically.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Real-time Analytics</h3>
+                <p>Track student progress with comprehensive dashboards and detailed performance metrics.</p>
+            </div>
+        </div>
+    </section></body>
+
+</html>

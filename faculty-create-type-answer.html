@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Type Answer – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        if (!checkAdminAuth()) {
+            // Will redirect if not authenticated
+        }
+    </script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <!-- Back Button -->
+                <div style="margin-bottom: 32px;">
+                    <button class="secondary-btn" id="backBtn"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
+                        Back</button>
+                </div>
+
+                <!-- Page Header -->
+                <div style="text-align: center; margin-bottom: 48px;">
+                    <div
+                        style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-bottom: 12px;">
+                        <h1 style="font-size: 36px; font-weight: 700; color: #f5f7ff; margin: 0;">⌨️ Create Type Answer
+                        </h1>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Question</button>
+                    </div>
+                    <p style="color: #9ea4b6; font-size: 16px; margin: 0;">Students type short text answers with smart
+                        auto-grading</p>
+                </div>
+
+                <!-- Question Configuration -->
+                <div class="grid two">
+                    <section class="panel">
+                        <h2>📝 Question Settings</h2>
+                        <form id="questionForm">
+                            <div>
+                                <label for="questionTitle">Question Title</label>
+                                <input type="text" id="questionTitle" placeholder="e.g., Geography Quiz" required>
+                            </div>
+
+                            <div>
+                                <label for="questionText">Question</label>
+                                <textarea id="questionText" rows="3" placeholder="e.g., What is the capital of France?"
+                                    required></textarea>
+                            </div>
+
+                            <div>
+                                <label for="correctAnswer">Correct Answer(s)</label>
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <input type="text" id="answerInput" placeholder="Enter correct answer"
+                                        style="flex: 1;">
+                                    <button type="button" class="secondary-btn" id="addAnswerBtn">+ Add</button>
+                                </div>
+                                <small style="color: #9ea4b6;">Add multiple acceptable answers (e.g., "Paris" and
+                                    "paris")</small>
+                            </div>
+
+                            <div>
+                                <label>Accepted Answers</label>
+                                <div id="answersList"
+                                    style="min-height: 100px; background: var(--card-darker); border-radius: 12px; padding: 16px;">
+                                    <p style="color: #9ea4b6; text-align: center; margin-top: 20px;">No answers added
+                                        yet</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="charLimit">Character Limit (Optional)</label>
+                                <input type="number" id="charLimit" placeholder="e.g., 100" min="1" max="500">
+                                <small style="color: #9ea4b6; display: block; margin-top: 4px;">Leave empty for no
+                                    limit</small>
+                            </div>
+
+                            <div style="display: flex; gap: 16px; flex-direction: column;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="caseSensitive">
+                                    <span>Case sensitive (Paris ≠ paris)</span>
+                                </label>
+
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="trimWhitespace" checked>
+                                    <span>Ignore extra spaces</span>
+                                </label>
+
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="showHint">
+                                    <span>Show character count to students</span>
+                                </label>
+                            </div>
+
+                            <div>
+                                <label for="hintText">Hint (Optional)</label>
+                                <input type="text" id="hintText" placeholder="e.g., Think about European capitals">
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Live Preview -->
+                    <section class="panel">
+                        <h2>👁️ Student View Preview</h2>
+                        <div id="previewContainer"
+                            style="background: var(--card-darker); border-radius: 20px; padding: 40px; min-height: 500px;">
+                            <div style="margin-bottom: 32px;">
+                                <h3 id="previewQuestion"
+                                    style="font-size: 24px; margin-bottom: 16px; color: #f5f7ff; min-height: 32px;">
+                                    Your question will appear here</h3>
+                                <p id="previewHint"
+                                    style="color: #9ea4b6; font-size: 14px; margin-bottom: 24px; min-height: 20px;"></p>
+                            </div>
+
+                            <div style="margin-bottom: 24px;">
+                                <label style="display: block; margin-bottom: 8px; color: #9ea4b6;">Your Answer:</label>
+                                <input type="text" id="previewInput"
+                                    style="width: 100%; padding: 16px; background: var(--card-dark); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; color: #f5f7ff; font-size: 16px;"
+                                    placeholder="Type your answer here...">
+                                <div id="previewCharCount"
+                                    style="text-align: right; margin-top: 8px; color: #9ea4b6; font-size: 13px;"></div>
+                            </div>
+
+                            <button class="primary-btn" id="testAnswerBtn" style="width: 100%;">Check Answer</button>
+
+                            <div id="testResult"
+                                style="margin-top: 24px; padding: 20px; border-radius: 12px; display: none;"></div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="loading-spinner.js"></script>
+    <script src="faculty-create-type-answer.js"></script>
+</body>
+
+</html>

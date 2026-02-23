@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="../loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave - Transform Learning into Epic Adventures</title>
+    <meta name="description"
+        content="AI-powered gamification platform for modern education. Create engaging learning experiences with our intelligent game builder.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/marketing-site/css/style.css">
+    <style>
+        /* Additional styles for new sections */
+
+        /* Dropdown Menu Styles */
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .nav-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .nav-dropdown-toggle i {
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-dropdown:hover .nav-dropdown-toggle i {
+            transform: rotate(180deg);
+        }
+
+        .nav-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            min-width: 300px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            padding: 12px 0;
+        }
+
+        .nav-dropdown:hover .nav-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            margin-top: 12px;
+        }
+
+        .nav-dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 20px;
+            color: #1d1d1f;
+            text-decoration: none;
+            transition: background 0.2s ease;
+        }
+
+        .nav-dropdown-menu a:hover {
+            background: #f5f5f7;
+        }
+
+        .nav-dropdown-menu a i {
+            font-size: 24px;
+            color: #667eea;
+            width: 32px;
+            text-align: center;
+        }
+
+        .nav-dropdown-menu a div {
+            flex: 1;
+        }
+
+        .nav-dropdown-menu a strong {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .nav-dropdown-menu a span {
+            display: block;
+            font-size: 12px;
+            color: #86868b;
+        }
+
+        @media (max-width: 768px) {
+            .nav-dropdown-menu {
+                position: static;
+                transform: none;
+                margin-top: 12px;
+                box-shadow: none;
+                background: transparent;
+                padding: 0;
+            }
+
+            .nav-dropdown-menu a {
+                padding: 12px 0;
+            }
+        }
+
+        /* Product Showcase Sections */
+        .product-showcase {
+            padding: 120px 0;
+            overflow: hidden;
+        }
+
+        .product-showcase.dark {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .showcase-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .showcase-container.reverse {
+            direction: rtl;
+        }
+
+        .showcase-container.reverse>* {
+            direction: ltr;
+        }
+
+        .showcase-content h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .showcase-content h2 {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .showcase-content p {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #6e6e73;
+            margin-bottom: 32px;
+        }
+
+        .showcase-visual {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            background: transparent;
+            min-height: auto;
+        }
+
+        .showcase-visual img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 20px;
+        }
+
+        .showcase-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .placeholder-text {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            z-index: 1;
+            position: relative;
+        }
+
+        /* Social Proof Bar */
+        .social-proof {
+            padding: 60px 0;
+            background: #f5f5f7;
+            text-align: center;
+        }
+
+        .social-proof h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 40px;
+        }
+
+        .logo-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            opacity: 0.6;
+        }
+
+        .logo-placeholder {
+            width: 120px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            opacity: 0.3;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 120px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .stats-grid {
+            max-width: 1200px;
+            margin: 60px auto 0;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 60px;
+        }
+
+        .stat-item h3 {
+            font-size: 64px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .stat-item p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 120px 0;
+            background: white;
+        }
+
+        .testimonials-grid {
+            max-width: 1200px;
+            margin: 60px auto 0;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .testimonial-card {
+            background: #f5f5f7;
+            padding: 40px;
+            border-radius: 20px;
+        }
+
+        .testimonial-text {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #1d1d1f;
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .author-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .author-info p {
+            font-size: 14px;
+            color: #86868b;
+        }
+
+        /* Comparison Table */
+        .comparison {
+            padding: 120px 0;
+            background: #f5f5f7;
+        }
+
+        .comparison-table {
+            max-width: 1000px;
+            margin: 60px auto 0;
+            padding: 0 20px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 20px;
+            text-align: left;
+            border-bottom: 1px solid #f5f5f7;
+        }
+
+        .comparison-table th {
+            background: #1d1d1f;
+            color: white;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            font-size: 16px;
+        }
+
+        .check-icon {
+            color: #34c759;
+            font-size: 20px;
+        }
+
+        .cross-icon {
+            color: #ff3b30;
+            font-size: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .showcase-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .showcase-content h2 {
+                font-size: 32px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 40px;
+            }
+
+            .stat-item h3 {
+                font-size: 48px;
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-table {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-brain"></i>
+                <span>Mind<span class="gradient-text">Wave</span></span>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <div class="nav-dropdown">
+                    <a href="#" class="nav-dropdown-toggle">
+                        Tools <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <div class="nav-dropdown-menu" style="min-width: 800px; max-width: 900px; padding: 30px;">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+                            <!-- Column 1: Core Tools -->
+                            <div>
+                                <h4
+                                    style="font-size: 12px; font-weight: 700; color: #667eea; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">
+                                    Core Tools</h4>
+                                <a href="tools/ai-quiz-builder.html">
+                                    <i class="fas fa-wand-magic-sparkles"></i>
+                                    <div>
+                                        <strong>AI Quiz Builder</strong>
+                                        <span>Create quizzes instantly</span>
+                                    </div>
+                                </a>
+                                <a href="tools/live-quiz.html">
+                                    <i class="fas fa-trophy"></i>
+                                    <div>
+                                        <strong>Live Competitions</strong>
+                                        <span>Real-time quizzes</span>
+                                    </div>
+                                </a>
+                                <a href="tools/analytics.html">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div>
+                                        <strong>Analytics</strong>
+                                        <span>Track progress</span>
+                                    </div>
+                                </a>
+                                <a href="tools/ai-tutor.html">
+                                    <i class="fas fa-robot"></i>
+                                    <div>
+                                        <strong>AI Tutor</strong>
+                                        <span>24/7 help</span>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- Column 2: Interactive Tools -->
+                            <div>
+                                <h4
+                                    style="font-size: 12px; font-weight: 700; color: #f093fb; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">
+                                    Ask Questions</h4>
+                                <a href="tools/quiz.html">
+                                    <i class="fas fa-circle-question" style="color: #f093fb;"></i>
+                                    <div>
+                                        <strong>Quiz</strong>
+                                        <span>Multiple choice</span>
+                                    </div>
+                                </a>
+                                <a href="tools/true-false.html">
+                                    <i class="fas fa-check-double" style="color: #f093fb;"></i>
+                                    <div>
+                                        <strong>True/False</strong>
+                                        <span>Binary questions</span>
+                                    </div>
+                                </a>
+                                <a href="tools/slider.html">
+                                    <i class="fas fa-sliders" style="color: #f093fb;"></i>
+                                    <div>
+                                        <strong>Slider</strong>
+                                        <span>Scale responses</span>
+                                    </div>
+                                </a>
+                                <a href="tools/poll.html">
+                                    <i class="fas fa-poll" style="color: #f093fb;"></i>
+                                    <div>
+                                        <strong>Poll</strong>
+                                        <span>Quick voting</span>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- Column 3: More Tools -->
+                            <div>
+                                <h4
+                                    style="font-size: 12px; font-weight: 700; color: #4facfe; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">
+                                    Collect Feedback</h4>
+                                <a href="tools/word-cloud.html">
+                                    <i class="fas fa-cloud" style="color: #4facfe;"></i>
+                                    <div>
+                                        <strong>Word Cloud</strong>
+                                        <span>Visual feedback</span>
+                                    </div>
+                                </a>
+                                <a href="tools/scale.html">
+                                    <i class="fas fa-ruler-horizontal" style="color: #4facfe;"></i>
+                                    <div>
+                                        <strong>Rating Scale</strong>
+                                        <span>Measure opinions</span>
+                                    </div>
+                                </a>
+                                <a href="tools/open-ended.html">
+                                    <i class="fas fa-comment-dots" style="color: #4facfe;"></i>
+                                    <div>
+                                        <strong>Open-Ended</strong>
+                                        <span>Free responses</span>
+                                    </div>
+                                </a>
+                                <a href="interactive-tools-selector.html"
+                                    style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f5f5f7;">
+                                    <i class="fas fa-grid-2" style="color: #667eea;"></i>
+                                    <div>
+                                        <strong>View All 21 Tools →</strong>
+                                        <span>Complete toolkit</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="#showcase">Product</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#faq">FAQ</a>
+                <a href="website-login.html" class="nav-login">Login</a>
+                <a href="website-signup.html" class="btn btn-primary">Get Started</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <!-- Decorative Labels -->
+            <div class="label label-top-left">
+                <span>✨ AI-Powered</span>
+            </div>
+            <div class="label label-top-right">
+                <span>🎮 Gamified Learning</span>
+            </div>
+
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Transform Learning into<br>
+                    <span class="gradient-text">Epic Adventures</span>
+                </h1>
+                <p class="hero-subtitle">
+                    MindWave is the AI-driven gamification platform that turns static curricula into immersive,
+                    high-impact learning experiences for schools and enterprises.
+                </p>
+                <div class="hero-ctas">
+                    <a href="website-signup.html" class="btn btn-primary btn-lg">
+                        Start Free Trial <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="#showcase" class="btn btn-outline btn-lg">
+                        <i class="fas fa-play-circle"></i> See How It Works
+                    </a>
+                </div>
+            </div>
+
+            <!-- Product Preview -->
+            <div class="product-preview">
+                <div class="browser-mockup">
+                    <div class="browser-header">
+                        <div class="browser-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <div class="browser-url">mindwave.app/dashboard</div>
+                    </div>
+                    <div class="browser-content">
+                        <img src="images/dashboard.png" alt="MindWave Dashboard"
+                            style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 0 0 12px 12px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Background Decoration -->
+        <div class="hero-bg-circle hero-bg-circle-1"></div>
+        <div class="hero-bg-circle hero-bg-circle-2"></div>
+    </section>
+
+    <!-- Social Proof Bar -->
+    <section class="social-proof">
+        <div class="container">
+            <h4>Trusted by leading institutions worldwide</h4>
+            <div class="logo-grid">
+                <div class="logo-placeholder"></div>
+                <div class="logo-placeholder"></div>
+                <div class="logo-placeholder"></div>
+                <div class="logo-placeholder"></div>
+                <div class="logo-placeholder"></div>
+                <div class="logo-placeholder"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Showcase 1: AI Quiz Builder -->
+    <section class="product-showcase" id="showcase">
+        <div class="showcase-container">
+            <div class="showcase-content">
+                <h3>AI-Powered</h3>
+                <h2>Create quizzes in seconds, not hours</h2>
+                <p>Simply describe your topic—"Photosynthesis for 9th grade" or "JavaScript loops"—and watch as our AI
+                    generates comprehensive questions, multiple-choice options, and detailed explanations. Edit,
+                    customize, or regenerate with one click.</p>
+                <a href="#" class="btn btn-primary">Try Quiz Builder <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="showcase-visual">
+                <img src="images/ai-quiz-builder.png" alt="AI Quiz Builder Interface"
+                    style="width: 100%; border-radius: 20px; display: block;">
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Showcase 2: Live Quiz -->
+    <section class="product-showcase dark">
+        <div class="showcase-container reverse">
+            <div class="showcase-content">
+                <h3>Engage Students</h3>
+                <h2 style="color: white;">Turn every lesson into an adventure</h2>
+                <p style="color: rgba(255,255,255,0.8);">Launch Kahoot-style live quizzes where students compete in
+                    real-time. Watch engagement soar with leaderboards, power-ups, and instant feedback. Students love
+                    it, teachers see the results.</p>
+                <a href="#" class="btn btn-primary">See Live Quizzes <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="showcase-visual">
+                <img src="images/live-quiz.png" alt="Live Quiz Competition"
+                    style="width: 100%; border-radius: 20px; display: block;">
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Showcase 3: Analytics -->
+    <section class="product-showcase">
+        <div class="showcase-container">
+            <div class="showcase-content">
+                <h3>Data-Driven</h3>
+                <h2>Know exactly where every student stands</h2>
+                <p>Track individual progress, identify learning gaps, and measure outcomes with beautiful, actionable
+                    dashboards. Export reports in seconds for parent-teacher conferences or administrative reviews.</p>
+                <a href="#" class="btn btn-primary">Explore Analytics <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="showcase-visual">
+                <img src="images/analytics.png" alt="Analytics Dashboard"
+                    style="width: 100%; border-radius: 20px; display: block;">
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <h2 style="font-size: 48px; font-weight: 800; margin-bottom: 16px;">The numbers speak for themselves</h2>
+            <p style="font-size: 20px; opacity: 0.9;">Making real impact in education worldwide</p>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>10,000+</h3>
+                    <p>Active Students</p>
+                </div>
+                <div class="stat-item">
+                    <h3>500+</h3>
+                    <p>Schools & Universities</p>
+                </div>
+                <div class="stat-item">
+                    <h3>50,000+</h3>
+                    <p>Quizzes Created</p>
+                </div>
+                <div class="stat-item">
+                    <h3>98%</h3>
+                    <p>Satisfaction Rate</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Everything You Need to Engage Students</h2>
+                <p class="section-subtitle">Powerful tools designed for modern educators</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h3>AI Game Builder</h3>
+                    <p>Transform any content into interactive games in seconds. Our AI understands your curriculum and
+                        creates perfectly tailored learning experiences.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Real-time Analytics</h3>
+                    <p>Track student engagement, identify learning gaps, and measure outcomes with comprehensive
+                        analytics dashboards.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users-gear"></i>
+                    </div>
+                    <h3>Multi-tenant Management</h3>
+                    <p>Manage multiple campuses, departments, and thousands of users with enterprise-grade controls and
+                        permissions.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Anti-Cheat System</h3>
+                    <p>Advanced proctoring with tab detection, face recognition, and behavior monitoring for exam
+                        integrity.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>24/7 AI Tutor</h3>
+                    <p>Instant help for students with personalized explanations and guidance, available anytime,
+                        anywhere.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <h3>Custom Branding</h3>
+                    <p>White-label options with your logo, colors, and domain for a seamless branded experience.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-plug"></i>
+                    </div>
+                    <h3>LMS Integration</h3>
+                    <p>Works with Canvas, Blackboard, Moodle, and more. Seamless grade sync and single sign-on.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-wifi-slash"></i>
+                    </div>
+                    <h3>Offline Mode</h3>
+                    <p>Download quizzes for offline use. Perfect for low-connectivity areas or field trips.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-universal-access"></i>
+                    </div>
+                    <h3>Accessibility</h3>
+                    <p>Screen reader support, keyboard navigation, and WCAG compliant for all learners.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Loved by teachers and students alike</h2>
+                <p class="section-subtitle">See what educators are saying about MindWave</p>
+            </div>
+
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"MindWave transformed my classroom. Students who never participated are
+                        now competing to answer questions. Engagement is through the roof!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar"></div>
+                        <div class="author-info">
+                            <h4>Sarah Johnson</h4>
+                            <p>8th Grade Science Teacher</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"The AI quiz builder saves me 5+ hours every week. I can create
+                        comprehensive assessments in minutes and focus on what matters—teaching."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar"></div>
+                        <div class="author-info">
+                            <h4>Dr. Michael Chen</h4>
+                            <p>Computer Science Professor</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"I actually look forward to quizzes now! The live competitions are so
+                        fun, and I can see my progress improving every week."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar"></div>
+                        <div class="author-info">
+                            <h4>Emma Rodriguez</h4>
+                            <p>10th Grade Student</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section class="comparison">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Why choose MindWave?</h2>
+                <p class="section-subtitle">See how we compare to the competition</p>
+            </div>
+
+            <div class="comparison-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>MindWave</th>
+                            <th>Kahoot</th>
+                            <th>Quizlet</th>
+                            <th>Google Forms</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>AI Quiz Generation</td>
+                            <td><i class="fas fa-check check-icon"></i></td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Live Competitions</td>
+                            <td><i class="fas fa-check check-icon"></i></td>
+                            <td><i class="fas fa-check check-icon"></i></td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Advanced Analytics</td>
+                            <td><i class="fas fa-check check-icon"></i></td>
+                            <td>Limited</td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                            <td>Basic</td>
+                        </tr>
+                        <tr>
+                            <td>Custom Branding</td>
+                            <td><i class="fas fa-check check-icon"></i></td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Anti-Cheat</td>
+                            <td><i class="fas fa-check check-icon"></i></td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                            <td><i class="fas fa-times cross-icon"></i></td>
+                        </tr>
+                        <tr>
+                            <td>LMS Integration</td>
+                            <td><i class="fas fa-check check-icon"></i></td>
+                            <td>Limited</td>
+                            <td>Limited</td>
+                            <td>Limited</td>
+                        </tr>
+                        <tr>
+                            <td>Starting Price</td>
+                            <td>₹499/mo</td>
+                            <td>₹999/mo</td>
+                            <td>₹3599/yr</td>
+                            <td>Free</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title text-white">From Curriculum to Connection in Minutes</h2>
+                <p class="section-subtitle text-light">Three simple steps to transform your teaching</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Configure Your Workspace</h3>
+                    <p>Choose your subscription tier and set up your institution's custom portal with your brand & logo.
+                    </p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Upload Your Content</h3>
+                    <p>Input your learning objectives. Our AI will propose multiple game formats tailored to your
+                        students.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Launch & Analyze</h3>
+                    <p>Send invitations to students and watch them engage in real-time with comprehensive performance
+                        reports.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Choose Your Plan</h2>
+                <p class="section-subtitle">Scale MindWave as your institution grows</p>
+            </div>
+
+            <div class="pricing-grid">
+                <!-- Personal Plan -->
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Personal</h3>
+                        <div class="pricing-price">
+                            <span class="currency">₹</span>
+                            <span class="amount">499</span>
+                            <span class="period">/month</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Up to 50 Students</li>
+                        <li><i class="fas fa-check"></i> Basic AI Builder</li>
+                        <li><i class="fas fa-check"></i> Single Classroom</li>
+                        <li><i class="fas fa-check"></i> Email Support</li>
+                        <li><i class="fas fa-check"></i> Community Access</li>
+                    </ul>
+                    <a href="website-signup.html" class="btn btn-outline btn-block">Start Free Trial</a>
+                </div>
+
+                <!-- Team Plan (Highlighted) -->
+                <div class="pricing-card pricing-card-featured">
+                    <div class="pricing-badge">Most Popular</div>
+                    <div class="pricing-header">
+                        <h3>Team</h3>
+                        <div class="pricing-price">
+                            <span class="currency">₹</span>
+                            <span class="amount">2499</span>
+                            <span class="period">/month</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Up to 500 Students</li>
+                        <li><i class="fas fa-check"></i> Unlimited AI Games</li>
+                        <li><i class="fas fa-check"></i> Multi-Teacher Support</li>
+                        <li><i class="fas fa-check"></i> Advanced Analytics</li>
+                        <li><i class="fas fa-check"></i> Priority Support</li>
+                        <li><i class="fas fa-check"></i> Custom Branding</li>
+                    </ul>
+                    <a href="website-signup.html" class="btn btn-primary btn-block">Get Started</a>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Enterprise</h3>
+                        <div class="pricing-price">
+                            <span class="amount custom">Custom</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Unlimited Students</li>
+                        <li><i class="fas fa-check"></i> SSO Integration</li>
+                        <li><i class="fas fa-check"></i> Multi-Campus Support</li>
+                        <li><i class="fas fa-check"></i> Dedicated Account Manager</li>
+                        <li><i class="fas fa-check"></i> SLA Guarantee</li>
+                        <li><i class="fas fa-check"></i> White-label Options</li>
+                    </ul>
+                    <a href="contact.html" class="btn btn-outline btn-block">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="section-subtitle">Everything you need to know about MindWave</p>
+            </div>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How does the subscription work?</h3>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>MindWave offers flexible monthly or annual subscriptions. You can upgrade, downgrade, or
+                            cancel at any time through your dashboard. We use Stripe for secure payment processing, and
+                            all plans include a 14-day free trial.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Is my student data secure?</h3>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Absolutely. We are SOC2 compliant and follow FERPA/GDPR guidelines to ensure student data is
+                            always encrypted and protected. Your data is stored in secure, isolated databases with
+                            regular backups.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Can I export student data and reports?</h3>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes! You can export comprehensive reports in CSV, PDF, or Excel formats. We also offer native
+                            integrations with popular LMS platforms like Canvas, Blackboard, and Moodle.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What kind of support do you offer?</h3>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>All plans include email support and access to our comprehensive documentation. Team plans get
+                            priority support with faster response times. Enterprise customers receive a dedicated
+                            account manager and 24/7 phone support.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How does the AI quiz builder work?</h3>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Simply describe your topic in natural language, and our AI analyzes your input to generate
+                            relevant questions, answer options, and explanations. You can customize difficulty levels,
+                            question types, and regenerate as needed.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Can I use MindWave with my existing LMS?</h3>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes! MindWave integrates seamlessly with Canvas, Blackboard, Moodle, Google Classroom, and
+                            Microsoft Teams. Grades sync automatically, and students can access quizzes through your
+                            LMS.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Transform Your Classroom?</h2>
+                <p>Join 500+ schools already using MindWave to engage students and improve learning outcomes.</p>
+                <a href="website-signup.html" class="btn btn-white btn-lg">Start Free Trial <i
+                        class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-brain"></i>
+                        <span>Mind<span class="gradient-text">Wave</span></span>
+                    </div>
+                    <p>Pioneering the next generation of digital learning through AI and gamification.</p>
+                </div>
+
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Product</h4>
+                        <a href="#features">Features</a>
+                        <a href="pricing.html">Pricing</a>
+                        <a href="demo.html">Demo</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <a href="contact.html">Contact</a>
+                        <a href="privacy.html">Privacy</a>
+                        <a href="terms.html">Terms</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <a href="#faq">FAQ</a>
+                        <a href="demo.html">Request Demo</a>
+                        <a href="contact.html">Support</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <a href="privacy.html">Privacy Policy</a>
+                        <a href="terms.html">Terms of Service</a>
+                        <a href="cookies.html">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 MindWave Inc. All rights reserved.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cookie Consent Banner -->
+    <link rel="stylesheet" href="css/cookie-consent.css">
+    <script src="js/cookie-consent.js"></script>
+
+    <!-- Marketing Chatbot -->
+    <link rel="stylesheet" href="css/chatbot.css">
+    <script src="js/chatbot.js"></script>
+
+    <script src="js/main.js"></script>
+    <script src="../loading-spinner.js"></script>
+</body>
+
+</html>

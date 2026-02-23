@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Recommendations - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+
+    <style>
+        .recommendations-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* AI Insights Card */
+        .ai-insights-card {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.1) 0%, rgba(77, 160, 255, 0.1) 100%);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 40px;
+        }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .ai-icon {
+            font-size: 32px;
+        }
+
+        .ai-title {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa 0%, #4da0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .ai-summary {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        /* Recommendations Grid */
+        .recommendations-grid {
+            display: grid;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .recommendation-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+            border-color: rgba(77, 160, 255, 0.5);
+        }
+
+        .recommendation-card.priority-high {
+            border-color: rgba(255, 68, 68, 0.5);
+            background: rgba(255, 68, 68, 0.05);
+        }
+
+        .recommendation-card.priority-medium {
+            border-color: rgba(255, 170, 0, 0.5);
+            background: rgba(255, 170, 0, 0.05);
+        }
+
+        .rec-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .rec-type {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .rec-type.topic {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+        }
+
+        .rec-type.quiz {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+        }
+
+        .rec-type.video {
+            background: rgba(77, 160, 255, 0.2);
+            color: #4da0ff;
+        }
+
+        .rec-type.study-group {
+            background: rgba(167, 139, 250, 0.2);
+            color: #a78bfa;
+        }
+
+        .priority-badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-badge.high {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+        }
+
+        .priority-badge.medium {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+        }
+
+        .rec-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .rec-description {
+            font-size: 14px;
+            color: #9ea4b6;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .rec-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #9ea4b6;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rec-action {
+            margin-top: 16px;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(77, 160, 255, 0.5);
+            background: rgba(77, 160, 255, 0.1);
+            color: #4da0ff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .action-btn:hover {
+            background: rgba(77, 160, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Study Plan Section */
+        .study-plan-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .study-plan-card h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .study-schedule {
+            display: grid;
+            gap: 16px;
+        }
+
+        .schedule-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .schedule-time {
+            min-width: 80px;
+            text-align: center;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(77, 160, 255, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+            border-radius: 8px;
+        }
+
+        .time-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #4da0ff;
+        }
+
+        .time-label {
+            font-size: 10px;
+            color: #9ea4b6;
+            text-transform: uppercase;
+        }
+
+        .schedule-details {
+            flex: 1;
+        }
+
+        .schedule-subject {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .schedule-topic {
+            font-size: 13px;
+            color: #9ea4b6;
+        }
+
+        @media (max-width: 768px) {
+            .rec-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .schedule-item {
+                flex-direction: column;
+            }
+
+            .schedule-time {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="student-performance.html">← Back to Performance</a>
+            <p class="eyebrow">AI-POWERED</p>
+            <h1>Study Recommendations</h1>
+            <p class="lede">Personalized suggestions to improve your learning</p>
+        </header>
+
+        <div class="recommendations-container">
+            <!-- AI Insights -->
+            <div class="ai-insights-card">
+                <div class="ai-header">
+                    <span class="ai-icon">🤖</span>
+                    <div class="ai-title">AI Analysis</div>
+                </div>
+                <div class="ai-summary">
+                    Based on your recent performance, you're excelling in <strong>Mathematics</strong> and
+                    <strong>Science</strong>.
+                    However, you could benefit from additional practice in <strong>English Literature analysis</strong>
+                    and
+                    <strong>History essay writing</strong>. We recommend focusing 30 minutes daily on these areas to
+                    improve your grades by 10-15%.
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="recommendations-grid">
+                <!-- Weak Topic -->
+                <div class="recommendation-card priority-high">
+                    <div class="rec-header">
+                        <span class="rec-type topic">Weak Topic</span>
+                        <span class="priority-badge high">High Priority</span>
+                    </div>
+                    <div class="rec-title">English Literature - Theme Analysis</div>
+                    <div class="rec-description">
+                        Your recent quiz scores indicate difficulty with identifying and analyzing themes in literature.
+                        We recommend reviewing the theme analysis framework and practicing with sample texts.
+                    </div>
+                    <div class="rec-meta">
+                        <div class="meta-item">
+                            <span>📚</span>
+                            <span>English</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>📊</span>
+                            <span>Current: 72%</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>🎯</span>
+                            <span>Target: 85%</span>
+                        </div>
+                    </div>
+                    <div class="rec-action">
+                        <button class="action-btn" onclick="startPractice('theme-analysis')">Start Practice</button>
+                    </div>
+                </div>
+
+                <!-- Practice Quiz -->
+                <div class="recommendation-card priority-medium">
+                    <div class="rec-header">
+                        <span class="rec-type quiz">Practice Quiz</span>
+                        <span class="priority-badge medium">Medium Priority</span>
+                    </div>
+                    <div class="rec-title">History - World War II Quiz</div>
+                    <div class="rec-description">
+                        Strengthen your understanding of WWII events and their impact. This quiz covers key battles,
+                        political decisions, and historical consequences.
+                    </div>
+                    <div class="rec-meta">
+                        <div class="meta-item">
+                            <span>📚</span>
+                            <span>History</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>⏱️</span>
+                            <span>15 minutes</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>❓</span>
+                            <span>20 questions</span>
+                        </div>
+                    </div>
+                    <div class="rec-action">
+                        <button class="action-btn" onclick="takeQuiz('wwii')">Take Quiz</button>
+                    </div>
+                </div>
+
+                <!-- Video Lesson -->
+                <div class="recommendation-card">
+                    <div class="rec-header">
+                        <span class="rec-type video">Video Lesson</span>
+                    </div>
+                    <div class="rec-title">Advanced Algebra Techniques</div>
+                    <div class="rec-description">
+                        Build on your strong math foundation with advanced problem-solving techniques.
+                        This video covers quadratic equations, factoring, and real-world applications.
+                    </div>
+                    <div class="rec-meta">
+                        <div class="meta-item">
+                            <span>📚</span>
+                            <span>Mathematics</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>⏱️</span>
+                            <span>25 minutes</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>👨‍🏫</span>
+                            <span>Prof. Smith</span>
+                        </div>
+                    </div>
+                    <div class="rec-action">
+                        <button class="action-btn" onclick="watchVideo('algebra')">Watch Video</button>
+                    </div>
+                </div>
+
+                <!-- Study Group -->
+                <div class="recommendation-card">
+                    <div class="rec-header">
+                        <span class="rec-type study-group">Study Group</span>
+                    </div>
+                    <div class="rec-title">Science Study Group - Photosynthesis</div>
+                    <div class="rec-description">
+                        Join a peer study group to discuss photosynthesis concepts. Collaborative learning can help
+                        reinforce understanding and clarify complex topics.
+                    </div>
+                    <div class="rec-meta">
+                        <div class="meta-item">
+                            <span>📚</span>
+                            <span>Science</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>👥</span>
+                            <span>4 students</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>📅</span>
+                            <span>Tomorrow, 3:00 PM</span>
+                        </div>
+                    </div>
+                    <div class="rec-action">
+                        <button class="action-btn" onclick="joinGroup('photosynthesis')">Join Group</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personalized Study Plan -->
+            <div class="study-plan-card">
+                <h3>📅 Your Personalized Study Plan</h3>
+                <div class="study-schedule">
+                    <div class="schedule-item">
+                        <div class="schedule-time">
+                            <div class="time-value">30m</div>
+                            <div class="time-label">Daily</div>
+                        </div>
+                        <div class="schedule-details">
+                            <div class="schedule-subject">English Literature</div>
+                            <div class="schedule-topic">Theme analysis practice and essay writing</div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-item">
+                        <div class="schedule-time">
+                            <div class="time-value">20m</div>
+                            <div class="time-label">Daily</div>
+                        </div>
+                        <div class="schedule-details">
+                            <div class="schedule-subject">History</div>
+                            <div class="schedule-topic">Review key events and practice essay structure</div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-item">
+                        <div class="schedule-time">
+                            <div class="time-value">45m</div>
+                            <div class="time-label">3x/week</div>
+                        </div>
+                        <div class="schedule-details">
+                            <div class="schedule-subject">Mathematics</div>
+                            <div class="schedule-topic">Advanced problem-solving and practice tests</div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-item">
+                        <div class="schedule-time">
+                            <div class="time-value">1h</div>
+                            <div class="time-label">Weekly</div>
+                        </div>
+                        <div class="schedule-details">
+                            <div class="schedule-subject">Science</div>
+                            <div class="schedule-topic">Lab review and concept reinforcement</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'student-login.html';
+        }
+
+        // Start practice
+        function startPractice(topic) {
+            console.log('Starting practice for:', topic);
+            // TODO: Navigate to practice page
+        }
+
+        // Take quiz
+        function takeQuiz(quizId) {
+            console.log('Taking quiz:', quizId);
+            // TODO: Navigate to quiz page
+        }
+
+        // Watch video
+        function watchVideo(videoId) {
+            console.log('Watching video:', videoId);
+            // TODO: Navigate to video player
+        }
+
+        // Join study group
+        function joinGroup(groupId) {
+            console.log('Joining group:', groupId);
+            // TODO: Navigate to study group
+        }
+
+        // Load recommendations from API
+        async function loadRecommendations() {
+            try {
+                const API_BASE = window.location.hostname === 'localhost'
+                    ? 'http://localhost:8081'
+                    : 'https://mindwave2.onrender.com';
+
+                const response = await fetch(`${API_BASE}/api/student/recommendations`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update recommendations with real data
+                    console.log('Recommendations data:', data);
+                } else {
+                    console.log('Using placeholder recommendations');
+                }
+            } catch (error) {
+                console.error('Error loading recommendations:', error);
+            }
+        }
+
+        // Initialize
+        loadRecommendations();
+    </script>
+</body>
+
+</html>

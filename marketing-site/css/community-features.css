@@ -1,0 +1,227 @@
+/* Content Section Switching */
+.content-section {
+    display: none;
+}
+
+.content-section.active {
+    display: block;
+}
+
+/* Feature Content Area */
+.feature-content-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 3rem 2rem;
+}
+
+/* Waiting Card & Feedback Card - Professional Centered Design */
+.waiting-card,
+.feedback-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 4rem 3rem;
+    text-align: center;
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* Icon Styling */
+.waiting-icon,
+.card-icon,
+.quiz-icon {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #00D9FF, #8B5CF6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    font-size: 4rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Typography */
+.waiting-card h1,
+.feedback-card h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-white);
+}
+
+.waiting-card p,
+.feedback-card p.subtitle {
+    color: var(--text-muted);
+    font-size: 1.125rem;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+}
+
+/* Pulse Indicator - Professional Animation */
+.pulse-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.pulse-indicator span {
+    width: 14px;
+    height: 14px;
+    background: #0f62fe;
+    border-radius: 50%;
+    animation: bounce 1.4s ease-in-out infinite;
+}
+
+.pulse-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.pulse-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Confidence Selector - Professional Design */
+.confidence-selector {
+    margin: 2.5rem 0;
+    text-align: left;
+}
+
+.confidence-selector label {
+    display: block;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: var(--text-white);
+}
+
+.emoji-options {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.emoji-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 110px;
+    flex: 1;
+    max-width: 130px;
+}
+
+.emoji-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #0f62fe;
+    transform: translateY(-6px);
+    box-shadow: 0 10px 30px rgba(15, 98, 254, 0.3);
+}
+
+.emoji-btn.selected {
+    background: linear-gradient(135deg, #0f62fe, #0353e9);
+    border-color: #0f62fe;
+    transform: translateY(-4px);
+}
+
+.emoji-btn .emoji {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.emoji-btn .label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.emoji-btn:hover .label,
+.emoji-btn.selected .label {
+    color: var(--text-white);
+}
+
+/* Submit Button Styling */
+.feedback-card .primary-btn {
+    margin-top: 1.5rem;
+    padding: 1rem 2.5rem;
+    font-size: 1.0625rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+
+    .waiting-card,
+    .feedback-card {
+        padding: 3rem 2rem;
+    }
+
+    .waiting-icon,
+    .card-icon,
+    .quiz-icon {
+        width: 100px;
+        height: 100px;
+        font-size: 3rem;
+    }
+
+    .waiting-card h1,
+    .feedback-card h1 {
+        font-size: 2rem;
+    }
+
+    .emoji-options {
+        gap: 0.75rem;
+    }
+
+    .emoji-btn {
+        min-width: 90px;
+        padding: 1.25rem 0.75rem;
+    }
+
+    .emoji-btn .emoji {
+        font-size: 2.5rem;
+    }
+}

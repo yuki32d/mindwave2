@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – Student Management</title>
+    <link rel="stylesheet" href="role-page.css">
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="manage-students.css">
+    <script src="theme-init.js"></script>
+</head>
+
+<body data-theme="dark" data-role="faculty" data-section="students">
+    <div class="page-shell">
+        <header class="hero">
+            <p class="eyebrow" id="heroEyebrow">Faculty Space</p>
+            <h1 id="pageTitle">👥 Student Management</h1>
+            <p class="lede" id="pageSubtitle">View and remove student accounts from the system.</p>
+            <div class="hero-actions">
+                <a class="ghost-link" href="faculty-settings.html">← Back to Settings</a>
+            </div>
+        </header>
+
+        <!-- Controls Section -->
+        <div class="controls-container">
+            <div class="controls-row">
+                <!-- Search Bar -->
+                <div class="search-box">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search by name or email...">
+                </div>
+
+                <!-- Date Filter -->
+                <select id="dateFilter" class="filter-select">
+                    <option value="all">All Time</option>
+                    <option value="7">Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                </select>
+
+                <!-- Page Size -->
+                <select id="pageSize" class="filter-select">
+                    <option value="10">10 per page</option>
+                    <option value="20" selected>20 per page</option>
+                    <option value="50">50 per page</option>
+                </select>
+
+                <!-- Refresh Button -->
+                <button id="refreshBtn" class="action-btn secondary-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+
+            <!-- Bulk Actions Row -->
+            <div class="bulk-actions-row" id="bulkActionsRow" style="display: none;">
+                <span id="selectedCount">0 selected</span>
+                <button id="deleteSelectedBtn" class="action-btn danger-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path
+                            d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    Delete Selected
+                </button>
+            </div>
+        </div>
+
+        <!-- Student Count -->
+        <div class="student-count">
+            <span id="studentCount">Loading students...</span>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-container">
+            <div class="spinner"></div>
+            <p>Loading students...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <h3>No Students Found</h3>
+            <p>There are no students matching your criteria.</p>
+        </div>
+
+        <!-- Students Table -->
+        <div id="tableContainer" class="table-container" style="display: none;">
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th class="checkbox-col">
+                            <input type="checkbox" id="selectAll">
+                        </th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Joined Date</th>
+                        <th>Games Played</th>
+                        <th>Last Active</th>
+                        <th class="actions-col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <!-- Students will be populated here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div id="paginationContainer" class="pagination-container" style="display: none;">
+            <button id="prevBtn" class="pagination-btn" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+                Previous
+            </button>
+
+            <div class="page-info">
+                <span>Page <strong id="currentPage">1</strong> of <strong id="totalPages">1</strong></span>
+            </div>
+
+            <button id="nextBtn" class="pagination-btn" disabled>
+                Next
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script src="role-page.js"></script>
+    <script src="manage-students.js"></script></body>
+
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request a Demo - MindWave</title>
+    <meta name="description"
+        content="Schedule a personalized demo of MindWave and see how AI-powered gamification can transform your classroom.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <style>
+        .demo-page {
+            padding: 120px 0 80px;
+            background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+            min-height: 100vh;
+        }
+
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .demo-header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .demo-header p {
+            font-size: 1.25rem;
+            color: #6B7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .demo-form-wrapper {
+            background: white;
+            padding: 3rem;
+            border-radius: 1.5rem;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-benefits {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .demo-benefits h3 {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .demo-benefits ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .demo-benefits li {
+            color: white;
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .demo-benefits li i {
+            color: #D1FAE5;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .demo-header h1 {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="website-home.html" class="nav-logo">
+                <i class="fas fa-brain"></i>
+                <span>Mind<span class="gradient-text">Wave</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="website-home.html#features">Features</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="website-home.html#faq">FAQ</a>
+                <a href="website-login.html" class="nav-login">Login</a>
+                <a href="website-signup.html" class="btn btn-primary">Get Started</a>
+            </div>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Demo Page -->
+    <section class="demo-page">
+        <div class="demo-container">
+            <div class="demo-header">
+                <h1>Request a Demo</h1>
+                <p>See MindWave in action! Schedule a personalized demo and discover how AI-powered gamification can
+                    transform your classroom.</p>
+            </div>
+
+            <div class="demo-form-wrapper">
+                <div class="demo-benefits">
+                    <h3>What you'll get in your demo:</h3>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> Personalized walkthrough of MindWave features</li>
+                        <li><i class="fas fa-check-circle"></i> Live AI game creation demonstration</li>
+                        <li><i class="fas fa-check-circle"></i> Q&A session with our product experts</li>
+                        <li><i class="fas fa-check-circle"></i> Custom pricing for your institution</li>
+                    </ul>
+                </div>
+
+                <form id="demo-form">
+                    <h2 style="margin-bottom: 2rem; color: #111827;">Tell us about yourself</h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first-name">First Name *</label>
+                            <input type="text" id="first-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="last-name">Last Name *</label>
+                            <input type="text" id="last-name" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Work Email *</label>
+                        <input type="email" id="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="organization">Organization Name *</label>
+                        <input type="text" id="organization" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="role">Your Role *</label>
+                            <select id="role" required>
+                                <option value="">Select your role</option>
+                                <option value="teacher">Teacher/Faculty</option>
+                                <option value="admin">Administrator</option>
+                                <option value="it">IT Manager</option>
+                                <option value="decision-maker">Decision Maker</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="students">Number of Students *</label>
+                            <select id="students" required>
+                                <option value="">Select range</option>
+                                <option value="1-50">1-50</option>
+                                <option value="51-200">51-200</option>
+                                <option value="201-500">201-500</option>
+                                <option value="501-1000">501-1,000</option>
+                                <option value="1000+">1,000+</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="preferred-date">Preferred Demo Date</label>
+                        <input type="date" id="preferred-date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="preferred-time">Preferred Time</label>
+                        <select id="preferred-time">
+                            <option value="">Select preferred time</option>
+                            <option value="morning">Morning (9 AM - 12 PM IST)</option>
+                            <option value="afternoon">Afternoon (12 PM - 3 PM IST)</option>
+                            <option value="evening">Evening (3 PM - 6 PM IST)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Tell us about your needs (Optional)</label>
+                        <textarea id="message" rows="4"
+                            placeholder="What are you hoping to achieve with MindWave?"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        Schedule Demo <i class="fas fa-calendar-check"></i>
+                    </button>
+
+                    <p style="text-align: center; margin-top: 1.5rem; color: #6B7280; font-size: 0.875rem;">
+                        By submitting this form, you agree to our <a href="privacy.html" style="color: #4F46E5;">Privacy
+                            Policy</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <i class="fas fa-brain"></i>
+                    <span>Mind<span class="gradient-text">Wave</span></span>
+                </div>
+                <p>Transform learning into epic adventures with AI-powered gamification.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Product</h4>
+                    <a href="website-home.html#features">Features</a>
+                    <a href="pricing.html">Pricing</a>
+                    <a href="demo.html">Request Demo</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <a href="contact.html">Contact</a>
+                    <a href="privacy.html">Privacy</a>
+                    <a href="terms.html">Terms</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <a href="website-home.html#faq">FAQ</a>
+                    <a href="#">Documentation</a>
+                    <a href="#">Blog</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms of Service</a>
+                    <a href="cookies.html">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 MindWave Inc. All rights reserved.</p>
+            <div class="footer-social">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Set minimum date to today
+        const dateInput = document.getElementById('preferred-date');
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+
+        // Demo form submission
+        document.getElementById('demo-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // In production, this would send data to backend
+            alert('Thank you for your interest! We\'ll contact you within 24 hours to schedule your personalized demo.');
+
+            // Redirect to home
+            window.location.href = 'website-home.html';
+        });
+    </script></body>
+
+</html>

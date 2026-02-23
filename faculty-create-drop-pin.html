@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Drop Pin – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        if (!checkAdminAuth()) {
+            // Will redirect if not authenticated
+        }
+    </script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <!-- Back Button -->
+                <div style="margin-bottom: 32px;">
+                    <button class="secondary-btn" id="backBtn"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
+                        Back</button>
+                </div>
+
+                <!-- Page Header -->
+                <div style="text-align: center; margin-bottom: 48px;">
+                    <div
+                        style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-bottom: 12px;">
+                        <h1 style="font-size: 36px; font-weight: 700; color: #f5f7ff; margin: 0;">📌 Create Drop Pin
+                        </h1>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Activity</button>
+                    </div>
+                    <p style="color: #9ea4b6; font-size: 16px; margin: 0;">Students drop pins on images to share
+                        opinions,
+                        feedback, or identify issues</p>
+                </div>
+
+                <!-- Activity Configuration -->
+                <section class="panel full-span">
+                    <h2>📝 Activity Settings</h2>
+                    <form id="dropPinForm">
+                        <div class="grid two">
+                            <div>
+                                <label for="activityTitle">Activity Title</label>
+                                <input type="text" id="activityTitle" placeholder="e.g., Campus Improvement Ideas"
+                                    required>
+                            </div>
+
+                            <div>
+                                <label for="questionText">Question/Prompt</label>
+                                <input type="text" id="questionText"
+                                    placeholder="e.g., Where would you add more seating?" required>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="imageUpload">Upload Image</label>
+                            <input type="file" id="imageUpload" accept="image/*" required
+                                style="padding: 12px; background: var(--card-darker); border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; cursor: pointer;">
+                            <small style="color: #9ea4b6; display: block; margin-top: 8px;">Upload a map, diagram, or
+                                photo (Max 5MB)</small>
+                        </div>
+
+                        <div style="display: flex; gap: 16px; flex-direction: column;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="allowMultiplePins" checked>
+                                <span>Allow multiple pins per student</span>
+                            </label>
+
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="requireComment" checked>
+                                <span>Require comment with each pin</span>
+                            </label>
+
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="showAllPins" checked>
+                                <span>Show all student pins in real-time</span>
+                            </label>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Image Canvas -->
+                <section class="panel full-span">
+                    <h2>🗺️ Preview Canvas</h2>
+                    <p style="color: #9ea4b6; margin-bottom: 24px;">Students will click on the image to drop pins and
+                        add comments</p>
+
+                    <div id="canvasContainer"
+                        style="background: var(--card-darker); border-radius: 20px; padding: 40px; text-align: center; min-height: 400px; display: flex; align-items: center; justify-content: center;">
+                        <p id="uploadPrompt" style="color: #9ea4b6; font-size: 18px;">Upload an image to see preview
+                        </p>
+                        <canvas id="imageCanvas"
+                            style="display: none; max-width: 100%; border-radius: 12px; cursor: crosshair; box-shadow: 0 8px 32px rgba(0,0,0,0.4);"></canvas>
+                    </div>
+
+                    <div id="pinsInfo" style="margin-top: 24px; color: #9ea4b6; text-align: center;"></div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="loading-spinner.js"></script>
+    <script src="faculty-create-drop-pin.js"></script>
+</body>
+
+</html>

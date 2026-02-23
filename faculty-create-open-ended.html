@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Open-Ended Question - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <header class="topbar">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button id="backBtn" class="back-btn"
+                    style="padding: 8px 16px; margin-top: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                    ← Back
+                </button>
+            </div>
+        </header>
+
+        <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
+            <div class="main-header">
+                <div>
+                    <h1>💬 Create Open-Ended Question</h1>
+                    <p>Collect detailed text responses from students</p>
+                </div>
+                <div class="header-actions">
+                    <button class="primary-btn" id="saveBtn">💾 Save & Publish</button>
+                </div>
+            </div>
+
+            <div class="grid two">
+                <section class="panel">
+                    <h2>Question Configuration</h2>
+                    <form id="openEndedForm">
+                        <div>
+                            <label for="oeQuestion">Question *</label>
+                            <textarea id="oeQuestion" rows="3" placeholder="e.g., What did you learn from this module?"
+                                required></textarea>
+                        </div>
+
+                        <div>
+                            <label for="oeHint">Hint/Placeholder (Optional)</label>
+                            <input type="text" id="oeHint" placeholder="e.g., Share your thoughts...">
+                        </div>
+
+                        <div>
+                            <label for="charLimit">Character Limit</label>
+                            <select id="charLimit">
+                                <option value="100">100 characters (Short)</option>
+                                <option value="250">250 characters (Medium)</option>
+                                <option value="500" selected>500 characters (Long)</option>
+                                <option value="1000">1000 characters (Essay)</option>
+                                <option value="">No limit</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Settings</label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="required" checked>
+                                <span>Required response</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                                <input type="checkbox" id="anonymous">
+                                <span>Allow anonymous responses</span>
+                            </label>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <h2>Student Preview</h2>
+                    <div style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 12px;">
+                        <h3 style="color: #f5f7ff; margin-bottom: 24px;" id="previewQ">Your question will appear here
+                        </h3>
+                        <textarea placeholder="Type your answer here..."
+                            style="width: 100%; min-height: 150px; padding: 16px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; color: #f5f7ff; font-size: 14px; resize: vertical;"
+                            id="previewTextarea"></textarea>
+                        <div style="margin-top: 8px; text-align: right; color: #9ea4b6; font-size: 12px;"
+                            id="charCount">0 / 500</div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('oeQuestion').addEventListener('input', function () {
+            document.getElementById('previewQ').textContent = this.value || 'Your question will appear here';
+        });
+
+        document.getElementById('oeHint').addEventListener('input', function () {
+            document.getElementById('previewTextarea').placeholder = this.value || 'Type your answer here...';
+        });
+
+        document.getElementById('charLimit').addEventListener('change', function () {
+            const limit = this.value;
+            const textarea = document.getElementById('previewTextarea');
+            if (limit) {
+                textarea.maxLength = limit;
+                document.getElementById('charCount').textContent = `0 / ${limit}`;
+            } else {
+                textarea.removeAttribute('maxLength');
+                document.getElementById('charCount').textContent = '0';
+            }
+        });
+
+        document.getElementById('previewTextarea').addEventListener('input', function () {
+            const limit = document.getElementById('charLimit').value;
+            if (limit) {
+                document.getElementById('charCount').textContent = `${this.value.length} / ${limit}`;
+            } else {
+                document.getElementById('charCount').textContent = this.value.length;
+            }
+        });
+
+        async function saveOpenEnded() {
+            const question = document.getElementById('oeQuestion').value;
+            const hint = document.getElementById('oeHint').value;
+            const charLimit = document.getElementById('charLimit').value;
+            const required = document.getElementById('required').checked;
+            const anonymous = document.getElementById('anonymous').checked;
+
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            const openEndedData = {
+                type: 'open-ended',
+                question,
+                hint,
+                charLimit: charLimit ? parseInt(charLimit) : null,
+                settings: { required, anonymous },
+                createdBy: localStorage.getItem('user_name'),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('/api/games/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    },
+                    body: JSON.stringify(openEndedData)
+                });
+
+                const data = await response.json();
+                if (data.ok) {
+                    alert('✅ Open-ended question created successfully!');
+                    window.location.href = 'admin.html';
+                } else {
+                    alert('❌ Error: ' + (data.message || 'Failed to create question'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Failed to save question. Please try again.');
+            }
+        }
+
+        // Save button handler\r\n        document.getElementById('saveBtn').addEventListener('click', saveOpenEnded);\r\n\r\n        // Back button handler
+        document.getElementById('backBtn').addEventListener('click', function () {
+            window.location.href = 'interactive-tools-selector.html';
+        });
+    </script>
+</body>
+
+</html>

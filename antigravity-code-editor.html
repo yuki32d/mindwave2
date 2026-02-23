@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Editor - MindWave</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="antigravity-editor.css">
+
+    <!-- Monaco Editor Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+
+    <!-- VS Code Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="vscode-container">
+        <!-- Title Bar -->
+        <div class="title-bar">
+            <div class="title-bar-left">
+                <div class="app-icon"></div>
+                <div class="app-title">MindWave Code Editor</div>
+            </div>
+            <div class="window-controls">
+                <div class="window-btn close" onclick="alert('Close window')"></div>
+                <div class="window-btn minimize" onclick="alert('Minimize window')"></div>
+                <div class="window-btn maximize" onclick="alert('Maximize window')"></div>
+            </div>
+        </div>
+
+        <!-- Menu Bar -->
+        <div class="menu-bar">
+            <div class="menu-item">File</div>
+            <div class="menu-item">Edit</div>
+            <div class="menu-item">Selection</div>
+            <div class="menu-item">View</div>
+            <div class="menu-item">Go</div>
+            <div class="menu-item">Run</div>
+            <div class="menu-item">Terminal</div>
+            <div class="menu-item">Help</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Activity Bar -->
+            <div class="activity-bar">
+                <div class="activity-icon active" title="Explorer">
+                    <i class="fas fa-copy"></i>
+                </div>
+                <div class="activity-icon" title="Search">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="activity-icon" title="Source Control">
+                    <i class="fas fa-code-branch"></i>
+                </div>
+                <div class="activity-icon" title="Run and Debug">
+                    <i class="fas fa-play-circle"></i>
+                </div>
+                <div class="activity-icon" title="AI Assistant" id="aiToggle">
+                    <i class="fas fa-robot"></i>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <span>Explorer</span>
+                    <div class="sidebar-actions">
+                        <i class="fas fa-file sidebar-action" title="New File"></i>
+                        <i class="fas fa-folder sidebar-action" title="New Folder"></i>
+                        <i class="fas fa-sync sidebar-action" title="Refresh"></i>
+                    </div>
+                </div>
+                <div class="file-tree" id="fileTree">
+                    <div class="folder-item expanded">
+                        <span class="folder-icon">▶</span>
+                        <span>📁 Practice Files</span>
+                    </div>
+                    <div class="file-item active" data-file="hello.py" data-lang="python">
+                        <span class="file-icon">🐍</span>
+                        <span>hello.py</span>
+                    </div>
+                    <div class="file-item" data-file="hello.js" data-lang="javascript">
+                        <span class="file-icon">💛</span>
+                        <span>hello.js</span>
+                    </div>
+                    <div class="file-item" data-file="hello.java" data-lang="java">
+                        <span class="file-icon">☕</span>
+                        <span>hello.java</span>
+                    </div>
+                    <div class="file-item" data-file="hello.cpp" data-lang="cpp">
+                        <span class="file-icon">⚡</span>
+                        <span>hello.cpp</span>
+                    </div>
+                    <div class="file-item" data-file="hello.cs" data-lang="csharp">
+                        <span class="file-icon">🎮</span>
+                        <span>hello.cs</span>
+                    </div>
+                    <div class="file-item" data-file="hello.go" data-lang="go">
+                        <span class="file-icon">🔵</span>
+                        <span>hello.go</span>
+                    </div>
+                    <div class="file-item" data-file="hello.rs" data-lang="rust">
+                        <span class="file-icon">🦀</span>
+                        <span>hello.rs</span>
+                    </div>
+                    <div class="file-item" data-file="hello.php" data-lang="php">
+                        <span class="file-icon">🐘</span>
+                        <span>hello.php</span>
+                    </div>
+                    <div class="file-item" data-file="hello.rb" data-lang="ruby">
+                        <span class="file-icon">💎</span>
+                        <span>hello.rb</span>
+                    </div>
+                    <div class="file-item" data-file="hello.swift" data-lang="swift">
+                        <span class="file-icon">🍎</span>
+                        <span>hello.swift</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor Area -->
+            <div class="editor-area">
+                <!-- Breadcrumb -->
+                <div class="breadcrumb">
+                    <div class="breadcrumb-item">
+                        <span>Practice Files</span>
+                        <span class="breadcrumb-separator">›</span>
+                        <span id="currentFileName">hello.py</span>
+                    </div>
+                </div>
+
+                <!-- Tab Bar -->
+                <div class="tab-bar" id="tabBar">
+                    <div class="tab active" data-file="hello.py">
+                        <span class="tab-icon">🐍</span>
+                        <span>hello.py</span>
+                        <span class="tab-close">×</span>
+                    </div>
+                </div>
+
+                <!-- Monaco Editor -->
+                <div class="monaco-editor-wrapper">
+                    <div id="monaco-editor"></div>
+                </div>
+            </div>
+
+            <!-- AI Chat Panel -->
+            <div class="ai-chat-panel" id="aiChatPanel" style="display: none;">
+                <div class="chat-header">
+                    <div class="chat-header-left">
+                        <div class="ai-indicator"></div>
+                        <span>AI Assistant</span>
+                    </div>
+                    <i class="fas fa-times chat-close" id="closeChatBtn"></i>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-message">
+                        <div class="message-header">
+                            <div class="message-avatar ai">🤖</div>
+                            <span>MindWave AI</span>
+                        </div>
+                        <div class="message-content">
+                            Hi! I'm your AI coding assistant! 👋<br><br>
+                            I can help you with:<br>
+                            • Explaining code concepts<br>
+                            • Debugging errors<br>
+                            • Suggesting improvements<br>
+                            • Writing code snippets<br><br>
+                            Just ask me anything!
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <textarea class="chat-input" id="chatInput" placeholder="Ask me anything about coding..."
+                        rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Panel (Terminal) -->
+        <div class="bottom-panel">
+            <div class="panel-header">
+                <div class="panel-tabs">
+                    <div class="panel-tab active">
+                        <i class="fas fa-terminal" style="margin-right: 6px;"></i>
+                        Terminal
+                    </div>
+                    <div class="panel-tab">
+                        <i class="fas fa-list" style="margin-right: 6px;"></i>
+                        Output
+                    </div>
+                    <div class="panel-tab">
+                        <i class="fas fa-bug" style="margin-right: 6px;"></i>
+                        Debug Console
+                    </div>
+                </div>
+                <div class="panel-actions">
+                    <i class="fas fa-plus panel-action" title="New Terminal"></i>
+                    <i class="fas fa-trash panel-action" title="Kill Terminal"></i>
+                    <i class="fas fa-chevron-down panel-action" title="Toggle Panel"></i>
+                </div>
+            </div>
+            <div class="terminal-content" id="terminal">
+                <div class="terminal-line">
+                    <span class="terminal-prompt">MindWave Code Editor v1.0.0</span>
+                </div>
+                <div class="terminal-line">
+                    <span style="color: #888;">Type your code above and click Run to execute! 🚀</span>
+                </div>
+                <div class="terminal-line"></div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <div class="status-item">
+                    <i class="fas fa-code-branch"></i>
+                    <span>main</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>0</span>
+                    <i class="fas fa-times-circle"></i>
+                    <span>0</span>
+                </div>
+            </div>
+            <div class="status-right">
+                <div class="status-item">
+                    <span>Ln 1, Col 1</span>
+                </div>
+                <div class="status-item">
+                    <span>Spaces: 4</span>
+                </div>
+                <div class="status-item">
+                    <span>UTF-8</span>
+                </div>
+                <div class="status-item" id="statusLanguage">
+                    <span>Python</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Run Button -->
+        <button class="run-button" id="runButton">
+            <i class="fas fa-play"></i>
+            Run Code
+        </button>
+    </div>
+
+    <script src="antigravity-editor.js"></script>
+</body>
+
+</html>

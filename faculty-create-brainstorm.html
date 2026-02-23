@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Brainstorm Board – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        if (!checkAdminAuth()) {
+            // Will redirect if not authenticated
+        }
+    </script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <!-- Back Button -->
+                <div style="margin-bottom: 32px;">
+                    <button class="secondary-btn" id="backBtn"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
+                        Back</button>
+                </div>
+
+                <!-- Page Header -->
+                <div style="text-align: center; margin-bottom: 48px;">
+                    <div
+                        style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-bottom: 12px;">
+                        <h1 style="font-size: 36px; font-weight: 700; color: #f5f7ff; margin: 0;">💡 Create Brainstorm
+                            Board</h1>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Board</button>
+                    </div>
+                    <p style="color: #9ea4b6; font-size: 16px; margin: 0;">Collaborative digital sticky notes for group
+                        brainstorming and idea collection</p>
+                </div>
+
+                <!-- Brainstorm Configuration -->
+                <div class="grid two">
+                    <section class="panel">
+                        <h2>⚙️ Board Settings</h2>
+                        <form id="brainstormForm">
+                            <div>
+                                <label for="boardTitle">Board Title</label>
+                                <input type="text" id="boardTitle" placeholder="e.g., Project Ideas Brainstorm"
+                                    required>
+                            </div>
+
+                            <div>
+                                <label for="promptText">Prompt/Question</label>
+                                <textarea id="promptText" rows="3"
+                                    placeholder="e.g., What features should we add to our app?" required></textarea>
+                            </div>
+
+                            <div>
+                                <label for="timeLimit">Time Limit (minutes, optional)</label>
+                                <input type="number" id="timeLimit" placeholder="e.g., 10" min="1" max="60">
+                                <small style="color: #9ea4b6; display: block; margin-top: 4px;">Leave empty for no time
+                                    limit</small>
+                            </div>
+
+                            <div style="display: flex; gap: 16px; flex-direction: column;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="allowAnonymous" checked>
+                                    <span>Allow anonymous ideas</span>
+                                </label>
+
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="allowVoting" checked>
+                                    <span>Enable voting on ideas</span>
+                                </label>
+
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="showRealTime" checked>
+                                    <span>Show ideas in real-time</span>
+                                </label>
+                            </div>
+
+                            <div>
+                                <label for="maxIdeas">Max Ideas Per Student (optional)</label>
+                                <input type="number" id="maxIdeas" placeholder="e.g., 5" min="1" max="20">
+                                <small style="color: #9ea4b6; display: block; margin-top: 4px;">Leave empty for
+                                    unlimited</small>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Live Preview -->
+                    <section class="panel">
+                        <h2>👁️ Student View Preview</h2>
+                        <div id="previewContainer"
+                            style="background: var(--card-darker); border-radius: 20px; padding: 40px; min-height: 500px;">
+                            <h3 id="previewTitle"
+                                style="font-size: 24px; margin-bottom: 16px; color: #f5f7ff; text-align: center;">
+                                Your brainstorm board will appear here</h3>
+                            <p id="previewPrompt"
+                                style="color: #9ea4b6; text-align: center; margin-bottom: 32px; min-height: 24px;"></p>
+
+                            <div id="stickyNotesPreview"
+                                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                                <!-- Sample sticky notes -->
+                                <div
+                                    style="background: linear-gradient(135deg, #FFE66D 0%, #FFC93C 100%); padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); min-height: 120px; position: relative;">
+                                    <p style="color: #1E2433; font-size: 14px; margin-bottom: 8px;">Add dark mode
+                                        support</p>
+                                    <div style="position: absolute; bottom: 12px; right: 12px; color: #1E2433;">👍 3
+                                    </div>
+                                </div>
+                                <div
+                                    style="background: linear-gradient(135deg, #A8E6CF 0%, #7FD8BE 100%); padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); min-height: 120px; position: relative;">
+                                    <p style="color: #1E2433; font-size: 14px; margin-bottom: 8px;">Better search
+                                        functionality</p>
+                                    <div style="position: absolute; bottom: 12px; right: 12px; color: #1E2433;">👍 5
+                                    </div>
+                                </div>
+                                <div
+                                    style="background: linear-gradient(135deg, #FFB6C1 0%, #FF9AA2 100%); padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); min-height: 120px; position: relative;">
+                                    <p style="color: #1E2433; font-size: 14px; margin-bottom: 8px;">Mobile app version
+                                    </p>
+                                    <div style="position: absolute; bottom: 12px; right: 12px; color: #1E2433;">👍 7
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="primary-btn" style="width: 100%;">+ Add Your Idea</button>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="loading-spinner.js"></script>
+    <script src="faculty-create-brainstorm.js"></script>
+</body>
+
+</html>

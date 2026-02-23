@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Activities – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 48px 24px;">
+            <!-- Back Button -->
+            <div style="margin-bottom: 32px;">
+                <button class="secondary-btn" id="backBtn"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
+                    Back to Dashboard</button>
+            </div>
+
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 48px;">
+                <div style="font-size: 64px; margin-bottom: 16px;">🎮</div>
+                <h1 style="font-size: 42px; font-weight: 700; color: #f5f7ff; margin-bottom: 12px;">
+                    Live Activities
+                </h1>
+                <p style="color: #9ea4b6; font-size: 18px;">
+                    Interactive activities from your instructors
+                </p>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div style="display: flex; gap: 12px; margin-bottom: 32px; justify-content: center; flex-wrap: wrap;">
+                <button class="filter-tab active" data-filter="all"
+                    style="padding: 10px 20px; background: rgba(0, 217, 255, 0.1); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 8px; color: #00d9ff; cursor: pointer; font-weight: 600;">
+                    All Activities
+                </button>
+                <button class="filter-tab" data-filter="quiz"
+                    style="padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600;">
+                    Quizzes
+                </button>
+                <button class="filter-tab" data-filter="poll"
+                    style="padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600;">
+                    Polls
+                </button>
+                <button class="filter-tab" data-filter="puzzle"
+                    style="padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600;">
+                    Puzzles
+                </button>
+                <button class="filter-tab" data-filter="slide"
+                    style="padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; font-weight: 600;">
+                    Slides
+                </button>
+            </div>
+
+            <!-- Activities Grid -->
+            <div id="activitiesGrid"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+                <!-- Loading State -->
+                <div id="loadingState" style="grid-column: 1 / -1; text-align: center; padding: 64px 24px;">
+                    <div class="spinner" style="margin: 0 auto 16px;"></div>
+                    <p style="color: #9ea4b6;">Loading activities...</p>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" style="display: none; text-align: center; padding: 64px 24px; grid-column: 1 / -1;">
+                <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.5;">📭</div>
+                <h3 style="color: #f5f7ff; margin-bottom: 8px;">No Activities Yet</h3>
+                <p style="color: #9ea4b6;">Your instructors haven't posted any activities yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .filter-tab:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            transition: all 0.2s;
+        }
+
+        .filter-tab.active {
+            background: rgba(0, 217, 255, 0.1) !important;
+            border-color: rgba(0, 217, 255, 0.3) !important;
+            color: #00d9ff !important;
+        }
+
+        .activity-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 217, 255, 0.15);
+            border-color: rgba(0, 217, 255, 0.3);
+        }
+
+        .activity-type-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #00d9ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <script src="loading-spinner.js"></script>
+    <script src="student-live-activity.js"></script>
+</body>
+
+</html>

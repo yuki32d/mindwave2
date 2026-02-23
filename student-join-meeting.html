@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Meeting | MindWave</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .join-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .join-container h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .join-container p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+            font-weight: bold;
+            transition: border-color 0.3s;
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .join-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .join-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .join-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="join-container">
+        <div class="icon">🎥</div>
+        <h1>Join Live Meeting</h1>
+        <p>Enter the 6-digit meeting code shared by your faculty</p>
+
+        <input type="text" id="meetingCodeInput" class="code-input" placeholder="000000" maxlength="6"
+            pattern="[0-9]{6}">
+
+        <button id="joinBtn" class="join-btn">Join Meeting</button>
+
+        <a href="homepage.html" class="back-link">← Back to Dashboard</a>
+    </div>
+
+    <script>
+        const codeInput = document.getElementById('meetingCodeInput');
+        const joinBtn = document.getElementById('joinBtn');
+
+        // Auto-focus on input
+        codeInput.focus();
+
+        // Only allow numbers
+        codeInput.addEventListener('input', function (e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+
+            // Enable button only if 6 digits entered
+            joinBtn.disabled = this.value.length !== 6;
+        });
+
+        // Join on Enter key
+        codeInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && this.value.length === 6) {
+                joinMeeting();
+            }
+        });
+
+        // Join button click
+        joinBtn.addEventListener('click', joinMeeting);
+
+        function joinMeeting() {
+            const code = codeInput.value.trim();
+
+            if (code.length !== 6) {
+                alert('Please enter a valid 6-digit meeting code');
+                return;
+            }
+
+            // Redirect to student meeting page with code
+            window.location.href = `student-live-meeting.html?code=${code}`;
+        }
+
+        // Disable button initially
+        joinBtn.disabled = true;
+    </script>
+</body>
+
+</html>

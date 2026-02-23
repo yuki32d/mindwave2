@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login – Mindwave</title>
+    <style>
+        :root {
+            /* Admin Theme Colors - More professional */
+            --cyan-bright: #00D9FF;
+            --purple-bright: #8B5CF6;
+            --admin-gold: #F59E0B;
+            --admin-blue: #3B82F6;
+            --bg-deep: #1A1F3A;
+            --card-dark: #1E2433;
+            --text-white: #FFFFFF;
+            --text-gray: #9CA3AF;
+
+            /* Shadows */
+            --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.35);
+            --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.45);
+            --shadow-glow: 0 0 40px rgba(245, 158, 11, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            color: var(--text-white);
+        }
+
+        /* Animated Background */
+        .background-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('../background.jpg') center/cover no-repeat fixed;
+            filter: brightness(0.4) blur(2px);
+            transform: scale(1.1);
+            animation: subtleZoom 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes subtleZoom {
+            0% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1.15);
+            }
+        }
+
+        .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                    rgba(245, 158, 11, 0.15) 0%,
+                    rgba(59, 130, 246, 0.15) 50%,
+                    rgba(26, 31, 58, 0.8) 100%);
+            pointer-events: none;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(245, 158, 11, 0.4);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+
+        /* Main Container */
+        .auth-container {
+            position: relative;
+            z-index: 1;
+            width: min(950px, 92%);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl), var(--shadow-glow);
+            backdrop-filter: blur(20px);
+            transform: translateZ(50px);
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) translateZ(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) translateZ(50px);
+            }
+        }
+
+        /* Left Hero Section - Admin Theme */
+        .auth-hero {
+            padding: 50px 40px;
+            background: linear-gradient(160deg,
+                    rgba(245, 158, 11, 0.2) 0%,
+                    rgba(59, 130, 246, 0.2) 100%);
+            backdrop-filter: blur(40px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle,
+                    rgba(245, 158, 11, 0.1) 0%,
+                    transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+        }
+
+        .auth-hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-tag {
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            font-size: 11px;
+            color: var(--admin-gold);
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+
+        .auth-hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text-white) 0%, var(--admin-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .auth-hero p {
+            color: var(--text-gray);
+            line-height: 1.7;
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature-list li:hover {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: var(--admin-gold);
+            transform: translateX(8px);
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--admin-gold), var(--admin-blue));
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        /* Right Login Card */
+        .auth-card {
+            padding: 50px 40px;
+            background: rgba(30, 36, 51, 0.95);
+            backdrop-filter: blur(40px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .auth-card h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .auth-card-subtitle {
+            color: var(--text-gray);
+            margin-bottom: 32px;
+            font-size: 15px;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-white);
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--admin-gold);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Login Button - Admin Theme */
+        .login-btn {
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, var(--admin-gold) 0%, var(--admin-blue) 100%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+            margin-bottom: 24px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 32px rgba(245, 158, 11, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Auth Links */
+        .auth-links {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .auth-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .auth-links a:hover {
+            color: var(--admin-gold);
+        }
+
+        .back-link {
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .back-link a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: var(--admin-gold);
+        }
+
+        /* Error Message */
+        .error-message {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+
+            .auth-hero {
+                display: none;
+            }
+
+            .auth-card {
+                padding: 40px 32px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 32px 24px;
+            }
+
+            .auth-card h2 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <!-- Animated Background -->
+    <div class="background-wrapper">
+        <div class="background-image"></div>
+        <div class="gradient-overlay"></div>
+        <div class="particles">
+            <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+            <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
+            <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+            <div class="particle" style="left: 40%; animation-delay: 1s;"></div>
+            <div class="particle" style="left: 50%; animation-delay: 3s;"></div>
+            <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+            <div class="particle" style="left: 70%; animation-delay: 2.5s;"></div>
+            <div class="particle" style="left: 80%; animation-delay: 4.5s;"></div>
+            <div class="particle" style="left: 90%; animation-delay: 1.5s;"></div>
+        </div>
+    </div>
+
+    <!-- Main Auth Container -->
+    <div class="auth-container">
+        <!-- Left Hero Section -->
+        <section class="auth-hero">
+            <div class="auth-hero-content">
+                <span class="brand-tag">👨‍💼 ADMIN PORTAL</span>
+                <h1>Welcome back, Admin!</h1>
+                <p>Create courses, manage students, build AI-powered games, and analyze learning outcomes.</p>
+                <ul class="feature-list">
+                    <li>Create & manage courses</li>
+                    <li>Build AI-powered learning games</li>
+                    <li>Advanced analytics & insights</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Right Login Card -->
+        <section class="auth-card">
+            <div>
+                <h2>Admin Sign in</h2>
+                <p class="auth-card-subtitle">Use your admin email to continue.</p>
+            </div>
+
+            <form id="login-form">
+                <!-- Email Input -->
+                <div class="form-group">
+                    <label for="username">Email</label>
+                    <input type="text" id="username" placeholder="name.mca@cmrit.ac.in" required>
+                </div>
+
+                <!-- Password Input -->
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+
+                <!-- Error Message -->
+                <div class="error-message" id="error-message"></div>
+
+                <!-- Login Button -->
+                <button type="submit" class="login-btn">Login →</button>
+
+                <!-- Auth Links -->
+                <div class="auth-links">
+                    <a href="admin-forgot-password.html">Forgot password?</a>
+                    <a href="admin-signup.html">Create account</a>
+                </div>
+
+                <!-- Back Link -->
+                <div class="back-link">
+                    <a href="website-login.html">← Back to role selection</a>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        // Authenticate and redirect to admin dashboard
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, role: 'admin' })
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    // Store authentication data in localStorage
+                    if (data.user) {
+                        localStorage.setItem('role', data.user.role);
+                        localStorage.setItem('email', data.user.email);
+                        localStorage.setItem('token', data.token || 'authenticated');
+                    }
+                    // Redirect to admin dashboard
+                    window.location.href = '../admin.html';
+                } else {
+                    errorMessage.textContent = data.message || 'Invalid credentials';
+                    errorMessage.classList.add('show');
+                }
+            } catch (error) {
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.classList.add('show');
+            }
+        });
+    </script></body>
+
+</html>

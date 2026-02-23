@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Crossword Puzzle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .crossword-container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .upload-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+        }
+
+        .upload-section input[type="file"] {
+            margin-top: 10px;
+            padding: 10px;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .puzzle-wrapper {
+            position: relative;
+            display: inline-block;
+            border: 3px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #puzzleImage {
+            display: block;
+            max-width: 100%;
+        }
+
+        #overlayCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .controls button {
+            padding: 12px 24px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .controls button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls button.clear {
+            background-color: #f44336;
+        }
+
+        .controls button.clear:hover {
+            background-color: #da190b;
+        }
+
+        .controls button.calibrate {
+            background-color: #ff9800;
+        }
+
+        .controls button.calibrate:hover {
+            background-color: #f57c00;
+        }
+
+        .calibration-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .calibration-panel.active {
+            display: block;
+        }
+
+        .calibration-panel h3 {
+            margin-bottom: 15px;
+            color: #e65100;
+        }
+
+        .calibration-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-group label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .control-group input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #1976D2;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+
+        .status-bar {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="crossword-container">
+        <h1>📝 Interactive Crossword Puzzle</h1>
+
+        <div class="upload-section">
+            <p><strong>📤 Upload your crossword image:</strong></p>
+            <input type="file" id="imageUpload" accept="image/*">
+        </div>
+
+        <div id="puzzleContainer" style="display: none; text-align: center;">
+            <div class="puzzle-wrapper" id="puzzleWrapper">
+                <img id="puzzleImage" alt="Crossword Puzzle">
+                <canvas id="overlayCanvas"></canvas>
+            </div>
+
+            <div class="controls">
+                <button onclick="toggleCalibration()" class="calibrate">⚙️ Calibrate Grid</button>
+                <button onclick="clearAll()" class="clear">🗑️ Clear All</button>
+                <button onclick="downloadImage()">💾 Save Progress</button>
+            </div>
+
+            <div class="calibration-panel" id="calibrationPanel">
+                <h3>🎯 Grid Calibration</h3>
+                <p style="margin-bottom: 10px; color: #666;">Adjust these values to align the grid with your crossword
+                    cells:</p>
+
+                <div class="calibration-controls">
+                    <div class="control-group">
+                        <label>Cell Size (px):</label>
+                        <input type="number" id="cellSize" value="31" step="0.5" min="10" max="100">
+                    </div>
+                    <div class="control-group">
+                        <label>Grid Offset X (px):</label>
+                        <input type="number" id="offsetX" value="0" step="1" min="-200" max="200">
+                    </div>
+                    <div class="control-group">
+                        <label>Grid Offset Y (px):</label>
+                        <input type="number" id="offsetY" value="0" step="1" min="-200" max="200">
+                    </div>
+                    <div class="control-group">
+                        <label>Font Size (%):</label>
+                        <input type="number" id="fontSize" value="60" step="5" min="30" max="100">
+                    </div>
+                </div>
+
+                <div class="status-bar" id="statusBar">
+                    Click on any white cell in the crossword to start typing!
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 How to Use:</h3>
+            <ul>
+                <li><strong>Step 1:</strong> Upload your crossword image using the button above</li>
+                <li><strong>Step 2:</strong> Click "Calibrate Grid" and adjust values until grid aligns perfectly</li>
+                <li><strong>Step 3:</strong> Click directly on any white cell in the crossword image</li>
+                <li><strong>Step 4:</strong> Type your answer - it appears on the image!</li>
+                <li><strong>Navigation:</strong> Use arrow keys (←↑→↓) to move between cells</li>
+                <li><strong>Editing:</strong> Press Backspace to delete, Delete to clear current cell</li>
+                <li><strong>Save:</strong> Click "Save Progress" to download your completed crossword</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const imageUpload = document.getElementById('imageUpload');
+        const puzzleContainer = document.getElementById('puzzleContainer');
+        const puzzleImage = document.getElementById('puzzleImage');
+        const canvas = document.getElementById('overlayCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let cellSize = 31;
+        let offsetX = 0;
+        let offsetY = 0;
+        let fontSize = 60;
+        let selectedCell = null;
+        let answers = {};
+
+        // Setup calibration inputs
+        document.getElementById('cellSize').addEventListener('input', function () {
+            cellSize = parseFloat(this.value);
+            redrawCanvas();
+        });
+
+        document.getElementById('offsetX').addEventListener('input', function () {
+            offsetX = parseFloat(this.value);
+            redrawCanvas();
+        });
+
+        document.getElementById('offsetY').addEventListener('input', function () {
+            offsetY = parseFloat(this.value);
+            redrawCanvas();
+        });
+
+        document.getElementById('fontSize').addEventListener('input', function () {
+            fontSize = parseFloat(this.value);
+            redrawCanvas();
+        });
+
+        // Handle image upload
+        imageUpload.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    puzzleImage.src = event.target.result;
+                    puzzleImage.onload = function () {
+                        initializePuzzle();
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function initializePuzzle() {
+            puzzleContainer.style.display = 'block';
+
+            // Set canvas size to match image
+            canvas.width = puzzleImage.width;
+            canvas.height = puzzleImage.height;
+
+            // Auto-detect cell size
+            cellSize = Math.round(puzzleImage.width / 22);
+            document.getElementById('cellSize').value = cellSize;
+
+            redrawCanvas();
+        }
+
+        function getCellFromClick(x, y) {
+            const col = Math.floor((x - offsetX) / cellSize);
+            const row = Math.floor((y - offsetY) / cellSize);
+            return { row, col };
+        }
+
+        function getCellCenter(row, col) {
+            const x = col * cellSize + offsetX + cellSize / 2;
+            const y = row * cellSize + offsetY + cellSize / 2;
+            return { x, y };
+        }
+
+        function isWhiteCell(x, y) {
+            // Check if the pixel at this location is white/light (not black)
+            if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) return false;
+
+            const pixel = ctx.getImageData(x, y, 1, 1).data;
+            // White or light gray cells
+            return pixel[0] > 200 && pixel[1] > 200 && pixel[2] > 200;
+        }
+
+        function redrawCanvas() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid lines (semi-transparent)
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.2)';
+            ctx.lineWidth = 1;
+
+            // Vertical lines
+            for (let col = 0; col < 30; col++) {
+                const x = col * cellSize + offsetX;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+
+            // Horizontal lines
+            for (let row = 0; row < 30; row++) {
+                const y = row * cellSize + offsetY;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Draw answers
+            const fontSizePx = Math.floor(cellSize * (fontSize / 100));
+            ctx.font = `bold ${fontSizePx}px Arial`;
+            ctx.fillStyle = '#000';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let key in answers) {
+                const [row, col] = key.split('-').map(Number);
+                const { x, y } = getCellCenter(row, col);
+                ctx.fillText(answers[key], x, y);
+            }
+
+            // Highlight selected cell
+            if (selectedCell) {
+                const { x, y } = getCellCenter(selectedCell.row, selectedCell.col);
+
+                ctx.fillStyle = 'rgba(255, 255, 0, 0.4)';
+                ctx.fillRect(
+                    selectedCell.col * cellSize + offsetX + 2,
+                    selectedCell.row * cellSize + offsetY + 2,
+                    cellSize - 4,
+                    cellSize - 4
+                );
+
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(
+                    selectedCell.col * cellSize + offsetX + 2,
+                    selectedCell.row * cellSize + offsetY + 2,
+                    cellSize - 4,
+                    cellSize - 4
+                );
+            }
+        }
+
+        // Handle canvas clicks
+        canvas.addEventListener('click', function (e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const cell = getCellFromClick(x, y);
+            const { x: centerX, y: centerY } = getCellCenter(cell.row, cell.col);
+
+            // Check if clicked cell is white
+            if (isWhiteCell(centerX, centerY)) {
+                selectedCell = cell;
+                redrawCanvas();
+                updateStatus(`Selected: Row ${cell.row}, Col ${cell.col}`);
+            }
+        });
+
+        // Handle keyboard input
+        document.addEventListener('keydown', function (e) {
+            if (!selectedCell) return;
+
+            const key = e.key.toUpperCase();
+            const cellKey = `${selectedCell.row}-${selectedCell.col}`;
+
+            if (key.length === 1 && key.match(/[A-Z0-9]/)) {
+                answers[cellKey] = key;
+                redrawCanvas();
+                moveToNextCell('right');
+                e.preventDefault();
+            } else if (e.key === 'Backspace') {
+                delete answers[cellKey];
+                redrawCanvas();
+                moveToNextCell('left');
+                e.preventDefault();
+            } else if (e.key === 'Delete') {
+                delete answers[cellKey];
+                redrawCanvas();
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                moveToNextCell('right');
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                moveToNextCell('left');
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown') {
+                moveToNextCell('down');
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp') {
+                moveToNextCell('up');
+                e.preventDefault();
+            }
+        });
+
+        function moveToNextCell(direction) {
+            if (!selectedCell) return;
+
+            let newRow = selectedCell.row;
+            let newCol = selectedCell.col;
+
+            if (direction === 'right') newCol++;
+            else if (direction === 'left') newCol--;
+            else if (direction === 'down') newRow++;
+            else if (direction === 'up') newRow--;
+
+            // Check if new cell is valid
+            const { x, y } = getCellCenter(newRow, newCol);
+            if (isWhiteCell(x, y)) {
+                selectedCell = { row: newRow, col: newCol };
+                redrawCanvas();
+            }
+        }
+
+        function toggleCalibration() {
+            const panel = document.getElementById('calibrationPanel');
+            panel.classList.toggle('active');
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to clear all answers?')) {
+                answers = {};
+                selectedCell = null;
+                redrawCanvas();
+                updateStatus('All answers cleared!');
+            }
+        }
+
+        function downloadImage() {
+            // Create final canvas with image and answers
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = puzzleImage.width;
+            finalCanvas.height = puzzleImage.height;
+            const finalCtx = finalCanvas.getContext('2d');
+
+            // Draw original image
+            finalCtx.drawImage(puzzleImage, 0, 0);
+
+            // Draw answers
+            const fontSizePx = Math.floor(cellSize * (fontSize / 100));
+            finalCtx.font = `bold ${fontSizePx}px Arial`;
+            finalCtx.fillStyle = '#000';
+            finalCtx.textAlign = 'center';
+            finalCtx.textBaseline = 'middle';
+
+            for (let key in answers) {
+                const [row, col] = key.split('-').map(Number);
+                const { x, y } = getCellCenter(row, col);
+                finalCtx.fillText(answers[key], x, y);
+            }
+
+            // Download
+            const link = document.createElement('a');
+            link.download = 'crossword-completed.png';
+            link.href = finalCanvas.toDataURL();
+            link.click();
+
+            updateStatus('Crossword saved successfully!');
+        }
+
+        function updateStatus(message) {
+            const statusBar = document.getElementById('statusBar');
+            statusBar.textContent = message;
+            setTimeout(() => {
+                statusBar.textContent = 'Click on any white cell in the crossword to start typing!';
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

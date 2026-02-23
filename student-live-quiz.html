@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Quiz - MindWave</title>
+    <link rel="stylesheet" href="../3d-depth-design.css">
+    <link rel="stylesheet" href="marketing-site/css/live-quiz.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body data-theme="dark">
+    <!-- Main Content -->
+    <main class="quiz-play-container">
+        <!-- Waiting Room -->
+        <section class="waiting-room" id="waitingRoom">
+            <div class="waiting-card">
+                <div class="quiz-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h1>Get Ready!</h1>
+                <p>Waiting for your teacher to start the quiz...</p>
+                <div class="pulse-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Play -->
+        <section class="quiz-play" id="quizPlay" style="display: none;">
+            <!-- Question Header -->
+            <div class="question-header">
+                <div class="question-info">
+                    <span class="question-number" id="questionNumber">Question 1 of 5</span>
+                    <span class="your-score">Score: <span id="currentScore">0</span></span>
+                </div>
+                <div class="timer-container">
+                    <div class="timer-circle" id="timerCircle">
+                        <span id="timeRemaining">15</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Display -->
+            <div class="question-display">
+                <h2 id="questionText">What is 2 + '2' in JavaScript?</h2>
+            </div>
+
+            <!-- Answer Grid -->
+            <div class="answer-grid" id="answerGrid">
+                <button class="answer-btn red" data-index="0">
+                    <div class="answer-letter">A</div>
+                    <div class="answer-text" id="answerA">For loop</div>
+                </button>
+                <button class="answer-btn blue" data-index="1">
+                    <div class="answer-letter">B</div>
+                    <div class="answer-text" id="answerB">While loop</div>
+                </button>
+                <button class="answer-btn yellow" data-index="2">
+                    <div class="answer-letter">C</div>
+                    <div class="answer-text" id="answerC">Do-while loop</div>
+                </button>
+                <button class="answer-btn green" data-index="3">
+                    <div class="answer-letter">D</div>
+                    <div class="answer-text" id="answerD">If-else statement</div>
+                </button>
+            </div>
+
+            <!-- Feedback Message -->
+            <div class="answer-feedback" id="answerFeedback" style="display: none;">
+                <div class="feedback-icon" id="feedbackIcon"></div>
+                <div class="feedback-text" id="feedbackText"></div>
+                <div class="points-earned" id="pointsEarned"></div>
+            </div>
+        </section>
+
+        <!-- Results Screen -->
+        <section class="quiz-results" id="quizResults" style="display: none;">
+            <div class="results-card">
+                <div class="trophy-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h1>Quiz Complete!</h1>
+                <div class="final-score">
+                    <div class="score-label">Your Score</div>
+                    <div class="score-value" id="finalScore">0</div>
+                    <div class="score-details">
+                        <span id="correctAnswers">0</span> correct out of <span id="totalQuestions">0</span>
+                    </div>
+                </div>
+
+                <!-- Personal Leaderboard Position -->
+                <div class="rank-display">
+                    <div class="rank-label">Your Rank</div>
+                    <div class="rank-value" id="yourRank">#1</div>
+                </div>
+
+                <!-- Top 3 Podium -->
+                <div class="podium-container">
+                    <h3><i class="fas fa-trophy"></i> Top 3</h3>
+                    <div class="podium" id="podium">
+                        <!-- Podium will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="window.location.href='student-community.html'">
+                    <i class="fas fa-home"></i> Back to Community
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script src="marketing-site/js/student-quiz.js"></script></body>
+
+</html>

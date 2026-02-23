@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave – Events</title>
+    <meta name="description" content="Upcoming assignments, quizzes, exams and meetings for MindWave students.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="student-theme.css">
+    <script>
+        (function () {
+            const t = localStorage.getItem('mw_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <style>
+        /* ── Page-level layout ── */
+        .evt-greeting {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .evt-greeting h1 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .evt-greeting p {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* ── Stats strip ── */
+        .evt-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .evt-stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .evt-stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .evt-stat-val {
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .evt-stat-lbl {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        /* ── Filter + Search Row ── */
+        .evt-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .evt-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 16px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .evt-chip:hover {
+            border-color: var(--accent-2);
+        }
+
+        .evt-chip.active {
+            background: var(--accent-2);
+            color: #fff;
+            border-color: var(--accent-2);
+        }
+
+        .evt-chip .chip-count {
+            display: inline-block;
+            background: rgba(255, 255, 255, .15);
+            padding: 1px 7px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .evt-range-toggle {
+            margin-left: auto;
+            display: flex;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .evt-range-btn {
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .evt-range-btn.active {
+            background: var(--accent-2);
+            color: #fff;
+        }
+
+        /* ── Main two-column layout ── */
+        .evt-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+
+        @media(max-width:920px) {
+            .evt-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .evt-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* ── Happening Now Hero ── */
+        .evt-hero {
+            background: linear-gradient(135deg, rgba(239, 68, 68, .12), rgba(245, 158, 11, .08));
+            border: 1px solid rgba(239, 68, 68, .35);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            animation: heroPulse 3s infinite;
+        }
+
+        @keyframes heroPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, .15);
+            }
+
+            50% {
+                box-shadow: 0 0 20px 4px rgba(239, 68, 68, .08);
+            }
+        }
+
+        .evt-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: #ef4444;
+            margin-bottom: 6px;
+        }
+
+        .evt-hero-badge .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulseDot 1.5s infinite;
+        }
+
+        @keyframes pulseDot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: .4;
+                transform: scale(1.3);
+            }
+        }
+
+        .evt-hero-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .evt-hero-meta {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .evt-hero-timer {
+            text-align: right;
+        }
+
+        .evt-hero-time {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ef4444;
+        }
+
+        .evt-hero-time-label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .evt-hero-action {
+            margin-top: 8px;
+        }
+
+        .evt-hero-action .mw-btn {
+            font-size: 12px;
+            padding: 6px 18px;
+            border-radius: 8px;
+        }
+
+        /* ── Event Cards ── */
+        .evt-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .evt-day-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            margin: 8px 0 4px;
+        }
+
+        .evt-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all .25s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .evt-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+            border-color: var(--accent-2);
+        }
+
+        .evt-card.urgent {
+            border-left: 3px solid #ef4444;
+        }
+
+        .evt-card-date {
+            min-width: 52px;
+            text-align: center;
+        }
+
+        .evt-card-day {
+            font-size: 24px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .evt-card-mon {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .evt-card-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .evt-type-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            padding: 2px 10px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
+
+        .evt-type-badge.assignment {
+            background: rgba(245, 158, 11, .15);
+            color: var(--orange);
+        }
+
+        .evt-type-badge.quiz {
+            background: rgba(239, 68, 68, .15);
+            color: #ef4444;
+        }
+
+        .evt-type-badge.exam {
+            background: rgba(168, 85, 247, .15);
+            color: #a78bfa;
+        }
+
+        .evt-type-badge.meeting {
+            background: rgba(59, 130, 246, .15);
+            color: #3b82f6;
+        }
+
+        .evt-type-badge.announcement {
+            background: rgba(34, 197, 94, .15);
+            color: #22c55e;
+        }
+
+        .evt-card-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .evt-card-meta {
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .evt-card-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .evt-card-countdown {
+            text-align: right;
+            min-width: 60px;
+            flex-shrink: 0;
+        }
+
+        .evt-cd-val {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .evt-cd-label {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .evt-cd-val.urgent-color {
+            color: #ef4444;
+        }
+
+        .evt-cd-val.soon-color {
+            color: var(--orange);
+        }
+
+        .evt-cd-val.chill-color {
+            color: var(--accent-2);
+        }
+
+        /* ── Right sidebar: Mini Calendar ── */
+        .evt-cal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .evt-cal-header h3 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .evt-cal-nav {
+            display: flex;
+            gap: 4px;
+        }
+
+        .evt-cal-nav button {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .evt-cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .evt-cal-dow {
+            font-weight: 700;
+            color: var(--muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            padding: 6px 0;
+        }
+
+        .evt-cal-day {
+            padding: 6px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            font-weight: 500;
+            transition: all .15s;
+        }
+
+        .evt-cal-day:hover {
+            background: rgba(99, 102, 241, .1);
+        }
+
+        .evt-cal-day.today {
+            background: var(--accent-2);
+            color: #fff;
+            font-weight: 700;
+            border-radius: 8px;
+        }
+
+        .evt-cal-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--accent-2);
+        }
+
+        .evt-cal-day.today.has-event::after {
+            background: #fff;
+        }
+
+        .evt-cal-day.other-month {
+            color: var(--muted);
+            opacity: .4;
+        }
+
+        /* ── Right sidebar: Today's agenda ── */
+        .evt-agenda-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .evt-agenda-item:last-child {
+            border-bottom: none;
+        }
+
+        .evt-agenda-time {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-2);
+            min-width: 60px;
+        }
+
+        .evt-agenda-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .evt-agenda-text {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .evt-agenda-sub {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* ── Empty state ── */
+        .evt-empty {
+            text-align: center;
+            padding: 60px 0;
+            color: var(--muted);
+        }
+
+        .evt-empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        /* ── Toast notification ── */
+        .evt-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-2);
+            border-radius: 12px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .3);
+            z-index: 9999;
+            animation: toastIn .4s ease-out;
+            max-width: 360px;
+        }
+
+        @keyframes toastIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .evt-toast-icon {
+            font-size: 20px;
+        }
+
+        .evt-toast-title {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .evt-toast-body {
+            font-size: 12px;
+            color: var(--muted);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mw-shell">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon">🌊</div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">BETA</span>
+            </div>
+
+            <nav class="mw-nav-section">
+                <div class="mw-nav-label">Main</div>
+                <a href="homepage.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">⚡</span> Dashboard
+                </a>
+                <a href="student-courses.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">📚</span> My Courses
+                </a>
+                <a href="student-timetable.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">📅</span> Timetable
+                </a>
+                <a href="student-performance.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">📊</span> Performance
+                </a>
+                <a href="student-leaderboard.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">🏆</span> Leaderboard
+                </a>
+            </nav>
+
+            <div class="mw-divider"></div>
+
+            <nav class="mw-nav-section">
+                <div class="mw-nav-label">Engage</div>
+                <a href="student-game.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">🎮</span> Play Games
+                </a>
+                <a href="student-community.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">👥</span> Community
+                </a>
+                <a href="student-achievements.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">🎖️</span> Achievements
+                </a>
+                <a href="student-upcoming-events.html" class="mw-nav-item active">
+                    <span class="mw-nav-icon">📢</span> Events
+                </a>
+            </nav>
+
+            <div class="mw-divider"></div>
+
+            <nav class="mw-nav-section">
+                <div class="mw-nav-label">Tools</div>
+                <a href="student-code-practice.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">💻</span> Code Practice
+                </a>
+                <a href="student-study-recommendations.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">🤖</span> AI Tutor
+                </a>
+                <a href="student-reports.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">📄</span> Reports
+                </a>
+                <a href="student-settings.html" class="mw-nav-item">
+                    <span class="mw-nav-icon">⚙️</span> Settings
+                </a>
+            </nav>
+
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">JB</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Jeeban</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                    <span class="mw-user-more">⋯</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
+
+            <!-- TOPBAR -->
+            <header class="mw-topbar">
+                <div class="mw-breadcrumb">Dashboard / <span>Events</span></div>
+                <div class="mw-search">
+                    <span>🔍</span>
+                    <input type="text" placeholder="Search events…" id="evtSearch">
+                </div>
+                <div class="mw-topbar-actions">
+                    <div class="mw-icon-btn" title="Notifications">🔔</div>
+                    <div class="mw-icon-btn" title="Settings">⚙️</div>
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle light/dark mode"
+                        aria-label="Toggle theme">
+                        <span class="mw-toggle-moon">🌙</span>
+                        <span class="mw-toggle-sun">☀️</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <div class="mw-content">
+
+                <!-- ── Header ── -->
+                <div class="evt-greeting">
+                    <div>
+                        <h1>📢 Events</h1>
+                        <p>Assignments, quizzes, exams, and meetings — all in one place</p>
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <button class="mw-btn mw-btn-ghost" style="font-size:13px;">📅 Sync Calendar</button>
+                    </div>
+                </div>
+
+                <!-- ── Stats Strip ── -->
+                <div class="evt-stats">
+                    <div class="evt-stat-card">
+                        <div class="evt-stat-icon" style="background:rgba(239,68,68,.12);color:#ef4444;">🔥</div>
+                        <div>
+                            <div class="evt-stat-val" style="color:#ef4444;">3</div>
+                            <div class="evt-stat-lbl">Due Today</div>
+                        </div>
+                    </div>
+                    <div class="evt-stat-card">
+                        <div class="evt-stat-icon" style="background:rgba(245,158,11,.12);color:var(--orange);">📋</div>
+                        <div>
+                            <div class="evt-stat-val" style="color:var(--orange);">8</div>
+                            <div class="evt-stat-lbl">This Week</div>
+                        </div>
+                    </div>
+                    <div class="evt-stat-card">
+                        <div class="evt-stat-icon" style="background:rgba(99,102,241,.12);color:var(--accent-2);">📚
+                        </div>
+                        <div>
+                            <div class="evt-stat-val" style="color:var(--accent-2);">5</div>
+                            <div class="evt-stat-lbl">Assignments</div>
+                        </div>
+                    </div>
+                    <div class="evt-stat-card">
+                        <div class="evt-stat-icon" style="background:rgba(34,197,94,.12);color:#22c55e;">✅</div>
+                        <div>
+                            <div class="evt-stat-val" style="color:#22c55e;">12</div>
+                            <div class="evt-stat-lbl">Completed</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Filters ── -->
+                <div class="evt-toolbar">
+                    <div class="evt-chip active">All <span class="chip-count">14</span></div>
+                    <div class="evt-chip">📋 Assignments <span class="chip-count">5</span></div>
+                    <div class="evt-chip">📝 Quizzes <span class="chip-count">3</span></div>
+                    <div class="evt-chip">📚 Exams <span class="chip-count">2</span></div>
+                    <div class="evt-chip">🎥 Meetings <span class="chip-count">3</span></div>
+                    <div class="evt-chip">📢 Announcements <span class="chip-count">1</span></div>
+
+                    <div class="evt-range-toggle">
+                        <button class="evt-range-btn active">Today</button>
+                        <button class="evt-range-btn">This Week</button>
+                        <button class="evt-range-btn">This Month</button>
+                        <button class="evt-range-btn">All</button>
+                    </div>
+                </div>
+
+                <!-- ── Two-column grid ── -->
+                <div class="evt-grid">
+
+                    <!-- LEFT: Event list -->
+                    <div>
+                        <!-- Happening Now Hero -->
+                        <div class="evt-hero">
+                            <div>
+                                <div class="evt-hero-badge">
+                                    <span class="pulse-dot"></span> Happening Now
+                                </div>
+                                <div class="evt-hero-title">Data Structures — Live Quiz</div>
+                                <div class="evt-hero-meta">📍 Room 301 · Prof. Sharma · Computer Science</div>
+                                <div class="evt-hero-action">
+                                    <a href="#" class="mw-btn mw-btn-primary">Join Now →</a>
+                                </div>
+                            </div>
+                            <div class="evt-hero-timer">
+                                <div class="evt-hero-time">45m</div>
+                                <div class="evt-hero-time-label">remaining</div>
+                            </div>
+                        </div>
+
+                        <!-- Today's Events -->
+                        <div class="evt-day-label">📌 Today — Feb 22</div>
+                        <div class="evt-list">
+
+                            <div class="evt-card urgent">
+                                <div class="evt-card-date">
+                                    <div class="evt-card-day" style="color:#ef4444;">22</div>
+                                    <div class="evt-card-mon">FEB</div>
+                                </div>
+                                <div class="evt-card-body">
+                                    <div class="evt-type-badge assignment">Assignment</div>
+                                    <div class="evt-card-title">Mathematics Homework — Chapter 5</div>
+                                    <div class="evt-card-meta">
+                                        <span>🕛 Due: 11:59 PM</span>
+                                        <span>📘 Mathematics</span>
+                                        <span>👤 Prof. Kumar</span>
+                                    </div>
+                                </div>
+                                <div class="evt-card-countdown">
+                                    <div class="evt-cd-val urgent-color">2h</div>
+                                    <div class="evt-cd-label">Left</div>
+                                </div>
+                            </div>
+
+                            <div class="evt-card urgent">
+                                <div class="evt-card-date">
+                                    <div class="evt-card-day" style="color:#ef4444;">22</div>
+                                    <div class="evt-card-mon">FEB</div>
+                                </div>
+                                <div class="evt-card-body">
+                                    <div class="evt-type-badge quiz">Quiz</div>
+                                    <div class="evt-card-title">Science Quiz — Photosynthesis</div>
+                                    <div class="evt-card-meta">
+                                        <span>🕙 10:00 – 10:30 AM</span>
+                                        <span>🔬 Science</span>
+                                        <span>👤 Prof. Rao</span>
+                                    </div>
+                                </div>
+                                <div class="evt-card-countdown">
+                                    <div class="evt-cd-val urgent-color">4h</div>
+                                    <div class="evt-cd-label">Left</div>
+                                </div>
+                            </div>
+
+                            <div class="evt-card">
+                                <div class="evt-card-date">
+                                    <div class="evt-card-day" style="color:var(--accent-2);">22</div>
+                                    <div class="evt-card-mon">FEB</div>
+                                </div>
+                                <div class="evt-card-body">
+                                    <div class="evt-type-badge meeting">Live Meeting</div>
+                                    <div class="evt-card-title">English Literature — Discussion</div>
+                                    <div class="evt-card-meta">
+                                        <span>🕒 3:00 – 4:00 PM</span>
+                                        <span>📕 English</span>
+                                        <span>👤 Prof. Mehta</span>
+                                    </div>
+                                </div>
+                                <div class="evt-card-countdown">
+                                    <div class="evt-cd-val soon-color">6h</div>
+                                    <div class="evt-cd-label">Left</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tomorrow -->
+                        <div class="evt-day-label" style="margin-top:20px;">📅 Tomorrow — Feb 23</div>
+                        <div class="evt-list">
+
+                            <div class="evt-card">
+                                <div class="evt-card-date">
+                                    <div class="evt-card-day" style="color:var(--orange);">23</div>
+                                    <div class="evt-card-mon">FEB</div>
+                                </div>
+                                <div class="evt-card-body">
+                                    <div class="evt-type-badge assignment">Assignment</div>
+                                    <div class="evt-card-title">DBMS ER Diagram — Submission</div>
+                                    <div class="evt-card-meta">
+                                        <span>🕛 Due: 6:00 PM</span>
+                                        <span>📓 DBMS</span>
+                                        <span>👤 Prof. Patel</span>
+                                    </div>
+                                </div>
+                                <div class="evt-card-countdown">
+                                    <div class="evt-cd-val soon-color">1d</div>
+                                    <div class="evt-cd-label">Left</div>
+                                </div>
+                            </div>
+
+                            <div class="evt-card">
+                                <div class="evt-card-date">
+                                    <div class="evt-card-day" style="color:#3b82f6;">23</div>
+                                    <div class="evt-card-mon">FEB</div>
+                                </div>
+                                <div class="evt-card-body">
+                                    <div class="evt-type-badge meeting">Live Meeting</div>
+                                    <div class="evt-card-title">Project Review — Team Alpha</div>
+                                    <div class="evt-card-meta">
+                                        <span>🕑 2:00 – 3:30 PM</span>
+                                        <span>💻 Software Eng</span>
+                                        <span>👤 Prof. Iyer</span>
+                                    </div>
+                                </div>
+                                <div class="evt-card-countdown">
+                                    <div class="evt-cd-val chill-color">1d</div>
+                                    <div class="evt-cd-label">Left</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Later -->
+                        <div class="evt-day-label" style="margin-top:20px;">🗓️ Feb 26 — Wednesday</div>
+                        <div class="evt-list">
+                            <div class="evt-card">
+                                <div class="evt-card-date">
+                                    <div class="evt-card-day" style="color:#a78bfa;">26</div>
+                                    <div class="evt-card-mon">FEB</div>
+                                </div>
+                                <div class="evt-card-body">
+                                    <div class="evt-type-badge exam">Exam</div>
+                                    <div class="evt-card-title">Operating Systems — Mid-Term</div>
+                                    <div class="evt-card-meta">
+                                        <span>🕙 10:00 AM – 12:00 PM</span>
+                                        <span>🏫 Hall A</span>
+                                        <span>📎 Syllabus attached</span>
+                                    </div>
+                                </div>
+                                <div class="evt-card-countdown">
+                                    <div class="evt-cd-val chill-color">4d</div>
+                                    <div class="evt-cd-label">Left</div>
+                                </div>
+                            </div>
+
+                            <div class="evt-card">
+                                <div class="evt-card-date">
+                                    <div class="evt-card-day" style="color:#22c55e;">26</div>
+                                    <div class="evt-card-mon">FEB</div>
+                                </div>
+                                <div class="evt-card-body">
+                                    <div class="evt-type-badge announcement">Announcement</div>
+                                    <div class="evt-card-title">🎉 Annual Tech Fest — Registration Open!</div>
+                                    <div class="evt-card-meta">
+                                        <span>📢 All Students</span>
+                                        <span>📅 Feb 26 – Mar 2</span>
+                                        <span>🔗 Register</span>
+                                    </div>
+                                </div>
+                                <div class="evt-card-countdown">
+                                    <div class="evt-cd-val chill-color">4d</div>
+                                    <div class="evt-cd-label">Left</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: Calendar + Today's Agenda -->
+                    <div>
+                        <!-- Mini Calendar -->
+                        <div class="mw-panel">
+                            <div class="mw-panel-header">
+                                <div class="mw-panel-title">📅 February 2026</div>
+                            </div>
+                            <div class="mw-panel-body">
+                                <div class="evt-cal-header">
+                                    <h3>February 2026</h3>
+                                    <div class="evt-cal-nav">
+                                        <button>‹</button>
+                                        <button>›</button>
+                                    </div>
+                                </div>
+                                <div class="evt-cal-grid">
+                                    <div class="evt-cal-dow">Su</div>
+                                    <div class="evt-cal-dow">Mo</div>
+                                    <div class="evt-cal-dow">Tu</div>
+                                    <div class="evt-cal-dow">We</div>
+                                    <div class="evt-cal-dow">Th</div>
+                                    <div class="evt-cal-dow">Fr</div>
+                                    <div class="evt-cal-dow">Sa</div>
+                                    <!-- Week 1 -->
+                                    <div class="evt-cal-day has-event">1</div>
+                                    <div class="evt-cal-day">2</div>
+                                    <div class="evt-cal-day">3</div>
+                                    <div class="evt-cal-day has-event">4</div>
+                                    <div class="evt-cal-day">5</div>
+                                    <div class="evt-cal-day has-event">6</div>
+                                    <div class="evt-cal-day">7</div>
+                                    <!-- Week 2 -->
+                                    <div class="evt-cal-day">8</div>
+                                    <div class="evt-cal-day has-event">9</div>
+                                    <div class="evt-cal-day">10</div>
+                                    <div class="evt-cal-day">11</div>
+                                    <div class="evt-cal-day has-event">12</div>
+                                    <div class="evt-cal-day">13</div>
+                                    <div class="evt-cal-day">14</div>
+                                    <!-- Week 3 -->
+                                    <div class="evt-cal-day has-event">15</div>
+                                    <div class="evt-cal-day">16</div>
+                                    <div class="evt-cal-day">17</div>
+                                    <div class="evt-cal-day has-event">18</div>
+                                    <div class="evt-cal-day">19</div>
+                                    <div class="evt-cal-day">20</div>
+                                    <div class="evt-cal-day">21</div>
+                                    <!-- Week 4 -->
+                                    <div class="evt-cal-day today has-event">22</div>
+                                    <div class="evt-cal-day has-event">23</div>
+                                    <div class="evt-cal-day">24</div>
+                                    <div class="evt-cal-day">25</div>
+                                    <div class="evt-cal-day has-event">26</div>
+                                    <div class="evt-cal-day">27</div>
+                                    <div class="evt-cal-day has-event">28</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Today's Agenda -->
+                        <div class="mw-panel" style="margin-top:14px;">
+                            <div class="mw-panel-header">
+                                <div class="mw-panel-title">📌 Today's Agenda</div>
+                            </div>
+                            <div class="mw-panel-body">
+                                <div class="evt-agenda-item">
+                                    <div class="evt-agenda-time">9:30 AM</div>
+                                    <div class="evt-agenda-dot" style="background:#ef4444;"></div>
+                                    <div>
+                                        <div class="evt-agenda-text">DS Quiz</div>
+                                        <div class="evt-agenda-sub">Room 301 · 30 min</div>
+                                    </div>
+                                </div>
+                                <div class="evt-agenda-item">
+                                    <div class="evt-agenda-time">10:00 AM</div>
+                                    <div class="evt-agenda-dot" style="background:var(--orange);"></div>
+                                    <div>
+                                        <div class="evt-agenda-text">Science Quiz</div>
+                                        <div class="evt-agenda-sub">Online · 30 min</div>
+                                    </div>
+                                </div>
+                                <div class="evt-agenda-item">
+                                    <div class="evt-agenda-time">3:00 PM</div>
+                                    <div class="evt-agenda-dot" style="background:#3b82f6;"></div>
+                                    <div>
+                                        <div class="evt-agenda-text">English Discussion</div>
+                                        <div class="evt-agenda-sub">Room 205 · 1 hour</div>
+                                    </div>
+                                </div>
+                                <div class="evt-agenda-item">
+                                    <div class="evt-agenda-time">11:59 PM</div>
+                                    <div class="evt-agenda-dot" style="background:#ef4444;"></div>
+                                    <div>
+                                        <div class="evt-agenda-text">Math HW Due</div>
+                                        <div class="evt-agenda-sub">Submit on GCR</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Links -->
+                        <div class="mw-panel" style="margin-top:14px;">
+                            <div class="mw-panel-header">
+                                <div class="mw-panel-title">⚡ Quick Links</div>
+                            </div>
+                            <div class="mw-panel-body">
+                                <a href="student-courses.html"
+                                    style="display:block;padding:8px 0;font-size:13px;font-weight:600;color:var(--accent-2);text-decoration:none;">📚
+                                    My Courses →</a>
+                                <a href="student-timetable.html"
+                                    style="display:block;padding:8px 0;font-size:13px;font-weight:600;color:var(--accent-2);text-decoration:none;">📅
+                                    Timetable →</a>
+                                <a href="student-game.html"
+                                    style="display:block;padding:8px 0;font-size:13px;font-weight:600;color:var(--accent-2);text-decoration:none;">🎮
+                                    Play Games →</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- end evt-grid -->
+
+            </div>
+            <!-- end mw-content -->
+        </div>
+        <!-- end mw-main -->
+    </div>
+    <!-- end mw-shell -->
+
+    <!-- Toast demo (auto-dismiss after 5s) -->
+    <div class="evt-toast" id="evtToast">
+        <div class="evt-toast-icon">🔔</div>
+        <div>
+            <div class="evt-toast-title">New Event from Prof. Sharma</div>
+            <div class="evt-toast-body">"OS Mid-Term" on Feb 26 at 10 AM</div>
+        </div>
+        <button onclick="this.parentElement.remove()"
+            style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;margin-left:8px;">✕</button>
+    </div>
+
+    <script>
+        // ── Theme toggle ──
+        const _root = document.documentElement;
+        const _toggleBtn = document.getElementById('themeToggle');
+        _toggleBtn.addEventListener('click', () => {
+            const next = _root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            _root.setAttribute('data-theme', next);
+            localStorage.setItem('mw_theme', next);
+        });
+
+        // ── Filter chips ──
+        document.querySelectorAll('.evt-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.evt-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+            });
+        });
+
+        // ── Range toggle ──
+        document.querySelectorAll('.evt-range-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.evt-range-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // ── Calendar day click ──
+        document.querySelectorAll('.evt-cal-day').forEach(day => {
+            day.addEventListener('click', () => {
+                document.querySelectorAll('.evt-cal-day').forEach(d => d.classList.remove('today'));
+                day.classList.add('today');
+            });
+        });
+
+        // ── Auto-dismiss toast ──
+        setTimeout(() => {
+            const toast = document.getElementById('evtToast');
+            if (toast) toast.style.opacity = '0';
+            setTimeout(() => toast && toast.remove(), 400);
+        }, 5000);
+    </script>
+</body>
+
+</html>

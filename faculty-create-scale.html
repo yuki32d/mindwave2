@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Scale - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <header class="topbar">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button id="backBtn" class="back-btn"
+                    style="padding: 8px 16px; margin-top: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                    ← Back
+                </button>
+            </div>
+        </header>
+
+        <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
+            <div class="main-header">
+                <div>
+                    <h1>📏 Create Scale</h1>
+                    <p>Collect ratings from students on a scale</p>
+                </div>
+                <div class="header-actions">
+                    <button class="secondary-btn" id="previewBtn">👁️ Preview</button>
+                    <button class="primary-btn" id="saveBtn">💾 Save & Publish</button>
+                </div>
+            </div>
+
+            <div class="grid two">
+                <section class="panel">
+                    <h2>Scale Configuration</h2>
+                    <form id="scaleForm">
+                        <div>
+                            <label for="scaleQuestion">Question *</label>
+                            <input type="text" id="scaleQuestion"
+                                placeholder="e.g., How satisfied are you with this course?" required>
+                        </div>
+
+                        <div>
+                            <label for="scaleType">Scale Type *</label>
+                            <select id="scaleType">
+                                <option value="1-5">1-5 (Likert Scale)</option>
+                                <option value="1-7">1-7 (Extended Likert)</option>
+                                <option value="1-10">1-10 (Full Range)</option>
+                                <option value="0-10">0-10 (NPS Style)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="lowLabel">Low End Label</label>
+                            <input type="text" id="lowLabel" placeholder="e.g., Very Dissatisfied"
+                                value="Very Dissatisfied">
+                        </div>
+
+                        <div>
+                            <label for="highLabel">High End Label</label>
+                            <input type="text" id="highLabel" placeholder="e.g., Very Satisfied" value="Very Satisfied">
+                        </div>
+
+                        <div>
+                            <label>Settings</label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="showAverage" checked>
+                                <span>Show average to students after submission</span>
+                            </label>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <h2>Student Preview</h2>
+                    <div id="scalePreview"
+                        style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 12px; min-height: 300px;">
+                        <!-- Preview will be rendered here -->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updatePreview() {
+            const question = document.getElementById('scaleQuestion').value;
+            const scaleType = document.getElementById('scaleType').value;
+            const lowLabel = document.getElementById('lowLabel').value;
+            const highLabel = document.getElementById('highLabel').value;
+            const preview = document.getElementById('scalePreview');
+
+            const [min, max] = scaleType.split('-').map(Number);
+            const range = max - min + 1;
+
+            if (!question) {
+                preview.innerHTML = `
+                    <div style="text-align: center; color: #9ea4b6; padding: 60px 20px;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📏</div>
+                        <p>Enter a question to see preview</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div style="margin-bottom: 32px;">
+                    <h3 style="color: #f5f7ff; margin-bottom: 24px; text-align: center;">${question}</h3>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                    <span style="color: #9ea4b6; font-size: 13px;">${lowLabel}</span>
+                    <span style="color: #9ea4b6; font-size: 13px;">${highLabel}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 8px;">
+            `;
+
+            for (let i = min; i <= max; i++) {
+                html += `
+                    <button class="scale-option"
+                        style="
+                            flex: 1;
+                            padding: 16px 8px;
+                            background: rgba(255, 255, 255, 0.05);
+                            border: 2px solid rgba(255, 255, 255, 0.1);
+                            border-radius: 12px;
+                            color: #f5f7ff;
+                            cursor: pointer;
+                            font-size: 18px;
+                            font-weight: 600;
+                            transition: all 0.2s;
+                        ">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            html += `</div>`;
+            preview.innerHTML = html;
+        }
+
+        async function saveScale() {
+            const question = document.getElementById('scaleQuestion').value;
+            const scaleType = document.getElementById('scaleType').value;
+            const lowLabel = document.getElementById('lowLabel').value;
+            const highLabel = document.getElementById('highLabel').value;
+            const showAverage = document.getElementById('showAverage').checked;
+
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            const [min, max] = scaleType.split('-').map(Number);
+
+            const scaleData = {
+                type: 'scale',
+                question,
+                scaleType,
+                min,
+                max,
+                lowLabel,
+                highLabel,
+                settings: { showAverage },
+                createdBy: localStorage.getItem('user_name'),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('/api/games/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    },
+                    body: JSON.stringify(scaleData)
+                });
+
+                const data = await response.json();
+                if (data.ok) {
+                    alert('✅ Scale created successfully!');
+                    window.location.href = 'admin.html';
+                } else {
+                    alert('❌ Error: ' + (data.message || 'Failed to create scale'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Failed to save scale. Please try again.');
+            }
+        }
+
+        // Live preview
+        document.getElementById('scaleQuestion').addEventListener('input', updatePreview);
+        document.getElementById('scaleType').addEventListener('change', updatePreview);
+        document.getElementById('lowLabel').addEventListener('input', updatePreview);
+        document.getElementById('highLabel').addEventListener('input', updatePreview);
+        updatePreview();
+
+        // Button handlers
+        document.getElementById('previewBtn').addEventListener('click', updatePreview);
+        document.getElementById('saveBtn').addEventListener('click', saveScale);
+
+        // Back button handler
+        document.getElementById('backBtn').addEventListener('click', function () {
+            window.location.href = 'interactive-tools-selector.html';
+        });
+    </script>
+</body>
+
+</html>

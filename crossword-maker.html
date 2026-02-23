@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crossword Puzzle Maker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .grid-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .grid-container {
+            display: grid;
+            gap: 2px;
+            background-color: #333;
+            padding: 2px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .cell {
+            width: 35px;
+            height: 35px;
+            background: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cell:hover {
+            background-color: #e3f2fd;
+        }
+
+        .cell.black {
+            background-color: #000;
+            cursor: not-allowed;
+        }
+
+        .cell.selected {
+            background-color: #fffacd;
+            box-shadow: inset 0 0 0 2px #ffd700;
+        }
+
+        .cell input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: transparent;
+            outline: none;
+        }
+
+        .cell-number {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            font-size: 9px;
+            font-weight: bold;
+            color: #666;
+            pointer-events: none;
+        }
+
+        .controls-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            height: fit-content;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+        }
+
+        .control-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            background: #e0e0e0;
+            color: #333;
+            border: 2px solid transparent;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #764ba2;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #2196F3;
+            margin-top: 15px;
+        }
+
+        .info-box strong {
+            color: #1976D2;
+        }
+
+        .grid-size-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .status-bar {
+            background: #4caf50;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Crossword Puzzle Maker</h1>
+            <p>Create your own custom crossword puzzles with ease!</p>
+        </div>
+
+        <div class="main-content">
+            <div class="grid-section">
+                <div class="grid-container" id="grid"></div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-section">
+                    <h3>🎨 Edit Mode</h3>
+                    <div class="mode-selector">
+                        <button class="mode-btn active" onclick="setMode('type')" id="modeType">✏️ Type</button>
+                        <button class="mode-btn" onclick="setMode('block')" id="modeBlock">⬛ Block</button>
+                        <button class="mode-btn" onclick="setMode('number')" id="modeNumber">🔢 Number</button>
+                    </div>
+                    <div class="info-box">
+                        <strong>Type Mode:</strong> Click cells to type answers<br>
+                        <strong>Block Mode:</strong> Click to toggle black cells<br>
+                        <strong>Number Mode:</strong> Click to add clue numbers
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>📐 Grid Size</h3>
+                    <div class="grid-size-controls">
+                        <div class="input-group">
+                            <label>Rows:</label>
+                            <input type="number" id="gridRows" value="20" min="5" max="30">
+                        </div>
+                        <div class="input-group">
+                            <label>Columns:</label>
+                            <input type="number" id="gridCols" value="20" min="5" max="30">
+                        </div>
+                    </div>
+                    <button class="btn-info" onclick="resizeGrid()" style="width: 100%;">🔄 Resize Grid</button>
+                </div>
+
+                <div class="control-section">
+                    <h3>🎬 Actions</h3>
+                    <div class="button-group">
+                        <button class="btn-success" onclick="autoNumber()">🔢 Auto Number</button>
+                        <button class="btn-warning" onclick="clearNumbers()">❌ Clear Numbers</button>
+                        <button class="btn-danger" onclick="clearAll()">🗑️ Clear All</button>
+                        <button class="btn-primary" onclick="downloadPuzzle()">💾 Download</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>📤 Export Options</h3>
+                    <button class="btn-success" onclick="downloadBlank()" style="width: 100%; margin-bottom: 10px;">📄
+                        Download Blank</button>
+                    <button class="btn-primary" onclick="downloadWithAnswers()" style="width: 100%;">✅ Download with
+                        Answers</button>
+                </div>
+
+                <div class="status-bar" id="statusBar">
+                    Ready to create! Click cells to start.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let rows = 20;
+        let cols = 20;
+        let currentMode = 'type';
+        let selectedCell = null;
+        let gridData = {};
+        let nextNumber = 1;
+
+        function initGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${cols}, 35px)`;
+            grid.style.gridTemplateRows = `repeat(${rows}, 35px)`;
+
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const cell = createCell(row, col);
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function createCell(row, col) {
+            const key = `${row}-${col}`;
+            const cellDiv = document.createElement('div');
+            cellDiv.className = 'cell';
+            cellDiv.dataset.row = row;
+            cellDiv.dataset.col = col;
+
+            // Initialize cell data if not exists
+            if (!gridData[key]) {
+                gridData[key] = { type: 'white', value: '', number: null };
+            }
+
+            const data = gridData[key];
+
+            if (data.type === 'black') {
+                cellDiv.classList.add('black');
+            } else {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.maxLength = 1;
+                input.value = data.value || '';
+
+                input.addEventListener('input', function () {
+                    this.value = this.value.toUpperCase();
+                    gridData[key].value = this.value;
+                    if (this.value) {
+                        moveToNextCell(row, col, 'right');
+                    }
+                });
+
+                input.addEventListener('keydown', function (e) {
+                    handleKeyNavigation(e, row, col);
+                });
+
+                cellDiv.appendChild(input);
+
+                if (data.number) {
+                    const numberSpan = document.createElement('span');
+                    numberSpan.className = 'cell-number';
+                    numberSpan.textContent = data.number;
+                    cellDiv.appendChild(numberSpan);
+                }
+            }
+
+            cellDiv.addEventListener('click', function () {
+                handleCellClick(row, col, cellDiv);
+            });
+
+            return cellDiv;
+        }
+
+        function handleCellClick(row, col, cellDiv) {
+            const key = `${row}-${col}`;
+
+            if (currentMode === 'block') {
+                // Toggle black/white
+                if (gridData[key].type === 'black') {
+                    gridData[key].type = 'white';
+                    gridData[key].value = '';
+                } else {
+                    gridData[key].type = 'black';
+                    gridData[key].value = '';
+                    gridData[key].number = null;
+                }
+                refreshGrid();
+            } else if (currentMode === 'number') {
+                // Add/remove number
+                if (gridData[key].type !== 'black') {
+                    if (gridData[key].number) {
+                        gridData[key].number = null;
+                    } else {
+                        gridData[key].number = nextNumber++;
+                    }
+                    refreshGrid();
+                }
+            } else if (currentMode === 'type') {
+                // Select cell for typing
+                if (gridData[key].type !== 'black') {
+                    const input = cellDiv.querySelector('input');
+                    if (input) {
+                        input.focus();
+                        selectedCell = { row, col };
+                    }
+                }
+            }
+        }
+
+        function handleKeyNavigation(e, row, col) {
+            if (e.key === 'ArrowRight') {
+                moveToNextCell(row, col, 'right');
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                moveToNextCell(row, col, 'left');
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown') {
+                moveToNextCell(row, col, 'down');
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp') {
+                moveToNextCell(row, col, 'up');
+                e.preventDefault();
+            } else if (e.key === 'Backspace' && !e.target.value) {
+                moveToNextCell(row, col, 'left');
+            }
+        }
+
+        function moveToNextCell(row, col, direction) {
+            let newRow = row;
+            let newCol = col;
+
+            if (direction === 'right') newCol++;
+            else if (direction === 'left') newCol--;
+            else if (direction === 'down') newRow++;
+            else if (direction === 'up') newRow--;
+
+            if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+                const key = `${newRow}-${newCol}`;
+                if (gridData[key].type !== 'black') {
+                    const cells = document.querySelectorAll('.cell');
+                    const targetCell = Array.from(cells).find(
+                        c => c.dataset.row == newRow && c.dataset.col == newCol
+                    );
+                    if (targetCell) {
+                        const input = targetCell.querySelector('input');
+                        if (input) input.focus();
+                    }
+                }
+            }
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+
+            const messages = {
+                type: 'Type mode: Click cells to enter answers',
+                block: 'Block mode: Click cells to toggle black/white',
+                number: 'Number mode: Click cells to add clue numbers'
+            };
+            updateStatus(messages[mode]);
+        }
+
+        function resizeGrid() {
+            rows = parseInt(document.getElementById('gridRows').value);
+            cols = parseInt(document.getElementById('gridCols').value);
+            initGrid();
+            updateStatus(`Grid resized to ${rows}x${cols}`);
+        }
+
+        function refreshGrid() {
+            initGrid();
+        }
+
+        function autoNumber() {
+            nextNumber = 1;
+
+            // Clear existing numbers
+            for (let key in gridData) {
+                gridData[key].number = null;
+            }
+
+            // Auto-number cells that start words
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const key = `${row}-${col}`;
+                    if (gridData[key].type === 'black') continue;
+
+                    const isStartOfAcross = col === 0 || gridData[`${row}-${col - 1}`]?.type === 'black';
+                    const isStartOfDown = row === 0 || gridData[`${row - 1}-${col}`]?.type === 'black';
+                    const hasAcrossWord = col < cols - 1 && gridData[`${row}-${col + 1}`]?.type !== 'black';
+                    const hasDownWord = row < rows - 1 && gridData[`${row + 1}-${col}`]?.type !== 'black';
+
+                    if ((isStartOfAcross && hasAcrossWord) || (isStartOfDown && hasDownWord)) {
+                        gridData[key].number = nextNumber++;
+                    }
+                }
+            }
+
+            refreshGrid();
+            updateStatus('Auto-numbering complete!');
+        }
+
+        function clearNumbers() {
+            for (let key in gridData) {
+                gridData[key].number = null;
+            }
+            nextNumber = 1;
+            refreshGrid();
+            updateStatus('All numbers cleared');
+        }
+
+        function clearAll() {
+            if (confirm('Clear entire grid? This cannot be undone.')) {
+                gridData = {};
+                nextNumber = 1;
+                initGrid();
+                updateStatus('Grid cleared');
+            }
+        }
+
+        function downloadPuzzle() {
+            const canvas = createCanvas(false);
+            downloadCanvas(canvas, 'crossword-puzzle.png');
+            updateStatus('Puzzle downloaded!');
+        }
+
+        function downloadBlank() {
+            const canvas = createCanvas(true);
+            downloadCanvas(canvas, 'crossword-blank.png');
+            updateStatus('Blank puzzle downloaded!');
+        }
+
+        function downloadWithAnswers() {
+            const canvas = createCanvas(false);
+            downloadCanvas(canvas, 'crossword-with-answers.png');
+            updateStatus('Puzzle with answers downloaded!');
+        }
+
+        function createCanvas(hideAnswers) {
+            const cellSize = 40;
+            const canvas = document.createElement('canvas');
+            canvas.width = cols * cellSize;
+            canvas.height = rows * cellSize;
+            const ctx = canvas.getContext('2d');
+
+            // Fill background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const key = `${row}-${col}`;
+                    const x = col * cellSize;
+                    const y = row * cellSize;
+                    const data = gridData[key] || { type: 'white', value: '', number: null };
+
+                    if (data.type === 'black') {
+                        ctx.fillStyle = '#000';
+                        ctx.fillRect(x, y, cellSize, cellSize);
+                    } else {
+                        // Draw cell border
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(x, y, cellSize, cellSize);
+
+                        // Draw number
+                        if (data.number) {
+                            ctx.fillStyle = '#000';
+                            ctx.font = 'bold 12px Arial';
+                            ctx.textAlign = 'left';
+                            ctx.textBaseline = 'top';
+                            ctx.fillText(data.number, x + 3, y + 3);
+                        }
+
+                        // Draw answer (if not hiding)
+                        if (!hideAnswers && data.value) {
+                            ctx.fillStyle = '#000';
+                            ctx.font = 'bold 24px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(data.value, x + cellSize / 2, y + cellSize / 2);
+                        }
+                    }
+                }
+            }
+
+            return canvas;
+        }
+
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function updateStatus(message) {
+            const statusBar = document.getElementById('statusBar');
+            statusBar.textContent = message;
+        }
+
+        // Initialize grid on load
+        initGrid();
+    </script>
+</body>
+
+</html>

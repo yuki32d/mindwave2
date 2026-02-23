@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slider Tool - MindWave</title>
+    <meta name="description"
+        content="Collect nuanced responses with interactive sliders. Perfect for gauging confidence, understanding, and opinions on a scale.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        .tool-hero {
+            padding: 120px 5% 80px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tool-hero h1 {
+            font-size: 64px;
+            font-weight: 900;
+            margin-bottom: 24px;
+        }
+
+        .tool-hero p {
+            font-size: 24px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+        }
+
+        .tool-demo {
+            padding: 80px 5%;
+            background: white;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-visual {
+            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ea 100%);
+            border-radius: 20px;
+            padding: 60px;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-visual::before {
+            content: '📊';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .feature-item {
+            padding: 40px;
+            background: #f5f5f7;
+            border-radius: 16px;
+        }
+
+        .feature-item i {
+            font-size: 40px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .feature-item h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .feature-item p {
+            color: #6e6e73;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-brain"></i>
+                <span>Mind<span class="gradient-text">Wave</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="../website-home.html">Home</a>
+                <a href="../website-home.html#pricing">Pricing</a>
+                <a href="../website-signup.html" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tool Hero -->
+    <section class="tool-hero">
+        <h1>Slider Tool</h1>
+        <p>Collect nuanced responses with interactive sliders. Perfect for gauging confidence, understanding, and
+            opinions on a scale.</p>
+        <a href="../website-signup.html" class="btn btn-white btn-lg">Try It Free <i class="fas fa-arrow-right"></i></a>
+    </section>
+
+    <!-- Tool Demo -->
+    <section class="tool-demo">
+        <div class="demo-container">
+            <h2 style="font-size: 48px; text-align: center; margin-bottom: 24px;">How It Works</h2>
+            <p style="text-align: center; font-size: 20px; color: #6e6e73; margin-bottom: 60px;">Capture precise
+                feedback on any scale</p>
+
+            <div class="demo-visual">
+                <div style="text-align: center; z-index: 1;">
+                    <h3 style="font-size: 32px; color: #1d1d1f; margin-bottom: 16px;">Interactive Slider Interface</h3>
+                    <p style="font-size: 18px; color: #6e6e73;">Students drag to express their level of agreement or
+                        confidence</p>
+                </div>
+            </div>
+
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="fas fa-sliders-h"></i>
+                    <h3>1. Set Your Scale</h3>
+                    <p>Define the range (0-100, 1-10, etc.) and add labels for context like "Not Confident" to "Very
+                        Confident"</p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-hand-pointer"></i>
+                    <h3>2. Students Respond</h3>
+                    <p>Students drag the slider to their chosen value. Smooth, intuitive, and fun to use.</p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-chart-area"></i>
+                    <h3>3. Visualize Distribution</h3>
+                    <p>See response distribution in real-time. Identify trends and outliers instantly.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 80px;">
+                <h2 style="font-size: 40px; margin-bottom: 40px;">Key Features</h2>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="fas fa-ruler-horizontal"></i>
+                        <h3>Customizable Ranges</h3>
+                        <p>Set any numeric range that fits your question - from 0-10 to 0-1000</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-tags"></i>
+                        <h3>Custom Labels</h3>
+                        <p>Add descriptive labels at key points to guide student responses</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-palette"></i>
+                        <h3>Color Gradients</h3>
+                        <p>Visual color gradients help students understand the scale at a glance</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Average & Median</h3>
+                        <p>Automatically calculate and display average, median, and standard deviation</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-eye"></i>
+                        <h3>Live Results</h3>
+                        <p>Watch the distribution graph update in real-time as students respond</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-user-secret"></i>
+                        <h3>Anonymous Mode</h3>
+                        <p>Enable anonymous responses for honest feedback on sensitive topics</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Capture Nuanced Feedback?</h2>
+                <p>Create your first slider question and see the power of scale-based responses</p>
+                <a href="../website-signup.html" class="btn btn-white btn-lg">Start Free Trial <i
+                        class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-brain"></i>
+                        <span>Mind<span class="gradient-text">Wave</span></span>
+                    </div>
+                    <p>Pioneering the next generation of digital learning through AI and gamification.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 MindWave Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Practice - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <link rel="stylesheet" href="stunning-sidebar.css">
+    <link rel="stylesheet" href="free-code-editor.css">
+    <link rel="stylesheet" href="hide-chatbot-practice.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        .practice-page {
+            min-height: calc(100vh - 60px);
+            background: var(--bg-darker);
+            padding: 24px;
+        }
+
+        .practice-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--text-gray);
+        }
+
+        .language-selector-section {
+            background: var(--card-dark);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .language-selector {
+            flex: 1;
+            max-width: 400px;
+            min-width: 300px;
+            padding: 12px 16px;
+            background: var(--bg-darker);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-white);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .language-selector:focus {
+            outline: none;
+            border-color: var(--cyan-bright);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        .language-selector option {
+            background: var(--bg-darker) !important;
+            color: var(--text-white) !important;
+            padding: 12px 16px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            min-height: 40px;
+            display: block !important;
+            white-space: normal !important;
+            text-overflow: clip !important;
+            overflow: visible !important;
+            text-indent: 0 !important;
+            direction: ltr !important;
+        }
+
+        .challenge-header {
+            background: var(--card-dark);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .challenge-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 8px;
+        }
+
+        .challenge-description {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-bottom: 16px;
+        }
+
+        .question-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-darker);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-white);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .question-input:focus {
+            outline: none;
+            border-color: var(--cyan-bright);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        .coding-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .editor-section {
+            background: var(--card-dark);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .editor-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-white);
+        }
+
+        .language-badge {
+            padding: 6px 14px;
+            background: linear-gradient(135deg, var(--cyan-bright), var(--purple-bright));
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .code-editor {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            min-height: 450px;
+            border: 2px solid #333;
+        }
+
+        .code-line {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 4px;
+        }
+
+        .line-number {
+            color: #858585;
+            user-select: none;
+            min-width: 30px;
+        }
+
+        .code-input {
+            background: transparent;
+            border: none;
+            color: #d4d4d4;
+            font-family: inherit;
+            font-size: inherit;
+            flex: 1;
+            outline: none;
+        }
+
+        .code-input.error {
+            background: rgba(255, 68, 68, 0.1);
+            border-bottom: 2px solid #ff4444;
+        }
+
+        .code-input.correct {
+            background: rgba(0, 255, 136, 0.1);
+            border-bottom: 2px solid #00ff88;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cyan-bright), var(--purple-bright));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 217, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-white);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .assistant-panel {
+            background: var(--card-dark);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: visible;
+            padding-top: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .robot-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: visible;
+            /* Allow robot to escape when roaming */
+            z-index: 1;
+            /* Base z-index */
+            /* For absolute positioning of robot */
+        }
+
+        .stats-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .robot-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .robot-control-btn {
+            background: linear-gradient(135deg, #00d9ff, #a855f7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 217, 255, 0.3);
+        }
+
+        .robot-control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 217, 255, 0.5);
+        }
+
+        .robot-control-btn:active {
+            transform: translateY(0);
+        }
+
+        .robot-control-btn.hidden {
+            display: none;
+        }
+
+        .btn-icon {
+            font-size: 16px;
+        }
+
+        .btn-text {
+            font-size: 13px;
+        }
+
+        .robot-parking-spot {
+            width: 100%;
+            height: 180px;
+            /* Increased to accommodate robot */
+            background: rgba(0, 217, 255, 0.05);
+            border: 2px dashed rgba(0, 217, 255, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            position: relative;
+            /* For absolute positioning of robot */
+            overflow: visible;
+            /* Allow speech bubble to extend outside */
+            animation: parkingPulse 3s ease-in-out infinite;
+        }
+
+        .robot-parking-spot::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0, 217, 255, 0.1) 0%, transparent 70%);
+            animation: parkingGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes parkingPulse {
+
+            0%,
+            100% {
+                border-color: rgba(0, 217, 255, 0.3);
+                box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
+            }
+
+            50% {
+                border-color: rgba(0, 217, 255, 0.5);
+                box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+            }
+        }
+
+        @keyframes parkingGlow {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .parking-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            z-index: 1;
+        }
+
+        .parking-icon {
+            font-size: 32px;
+            filter: drop-shadow(0 0 10px rgba(0, 217, 255, 0.5));
+        }
+
+        .parking-label {
+            font-size: 12px;
+            color: rgba(0, 217, 255, 0.8);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .robot-parking-spot.occupied {
+            background: rgba(0, 230, 118, 0.1);
+            border-color: rgba(0, 230, 118, 0.5);
+            animation: none;
+        }
+
+        .robot-parking-spot.occupied::before {
+            background: radial-gradient(circle, rgba(0, 230, 118, 0.2) 0%, transparent 70%);
+        }
+
+        /* Hide the CSS robot - we're using Three.js robot instead */
+        .flying-robot {
+            display: none !important;
+        }
+
+        .angel-character {
+            width: 150px;
+            height: 150px;
+            position: fixed;
+            z-index: 1000;
+            pointer-events: none;
+            animation: flyEverywhere 20s ease-in-out infinite;
+        }
+
+        @keyframes flyEverywhere {
+            0% {
+                top: 20%;
+                left: 80%;
+                transform: rotate(0deg) scale(1);
+            }
+
+            10% {
+                top: 15%;
+                left: 60%;
+                transform: rotate(-10deg) scale(1.1);
+            }
+
+            20% {
+                top: 40%;
+                left: 30%;
+                transform: rotate(15deg) scale(0.9);
+            }
+
+            30% {
+                top: 60%;
+                left: 70%;
+                transform: rotate(-5deg) scale(1.05);
+            }
+
+            40% {
+                top: 30%;
+                left: 85%;
+                transform: rotate(20deg) scale(1);
+            }
+
+            50% {
+                top: 70%;
+                left: 50%;
+                transform: rotate(-15deg) scale(1.1);
+            }
+
+            60% {
+                top: 25%;
+                left: 20%;
+                transform: rotate(10deg) scale(0.95);
+            }
+
+            70% {
+                top: 55%;
+                left: 40%;
+                transform: rotate(-20deg) scale(1.05);
+            }
+
+            80% {
+                top: 35%;
+                left: 75%;
+                transform: rotate(5deg) scale(1);
+            }
+
+            90% {
+                top: 65%;
+                left: 25%;
+                transform: rotate(-10deg) scale(1.1);
+            }
+
+            100% {
+                top: 20%;
+                left: 80%;
+                transform: rotate(0deg) scale(1);
+            }
+        }
+
+        .angel-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8));
+            animation: glow 2s ease-in-out infinite;
+            background: transparent;
+            mix-blend-mode: normal;
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 10px rgba(135, 206, 250, 0.6));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)) drop-shadow(0 0 20px rgba(135, 206, 250, 0.9));
+            }
+        }
+
+        .angel-emoji {
+            font-size: 60px;
+            display: block;
+            text-align: center;
+            filter: drop-shadow(0 4px 8px rgba(0, 217, 255, 0.3));
+        }
+
+        .sparkles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .sparkle {
+            position: absolute;
+            font-size: 16px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .assistant-message {
+            background: linear-gradient(135deg, var(--cyan-bright), var(--purple-bright));
+            color: white;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+            min-height: 60px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .assistant-message::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid var(--cyan-bright);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--cyan-bright);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-gray);
+            margin-top: 4px;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 100px;
+            animation: celebrate 1s ease-out;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @keyframes celebrate {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+
+        .animated-angel-container {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            top: 41%;
+            left: 40%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            pointer-events: none;
+            /* Animation removed - robot movement is now controlled by Three.js */
+        }
+
+        @keyframes flyAroundScreen {
+            0% {
+                top: 10%;
+                left: 80%;
+                transform: rotate(0deg);
+                z-index: 99999;
+            }
+
+            10% {
+                top: 20%;
+                left: 60%;
+                transform: rotate(-15deg);
+                z-index: 99999;
+            }
+
+            20% {
+                top: 50%;
+                left: 30%;
+                transform: rotate(10deg);
+                z-index: 99999;
+            }
+
+            30% {
+                top: 70%;
+                left: 50%;
+                transform: rotate(-5deg);
+                z-index: 99999;
+            }
+
+            40% {
+                top: 40%;
+                left: 80%;
+                transform: rotate(15deg);
+                z-index: 99999;
+            }
+
+            50% {
+                top: 60%;
+                left: 20%;
+                transform: rotate(-10deg);
+                z-index: 99999;
+            }
+
+            60% {
+                top: 30%;
+                left: 40%;
+                transform: rotate(5deg);
+                z-index: 99999;
+            }
+
+            70% {
+                top: 80%;
+                left: 70%;
+                transform: rotate(-15deg);
+                z-index: 99999;
+            }
+
+            80% {
+                top: 25%;
+                left: 85%;
+                transform: rotate(10deg);
+                z-index: 99999;
+            }
+
+            90% {
+                top: 65%;
+                left: 15%;
+                transform: rotate(-5deg);
+                z-index: 99999;
+            }
+
+            100% {
+                top: 10%;
+                left: 80%;
+                transform: rotate(0deg);
+                z-index: 99999;
+            }
+        }
+
+        .angel-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            animation: bobbing 2s ease-in-out infinite;
+        }
+
+        @keyframes bobbing {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Robot Head */
+        .robot-head {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #fff, #e0e0e0);
+            border-radius: 50%;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 3px solid #4a90e2;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.5);
+        }
+
+        .antenna {
+            position: absolute;
+            width: 3px;
+            height: 15px;
+            background: #4a90e2;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .antenna::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffd700;
+            border-radius: 50%;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: antennaBlink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes antennaBlink {
+
+            0%,
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 10px #ffd700;
+            }
+
+            50% {
+                opacity: 0.3;
+                box-shadow: 0 0 5px #ffd700;
+            }
+        }
+
+        .halo {
+            position: absolute;
+            width: 70px;
+            height: 15px;
+            border: 4px solid #ffd700;
+            border-radius: 50%;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            animation: haloFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes haloFloat {
+
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0px);
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        .eyes {
+            position: absolute;
+            width: 100%;
+            top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .eye {
+            width: 12px;
+            height: 12px;
+            background: #4a90e2;
+            border-radius: 50%;
+            animation: eyeBlink 4s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(74, 144, 226, 0.8);
+        }
+
+        @keyframes eyeBlink {
+
+            0%,
+            90%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            95% {
+                transform: scaleY(0.1);
+            }
+        }
+
+        .mouth {
+            position: absolute;
+            width: 20px;
+            height: 10px;
+            border: 2px solid #4a90e2;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: mouthTalk 0.5s ease-in-out infinite;
+        }
+
+        @keyframes mouthTalk {
+
+            0%,
+            100% {
+                height: 10px;
+            }
+
+            50% {
+                height: 15px;
+            }
+        }
+
+        /* Robot Body */
+        .robot-torso {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            border-radius: 10px;
+            top: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 2px solid #2c5f8d;
+        }
+
+        .chest-light {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #00ff88;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: heartbeat 1.5s ease-in-out infinite;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+        }
+
+        @keyframes heartbeat {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+
+        /* Wings */
+        .wing {
+            position: absolute;
+            width: 50px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(200, 230, 255, 0.8));
+            border-radius: 50% 0 50% 0;
+            top: 90px;
+            box-shadow: 0 0 20px rgba(135, 206, 250, 0.6);
+        }
+
+        .left-wing {
+            left: -20px;
+            transform-origin: right center;
+            animation: flapLeft 0.8s ease-in-out infinite;
+        }
+
+        .right-wing {
+            right: -20px;
+            transform: scaleX(-1);
+            transform-origin: left center;
+            animation: flapRight 0.8s ease-in-out infinite;
+        }
+
+        @keyframes flapLeft {
+
+            0%,
+            100% {
+                transform: rotateY(0deg) translateX(0px);
+            }
+
+            50% {
+                transform: rotateY(-30deg) translateX(-10px);
+            }
+        }
+
+        @keyframes flapRight {
+
+            0%,
+            100% {
+                transform: scaleX(-1) rotateY(0deg) translateX(0px);
+            }
+
+            50% {
+                transform: scaleX(-1) rotateY(-30deg) translateX(-10px);
+            }
+        }
+
+        /* Arms */
+        .arm {
+            position: absolute;
+            width: 8px;
+            height: 30px;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            border-radius: 10px;
+            top: 95px;
+        }
+
+        .left-arm {
+            left: 45px;
+            animation: waveLeft 2s ease-in-out infinite;
+        }
+
+        .right-arm {
+            right: 45px;
+            animation: waveRight 2s ease-in-out infinite;
+        }
+
+        @keyframes waveLeft {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            50% {
+                transform: rotate(-20deg);
+            }
+        }
+
+        @keyframes waveRight {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            50% {
+                transform: rotate(20deg);
+            }
+        }
+
+        /* Speech Bubble */
+        .speech-bubble {
+            position: absolute;
+            background: linear-gradient(135deg, #00d9ff, #a855f7);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 15px;
+            top: 50px;
+            left: 120px;
+            min-width: 200px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            animation: bubblePulse 3s ease-in-out infinite;
+        }
+
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #00d9ff;
+            bottom: -10px;
+            left: 20px;
+        }
+
+        @keyframes bubblePulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 0.95;
+            }
+        }
+
+        .speech-text {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 600;
+            animation: textFade 6s ease-in-out infinite;
+        }
+
+        @keyframes textFade {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        /* Sparkles */
+        .angel-sparkles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .angel-sparkles .sparkle {
+            position: absolute;
+            font-size: 20px;
+            animation: sparkleFloat 2s ease-in-out infinite;
+        }
+
+        .angel-sparkles .sparkle:nth-child(1) {
+            top: 10%;
+            left: 20%;
+        }
+
+        .angel-sparkles .sparkle:nth-child(2) {
+            top: 30%;
+            right: 20%;
+            animation-delay: 0.5s;
+        }
+
+        .angel-sparkles .sparkle:nth-child(3) {
+            bottom: 20%;
+            left: 30%;
+            animation-delay: 1s;
+        }
+
+        @keyframes sparkleFloat {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
+        }
+    </style>
+
+    <script>
+        // Dynamic speech messages
+        document.addEventListener('DOMContentLoaded', function () {
+            const angelMessages = [
+                "Hi! I'm your AI coding assistant! 🤖",
+                "Let's learn to code together! 💻",
+                "AI makes coding fun and easy! ✨",
+                "I'm here to help you succeed! 🌟",
+                "Keep coding, you're doing great! 🚀",
+                "Mistakes are how we learn! 💡",
+                "Let's debug this together! 🔧",
+                "You're becoming a great coder! 🎯"
+            ];
+
+            let messageIndex = 0;
+            const speechText = document.querySelector('.speech-text');
+
+            if (speechText) {
+                function changeMessage() {
+                    messageIndex = (messageIndex + 1) % angelMessages.length;
+                    speechText.textContent = angelMessages[messageIndex];
+                }
+
+                // Change message every 5 seconds
+                setInterval(changeMessage, 5000);
+            }
+        });
+    </script>
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="topbar-brand"><span>🌊</span><span>MindwaveIo</span></div>
+            <div class="topbar-search"><span>🔍</span><input type="text" placeholder="Search..."></div>
+            <div class="topbar-actions">
+                <span style="cursor:pointer" title="Notifications">🔔</span>
+                <div class="profile-toggle"><span>👤</span><small>Account</small></div>
+            </div>
+        </header>
+
+        <div class="practice-page">
+            <div class="practice-container">
+                <div class="page-header">
+                    <a href="homepage.html" style="color:var(--text-gray);text-decoration:none;font-size:14px">← Back to
+                        Home</a>
+                    <h1 class="page-title">💻 Code Practice</h1>
+                    <p class="page-subtitle">Practice coding in any language with AI assistance</p>
+                </div>
+
+                <div class="language-selector-section">
+                    <label style="color: var(--text-white); font-weight: 600;">Select Language:</label>
+                    <select class="language-selector" id="languageSelector">
+                        <option value="python">🐍 Python</option>
+                        <option value="javascript">💛 JavaScript</option>
+                        <option value="typescript">📘 TypeScript</option>
+                        <option value="java">☕ Java</option>
+                        <option value="cpp">⚡ C++</option>
+                        <option value="csharp">🎮 C#</option>
+                        <option value="go">🔵 Go</option>
+                        <option value="rust">🦀 Rust</option>
+                        <option value="swift">🍎 Swift</option>
+                        <option value="kotlin">🤖 Kotlin</option>
+                        <option value="php">🐘 PHP</option>
+                        <option value="ruby">💎 Ruby</option>
+                        <option value="dart">🎯 Dart</option>
+                        <option value="scala">🔴 Scala</option>
+                        <option value="r">📊 R</option>
+                        <option value="sql">🗄️ SQL</option>
+                        <option value="perl">🐪 Perl</option>
+                        <option value="lua">🌙 Lua</option>
+                        <option value="haskell">🎩 Haskell</option>
+                        <option value="elixir">💧 Elixir</option>
+                        <option value="clojure">🔷 Clojure</option>
+                        <option value="fsharp">🔶 F#</option>
+                        <option value="objectivec">📱 Objective-C</option>
+                        <option value="bash">🐚 Bash</option>
+                        <option value="powershell">💙 PowerShell</option>
+                        <option value="groovy">🎸 Groovy</option>
+                        <option value="julia">🔢 Julia</option>
+                        <option value="matlab">📐 MATLAB</option>
+                        <option value="vb">🔵 Visual Basic</option>
+                        <option value="assembly">⚙️ Assembly</option>
+                        <option value="ada">🎯 Ada</option>
+                        <option value="ballerina">🩰 Ballerina</option>
+                        <option value="carbon">⚫ Carbon</option>
+                        <option value="cobol">📜 COBOL</option>
+                        <option value="crystal">💎 Crystal</option>
+                        <option value="erlang">📡 Erlang</option>
+                        <option value="fortran">🔢 Fortran</option>
+                        <option value="gleam">✨ Gleam</option>
+                        <option value="mojo">🔥 Mojo</option>
+                        <option value="nim">👑 Nim</option>
+                        <option value="ocaml">🐫 OCaml</option>
+                        <option value="pony">🐴 Pony</option>
+                        <option value="prolog">🧠 Prolog</option>
+                        <option value="racket">🎾 Racket</option>
+                        <option value="roc">🪨 Roc</option>
+                        <option value="scheme">🎨 Scheme</option>
+                        <option value="solidity">⛓️ Solidity</option>
+                        <option value="v">🌟 V</option>
+                        <option value="verilog">🔌 Verilog</option>
+                        <option value="vhdl">⚡ VHDL</option>
+                        <option value="zig">⚡ Zig</option>
+                    </select>
+                </div>
+
+                <div class="challenge-header">
+                    <div class="challenge-title" id="challengeTitle">📝 Challenge 1: Print "Hello World"</div>
+                    <p class="challenge-description" id="challengeDescription">Write a program that prints "Hello World"
+                        to the console.</p>
+                    <input type="text" class="question-input" id="questionInput"
+                        placeholder="💬 Ask your AI assistant anything...">
+                </div>
+
+                <div class="coding-container">
+                    <div class="editor-section">
+                        <div class="editor-header">
+                            <div class="editor-title">💻 Code Editor</div>
+                            <div class="language-badge" id="languageBadge">🐍 Python</div>
+                        </div>
+
+                        <div class="code-editor" id="codeEditor">
+                            <div class="code-line">
+                                <span class="line-number">1</span>
+                                <input type="text" class="code-input" id="line1"
+                                    placeholder="# Start typing your code here...">
+                            </div>
+                            <div class="code-line">
+                                <span class="line-number">2</span>
+                                <input type="text" class="code-input" id="line2">
+                            </div>
+                            <div class="code-line">
+                                <span class="line-number">3</span>
+                                <input type="text" class="code-input" id="line3">
+                            </div>
+                            <div class="code-line">
+                                <span class="line-number">4</span>
+                                <input type="text" class="code-input" id="line4">
+                            </div>
+                            <div class="code-line">
+                                <span class="line-number">5</span>
+                                <input type="text" class="code-input" id="line5">
+                            </div>
+                            <div class="code-line">
+                                <span class="line-number">6</span>
+                                <input type="text" class="code-input" id="line6">
+                            </div>
+                            <div class="code-line">
+                                <span class="line-number">7</span>
+                                <input type="text" class="code-input" id="line7">
+                            </div>
+                            <div class="code-line">
+                                <span class="line-number">8</span>
+                                <input type="text" class="code-input" id="line8">
+                            </div>
+                        </div>
+
+                        <div class="editor-actions">
+                            <button class="btn btn-primary" id="runBtn">▶ Run Code</button>
+                            <button class="btn btn-secondary" id="hintBtn">💡 Get Hint</button>
+                            <button class="btn btn-primary" id="submitBtn">✓ Submit</button>
+                            <button class="btn btn-secondary" id="clearBtn">🗑️ Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="assistant-panel">
+                        <!-- Robot Display Section -->
+                        <div class="robot-section">
+                            <!-- Robot Parking Spot -->
+                            <div class="robot-parking-spot">
+                                <!-- Three.js 3D Flying Robot -->
+                                <div class="animated-angel-container">
+                                    <div class="flying-robot">
+                                        <!-- Robot Head -->
+                                        <div class="robot-head-3d">
+                                            <div class="antenna-top"></div>
+                                            <div class="head-glow"></div>
+                                            <div class="robot-face">
+                                                <div class="eye-3d left"></div>
+                                                <div class="eye-3d right"></div>
+                                                <div class="smile-3d"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Robot Body -->
+                                        <div class="robot-body-3d">
+                                            <div class="chest-core"></div>
+                                            <div class="body-panel left-panel"></div>
+                                            <div class="body-panel right-panel"></div>
+                                        </div>
+
+                                        <!-- Propeller/Wings -->
+                                        <div class="propeller-container">
+                                            <div class="propeller"></div>
+                                        </div>
+
+                                        <!-- Arms -->
+                                        <div class="robot-arm-3d left-arm-3d"></div>
+                                        <div class="robot-arm-3d right-arm-3d"></div>
+
+                                        <!-- Legs/Thrusters -->
+                                        <div class="thruster left-thruster">
+                                            <div class="thruster-flame"></div>
+                                        </div>
+                                        <div class="thruster right-thruster">
+                                            <div class="thruster-flame"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Speech Bubble -->
+                                    <div class="speech-bubble">
+                                        <p class="speech-text" id="angelSpeech">Hi! I'm your AI coding assistant! 🤖</p>
+                                    </div>
+                                </div>
+
+                                <div class="parking-indicator">
+                                    <span class="parking-icon">🏠</span>
+                                    <span class="parking-label">Rest Area</span>
+                                </div>
+                            </div>
+
+                            <!-- Robot Control Buttons -->
+                            <div class="robot-controls">
+                                <button class="robot-control-btn hidden" id="stopRoamingBtn">
+                                    <span class="btn-icon">⏸️</span>
+                                    <span class="btn-text">Stop Roaming</span>
+                                </button>
+                                <button class="robot-control-btn" id="moveAroundBtn">
+                                    <span class="btn-icon">▶️</span>
+                                    <span class="btn-text">Move Around</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Stats Section -->
+                        <div class="stats-section">
+                            <div class="assistant-message" id="assistantMessage">
+                                👋 Hi! I'm your coding assistant! Select a language and start coding. I'll help you
+                                along
+                                the way!
+                            </div>
+
+                            <div class="stats">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="correctCount">0</div>
+                                    <div class="stat-label">Correct Lines</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="hintCount">0</div>
+                                    <div class="stat-label">Hints Used</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="fix-dropdown.js"></script>
+    <script src="universal-code-practice.js"></script>
+    <script src="robot-3d.js"></script>
+    <script src="free-code-editor.js"></script>
+    <script src="stunning-sidebar.js"></script>
+    <script src="chatbot.js"></script>
+</body>
+
+</html>

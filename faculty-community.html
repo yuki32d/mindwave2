@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – Faculty Community</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <link rel="stylesheet" href="marketing-site/css/community-features.css">
+    <link rel="stylesheet" href="marketing-site/css/faculty-tools.css">
+    <link rel="stylesheet" href="marketing-site/css/live-quiz-faculty.css?v=2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Interactive Features Quick Access */
+        .interactive-features {
+            margin-top: 2rem;
+        }
+
+        .features-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .feature-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+        }
+
+        .feature-content h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .feature-content p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .poll-card:hover {
+            border-color: #00D9FF;
+            box-shadow: 0 8px 24px rgba(0, 217, 255, 0.3);
+        }
+
+        .feedback-card:hover {
+            border-color: #8B5CF6;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+        }
+
+        .quiz-card:hover {
+            border-color: #FFD700;
+            box-shadow: 0 8px 24px rgba(255, 215, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark" data-role="faculty" data-section="community">
+    <div class="page-shell">
+        <header class="hero">
+            <p class="eyebrow" id="heroEyebrow">Faculty Space</p>
+            <h1 id="pageTitle">Community</h1>
+            <p class="lede" id="pageSubtitle">Host rituals, highlight wins, and keep the space healthy.</p>
+            <div class="hero-actions">
+                <a class="ghost-link" href="admin.html">← Back to Creator Hub</a>
+                <button class="ghost-btn active" data-section="poll">📊 Quick Poll</button>
+                <button class="ghost-btn" data-section="feedback">💬 Live Feedback</button>
+                <button class="ghost-btn" data-section="quiz">🏆 Live Quiz</button>
+            </div>
+        </header>
+
+        <!-- Quick Poll Section (Default) -->
+        <section id="pollSection" class="content-section active">
+            <div class="feature-content-area">
+                <div class="faculty-tool-card">
+                    <div class="tool-icon poll-icon">
+                        <i class="fas fa-poll"></i>
+                    </div>
+                    <h1>Quick Poll</h1>
+                    <p class="subtitle">Create instant polls to gauge student understanding</p>
+
+                    <div class="poll-creator">
+                        <div class="form-group">
+                            <label>Poll Question</label>
+                            <input type="text" class="input-field" placeholder="e.g., What is 2 + 2?" />
+                        </div>
+
+                        <div class="options-grid">
+                            <input type="text" class="input-field" placeholder="Option A" />
+                            <input type="text" class="input-field" placeholder="Option B" />
+                            <input type="text" class="input-field" placeholder="Option C" />
+                            <input type="text" class="input-field" placeholder="Option D" />
+                        </div>
+
+                        <button class="primary-btn">
+                            <i class="fas fa-rocket"></i> Launch Poll
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Feedback Section -->
+        <section id="feedbackSection" class="content-section" style="display: none;">
+            <div class="feature-content-area">
+                <div class="faculty-tool-card">
+                    <div class="tool-icon feedback-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h1>Live Feedback</h1>
+                    <p class="subtitle">Track student confidence and sentiment in real-time</p>
+
+                    <div class="feedback-controls">
+                        <button class="primary-btn">
+                            <i class="fas fa-play"></i> Start Collecting Feedback
+                        </button>
+
+                        <div class="feedback-stats" style="margin-top: 2rem;">
+                            <div class="stat-card">
+                                <div class="stat-icon">😟</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Very Confused</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">😕</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Confused</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">😐</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Neutral</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🙂</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Confident</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">😄</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Very Confident</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Quiz Section -->
+        <section id="quizSection" class="content-section" style="display: none;">
+            <div class="feature-content-area">
+                <div class="faculty-tool-card">
+                    <div class="tool-icon quiz-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h1>Live Quiz</h1>
+                    <p class="subtitle">Host Kahoot-style quiz competitions</p>
+
+                    <div class="quiz-creator" id="quizBuilder">
+                        <!-- Quiz Title -->
+                        <div class="form-group" style="margin-bottom: 2rem;">
+                            <label>Quiz Title</label>
+                            <input type="text" id="quizTitle" class="input-field"
+                                placeholder="e.g., JavaScript Basics Quiz" />
+                        </div>
+
+                        <!-- AI Topic Input -->
+                        <div class="ai-topic-section">
+                            <label><i class="fas fa-robot"></i> AI Quiz Generator</label>
+                            <textarea id="aiTopicInput" class="topic-textarea"
+                                placeholder="Describe your quiz topic... Example: Create 10 questions about JavaScript arrays, including map, filter, reduce methods with practical examples."
+                                rows="3"></textarea>
+                            <button class="generate-ai-btn" id="generateAiBtn">
+                                <i class="fas fa-wand-magic-sparkles"></i> Generate
+                            </button>
+                        </div>
+
+                        <!-- Quiz Builder Container -->
+                        <div class="quiz-builder-container">
+                            <!-- Questions Sidebar -->
+                            <div class="questions-sidebar">
+                                <div class="sidebar-header">
+                                    <span>Questions</span>
+                                    <button class="add-question-btn" id="addQuestionBtn" title="Add Question">
+                                        <i class="fas fa-plus"></i> Add
+                                    </button>
+                                </div>
+                                <div id="questionsList" class="questions-list">
+                                    <!-- Question items will be added here dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Question Editor -->
+                            <div class="question-editor" id="questionEditor">
+                                <!-- Editor content will be populated when a question is selected -->
+                                <div class="editor-placeholder">
+                                    <i class="fas fa-arrow-left"></i>
+                                    <p>Select a question from the sidebar or click "Add" to create one</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Launch Button -->
+                        <button class="launch-quiz-btn" id="launchQuizBtn">
+                            <i class="fas fa-rocket"></i> Launch Quiz
+                        </button>
+                    </div>
+
+                    <!-- Quiz Control Panel (shown after launch) -->
+                    <div class="quiz-control-panel" id="quizControlPanel" style="display: none;">
+                        <div class="control-panel-header">
+                            <div class="session-info-card">
+                                <div class="info-label">
+                                    <i class="fas fa-qrcode"></i> Quiz Code
+                                </div>
+                                <div class="code-display" id="sessionCodeDisplay">ABCD12</div>
+                                <div class="info-hint">Share this code with your students</div>
+                            </div>
+
+                            <div class="participants-card">
+                                <div class="info-label">
+                                    <i class="fas fa-users"></i> Participants
+                                </div>
+                                <div class="participant-count-display">
+                                    <span id="participantCount">0</span>
+                                </div>
+                                <div class="info-hint">Students joined</div>
+                            </div>
+                        </div>
+
+                        <div class="quiz-controls">
+                            <button class="control-btn start-btn" id="startQuizBtn">
+                                <i class="fas fa-play"></i> Start Quiz
+                            </button>
+                            <button class="control-btn next-btn" id="nextQuestionBtn" style="display: none;">
+                                <i class="fas fa-forward"></i> Next Question
+                            </button>
+                            <button class="control-btn end-btn" id="endQuizBtn">
+                                <i class="fas fa-stop"></i> End Quiz
+                            </button>
+                        </div>
+
+                        <div class="current-question-display" id="currentQuestionDisplay"></div>
+                        <div class="answer-distribution-panel" id="answerDistribution" style="display: none;"></div>
+                        <div class="live-leaderboard" id="liveLeaderboard"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+
+    <script src="role-page.js"></script>
+    <script src="marketing-site/js/community-navigation.js"></script>
+    <script src="marketing-site/js/live-quiz.js"></script></body>
+
+</html>
+```

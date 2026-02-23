@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Word Cloud - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <header class="topbar">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button id="backBtn" class="back-btn"
+                    style="padding: 8px 16px; margin-top: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                    ← Back
+                </button>
+            </div>
+        </header>
+
+        <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
+            <div class="main-header">
+                <div>
+                    <h1>☁️ Create Word Cloud</h1>
+                    <p>Collect words or short phrases from students</p>
+                </div>
+                <div class="header-actions">
+                    <button class="primary-btn" id="saveBtn">💾 Save & Publish</button>
+                </div>
+            </div>
+
+            <div class="grid two">
+                <section class="panel">
+                    <h2>Word Cloud Configuration</h2>
+                    <form id="wordCloudForm">
+                        <div>
+                            <label for="wcQuestion">Question/Prompt *</label>
+                            <input type="text" id="wcQuestion"
+                                placeholder="e.g., In one word, how do you feel about programming?" required>
+                        </div>
+
+                        <div>
+                            <label for="wcDescription">Instructions (Optional)</label>
+                            <textarea id="wcDescription" rows="2"
+                                placeholder="Provide context or examples..."></textarea>
+                        </div>
+
+                        <div>
+                            <label for="maxWords">Maximum Words Per Student</label>
+                            <select id="maxWords">
+                                <option value="1">1 word</option>
+                                <option value="3" selected>3 words</option>
+                                <option value="5">5 words</option>
+                                <option value="10">10 words</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="charLimit">Character Limit Per Word</label>
+                            <input type="number" id="charLimit" value="20" min="5" max="50">
+                        </div>
+
+                        <div>
+                            <label>Settings</label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="showLive" checked>
+                                <span>Show live word cloud to students</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                                <input type="checkbox" id="allowDuplicates">
+                                <span>Allow duplicate words from same student</span>
+                            </label>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <h2>Preview</h2>
+                    <div
+                        style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 12px; min-height: 300px;">
+                        <h3 style="color: #f5f7ff; margin-bottom: 24px; text-align: center;" id="previewQuestion">Your
+                            question will appear here</h3>
+                        <div style="text-align: center; margin-bottom: 24px;">
+                            <input type="text" placeholder="Type a word..."
+                                style="width: 100%; max-width: 400px; padding: 12px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; font-size: 16px;">
+                        </div>
+                        <div style="text-align: center; color: #9ea4b6;">
+                            <p>Students will type words here</p>
+                            <p style="font-size: 12px; margin-top: 8px;">Words will appear in a cloud visualization</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('wcQuestion').addEventListener('input', function () {
+            document.getElementById('previewQuestion').textContent = this.value || 'Your question will appear here';
+        });
+
+        async function saveWordCloud() {
+            const question = document.getElementById('wcQuestion').value;
+            const description = document.getElementById('wcDescription').value;
+            const maxWords = parseInt(document.getElementById('maxWords').value);
+            const charLimit = parseInt(document.getElementById('charLimit').value);
+            const showLive = document.getElementById('showLive').checked;
+            const allowDuplicates = document.getElementById('allowDuplicates').checked;
+
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            const wordCloudData = {
+                type: 'wordcloud',
+                question,
+                description,
+                maxWords,
+                charLimit,
+                settings: { showLive, allowDuplicates },
+                createdBy: localStorage.getItem('user_name'),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('/api/games/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    },
+                    body: JSON.stringify(wordCloudData)
+                });
+
+                const data = await response.json();
+                if (data.ok) {
+                    alert('✅ Word Cloud created successfully!');
+                    window.location.href = 'admin.html';
+                } else {
+                    alert('❌ Error: ' + (data.message || 'Failed to create word cloud'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Failed to save word cloud. Please try again.');
+            }
+        }
+
+        // Save button handler\r\n        document.getElementById('saveBtn').addEventListener('click', saveWordCloud);\r\n\r\n        // Back button handler
+        document.getElementById('backBtn').addEventListener('click', function () {
+            window.location.href = 'interactive-tools-selector.html';
+        });
+    </script>
+</body>
+
+</html>

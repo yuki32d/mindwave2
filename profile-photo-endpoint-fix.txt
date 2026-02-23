@@ -1,0 +1,39 @@
+// PROFILE PHOTO UPLOAD - Updated to work with email-based auth
+// This endpoint works for students who use email authentication
+
+app.post('/api/upload-profile-photo', profileUpload.single('profilePhoto'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ ok: false, message: 'No file uploaded' });
+    }
+
+    // Get email from request body (sent by frontend)
+    const email = req.body.email;
+    
+    if (!email) {
+      return res.status(400).json({ ok: false, message: 'Email is required. Please log in again.' });
+    }
+
+    const photoUrl = `/uploads/profiles/${req.file.filename}`;
+
+    // Update user's profile photo in database by email
+    const user = await User.findOneAndUpdate(
+      { email: email },
+      { profilePhoto: photoUrl },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ ok: false, message: `User with email ${email} not found in database` });
+    }
+
+    res.json({
+      ok: true,
+      message: 'Profile photo uploaded successfully',
+      photoUrl: photoUrl
+    });
+  } catch (error) {
+    console.error('Profile photo upload error:', error);
+    res.status(500).json({ ok: false, message: 'Failed to upload profile photo', error: error.message });
+  }
+});

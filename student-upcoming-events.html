@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - MindWave</title>
+    <meta name="description" content="Upcoming assignments, quizzes, exams and meetings.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script>
+        (function () { const t = localStorage.getItem('mw_theme') || 'dark'; document.documentElement.setAttribute('data-theme', t); })();
+    </script>
+    <style>
+        /* ── Stats Strip ── */
+        .evt-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .evt-stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform .2s;
+        }
+
+        .evt-stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .evt-stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .evt-stat-val {
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .evt-stat-lbl {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        /* ── Toolbar ── */
+        .evt-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .evt-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 16px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .evt-chip:hover {
+            border-color: var(--accent-2);
+        }
+
+        .evt-chip.active {
+            background: var(--accent-2);
+            color: #fff;
+            border-color: var(--accent-2);
+        }
+
+        .evt-chip .chip-count {
+            display: inline-block;
+            background: rgba(255, 255, 255, .15);
+            padding: 1px 7px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .evt-range-toggle {
+            margin-left: auto;
+            display: flex;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .evt-range-btn {
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .evt-range-btn:hover {
+            color: var(--text);
+        }
+
+        .evt-range-btn.active {
+            background: var(--accent-2);
+            color: #fff;
+        }
+
+        /* ── Grid ── */
+        .evt-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+
+        @media(max-width:960px) {
+            .evt-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .evt-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* ── Hero (Happening Now) ── */
+        .evt-hero {
+            background: linear-gradient(135deg, rgba(239, 68, 68, .12), rgba(245, 158, 11, .08));
+            border: 1px solid rgba(239, 68, 68, .35);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            animation: hp 3s infinite;
+            display: none;
+        }
+
+        .evt-hero.visible {
+            display: flex;
+        }
+
+        @keyframes hp {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, .15);
+            }
+
+            50% {
+                box-shadow: 0 0 20px 4px rgba(239, 68, 68, .08);
+            }
+        }
+
+        .evt-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: #ef4444;
+            margin-bottom: 6px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pd 1.5s infinite;
+            display: inline-block;
+        }
+
+        @keyframes pd {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: .4;
+                transform: scale(1.3);
+            }
+        }
+
+        .evt-hero-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .evt-hero-meta {
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .evt-hero-timer {
+            text-align: right;
+        }
+
+        .evt-hero-time {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ef4444;
+        }
+
+        .evt-hero-time-label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        /* ── Event Cards ── */
+        .evt-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .evt-day-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            margin: 14px 0 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .evt-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all .25s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .evt-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+            border-color: var(--accent-2);
+        }
+
+        .evt-card.urgent {
+            border-left: 3px solid #ef4444;
+        }
+
+        .evt-card-date {
+            min-width: 52px;
+            text-align: center;
+        }
+
+        .evt-card-day {
+            font-size: 24px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .evt-card-mon {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .evt-card-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .evt-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            padding: 2px 10px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
+
+        .evt-type-badge.assignment {
+            background: rgba(245, 158, 11, .15);
+            color: var(--orange);
+        }
+
+        .evt-type-badge.quiz {
+            background: rgba(239, 68, 68, .15);
+            color: #ef4444;
+        }
+
+        .evt-type-badge.exam {
+            background: rgba(168, 85, 247, .15);
+            color: #a78bfa;
+        }
+
+        .evt-type-badge.meeting {
+            background: rgba(59, 130, 246, .15);
+            color: #3b82f6;
+        }
+
+        .evt-type-badge.announcement {
+            background: rgba(34, 197, 94, .15);
+            color: #22c55e;
+        }
+
+        .evt-card-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .evt-card-meta {
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .evt-card-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .evt-card-countdown {
+            text-align: right;
+            min-width: 60px;
+            flex-shrink: 0;
+        }
+
+        .evt-cd-val {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .evt-cd-label {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .evt-cd-val.urgent {
+            color: #ef4444;
+        }
+
+        .evt-cd-val.soon {
+            color: var(--orange);
+        }
+
+        .evt-cd-val.chill {
+            color: var(--accent-2);
+        }
+
+        /* ── Calendar ── */
+        .evt-cal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .evt-cal-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .evt-cal-nav {
+            display: flex;
+            gap: 4px;
+        }
+
+        .evt-cal-nav button {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .evt-cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .evt-cal-dow {
+            font-weight: 700;
+            color: var(--muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            padding: 6px 0;
+        }
+
+        .evt-cal-day {
+            padding: 6px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            font-weight: 500;
+            transition: all .15s;
+        }
+
+        .evt-cal-day:hover {
+            background: rgba(99, 102, 241, .1);
+        }
+
+        .evt-cal-day.today {
+            background: var(--accent-2);
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .evt-cal-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--accent-2);
+        }
+
+        .evt-cal-day.today.has-event::after {
+            background: #fff;
+        }
+
+        .evt-cal-day.other {
+            opacity: .3;
+        }
+
+        /* ── Agenda ── */
+        .evt-agenda-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .evt-agenda-item:last-child {
+            border-bottom: none;
+        }
+
+        .evt-agenda-time {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-2);
+            min-width: 60px;
+        }
+
+        .evt-agenda-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .evt-agenda-text {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .evt-agenda-sub {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* ── Empty ── */
+        .evt-empty {
+            text-align: center;
+            padding: 60px 0;
+            color: var(--muted);
+        }
+
+        .evt-empty i {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            opacity: .4;
+        }
+
+        /* ── Toast ── */
+        .evt-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-2);
+            border-radius: 12px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .3);
+            z-index: 9999;
+            animation: toastIn .4s ease-out;
+            max-width: 360px;
+        }
+
+        @keyframes toastIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .evt-toast-icon i {
+            width: 20px;
+            height: 20px;
+        }
+
+        .evt-toast-title {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .evt-toast-body {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .evt-toast .close-toast {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 8px;
+        }
+
+        /* ── Skeleton ── */
+        .skel {
+            background: linear-gradient(90deg, var(--border) 25%, rgba(255, 255, 255, .06) 50%, var(--border) 75%);
+            background-size: 200%;
+            border-radius: 8px;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mw-shell">
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar" id="mwSidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon">🌊</div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">BETA</span>
+            </div>
+            <div class="mw-sidebar-nav">
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="zap"></i></span>
+                        Dashboard</a>
+                    <a href="student-courses.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="book-open"></i></span> My Courses</a>
+                    <a href="student-timetable.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="calendar"></i></span> Timetable</a>
+                    <a href="student-performance.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="bar-chart-2"></i></span> Performance</a>
+                    <a href="student-leaderboard.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="trophy"></i></span> Leaderboard</a>
+                </nav>
+                <div class="mw-divider"></div>
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="gamepad-2"></i></span> Play Games</a>
+                    <a href="student-community.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="users"></i></span> Community</a>
+                    <a href="student-achievements.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="award"></i></span> Achievements</a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item active"><span class="mw-nav-icon"><i
+                                data-lucide="megaphone"></i></span> Events</a>
+                </nav>
+                <div class="mw-divider"></div>
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="code-2"></i></span> Code Practice</a>
+                    <a href="student-study-recommendations.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="bot"></i></span> AI Tutor</a>
+                    <a href="student-reports.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="file-text"></i></span> Reports</a>
+                    <a href="student-settings.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="settings"></i></span> Settings</a>
+                </nav>
+            </div>
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                    <span class="mw-user-more">⋯</span>
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
+                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
+                        <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+                        <button id="signOutBtn"><i data-lucide="log-out"></i> Sign Out</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
+            <header class="mw-topbar">
+                <div class="mw-breadcrumb">Dashboard / <span>Events</span></div>
+                <div class="mw-search">
+                    <i data-lucide="search" style="width:16px;height:16px;"></i>
+                    <input type="text" placeholder="Search events…" id="evtSearch">
+                </div>
+                <div class="mw-topbar-actions">
+                    <div class="mw-icon-btn" title="Notifications"><i data-lucide="bell"></i></div>
+                    <div class="mw-icon-btn" title="Settings" onclick="location.href='student-settings.html'"><i
+                            data-lucide="settings"></i></div>
+                    <button class="mw-theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon" style="width:16px;height:16px;"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun" style="width:16px;height:16px;"></i></span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="mw-content">
+                <!-- Header -->
+                <div
+                    style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
+                    <div>
+                        <h1
+                            style="font-size:22px;font-weight:800;letter-spacing:-0.02em;display:flex;align-items:center;gap:8px;">
+                            <i data-lucide="calendar-days" style="width:24px;height:24px;color:var(--accent-2);"></i>
+                            Events
+                        </h1>
+                        <p style="font-size:13px;color:var(--muted);margin-top:2px;">Assignments, quizzes, exams, and
+                            meetings — all in one place</p>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="evt-stats" id="evtStats">
+                    <div class="evt-stat-card">
+                        <div class="evt-stat-icon" style="background:rgba(239,68,68,.12);color:#ef4444;"><i
+                                data-lucide="flame" style="width:22px;height:22px;"></i></div>
+                        <div>
+                            <div class="evt-stat-val" style="color:#ef4444;" id="statToday">—</div>
+                            <div class="evt-stat-lbl">Due Today</div>
+                        </div>
+                    </div>
+                    <div class="evt-stat-card">
+                        <div class="evt-stat-icon" style="background:rgba(245,158,11,.12);color:var(--orange);"><i
+                                data-lucide="calendar-range" style="width:22px;height:22px;"></i></div>
+                        <div>
+                            <div class="evt-stat-val" style="color:var(--orange);" id="statWeek">—</div>
+                            <div class="evt-stat-lbl">This Week</div>
+                        </div>
+                    </div>
+                    <div class="evt-stat-card">
+                        <div class="evt-stat-icon" style="background:rgba(99,102,241,.12);color:var(--accent-2);"><i
+                                data-lucide="clipboard-list" style="width:22px;height:22px;"></i></div>
+                        <div>
+                            <div class="evt-stat-val" style="color:var(--accent-2);" id="statAssign">—</div>
+                            <div class="evt-stat-lbl">Assignments</div>
+                        </div>
+                    </div>
+                    <div class="evt-stat-card">
+                        <div class="evt-stat-icon" style="background:rgba(34,197,94,.12);color:#22c55e;"><i
+                                data-lucide="check-circle-2" style="width:22px;height:22px;"></i></div>
+                        <div>
+                            <div class="evt-stat-val" style="color:#22c55e;" id="statTotal">—</div>
+                            <div class="evt-stat-lbl">Total Events</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="evt-toolbar" id="evtToolbar">
+                    <div class="evt-chip active" data-type="all"><i data-lucide="layers"
+                            style="width:14px;height:14px;"></i> All <span class="chip-count" id="countAll">—</span>
+                    </div>
+                    <div class="evt-chip" data-type="assignment"><i data-lucide="file-edit"
+                            style="width:14px;height:14px;"></i> Assignments <span class="chip-count"
+                            id="countAssign">—</span></div>
+                    <div class="evt-chip" data-type="quiz"><i data-lucide="brain" style="width:14px;height:14px;"></i>
+                        Quizzes <span class="chip-count" id="countQuiz">—</span></div>
+                    <div class="evt-chip" data-type="exam"><i data-lucide="book-open-check"
+                            style="width:14px;height:14px;"></i> Exams <span class="chip-count" id="countExam">—</span>
+                    </div>
+                    <div class="evt-chip" data-type="meeting"><i data-lucide="video"
+                            style="width:14px;height:14px;"></i> Meetings <span class="chip-count"
+                            id="countMeet">—</span></div>
+                    <div class="evt-chip" data-type="announcement"><i data-lucide="megaphone"
+                            style="width:14px;height:14px;"></i> Announcements <span class="chip-count"
+                            id="countAnn">—</span></div>
+                    <div class="evt-range-toggle">
+                        <button class="evt-range-btn" data-range="today">Today</button>
+                        <button class="evt-range-btn" data-range="week">This Week</button>
+                        <button class="evt-range-btn" data-range="month">Month</button>
+                        <button class="evt-range-btn active" data-range="all">All</button>
+                    </div>
+                </div>
+
+                <!-- Two-column grid -->
+                <div class="evt-grid">
+                    <!-- LEFT: Event list -->
+                    <div>
+                        <div class="evt-hero" id="evtHero"></div>
+                        <div id="evtList">
+                            <!-- Skeleton loaders -->
+                            <div style="display:flex;flex-direction:column;gap:12px;">
+                                <div class="skel" style="height:90px;"></div>
+                                <div class="skel" style="height:90px;"></div>
+                                <div class="skel" style="height:90px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: Calendar + Agenda -->
+                    <div>
+                        <div class="mw-panel" id="calendarPanel">
+                            <div class="mw-panel-header">
+                                <div class="mw-panel-title" style="display:flex;align-items:center;gap:6px;"><i
+                                        data-lucide="calendar" style="width:16px;height:16px;"></i> Calendar</div>
+                            </div>
+                            <div class="mw-panel-body" id="calendarBody"></div>
+                        </div>
+                        <div class="mw-panel" style="margin-top:14px;" id="agendaPanel">
+                            <div class="mw-panel-header">
+                                <div class="mw-panel-title" style="display:flex;align-items:center;gap:6px;"><i
+                                        data-lucide="clock" style="width:16px;height:16px;"></i> Today's Agenda</div>
+                            </div>
+                            <div class="mw-panel-body" id="agendaBody">
+                                <div style="padding:16px 0;text-align:center;color:var(--muted);font-size:13px;">
+                                    Loading…</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastContainer"></div>
+
+    <script src="sidebar.js"></script>
+    <script>
+        /* ── Globals ── */
+        const API = window.location.origin;
+        const TOKEN = localStorage.getItem('token') || localStorage.getItem('mindwave_token');
+        let allEvents = [];
+        let currentType = 'all';
+        let currentRange = 'all';
+
+        /* ── Theme Toggle ── */
+        const _root = document.documentElement;
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const next = _root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            _root.setAttribute('data-theme', next);
+            localStorage.setItem('mw_theme', next);
+        });
+
+        /* ── Profile Dropdown ── */
+        const profileToggle = document.getElementById('profileToggle');
+        const profileDropdown = document.getElementById('profileDropdown');
+        if (profileToggle && profileDropdown) {
+            profileToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('visible');
+            });
+            document.addEventListener('click', () => profileDropdown.classList.remove('visible'));
+        }
+
+        /* ── Sign Out ── */
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'marketing-site/student-login.html';
+            });
+        }
+
+        /* ── Icon config per event type ── */
+        const TYPE_ICONS = {
+            assignment: { lucide: 'file-edit', color: 'var(--orange)', bg: 'rgba(245,158,11,.15)' },
+            quiz: { lucide: 'brain', color: '#ef4444', bg: 'rgba(239,68,68,.15)' },
+            exam: { lucide: 'book-open-check', color: '#a78bfa', bg: 'rgba(168,85,247,.15)' },
+            meeting: { lucide: 'video', color: '#3b82f6', bg: 'rgba(59,130,246,.15)' },
+            announcement: { lucide: 'megaphone', color: '#22c55e', bg: 'rgba(34,197,94,.15)' }
+        };
+
+        /* ── Fetch Events ── */
+        async function loadEvents() {
+            try {
+                const params = new URLSearchParams();
+                if (currentType !== 'all') params.set('type', currentType);
+                if (currentRange !== 'all') params.set('range', currentRange);
+                const searchVal = document.getElementById('evtSearch').value.trim();
+                if (searchVal) params.set('search', searchVal);
+
+                const res = await fetch(`${API}/api/events?${params}`, {
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
+                });
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.message);
+
+                allEvents = data.events || [];
+                const stats = data.stats || {};
+
+                // Update stats
+                document.getElementById('statToday').textContent = stats.dueToday || 0;
+                document.getElementById('statWeek').textContent = stats.thisWeek || 0;
+                document.getElementById('statAssign').textContent = stats.assignments || 0;
+                document.getElementById('statTotal').textContent = stats.total || 0;
+
+                // Update chip counts
+                document.getElementById('countAll').textContent = stats.total || 0;
+                document.getElementById('countAssign').textContent = stats.assignments || 0;
+                document.getElementById('countQuiz').textContent = stats.quizzes || 0;
+                document.getElementById('countExam').textContent = stats.exams || 0;
+                document.getElementById('countMeet').textContent = stats.meetings || 0;
+                document.getElementById('countAnn').textContent = stats.announcements || 0;
+
+                renderEvents(allEvents);
+                renderAgenda(allEvents);
+                renderCalendar(allEvents);
+                checkHeroEvent(allEvents);
+            } catch (err) {
+                console.error('Failed to load events:', err);
+                document.getElementById('evtList').innerHTML = `
+            <div class="evt-empty">
+                <i data-lucide="calendar-off" style="width:48px;height:48px;opacity:.4;"></i>
+                <h3 style="margin:12px 0 6px;">Failed to load events</h3>
+                <p style="font-size:13px;">${err.message || 'Check your connection and try again.'}</p>
+            </div>`;
+                lucide.createIcons();
+            }
+        }
+
+        /* ── Render Event Cards ── */
+        function renderEvents(events) {
+            const container = document.getElementById('evtList');
+            if (!events.length) {
+                container.innerHTML = `
+            <div class="evt-empty">
+                <i data-lucide="party-popper" style="width:48px;height:48px;opacity:.4;"></i>
+                <h3 style="margin:12px 0 6px;">No upcoming events</h3>
+                <p style="font-size:13px;">Enjoy the free time! Your teachers haven't posted any events yet.</p>
+            </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            // Group by day
+            const groups = {};
+            events.forEach(evt => {
+                const d = new Date(evt.startTime);
+                const key = d.toISOString().split('T')[0];
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(evt);
+            });
+
+            let html = '';
+            const today = new Date().toISOString().split('T')[0];
+            const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+            Object.keys(groups).sort().forEach(dateKey => {
+                const d = new Date(dateKey + 'T00:00:00');
+                const label = dateKey === today ? 'Today' :
+                    dateKey === tomorrow ? 'Tomorrow' :
+                        d.toLocaleDateString('en-IN', { weekday: 'long', month: 'short', day: 'numeric' });
+
+                const icon = dateKey === today ? 'pin' : 'calendar';
+                html += `<div class="evt-day-label"><i data-lucide="${icon}" style="width:14px;height:14px;"></i> ${label}</div>`;
+                html += '<div class="evt-list">';
+
+                groups[dateKey].forEach(evt => {
+                    const cd = evt.countdown || {};
+                    const st = new Date(evt.startTime);
+                    const day = st.getDate().toString().padStart(2, '0');
+                    const mon = st.toLocaleString('en', { month: 'short' }).toUpperCase();
+                    const timeStr = formatTime(st);
+                    const endStr = evt.endTime ? ` – ${formatTime(new Date(evt.endTime))}` : '';
+                    const dueStr = evt.dueTime ? `Due: ${formatTime(new Date(evt.dueTime))}` : `${timeStr}${endStr}`;
+                    const ti = TYPE_ICONS[evt.type] || TYPE_ICONS.announcement;
+                    const isUrgent = cd.urgency === 'urgent' ? ' urgent' : '';
+
+                    html += `
+            <div class="evt-card${isUrgent}">
+                <div class="evt-card-date">
+                    <div class="evt-card-day" style="color:${ti.color};">${day}</div>
+                    <div class="evt-card-mon">${mon}</div>
+                </div>
+                <div class="evt-card-body">
+                    <div class="evt-type-badge ${evt.type}"><i data-lucide="${ti.lucide}" style="width:12px;height:12px;"></i> ${evt.type}</div>
+                    <div class="evt-card-title">${esc(evt.title)}</div>
+                    <div class="evt-card-meta">
+                        <span><i data-lucide="clock" style="width:12px;height:12px;"></i> ${dueStr}</span>
+                        ${evt.subject ? `<span><i data-lucide="book" style="width:12px;height:12px;"></i> ${esc(evt.subject)}</span>` : ''}
+                        ${evt.createdByName ? `<span><i data-lucide="user" style="width:12px;height:12px;"></i> ${esc(evt.createdByName)}</span>` : ''}
+                        ${evt.location ? `<span><i data-lucide="map-pin" style="width:12px;height:12px;"></i> ${esc(evt.location)}</span>` : ''}
+                        ${evt.attachments && evt.attachments.length ? `<span><i data-lucide="paperclip" style="width:12px;height:12px;"></i> ${evt.attachments.length} file(s)</span>` : ''}
+                    </div>
+                </div>
+                <div class="evt-card-countdown">
+                    <div class="evt-cd-val ${cd.urgency || 'chill'}">${cd.label || '—'}</div>
+                    <div class="evt-cd-label">${cd.ms > 0 ? 'Left' : ''}</div>
+                </div>
+            </div>`;
+                });
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        /* ── Hero (Happening Now) ── */
+        function checkHeroEvent(events) {
+            const hero = document.getElementById('evtHero');
+            const now = Date.now();
+            const happening = events.find(e => {
+                const start = new Date(e.startTime).getTime();
+                const end = e.endTime ? new Date(e.endTime).getTime() : start + 3600000;
+                return now >= start && now <= end && ['quiz', 'meeting', 'exam'].includes(e.type);
+            });
+
+            if (!happening) { hero.classList.remove('visible'); return; }
+
+            const end = happening.endTime ? new Date(happening.endTime) : new Date(new Date(happening.startTime).getTime() + 3600000);
+            const minsLeft = Math.max(0, Math.round((end - now) / 60000));
+            const ti = TYPE_ICONS[happening.type] || TYPE_ICONS.meeting;
+
+            hero.innerHTML = `
+        <div>
+            <div class="evt-hero-badge"><span class="pulse-dot"></span> Happening Now</div>
+            <div class="evt-hero-title">${esc(happening.title)}</div>
+            <div class="evt-hero-meta">
+                ${happening.location ? `<span><i data-lucide="map-pin" style="width:14px;height:14px;"></i> ${esc(happening.location)}</span>` : ''}
+                ${happening.createdByName ? `<span><i data-lucide="user" style="width:14px;height:14px;"></i> ${esc(happening.createdByName)}</span>` : ''}
+                ${happening.subject ? `<span>${esc(happening.subject)}</span>` : ''}
+            </div>
+            ${happening.meetingLink ? `<div style="margin-top:8px;"><a href="${happening.meetingLink}" class="mw-btn mw-btn-primary" style="font-size:12px;padding:6px 18px;border-radius:8px;">Join Now →</a></div>` : ''}
+        </div>
+        <div class="evt-hero-timer">
+            <div class="evt-hero-time">${minsLeft}m</div>
+            <div class="evt-hero-time-label">remaining</div>
+        </div>`;
+            hero.classList.add('visible');
+            lucide.createIcons();
+        }
+
+        /* ── Agenda ── */
+        function renderAgenda(events) {
+            const body = document.getElementById('agendaBody');
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayEvts = events.filter(e => new Date(e.startTime).toISOString().split('T')[0] === todayStr);
+
+            if (!todayEvts.length) {
+                body.innerHTML = '<div style="padding:16px 0;text-align:center;color:var(--muted);font-size:13px;"><i data-lucide="coffee" style="width:18px;height:18px;opacity:.5;"></i><br>No events today</div>';
+                lucide.createIcons();
+                return;
+            }
+
+            const DOTS = { assignment: 'var(--orange)', quiz: '#ef4444', exam: '#a78bfa', meeting: '#3b82f6', announcement: '#22c55e' };
+            body.innerHTML = todayEvts.map(e => {
+                const t = formatTime(new Date(e.startTime));
+                return `
+        <div class="evt-agenda-item">
+            <div class="evt-agenda-time">${t}</div>
+            <div class="evt-agenda-dot" style="background:${DOTS[e.type] || 'var(--accent-2)'};"></div>
+            <div>
+                <div class="evt-agenda-text">${esc(e.title)}</div>
+                <div class="evt-agenda-sub">${e.subject || e.type}${e.location ? ' · ' + e.location : ''}</div>
+            </div>
+        </div>`;
+            }).join('');
+        }
+
+        /* ── Calendar ── */
+        function renderCalendar(events) {
+            const body = document.getElementById('calendarBody');
+            const now = new Date();
+            const year = now.getFullYear(), month = now.getMonth();
+            const first = new Date(year, month, 1);
+            const last = new Date(year, month + 1, 0);
+            const startDay = first.getDay(); // 0=Sun
+            const daysInMonth = last.getDate();
+            const today = now.getDate();
+
+            // Collect event dates (day numbers)
+            const eventDays = new Set();
+            events.forEach(e => {
+                const d = new Date(e.startTime);
+                if (d.getMonth() === month && d.getFullYear() === year) eventDays.add(d.getDate());
+            });
+
+            const monthName = now.toLocaleString('en', { month: 'long', year: 'numeric' });
+
+            let html = `<div class="evt-cal-header"><h3>${monthName}</h3><div class="evt-cal-nav"><button>‹</button><button>›</button></div></div>`;
+            html += '<div class="evt-cal-grid">';
+            ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].forEach(d => html += `<div class="evt-cal-dow">${d}</div>`);
+
+            // Empty cells before first day
+            for (let i = 0; i < startDay; i++) html += '<div class="evt-cal-day other"></div>';
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const cls = [];
+                if (d === today) cls.push('today');
+                if (eventDays.has(d)) cls.push('has-event');
+                html += `<div class="evt-cal-day ${cls.join(' ')}">${d}</div>`;
+            }
+            html += '</div>';
+            body.innerHTML = html;
+        }
+
+        /* ── Filter handlers ── */
+        document.querySelectorAll('.evt-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.evt-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                currentType = chip.dataset.type;
+                loadEvents();
+            });
+        });
+
+        document.querySelectorAll('.evt-range-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.evt-range-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentRange = btn.dataset.range;
+                loadEvents();
+            });
+        });
+
+        // Search debounce
+        let searchTimer;
+        document.getElementById('evtSearch').addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(loadEvents, 400);
+        });
+
+        /* ── Socket.IO Real-time ── */
+        function initSocket() {
+            if (typeof io === 'undefined') return;
+            const socket = io();
+            socket.on('new-event', (data) => {
+                showToast(data.message || 'New event posted!', data.event);
+                loadEvents(); // Refresh the list
+            });
+            socket.on('event-updated', () => loadEvents());
+            socket.on('event-deleted', () => loadEvents());
+        }
+
+        /* ── Toast ── */
+        function showToast(message, event) {
+            const container = document.getElementById('toastContainer');
+            const ti = event ? (TYPE_ICONS[event.type] || TYPE_ICONS.announcement) : TYPE_ICONS.announcement;
+            const toast = document.createElement('div');
+            toast.className = 'evt-toast';
+            toast.innerHTML = `
+        <div class="evt-toast-icon"><i data-lucide="${ti.lucide}" style="width:20px;height:20px;color:${ti.color};"></i></div>
+        <div>
+            <div class="evt-toast-title">${esc(message)}</div>
+            ${event ? `<div class="evt-toast-body">${event.subject || ''} · ${new Date(event.startTime).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</div>` : ''}
+        </div>
+        <button class="close-toast" onclick="this.parentElement.remove()">✕</button>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 5000);
+        }
+
+        /* ── Helpers ── */
+        function formatTime(d) { return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }); }
+        function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+        /* ── Init ── */
+        lucide.createIcons();
+        loadEvents();
+
+        // Try loading Socket.IO client
+        const sioScript = document.createElement('script');
+        sioScript.src = '/socket.io/socket.io.js';
+        sioScript.onload = initSocket;
+        document.body.appendChild(sioScript);
+    </script>
+</body>
+
+</html>

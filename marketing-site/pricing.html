@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - MindWave</title>
+    <meta name="description"
+        content="Choose the perfect MindWave plan for your institution. Flexible pricing for every need.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .pricing-hero {
+            padding: 140px 0 60px;
+            text-align: center;
+            background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+        }
+
+        .pricing-hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-hero p {
+            font-size: 1.25rem;
+            color: #6B7280;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+        }
+
+        .billing-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .billing-toggle button {
+            padding: 0.75rem 2rem;
+            border: none;
+            background: transparent;
+            color: #6B7280;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .billing-toggle button.active {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: white;
+        }
+
+        .pricing-section {
+            padding: 60px 0 80px;
+            background: white;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .pricing-card {
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .pricing-card.featured {
+            border-color: #4F46E5;
+            box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.2);
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: -12px;
+            right: 2rem;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-card .description {
+            color: #6B7280;
+            margin-bottom: 2rem;
+        }
+
+        .price {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .price .amount {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .price .period {
+            color: #6B7280;
+            font-size: 1rem;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem 0;
+        }
+
+        .features-list li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            color: #374151;
+        }
+
+        .features-list li i {
+            color: #10B981;
+            margin-top: 0.25rem;
+        }
+
+        .comparison-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+        }
+
+        .comparison-table {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .comparison-table h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 3rem;
+        }
+
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        th {
+            background: #F9FAFB;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        td:first-child {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .check {
+            color: #10B981;
+            font-size: 1.25rem;
+        }
+
+        .cross {
+            color: #EF4444;
+            font-size: 1.25rem;
+        }
+
+        @media (max-width: 968px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+
+            .pricing-hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="website-home.html" class="nav-logo">
+                <i class="fas fa-brain"></i>
+                <span>Mind<span class="gradient-text">Wave</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="website-home.html#features">Features</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="website-home.html#faq">FAQ</a>
+                <a href="website-login.html" class="nav-login">Login</a>
+                <a href="website-signup.html" class="btn btn-primary">Get Started</a>
+            </div>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Pricing Hero -->
+    <section class="pricing-hero">
+        <div class="container">
+            <h1>Simple, Transparent Pricing</h1>
+            <p>Choose the perfect plan for your institution. All plans include a 14-day free trial with full access to
+                features.</p>
+
+            <div class="billing-toggle">
+                <button class="active" id="monthly-btn">Monthly</button>
+                <button id="annual-btn">Annual <span style="color: #10B981; font-size: 0.875rem;">(Save
+                        20%)</span></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Cards -->
+    <section class="pricing-section">
+        <div class="pricing-grid">
+            <!-- Personal Plan -->
+            <div class="pricing-card">
+                <h3>Personal</h3>
+                <p class="description">Perfect for individual educators</p>
+                <div class="price">
+                    <span class="amount monthly-price">$19</span>
+                    <span class="annual-price" style="display: none;">$15</span>
+                    <span class="period">/month</span>
+                </div>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Up to 50 students</li>
+                    <li><i class="fas fa-check"></i> 5 courses</li>
+                    <li><i class="fas fa-check"></i> Basic AI game builder</li>
+                    <li><i class="fas fa-check"></i> Student progress tracking</li>
+                    <li><i class="fas fa-check"></i> Email support</li>
+                    <li><i class="fas fa-check"></i> Mobile app access</li>
+                </ul>
+                <a href="website-signup.html" class="btn btn-outline btn-block">Start Free Trial</a>
+            </div>
+
+            <!-- Team Plan (Featured) -->
+            <div class="pricing-card featured">
+                <div class="pricing-badge">Most Popular</div>
+                <h3>Team</h3>
+                <p class="description">For small to medium institutions</p>
+                <div class="price">
+                    <span class="amount monthly-price">$99</span>
+                    <span class="annual-price" style="display: none;">$79</span>
+                    <span class="period">/month</span>
+                </div>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Up to 500 students</li>
+                    <li><i class="fas fa-check"></i> Unlimited courses</li>
+                    <li><i class="fas fa-check"></i> Advanced AI features</li>
+                    <li><i class="fas fa-check"></i> Custom branding</li>
+                    <li><i class="fas fa-check"></i> Priority support</li>
+                    <li><i class="fas fa-check"></i> Analytics dashboard</li>
+                    <li><i class="fas fa-check"></i> API access</li>
+                    <li><i class="fas fa-check"></i> Team collaboration</li>
+                </ul>
+                <a href="website-signup.html" class="btn btn-primary btn-block">Start Free Trial</a>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="pricing-card">
+                <h3>Enterprise</h3>
+                <p class="description">For large organizations</p>
+                <div class="price">
+                    <span class="amount">Custom</span>
+                </div>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Unlimited students</li>
+                    <li><i class="fas fa-check"></i> Unlimited courses</li>
+                    <li><i class="fas fa-check"></i> All features included</li>
+                    <li><i class="fas fa-check"></i> SSO integration</li>
+                    <li><i class="fas fa-check"></i> Dedicated support</li>
+                    <li><i class="fas fa-check"></i> Custom integrations</li>
+                    <li><i class="fas fa-check"></i> SLA guarantee</li>
+                    <li><i class="fas fa-check"></i> On-premise option</li>
+                </ul>
+                <a href="contact.html" class="btn btn-outline btn-block">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Comparison Table -->
+    <section class="comparison-section">
+        <div class="comparison-table">
+            <h2>Compare Plans</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Personal</th>
+                        <th>Team</th>
+                        <th>Enterprise</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Students</td>
+                        <td>Up to 50</td>
+                        <td>Up to 500</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td>Courses</td>
+                        <td>5</td>
+                        <td>Unlimited</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td>AI Game Builder</td>
+                        <td><i class="fas fa-check check"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Progress Tracking</td>
+                        <td><i class="fas fa-check check"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Custom Branding</td>
+                        <td><i class="fas fa-times cross"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Analytics Dashboard</td>
+                        <td><i class="fas fa-times cross"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>API Access</td>
+                        <td><i class="fas fa-times cross"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>SSO Integration</td>
+                        <td><i class="fas fa-times cross"></i></td>
+                        <td><i class="fas fa-times cross"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Priority Support</td>
+                        <td><i class="fas fa-times cross"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Dedicated Support</td>
+                        <td><i class="fas fa-times cross"></i></td>
+                        <td><i class="fas fa-times cross"></i></td>
+                        <td><i class="fas fa-check check"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq">
+        <div class="container">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>Can I switch plans later?</h3>
+                    <p>Yes! You can upgrade or downgrade your plan at any time. Changes will be reflected in your next
+                        billing cycle.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>What payment methods do you accept?</h3>
+                    <p>We accept all major credit cards (Visa, MasterCard, American Express) and offer invoice billing
+                        for Enterprise customers.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Is there a free trial?</h3>
+                    <p>Yes! All plans come with a 14-day free trial with full access to features. No credit card
+                        required to start.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>What happens after my trial ends?</h3>
+                    <p>You'll be automatically enrolled in your chosen plan. You can cancel anytime before the trial
+                        ends with no charges.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Do you offer refunds?</h3>
+                    <p>Yes, we offer a 14-day money-back guarantee for new subscriptions. Contact support for
+                        assistance.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Can I get a custom plan?</h3>
+                    <p>Absolutely! Contact our sales team to discuss custom pricing and features tailored to your needs.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container cta-content">
+            <h2>Ready to Transform Your Classroom?</h2>
+            <p>Join thousands of educators using MindWave to make learning fun and engaging.</p>
+            <div class="cta-buttons">
+                <a href="website-signup.html" class="btn btn-primary btn-lg">Start Free Trial</a>
+                <a href="demo.html" class="btn btn-outline btn-lg">Request Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <i class="fas fa-brain"></i>
+                    <span>Mind<span class="gradient-text">Wave</span></span>
+                </div>
+                <p>Transform learning into epic adventures with AI-powered gamification.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Product</h4>
+                    <a href="website-home.html#features">Features</a>
+                    <a href="pricing.html">Pricing</a>
+                    <a href="demo.html">Request Demo</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <a href="contact.html">Contact</a>
+                    <a href="privacy.html">Privacy</a>
+                    <a href="terms.html">Terms</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <a href="website-home.html#faq">FAQ</a>
+                    <a href="#">Documentation</a>
+                    <a href="#">Blog</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms of Service</a>
+                    <a href="cookies.html">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 MindWave Inc. All rights reserved.</p>
+            <div class="footer-social">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Billing toggle
+        const monthlyBtn = document.getElementById('monthly-btn');
+        const annualBtn = document.getElementById('annual-btn');
+        const monthlyPrices = document.querySelectorAll('.monthly-price');
+        const annualPrices = document.querySelectorAll('.annual-price');
+
+        monthlyBtn.addEventListener('click', function () {
+            this.classList.add('active');
+            annualBtn.classList.remove('active');
+            monthlyPrices.forEach(el => el.style.display = 'inline');
+            annualPrices.forEach(el => el.style.display = 'none');
+        });
+
+        annualBtn.addEventListener('click', function () {
+            this.classList.add('active');
+            monthlyBtn.classList.remove('active');
+            monthlyPrices.forEach(el => el.style.display = 'none');
+            annualPrices.forEach(el => el.style.display = 'inline');
+        });
+    </script></body>
+
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Tool - MindWave</title>
+    <meta name="description"
+        content="Create engaging multiple-choice quizzes that boost student participation and track learning progress in real-time.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        .tool-hero {
+            padding: 120px 5% 80px;
+            text-align: center;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .tool-hero h1 {
+            font-size: 64px;
+            font-weight: 900;
+            margin-bottom: 24px;
+        }
+
+        .tool-hero p {
+            font-size: 24px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+        }
+
+        .tool-demo {
+            padding: 80px 5%;
+            background: white;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-visual {
+            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ea 100%);
+            border-radius: 20px;
+            padding: 60px;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-visual::before {
+            content: '🎯';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .feature-item {
+            padding: 40px;
+            background: #f5f5f7;
+            border-radius: 16px;
+        }
+
+        .feature-item i {
+            font-size: 40px;
+            color: #f093fb;
+            margin-bottom: 20px;
+        }
+
+        .feature-item h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .feature-item p {
+            color: #6e6e73;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-brain"></i>
+                <span>Mind<span class="gradient-text">Wave</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="../website-home.html">Home</a>
+                <a href="../website-home.html#pricing">Pricing</a>
+                <a href="../website-signup.html" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tool Hero -->
+    <section class="tool-hero">
+        <h1>Quiz Tool</h1>
+        <p>Create engaging multiple-choice quizzes that boost student participation and track learning progress in
+            real-time.</p>
+        <a href="../website-signup.html" class="btn btn-white btn-lg">Try It Free <i class="fas fa-arrow-right"></i></a>
+    </section>
+
+    <!-- Tool Demo -->
+    <section class="tool-demo">
+        <div class="demo-container">
+            <h2 style="font-size: 48px; text-align: center; margin-bottom: 24px;">How It Works</h2>
+            <p style="text-align: center; font-size: 20px; color: #6e6e73; margin-bottom: 60px;">Create interactive
+                quizzes in minutes</p>
+
+            <div class="demo-visual">
+                <div style="text-align: center; z-index: 1;">
+                    <h3 style="font-size: 32px; color: #1d1d1f; margin-bottom: 16px;">Interactive Quiz Interface</h3>
+                    <p style="font-size: 18px; color: #6e6e73;">Multiple choice questions with instant feedback</p>
+                </div>
+            </div>
+
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="fas fa-list-check"></i>
+                    <h3>1. Create Questions</h3>
+                    <p>Add multiple-choice questions with up to 6 answer options. Set the correct answer and add
+                        explanations.</p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-users"></i>
+                    <h3>2. Launch to Students</h3>
+                    <p>Share a unique code with students. They join instantly from any device - no login required.</p>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>3. Track Results</h3>
+                    <p>See real-time responses, identify learning gaps, and export detailed analytics.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 80px;">
+                <h2 style="font-size: 40px; margin-bottom: 40px;">Key Features</h2>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="fas fa-bolt"></i>
+                        <h3>Instant Feedback</h3>
+                        <p>Students see correct answers immediately with detailed explanations to reinforce learning</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-trophy"></i>
+                        <h3>Gamification</h3>
+                        <p>Points, streaks, and leaderboards make learning competitive and fun</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-mobile-alt"></i>
+                        <h3>Mobile Friendly</h3>
+                        <p>Works perfectly on phones, tablets, and computers - no app download needed</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-clock"></i>
+                        <h3>Timed Questions</h3>
+                        <p>Add time limits to questions for added challenge and focus</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-image"></i>
+                        <h3>Rich Media Support</h3>
+                        <p>Add images, videos, and code snippets to your questions</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-download"></i>
+                        <h3>Export Results</h3>
+                        <p>Download detailed reports in CSV or PDF format for record-keeping</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Create Your First Quiz?</h2>
+                <p>Join thousands of educators engaging students with interactive quizzes</p>
+                <a href="../website-signup.html" class="btn btn-white btn-lg">Start Free Trial <i
+                        class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-brain"></i>
+                        <span>Mind<span class="gradient-text">Wave</span></span>
+                    </div>
+                    <p>Pioneering the next generation of digital learning through AI and gamification.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 MindWave Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Slider - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <header class="topbar">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button id="backBtn" class="back-btn"
+                    style="padding: 8px 16px; margin-top: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                    ← Back
+                </button>
+            </div>
+        </header>
+
+        <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
+            <div class="main-header">
+                <div>
+                    <h1>📊 Create Slider Question</h1>
+                    <p>Ask students to select a value on a slider</p>
+                </div>
+                <div class="header-actions">
+                    <button class="primary-btn" id="saveBtn">💾 Save & Publish</button>
+                </div>
+            </div>
+
+            <div class="grid two">
+                <section class="panel">
+                    <h2>Slider Configuration</h2>
+                    <form id="sliderForm">
+                        <div>
+                            <label for="sliderQuestion">Question *</label>
+                            <input type="text" id="sliderQuestion"
+                                placeholder="e.g., How many hours do you study per day?" required>
+                        </div>
+
+                        <div class="grid two">
+                            <div>
+                                <label for="minValue">Minimum Value *</label>
+                                <input type="number" id="minValue" value="0" required>
+                            </div>
+                            <div>
+                                <label for="maxValue">Maximum Value *</label>
+                                <input type="number" id="maxValue" value="10" required>
+                            </div>
+                        </div>
+
+                        <div class="grid two">
+                            <div>
+                                <label for="minLabel">Min Label</label>
+                                <input type="text" id="minLabel" placeholder="e.g., None" value="0">
+                            </div>
+                            <div>
+                                <label for="maxLabel">Max Label</label>
+                                <input type="text" id="maxLabel" placeholder="e.g., A lot" value="10">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="stepSize">Step Size</label>
+                            <input type="number" id="stepSize" value="1" min="0.1" step="0.1">
+                        </div>
+
+                        <div>
+                            <label>Settings</label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="showAverage" checked>
+                                <span>Show average to students</span>
+                            </label>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <h2>Student Preview</h2>
+                    <div style="background: rgba(255,255,255,0.03); padding: 32px; border-radius: 12px;">
+                        <h3 style="color: #f5f7ff; margin-bottom: 32px; text-align: center;" id="previewQ">Your question
+                            will appear here</h3>
+                        <div style="padding: 0 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                                <span style="color: #9ea4b6; font-size: 14px;" id="previewMinLabel">0</span>
+                                <span style="color: #0f62fe; font-size: 24px; font-weight: 600;"
+                                    id="sliderValue">5</span>
+                                <span style="color: #9ea4b6; font-size: 14px;" id="previewMaxLabel">10</span>
+                            </div>
+                            <input type="range" id="previewSlider" min="0" max="10" value="5" step="1"
+                                style="width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0f62fe 0%, #9f7aea 100%); outline: none; appearance: none; -webkit-appearance: none;">
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updatePreview() {
+            const question = document.getElementById('sliderQuestion').value;
+            const min = document.getElementById('minValue').value;
+            const max = document.getElementById('maxValue').value;
+            const minLabel = document.getElementById('minLabel').value;
+            const maxLabel = document.getElementById('maxLabel').value;
+            const step = document.getElementById('stepSize').value;
+
+            document.getElementById('previewQ').textContent = question || 'Your question will appear here';
+            document.getElementById('previewMinLabel').textContent = minLabel || min;
+            document.getElementById('previewMaxLabel').textContent = maxLabel || max;
+
+            const slider = document.getElementById('previewSlider');
+            slider.min = min;
+            slider.max = max;
+            slider.step = step;
+            slider.value = (parseFloat(min) + parseFloat(max)) / 2;
+            document.getElementById('sliderValue').textContent = slider.value;
+        }
+
+        ['sliderQuestion', 'minValue', 'maxValue', 'minLabel', 'maxLabel', 'stepSize'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updatePreview);
+        });
+
+        async function saveSlider() {
+            const question = document.getElementById('sliderQuestion').value;
+            const min = parseFloat(document.getElementById('minValue').value);
+            const max = parseFloat(document.getElementById('maxValue').value);
+            const minLabel = document.getElementById('minLabel').value;
+            const maxLabel = document.getElementById('maxLabel').value;
+            const step = parseFloat(document.getElementById('stepSize').value);
+            const showAverage = document.getElementById('showAverage').checked;
+
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            const sliderData = {
+                type: 'slider',
+                question,
+                min,
+                max,
+                minLabel,
+                maxLabel,
+                step,
+                settings: { showAverage },
+                createdBy: localStorage.getItem('user_name'),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('/api/games/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    },
+                    body: JSON.stringify(sliderData)
+                });
+
+                const data = await response.json();
+                if (data.ok) {
+                    alert('✅ Slider created successfully!');
+                    window.location.href = 'admin.html';
+                } else {
+                    alert('❌ Error: ' + (data.message || 'Failed to create slider'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Failed to save slider. Please try again.');
+            }
+        }
+
+        updatePreview();
+
+        // Preview slider handler
+        document.getElementById('previewSlider').addEventListener('input', function () {
+            document.getElementById('sliderValue').textContent = this.value;
+        });
+
+        // Save button handler
+        document.getElementById('saveBtn').addEventListener('click', saveSlider);
+
+        // Back button handler
+        document.getElementById('backBtn').addEventListener('click', function () {
+            window.location.href = 'interactive-tools-selector.html';
+        });
+    </script>
+</body>
+
+</html>

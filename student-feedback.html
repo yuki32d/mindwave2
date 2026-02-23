@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Feedback - MindWave</title>
+    <link rel="stylesheet" href="../3d-depth-design.css">
+    <link rel="stylesheet" href="marketing-site/css/student-feedback.css">
+    <link rel="stylesheet" href="marketing-site/css/student-nav.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+
+<body data-theme="dark">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-brain"></i>
+                <span>MindWave</span>
+            </div>
+            <div class="nav-actions">
+                <a href="student-community.html" class="nav-btn primary-nav-btn"><i class="fas fa-plus"></i> Create
+                    Post</a>
+                <a href="student-community.html" class="nav-btn"><i class="fas fa-file-alt"></i> My Posts</a>
+                <a href="student-poll-response.html" class="nav-btn"><i class="fas fa-poll"></i> Quick Poll</a>
+                <a href="student-feedback.html" class="nav-btn active"><i class="fas fa-comments"></i> Feedback</a>
+                <a href="student-live-quiz.html" class="nav-btn"><i class="fas fa-trophy"></i> Live Quiz</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="feedback-container">
+        <!-- Feedback Form -->
+        <section class="feedback-section" id="feedbackSection">
+            <div class="feedback-card">
+                <div class="card-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+
+                <h1>How are you feeling?</h1>
+                <p class="subtitle">Your feedback is anonymous and helps improve the lesson</p>
+
+                <!-- Confidence Slider -->
+                <div class="confidence-selector">
+                    <label>How confident are you feeling about this topic?</label>
+
+                    <div class="emoji-options">
+                        <button class="emoji-btn" data-value="1" title="Very Confused">
+                            <span class="emoji">😟</span>
+                            <span class="label">Very Confused</span>
+                        </button>
+                        <button class="emoji-btn" data-value="2" title="Confused">
+                            <span class="emoji">😕</span>
+                            <span class="label">Confused</span>
+                        </button>
+                        <button class="emoji-btn" data-value="3" title="Neutral">
+                            <span class="emoji">😐</span>
+                            <span class="label">Neutral</span>
+                        </button>
+                        <button class="emoji-btn" data-value="4" title="Confident">
+                            <span class="emoji">🙂</span>
+                            <span class="label">Confident</span>
+                        </button>
+                        <button class="emoji-btn" data-value="5" title="Very Confident">
+                            <span class="emoji">😄</span>
+                            <span class="label">Very Confident</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Optional Comment -->
+                <div class="comment-section">
+                    <label>
+                        <i class="fas fa-comment-dots"></i> Any questions or comments? (Optional)
+                    </label>
+                    <textarea id="feedbackComment"
+                        placeholder="e.g., Can you explain the difference between let and const again?"
+                        rows="4"></textarea>
+                    <div class="char-count">
+                        <span id="charCount">0</span>/500
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button class="btn-submit" id="submitBtn" disabled>
+                    <i class="fas fa-paper-plane"></i> Submit Feedback
+                </button>
+
+                <div class="privacy-note">
+                    <i class="fas fa-lock"></i> Your response is completely anonymous
+                </div>
+            </div>
+        </section>
+
+        <!-- Success State -->
+        <section class="success-section" id="successSection" style="display: none;">
+            <div class="success-card">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h1>Thank You!</h1>
+                <p>Your feedback has been submitted anonymously.</p>
+                <p class="help-text">Your input helps make the lesson better for everyone!</p>
+
+                <button class="btn-back" onclick="location.href='homepage.html'">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </button>
+            </div>
+        </section>
+
+        <!-- Inactive State -->
+        <section class="inactive-section" id="inactiveSection" style="display: none;">
+            <div class="inactive-card">
+                <div class="inactive-icon">
+                    <i class="fas fa-pause-circle"></i>
+                </div>
+                <h1>Feedback Not Active</h1>
+                <p>Your instructor hasn't started collecting feedback yet.</p>
+                <p class="help-text">Check back during class!</p>
+
+                <button class="btn-back" onclick="location.href='homepage.html'">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script src="marketing-site/js/student-feedback.js"></script></body>
+
+</html>

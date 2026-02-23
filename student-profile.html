@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – My Profile</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+    <style>
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .profile-hero {
+            background: linear-gradient(135deg, rgba(15, 98, 254, 0.2) 0%, rgba(138, 43, 226, 0.2) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-info h1 {
+            margin: 0 0 8px;
+            font-size: 36px;
+        }
+
+        .profile-info p {
+            margin: 0;
+            color: #9ea4b6;
+            font-size: 16px;
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            color: #000;
+            border-radius: 999px;
+            font-weight: 700;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .edit-profile-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .edit-profile-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #9ea4b6;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn:hover {
+            color: white;
+        }
+
+        .tab-btn.active {
+            color: white;
+            border-bottom-color: #0f62fe;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-4px);
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #9ea4b6;
+            font-size: 14px;
+        }
+
+        /* Achievements */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .achievement-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .achievement-card.unlocked {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .achievement-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .achievement-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .achievement-desc {
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        /* Activity List */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .activity-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .activity-icon {
+            font-size: 24px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(15, 98, 254, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .activity-info h4 {
+            margin: 0 0 4px;
+            font-size: 16px;
+        }
+
+        .activity-info p {
+            margin: 0;
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        .activity-score {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4da0ff;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        /* Skills */
+        .skills-grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .skill-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .skill-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .skill-score {
+            font-weight: 700;
+            color: #4da0ff;
+        }
+
+        .skill-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .skill-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4da0ff 0%, #a78bfa 100%);
+            border-radius: 999px;
+            transition: width 0.6s ease;
+        }
+
+        /* Settings */
+        .settings-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .settings-section h3 {
+            margin: 0 0 24px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #9ea4b6;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0f62fe;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .switch.active {
+            background: #0f62fe;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .switch.active::after {
+            transform: translateX(24px);
+        }
+
+        .save-btn {
+            padding: 12px 32px;
+            background: #0f62fe;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .save-btn:hover {
+            background: #0353e9;
+        }
+
+        @media (max-width: 768px) {
+            .profile-hero {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .activity-item {
+                grid-template-columns: auto 1fr;
+            }
+
+            .activity-score,
+            .activity-time {
+                grid-column: 2;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="homepage.html">← Back to Dashboard</a>
+            <p class="eyebrow">Your Profile</p>
+            <h1>Student Profile</h1>
+            <p class="lede">Track your progress and achievements</p>
+        </header>
+
+        <div class="profile-container">
+            <!-- Hero Section -->
+            <div class="profile-hero">
+                <div class="profile-avatar" id="profileAvatar">ST</div>
+                <div class="profile-info">
+                    <h1 id="profileName">Student Name</h1>
+                    <p id="profileEmail">student@example.com</p>
+                    <span class="rank-badge" id="rankBadge">🏆 Rank #-</span>
+                </div>
+                <button class="edit-profile-btn" data-tab="settings">⚙️ Edit Profile</button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="overview">Overview</button>
+                <button class="tab-btn" data-tab="activity">Activity</button>
+                <button class="tab-btn" data-tab="achievements">Achievements</button>
+                <button class="tab-btn" data-tab="settings">Settings</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div class="tab-content active" id="overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-icon">🎯</span>
+                        <div class="stat-value" id="totalPoints">0</div>
+                        <div class="stat-label">Total Points</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">🏆</span>
+                        <div class="stat-value" id="currentRank">#-</div>
+                        <div class="stat-label">Current Rank</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">🎮</span>
+                        <div class="stat-value" id="gamesCompleted">0</div>
+                        <div class="stat-label">Games Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">📊</span>
+                        <div class="stat-value" id="avgAccuracy">0%</div>
+                        <div class="stat-label">Avg Accuracy</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">⏱️</span>
+                        <div class="stat-value" id="totalTime">0m</div>
+                        <div class="stat-label">Time Spent</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">🔥</span>
+                        <div class="stat-value" id="currentStreak">0</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                </div>
+
+                <h2 style="margin-bottom: 16px;">Skills Breakdown</h2>
+                <div class="skills-grid" id="skillsGrid"></div>
+            </div>
+
+            <!-- Activity Tab -->
+            <div class="tab-content" id="activity">
+                <h2 style="margin-bottom: 16px;">Recent Games</h2>
+                <div class="activity-list" id="activityList"></div>
+            </div>
+
+            <!-- Achievements Tab -->
+            <div class="tab-content" id="achievements">
+                <h2 style="margin-bottom: 16px;">Your Achievements</h2>
+                <div class="achievements-grid" id="achievementsGrid"></div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="settings">
+                <div class="settings-section">
+                    <h3>Profile Photo</h3>
+                    <div class="form-group">
+                        <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;">
+                        <button class="edit-profile-btn" id="uploadPhotoBtn">📷 Change Photo</button>
+                        <p style="margin-top: 8px; font-size: 12px; color: #9ea4b6;">Max size: 5MB. Supported formats:
+                            JPG, PNG, GIF</p>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Personal Information</h3>
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="displayName" placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="emailInput" readonly>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Privacy</h3>
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <div class="switch" id="privacyToggle"></div>
+                            <label style="margin: 0;">Show profile on leaderboard</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Notifications</h3>
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <div class="switch active" id="notifToggle"></div>
+                            <label style="margin: 0;">Enable notifications</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="save-btn" id="saveSettingsBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="student-profile.js"></script>
+    <script src="chatbot.js"></script></body>
+
+</html>

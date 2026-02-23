@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Classic Slide – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        if (!checkAdminAuth()) {
+            // Will redirect if not authenticated
+        }
+    </script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <!-- Back Button -->
+                <div style="margin-bottom: 32px;">
+                    <button class="secondary-btn" id="backBtn"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; color: #f5f7ff; cursor: pointer; font-size: 14px; font-weight: 500;">←
+                        Back</button>
+                </div>
+
+                <!-- Page Header -->
+                <div style="text-align: center; margin-bottom: 48px;">
+                    <div
+                        style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-bottom: 12px;">
+                        <h1 style="font-size: 36px; font-weight: 700; color: #f5f7ff; margin: 0;">📄 Create Classic
+                            Slide</h1>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Slide</button>
+                    </div>
+                    <p style="color: #9ea4b6; font-size: 16px; margin: 0;">Simple, clean slide with title and content
+                    </p>
+                </div>
+
+                <!-- Slide Configuration -->
+                <div class="grid two">
+                    <section class="panel">
+                        <h2>📝 Slide Content</h2>
+                        <form id="slideForm">
+                            <div>
+                                <label for="slideTitle">Slide Title</label>
+                                <input type="text" id="slideTitle" placeholder="e.g., Introduction to AI" required>
+                            </div>
+
+                            <div>
+                                <label for="slideContent">Content</label>
+                                <textarea id="slideContent" rows="8" placeholder="Enter your slide content here..."
+                                    required></textarea>
+                            </div>
+
+                            <div>
+                                <label for="backgroundColor">Background Color</label>
+                                <select id="backgroundColor">
+                                    <option value="dark">Dark (Default)</option>
+                                    <option value="light">Light</option>
+                                    <option value="blue">Blue</option>
+                                    <option value="green">Green</option>
+                                    <option value="purple">Purple</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="displayDuration">Display Duration (seconds)</label>
+                                <input type="number" id="displayDuration" value="30" min="5" max="300">
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Live Preview -->
+                    <section class="panel">
+                        <h2>👁️ Live Preview</h2>
+                        <div id="slidePreview"
+                            style="aspect-ratio: 16/9; background: #1E2433; border-radius: 16px; padding: 48px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
+                            <h2 id="previewTitle"
+                                style="font-size: 36px; font-weight: 700; color: #f5f7ff; margin-bottom: 24px;">Your
+                                slide title</h2>
+                            <p id="previewContent"
+                                style="font-size: 18px; line-height: 1.6; color: #9ea4b6; white-space: pre-wrap;">Your
+                                content will appear here</p>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="loading-spinner.js"></script>
+    <script src="faculty-create-slide-classic.js"></script>
+</body>
+
+</html>

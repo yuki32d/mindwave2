@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave - Dashboard</title>
+    <link rel="stylesheet" href="css/modern-dashboard.css">
+    <link rel="stylesheet" href="css/notification-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="favicon.png" alt="MindWave" class="logo-icon" style="width: 28px; height: 28px;">
+                    <span class="logo-text">MindWave</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-label">MAIN MENU</span>
+                    <a href="modern-dashboard.html" class="nav-item active">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="org-analytics.html" class="nav-item">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                    <a href="org-billing.html" class="nav-item">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Billing</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">MANAGEMENT</span>
+                    <a href="org-team.html" class="nav-item">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Team Members</span>
+                    </a>
+                    <a href="org-students.html" class="nav-item">
+                        <span class="nav-icon">🎓</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a href="org-games.html" class="nav-item">
+                        <span class="nav-icon">🎮</span>
+                        <span class="nav-text">Games</span>
+                    </a>
+                    <a href="org-settings.html" class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">SUPPORT</span>
+                    <a href="#help" class="nav-item">
+                        <span class="nav-icon">❓</span>
+                        <span class="nav-text">Help Center</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="search-container">
+                    <input type="text" placeholder="Search..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="header-actions">
+                    <!-- Notification Bell -->
+                    <div class="notification-container">
+                        <button class="btn-icon" id="notificationBell">
+                            🔔
+                            <span class="notification-badge" style="display: none;">0</span>
+                        </button>
+                        <div class="notification-dropdown" id="notificationDropdown" style="display: none;">
+                            <div class="notification-header">
+                                <h3>Notifications</h3>
+                                <button class="btn-text" id="markAllRead">Mark all as read</button>
+                            </div>
+                            <div class="notification-list" id="notificationList">
+                                <div class="notification-empty">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>No notifications</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown">
+                        <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="profile-avatar">
+                        <div class="dropdown-menu">
+                            <a href="org-profile.html" class="dropdown-item">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="org-settings.html" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <hr>
+                            <a href="#" class="dropdown-item" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Welcome Hero Section -->
+            <section class="welcome-hero">
+                <div class="welcome-content">
+                    <h1>Welcome to MindWave, <span id="orgName">Organization</span>! 🎉</h1>
+                    <p class="welcome-subtitle">
+                        <span id="orgType">University</span> •
+                        <span id="planName">Professional Plan</span> •
+                        <span id="trialStatus" class="trial-badge">14 days remaining in trial</span>
+                    </p>
+                </div>
+            </section>
+
+            <!-- Getting Started Section -->
+            <section class="getting-started-section" id="gettingStartedSection">
+                <div class="section-header">
+                    <h2>🚀 Getting Started</h2>
+                    <p>Complete these steps to set up your organization</p>
+                </div>
+
+                <div class="checklist-grid">
+                    <div class="checklist-item" data-step="invite-admin">
+                        <div class="checklist-icon">👥</div>
+                        <div class="checklist-content">
+                            <h3>Invite Team Members</h3>
+                            <p>Add admins and faculty to help manage your organization</p>
+                            <button class="btn-primary" id="inviteAdminBtn">
+                                <i class="fas fa-user-plus"></i> Invite Admin
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="checklist-item" data-step="configure-students">
+                        <div class="checklist-icon">🎓</div>
+                        <div class="checklist-content">
+                            <h3>Configure Student Access</h3>
+                            <p>Set up allowed email domains for student self-signup</p>
+                            <button class="btn-primary" id="configureStudentsBtn">
+                                <i class="fas fa-cog"></i> Configure
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="checklist-item" data-step="add-students">
+                        <div class="checklist-icon">📝</div>
+                        <div class="checklist-content">
+                            <h3>Add Students</h3>
+                            <p>Bulk upload students or let them self-signup</p>
+                            <button class="btn-secondary" id="addStudentsBtn">
+                                <i class="fas fa-upload"></i> Add Students
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="checklist-item" data-step="create-course">
+                        <div class="checklist-icon">📚</div>
+                        <div class="checklist-content">
+                            <h3>Create First Course</h3>
+                            <p>Start building your first course or game</p>
+                            <button class="btn-secondary" id="createCourseBtn">
+                                <i class="fas fa-plus"></i> Create Course
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Stats (Hidden for new users) -->
+            <section class="stats-section" id="statsSection" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value" id="teamCount">0</div>
+                        <div class="stat-label">Team Members</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎓</div>
+                        <div class="stat-value" id="studentCount">0</div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-value" id="courseCount">0</div>
+                        <div class="stat-label">Courses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎮</div>
+                        <div class="stat-value" id="gameCount">0</div>
+                        <div class="stat-label">Games</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Invite Admin Modal -->
+    <div class="modal" id="inviteAdminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Invite Team Member</h2>
+                <button class="modal-close" id="closeInviteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="inviteAdminForm">
+                    <div class="form-group">
+                        <label for="adminEmail">Email Address</label>
+                        <input type="email" id="adminEmail" placeholder="admin@organization.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adminRole">Role</label>
+                        <select id="adminRole" required>
+                            <option value="admin">Admin</option>
+                            <option value="faculty">Faculty</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="autoGeneratePassword" checked>
+                            Auto-generate secure password
+                        </label>
+                    </div>
+
+                    <div class="credentials-display" id="credentialsDisplay" style="display: none;">
+                        <div class="credentials-header">
+                            <i class="fas fa-key"></i> Generated Credentials
+                        </div>
+                        <div class="credentials-content">
+                            <div class="credential-item">
+                                <label>Email:</label>
+                                <span id="displayEmail"></span>
+                            </div>
+                            <div class="credential-item">
+                                <label>Password:</label>
+                                <div class="password-display">
+                                    <span id="displayPassword"></span>
+                                    <button type="button" class="btn-copy" id="copyPasswordBtn">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="credentials-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Share these credentials securely with the admin. They will be required to reset their
+                            password on first login.
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" id="cancelInviteBtn">Cancel</button>
+                        <button type="submit" class="btn-primary" id="sendInviteBtn">
+                            <i class="fas fa-paper-plane"></i> Send Invitation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configure Students Modal -->
+    <div class="modal" id="configureStudentsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Configure Student Email Domains</h2>
+                <button class="modal-close" id="closeStudentsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    Students with these email domains will be able to self-signup and will be automatically linked to
+                    your organization.
+                </p>
+                <form id="configureStudentsForm">
+                    <div class="form-group">
+                        <label>Allowed Student Email Domains</label>
+                        <div class="domain-list" id="domainList">
+                            <div class="domain-item">
+                                <input type="text" class="domain-input" placeholder="@student.org.ac.in" required>
+                                <button type="button" class="btn-remove-domain">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-add-domain" id="addDomainBtn">
+                            <i class="fas fa-plus"></i> Add Another Domain
+                        </button>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" id="cancelStudentsBtn">Cancel</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/org-notification-service.js"></script>
+    <script src="js/org-dashboard-service.js"></script>
+    <script src="js/modern-dashboard.js"></script>
+</body>
+
+</html>

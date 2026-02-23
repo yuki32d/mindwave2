@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Random Spinner – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        if (!checkAdminAuth()) {
+            // Will redirect if not authenticated
+        }
+    </script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <!-- Header -->
+        <header class="topbar">
+            <div class="topbar-brand">
+                <span>🌊</span>
+                <span>MindwaveIo</span>
+            </div>
+            <div class="topbar-search">
+                <span>🔍</span>
+                <input type="text" placeholder="Search...">
+            </div>
+            <div class="topbar-actions">
+                <span id="adminNotificationBtn" style="cursor: pointer;" title="Notifications">🔔</span>
+                <span id="adminSettingsBtn" style="cursor: pointer;" title="Settings">⚙️</span>
+                <div class="profile-toggle" id="profileToggle">
+                    <span>👤</span>
+                    <small>Account</small>
+                </div>
+            </div>
+        </header>
+
+
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <div class="main-header">
+                    <div>
+                        <h1>🎡 Create Random Spinner</h1>
+                        <p>Add excitement to classroom participation with a spinning wheel</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="secondary-btn" onclick="window.history.back()">← Back</button>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Spinner</button>
+                    </div>
+                </div>
+
+                <!-- Spinner Configuration -->
+                <div class="grid two">
+                    <section class="panel">
+                        <h2>⚙️ Spinner Settings</h2>
+                        <form id="spinnerForm">
+                            <div>
+                                <label for="spinnerTitle">Spinner Title</label>
+                                <input type="text" id="spinnerTitle" placeholder="e.g., Pick a Student" required>
+                            </div>
+
+                            <div>
+                                <label for="spinnerDescription">Description (Optional)</label>
+                                <textarea id="spinnerDescription" rows="3"
+                                    placeholder="What is this spinner for?"></textarea>
+                            </div>
+
+                            <div>
+                                <label for="optionInput">Add Options</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="optionInput" placeholder="Enter option name"
+                                        style="flex: 1;">
+                                    <button type="button" class="secondary-btn" id="addOptionBtn">+ Add</button>
+                                </div>
+                                <small style="color: #9ea4b6; margin-top: 8px; display: block;">Press Enter or click Add
+                                    to add options</small>
+                            </div>
+
+                            <div>
+                                <label>Options List (Drag to reorder)</label>
+                                <div id="optionsList"
+                                    style="min-height: 200px; background: var(--card-darker); border-radius: 12px; padding: 16px;">
+                                    <p style="color: #9ea4b6; text-align: center; margin-top: 60px;">No options added
+                                        yet</p>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 16px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="removeAfterSpin">
+                                    <span>Remove option after selection</span>
+                                </label>
+                            </div>
+
+                            <div style="display: flex; gap: 16px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="enableSound" checked>
+                                    <span>Enable sound effects</span>
+                                </label>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Live Preview -->
+                    <section class="panel">
+                        <h2>👁️ Live Preview</h2>
+                        <div id="spinnerPreview"
+                            style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 500px; background: var(--card-darker); border-radius: 20px; padding: 40px;">
+                            <div id="wheelContainer" style="position: relative; width: 400px; height: 400px;">
+                                <canvas id="wheelCanvas" width="400" height="400"
+                                    style="border-radius: 50%; box-shadow: 0 8px 32px rgba(0,0,0,0.4);"></canvas>
+                                <div id="pointer"
+                                    style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 40px solid #00D9FF; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); z-index: 10;">
+                                </div>
+                            </div>
+                            <button class="primary-btn" id="previewSpinBtn"
+                                style="margin-top: 32px; font-size: 18px; padding: 16px 32px;">🎡 SPIN!</button>
+                            <div id="resultDisplay"
+                                style="margin-top: 24px; font-size: 24px; font-weight: 700; color: #00D9FF; min-height: 32px; text-align: center;">
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="loading-spinner.js"></script>
+    <script src="faculty-create-spinner.js"></script>
+</body>
+
+</html>

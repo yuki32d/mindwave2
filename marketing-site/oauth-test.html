@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Test Page - MindWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .test-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-bottom: 2rem;
+        }
+
+        .section {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section h2 {
+            color: #2d3748;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .status-icon.success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .status-icon.error {
+            background: #f56565;
+            color: white;
+        }
+
+        .status-icon.pending {
+            background: #ecc94b;
+            color: white;
+        }
+
+        .status-text {
+            flex: 1;
+            color: #2d3748;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-box {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .info-box p {
+            color: #2c5282;
+            margin: 0;
+        }
+
+        .test-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .test-result.success {
+            background: #c6f6d5;
+            border: 1px solid #48bb78;
+            color: #22543d;
+        }
+
+        .test-result.error {
+            background: #fed7d7;
+            border: 1px solid #f56565;
+            color: #742a2a;
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <div class="test-container">
+        <h1><i class="fas fa-flask"></i> OAuth 2.0 Test Page</h1>
+        <p class="subtitle">Test your Google and Microsoft OAuth implementation</p>
+
+        <!-- Configuration Status -->
+        <div class="section">
+            <h2><i class="fas fa-cog"></i> Configuration Status</h2>
+            <div id="configStatus">
+                <div class="status-item">
+                    <div class="status-icon pending" id="googleConfigIcon">
+                        <i class="fas fa-question"></i>
+                    </div>
+                    <div class="status-text">
+                        <strong>Google OAuth Client ID:</strong>
+                        <span id="googleClientId">Checking...</span>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <div class="status-icon pending" id="microsoftConfigIcon">
+                        <i class="fas fa-question"></i>
+                    </div>
+                    <div class="status-text">
+                        <strong>Microsoft OAuth Client ID:</strong>
+                        <span id="microsoftClientId">Checking...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="info-box">
+                <p><strong>Note:</strong> Replace placeholder Client IDs in <code>signup.js</code> and
+                    <code>oauth-callback.js</code> before testing.</p>
+            </div>
+        </div>
+
+        <!-- Test OAuth Flow -->
+        <div class="section">
+            <h2><i class="fas fa-play-circle"></i> Test OAuth Flow</h2>
+            <p style="color: #4a5568; margin-bottom: 1rem;">
+                Click the buttons below to test the OAuth authentication flow:
+            </p>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="testGoogleOAuth()">
+                    <i class="fab fa-google"></i> Test Google OAuth
+                </button>
+                <button class="btn btn-primary" onclick="testMicrosoftOAuth()">
+                    <i class="fab fa-microsoft"></i> Test Microsoft OAuth
+                </button>
+            </div>
+            <div id="testResult" class="test-result"></div>
+        </div>
+
+        <!-- Session Storage Check -->
+        <div class="section">
+            <h2><i class="fas fa-database"></i> Session Storage</h2>
+            <div id="sessionInfo">
+                <p style="color: #4a5568; margin-bottom: 0.5rem;">Current OAuth session data:</p>
+                <div class="code-block" id="sessionData">No OAuth session data found</div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-outline" onclick="refreshSessionData()">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+                <button class="btn btn-outline" onclick="clearSessionData()">
+                    <i class="fas fa-trash"></i> Clear Session
+                </button>
+            </div>
+        </div>
+
+        <!-- Local Storage Check -->
+        <div class="section">
+            <h2><i class="fas fa-user-check"></i> Authentication Status</h2>
+            <div id="authInfo">
+                <p style="color: #4a5568; margin-bottom: 0.5rem;">Current user authentication:</p>
+                <div class="code-block" id="authData">Not authenticated</div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-outline" onclick="refreshAuthData()">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+                <button class="btn btn-outline" onclick="clearAuthData()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="section">
+            <h2><i class="fas fa-link"></i> Quick Links</h2>
+            <div class="button-group">
+                <button class="btn btn-outline" onclick="window.location.href='website-signup.html'">
+                    <i class="fas fa-user-plus"></i> Signup Page
+                </button>
+                <button class="btn btn-outline" onclick="window.location.href='oauth-callback.html'">
+                    <i class="fas fa-exchange-alt"></i> Callback Page
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check configuration on load
+        window.addEventListener('DOMContentLoaded', function () {
+            checkConfiguration();
+            refreshSessionData();
+            refreshAuthData();
+        });
+
+        function checkConfiguration() {
+            // This is a simple check - in reality, we'd need to load the actual config
+            const googleConfigured = localStorage.getItem('google_client_configured') === 'true';
+            const microsoftConfigured = localStorage.getItem('microsoft_client_configured') === 'true';
+
+            // Update Google status
+            const googleIcon = document.getElementById('googleConfigIcon');
+            const googleText = document.getElementById('googleClientId');
+
+            if (googleConfigured) {
+                googleIcon.className = 'status-icon success';
+                googleIcon.innerHTML = '<i class="fas fa-check"></i>';
+                googleText.textContent = 'Configured ✓';
+            } else {
+                googleIcon.className = 'status-icon error';
+                googleIcon.innerHTML = '<i class="fas fa-times"></i>';
+                googleText.textContent = 'Not configured (using placeholder)';
+            }
+
+            // Update Microsoft status
+            const microsoftIcon = document.getElementById('microsoftConfigIcon');
+            const microsoftText = document.getElementById('microsoftClientId');
+
+            if (microsoftConfigured) {
+                microsoftIcon.className = 'status-icon success';
+                microsoftIcon.innerHTML = '<i class="fas fa-check"></i>';
+                microsoftText.textContent = 'Configured ✓';
+            } else {
+                microsoftIcon.className = 'status-icon error';
+                microsoftIcon.innerHTML = '<i class="fas fa-times"></i>';
+                microsoftText.textContent = 'Not configured (using placeholder)';
+            }
+        }
+
+        function testGoogleOAuth() {
+            const result = document.getElementById('testResult');
+            result.className = 'test-result success';
+            result.style.display = 'block';
+            result.innerHTML = '<i class="fas fa-info-circle"></i> Redirecting to signup page to test Google OAuth...';
+
+            setTimeout(() => {
+                window.location.href = 'website-signup.html';
+            }, 1500);
+        }
+
+        function testMicrosoftOAuth() {
+            const result = document.getElementById('testResult');
+            result.className = 'test-result success';
+            result.style.display = 'block';
+            result.innerHTML = '<i class="fas fa-info-circle"></i> Redirecting to signup page to test Microsoft OAuth...';
+
+            setTimeout(() => {
+                window.location.href = 'website-signup.html';
+            }, 1500);
+        }
+
+        function refreshSessionData() {
+            const sessionData = {
+                oauth_state: sessionStorage.getItem('oauth_state'),
+                oauth_provider: sessionStorage.getItem('oauth_provider'),
+                oauth_code_verifier: sessionStorage.getItem('oauth_code_verifier')
+            };
+
+            const hasData = Object.values(sessionData).some(val => val !== null);
+
+            const display = document.getElementById('sessionData');
+            if (hasData) {
+                display.textContent = JSON.stringify(sessionData, null, 2);
+            } else {
+                display.textContent = 'No OAuth session data found';
+            }
+        }
+
+        function clearSessionData() {
+            sessionStorage.removeItem('oauth_state');
+            sessionStorage.removeItem('oauth_provider');
+            sessionStorage.removeItem('oauth_code_verifier');
+            refreshSessionData();
+
+            const result = document.getElementById('testResult');
+            result.className = 'test-result success';
+            result.style.display = 'block';
+            result.innerHTML = '<i class="fas fa-check"></i> Session data cleared successfully!';
+
+            setTimeout(() => {
+                result.style.display = 'none';
+            }, 3000);
+        }
+
+        function refreshAuthData() {
+            const authData = {
+                auth_token: localStorage.getItem('auth_token'),
+                user_email: localStorage.getItem('user_email'),
+                user_name: localStorage.getItem('user_name'),
+                auth_provider: localStorage.getItem('auth_provider')
+            };
+
+            const hasData = Object.values(authData).some(val => val !== null);
+
+            const display = document.getElementById('authData');
+            if (hasData) {
+                display.textContent = JSON.stringify(authData, null, 2);
+            } else {
+                display.textContent = 'Not authenticated';
+            }
+        }
+
+        function clearAuthData() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('user_name');
+            localStorage.removeItem('auth_provider');
+            refreshAuthData();
+
+            const result = document.getElementById('testResult');
+            result.className = 'test-result success';
+            result.style.display = 'block';
+            result.innerHTML = '<i class="fas fa-check"></i> Logged out successfully!';
+
+            setTimeout(() => {
+                result.style.display = 'none';
+            }, 3000);
+        }
+    </script></body>
+
+</html>

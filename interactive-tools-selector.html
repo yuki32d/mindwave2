@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Tools - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <style>
+        .tools-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .tools-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .tools-actions button {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: #f5f7ff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .tools-actions button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .tool-category {
+            margin-bottom: 40px;
+        }
+
+        .category-header {
+            font-size: 18px;
+            color: #9ea4b6;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .tool-card.premium::before {
+            content: '⭐';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 16px;
+        }
+
+        .tool-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .tool-name {
+            color: #f5f7ff;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .tool-card.ask-questions:hover {
+            background: linear-gradient(135deg, rgba(255, 55, 95, 0.1) 0%, rgba(255, 159, 10, 0.1) 100%);
+        }
+
+        .tool-card.collect-opinions:hover {
+            background: linear-gradient(135deg, rgba(15, 98, 254, 0.1) 0%, rgba(107, 70, 193, 0.1) 100%);
+        }
+
+        .tool-card.media-slides:hover {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #f5f7ff;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-bottom: 24px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-4px);
+        }
+
+        .recent-tool-item:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <!-- Header -->
+        <header class="topbar">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button id="backBtn" class="back-btn"
+                    style="padding: 8px 16px; margin-top: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f5f7ff; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                    ← Back
+                </button>
+            </div>
+        </header>
+
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px; display: flex; gap: 24px;">
+            <!-- Main Content (65%) -->
+            <main style="flex: 1; max-width: 65%;">
+                <div class="tools-header">
+                    <div>
+                        <h1>Interactive Tools</h1>
+                        <p>Create engaging questions, polls, and presentations</p>
+                    </div>
+                    <div class="tools-actions">
+                        <button id="generateAIBtn">✨ Generate with AI</button>
+                        <button id="importBtn">📥 Import</button>
+                    </div>
+                </div>
+
+
+                <!-- Ask Questions -->
+                <div class="tool-category">
+                    <h2 class="category-header">Ask questions</h2>
+                    <div class="tool-grid">
+                        <div class="tool-card ask-questions" data-url="faculty-create-quiz.html">
+                            <div class="tool-icon">🎯</div>
+                            <div class="tool-name">Quiz</div>
+                        </div>
+                        <div class="tool-card ask-questions" data-url="faculty-create-fillin.html">
+                            <div class="tool-icon">✓/✗</div>
+                            <div class="tool-name">True or false</div>
+                        </div>
+                        <div class="tool-card ask-questions" data-url="faculty-create-type-answer.html">
+                            <div class="tool-icon">⌨️</div>
+                            <div class="tool-name">Type answer</div>
+                        </div>
+                        <div class="tool-card ask-questions premium" data-url="faculty-create-slider.html">
+                            <div class="tool-icon">📊</div>
+                            <div class="tool-name">Slider</div>
+                        </div>
+                        <div class="tool-card ask-questions premium" data-url="faculty-create-pin-answer.html">
+                            <div class="tool-icon">📍</div>
+                            <div class="tool-name">Pin answer</div>
+                        </div>
+                        <div class="tool-card ask-questions premium" data-url="faculty-create-puzzle.html">
+                            <div class="tool-icon">🧩</div>
+                            <div class="tool-name">Puzzle</div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Collect Opinions -->
+                <div class="tool-category">
+                    <h2 class="category-header">Collect opinions</h2>
+                    <div class="tool-grid">
+                        <div class="tool-card collect-opinions premium" data-url="faculty-create-poll.html">
+                            <div class="tool-icon">📊</div>
+                            <div class="tool-name">Poll</div>
+                        </div>
+                        <div class="tool-card collect-opinions premium" data-url="faculty-create-scale.html">
+                            <div class="tool-icon">📏</div>
+                            <div class="tool-name">Scale</div>
+                        </div>
+                        <div class="tool-card collect-opinions premium" data-url="faculty-create-nps.html">
+                            <div class="tool-icon">⭐</div>
+                            <div class="tool-name">NPS scale</div>
+                        </div>
+                        <div class="tool-card collect-opinions premium" data-url="faculty-create-drop-pin.html">
+                            <div class="tool-icon">📌</div>
+                            <div class="tool-name">Drop pin</div>
+                        </div>
+                        <div class="tool-card collect-opinions premium" data-url="faculty-create-wordcloud.html">
+                            <div class="tool-icon">☁️</div>
+                            <div class="tool-name">Word cloud</div>
+                        </div>
+                        <div class="tool-card collect-opinions premium" data-url="faculty-create-open-ended.html">
+                            <div class="tool-icon">💬</div>
+                            <div class="tool-name">Open-ended</div>
+                        </div>
+                        <div class="tool-card collect-opinions premium" data-url="faculty-create-brainstorm.html">
+                            <div class="tool-icon">💡</div>
+                            <div class="tool-name">Brainstorm</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Media Slides -->
+                <div class="tool-category">
+                    <h2 class="category-header">Media slides</h2>
+                    <div class="tool-grid">
+                        <div class="tool-card media-slides premium" data-url="faculty-create-slide-classic.html">
+                            <div class="tool-icon">📄</div>
+                            <div class="tool-name">Classic</div>
+                        </div>
+                        <div class="tool-card media-slides premium" data-url="faculty-create-slide-big-title.html">
+                            <div class="tool-icon">📰</div>
+                            <div class="tool-name">Big title</div>
+                        </div>
+                        <div class="tool-card media-slides premium" data-url="faculty-create-slide-title-text.html">
+                            <div class="tool-icon">📝</div>
+                            <div class="tool-name">Title and text</div>
+                        </div>
+                        <div class="tool-card media-slides premium" data-url="faculty-create-slide-bullets.html">
+                            <div class="tool-icon">📋</div>
+                            <div class="tool-name">Bullet points</div>
+                        </div>
+                        <div class="tool-card media-slides premium" data-url="faculty-create-slide-quote.html">
+                            <div class="tool-icon">💭</div>
+                            <div class="tool-name">Quote</div>
+                        </div>
+                        <div class="tool-card media-slides premium" data-url="faculty-create-slide-big-media.html">
+                            <div class="tool-icon">🖼️</div>
+                            <div class="tool-name">Big media</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Sidebar (35%) -->
+            <aside style="width: 35%; display: flex; flex-direction: column; gap: 20px;">
+                <!-- Activity Stats Card -->
+                <div class="panel" style="padding: 20px;">
+                    <h3
+                        style="margin: 0 0 16px; font-size: 16px; color: #f5f7ff; display: flex; align-items: center; gap: 8px;">
+                        📊 Your Activity
+                    </h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div
+                            style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <span style="color: #9ea4b6; font-size: 14px;">Tools Created</span>
+                            <span id="toolsCreatedCount"
+                                style="color: #0f62fe; font-weight: 600; font-size: 16px;">0</span>
+                        </div>
+                        <div
+                            style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <span style="color: #9ea4b6; font-size: 14px;">Student Responses</span>
+                            <span id="studentResponsesCount"
+                                style="color: #34c759; font-weight: 600; font-size: 16px;">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                            <span style="color: #9ea4b6; font-size: 14px;">Avg Engagement</span>
+                            <span id="avgEngagementRate"
+                                style="color: #ff9f0a; font-weight: 600; font-size: 16px;">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recently Used Tools -->
+                <div class="panel" style="padding: 20px;">
+                    <h3
+                        style="margin: 0 0 16px; font-size: 16px; color: #f5f7ff; display: flex; align-items: center; gap: 8px;">
+                        🕐 Recently Used
+                    </h3>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="recent-tool-item"
+                            style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-size: 13px; color: #f5f7ff; font-weight: 500;">📊 Poll</div>
+                            <div style="font-size: 11px; color: #9ea4b6; margin-top: 4px;">"Course Feedback Survey"
+                            </div>
+                        </div>
+                        <div class="recent-tool-item"
+                            style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-size: 13px; color: #f5f7ff; font-weight: 500;">🎯 Quiz</div>
+                            <div style="font-size: 11px; color: #9ea4b6; margin-top: 4px;">"Week 5 Assessment"</div>
+                        </div>
+                        <div class="recent-tool-item"
+                            style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-size: 13px; color: #f5f7ff; font-weight: 500;">📊 Slider</div>
+                            <div style="font-size: 11px; color: #9ea4b6; margin-top: 4px;">"Study Hours Tracker"</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pro Tips -->
+                <div class="panel" style="padding: 20px;">
+                    <h3
+                        style="margin: 0 0 16px; font-size: 16px; color: #f5f7ff; display: flex; align-items: center; gap: 8px;">
+                        💡 Pro Tips
+                    </h3>
+                    <div
+                        style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: #9ea4b6; line-height: 1.6;">
+                        <div style="display: flex; gap: 8px;">
+                            <span style="color: #0f62fe;">•</span>
+                            <span>Use <strong style="color: #f5f7ff;">polls</strong> for quick pulse checks at the start
+                                of class</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <span style="color: #34c759;">•</span>
+                            <span>Combine <strong style="color: #f5f7ff;">quiz + slider</strong> for better learning
+                                insights</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <span style="color: #ff9f0a;">•</span>
+                            <span><strong style="color: #f5f7ff;">Word clouds</strong> work great for brainstorming
+                                sessions</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <span style="color: #9f7aea;">•</span>
+                            <span>Enable <strong style="color: #f5f7ff;">anonymous mode</strong> for honest
+                                feedback</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Load real-time activity stats
+        async function loadActivityStats() {
+            try {
+                // Fetch tools created count
+                const gamesRes = await fetch('/api/games/my');
+                const gamesData = await gamesRes.json();
+                if (gamesData && gamesData.ok) {
+                    document.getElementById('toolsCreatedCount').textContent = gamesData.games.length;
+                }
+
+                // Fetch engagement data
+                const engagementRes = await fetch('/api/engagement');
+                const engagementData = await engagementRes.json();
+                if (engagementData && engagementData.ok && engagementData.summary) {
+                    document.getElementById('avgEngagementRate').textContent = `${engagementData.summary.engagementRate}%`;
+
+                    // Calculate total responses from games data
+                    if (engagementData.games && engagementData.games.totalPlays) {
+                        document.getElementById('studentResponsesCount').textContent = engagementData.games.totalPlays;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load activity stats:', error);
+            }
+        }
+
+        // Load stats on page load
+        loadActivityStats();
+
+        // Tool card click handlers
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.addEventListener('click', function () {
+                const url = this.dataset.url;
+                const alertMsg = this.dataset.alert;
+
+                if (url) {
+                    window.location.href = url;
+                } else if (alertMsg) {
+                    alert(alertMsg);
+                }
+            });
+        });
+
+        // Action button handlers
+        document.getElementById('generateAIBtn').addEventListener('click', function () {
+            window.location.href = 'ai-game-builder.html';
+        });
+
+        document.getElementById('importBtn').addEventListener('click', function () {
+            alert('Import feature coming soon!');
+        });
+
+        // Back button handler
+        document.getElementById('backBtn').addEventListener('click', function () {
+            window.location.href = 'admin.html';
+        });
+    </script>
+</body>
+
+</html>

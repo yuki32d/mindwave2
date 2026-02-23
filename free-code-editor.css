@@ -1,0 +1,88 @@
+/* Free-Form Code Editor Styles */
+
+.free-code-editor {
+    display: flex;
+    background: #1e1e1e;
+    border-radius: 8px;
+    border: 2px solid #333;
+    min-height: 450px;
+    max-height: 600px;
+    overflow: hidden;
+    position: relative;
+}
+
+.line-numbers {
+    background: #252526;
+    padding: 16px 12px;
+    text-align: right;
+    user-select: none;
+    color: #858585;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    min-width: 50px;
+    overflow-y: hidden;
+    border-right: 1px solid #333;
+}
+
+.line-num {
+    height: 22.4px;
+    /* Match textarea line height */
+}
+
+.code-textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #d4d4d4;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 16px;
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+    overflow-x: auto;
+    white-space: pre;
+    tab-size: 4;
+}
+
+.code-textarea::placeholder {
+    color: #6a6a6a;
+}
+
+/* Syntax highlighting hints */
+.code-textarea:focus {
+    background: rgba(66, 133, 244, 0.02);
+}
+
+/* Scrollbar styling for code editor */
+.code-textarea::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.code-textarea::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+.code-textarea::-webkit-scrollbar-thumb {
+    background: #424242;
+    border-radius: 6px;
+}
+
+.code-textarea::-webkit-scrollbar-thumb:hover {
+    background: #4e4e4e;
+}
+
+/* Selection color */
+.code-textarea::selection {
+    background: rgba(66, 133, 244, 0.3);
+}
+
+/* Hide old code editor styles */
+.code-line,
+.line-number:not(.line-num),
+.code-input {
+    display: none !important;
+}

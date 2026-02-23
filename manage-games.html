@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – Manage Games</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        // Check admin/faculty authentication on page load
+        if (!checkAuth()) {
+            // Will redirect if not authenticated
+        }
+    </script>
+    <style>
+        .game-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .game-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .game-info {
+            flex: 1;
+        }
+
+        .game-info h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            color: #f5f7ff;
+        }
+
+        .game-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #9ea4b6;
+        }
+
+        .danger-btn {
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .danger-btn:hover {
+            background: rgba(255, 59, 48, 0.2);
+            border-color: rgba(255, 59, 48, 0.4);
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: 24px auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #0f62fe;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-input::placeholder {
+            color: #9ea4b6;
+        }
+
+        .game-list-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #9ea4b6;
+            padding: 60px 20px;
+            font-size: 16px;
+        }
+
+        .loading-state {
+            text-align: center;
+            color: #9ea4b6;
+            padding: 60px 20px;
+            font-size: 16px;
+        }
+
+        .delete-all-container {
+            max-width: 600px;
+            margin: 32px auto;
+        }
+    </style>
+</head>
+
+<body data-theme="dark" data-role="faculty" data-section="manage-games">
+    <div class="page-shell">
+        <header class="hero">
+            <p class="eyebrow">Faculty Space</p>
+            <a class="ghost-link" href="faculty-settings.html">← Back to Settings</a>
+            <h1 id="pageTitle">Game Management</h1>
+            <p class="lede" id="pageSubtitle">View, search, and delete games from the system.</p>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search games by title or type...">
+        </div>
+
+        <!-- Game List Container -->
+        <div class="game-list-container">
+            <div id="gameList">
+                <div class="loading-state">Loading games...</div>
+            </div>
+        </div>
+
+        <!-- Delete All Button -->
+        <div class="delete-all-container">
+            <button class="danger-btn" id="deleteAllGamesBtn" style="width: 100%;">
+                🗑️ Delete All Games
+            </button>
+        </div>
+    </div>
+
+    <!-- We include role-page.js for the header -->
+    <script src="role-page.js"></script>
+    <script src="manage-games.js"></script></body>
+
+</html>

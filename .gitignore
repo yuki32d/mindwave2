@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Environment variables (contains secrets!)
+.env
+*.env
+
+# Large binary / SDK files
+public/jitsi/
+*.exe
+*.zip
+*.msi
+
+# User uploaded files
+uploads/
+
+# Logs
+*.log
+npm-debug.log*
+push_log.txt
+push_output.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp

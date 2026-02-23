@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games - MindWave</title>
+    <link rel="stylesheet" href="css/modern-dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🌊</span>
+                    <span class="logo-text">MindWave</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-label">MAIN MENU</span>
+                    <a href="modern-dashboard.html" class="nav-item">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="org-analytics.html" class="nav-item">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                    <a href="org-billing.html" class="nav-item">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Billing</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">MANAGEMENT</span>
+                    <a href="org-team.html" class="nav-item">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Team Members</span>
+                    </a>
+                    <a href="org-students.html" class="nav-item">
+                        <span class="nav-icon">🎓</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a href="org-games.html" class="nav-item active">
+                        <span class="nav-icon">🎮</span>
+                        <span class="nav-text">Games</span>
+                    </a>
+                    <a href="org-settings.html" class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">SUPPORT</span>
+                    <a href="#help" class="nav-item">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">Help Center</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="search-container">
+                    <input type="text" placeholder="Search games..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-create">
+                        <span>➕</span>
+                        <span>Create Game</span>
+                    </button>
+                    <button class="btn-icon">🔔</button>
+                    <div class="user-avatar">
+                        <img src="https://i.pravatar.cc/40?img=5" alt="User">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Title -->
+            <div class="page-header">
+                <h1>Games Library</h1>
+                <p>View and manage all games created by your team</p>
+            </div>
+
+            <!-- Game Stats -->
+            <div class="stats-row" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <div class="stat-label">Total Games</div>
+                    <div class="stat-value">42</div>
+                    <div class="stat-change positive">
+                        <span class="change-icon">↗</span>
+                        <span>5 created this month</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Plays</div>
+                    <div class="stat-value">3,456</div>
+                    <div class="stat-change positive">
+                        <span>Across all games</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg. Completion</div>
+                    <div class="stat-value">78%</div>
+                    <div class="stat-change positive">
+                        <span class="change-icon">↗</span>
+                        <span>+5% this week</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs" style="margin-bottom: 1.5rem;">
+                <button class="filter-tab active">All Games (42)</button>
+                <button class="filter-tab">Published (38)</button>
+                <button class="filter-tab">Draft (4)</button>
+            </div>
+
+            <!-- Games Grid -->
+            <div class="games-grid">
+                <div class="game-card">
+                    <div class="game-card-header">
+                        <div class="game-icon-large">🎯</div>
+                        <span class="game-status published">Published</span>
+                    </div>
+                    <h3 class="game-card-title">Math Quiz Master</h3>
+                    <p class="game-card-desc">Test your math skills with challenging questions</p>
+                    <div class="game-card-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-label">Plays</span>
+                            <span class="game-stat-value">1,234</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-label">Avg Score</span>
+                            <span class="game-stat-value">85%</span>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <span class="game-creator">By Sarah J.</span>
+                        <button class="btn-game-action">View</button>
+                    </div>
+                </div>
+
+                <div class="game-card">
+                    <div class="game-card-header">
+                        <div class="game-icon-large">🧪</div>
+                        <span class="game-status published">Published</span>
+                    </div>
+                    <h3 class="game-card-title">Science Explorer</h3>
+                    <p class="game-card-desc">Discover the wonders of science through interactive challenges</p>
+                    <div class="game-card-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-label">Plays</span>
+                            <span class="game-stat-value">987</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-label">Avg Score</span>
+                            <span class="game-stat-value">78%</span>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <span class="game-creator">By Michael C.</span>
+                        <button class="btn-game-action">View</button>
+                    </div>
+                </div>
+
+                <div class="game-card">
+                    <div class="game-card-header">
+                        <div class="game-icon-large">📚</div>
+                        <span class="game-status published">Published</span>
+                    </div>
+                    <h3 class="game-card-title">History Challenge</h3>
+                    <p class="game-card-desc">Journey through time with historical trivia</p>
+                    <div class="game-card-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-label">Plays</span>
+                            <span class="game-stat-value">856</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-label">Avg Score</span>
+                            <span class="game-stat-value">92%</span>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <span class="game-creator">By Emily R.</span>
+                        <button class="btn-game-action">View</button>
+                    </div>
+                </div>
+
+                <div class="game-card">
+                    <div class="game-card-header">
+                        <div class="game-icon-large">🌍</div>
+                        <span class="game-status draft">Draft</span>
+                    </div>
+                    <h3 class="game-card-title">Geography Quest</h3>
+                    <p class="game-card-desc">Explore the world through geography puzzles</p>
+                    <div class="game-card-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-label">Plays</span>
+                            <span class="game-stat-value">0</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-label">Avg Score</span>
+                            <span class="game-stat-value">-</span>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <span class="game-creator">By David K.</span>
+                        <button class="btn-game-action">Edit</button>
+                    </div>
+                </div>
+
+                <div class="game-card">
+                    <div class="game-card-header">
+                        <div class="game-icon-large">📖</div>
+                        <span class="game-status published">Published</span>
+                    </div>
+                    <h3 class="game-card-title">English Grammar Pro</h3>
+                    <p class="game-card-desc">Master grammar rules with fun exercises</p>
+                    <div class="game-card-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-label">Plays</span>
+                            <span class="game-stat-value">723</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-label">Avg Score</span>
+                            <span class="game-stat-value">88%</span>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <span class="game-creator">By Alex T.</span>
+                        <button class="btn-game-action">View</button>
+                    </div>
+                </div>
+
+                <div class="game-card">
+                    <div class="game-card-header">
+                        <div class="game-icon-large">🎨</div>
+                        <span class="game-status published">Published</span>
+                    </div>
+                    <h3 class="game-card-title">Art History Adventure</h3>
+                    <p class="game-card-desc">Learn about famous artists and their masterpieces</p>
+                    <div class="game-card-stats">
+                        <div class="game-stat">
+                            <span class="game-stat-label">Plays</span>
+                            <span class="game-stat-value">654</span>
+                        </div>
+                        <div class="game-stat">
+                            <span class="game-stat-label">Avg Score</span>
+                            <span class="game-stat-value">75%</span>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <span class="game-creator">By Sarah J.</span>
+                        <button class="btn-game-action">View</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div></body>
+
+</html>

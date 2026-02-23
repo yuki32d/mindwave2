@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="theme-init.js"></script>
+
+    <style>
+        .reports-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Report Types Grid */
+        .report-types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .report-type-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 28px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .report-type-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+            border-color: rgba(77, 160, 255, 0.5);
+        }
+
+        .report-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .report-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .report-description {
+            font-size: 14px;
+            color: #9ea4b6;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .report-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #9ea4b6;
+            margin-bottom: 20px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .generate-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(77, 160, 255, 0.4);
+        }
+
+        /* Recent Reports */
+        .recent-reports {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 40px;
+        }
+
+        .recent-reports h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .report-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .report-info {
+            flex: 1;
+        }
+
+        .report-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .report-date {
+            font-size: 12px;
+            color: #9ea4b6;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .action-btn:hover {
+            background: rgba(77, 160, 255, 0.2);
+            border-color: rgba(77, 160, 255, 0.5);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            border: none;
+        }
+
+        /* Custom Report Builder */
+        .custom-report-builder {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .custom-report-builder h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: rgba(77, 160, 255, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .report-types-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-item {
+                flex-direction: column;
+                gap: 12px;
+                align-items: start;
+            }
+
+            .report-actions {
+                width: 100%;
+            }
+
+            .action-btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="student-performance.html">← Back to Performance</a>
+            <p class="eyebrow">DOCUMENTS</p>
+            <h1>Reports</h1>
+            <p class="lede">Generate and download performance reports</p>
+        </header>
+
+        <div class="reports-container">
+            <!-- Report Types -->
+            <div class="report-types-grid">
+                <div class="report-type-card" onclick="generateReport('weekly')">
+                    <div class="report-icon">📊</div>
+                    <div class="report-title">Weekly Summary</div>
+                    <div class="report-description">
+                        Quick overview of your performance for the past week including grades, attendance, and
+                        activities.
+                    </div>
+                    <div class="report-meta">
+                        <div class="meta-item">
+                            <span>📄</span>
+                            <span>2 pages</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>⏱️</span>
+                            <span>Instant</span>
+                        </div>
+                    </div>
+                    <button class="generate-btn">Generate Report</button>
+                </div>
+
+                <div class="report-type-card" onclick="generateReport('monthly')">
+                    <div class="report-icon">📈</div>
+                    <div class="report-title">Monthly Report</div>
+                    <div class="report-description">
+                        Comprehensive monthly analysis with trends, comparisons, and detailed subject breakdowns.
+                    </div>
+                    <div class="report-meta">
+                        <div class="meta-item">
+                            <span>📄</span>
+                            <span>5 pages</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>⏱️</span>
+                            <span>~30 sec</span>
+                        </div>
+                    </div>
+                    <button class="generate-btn">Generate Report</button>
+                </div>
+
+                <div class="report-type-card" onclick="generateReport('semester')">
+                    <div class="report-icon">🎓</div>
+                    <div class="report-title">Semester Summary</div>
+                    <div class="report-description">
+                        Complete semester overview with final grades, attendance records, and achievement highlights.
+                    </div>
+                    <div class="report-meta">
+                        <div class="meta-item">
+                            <span>📄</span>
+                            <span>8 pages</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>⏱️</span>
+                            <span>~1 min</span>
+                        </div>
+                    </div>
+                    <button class="generate-btn">Generate Report</button>
+                </div>
+
+                <div class="report-type-card" onclick="generateReport('certificate')">
+                    <div class="report-icon">🏆</div>
+                    <div class="report-title">Progress Certificate</div>
+                    <div class="report-description">
+                        Official certificate showcasing your achievements, grades, and participation for sharing.
+                    </div>
+                    <div class="report-meta">
+                        <div class="meta-item">
+                            <span>📄</span>
+                            <span>1 page</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>⏱️</span>
+                            <span>Instant</span>
+                        </div>
+                    </div>
+                    <button class="generate-btn">Generate Certificate</button>
+                </div>
+            </div>
+
+            <!-- Recent Reports -->
+            <div class="recent-reports">
+                <h3>📁 Recent Reports</h3>
+                <div class="report-item">
+                    <div class="report-info">
+                        <div class="report-name">December 2025 - Monthly Report</div>
+                        <div class="report-date">Generated on Jan 1, 2026</div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="action-btn primary" onclick="downloadReport('dec-monthly')">Download PDF</button>
+                        <button class="action-btn" onclick="shareReport('dec-monthly')">Share</button>
+                    </div>
+                </div>
+
+                <div class="report-item">
+                    <div class="report-info">
+                        <div class="report-name">Week 52 - Weekly Summary</div>
+                        <div class="report-date">Generated on Dec 29, 2025</div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="action-btn primary" onclick="downloadReport('week52')">Download PDF</button>
+                        <button class="action-btn" onclick="shareReport('week52')">Share</button>
+                    </div>
+                </div>
+
+                <div class="report-item">
+                    <div class="report-info">
+                        <div class="report-name">Fall 2025 - Semester Summary</div>
+                        <div class="report-date">Generated on Dec 20, 2025</div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="action-btn primary" onclick="downloadReport('fall-semester')">Download
+                            PDF</button>
+                        <button class="action-btn" onclick="shareReport('fall-semester')">Share</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Report Builder -->
+            <div class="custom-report-builder">
+                <h3>🛠️ Custom Report Builder</h3>
+
+                <div class="form-group">
+                    <label class="form-label">Report Title</label>
+                    <input type="text" class="form-input" placeholder="Enter report title" id="customTitle">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date Range</label>
+                    <select class="form-select" id="dateRange">
+                        <option>Last 7 days</option>
+                        <option>Last 30 days</option>
+                        <option>This semester</option>
+                        <option>Custom range</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Include Sections</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" checked>
+                            <span>Grade Summary</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" checked>
+                            <span>Attendance Records</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" checked>
+                            <span>Subject Breakdown</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox">
+                            <span>Performance Charts</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox">
+                            <span>Achievements</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox">
+                            <span>Recommendations</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="generate-btn" onclick="generateCustomReport()">Generate Custom Report</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'student-login.html';
+        }
+
+        // Generate report
+        function generateReport(type) {
+            console.log('Generating report:', type);
+            // TODO: Call API to generate report
+            alert(`Generating ${type} report... This will download as PDF.`);
+        }
+
+        // Download report
+        function downloadReport(reportId) {
+            console.log('Downloading report:', reportId);
+            // TODO: Download PDF
+        }
+
+        // Share report
+        function shareReport(reportId) {
+            console.log('Sharing report:', reportId);
+            // TODO: Show share modal
+            alert('Share report via email or link - Coming soon!');
+        }
+
+        // Generate custom report
+        function generateCustomReport() {
+            const title = document.getElementById('customTitle').value;
+            const dateRange = document.getElementById('dateRange').value;
+
+            console.log('Generating custom report:', { title, dateRange });
+            // TODO: Call API with custom parameters
+            alert('Generating custom report... This will download as PDF.');
+        }
+
+        // Load recent reports
+        async function loadRecentReports() {
+            try {
+                const API_BASE = window.location.hostname === 'localhost'
+                    ? 'http://localhost:8081'
+                    : 'https://mindwave2.onrender.com';
+
+                const response = await fetch(`${API_BASE}/api/student/reports`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update reports list with real data
+                    console.log('Reports data:', data);
+                } else {
+                    console.log('Using placeholder reports');
+                }
+            } catch (error) {
+                console.error('Error loading reports:', error);
+            }
+        }
+
+        // Initialize
+        loadRecentReports();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All 21 Interactive Tools - MindWave</title>
+    <meta name="description"
+        content="Explore our complete toolkit of 21 interactive tools to create engaging questions, polls, and presentations for your students.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .tools-hero {
+            padding: 120px 5% 80px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tools-hero h1 {
+            font-size: 64px;
+            font-weight: 900;
+            margin-bottom: 24px;
+        }
+
+        .tools-hero p {
+            font-size: 24px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+        }
+
+        .tools-content {
+            padding: 80px 5%;
+            background: white;
+        }
+
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            margin-bottom: 48px;
+        }
+
+        .section-header h2 {
+            font-size: 40px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: #1d1d1f;
+        }
+
+        .section-header p {
+            font-size: 20px;
+            color: #6e6e73;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 32px;
+            margin-bottom: 80px;
+        }
+
+        .tool-card {
+            background: #f5f5f7;
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            border: 2px solid transparent;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .tool-icon {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 28px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .tool-title {
+            flex: 1;
+        }
+
+        .tool-title h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1d1d1f;
+        }
+
+        .tool-title span {
+            font-size: 14px;
+            color: #86868b;
+            font-weight: 500;
+        }
+
+        .tool-description {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #6e6e73;
+            margin-bottom: 20px;
+        }
+
+        .tool-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .feature-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: white;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .feature-tag i {
+            font-size: 12px;
+        }
+
+        /* Color variations for different categories */
+        .tool-card[data-category="core"] .tool-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .tool-card[data-category="quiz"] .tool-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .tool-card[data-category="feedback"] .tool-icon {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .tool-card[data-category="engagement"] .tool-icon {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .tool-card[data-category="creative"] .tool-icon {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        .tool-card[data-category="assessment"] .tool-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 8px;
+        }
+
+        .badge-new {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .badge-premium {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .category-divider {
+            margin: 80px 0 40px;
+            text-align: center;
+        }
+
+        .category-divider h2 {
+            font-size: 36px;
+            font-weight: 800;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+        }
+
+        .category-divider p {
+            font-size: 18px;
+            color: #6e6e73;
+        }
+
+        @media (max-width: 768px) {
+            .tools-hero h1 {
+                font-size: 40px;
+            }
+
+            .tools-hero p {
+                font-size: 18px;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .section-header h2 {
+                font-size: 32px;
+            }
+
+            .category-divider h2 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-brain"></i>
+                <span>Mind<span class="gradient-text">Wave</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="website-home.html">Home</a>
+                <a href="website-home.html#pricing">Pricing</a>
+                <a href="website-signup.html" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="tools-hero">
+        <h1>View All 21 Tools →</h1>
+        <p>Complete toolkit for creating engaging, interactive learning experiences</p>
+        <a href="website-signup.html" class="btn btn-white btn-lg">Start Free Trial <i
+                class="fas fa-arrow-right"></i></a>
+    </section>
+
+    <!-- Tools Content -->
+    <section class="tools-content">
+        <div class="content-container">
+            <!-- Core Tools Section -->
+            <div class="section-header">
+                <h2>Core Tools</h2>
+                <p>Essential features that power your teaching experience</p>
+            </div>
+
+            <div class="tools-grid">
+                <a href="tools/ai-quiz-builder.html" class="tool-card" data-category="core">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>AI Quiz Builder</h3>
+                            <span>Automated Content Creation</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Transform any topic into comprehensive quizzes in seconds. Simply describe your subject and let
+                        AI generate questions, multiple-choice options, and detailed explanations instantly.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Auto-generate</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Edit & customize</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Bulk creation</span>
+                    </div>
+                </a>
+
+                <a href="tools/live-quiz.html" class="tool-card" data-category="core">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Live Competitions</h3>
+                            <span>Real-time Engagement</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Launch Kahoot-style live quizzes where students compete in real-time. Features leaderboards,
+                        power-ups, instant feedback, and exciting animations that make learning feel like a game.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Live leaderboard</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Power-ups</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Team mode</span>
+                    </div>
+                </a>
+
+                <a href="tools/analytics.html" class="tool-card" data-category="core">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Analytics Dashboard</h3>
+                            <span>Data-Driven Insights</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Track individual progress, identify learning gaps, and measure outcomes with comprehensive
+                        analytics. Beautiful dashboards make data easy to understand and act upon.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Student tracking</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Gap analysis</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Export reports</span>
+                    </div>
+                </a>
+
+                <a href="tools/ai-tutor.html" class="tool-card" data-category="core">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>AI Tutor</h3>
+                            <span>24/7 Learning Support</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Provide instant help to students with personalized explanations and guidance. Available anytime,
+                        anywhere, the AI tutor adapts to each student's learning pace and style.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Instant answers</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Personalized</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Always available</span>
+                    </div>
+                </a>
+
+                <a href="tools/anti-cheat.html" class="tool-card" data-category="core">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Anti-Cheat System</h3>
+                            <span>Exam Integrity</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Advanced proctoring with tab detection, face recognition, and behavior monitoring ensures exam
+                        integrity. Maintain academic honesty while respecting student privacy.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Tab detection</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Face recognition</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Behavior tracking</span>
+                    </div>
+                </a>
+
+                <a href="tools/game-templates.html" class="tool-card" data-category="core">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Game Templates</h3>
+                            <span>Ready-to-Use Games</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Choose from dozens of pre-built game templates including trivia, memory match, spin the wheel,
+                        and more. Customize with your content and launch in minutes.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> 20+ templates</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Customizable</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Quick setup</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Ask Questions Section -->
+            <div class="category-divider">
+                <h2>Ask Questions</h2>
+                <p>Diverse question types to assess understanding in multiple ways</p>
+            </div>
+
+            <div class="tools-grid">
+                <a href="tools/quiz.html" class="tool-card" data-category="quiz">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-circle-question"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Multiple Choice Quiz</h3>
+                            <span>Classic Assessment</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Create traditional multiple-choice questions with 2-6 answer options. Perfect for testing
+                        knowledge retention, concept understanding, and quick assessments.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> 2-6 options</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Randomize order</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Explanations</span>
+                    </div>
+                </a>
+
+                <a href="tools/true-false.html" class="tool-card" data-category="quiz">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>True or False</h3>
+                            <span>Binary Questions</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Quick binary questions perfect for fact-checking and rapid assessment. Students choose between
+                        true or false, making it ideal for fast-paced review sessions.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Fast answers</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Fact checking</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Quick review</span>
+                    </div>
+                </a>
+
+                <a href="tools/type-answer.html" class="tool-card" data-category="quiz">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-keyboard"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Type Answer<span class="badge badge-new">New</span></h3>
+                            <span>Short Text Response</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Students type short answers directly. Perfect for fill-in-the-blank, vocabulary, definitions,
+                        and recall questions. Auto-grading with flexible matching options.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Auto-grade</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Flexible matching</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Case insensitive</span>
+                    </div>
+                </a>
+
+                <a href="tools/slider.html" class="tool-card" data-category="quiz">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-sliders"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Slider Scale</h3>
+                            <span>Numeric Responses</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Students drag a slider to select a value on a scale. Great for estimations, confidence levels,
+                        ratings, and any question requiring a numeric response.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Custom range</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Visual feedback</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Smooth interaction</span>
+                    </div>
+                </a>
+
+                <a href="tools/pin-answer.html" class="tool-card" data-category="quiz">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-map-pin"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Pin on Image</h3>
+                            <span>Visual Location</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Upload an image and students click to mark specific locations. Perfect for geography, anatomy,
+                        diagrams, maps, and any visual identification tasks.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Image upload</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Multiple pins</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Zoom support</span>
+                    </div>
+                </a>
+
+                <a href="tools/puzzle.html" class="tool-card" data-category="quiz">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-puzzle-piece"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Puzzle Match</h3>
+                            <span>Drag & Drop</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Students drag and drop items to match pairs or arrange in correct order. Ideal for matching
+                        vocabulary, sequencing events, categorizing concepts, and more.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Match pairs</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Sequence order</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Categorize</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Collect Feedback Section -->
+            <div class="category-divider">
+                <h2>Collect Feedback</h2>
+                <p>Gather insights, opinions, and reflections from your students</p>
+            </div>
+
+            <div class="tools-grid">
+                <a href="tools/word-cloud.html" class="tool-card" data-category="feedback">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Word Cloud</h3>
+                            <span>Visual Feedback</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Collect and visualize student responses in beautiful, interactive word clouds. Words appear in
+                        real-time, sized by frequency. Perfect for brainstorming and gathering feedback.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Real-time</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Auto-sizing</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Export image</span>
+                    </div>
+                </a>
+
+                <a href="tools/scale.html" class="tool-card" data-category="feedback">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-ruler-horizontal"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Rating Scale</h3>
+                            <span>Measure Opinions</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Students rate on a customizable scale (1-5, 1-10, etc.). Perfect for measuring agreement,
+                        satisfaction, confidence, or any opinion on a spectrum.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Custom scale</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Labels</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Average display</span>
+                    </div>
+                </a>
+
+                <a href="tools/open-ended.html" class="tool-card" data-category="feedback">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Open-Ended Questions</h3>
+                            <span>Free Text Responses</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Collect detailed, thoughtful responses from students. Perfect for reflections, feedback, essays,
+                        and deeper understanding. Includes AI-powered sentiment analysis.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Unlimited length</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Anonymous option</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> AI insights</span>
+                    </div>
+                </a>
+
+                <a href="tools/poll.html" class="tool-card" data-category="feedback">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-poll"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Quick Poll</h3>
+                            <span>Instant Voting</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Launch quick polls to gauge class opinion, make decisions, or check understanding. Results
+                        display in real-time with beautiful charts and percentages.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Live results</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Multiple choice</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Charts</span>
+                    </div>
+                </a>
+
+                <a href="tools/nps-scale.html" class="tool-card" data-category="feedback">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>NPS Scale</h3>
+                            <span>Net Promoter Score</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Measure student satisfaction and likelihood to recommend using the industry-standard Net
+                        Promoter Score system. Automatic categorization and scoring.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> 0-10 scale</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Auto-calculate</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Track trends</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Engagement & Creative Section -->
+            <div class="category-divider">
+                <h2>Engagement & Creative</h2>
+                <p>Interactive tools that make learning fun and memorable</p>
+            </div>
+
+            <div class="tools-grid">
+                <a href="tools/spinner.html" class="tool-card" data-category="engagement">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-spinner"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Random Spinner<span class="badge badge-new">New</span></h3>
+                            <span>Random Selection</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Spin the wheel to randomly select students, topics, or options. Add excitement to classroom
+                        participation and make random selection fair and fun.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Custom options</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Animations</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Sound effects</span>
+                    </div>
+                </a>
+
+                <a href="tools/ranking.html" class="tool-card" data-category="engagement">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-ranking-star"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Ranking</h3>
+                            <span>Order by Preference</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Students drag items to rank them in order of preference or importance. Perfect for prioritizing,
+                        sequencing, and understanding student perspectives.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Drag & drop</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Aggregate results</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Visual ranking</span>
+                    </div>
+                </a>
+
+                <a href="tools/draw.html" class="tool-card" data-category="creative">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-draw-polygon"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Draw & Sketch</h3>
+                            <span>Visual Expression</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Students draw, sketch, or annotate directly on screen. Perfect for diagrams, illustrations,
+                        visual explanations, and creative expression.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Drawing tools</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Colors</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Save images</span>
+                    </div>
+                </a>
+
+                <a href="tools/video-response.html" class="tool-card" data-category="creative">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Video Response<span class="badge badge-new">New</span></h3>
+                            <span>Record Answers</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Students record video responses using their webcam. Perfect for presentations, oral exams,
+                        language practice, and building communication skills.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Webcam record</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Time limits</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Review mode</span>
+                    </div>
+                </a>
+
+                <a href="#" class="tool-card" data-category="engagement">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Brainstorm Board</h3>
+                            <span>Collaborative Ideas</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Collaborative digital whiteboard where students contribute ideas in real-time. Perfect for group
+                        brainstorming, mind mapping, and collective problem-solving.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Real-time collab</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Sticky notes</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Organize ideas</span>
+                    </div>
+                </a>
+
+                <a href="#" class="tool-card" data-category="assessment">
+                    <div class="tool-header">
+                        <div class="tool-icon">
+                            <i class="fas fa-file-audio"></i>
+                        </div>
+                        <div class="tool-title">
+                            <h3>Audio Response<span class="badge badge-premium">Premium</span></h3>
+                            <span>Voice Recording</span>
+                        </div>
+                    </div>
+                    <p class="tool-description">
+                        Students record audio responses using their microphone. Ideal for language learning,
+                        pronunciation practice, oral assessments, and accessibility.
+                    </p>
+                    <div class="tool-features">
+                        <span class="feature-tag"><i class="fas fa-check"></i> Audio record</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Playback</span>
+                        <span class="feature-tag"><i class="fas fa-check"></i> Download</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Transform Your Teaching?</h2>
+                <p>Get access to all 21 interactive tools and start creating engaging learning experiences today</p>
+                <a href="website-signup.html" class="btn btn-white btn-lg">Start Free Trial <i
+                        class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-brain"></i>
+                        <span>Mind<span class="gradient-text">Wave</span></span>
+                    </div>
+                    <p>Pioneering the next generation of digital learning through AI and gamification.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 MindWave Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

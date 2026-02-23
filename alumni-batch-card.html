@@ -1,0 +1,39 @@
+<!-- 6. Alumni Batch Management -->
+<div class="settings-card">
+    <h2>🎓 Alumni Batch Management</h2>
+
+    <div class="control-group">
+        <div class="control-label">
+            <strong>Block Graduated Batches</strong>
+            <span>Disable login for entire batches by email pattern.</span>
+        </div>
+    </div>
+
+    <!-- Add New Block Form -->
+    <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+        <label style="display: block; font-size: 13px; color: #9ea4b6; margin-bottom: 6px;">Email Pattern</label>
+        <input type="text" id="emailPattern" placeholder=".mca25@cmrit.ac.in"
+            style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; margin-bottom: 12px;">
+
+        <label style="display: block; font-size: 13px; color: #9ea4b6; margin-bottom: 6px;">Reason</label>
+        <input type="text" id="blockReason" placeholder="Graduated - Class of 2025"
+            style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; margin-bottom: 12px;">
+
+        <button id="blockPatternBtn"
+            style="width: 100%; background: linear-gradient(120deg, #ff9f0a, #ff3b30); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+            🚫 Block Batch
+        </button>
+    </div>
+
+    <!-- Blocked Patterns List -->
+    <div class="control-group">
+        <div class="control-label">
+            <strong>Currently Blocked Patterns</strong>
+            <span id="blockedCount">Loading...</span>
+        </div>
+    </div>
+
+    <div id="blockedPatternsList" style="max-height: 300px; overflow-y: auto;">
+        <!-- Populated dynamically -->
+    </div>
+</div>

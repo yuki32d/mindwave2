@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community — MindWave</title>
+    <meta name="description" content="Share projects, collaborate, and connect with fellow students on MindWave.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="theme-init.js"></script>
+    <script src="sidebar.js"></script>
+
+    <style>
+        /* ── Community-specific tokens ── */
+        .cm-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .cm-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            border-radius: 99px;
+            border: 1.5px solid var(--border, rgba(255, 255, 255, .08));
+            background: var(--card, #161b2e);
+            color: var(--text-secondary, #9ea4b6);
+            font-size: .875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .18s;
+        }
+
+        .cm-tab:hover {
+            border-color: var(--accent, #6366f1);
+            color: var(--text, #f5f7ff);
+        }
+
+        .cm-tab.active {
+            background: var(--accent, #6366f1);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, .35);
+        }
+
+        .cm-tab-create {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .cm-tab-create:hover {
+            opacity: .9;
+        }
+
+        /* ── Light mode: dark pills need light text & icons ── */
+        [data-theme="light"] .cm-tab {
+            color: #c8ccee;
+            /* light lavender — readable on dark pill */
+        }
+
+        [data-theme="light"] .cm-tab:hover {
+            color: #fff;
+        }
+
+        /* active + create already enforce #fff, keep them */
+        [data-theme="light"] .cm-tab.active,
+        [data-theme="light"] .cm-tab-create {
+            color: #fff;
+        }
+
+        /* Sort buttons also have dark bg — same fix */
+        [data-theme="light"] .cm-sort-btn {
+            color: #c8ccee;
+        }
+
+        [data-theme="light"] .cm-sort-btn:hover {
+            color: #fff;
+        }
+
+        [data-theme="light"] .cm-sort-btn.active {
+            color: #fff;
+        }
+
+        /* In-feed search input text in light mode */
+        [data-theme="light"] .cm-search input {
+            color: #e8eaf6;
+        }
+
+        [data-theme="light"] .cm-search input::placeholder {
+            color: #9ea4b6;
+        }
+
+        /* ── Section wiring ── */
+        .cm-section {
+            display: none;
+        }
+
+        .cm-section.active {
+            display: block;
+        }
+
+        /* ── Search + filter row ── */
+        .cm-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .cm-search {
+            flex: 1;
+            min-width: 180px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card, #161b2e);
+            border: 1.5px solid var(--border, rgba(255, 255, 255, .08));
+            border-radius: 12px;
+            padding: 0 16px;
+            height: 42px;
+        }
+
+        .cm-search i {
+            color: var(--text-secondary, #9ea4b6);
+            flex-shrink: 0;
+        }
+
+        .cm-search input {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text, #f5f7ff);
+            font-size: .9rem;
+            width: 100%;
+        }
+
+        .cm-search input::placeholder {
+            color: var(--text-secondary, #9ea4b6);
+        }
+
+        .cm-sort-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .cm-sort-btn {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border, rgba(255, 255, 255, .08));
+            background: var(--card, #161b2e);
+            color: var(--text-secondary);
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .16s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .cm-sort-btn:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .cm-sort-btn.active {
+            background: var(--accent, #6366f1);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        /* ── Trending tags ── */
+        .cm-tags-bar {
+            background: var(--card, #161b2e);
+            border: 1px solid var(--border, rgba(255, 255, 255, .08));
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .cm-tags-bar .cm-tags-label {
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        #tagList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        #tagList .tag-chip {
+            padding: 4px 12px;
+            border-radius: 99px;
+            background: rgba(99, 102, 241, .12);
+            border: 1px solid rgba(99, 102, 241, .25);
+            color: #818cf8;
+            font-size: .78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        #tagList .tag-chip:hover {
+            background: rgba(99, 102, 241, .25);
+        }
+
+        /* ── Posts feed ── */
+        #postsContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Post cards rendered by JS — also make them look premium */
+        #postsContainer .post-card,
+        .post-card {
+            background: var(--card, #161b2e);
+            border: 1px solid var(--border, rgba(255, 255, 255, .08));
+            border-radius: 16px;
+            padding: 20px 22px;
+            transition: border-color .18s, box-shadow .18s;
+        }
+
+        .post-card:hover {
+            border-color: rgba(99, 102, 241, .35);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+        }
+
+        /* ── Empty state ── */
+        .cm-empty {
+            text-align: center;
+            padding: 72px 24px;
+        }
+
+        .cm-empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .cm-empty h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .cm-empty p {
+            color: var(--text-secondary);
+            font-size: .9rem;
+        }
+
+        /* ── Feature cards (poll / feedback / quiz) ── */
+        .cm-feature-card {
+            background: var(--card, #161b2e);
+            border: 1px solid var(--border, rgba(255, 255, 255, .08));
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 520px;
+            margin: 40px auto;
+            text-align: center;
+        }
+
+        .cm-feature-card .cf-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 36px;
+        }
+
+        .cm-feature-card h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .cm-feature-card p {
+            color: var(--text-secondary);
+            font-size: .95rem;
+            margin-bottom: 28px;
+        }
+
+        /* pulse dots */
+        .pulse-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .pulse-indicator span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent, #6366f1);
+            animation: pulse-dot 1.4s infinite ease-in-out;
+        }
+
+        .pulse-indicator span:nth-child(2) {
+            animation-delay: .2s;
+        }
+
+        .pulse-indicator span:nth-child(3) {
+            animation-delay: .4s;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(.6);
+                opacity: .4
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+
+        /* Feedback selector */
+        .emoji-options {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .emoji-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1.5px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .emoji-btn .emoji {
+            font-size: 28px;
+        }
+
+        .emoji-btn .label {
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .emoji-btn.selected,
+        .emoji-btn:hover {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, .1);
+        }
+
+        /* Quiz code input */
+        .quiz-code-input {
+            width: 100%;
+            padding: 16px 24px;
+            font-size: 26px;
+            text-align: center;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, .05);
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            color: var(--text);
+            font-weight: 700;
+            transition: border-color .15s;
+            margin-bottom: 16px;
+        }
+
+        .quiz-code-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* ── Primary + ghost buttons (override theme defaults for community) ── */
+        .cm-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: #fff;
+            font-size: .95rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 18px rgba(99, 102, 241, .3);
+            transition: opacity .15s, transform .12s;
+        }
+
+        .cm-btn-primary:hover {
+            opacity: .9;
+            transform: translateY(-1px);
+        }
+
+        .cm-btn-primary:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ── Load more ── */
+        #loadMoreContainer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #loadMoreBtn {
+            padding: 10px 28px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            background: var(--card);
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        #loadMoreBtn:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        /* ── Modal ── */
+        .cm-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9000;
+            padding: 20px;
+        }
+
+        .cm-modal-overlay.active {
+            display: flex;
+        }
+
+        .cm-modal {
+            background: var(--surface, #0f1525);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 560px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .cm-modal-large {
+            max-width: 760px;
+        }
+
+        .cm-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 24px 0;
+        }
+
+        .cm-modal-header h2 {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .cm-modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+        }
+
+        .cm-modal-close:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .cm-modal-body {
+            padding: 20px 24px 24px;
+        }
+
+        /* form */
+        .cm-form-group {
+            margin-bottom: 18px;
+        }
+
+        .cm-form-group label {
+            display: block;
+            font-size: .82rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .cm-form-group input,
+        .cm-form-group textarea,
+        .cm-form-group select {
+            width: 100%;
+            padding: 11px 14px;
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: .9rem;
+            transition: border-color .15s;
+        }
+
+        .cm-form-group input:focus,
+        .cm-form-group textarea:focus,
+        .cm-form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .cm-form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        .cm-form-group small {
+            display: block;
+            margin-top: 5px;
+            font-size: .76rem;
+            color: var(--text-secondary);
+        }
+
+        .cm-modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .cm-modal-actions .cm-btn-cancel {
+            flex: 1;
+            padding: 11px 20px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            background: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .cm-modal-actions .cm-btn-cancel:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .cm-modal-actions .cm-btn-primary {
+            flex: 2;
+        }
+
+        /* Quiz error box */
+        #quizError {
+            display: none;
+            margin-top: 14px;
+            padding: 12px;
+            background: rgba(255, 55, 95, .1);
+            border: 1px solid rgba(255, 55, 95, .3);
+            border-radius: 10px;
+            color: #ff5b87;
+            font-size: .85rem;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .cm-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .cm-sort-group {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mw-app" id="mwApp">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
+            </div>
+
+            <div class="mw-sidebar-nav">
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+                    </a>
+                    <a href="student-courses.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
+                    </a>
+                    <a href="student-timetable.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
+                    </a>
+                    <a href="student-performance.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
+                    </a>
+                    <a href="student-leaderboard.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="trophy"></i></span> Leaderboard
+                        <span class="mw-nav-badge" style="font-size:10px;">HOT</span>
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="gamepad-2"></i></span> Play Games
+                    </a>
+                    <a href="student-community.html" class="mw-nav-item active">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Community
+                    </a>
+                    <a href="student-achievements.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="award"></i></span> Achievements
+                    </a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="megaphone"></i></span> Events
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
+                    </a>
+                    <a href="student-study-recommendations.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
+                    </a>
+                    <a href="student-reports.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
+                    </a>
+                    <a href="student-settings.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
+            </div>
+
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                    <span class="mw-user-more">⋯</span>
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
+                        </div>
+                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
+                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
+                        <a href="student-notifications.html"><i data-lucide="bell"></i> Notifications</a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <div class="mw-main" id="mwMain">
+
+            <!-- Topbar -->
+            <header class="mw-topbar">
+                <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="mw-breadcrumb">Dashboard / <span>Community</span></div>
+                <div class="mw-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" placeholder="Search posts…" autocomplete="off">
+                </div>
+                <div class="mw-topbar-actions">
+                    <div class="mw-notif-wrap">
+                        <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="mw-notif-dot hidden" id="notificationBadge"></span>
+                        </div>
+                        <div class="mw-notif-dropdown" id="notificationDropdown"></div>
+                    </div>
+                    <div class="mw-icon-btn" id="settingsBtn" title="Settings">
+                        <i data-lucide="settings"></i>
+                    </div>
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle light/dark"
+                        aria-label="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="mw-content">
+
+                <!-- Page header -->
+                <div class="greeting-row" style="margin-bottom:24px;">
+                    <div>
+                        <div class="greeting-name" style="font-size:1.6rem;">Community</div>
+                        <div class="greeting-date">Share projects, collaborate, and connect with fellow students.</div>
+                    </div>
+                </div>
+
+                <!-- ── Tab bar ── -->
+                <div class="cm-tabs">
+                    <button class="cm-tab cm-tab-create" id="createPostBtn">
+                        <i data-lucide="plus-circle"></i> Create Post
+                    </button>
+                    <button class="cm-tab active" data-section="community">
+                        <i data-lucide="newspaper"></i> Feed
+                    </button>
+                    <button class="cm-tab" id="myPostsBtn" data-section="community" data-my="1">
+                        <i data-lucide="user-pen"></i> My Posts
+                    </button>
+                    <button class="cm-tab" data-section="poll">
+                        <i data-lucide="bar-chart-3"></i> Quick Poll
+                    </button>
+                    <button class="cm-tab" data-section="feedback">
+                        <i data-lucide="message-circle-heart"></i> Feedback
+                    </button>
+                    <button class="cm-tab" data-section="quiz">
+                        <i data-lucide="trophy"></i> Live Quiz
+                    </button>
+                </div>
+
+                <!-- ═══════════════════ FEED SECTION ═══════════════════ -->
+                <div id="communitySection" class="cm-section active">
+
+                    <!-- Search + sort -->
+                    <div class="cm-toolbar">
+                        <div class="cm-search">
+                            <i data-lucide="search"></i>
+                            <!-- NOTE: reusing the topbar #searchInput via JS; this is a visual duplicate handled by student-community.js -->
+                            <input type="text" id="searchInputAlt" placeholder="Search posts…" autocomplete="off">
+                        </div>
+                        <div class="cm-sort-group" id="sortBtns">
+                            <button class="cm-sort-btn active" data-sort="recent"><i data-lucide="clock-4"></i>
+                                Recent</button>
+                            <button class="cm-sort-btn" data-sort="popular"><i data-lucide="flame"></i> Popular</button>
+                            <button class="cm-sort-btn" data-sort="trending"><i data-lucide="trending-up"></i>
+                                Trending</button>
+                        </div>
+                    </div>
+
+                    <!-- Trending tags -->
+                    <div class="cm-tags-bar" id="trendingTags">
+                        <span class="cm-tags-label"><i data-lucide="tag"></i> &nbsp;Tags</span>
+                        <div id="tagList">
+                            <span style="color:var(--text-secondary);font-size:.82rem;">No trending tags yet</span>
+                        </div>
+                    </div>
+
+                    <!-- Posts feed -->
+                    <div id="postsContainer">
+                        <!-- Default empty state; replaced by JS -->
+                        <div class="cm-empty">
+                            <div class="cm-empty-icon">📬</div>
+                            <h3>No posts yet</h3>
+                            <p>Be the first to share something with the community!</p>
+                        </div>
+                    </div>
+
+                    <!-- Load more -->
+                    <div class="load-more-container" id="loadMoreContainer" style="display:none;">
+                        <button id="loadMoreBtn">Load More Posts</button>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════ POLL SECTION ═══════════════════ -->
+                <div id="pollSection" class="cm-section">
+                    <div class="cm-feature-card">
+                        <div class="cf-icon" style="background:rgba(99,102,241,.12);">⏳</div>
+                        <h2>Waiting for Poll</h2>
+                        <p>Your instructor will launch a poll soon. Stay tuned!</p>
+                        <div class="pulse-indicator">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════ FEEDBACK SECTION ═══════════════════ -->
+                <div id="feedbackSection" class="cm-section">
+                    <div class="cm-feature-card">
+                        <div class="cf-icon" style="background:rgba(168,85,247,.12);">💬</div>
+                        <h2>How are you feeling?</h2>
+                        <p>Your feedback is anonymous and helps improve the lesson.</p>
+                        <div class="confidence-selector">
+                            <div class="emoji-options">
+                                <button class="emoji-btn" data-value="1">
+                                    <span class="emoji">😟</span>
+                                    <span class="label">Very Confused</span>
+                                </button>
+                                <button class="emoji-btn" data-value="2">
+                                    <span class="emoji">😕</span>
+                                    <span class="label">Confused</span>
+                                </button>
+                                <button class="emoji-btn" data-value="3">
+                                    <span class="emoji">😐</span>
+                                    <span class="label">Neutral</span>
+                                </button>
+                                <button class="emoji-btn" data-value="4">
+                                    <span class="emoji">🙂</span>
+                                    <span class="label">Confident</span>
+                                </button>
+                                <button class="emoji-btn" data-value="5">
+                                    <span class="emoji">😄</span>
+                                    <span class="label">Very Confident</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="cm-btn-primary" id="submitFeedbackBtn" disabled style="margin-top:8px;">
+                            <i data-lucide="send"></i> Submit Feedback
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════ QUIZ SECTION ═══════════════════ -->
+                <div id="quizSection" class="cm-section">
+                    <div class="cm-feature-card">
+                        <div class="cf-icon" style="background:rgba(251,191,36,.12);font-size:2rem;">🏆</div>
+                        <h2>Join Live Quiz</h2>
+                        <p>Enter the 6-letter code from your instructor to join instantly.</p>
+                        <input type="text" id="quizCodeInput" class="quiz-code-input" placeholder="ABCDEF"
+                            maxlength="6">
+                        <button id="joinQuizBtn" class="cm-btn-primary">
+                            <i data-lucide="zap"></i> Join Quiz
+                        </button>
+                        <div id="quizError"></div>
+                    </div>
+                </div>
+
+            </div><!-- end mw-content -->
+        </div><!-- end mw-main -->
+    </div><!-- end mw-app -->
+
+    <!-- ══════════════════ CREATE POST MODAL ══════════════════ -->
+    <div class="cm-modal-overlay" id="createPostModal">
+        <div class="cm-modal">
+            <div class="cm-modal-header">
+                <h2>✨ Create New Post</h2>
+                <button class="cm-modal-close" id="closeModalBtn">✕</button>
+            </div>
+            <div class="cm-modal-body">
+                <form id="createPostForm">
+                    <div class="cm-form-group">
+                        <label for="postTitle">Title *</label>
+                        <input type="text" id="postTitle" maxlength="300" required
+                            placeholder="Give your post a catchy title…">
+                    </div>
+                    <div class="cm-form-group">
+                        <label for="postContent">Content *</label>
+                        <textarea id="postContent" rows="6" maxlength="5000" required
+                            placeholder="Share your thoughts, project details, or ask a question…"></textarea>
+                    </div>
+                    <div class="cm-form-group">
+                        <label for="postType">Post Type</label>
+                        <select id="postType">
+                            <option value="text">📝 Text Post</option>
+                            <option value="image">🖼️ Image Post</option>
+                            <option value="video">🎥 Video Post</option>
+                            <option value="project">🚀 Project Showcase</option>
+                        </select>
+                    </div>
+                    <div class="cm-form-group" id="mediaUploadGroup" style="display:none;">
+                        <label for="mediaFile">Upload Media</label>
+                        <input type="file" id="mediaFile" accept="image/*,video/*">
+                        <small>Max 50 MB for videos, 5 MB for images</small>
+                    </div>
+                    <div class="cm-form-group" id="projectUrlGroup" style="display:none;">
+                        <label for="projectUrl">Project URL</label>
+                        <input type="url" id="projectUrl" placeholder="https://github.com/username/project">
+                    </div>
+                    <div class="cm-form-group">
+                        <label for="postTags">Tags (comma separated)</label>
+                        <input type="text" id="postTags" placeholder="e.g., javascript, web-dev, project">
+                        <small>Add tags to help others find your post</small>
+                    </div>
+                    <div class="cm-modal-actions">
+                        <button type="button" class="cm-btn-cancel" id="cancelPostBtn">Cancel</button>
+                        <button type="submit" class="cm-btn-primary">
+                            <i data-lucide="rocket"></i> Publish Post
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════ POST DETAIL MODAL ══════════════════ -->
+    <div class="cm-modal-overlay" id="postDetailModal">
+        <div class="cm-modal cm-modal-large">
+            <div class="cm-modal-header">
+                <h2>Post Details</h2>
+                <button class="cm-modal-close" id="closeDetailModalBtn">✕</button>
+            </div>
+            <div class="cm-modal-body" id="postDetailContent">
+                <!-- Loaded by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════ SCRIPTS ══════════════════ -->
+    <script>
+        // Auth guard
+        if (!localStorage.getItem('token')) window.location.href = 'student-login.html';
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // ── User info ──
+            const firstName = localStorage.getItem('firstName') || '';
+            const lastName = localStorage.getItem('lastName') || '';
+            const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Student';
+            const initials = (firstName[0] || '') + (lastName[0] || '') || 'S';
+
+            const el = (id) => document.getElementById(id);
+            if (el('sidebarUserName')) el('sidebarUserName').textContent = fullName;
+            if (el('dropdownUserName')) el('dropdownUserName').textContent = fullName;
+            if (el('avatarInitials')) el('avatarInitials').textContent = initials.toUpperCase();
+
+            // ── Profile dropdown ──
+            const profileToggle = el('profileToggle');
+            const profileDropdown = el('profileDropdown');
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('active');
+                });
+                document.addEventListener('click', () => profileDropdown.classList.remove('active'));
+            }
+
+            // ── Sign out ──
+            const signOutBtn = el('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', () => {
+                ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
+                    .forEach(k => localStorage.removeItem(k));
+                window.location.replace('student-login.html');
+            });
+
+            // ── Theme toggle ──
+            const themeBtn = el('themeToggle');
+            if (themeBtn) themeBtn.addEventListener('click', () => {
+                const cur = document.documentElement.getAttribute('data-theme');
+                document.documentElement.setAttribute('data-theme', cur === 'light' ? 'dark' : 'light');
+                localStorage.setItem('mw_theme', cur === 'light' ? 'dark' : 'light');
+            });
+
+            // ── Section tabs ──
+            const sections = ['communitySection', 'pollSection', 'feedbackSection', 'quizSection'];
+            document.querySelectorAll('.cm-tab[data-section]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.dataset.section + 'Section';
+                    // Update active tab (exclude create button)
+                    document.querySelectorAll('.cm-tab[data-section]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    // Show section
+                    sections.forEach(id => {
+                        const sec = el(id);
+                        if (sec) sec.classList.toggle('active', id === target);
+                    });
+                    // If "My Posts" tab
+                    if (btn.dataset.my === '1' && typeof showMyPosts === 'function') showMyPosts();
+                });
+            });
+
+            // ── Sort buttons ──
+            document.querySelectorAll('.cm-sort-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.cm-sort-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+            });
+
+            // ── Sync topbar search → community search ──
+            const topSearch = el('searchInput');
+            const altSearch = el('searchInputAlt');
+            if (topSearch && altSearch) {
+                topSearch.addEventListener('input', e => { altSearch.value = e.target.value; altSearch.dispatchEvent(new Event('input')); });
+                altSearch.addEventListener('input', e => { topSearch.value = e.target.value; });
+            }
+
+            // ── Modal helpers ──
+            // The existing student-community.js opens/closes via class .active on .modal
+            // We need to bridge the old .modal class to new .cm-modal-overlay
+            window.openCreatePostModal = () => el('createPostModal')?.classList.add('active');
+            window.closeCreatePostModal = () => el('createPostModal')?.classList.remove('active');
+            window.closePostDetailModal = () => el('postDetailModal')?.classList.remove('active');
+
+            el('createPostBtn')?.addEventListener('click', window.openCreatePostModal);
+            el('closeModalBtn')?.addEventListener('click', window.closeCreatePostModal);
+            el('cancelPostBtn')?.addEventListener('click', window.closeCreatePostModal);
+            el('closeDetailModalBtn')?.addEventListener('click', window.closePostDetailModal);
+
+            // Close modals on overlay click
+            el('createPostModal')?.addEventListener('click', e => { if (e.target === el('createPostModal')) window.closeCreatePostModal(); });
+            el('postDetailModal')?.addEventListener('click', e => { if (e.target === el('postDetailModal')) window.closePostDetailModal(); });
+
+            // ── Feedback emoji buttons ──
+            let selectedConfidence = null;
+            document.querySelectorAll('.emoji-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedConfidence = btn.dataset.value;
+                    const submitBtn = el('submitFeedbackBtn');
+                    if (submitBtn) submitBtn.disabled = false;
+                });
+            });
+
+            lucide.createIcons();
+        });
+    </script>
+
+    <script src="student-community.js"></script>
+    <script src="chatbot.js"></script>
+</body>
+
+</html>

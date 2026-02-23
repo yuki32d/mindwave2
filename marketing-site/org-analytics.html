@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - MindWave</title>
+    <link rel="stylesheet" href="css/modern-dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🌊</span>
+                    <span class="logo-text">MindWave</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-label">MAIN MENU</span>
+                    <a href="modern-dashboard.html" class="nav-item">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="org-analytics.html" class="nav-item active">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                    <a href="org-billing.html" class="nav-item">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Billing</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">MANAGEMENT</span>
+                    <a href="org-team.html" class="nav-item">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Team Members</span>
+                    </a>
+                    <a href="org-students.html" class="nav-item">
+                        <span class="nav-icon">🎓</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a href="org-games.html" class="nav-item">
+                        <span class="nav-icon">🎮</span>
+                        <span class="nav-text">Games</span>
+                    </a>
+                    <a href="org-settings.html" class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">SUPPORT</span>
+                    <a href="#help" class="nav-item">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">Help Center</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="search-container">
+                    <input type="text" placeholder="Search analytics..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="header-actions">
+                    <select class="form-input" style="width: auto;">
+                        <option>Last 30 Days</option>
+                        <option>Last 7 Days</option>
+                        <option>Last 90 Days</option>
+                        <option>This Year</option>
+                    </select>
+                    <button class="btn-export">
+                        <span>📤</span>
+                        <span>Export Report</span>
+                    </button>
+                    <button class="btn-icon">🔔</button>
+                    <div class="user-avatar">
+                        <img src="https://i.pravatar.cc/40?img=5" alt="User">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Title -->
+            <div class="page-header">
+                <h1>Analytics & Insights</h1>
+                <p>Track your organization's performance and engagement</p>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="stats-row" style="margin-bottom: 2rem; grid-template-columns: repeat(4, 1fr);">
+                <div class="stat-card">
+                    <div class="stat-label">Total Engagement</div>
+                    <div class="stat-value">1,247</div>
+                    <div class="stat-change positive">
+                        <span class="change-icon">↗</span>
+                        <span>+12% vs last month</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Completion Rate</div>
+                    <div class="stat-value">78%</div>
+                    <div class="stat-change positive">
+                        <span class="change-icon">↗</span>
+                        <span>+5% improvement</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg. Score</div>
+                    <div class="stat-value">85.3</div>
+                    <div class="stat-change positive">
+                        <span class="change-icon">↗</span>
+                        <span>+2.1 points</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active Time</div>
+                    <div class="stat-value">42h</div>
+                    <div class="stat-change positive">
+                        <span>Per student/week</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="dashboard-grid">
+                <div class="left-column">
+                    <!-- Student Activity Chart -->
+                    <div class="chart-card" style="margin-bottom: 1.5rem;">
+                        <div class="chart-header">
+                            <h3>Student Activity Trend</h3>
+                            <div class="chart-legend">
+                                <span class="legend-item">
+                                    <span class="legend-dot blue"></span>
+                                    Active Students
+                                </span>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Game Performance -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Game Performance</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="gamePerformanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-column">
+                    <!-- Top Performing Students -->
+                    <div class="settings-card" style="margin-bottom: 1.5rem;">
+                        <div class="settings-card-header">
+                            <h2>Top Performers</h2>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="leaderboard-list">
+                                <div class="leaderboard-item">
+                                    <div class="rank">1</div>
+                                    <img src="https://i.pravatar.cc/32?img=11" alt="Student">
+                                    <div class="leaderboard-info">
+                                        <div class="leaderboard-name">Emma Wilson</div>
+                                        <div class="leaderboard-score">2,450 pts</div>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item">
+                                    <div class="rank">2</div>
+                                    <img src="https://i.pravatar.cc/32?img=13" alt="Student">
+                                    <div class="leaderboard-info">
+                                        <div class="leaderboard-name">Sophia Lee</div>
+                                        <div class="leaderboard-score">2,320 pts</div>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item">
+                                    <div class="rank">3</div>
+                                    <img src="https://i.pravatar.cc/32?img=14" alt="Student">
+                                    <div class="leaderboard-info">
+                                        <div class="leaderboard-name">Oliver Brown</div>
+                                        <div class="leaderboard-score">2,180 pts</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Popular Games -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h2>Most Popular Games</h2>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="popular-games-list">
+                                <div class="popular-game-item">
+                                    <div class="game-icon">🎯</div>
+                                    <div class="game-info">
+                                        <div class="game-name">Math Quiz Master</div>
+                                        <div class="game-plays">1,234 plays</div>
+                                    </div>
+                                </div>
+                                <div class="popular-game-item">
+                                    <div class="game-icon">🧪</div>
+                                    <div class="game-info">
+                                        <div class="game-name">Science Explorer</div>
+                                        <div class="game-plays">987 plays</div>
+                                    </div>
+                                </div>
+                                <div class="popular-game-item">
+                                    <div class="game-icon">📚</div>
+                                    <div class="game-info">
+                                        <div class="game-name">History Challenge</div>
+                                        <div class="game-plays">856 plays</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/modern-dashboard.js"></script>
+    <script>
+        // Activity Chart
+        const activityCtx = document.getElementById('activityChart');
+        if (activityCtx) {
+            new Chart(activityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Active Students',
+                        data: [180, 195, 210, 198],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // Game Performance Chart
+        const gameCtx = document.getElementById('gamePerformanceChart');
+        if (gameCtx) {
+            new Chart(gameCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Math', 'Science', 'History', 'English', 'Geography'],
+                    datasets: [{
+                        label: 'Avg Score',
+                        data: [85, 78, 92, 88, 75],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    </script></body>
+
+</html>

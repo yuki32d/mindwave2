@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Ranking – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        if (!checkAdminAuth()) {
+            // Will redirect if not authenticated
+        }
+    </script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <!-- Header -->
+        <header class="topbar">
+            <div class="topbar-brand">
+                <span>🌊</span>
+                <span>MindwaveIo</span>
+            </div>
+            <div class="topbar-search">
+                <span>🔍</span>
+                <input type="text" placeholder="Search...">
+            </div>
+            <div class="topbar-actions">
+                <span id="adminNotificationBtn" style="cursor: pointer;" title="Notifications">🔔</span>
+                <span id="adminSettingsBtn" style="cursor: pointer;" title="Settings">⚙️</span>
+                <div class="profile-toggle" id="profileToggle">
+                    <span>👤</span>
+                    <small>Account</small>
+                </div>
+            </div>
+        </header>
+
+
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <div class="main-header">
+                    <div>
+                        <h1>🏆 Create Ranking</h1>
+                        <p>Students drag to rank items by preference or importance</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="secondary-btn" onclick="window.history.back()">← Back</button>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Ranking</button>
+                    </div>
+                </div>
+
+                <!-- Ranking Configuration -->
+                <div class="grid two">
+                    <section class="panel">
+                        <h2>⚙️ Ranking Settings</h2>
+                        <form id="rankingForm">
+                            <div>
+                                <label for="rankingTitle">Ranking Title</label>
+                                <input type="text" id="rankingTitle" placeholder="e.g., Study Methods Effectiveness"
+                                    required>
+                            </div>
+
+                            <div>
+                                <label for="questionText">Question/Prompt</label>
+                                <textarea id="questionText" rows="2"
+                                    placeholder="e.g., Rank these study methods from most to least effective"
+                                    required></textarea>
+                            </div>
+
+                            <div>
+                                <label for="itemInput">Add Items to Rank</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="itemInput" placeholder="Enter item" style="flex: 1;">
+                                    <button type="button" class="secondary-btn" id="addItemBtn">+ Add</button>
+                                </div>
+                                <small style="color: #9ea4b6; margin-top: 8px; display: block;">Add 3-10 items for
+                                    students to rank</small>
+                            </div>
+
+                            <div>
+                                <label>Items List (Drag to set correct order)</label>
+                                <div id="itemsList"
+                                    style="min-height: 250px; background: var(--card-darker); border-radius: 12px; padding: 16px;">
+                                    <p style="color: #9ea4b6; text-align: center; margin-top: 80px;">No items added yet
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 16px; flex-direction: column;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="hasCorrectOrder">
+                                    <span>Has correct order (for grading)</span>
+                                </label>
+
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="showAggregate" checked>
+                                    <span>Show aggregate class rankings</span>
+                                </label>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Live Preview -->
+                    <section class="panel">
+                        <h2>👁️ Student View Preview</h2>
+                        <div id="previewContainer"
+                            style="background: var(--card-darker); border-radius: 20px; padding: 40px; min-height: 500px;">
+                            <h3 id="previewTitle"
+                                style="font-size: 24px; margin-bottom: 16px; color: #f5f7ff; text-align: center;">
+                                Your ranking will appear here</h3>
+                            <p id="previewQuestion"
+                                style="color: #9ea4b6; text-align: center; margin-bottom: 32px; min-height: 24px;"></p>
+
+                            <div id="previewRankingList"></div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="loading-spinner.js"></script>
+    <script src="faculty-create-ranking.js"></script>
+</body>
+
+</html>

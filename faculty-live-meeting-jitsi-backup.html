@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave Meet - Faculty</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+            background: #202124;
+            color: #e8eaed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 500px;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 400;
+            margin-bottom: 16px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #9aa0a6;
+            margin-bottom: 32px;
+        }
+
+        .meeting-info {
+            background: #292a2d;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .code-label {
+            font-size: 14px;
+            color: #9aa0a6;
+            margin-bottom: 8px;
+        }
+
+        .meeting-code {
+            font-size: 24px;
+            font-weight: 600;
+            color: #667eea;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .meeting-link {
+            font-size: 13px;
+            color: #9aa0a6;
+            word-break: break-all;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            margin-right: 12px;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #3c4043;
+            color: #e8eaed;
+        }
+
+        .btn-secondary:hover {
+            background: #5f6368;
+        }
+
+        .copy-btn {
+            background: #3c4043;
+            color: #e8eaed;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+            margin-top: 8px;
+        }
+
+        .copy-btn:hover {
+            background: #5f6368;
+        }
+
+        .instructions {
+            background: #292a2d;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: left;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Your Meeting is Ready!</h1>
+        <p class="subtitle">Share this code with your students to join</p>
+
+        <div class="meeting-info">
+            <div class="code-label">Meeting Code</div>
+            <div class="meeting-code" id="meetingCode">Loading...</div>
+            <div class="meeting-link" id="meetingLink">Loading...</div>
+            <button class="copy-btn" onclick="copyLink()">📋 Copy Link</button>
+        </div>
+
+        <div>
+            <a href="#" class="btn btn-primary" id="joinBtn">Join Meeting</a>
+            <a href="admin.html" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+
+        <div class="instructions">
+            <strong>How to share:</strong>
+            <ol>
+                <li>Copy the meeting link above</li>
+                <li>Share it with your students via WhatsApp, email, or chat</li>
+                <li>Click "Join Meeting" to start</li>
+                <li>When done, close the Jitsi tab and click "Back to Dashboard"</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="faculty-meeting-notify.js"></script>
+    <script>
+        // Get user info
+        const token = localStorage.getItem('token');
+        let userName = 'Faculty';
+        let userEmail = '';
+
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                userName = payload.name || 'Faculty';
+                userEmail = payload.email || '';
+            } catch (e) {
+                console.log('Could not parse token');
+            }
+        }
+
+        // Generate meeting code and save to database
+        async function generateMeetingCode() {
+            try {
+                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://mindwave2.onrender.com';
+
+                const response = await fetch(`${API_BASE}/api/meetings/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.ok) {
+                    return data.code;
+                }
+            } catch (error) {
+                console.error('Error creating meeting code:', error);
+            }
+
+            // Fallback to local generation
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // Initialize meeting
+        async function init() {
+            const meetingCode = await generateMeetingCode();
+            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8081' : 'https://mindwave2.onrender.com';
+
+            try {
+                // Call backend API to get Jitsi URL with JWT token
+                const response = await fetch(`${API_BASE}/api/meetings/create-jitsi`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        meetingCode: meetingCode,  // Send only numeric code, backend adds "MindWave" prefix
+                        facultyName: userName,
+                        facultyEmail: userEmail || `${userName}@mindwave.local`
+                    })
+                });
+
+                const data = await response.json();
+
+                console.log('=== Backend Response Debug ===');
+                console.log('Full response:', data);
+                console.log('data.success:', data.success);
+                console.log('data.jitsiUrl:', data.jitsiUrl);
+                console.log('data.meetingCode:', data.meetingCode);
+
+                if (data.success) {
+                    const meetingUrl = data.jitsiUrl;
+
+                    document.getElementById('meetingCode').textContent = meetingCode;
+                    document.getElementById('meetingLink').textContent = meetingUrl;
+                    document.getElementById('joinBtn').href = meetingUrl;
+
+                    console.log('=== URL Assignment ===');
+                    console.log('Meeting Code:', meetingCode);
+                    console.log('Meeting URL:', meetingUrl);
+                    console.log('Join Button href:', document.getElementById('joinBtn').href);
+                    console.log('URL includes JWT?', meetingUrl.includes('jwt='));
+                    console.log('URL includes #config?', meetingUrl.includes('#config'));
+                } else {
+                    console.error('Failed to create Jitsi meeting:', data.error);
+                    alert('Failed to create meeting. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error creating Jitsi meeting:', error);
+                alert('Failed to create meeting. Please try again.');
+            }
+        }
+
+        init();
+
+        // Copy link function
+        function copyLink() {
+            const meetingUrl = document.getElementById('meetingLink').textContent;
+            navigator.clipboard.writeText(meetingUrl);
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Copied!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+    </script>
+</body>
+
+</html>

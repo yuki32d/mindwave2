@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWAVE – AI Game Builder</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <style>
+        .builder-shell {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            height: calc(100vh - 200px);
+        }
+
+        .chat-panel,
+        .preview-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #f5f7ff;
+        }
+
+        .panel-header p {
+            margin: 4px 0 0;
+            font-size: 14px;
+            color: #9ea4b6;
+        }
+
+        /* Chat Styles */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chat-message {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background: #0f62fe;
+            color: white;
+        }
+
+        .chat-message.ai {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.05);
+            color: #f5f7ff;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .chat-input-area input:focus {
+            outline: none;
+            border-color: #0f62fe;
+        }
+
+        .send-btn {
+            background: #0f62fe;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Preview Styles */
+        .preview-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .empty-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #9ea4b6;
+            text-align: center;
+        }
+
+        .empty-preview svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .game-preview {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .game-preview h3 {
+            margin: 0 0 8px;
+            color: #f5f7ff;
+        }
+
+        .game-preview p {
+            margin: 4px 0;
+            color: #9ea4b6;
+            font-size: 14px;
+        }
+
+        .game-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #9ea4b6;
+        }
+
+        .publish-btn {
+            width: 100%;
+            padding: 14px;
+            background: #34c759;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .publish-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .publish-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            align-self: flex-start;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* Edit Mode Styles */
+        .edit-mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #0f62fe;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(24px);
+        }
+
+        .question-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .edit-btn {
+            background: rgba(15, 98, 254, 0.2);
+            color: #0f62fe;
+            border: 1px solid rgba(15, 98, 254, 0.3);
+        }
+
+        .edit-btn:hover {
+            background: rgba(15, 98, 254, 0.3);
+        }
+
+        .delete-btn {
+            background: rgba(220, 38, 38, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        .delete-btn:hover {
+            background: rgba(220, 38, 38, 0.3);
+        }
+
+        .add-question-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(52, 199, 89, 0.1);
+            border: 2px dashed rgba(52, 199, 89, 0.3);
+            border-radius: 12px;
+            color: #34c759;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+
+        .add-question-btn:hover {
+            background: rgba(52, 199, 89, 0.2);
+            border-color: rgba(52, 199, 89, 0.5);
+        }
+
+        .save-cancel-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .save-btn,
+        .cancel-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .save-btn {
+            background: #34c759;
+            color: white;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .cancel-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f5f7ff;
+        }
+
+        .cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Create Games Section */
+        .create-games-section {
+            max-width: 1400px;
+            margin: 60px auto 40px;
+            padding: 0 24px;
+        }
+
+        .create-games-section h2 {
+            font-size: 24px;
+            color: #f5f7ff;
+            margin-bottom: 8px;
+        }
+
+        .create-games-section>p {
+            color: #9ea4b6;
+            margin-bottom: 24px;
+        }
+
+        .game-types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .game-type-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-type-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(15, 98, 254, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .game-type-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(15, 98, 254, 0.5);
+            box-shadow: 0 8px 24px rgba(15, 98, 254, 0.2);
+        }
+
+        .game-type-card:hover::before {
+            opacity: 1;
+        }
+
+        .game-type-icon {
+            font-size: 48px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-type-card h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #f5f7ff;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-type-card p {
+            margin: 0;
+            font-size: 13px;
+            color: #9ea4b6;
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Specific gradient colors for each card */
+        .game-type-card:nth-child(1):hover::before {
+            background: linear-gradient(135deg, rgba(255, 55, 95, 0.15) 0%, rgba(255, 159, 10, 0.15) 100%);
+        }
+
+        .game-type-card:nth-child(2):hover::before {
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.15) 0%, rgba(0, 82, 204, 0.15) 100%);
+        }
+
+        .game-type-card:nth-child(3):hover::before {
+            background: linear-gradient(135deg, rgba(159, 122, 234, 0.15) 0%, rgba(107, 70, 193, 0.15) 100%);
+        }
+
+        .game-type-card:nth-child(4):hover::before {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
+        }
+
+        .game-type-card:nth-child(5):hover::before {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.15) 100%);
+        }
+
+        .game-type-card:nth-child(6):hover::before {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(219, 39, 119, 0.15) 100%);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: #1a1d2e;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #f5f7ff;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #9ea4b6;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: #f5f7ff;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #f5f7ff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0f62fe;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .option-input {
+            grid-column: 1;
+        }
+
+        .correct-radio {
+            grid-column: 2;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-actions .primary {
+            background: #0f62fe;
+            color: white;
+        }
+
+        .modal-actions .secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f5f7ff;
+        }
+
+        @media (max-width: 1024px) {
+            .builder-shell {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .chat-panel {
+                height: 400px;
+            }
+
+            .preview-panel {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div class="page-shell">
+        <header class="hero">
+            <a class="ghost-link" href="admin.html" style="margin-bottom: 24px;">← Back to Dashboard</a>
+            <p class="eyebrow">AI-Powered</p>
+            <h1>🤖 AI Game Builder</h1>
+            <p class="lede">Create educational games through conversation. Just describe what you want, and AI will
+                generate it for you!</p>
+        </header>
+
+        <div class="builder-shell">
+            <!-- Chat Panel -->
+            <div class="chat-panel">
+                <div class="panel-header">
+                    <h2>💬 Conversation</h2>
+                    <p>Tell me what game you'd like to create</p>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-message ai">
+                        Hello! I'm your AI Game Builder assistant. 🎮<br><br>
+                        I can help you create:<br>
+                        • Quiz games<br>
+                        • SQL Builder challenges<br>
+                        • Code Unjumble puzzles<br>
+                        • Syntax Fill-in exercises<br>
+                        • Bug Hunt challenges<br>
+                        • Tech Sorter games<br><br>
+                        What would you like to create today?
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="e.g., Create a quiz about Python loops..."
+                        autocomplete="off">
+                    <button class="send-btn" id="sendBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="preview-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>👁️ Preview</h2>
+                        <p>Your game will appear here</p>
+                    </div>
+                    <div class="edit-mode-toggle" id="editModeToggleContainer" style="display: none;">
+                        <span style="color: #9ea4b6; font-size: 14px;">Edit Mode</span>
+                        <div class="toggle-switch" id="editModeToggle">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preview-content" id="previewContent">
+                    <div class="empty-preview">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        </svg>
+                        <p>Start chatting to generate a game!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Create Games Section -->
+        <div class="create-games-section">
+            <h2>🎮 Create Games</h2>
+            <p>Choose a game type to start creating your educational game</p>
+            <div class="game-types-grid">
+                <a href="faculty-create-quiz.html" class="game-type-card">
+                    <div class="game-type-icon">❓</div>
+                    <h3>Quiz</h3>
+                    <p>Multiple choice questions with instant feedback</p>
+                </a>
+                <a href="faculty-create-sql.html" class="game-type-card">
+                    <div class="game-type-icon">🕸️</div>
+                    <h3>SQL Builder</h3>
+                    <p>Build and validate SQL queries</p>
+                </a>
+                <a href="faculty-create-unjumble.html" class="game-type-card">
+                    <div class="game-type-icon">🧩</div>
+                    <h3>Code Unjumble</h3>
+                    <p>Reorder code lines to fix logic</p>
+                </a>
+                <a href="faculty-create-fillin.html" class="game-type-card">
+                    <div class="game-type-icon">⌨️</div>
+                    <h3>Syntax Fill-in</h3>
+                    <p>Fill in missing code syntax</p>
+                </a>
+                <a href="faculty-create-debug.html" class="game-type-card">
+                    <div class="game-type-icon">🐛</div>
+                    <h3>Bug Hunt</h3>
+                    <p>Find and fix bugs in code</p>
+                </a>
+                <a href="faculty-create-sorter.html" class="game-type-card">
+                    <div class="game-type-icon">🗂️</div>
+                    <h3>Tech Sorter</h3>
+                    <p>Categorize technologies correctly</p>
+                </a>
+                <a href="faculty-create-scenario.html" class="game-type-card">
+                    <div class="game-type-icon">🎭</div>
+                    <h3>Scenario</h3>
+                    <p>Interactive branching storylines</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Edit/Add Question Modal -->
+        <div id="questionModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Edit Question</h3>
+                    <button class="close-modal" id="closeModal">×</button>
+                </div>
+
+                <form id="questionForm">
+                    <div class="form-group">
+                        <label for="questionText">Question Text</label>
+                        <textarea id="questionText" required placeholder="Enter your question..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Options (select correct answer)</label>
+                        <div class="options-grid">
+                            <input type="text" id="optionA" class="option-input" placeholder="Option A" required>
+                            <input type="radio" name="correctAnswer" value="0" class="correct-radio" required>
+
+                            <input type="text" id="optionB" class="option-input" placeholder="Option B" required>
+                            <input type="radio" name="correctAnswer" value="1" class="correct-radio">
+
+                            <input type="text" id="optionC" class="option-input" placeholder="Option C" required>
+                            <input type="radio" name="correctAnswer" value="2" class="correct-radio">
+
+                            <input type="text" id="optionD" class="option-input" placeholder="Option D" required>
+                            <input type="radio" name="correctAnswer" value="3" class="correct-radio">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="questionPoints">Points</label>
+                        <input type="number" id="questionPoints" min="1" max="100" value="10" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="questionExplanation">Explanation (Optional)</label>
+                        <textarea id="questionExplanation" placeholder="Explain the correct answer..."></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="secondary" id="cancelModal">Cancel</button>
+                        <button type="submit" class="primary">Save Question</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="ai-game-builder.js"></script>    <script src="loading-spinner.js"></script>
+</body>
+
+</html>

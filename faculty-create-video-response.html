@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="loading-spinner.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Video Response – MindWave</title>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <script src="auth-guard.js"></script>
+    <script>
+        if (!checkAdminAuth()) {
+            // Will redirect if not authenticated
+        }
+    </script>
+</head>
+
+<body data-theme="dark">
+    <div class="app-shell">
+        <!-- Header -->
+        <header class="topbar">
+            <div class="topbar-brand">
+                <span>🌊</span>
+                <span>MindwaveIo</span>
+            </div>
+            <div class="topbar-search">
+                <span>🔍</span>
+                <input type="text" placeholder="Search...">
+            </div>
+            <div class="topbar-actions">
+                <span id="adminNotificationBtn" style="cursor: pointer;" title="Notifications">🔔</span>
+                <span id="adminSettingsBtn" style="cursor: pointer;" title="Settings">⚙️</span>
+                <div class="profile-toggle" id="profileToggle">
+                    <span>👤</span>
+                    <small>Account</small>
+                </div>
+            </div>
+        </header>
+
+
+        <div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+            <!-- Main Content -->
+            <main>
+                <div class="main-header">
+                    <div>
+                        <h1>🎥 Create Video Response</h1>
+                        <p>Students record video responses using their webcam</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="secondary-btn" onclick="window.history.back()">← Back</button>
+                        <button class="primary-btn" id="publishBtn">🚀 Publish Activity</button>
+                    </div>
+                </div>
+
+                <!-- Video Configuration -->
+                <div class="grid two">
+                    <section class="panel">
+                        <h2>⚙️ Activity Settings</h2>
+                        <form id="videoForm">
+                            <div>
+                                <label for="activityTitle">Activity Title</label>
+                                <input type="text" id="activityTitle" placeholder="e.g., Project Presentation" required>
+                            </div>
+
+                            <div>
+                                <label for="questionText">Question/Prompt</label>
+                                <textarea id="questionText" rows="3"
+                                    placeholder="e.g., Present your project findings in 2-3 minutes"
+                                    required></textarea>
+                            </div>
+
+                            <div class="grid two">
+                                <div>
+                                    <label for="minDuration">Minimum Duration (seconds)</label>
+                                    <input type="number" id="minDuration" placeholder="e.g., 30" min="10" max="600">
+                                    <small style="color: #9ea4b6; display: block; margin-top: 4px;">Optional</small>
+                                </div>
+
+                                <div>
+                                    <label for="maxDuration">Maximum Duration (seconds)</label>
+                                    <input type="number" id="maxDuration" placeholder="e.g., 180" min="10" max="600"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="retakesAllowed">Retakes Allowed</label>
+                                <select id="retakesAllowed">
+                                    <option value="unlimited">Unlimited</option>
+                                    <option value="3">3 attempts</option>
+                                    <option value="2">2 attempts</option>
+                                    <option value="1">1 attempt only</option>
+                                </select>
+                            </div>
+
+                            <div style="display: flex; gap: 16px; flex-direction: column;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="requireReview" checked>
+                                    <span>Students must review before submitting</span>
+                                </label>
+
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="showTimer" checked>
+                                    <span>Show timer during recording</span>
+                                </label>
+                            </div>
+
+                            <div>
+                                <label for="rubricText">Grading Rubric (Optional)</label>
+                                <textarea id="rubricText" rows="3"
+                                    placeholder="What are you looking for in the video response?"></textarea>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Live Preview -->
+                    <section class="panel">
+                        <h2>👁️ Student View Preview</h2>
+                        <div id="previewContainer"
+                            style="background: var(--card-darker); border-radius: 20px; padding: 40px; min-height: 500px;">
+                            <h3 id="previewTitle"
+                                style="font-size: 24px; margin-bottom: 16px; color: #f5f7ff; text-align: center;">
+                                Your activity will appear here</h3>
+                            <p id="previewQuestion"
+                                style="color: #9ea4b6; text-align: center; margin-bottom: 24px; min-height: 24px;"></p>
+
+                            <div
+                                style="width: 100%; max-width: 500px; aspect-ratio: 16/9; background: #1E2433; border-radius: 16px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.1); position: relative;">
+                                <div style="text-align: center; color: #9ea4b6;">
+                                    <div style="font-size: 64px; margin-bottom: 16px;">📹</div>
+                                    <div style="font-size: 16px;">Webcam Preview</div>
+                                </div>
+                                <div id="timerPreview"
+                                    style="position: absolute; top: 16px; right: 16px; background: rgba(255,59,48,0.9); color: white; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 18px; display: none;">
+                                    0:00 / <span id="maxTimeDisplay">3:00</span>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 12px; justify-content: center;">
+                                <button class="primary-btn" style="padding: 16px 32px; font-size: 16px;">
+                                    🔴 Start Recording
+                                </button>
+                                <button class="secondary-btn" style="padding: 16px 32px; font-size: 16px;">
+                                    ▶️ Preview
+                                </button>
+                            </div>
+
+                            <div id="retakesInfo"
+                                style="text-align: center; margin-top: 24px; color: #9ea4b6; font-size: 14px;"></div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="loading-spinner.js"></script>
+    <script src="faculty-create-video-response.js"></script>
+</body>
+
+</html>
