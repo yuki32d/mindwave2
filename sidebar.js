@@ -6,13 +6,16 @@
     const STORAGE_KEY = 'mw_sidebar_collapsed';
 
     function getApp() {
-        return document.querySelector('.mw-app');
+        return document.querySelector('.mw-app') || document.querySelector('.mw-shell');
     }
 
     function applyState(collapsed) {
         const app = getApp();
         if (!app) return;
         app.classList.toggle('sidebar-collapsed', collapsed);
+        // Also toggle the aside directly in case CSS targets the aside
+        const sidebar = document.getElementById('mwSidebar');
+        if (sidebar) sidebar.classList.toggle('collapsed', collapsed);
     }
 
     function toggle() {
