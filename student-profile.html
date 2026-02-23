@@ -1,549 +1,1244 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINDWAVE – My Profile</title>
-    <link rel="stylesheet" href="3d-depth-design.css">
-    <script src="theme-init.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile — MindWave</title>
+    <meta name="description" content="View your MindWave profile, stats, skills and recent activity.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="auth-guard.js"></script>
+    <script>if (!checkStudentAuth()) { }</script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script>
+        (function () {
+            const t = localStorage.getItem('mw_theme') || localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+
     <style>
-        .profile-container {
-            max-width: 1200px;
+        /* ── PROFILE LAYOUT ── */
+        .pf-body {
+            padding: 28px 36px;
+            max-width: 960px;
             margin: 0 auto;
         }
 
-        /* Hero Section */
-        .profile-hero {
-            background: linear-gradient(135deg, rgba(15, 98, 254, 0.2) 0%, rgba(138, 43, 226, 0.2) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 24px;
-            padding: 48px;
-            margin-bottom: 32px;
+        /* HERO BANNER */
+        .pf-hero {
+            background: linear-gradient(135deg, rgba(88, 101, 242, .18) 0%, rgba(167, 139, 250, .14) 100%);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 32px 36px;
             display: flex;
             align-items: center;
-            gap: 32px;
-            backdrop-filter: blur(10px);
-        }
-
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            font-weight: 700;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            flex-shrink: 0;
-        }
-
-        .profile-info {
-            flex: 1;
-        }
-
-        .profile-info h1 {
-            margin: 0 0 8px;
-            font-size: 36px;
-        }
-
-        .profile-info p {
-            margin: 0;
-            color: #9ea4b6;
-            font-size: 16px;
-        }
-
-        .rank-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
-            color: #000;
-            border-radius: 999px;
-            font-weight: 700;
-            margin-top: 12px;
-            font-size: 14px;
-        }
-
-        .edit-profile-btn {
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-
-        .edit-profile-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 32px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 0;
-        }
-
-        .tab-btn {
-            padding: 12px 24px;
-            background: transparent;
-            border: none;
-            color: #9ea4b6;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 16px;
-            font-weight: 500;
-            border-bottom: 2px solid transparent;
-        }
-
-        .tab-btn:hover {
-            color: white;
-        }
-
-        .tab-btn.active {
-            color: white;
-            border-bottom-color: #0f62fe;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            transition: all 0.3s;
-        }
-
-        .stat-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-4px);
-        }
-
-        .stat-icon {
-            font-size: 32px;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .stat-value {
-            font-size: 36px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            color: #9ea4b6;
-            font-size: 14px;
-        }
-
-        /* Achievements */
-        .achievements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 24px;
-        }
-
-        .achievement-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .achievement-card.unlocked {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
-            border-color: rgba(255, 215, 0, 0.3);
-        }
-
-        .achievement-card.locked {
-            opacity: 0.5;
-            filter: grayscale(100%);
-        }
-
-        .achievement-card:hover {
-            transform: translateY(-4px);
-        }
-
-        .achievement-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .achievement-name {
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .achievement-desc {
-            font-size: 12px;
-            color: #9ea4b6;
-        }
-
-        /* Activity List */
-        .activity-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .activity-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: auto 1fr auto auto;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .activity-icon {
-            font-size: 24px;
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: rgba(15, 98, 254, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .activity-info h4 {
-            margin: 0 0 4px;
-            font-size: 16px;
-        }
-
-        .activity-info p {
-            margin: 0;
-            font-size: 12px;
-            color: #9ea4b6;
-        }
-
-        .activity-score {
-            font-size: 24px;
-            font-weight: 700;
-            color: #4da0ff;
-        }
-
-        .activity-time {
-            font-size: 12px;
-            color: #9ea4b6;
-        }
-
-        /* Skills */
-        .skills-grid {
-            display: grid;
-            gap: 24px;
-        }
-
-        .skill-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .skill-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .skill-name {
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .skill-score {
-            font-weight: 700;
-            color: #4da0ff;
-        }
-
-        .skill-bar {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 999px;
+            gap: 28px;
+            margin-bottom: 24px;
+            position: relative;
             overflow: hidden;
         }
 
-        .skill-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4da0ff 0%, #a78bfa 100%);
-            border-radius: 999px;
-            transition: width 0.6s ease;
-        }
-
-        /* Settings */
-        .settings-section {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-
-        .settings-section h3 {
-            margin: 0 0 24px;
-            font-size: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #9ea4b6;
-            font-size: 14px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: white;
-            font-size: 14px;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #0f62fe;
-        }
-
-        .toggle-switch {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .switch {
-            position: relative;
-            width: 48px;
-            height: 24px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 999px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .switch.active {
-            background: #0f62fe;
-        }
-
-        .switch::after {
+        .pf-hero::before {
             content: '';
             position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 20px;
-            height: 20px;
-            background: white;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(88, 101, 242, .06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* AVATAR */
+        .pf-avatar {
+            width: 96px;
+            height: 96px;
             border-radius: 50%;
-            transition: transform 0.2s;
-        }
-
-        .switch.active::after {
-            transform: translateX(24px);
-        }
-
-        .save-btn {
-            padding: 12px 32px;
-            background: #0f62fe;
-            border: none;
+            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            font-weight: 800;
             color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
+            flex-shrink: 0;
+            border: 3px solid rgba(255, 255, 255, .15);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pf-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            inset: 0;
+            display: none;
+        }
+
+        .pf-hero-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pf-hero-info h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 0 0 4px;
+        }
+
+        .pf-hero-email {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0 0 12px;
+        }
+
+        .pf-hero-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pf-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
             font-weight: 600;
-            transition: background 0.2s;
         }
 
-        .save-btn:hover {
-            background: #0353e9;
+        .pf-chip-gold {
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+            color: #000;
         }
 
-        @media (max-width: 768px) {
-            .profile-hero {
+        .pf-chip-blue {
+            background: var(--accent-subtle);
+            color: var(--accent);
+        }
+
+        .pf-chip-green {
+            background: rgba(16, 185, 129, .15);
+            color: #10b981;
+        }
+
+        .pf-chip svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .pf-hero-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+
+        /* COMPLETENESS BAR */
+        .pf-complete-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .pf-complete-info {
+            flex: 1;
+        }
+
+        .pf-complete-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .pf-complete-bar-wrap {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .pf-complete-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, #a78bfa 100%);
+            border-radius: 3px;
+            transition: width .6s ease;
+        }
+
+        .pf-complete-pct {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .pf-complete-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* TABS */
+        .pf-tabs {
+            display: flex;
+            gap: 2px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 28px;
+        }
+
+        .pf-tab-btn {
+            padding: 11px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: color .15s;
+        }
+
+        .pf-tab-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .pf-tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .pf-tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .pf-panel {
+            display: none;
+        }
+
+        .pf-panel.active {
+            display: block;
+        }
+
+        /* STATS GRID */
+        .pf-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .pf-stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: border-color .2s, transform .2s;
+        }
+
+        .pf-stat-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .pf-stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+
+        .pf-stat-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .pf-icon-blue {
+            background: rgba(88, 101, 242, .15);
+            color: var(--accent);
+        }
+
+        .pf-icon-gold {
+            background: rgba(255, 215, 0, .12);
+            color: #fbbf24;
+        }
+
+        .pf-icon-green {
+            background: rgba(16, 185, 129, .12);
+            color: #10b981;
+        }
+
+        .pf-icon-cyan {
+            background: rgba(6, 182, 212, .12);
+            color: #06b6d4;
+        }
+
+        .pf-icon-purple {
+            background: rgba(167, 139, 250, .12);
+            color: #a78bfa;
+        }
+
+        .pf-icon-red {
+            background: rgba(239, 68, 68, .12);
+            color: #ef4444;
+        }
+
+        .pf-stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .pf-stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* SECTION HEADER */
+        .pf-section-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .pf-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pf-section-title svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent);
+        }
+
+        /* SKILLS */
+        .pf-skills-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .pf-skill-row {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+
+        .pf-skill-hdr {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .pf-skill-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .pf-skill-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .pf-skill-score {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .pf-bar-wrap {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .pf-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, #a78bfa 100%);
+            border-radius: 3px;
+            transition: width .7s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        /* ACTIVITY */
+        .pf-activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pf-activity-row {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: grid;
+            grid-template-columns: 40px 1fr auto auto;
+            align-items: center;
+            gap: 16px;
+            transition: border-color .15s;
+        }
+
+        .pf-activity-row:hover {
+            border-color: var(--accent);
+        }
+
+        .pf-activity-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-subtle);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        .pf-activity-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .pf-activity-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .pf-activity-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .pf-activity-score {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent);
+            text-align: right;
+        }
+
+        .pf-activity-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        /* ACHIEVEMENTS */
+        .pf-ach-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .pf-ach-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 16px;
+            text-align: center;
+            transition: transform .2s, border-color .2s;
+        }
+
+        .pf-ach-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .pf-ach-card.unlocked {
+            border-color: rgba(255, 215, 0, .35);
+            background: linear-gradient(135deg, rgba(255, 215, 0, .07), rgba(255, 165, 0, .05));
+        }
+
+        .pf-ach-card.locked {
+            opacity: .45;
+            filter: grayscale(.8);
+        }
+
+        .pf-ach-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--accent-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            color: var(--accent);
+        }
+
+        .pf-ach-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .pf-ach-card.unlocked .pf-ach-icon {
+            background: rgba(255, 215, 0, .15);
+            color: #fbbf24;
+        }
+
+        .pf-ach-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .pf-ach-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .pf-ach-status {
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .pf-ach-status.ok {
+            color: #10b981;
+        }
+
+        .pf-ach-status.no {
+            color: var(--text-muted);
+        }
+
+        /* BIO CARD */
+        .pf-bio-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin-bottom: 20px;
+        }
+
+        .pf-bio-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-style: italic;
+        }
+
+        .pf-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .pf-info-item {}
+
+        .pf-info-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .pf-info-value {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* EMPTY STATE */
+        .pf-empty {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-muted);
+        }
+
+        .pf-empty svg {
+            width: 48px;
+            height: 48px;
+            opacity: .3;
+            margin: 0 auto 14px;
+            display: block;
+        }
+
+        .pf-empty p {
+            font-size: 14px;
+        }
+
+        /* SKELETON SHIMMER */
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .pf-skeleton {
+            background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 6px;
+        }
+
+        /* BUTTON */
+        .pf-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            border-radius: 9px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .15s;
+        }
+
+        .pf-btn:hover {
+            opacity: .85;
+        }
+
+        .pf-btn-ghost {
+            background: var(--surface-hover);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .pf-btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .pf-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        @media (max-width: 700px) {
+            .pf-body {
+                padding: 16px;
+            }
+
+            .pf-hero {
                 flex-direction: column;
                 text-align: center;
             }
 
-            .activity-item {
-                grid-template-columns: auto 1fr;
+            .pf-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
 
-            .activity-score,
-            .activity-time {
+            .pf-hero-actions {
+                align-items: center;
+            }
+
+            .pf-activity-row {
+                grid-template-columns: 40px 1fr;
+            }
+
+            .pf-activity-score,
+            .pf-activity-time {
                 grid-column: 2;
             }
         }
     </style>
 </head>
 
-<body data-theme="dark">
-    <div class="page-shell">
-        <header class="hero">
-            <a class="ghost-link" href="homepage.html">← Back to Dashboard</a>
-            <p class="eyebrow">Your Profile</p>
-            <h1>Student Profile</h1>
-            <p class="lede">Track your progress and achievements</p>
-        </header>
+<body>
+    <div class="mw-app" id="mwApp">
 
-        <div class="profile-container">
-            <!-- Hero Section -->
-            <div class="profile-hero">
-                <div class="profile-avatar" id="profileAvatar">ST</div>
-                <div class="profile-info">
-                    <h1 id="profileName">Student Name</h1>
-                    <p id="profileEmail">student@example.com</p>
-                    <span class="rank-badge" id="rankBadge">🏆 Rank #-</span>
-                </div>
-                <button class="edit-profile-btn" data-tab="settings">⚙️ Edit Profile</button>
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar" id="mwSidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
             </div>
-
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab-btn active" data-tab="overview">Overview</button>
-                <button class="tab-btn" data-tab="activity">Activity</button>
-                <button class="tab-btn" data-tab="achievements">Achievements</button>
-                <button class="tab-btn" data-tab="settings">Settings</button>
+            <div class="mw-sidebar-nav">
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="layout-dashboard"></i></span> Dashboard</a>
+                    <a href="student-courses.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="book-open"></i></span> My Courses</a>
+                    <a href="student-timetable.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="calendar-days"></i></span> Timetable</a>
+                    <a href="student-performance.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="bar-chart-2"></i></span> Performance</a>
+                    <a href="student-leaderboard.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="trophy"></i></span> Leaderboard<span class="mw-nav-badge"
+                            style="font-size:10px;">HOT</span></a>
+                </nav>
+                <div class="mw-divider"></div>
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="gamepad-2"></i></span> Play Games</a>
+                    <a href="student-community.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="users"></i></span> Community</a>
+                    <a href="student-achievements.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="award"></i></span> Achievements</a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="megaphone"></i></span> Events</a>
+                </nav>
+                <div class="mw-divider"></div>
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="terminal-square"></i></span> Code Practice</a>
+                    <a href="student-ai-tutor.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="bot"></i></span> AI Tutor</a>
+                    <a href="student-reports.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="file-text"></i></span> Reports</a>
+                    <a href="student-settings.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="settings"></i></span> Settings</a>
+                </nav>
+                <div class="mw-divider"></div>
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
             </div>
-
-            <!-- Overview Tab -->
-            <div class="tab-content active" id="overview">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-icon">🎯</span>
-                        <div class="stat-value" id="totalPoints">0</div>
-                        <div class="stat-label">Total Points</div>
+            <div class="mw-sidebar-footer">
+                <div class="mw-user-card" id="profileToggle" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div class="mw-user-info">
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
                     </div>
-                    <div class="stat-card">
-                        <span class="stat-icon">🏆</span>
-                        <div class="stat-value" id="currentRank">#-</div>
-                        <div class="stat-label">Current Rank</div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-icon">🎮</span>
-                        <div class="stat-value" id="gamesCompleted">0</div>
-                        <div class="stat-label">Games Completed</div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-icon">📊</span>
-                        <div class="stat-value" id="avgAccuracy">0%</div>
-                        <div class="stat-label">Avg Accuracy</div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-icon">⏱️</span>
-                        <div class="stat-value" id="totalTime">0m</div>
-                        <div class="stat-label">Time Spent</div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-icon">🔥</span>
-                        <div class="stat-value" id="currentStreak">0</div>
-                        <div class="stat-label">Day Streak</div>
-                    </div>
-                </div>
-
-                <h2 style="margin-bottom: 16px;">Skills Breakdown</h2>
-                <div class="skills-grid" id="skillsGrid"></div>
-            </div>
-
-            <!-- Activity Tab -->
-            <div class="tab-content" id="activity">
-                <h2 style="margin-bottom: 16px;">Recent Games</h2>
-                <div class="activity-list" id="activityList"></div>
-            </div>
-
-            <!-- Achievements Tab -->
-            <div class="tab-content" id="achievements">
-                <h2 style="margin-bottom: 16px;">Your Achievements</h2>
-                <div class="achievements-grid" id="achievementsGrid"></div>
-            </div>
-
-            <!-- Settings Tab -->
-            <div class="tab-content" id="settings">
-                <div class="settings-section">
-                    <h3>Profile Photo</h3>
-                    <div class="form-group">
-                        <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;">
-                        <button class="edit-profile-btn" id="uploadPhotoBtn">📷 Change Photo</button>
-                        <p style="margin-top: 8px; font-size: 12px; color: #9ea4b6;">Max size: 5MB. Supported formats:
-                            JPG, PNG, GIF</p>
+                    <span class="mw-user-more">⋯</span>
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
+                        </div>
+                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
+                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
+                        <a href="student-notifications.html"><i data-lucide="bell"></i> Notifications</a>
                     </div>
                 </div>
+            </div>
+        </aside>
 
-                <div class="settings-section">
-                    <h3>Personal Information</h3>
-                    <div class="form-group">
-                        <label>Display Name</label>
-                        <input type="text" id="displayName" placeholder="Enter your name">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="emailInput" readonly>
-                    </div>
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
+            <header class="mw-topbar">
+                <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="mw-breadcrumb">Dashboard / <span>My Profile</span></div>
+                <div class="mw-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search…" id="globalSearch">
                 </div>
+                <div class="mw-topbar-actions">
+                    <div class="mw-notif-wrap">
+                        <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="mw-notif-dot hidden" id="notificationBadge"></span>
+                        </div>
+                        <div class="mw-notif-dropdown" id="notificationDropdown"></div>
+                    </div>
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
+                    </button>
+                </div>
+            </header>
 
-                <div class="settings-section">
-                    <h3>Privacy</h3>
-                    <div class="form-group">
-                        <div class="toggle-switch">
-                            <div class="switch" id="privacyToggle"></div>
-                            <label style="margin: 0;">Show profile on leaderboard</label>
+            <div class="mw-content">
+                <div class="pf-body">
+
+                    <!-- HERO -->
+                    <div class="pf-hero">
+                        <div class="pf-avatar" id="pfAvatar">
+                            <span id="pfAvatarInitials">ST</span>
+                            <img id="pfAvatarImg" alt="Profile photo">
+                        </div>
+                        <div class="pf-hero-info">
+                            <h1 id="pfName">Loading…</h1>
+                            <p class="pf-hero-email" id="pfEmail"></p>
+                            <div class="pf-hero-chips">
+                                <span class="pf-chip pf-chip-gold" id="pfRankChip"><i data-lucide="trophy"></i> Rank
+                                    #—</span>
+                                <span class="pf-chip pf-chip-blue" id="pfDeptChip" style="display:none;"><i
+                                        data-lucide="graduation-cap"></i> —</span>
+                                <span class="pf-chip pf-chip-green" id="pfStreakChip" style="display:none;"><i
+                                        data-lucide="flame"></i> — day streak</span>
+                            </div>
+                        </div>
+                        <div class="pf-hero-actions">
+                            <a href="student-settings.html" class="pf-btn pf-btn-ghost">
+                                <i data-lucide="settings"></i> Edit Profile
+                            </a>
+                            <button class="pf-btn pf-btn-ghost" id="pfRefreshBtn" title="Refresh data">
+                                <i data-lucide="refresh-cw"></i>
+                            </button>
                         </div>
                     </div>
-                </div>
 
-                <div class="settings-section">
-                    <h3>Notifications</h3>
-                    <div class="form-group">
-                        <div class="toggle-switch">
-                            <div class="switch active" id="notifToggle"></div>
-                            <label style="margin: 0;">Enable notifications</label>
+                    <!-- PROFILE COMPLETENESS -->
+                    <div class="pf-complete-card" id="pfCompleteCard" style="display:none;">
+                        <div class="pf-complete-info">
+                            <div class="pf-complete-label">Profile Completeness</div>
+                            <div class="pf-complete-bar-wrap">
+                                <div class="pf-complete-bar" id="pfCompleteBar" style="width:0%"></div>
+                            </div>
+                            <div class="pf-complete-hint" id="pfCompleteHint"></div>
+                        </div>
+                        <div class="pf-complete-pct" id="pfCompletePct">0%</div>
+                    </div>
+
+                    <!-- TABS -->
+                    <div class="pf-tabs">
+                        <button class="pf-tab-btn active" data-panel="overview">
+                            <i data-lucide="layout-grid"></i> Overview
+                        </button>
+                        <button class="pf-tab-btn" data-panel="activity">
+                            <i data-lucide="activity"></i> Activity
+                        </button>
+                        <button class="pf-tab-btn" data-panel="achievements">
+                            <i data-lucide="award"></i> Achievements
+                        </button>
+                    </div>
+
+                    <!-- ── OVERVIEW PANEL ── -->
+                    <div class="pf-panel active" id="panel-overview">
+
+                        <!-- Bio / info card -->
+                        <div class="pf-bio-card" id="pfBioCard" style="display:none;">
+                            <div class="pf-section-title" style="margin-bottom:10px;">
+                                <i data-lucide="user"></i> About
+                            </div>
+                            <p class="pf-bio-text" id="pfBioText"></p>
+                            <div class="pf-info-grid" id="pfInfoGrid"></div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="pf-section-hdr">
+                            <div class="pf-section-title"><i data-lucide="bar-chart-2"></i> Performance Stats</div>
+                        </div>
+                        <div class="pf-stats-grid">
+                            <div class="pf-stat-card">
+                                <div class="pf-stat-icon pf-icon-blue"><i data-lucide="zap"></i></div>
+                                <div class="pf-stat-value" id="pfPoints">—</div>
+                                <div class="pf-stat-label">Total Points</div>
+                            </div>
+                            <div class="pf-stat-card">
+                                <div class="pf-stat-icon pf-icon-gold"><i data-lucide="trophy"></i></div>
+                                <div class="pf-stat-value" id="pfRank">—</div>
+                                <div class="pf-stat-label">Current Rank</div>
+                            </div>
+                            <div class="pf-stat-card">
+                                <div class="pf-stat-icon pf-icon-green"><i data-lucide="gamepad-2"></i></div>
+                                <div class="pf-stat-value" id="pfGames">—</div>
+                                <div class="pf-stat-label">Games Completed</div>
+                            </div>
+                            <div class="pf-stat-card">
+                                <div class="pf-stat-icon pf-icon-cyan"><i data-lucide="target"></i></div>
+                                <div class="pf-stat-value" id="pfAccuracy">—</div>
+                                <div class="pf-stat-label">Avg Accuracy</div>
+                            </div>
+                            <div class="pf-stat-card">
+                                <div class="pf-stat-icon pf-icon-purple"><i data-lucide="clock"></i></div>
+                                <div class="pf-stat-value" id="pfTime">—</div>
+                                <div class="pf-stat-label">Time Spent</div>
+                            </div>
+                            <div class="pf-stat-card">
+                                <div class="pf-stat-icon pf-icon-red"><i data-lucide="flame"></i></div>
+                                <div class="pf-stat-value" id="pfStreak">—</div>
+                                <div class="pf-stat-label">Day Streak</div>
+                            </div>
+                        </div>
+
+                        <!-- Skills -->
+                        <div class="pf-section-hdr" style="margin-top:8px;">
+                            <div class="pf-section-title"><i data-lucide="sliders-horizontal"></i> Skills Breakdown
+                            </div>
+                        </div>
+                        <div class="pf-skills-list" id="pfSkillsList">
+                            <div class="pf-empty">
+                                <i data-lucide="bar-chart-2"></i>
+                                <p>Play some games to see your skills!</p>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <button class="save-btn" id="saveSettingsBtn">Save Changes</button>
+                    <!-- ── ACTIVITY PANEL ── -->
+                    <div class="pf-panel" id="panel-activity">
+                        <div class="pf-section-hdr">
+                            <div class="pf-section-title"><i data-lucide="clock"></i> Recent Games</div>
+                            <span id="pfActivityCount" style="font-size:12px;color:var(--text-muted);"></span>
+                        </div>
+                        <div class="pf-activity-list" id="pfActivityList">
+                            <div class="pf-empty">
+                                <i data-lucide="gamepad-2"></i>
+                                <p>No activity yet — start playing!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── ACHIEVEMENTS PANEL ── -->
+                    <div class="pf-panel" id="panel-achievements">
+                        <div class="pf-section-hdr">
+                            <div class="pf-section-title"><i data-lucide="award"></i> Achievements</div>
+                            <a href="student-achievements.html" class="pf-btn pf-btn-ghost"
+                                style="font-size:12px;padding:6px 12px;">
+                                <i data-lucide="arrow-right"></i> View All
+                            </a>
+                        </div>
+                        <div class="pf-ach-grid" id="pfAchGrid">
+                            <div class="pf-empty" style="grid-column:1/-1;">
+                                <i data-lucide="award"></i>
+                                <p>Complete games to unlock achievements</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- end pf-body -->
+            </div><!-- end mw-content -->
+        </div><!-- end mw-main -->
+    </div><!-- end mw-app -->
+
+    <!-- LOGOUT MODAL -->
+    <div id="logoutModal"
+        style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+        <div
+            style="background:var(--surface,#1a1d2e);border:1px solid var(--border,rgba(255,255,255,.1));border-radius:20px;padding:36px 32px;max-width:380px;width:90%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);">
+            <div
+                style="width:64px;height:64px;border-radius:50%;background:rgba(255,59,48,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                <i data-lucide="log-out" style="width:28px;height:28px;color:#ff3b30;"></i>
+            </div>
+            <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:var(--text-primary,#f5f7ff);">Sign out?</h2>
+            <p style="margin:0 0 28px;font-size:14px;color:var(--text-muted,#9ea4b6);line-height:1.5;">You'll need to
+                log back in to access your dashboard.</p>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <button id="logoutCancelBtn"
+                    style="flex:1;padding:12px;border-radius:10px;border:1px solid var(--border,rgba(255,255,255,.1));background:var(--surface-hover,rgba(255,255,255,.06));color:var(--text-primary,#f5f7ff);font-size:15px;font-weight:600;cursor:pointer;">Cancel</button>
+                <button id="logoutConfirmBtn"
+                    style="flex:1;padding:12px;border-radius:10px;border:none;background:#ff3b30;color:#fff;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i data-lucide="log-out" style="width:16px;height:16px;"></i> Sign Out
+                </button>
             </div>
         </div>
     </div>
 
-    <script src="student-profile.js"></script>
-    <script src="chatbot.js"></script></body>
+    <script src="theme-init.js"></script>
+    <script src="sidebar.js"></script>
+    <script>
+        // ── CONSTANTS ──
+        const PF_API = window.location.origin;
+        const PF_TOKEN = localStorage.getItem('token') || localStorage.getItem('auth_token');
+
+        // ── HELPERS ──
+        function pfInitials(name) {
+            return (name || 'ST').trim().split(' ').map(w => w[0] || '').join('').toUpperCase().slice(0, 2);
+        }
+
+        function timeAgo(date) {
+            const s = Math.floor((Date.now() - new Date(date)) / 1000);
+            if (s < 60) return 'Just now';
+            const m = Math.floor(s / 60);
+            if (m < 60) return `${m}m ago`;
+            const h = Math.floor(m / 60);
+            if (h < 24) return `${h}h ago`;
+            return `${Math.floor(h / 24)}d ago`;
+        }
+
+        function fmtTime(secs) {
+            const m = Math.floor(secs / 60), s = secs % 60;
+            return `${m}m ${s}s`;
+        }
+
+        // ── TAB SWITCHING ──
+        document.querySelectorAll('.pf-tab-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.pf-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.pf-panel').forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('panel-' + this.dataset.panel).classList.add('active');
+            });
+        });
+
+        // ── LOAD ALL DATA ──
+        async function loadProfile() {
+            try {
+                // Parallel fetch all 3 endpoints
+                const [meRes, lbRes, resultsRes] = await Promise.all([
+                    fetch(`${PF_API}/api/me`, { headers: { Authorization: `Bearer ${PF_TOKEN}` } }),
+                    fetch(`${PF_API}/api/leaderboard`),
+                    fetch(`${PF_API}/api/game-results/my-results`, { headers: { Authorization: `Bearer ${PF_TOKEN}` } })
+                ]);
+
+                const [meData, lbData, resultsData] = await Promise.all([
+                    meRes.json(), lbRes.json(), resultsRes.json()
+                ]);
+
+                const user = meData.ok ? meData.user : null;
+                const results = (resultsData.ok && resultsData.results) ? resultsData.results : [];
+                const leaderboard = (lbData.ok && lbData.leaderboard) ? lbData.leaderboard : [];
+
+                // ── HERO ──
+                if (user) {
+                    const name = user.displayName || user.name || 'Student';
+                    document.getElementById('pfName').textContent = name;
+                    document.getElementById('pfEmail').textContent = user.email || '';
+                    document.getElementById('pfAvatarInitials').textContent = pfInitials(name);
+                    if (user.profilePhoto) {
+                        const img = document.getElementById('pfAvatarImg');
+                        img.src = user.profilePhoto;
+                        img.style.display = 'block';
+                        document.getElementById('pfAvatarInitials').style.display = 'none';
+                    }
+                    if (user.department) {
+                        const c = document.getElementById('pfDeptChip');
+                        c.style.display = '';
+                        c.innerHTML = `<i data-lucide="graduation-cap"></i> ${user.department}`;
+                    }
+
+                    // Bio / Info card
+                    if (user.bio || user.rollNumber || user.batch || user.section) {
+                        document.getElementById('pfBioCard').style.display = 'block';
+                        if (user.bio) document.getElementById('pfBioText').textContent = user.bio;
+                        const infoItems = [
+                            user.rollNumber && { label: 'Roll Number', value: user.rollNumber },
+                            user.batch && { label: 'Batch', value: user.batch },
+                            user.department && { label: 'Department', value: user.department },
+                            user.section && { label: 'Section', value: `Section ${user.section}` },
+                            user.phone && { label: 'Phone', value: user.phone }
+                        ].filter(Boolean);
+                        document.getElementById('pfInfoGrid').innerHTML = infoItems.map(i =>
+                            `<div class="pf-info-item"><div class="pf-info-label">${i.label}</div><div class="pf-info-value">${i.value}</div></div>`
+                        ).join('');
+                    }
+
+                    // Completeness
+                    const fields = [user.displayName || user.name, user.bio, user.profilePhoto, user.phone, user.rollNumber, user.batch, user.department, user.section];
+                    const filled = fields.filter(Boolean).length;
+                    const pct = Math.round((filled / fields.length) * 100);
+                    const missing = ['Display name', 'Bio', 'Profile photo', 'Phone', 'Roll number', 'Batch', 'Department', 'Section'].filter((_, i) => !fields[i]);
+                    document.getElementById('pfCompleteCard').style.display = 'flex';
+                    document.getElementById('pfCompleteBar').style.width = pct + '%';
+                    document.getElementById('pfCompletePct').textContent = pct + '%';
+                    document.getElementById('pfCompleteHint').textContent = pct < 100
+                        ? `Missing: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? '…' : ''} — complete in Settings`
+                        : 'Your profile is fully complete!';
+                }
+
+                // ── STATS ──
+                const totalPoints = results.reduce((s, r) => s + (r.rawScore || 0), 0);
+                const gamesCompleted = results.length;
+                const avgAccuracy = gamesCompleted > 0 ? Math.round(results.reduce((s, r) => s + (r.score || 0), 0) / gamesCompleted) : 0;
+                const totalTimeSec = results.reduce((s, r) => s + (r.timeTaken || 0), 0);
+
+                // Streak
+                const uniqueDates = [...new Set(results.map(r => new Date(r.completedAt).toDateString()))].sort();
+                let streak = 0;
+                const today = new Date().toDateString();
+                const yesterday = new Date(Date.now() - 86400000).toDateString();
+                if (uniqueDates.includes(today) || uniqueDates.includes(yesterday)) {
+                    streak = 1;
+                    for (let i = uniqueDates.length - 2; i >= 0; i--) {
+                        if ((new Date(uniqueDates[i + 1]) - new Date(uniqueDates[i])) / 86400000 === 1) streak++;
+                        else break;
+                    }
+                }
+
+                // Rank
+                let rank = '—';
+                if (user && leaderboard.length) {
+                    const idx = leaderboard.findIndex(p => p.email === user.email);
+                    if (idx >= 0) rank = `#${idx + 1}`;
+                }
+
+                document.getElementById('pfPoints').textContent = totalPoints.toLocaleString();
+                document.getElementById('pfRank').textContent = rank;
+                document.getElementById('pfGames').textContent = gamesCompleted;
+                document.getElementById('pfAccuracy').textContent = avgAccuracy + '%';
+                document.getElementById('pfTime').textContent = totalTimeSec >= 3600
+                    ? `${Math.floor(totalTimeSec / 3600)}h ${Math.floor((totalTimeSec % 3600) / 60)}m`
+                    : `${Math.floor(totalTimeSec / 60)}m`;
+                document.getElementById('pfStreak').textContent = streak;
+
+                // Update hero chips
+                document.getElementById('pfRankChip').innerHTML = `<i data-lucide="trophy"></i> ${rank === '—' ? 'Unranked' : 'Rank ' + rank}`;
+                if (streak > 0) {
+                    const sc = document.getElementById('pfStreakChip');
+                    sc.style.display = '';
+                    sc.innerHTML = `<i data-lucide="flame"></i> ${streak}-day streak`;
+                }
+
+                // ── SKILLS ──
+                const gameTypeMap = { quiz: 'Quiz', unjumble: 'Logic Unjumble', 'code-unjumble': 'Logic Unjumble', sorter: 'Tech Sorter', 'tech-sorter': 'Tech Sorter', fillin: 'Syntax Fill-in', 'syntax-fill': 'Syntax Fill-in', sql: 'SQL Builder', 'sql-builder': 'SQL Builder' };
+                const skillsMap = {};
+                results.forEach(r => {
+                    const type = gameTypeMap[r.gameType] || r.gameType || 'General';
+                    if (!skillsMap[type]) skillsMap[type] = { count: 0, total: 0 };
+                    skillsMap[type].count++;
+                    skillsMap[type].total += r.score || 0;
+                });
+                const skills = Object.entries(skillsMap).map(([name, d]) => ({ name, avg: Math.round(d.total / d.count), count: d.count })).sort((a, b) => b.avg - a.avg);
+
+                if (skills.length) {
+                    document.getElementById('pfSkillsList').innerHTML = skills.map(sk => `
+                    <div class="pf-skill-row">
+                        <div class="pf-skill-hdr">
+                            <div>
+                                <div class="pf-skill-name">${sk.name}</div>
+                                <div class="pf-skill-meta">${sk.count} ${sk.count === 1 ? 'game' : 'games'} played</div>
+                            </div>
+                            <div class="pf-skill-score">${sk.avg}%</div>
+                        </div>
+                        <div class="pf-bar-wrap"><div class="pf-bar-fill" style="width:0%" data-target="${sk.avg}"></div></div>
+                    </div>`).join('');
+                    // Animate bars
+                    requestAnimationFrame(() => {
+                        document.querySelectorAll('.pf-bar-fill').forEach(b => {
+                            b.style.width = b.dataset.target + '%';
+                        });
+                    });
+                }
+
+                // ── ACTIVITY ──
+                const sorted = [...results].sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt)).slice(0, 15);
+                document.getElementById('pfActivityCount').textContent = `${sorted.length} recent entries`;
+                if (sorted.length) {
+                    document.getElementById('pfActivityList').innerHTML = sorted.map(r => {
+                        const name = r.gameTitle || r.title || r.gameName || (gameTypeMap[r.gameType] || r.gameType || 'Game');
+                        const score = Math.round(r.score ?? 0);
+                        const scoreColor = score >= 80 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444';
+                        return `<div class="pf-activity-row">
+                        <div class="pf-activity-icon"><i data-lucide="gamepad-2"></i></div>
+                        <div>
+                            <div class="pf-activity-name">${name}</div>
+                            <div class="pf-activity-sub">${gameTypeMap[r.gameType] || r.gameType || 'Game'} &bull; ${timeAgo(r.completedAt)}</div>
+                        </div>
+                        <div>
+                            <div class="pf-activity-score" style="color:${scoreColor}">${score}%</div>
+                            <div class="pf-activity-time">${fmtTime(r.timeTaken || 0)}</div>
+                        </div>
+                    </div>`;
+                    }).join('');
+                }
+
+                // ── ACHIEVEMENTS ──
+                const achs = [
+                    { name: 'First Steps', desc: 'Complete your first game', icon: 'star', unlocked: results.length > 0 },
+                    { name: 'Perfect Score', desc: 'Score 100% on any game', icon: 'check-circle', unlocked: results.some(r => r.score === 100) },
+                    { name: 'Speed Demon', desc: 'Finish a game in under 2 min', icon: 'zap', unlocked: results.some(r => (r.timeTaken || 0) < 120) },
+                    { name: 'Consistent Learner', desc: 'Maintain a 7-day streak', icon: 'flame', unlocked: streak >= 7 },
+                    { name: 'Quiz Master', desc: 'Complete 10 quizzes', icon: 'clipboard-list', unlocked: results.filter(r => r.gameType === 'quiz').length >= 10 },
+                    { name: 'SQL Wizard', desc: 'Perfect score on SQL game', icon: 'database', unlocked: results.some(r => (r.gameType === 'sql' || r.gameType === 'sql-builder') && r.score === 100) },
+                    { name: 'High Scorer', desc: 'Earn 500 total points', icon: 'trophy', unlocked: totalPoints >= 500 },
+                    { name: 'Dedicated', desc: 'Complete 25 games', icon: 'award', unlocked: gamesCompleted >= 25 }
+                ];
+                const unlockedCount = achs.filter(a => a.unlocked).length;
+                document.getElementById('pfAchGrid').innerHTML = achs.map(a => `
+                <div class="pf-ach-card ${a.unlocked ? 'unlocked' : 'locked'}">
+                    <div class="pf-ach-icon"><i data-lucide="${a.icon}"></i></div>
+                    <div class="pf-ach-name">${a.name}</div>
+                    <div class="pf-ach-desc">${a.desc}</div>
+                    <div class="pf-ach-status ${a.unlocked ? 'ok' : 'no'}">${a.unlocked ? '✓ Unlocked' : 'Locked'}</div>
+                </div>`).join('');
+
+                // Update achievements tab button badge
+                document.querySelector('[data-panel="achievements"]').innerHTML =
+                    `<i data-lucide="award"></i> Achievements <span class="mw-nav-badge" style="font-size:10px;margin-left:6px;">${unlockedCount}/${achs.length}</span>`;
+
+                // Re-render Lucide icons for newly injected HTML
+                lucide.createIcons();
+
+            } catch (e) {
+                console.error('Profile load error:', e);
+                document.getElementById('pfName').textContent = localStorage.getItem('mw_displayName') || localStorage.getItem('firstName') || 'Student';
+            }
+        }
+
+        // ── THEME TOGGLE ──
+        document.getElementById('themeToggle').addEventListener('click', function () {
+            const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = cur === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('mw_theme', next);
+            localStorage.setItem('theme', next);
+        });
+
+        // ── LOGOUT MODAL ──
+        document.getElementById('signOutBtn').addEventListener('click', e => {
+            e.stopPropagation();
+            document.getElementById('logoutModal').style.display = 'flex';
+        });
+        document.getElementById('logoutCancelBtn').addEventListener('click', () => {
+            document.getElementById('logoutModal').style.display = 'none';
+        });
+        document.getElementById('logoutConfirmBtn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('mw_displayName');
+            window.location.href = 'login.html';
+        });
+        document.getElementById('logoutModal').addEventListener('click', function (e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+
+        // ── REFRESH BTN ──
+        document.getElementById('pfRefreshBtn').addEventListener('click', () => {
+            document.getElementById('pfPoints').textContent = '—';
+            loadProfile();
+        });
+
+        // ── SIDEBAR DROPDOWN ──
+        document.addEventListener('DOMContentLoaded', function () {
+            lucide.createIcons();
+            loadProfile();
+
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', e => {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('show');
+                });
+                document.addEventListener('click', () => profileDropdown.classList.remove('show'));
+            }
+
+            // Auto-refresh every 60 seconds
+            setInterval(loadProfile, 60000);
+        });
+    </script>
+</body>
 
 </html>
