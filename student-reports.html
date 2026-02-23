@@ -11,12 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="student-theme.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="auth-guard.js"></script>
-    <script>
-        if (!checkStudentAuth()) { /* redirects */ }
-    </script>
+    <script>if (!checkStudentAuth()) { }</script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script>
         (function () {
             const t = localStorage.getItem('mw_theme') || 'dark';
@@ -781,7 +779,42 @@
         <span id="rpToastMsg">Report generated!</span>
     </div>
 
-    <script src="homepage.js"></script>
+    <script src="theme-init.js"></script>
+    <script src="sidebar.js"></script>
+    <script>
+        // ── LOGOUT ──
+        document.addEventListener('DOMContentLoaded', function () {
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', function () {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('mw_displayName');
+                    window.location.href = 'login.html';
+                });
+            }
+
+            // Profile dropdown toggle
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('show');
+                });
+                document.addEventListener('click', function () {
+                    profileDropdown.classList.remove('show');
+                });
+            }
+
+            // Settings button → settings page
+            const settingsBtn = document.getElementById('settingsBtn');
+            if (settingsBtn) settingsBtn.addEventListener('click', () => window.location.href = 'student-settings.html');
+
+            // Notification button → notifications page
+            const notifBtn = document.getElementById('notificationBtn');
+            if (notifBtn) notifBtn.addEventListener('click', () => window.location.href = 'student-notifications.html');
+        });
+    </script>
     <script>
         // ── CONSTANTS ── (prefixed to avoid conflict with homepage.js's API_BASE)
         const RP_API_BASE = window.location.hostname === 'localhost'
