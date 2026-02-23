@@ -1390,12 +1390,7 @@
             lucide.createIcons();
             loadProfile();
 
-            const signOutBtn = document.getElementById('signOutBtn');
-            if (signOutBtn) signOutBtn.addEventListener('click', () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('mw_displayName');
-                window.location.href = 'login.html';
-            });
+
 
             const profileToggle = document.getElementById('profileToggle');
             const profileDropdown = document.getElementById('profileDropdown');
