@@ -626,11 +626,20 @@
                         <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
                     </a>
                 </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
             </div>
 
             <div class="mw-sidebar-footer">
-                <div class="mw-user-card" id="profileToggle">
-                    <div class="mw-user-avatar" id="avatarInitials">--</div>
+                <div class="mw-user-card" id="profileToggle" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
                     <div class="mw-user-info">
                         <div class="mw-user-name" id="sidebarUserName">Loading…</div>
                         <div class="mw-user-role">Student</div>
@@ -644,9 +653,6 @@
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
                         <a href="student-notifications.html"><i data-lucide="bell"></i> Notifications</a>
-                        <a id="signOutBtn" style="cursor:pointer;color:var(--red,#ff3b30);">
-                            <i data-lucide="log-out"></i> Logout
-                        </a>
                     </div>
                 </div>
             </div>
