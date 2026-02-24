@@ -74,7 +74,8 @@
                     <a href="student-ai-tutor.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
                     </a>
-                <a href="student-live-meeting.html" class="mw-nav-item"><span class="mw-nav-icon"><i data-lucide="video"></i></span> Web Conf</a>
+                    <a href="student-live-meeting.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="video"></i></span> Web Conf</a>
 
                     <a href="student-reports.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
@@ -168,7 +169,7 @@
                             <div class="perf-stat-value" id="overallGPA">—</div>
                             <div class="perf-stat-label">Overall GPA</div>
                         </div>
-                        <div class="perf-stat-ring" style="--pct:76;--c:#6366f1;">
+                        <div class="perf-stat-ring" id="gpaRing" style="--pct:0;--c:#6366f1;">
                             <svg viewBox="0 0 36 36">
                                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(99,102,241,.15)"
                                     stroke-width="2.5" />
@@ -187,7 +188,7 @@
                             <div class="perf-stat-value" id="attendanceRate">—</div>
                             <div class="perf-stat-label">Attendance Rate</div>
                         </div>
-                        <div class="perf-stat-ring" style="--pct:92;--c:#22c55e;">
+                        <div class="perf-stat-ring" id="attRing" style="--pct:0;--c:#22c55e;">
                             <svg viewBox="0 0 36 36">
                                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(34,197,94,.15)"
                                     stroke-width="2.5" />
@@ -206,7 +207,7 @@
                             <div class="perf-stat-value" id="completionRate">—</div>
                             <div class="perf-stat-label">Completion Rate</div>
                         </div>
-                        <div class="perf-stat-ring" style="--pct:88;--c:#f59e0b;">
+                        <div class="perf-stat-ring" id="compRing" style="--pct:0;--c:#f59e0b;">
                             <svg viewBox="0 0 36 36">
                                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(245,158,11,.15)"
                                     stroke-width="2.5" />
@@ -225,7 +226,7 @@
                             <div class="perf-stat-value" id="currentStreak">—</div>
                             <div class="perf-stat-label">Day Streak</div>
                         </div>
-                        <div class="perf-stat-ring" style="--pct:60;--c:#ef4444;">
+                        <div class="perf-stat-ring" id="streakRing" style="--pct:0;--c:#ef4444;">
                             <svg viewBox="0 0 36 36">
                                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(239,68,68,.15)"
                                     stroke-width="2.5" />
@@ -727,29 +728,43 @@
         });
 
         // ── Quick stats ───────────────────────────────────────────────────────
+        function setRing(id, pct) {
+            const el = document.getElementById(id);
+            if (el) el.style.setProperty('--pct', Math.round(Math.min(100, Math.max(0, pct))));
+        }
+
         async function loadQuickStats() {
             const token = localStorage.getItem('token') || localStorage.getItem('mindwave_token');
             if (!token) return;
-
-            const setStats = (gpa, att, comp, streak) => {
-                document.getElementById('overallGPA').textContent = gpa;
-                document.getElementById('attendanceRate').textContent = att;
-                document.getElementById('completionRate').textContent = comp;
-                document.getElementById('currentStreak').textContent = streak;
-            };
 
             try {
                 const res = await fetch('/api/student/performance-summary', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (res.ok) {
-                    const d = await res.json();
-                    setStats(d.gpa || '—', `${d.attendance ?? '—'}%`, `${d.completion ?? '—'}%`, d.streak ?? '—');
-                } else {
-                    setStats('3.8', '92%', '88%', '7');
-                }
+                if (!res.ok) throw new Error('api');
+                const d = await res.json();
+
+                const gpaVal = d.gpa != null ? parseFloat(d.gpa) : null;
+                const attVal = d.attendance != null ? Number(d.attendance) : null;
+                const compVal = d.completion != null ? Number(d.completion) : null;
+                const streakVal = d.streak != null ? Number(d.streak) : null;
+
+                // Update text
+                document.getElementById('overallGPA').textContent = gpaVal != null ? gpaVal.toFixed(1) : '—';
+                document.getElementById('attendanceRate').textContent = attVal != null ? attVal + '%' : '—';
+                document.getElementById('completionRate').textContent = compVal != null ? compVal + '%' : '—';
+                document.getElementById('currentStreak').textContent = streakVal != null ? streakVal : '—';
+
+                // Update ring gauges with real values
+                setRing('gpaRing', gpaVal != null ? (gpaVal / 4.0) * 100 : 0); // 4.0 = max GPA
+                setRing('attRing', attVal != null ? attVal : 0);
+                setRing('compRing', compVal != null ? compVal : 0);
+                setRing('streakRing', streakVal != null ? Math.min((streakVal / 30) * 100, 100) : 0); // 30 days = full ring
+
             } catch (_) {
-                setStats('3.8', '92%', '88%', '7');
+                // On error show dashes — no fake numbers
+                ['overallGPA', 'attendanceRate', 'completionRate', 'currentStreak']
+                    .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '—'; });
             }
         }
     </script>
