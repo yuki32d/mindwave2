@@ -1,4 +1,4 @@
-// ============================================
+﻿// ============================================
 // STUDENT PERFORMANCE ANALYTICS - API ROUTES
 // ============================================
 // Import this file in server.js to add all student performance endpoints
@@ -52,6 +52,7 @@ router.get('/performance-summary', async (req, res) => {
     }
 });
 
+
 // ============================================
 // 2. PERFORMANCE CHARTS
 // ============================================
@@ -60,107 +61,161 @@ router.get('/performance-charts', async (req, res) => {
         const studentId = req.userId;
         const { range = '30days' } = req.query;
 
-        // Calculate date range
         const now = new Date();
         let startDate = new Date();
-
         switch (range) {
-            case '7days':
-                startDate.setDate(now.getDate() - 7);
-                break;
-            case '30days':
-                startDate.setDate(now.getDate() - 30);
-                break;
-            case 'semester':
-                startDate.setMonth(now.getMonth() - 4);
-                break;
-            case 'year':
-                startDate.setFullYear(now.getFullYear() - 1);
-                break;
+            case '7days': startDate.setDate(now.getDate() - 7); break;
+            case '30days': startDate.setDate(now.getDate() - 30); break;
+            case 'semester': startDate.setMonth(now.getMonth() - 4); break;
+            case 'year': startDate.setFullYear(now.getFullYear() - 1); break;
         }
 
-        // Get grades for trend
-        const grades = await Grade.find({
-            studentId,
-            createdAt: { $gte: startDate }
-        }).sort({ createdAt: 1 });
+        const { default: mongoose } = await import('mongoose');
+        const studentObjId = new mongoose.Types.ObjectId(studentId);
 
-        // Group by week for grade trends
-        const weeklyGrades = {};
-        grades.forEach(grade => {
-            const week = `Week ${Math.ceil((now - grade.createdAt) / (7 * 24 * 60 * 60 * 1000))}`;
-            if (!weeklyGrades[week]) weeklyGrades[week] = [];
-            weeklyGrades[week].push(grade.score);
+        // Grade trend (weekly buckets)
+        const grades = await Grade.find({ studentId, createdAt: { $gte: startDate } }).sort({ createdAt: 1 });
+        const weekBuckets = {};
+        grades.forEach(g => {
+            const d = new Date(g.createdAt);
+            const ws = new Date(d); ws.setDate(d.getDate() - d.getDay());
+            const key = ws.toISOString().split('T')[0];
+            if (!weekBuckets[key]) weekBuckets[key] = [];
+            weekBuckets[key].push(g.score);
         });
-
+        const sortedWeeks = Object.keys(weekBuckets).sort();
         const gradeTrends = {
-            labels: Object.keys(weeklyGrades).reverse(),
-            data: Object.values(weeklyGrades).map(scores =>
-                scores.reduce((a, b) => a + b, 0) / scores.length
-            ).reverse()
+            labels: sortedWeeks.map(k => new Date(k).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+            data: sortedWeeks.map(k => { const a = weekBuckets[k]; return Math.round(a.reduce((s, v) => s + v, 0) / a.length * 10) / 10; })
         };
 
-        // Subject performance (radar chart)
+        // Subject performance with trend
         const subjectGrades = await Grade.aggregate([
-            { $match: { studentId: req.userId } },
-            {
-                $group: {
-                    _id: '$subject',
-                    avgScore: { $avg: '$score' }
-                }
-            }
+            { $match: { studentId: studentObjId } },
+            { $group: { _id: '$subject', avgScore: { $avg: '$score' }, scores: { $push: { score: '$score', date: '$createdAt' } } } }
         ]);
-
+        const myAvg = subjectGrades.length > 0 ? subjectGrades.reduce((s, g) => s + g.avgScore, 0) / subjectGrades.length : 0;
         const subjectPerformance = {
             labels: subjectGrades.map(s => s._id),
-            data: subjectGrades.map(s => s.avgScore)
+            data: subjectGrades.map(s => Math.round(s.avgScore)),
+            trends: subjectGrades.map(s => {
+                if (s.scores.length < 2) return 0;
+                const sorted = [...s.scores].sort((a, b) => new Date(a.date) - new Date(b.date));
+                const mid = Math.floor(sorted.length / 2);
+                const fh = sorted.slice(0, mid).reduce((a, b) => a + b.score, 0) / mid;
+                const sh = sorted.slice(mid).reduce((a, b) => a + b.score, 0) / (sorted.length - mid);
+                return Math.round((sh - fh) * 10) / 10;
+            })
         };
 
-        // Attendance trend
-        const attendanceRecords = await Attendance.find({
-            studentId,
-            date: { $gte: startDate }
-        }).sort({ date: 1 });
-
-        const weeklyAttendance = {};
-        attendanceRecords.forEach(record => {
-            const week = `Week ${Math.ceil((now - record.date) / (7 * 24 * 60 * 60 * 1000))}`;
-            if (!weeklyAttendance[week]) weeklyAttendance[week] = { present: 0, total: 0 };
-            weeklyAttendance[week].total++;
-            if (record.status === 'present' || record.status === 'late') {
-                weeklyAttendance[week].present++;
-            }
+        // Attendance trend (weekly)
+        const attRecs = await Attendance.find({ studentId, date: { $gte: startDate } }).sort({ date: 1 });
+        const attBuckets = {};
+        attRecs.forEach(r => {
+            const d = new Date(r.date); const ws = new Date(d); ws.setDate(d.getDate() - d.getDay());
+            const key = ws.toISOString().split('T')[0];
+            if (!attBuckets[key]) attBuckets[key] = { present: 0, total: 0 };
+            attBuckets[key].total++;
+            if (r.status === 'present' || r.status === 'late') attBuckets[key].present++;
         });
-
+        const sortedAttWeeks = Object.keys(attBuckets).sort();
         const attendance = {
-            labels: Object.keys(weeklyAttendance).reverse(),
-            data: Object.values(weeklyAttendance).map(w =>
-                (w.present / w.total * 100).toFixed(0)
-            ).reverse()
+            labels: sortedAttWeeks.map(k => new Date(k).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+            data: sortedAttWeeks.map(k => attBuckets[k].total > 0 ? Math.round(attBuckets[k].present / attBuckets[k].total * 100) : 0)
         };
 
-        // Assignment completion (placeholder - needs assignment tracking)
-        const completion = {
-            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-            data: [95, 88, 92, 100]
-        };
+        // Assignment completion
+        const assignments = await Assignment.find({ organizationId: req.organizationId });
+        let submitted = 0, pending = 0, missed = 0;
+        assignments.forEach(a => {
+            const sub = a.submissions.find(s => s.studentId && s.studentId.toString() === studentId.toString());
+            if (!sub || sub.status === 'pending') pending++;
+            else if (sub.status === 'submitted' || sub.status === 'graded') submitted++;
+            else missed++;
+        });
+        const completionPct = assignments.length > 0 ? Math.round(submitted / assignments.length * 100) : 0;
 
-        // Subject-wise grades (bar chart)
-        const subjectGradesBar = {
-            labels: subjectGrades.map(s => s._id),
-            data: subjectGrades.map(s => s.avgScore)
-        };
+        // Class rank & percentile
+        const allAvgs = await Grade.aggregate([
+            { $match: { organizationId: new mongoose.Types.ObjectId(req.organizationId) } },
+            { $group: { _id: '$studentId', avgScore: { $avg: '$score' } } },
+            { $sort: { avgScore: -1 } }
+        ]);
+        const rank = (allAvgs.findIndex(s => s._id.toString() === studentId.toString()) + 1) || 1;
+        const totalStudents = allAvgs.length || 1;
+        const percentile = Math.round(((totalStudents - rank) / totalStudents) * 100);
+
+        // Predicted grade (linear regression)
+        let predictedGrade = 'N/A', confidence = 0;
+        if (gradeTrends.data.length >= 2) {
+            const n = gradeTrends.data.length;
+            const xs = gradeTrends.data.map((_, i) => i), ys = gradeTrends.data;
+            const sumX = xs.reduce((a, b) => a + b, 0), sumY = ys.reduce((a, b) => a + b, 0);
+            const sumXY = xs.reduce((s, x, i) => s + x * ys[i], 0), sumXX = xs.reduce((s, x) => s + x * x, 0);
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            const projected = Math.min(100, Math.max(0, intercept + slope * (n + 3)));
+            predictedGrade = projected >= 90 ? 'A' : projected >= 80 ? 'B' : projected >= 70 ? 'C' : projected >= 60 ? 'D' : 'F';
+            confidence = Math.min(92, 40 + n * 5);
+        }
+
+        // XP streak
+        const xpDoc = await StudentXP.findOne({ studentId });
+        const streak = xpDoc ? xpDoc.streak : 0;
 
         res.json({
             gradeTrends,
             subjectPerformance,
-            completion,
+            completion: { submitted, pending, missed, pct: completionPct },
             attendance,
-            subjectGrades: subjectGradesBar
+            subjectGrades: { labels: subjectGrades.map(s => s._id), data: subjectGrades.map(s => Math.round(s.avgScore)) },
+            classRank: rank, totalStudents, percentile,
+            predictedGrade, confidence,
+            overallAvg: Math.round(myAvg * 10) / 10,
+            streak
         });
     } catch (error) {
-        console.error('Error fetching performance charts:', error);
+        console.error('Performance charts error:', error);
         res.status(500).json({ error: 'Failed to fetch performance charts' });
+    }
+});
+
+// ============================================
+// 2b. ACTIVITY HEATMAP (180 days)
+// ============================================
+router.get('/performance-charts/heatmap', async (req, res) => {
+    try {
+        const studentId = req.userId;
+        const today = new Date();
+        const since = new Date(); since.setDate(today.getDate() - 179); since.setHours(0, 0, 0, 0);
+
+        const [attRecs, gradeRecs, assignRecs] = await Promise.all([
+            Attendance.find({ studentId, date: { $gte: since } }),
+            Grade.find({ studentId, createdAt: { $gte: since } }),
+            Assignment.find({ 'submissions.studentId': studentId })
+        ]);
+
+        const dk = d => { const dt = new Date(d); return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; };
+        const dayMap = {};
+
+        attRecs.forEach(r => { if (r.status === 'present' || r.status === 'late') { const k = dk(r.date); dayMap[k] = (dayMap[k]||0) + 2; } });
+        gradeRecs.forEach(r => { const k = dk(r.createdAt); dayMap[k] = (dayMap[k]||0) + 1; });
+        assignRecs.forEach(a => {
+            a.submissions.forEach(s => {
+                if (s.studentId && s.studentId.toString() === studentId.toString() && s.submittedAt && new Date(s.submittedAt) >= since) {
+                    const k = dk(s.submittedAt); dayMap[k] = (dayMap[k]||0) + 2;
+                }
+            });
+        });
+
+        const maxVal = Math.max(1, ...Object.values(dayMap));
+        const heatmap = {};
+        for (const [k, v] of Object.entries(dayMap)) heatmap[k] = Math.min(4, Math.ceil((v/maxVal)*4));
+
+        res.json({ heatmap, since: since.toISOString(), today: today.toISOString() });
+    } catch (error) {
+        console.error('Heatmap error:', error);
+        res.status(500).json({ error: 'Failed to fetch heatmap' });
     }
 });
 

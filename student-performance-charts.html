@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -6,379 +6,1168 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Performance Charts - MindWave</title>
-    <link rel="stylesheet" href="3d-depth-design.css">
     <script src="theme-init.js"></script>
-
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <style>
-        .charts-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
         }
 
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
+        html,
+        body {
+            height: 100%;
+            overflow: hidden
         }
 
-        .chart-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 28px;
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #080b14;
+            color: #e8eaf6;
+            display: flex;
+            flex-direction: column
         }
 
-        .chart-card h3 {
-            margin: 0 0 24px;
-            font-size: 20px;
+        /*  Top bar  */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: .7rem 1.5rem;
+            background: rgba(255, 255, 255, .025);
+            border-bottom: 1px solid rgba(255, 255, 255, .07);
+            flex-shrink: 0
+        }
+
+        .tb-back {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            font-size: .8rem;
+            color: #9ea4b6;
+            text-decoration: none;
+            padding: .35rem .7rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            transition: all .2s
+        }
+
+        .tb-back:hover {
+            color: #e8eaf6;
+            border-color: rgba(255, 255, 255, .18);
+            background: rgba(255, 255, 255, .05)
+        }
+
+        .tb-back svg {
+            width: 14px;
+            height: 14px
+        }
+
+        .tb-title {
+            font-size: 1rem;
+            font-weight: 700;
+            flex: 1
+        }
+
+        .tb-eyebrow {
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            color: #6366f1;
+            text-transform: uppercase
+        }
+
+        .tb-filters {
+            display: flex;
+            gap: .4rem
+        }
+
+        .fb {
+            padding: .38rem .9rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, .1);
+            background: transparent;
+            color: #9ea4b6;
+            font-size: .78rem;
             font-weight: 600;
-            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            cursor: pointer;
+            transition: all .2s;
+            font-family: inherit
+        }
+
+        .fb:hover {
+            color: #e8eaf6;
+            border-color: rgba(99, 102, 241, .4);
+            background: rgba(99, 102, 241, .08)
+        }
+
+        .fb.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-color: transparent;
+            color: #fff
+        }
+
+        /*  Main scroll area  */
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem
+        }
+
+        .main::-webkit-scrollbar {
+            width: 4px
+        }
+
+        .main::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        .main::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, .35);
+            border-radius: 4px
+        }
+
+        /*  KPI strip  */
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: .9rem
+        }
+
+        .kpi {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: 16px;
+            padding: 1rem 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: .9rem;
+            transition: border-color .2s
+        }
+
+        .kpi:hover {
+            border-color: rgba(99, 102, 241, .3)
+        }
+
+        .kpi-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0
+        }
+
+        .kpi-icon svg {
+            width: 20px;
+            height: 20px
+        }
+
+        .kpi-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -.5px
+        }
+
+        .kpi-lbl {
+            font-size: .72rem;
+            color: #9ea4b6;
+            margin-top: .2rem;
+            font-weight: 500
+        }
+
+        .kpi-delta {
+            font-size: .72rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: .2rem;
+            margin-top: .3rem
+        }
+
+        .kpi-delta svg {
+            width: 11px;
+            height: 11px
+        }
+
+        .kpi-delta.up {
+            color: #22c55e
+        }
+
+        .kpi-delta.down {
+            color: #f87171
+        }
+
+        .kpi-delta.neutral {
+            color: #9ea4b6
+        }
+
+        /*  Grid rows  */
+        .row {
+            display: grid;
+            gap: .9rem
+        }
+
+        .row-3 {
+            grid-template-columns: 2fr 1fr 1fr
+        }
+
+        .row-2 {
+            grid-template-columns: 1fr 1fr
+        }
+
+        .row-ful {
+            grid-template-columns: 1fr
+        }
+
+        /*  Cards  */
+        .card {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: 16px;
+            padding: 1.1rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: .85rem
+        }
+
+        .card-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            font-size: .88rem;
+            font-weight: 700
+        }
+
+        .card-title svg {
+            width: 16px;
+            height: 16px;
+            color: #6366f1
+        }
+
+        .card-badge {
+            font-size: .68rem;
+            font-weight: 700;
+            padding: .2rem .5rem;
+            border-radius: 6px
+        }
+
+        .chart-wrap {
+            position: relative;
+            flex: 1;
+            min-height: 0
+        }
+
+        canvas {
+            width: 100% !important
+        }
+
+        /*  Weak area panel  */
+        .weak-list {
+            display: flex;
+            flex-direction: column;
+            gap: .6rem;
+            flex: 1
+        }
+
+        .weak-item {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .65rem .75rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .06)
+        }
+
+        .w-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0
+        }
+
+        .w-icon svg {
+            width: 15px;
+            height: 15px
+        }
+
+        .w-name {
+            font-size: .82rem;
+            font-weight: 600;
+            flex: 1
+        }
+
+        .w-grade {
+            font-size: .78rem;
+            font-weight: 700
+        }
+
+        .w-bar-bg {
+            height: 4px;
+            background: rgba(255, 255, 255, .08);
+            border-radius: 2px;
+            margin-top: .3rem
+        }
+
+        .w-bar-fill {
+            height: 4px;
+            border-radius: 2px
+        }
+
+        .w-trend {
+            font-size: .68rem;
+            display: flex;
+            align-items: center;
+            gap: .2rem;
+            margin-top: .05rem
+        }
+
+        .w-trend svg {
+            width: 10px;
+            height: 10px
+        }
+
+        /*  Percentile gauge  */
+        .gauge-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: .5rem
+        }
+
+        .gauge-label {
+            font-size: .78rem;
+            color: #9ea4b6;
+            text-align: center
+        }
+
+        .gauge-num {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            line-height: 1
         }
 
-        .chart-container {
-            position: relative;
-            height: 350px;
+        .gauge-sub {
+            font-size: .72rem;
+            color: #9ea4b6;
+            text-align: center
         }
 
-        .chart-card.full-width {
-            grid-column: 1 / -1;
+        /*  Subject grade tiles  */
+        .subj-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: .6rem;
+            flex: 1
         }
 
-        /* Filters */
-        .filters {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 12px 24px;
+        .subj-tile {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .07);
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
+            padding: .7rem .9rem;
+            display: flex;
+            flex-direction: column;
+            gap: .4rem
+        }
+
+        .subj-name {
+            font-size: .75rem;
+            color: #9ea4b6;
+            font-weight: 600
+        }
+
+        .subj-row {
+            display: flex;
+            align-items: baseline;
+            gap: .45rem
+        }
+
+        .subj-pct {
+            font-size: 1.3rem;
+            font-weight: 800;
+            line-height: 1
+        }
+
+        .subj-letter {
+            font-size: .72rem;
+            font-weight: 800;
+            padding: .1rem .35rem;
+            border-radius: 5px
+        }
+
+        .subj-bar {
+            height: 3px;
+            background: rgba(255, 255, 255, .08);
+            border-radius: 2px;
+            overflow: hidden
+        }
+
+        .subj-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width .8s cubic-bezier(.4, 0, .2, 1)
+        }
+
+        .subj-trend {
+            font-size: .68rem;
+            display: flex;
+            align-items: center;
+            gap: .2rem
+        }
+
+        .subj-trend svg {
+            width: 10px;
+            height: 10px
+        }
+
+        .trend-up {
+            color: #22c55e
+        }
+
+        .trend-dn {
+            color: #f87171
+        }
+
+        .trend-nt {
+            color: #9ea4b6
+        }
+
+        /*  Heatmap  */
+        .heatmap-wrap {
+            overflow-x: auto
+        }
+
+        .heatmap-grid {
+            display: grid;
+            grid-template-rows: repeat(7, 14px);
+            grid-auto-flow: column;
+            gap: 3px;
+            width: max-content
+        }
+
+        .hc {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
+            position: relative;
+            transition: transform .15s
         }
 
-        .filter-btn:hover {
-            background: rgba(77, 160, 255, 0.2);
-            border-color: rgba(77, 160, 255, 0.5);
+        .hc:hover {
+            transform: scale(1.35)
         }
 
-        .filter-btn.active {
-            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
-            border-color: transparent;
+        .hc[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: calc(100% + 5px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e2235;
+            color: #e8eaf6;
+            font-size: .65rem;
+            padding: .25rem .5rem;
+            border-radius: 6px;
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+            border: 1px solid rgba(255, 255, 255, .1)
         }
 
-        @media (max-width: 768px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
+        .hm-legend {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            margin-top: .65rem;
+            justify-content: flex-end
+        }
+
+        .hm-legend span {
+            font-size: .7rem;
+            color: #9ea4b6
+        }
+
+        .hm-leg-sq {
+            width: 11px;
+            height: 11px;
+            border-radius: 2px
+        }
+
+        .hm-months {
+            display: flex;
+            gap: 0;
+            margin-bottom: .35rem;
+            width: max-content
+        }
+
+        .hm-month {
+            font-size: .68rem;
+            color: #9ea4b6;
+            text-align: left
+        }
+
+        .hm-days {
+            display: grid;
+            grid-template-rows: repeat(7, 14px);
+            gap: 3px;
+            margin-right: .4rem;
+            flex-shrink: 0
+        }
+
+        .hm-day {
+            font-size: .62rem;
+            color: #9ea4b6;
+            line-height: 14px;
+            text-align: right;
+            padding-right: .35rem
+        }
+
+        .hm-outer {
+            display: flex
+        }
+
+        /*  Predicted grade card  */
+        .pred-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: .6rem
+        }
+
+        .pred-grade {
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(135deg, #6366f1, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .pred-label {
+            font-size: .78rem;
+            color: #9ea4b6;
+            text-align: center
+        }
+
+        .conf-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, .08);
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        .conf-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6)
+        }
+
+        /*  AI insight strip  */
+        .insight-strip {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .75rem 1rem;
+            background: rgba(99, 102, 241, .08);
+            border: 1px solid rgba(99, 102, 241, .2);
+            border-radius: 12px
+        }
+
+        .insight-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(99, 102, 241, .2);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #a5b4fc
+        }
+
+        .insight-icon svg {
+            width: 15px;
+            height: 15px
+        }
+
+        .insight-text {
+            font-size: .8rem;
+            color: #c7d2fe;
+            line-height: 1.5;
+            flex: 1
+        }
+
+        .insight-text strong {
+            color: #e8eaf6
+        }
+
+        /* colors */
+        .c-i {
+            color: #6366f1
+        }
+
+        .c-g {
+            color: #22c55e
+        }
+
+        .c-a {
+            color: #f59e0b
+        }
+
+        .c-r {
+            color: #f87171
+        }
+
+        .c-p {
+            color: #a78bfa
+        }
+
+        .bg-i {
+            background: rgba(99, 102, 241, .15)
+        }
+
+        .bg-g {
+            background: rgba(34, 197, 94, .15)
+        }
+
+        .bg-a {
+            background: rgba(245, 158, 11, .15)
+        }
+
+        .bg-r {
+            background: rgba(248, 113, 113, .15)
+        }
+
+        .bg-p {
+            background: rgba(167, 139, 250, .15)
         }
     </style>
 </head>
 
-<body data-theme="dark">
-    <div class="page-shell">
-        <header class="hero">
-            <a class="ghost-link" href="student-performance.html">? Back to Performance</a>
-            <p class="eyebrow">ANALYTICS</p>
-            <h1>Performance Charts</h1>
-            <p class="lede">Interactive visualizations of your academic progress</p>
-        </header>
+<body>
 
-        <div class="charts-container">
-            <!-- Time Range Filters -->
-            <div class="filters">
-                <button class="filter-btn" onclick="changeTimeRange('7days')">Last 7 Days</button>
-                <button class="filter-btn active" onclick="changeTimeRange('30days')">Last 30 Days</button>
-                <button class="filter-btn" onclick="changeTimeRange('semester')">This Semester</button>
-                <button class="filter-btn" onclick="changeTimeRange('year')">This Year</button>
+    <!-- Top Bar -->
+    <div class="topbar">
+        <a class="tb-back" href="student-performance.html"><i data-lucide="arrow-left"></i> Performance</a>
+        <div>
+            <div class="tb-eyebrow">Analytics</div>
+            <div class="tb-title">Performance Charts</div>
+        </div>
+        <div style="flex:1"></div>
+        <div class="tb-filters">
+            <button class="fb" onclick="setRange(this,'7d')">7 Days</button>
+            <button class="fb active" onclick="setRange(this,'30d')">30 Days</button>
+            <button class="fb" onclick="setRange(this,'sem')">Semester</button>
+            <button class="fb" onclick="setRange(this,'yr')">This Year</button>
+        </div>
+    </div>
+
+    <!-- Main scrollable area -->
+    <div class="main">
+
+        <!-- AI Insight -->
+        <div class="insight-strip">
+            <div class="insight-icon"><i data-lucide="sparkles"></i></div>
+            <div class="insight-text"><strong>AI Insight:</strong> You improved <strong>+7%</strong> in Mathematics this
+                month. Science shows a slight downward trend consider reviewing Chapter 6 before the next test.</div>
+        </div>
+
+        <!-- KPI Strip -->
+        <div class="kpi-strip">
+            <div class="kpi">
+                <div class="kpi-icon bg-i c-i"><i data-lucide="graduation-cap"></i></div>
+                <div>
+                    <div class="kpi-val" id="kpiOverall">88.5<span
+                            style="font-size:.9rem;font-weight:600;color:#9ea4b6">%</span></div>
+                    <div class="kpi-lbl">Overall Grade</div>
+                    <div class="kpi-delta up"><i data-lucide="trending-up"></i> +3.2% vs last period</div>
+                </div>
             </div>
+            <div class="kpi">
+                <div class="kpi-icon bg-p c-p"><i data-lucide="trophy"></i></div>
+                <div>
+                    <div class="kpi-val">#<span id="kpiRank">7</span></div>
+                    <div class="kpi-lbl">Class Rank</div>
+                    <div class="kpi-delta up" id="kpiRankSub"><i data-lucide="trending-up"></i> Up 2 places</div>
+                </div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-icon bg-a" style="color:#f59e0b"><i data-lucide="flame"></i></div>
+                <div>
+                    <div class="kpi-val" id="kpiStreak">9<span
+                            style="font-size:1rem;font-weight:600;color:#9ea4b6">wk</span></div>
+                    <div class="kpi-lbl">Improvement Streak</div>
+                    <div class="kpi-delta up"><i data-lucide="zap"></i> Personal best!</div>
+                </div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-icon bg-g c-g"><i data-lucide="calendar-check"></i></div>
+                <div>
+                    <div class="kpi-val">96<span style="font-size:.9rem;font-weight:600;color:#9ea4b6">%</span></div>
+                    <div class="kpi-lbl">Attendance</div>
+                    <div class="kpi-delta neutral"><i data-lucide="minus"></i> Stable</div>
+                </div>
+            </div>
+        </div>
 
-            <!-- Charts Grid -->
-            <div class="charts-grid">
-                <!-- Grade Trends -->
-                <div class="chart-card">
-                    <h3>?? Grade Trends Over Time</h3>
-                    <div class="chart-container">
-                        <canvas id="gradeTrendsChart"></canvas>
+        <!-- Row 1: Grade trend (wide) + Percentile + Predicted -->
+        <div class="row row-3">
+            <!-- Grade Trends -->
+            <div class="card">
+                <div class="card-hdr">
+                    <div class="card-title"><i data-lucide="trending-up"></i> Grade Trends Over Time</div>
+                    <div style="display:flex;gap:.4rem">
+                        <div class="card-badge" style="background:rgba(99,102,241,.15);color:#a5b4fc">You</div>
+                        <div class="card-badge" style="background:rgba(255,255,255,.08);color:#9ea4b6">Class Avg</div>
                     </div>
                 </div>
-
-                <!-- Subject Performance Radar -->
-                <div class="chart-card">
-                    <h3>?? Subject Performance</h3>
-                    <div class="chart-container">
-                        <canvas id="subjectRadarChart"></canvas>
-                    </div>
+                <div class="chart-wrap" style="height:180px"><canvas id="chtTrend"></canvas></div>
+            </div>
+            <!-- Percentile -->
+            <div class="card">
+                <div class="card-hdr">
+                    <div class="card-title"><i data-lucide="bar-chart-2"></i> Percentile Rank</div>
                 </div>
-
-                <!-- Assignment Completion -->
-                <div class="chart-card">
-                    <h3>? Assignment Completion Rate</h3>
-                    <div class="chart-container">
-                        <canvas id="completionChart"></canvas>
-                    </div>
+                <div class="gauge-wrap">
+                    <div class="chart-wrap" style="height:120px;width:120px"><canvas id="chtGauge"></canvas></div>
+                    <div class="gauge-num" id="percentileNum">Top 18%</div>
+                    <div class="gauge-sub">of your class</div>
                 </div>
-
-                <!-- Attendance Trend -->
-                <div class="chart-card">
-                    <h3>?? Attendance Trend</h3>
-                    <div class="chart-container">
-                        <canvas id="attendanceChart"></canvas>
-                    </div>
+            </div>
+            <!-- Predicted Grade -->
+            <div class="card">
+                <div class="card-hdr">
+                    <div class="card-title"><i data-lucide="sparkles"></i> Predicted Final</div>
                 </div>
-
-                <!-- Subject-wise Grades (Bar Chart) -->
-                <div class="chart-card full-width">
-                    <h3>?? Subject-wise Grade Distribution</h3>
-                    <div class="chart-container">
-                        <canvas id="subjectGradesChart"></canvas>
+                <div class="pred-content">
+                    <div class="pred-grade" id="predGrade">A</div>
+                    <div class="pred-label">Projected end-of-semester grade based on current trajectory</div>
+                    <div style="width:100%">
+                        <div
+                            style="display:flex;justify-content:space-between;font-size:.68rem;color:#9ea4b6;margin-bottom:.3rem">
+                            <span>Confidence</span><span id="confVal" style="color:#a5b4fc;font-weight:700">84%</span>
+                        </div>
+                        <div class="conf-bar">
+                            <div class="conf-fill" id="confFill" style="width:84%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Row 2: Subject grades + Radar + Weak area detector -->
+        <div class="row row-3">
+            <!-- Subject grade tiles -->
+            <div class="card">
+                <div class="card-hdr">
+                    <div class="card-title"><i data-lucide="book-open"></i> Subject Grades</div>
+                    <span style="font-size:.7rem;color:#9ea4b6">vs class avg shown</span>
+                </div>
+                <div class="subj-grid" id="subjGrid"></div>
+            </div>
+            <!-- Radar -->
+            <div class="card">
+                <div class="card-hdr">
+                    <div class="card-title"><i data-lucide="activity"></i> Subject Radar</div>
+                </div>
+                <div class="chart-wrap" style="height:195px"><canvas id="chtRadar"></canvas></div>
+            </div>
+            <!-- Weak area -->
+            <div class="card">
+                <div class="card-hdr">
+                    <div class="card-title"><i data-lucide="alert-triangle"></i> Needs Attention</div>
+                    <div class="card-badge"
+                        style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.2)">3
+                        flagged</div>
+                </div>
+                <div class="weak-list" id="weakList"></div>
+            </div>
+        </div>
+
+        <!-- Row 3: Completion donut + Attendance bar + Grade distribution -->
+        <div class="row row-3">
+            <div class="card">
+                <div class="card-hdr">
+                    <div class="card-title"><i data-lucide="check-circle-2"></i> Assignment Completion</div>
+                </div>
+                <div class="chart-wrap" style="height:155px"><canvas id="chtCompletion"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-hdr">
+                    <div class="card-title"><i data-lucide="user-check"></i> Attendance Trend</div>
+                </div>
+                <div class="chart-wrap" style="height:155px"><canvas id="chtAttendance"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-hdr">
+                    <div class="card-title"><i data-lucide="layers"></i> Grade Distribution</div>
+                </div>
+                <div class="chart-wrap" style="height:155px"><canvas id="chtDist"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Activity Heatmap -->
+        <div class="card">
+            <div class="card-hdr">
+                <div class="card-title"><i data-lucide="calendar"></i> Study Activity Last 6 Months</div>
+                <span style="font-size:.72rem;color:#9ea4b6">Darker = more active</span>
+            </div>
+            <div class="heatmap-wrap">
+                <div class="hm-outer">
+                    <div class="hm-days">
+                        <div class="hm-day">Mon</div>
+                        <div class="hm-day">Tue</div>
+                        <div class="hm-day">Wed</div>
+                        <div class="hm-day">Thu</div>
+                        <div class="hm-day">Fri</div>
+                        <div class="hm-day">Sat</div>
+                        <div class="hm-day">Sun</div>
+                    </div>
+                    <div>
+                        <div class="hm-months" id="hmMonths"></div>
+                        <div class="heatmap-grid" id="hmGrid"></div>
+                    </div>
+                </div>
+                <div class="hm-legend">
+                    <span>Less</span>
+                    <div class="hm-leg-sq" style="background:rgba(99,102,241,.1)"></div>
+                    <div class="hm-leg-sq" style="background:rgba(99,102,241,.25)"></div>
+                    <div class="hm-leg-sq" style="background:rgba(99,102,241,.45)"></div>
+                    <div class="hm-leg-sq" style="background:rgba(99,102,241,.7)"></div>
+                    <div class="hm-leg-sq" style="background:#6366f1"></div>
+                    <span>More</span>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /main -->
 
     <script>
-        // Authentication check
         const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = 'marketing-site/student-login.html';
-        }
+        if (!token) window.location.href = 'marketing-site/student-login.html';
 
-        let currentTimeRange = '30days';
-        let charts = {};
+        const API = window.location.hostname === 'localhost' ? 'http://localhost:8081' : '';
+        const H = { Authorization: 'Bearer ' + token };
 
-        // Chart.js default config
         Chart.defaults.color = '#9ea4b6';
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+        Chart.defaults.borderColor = 'rgba(255,255,255,.07)';
+        Chart.defaults.font.family = "'Inter',system-ui,sans-serif";
 
-        // Initialize all charts
-        function initializeCharts() {
-            // Grade Trends Line Chart
-            const gradeTrendsCtx = document.getElementById('gradeTrendsChart').getContext('2d');
-            charts.gradeTrends = new Chart(gradeTrendsCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    datasets: [{
-                        label: 'Average Grade',
-                        data: [85, 88, 87, 90],
-                        borderColor: '#4da0ff',
-                        backgroundColor: 'rgba(77, 160, 255, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
+        const PURPLE = '#6366f1', PL = 'rgba(99,102,241,';
+        let charts = {};
+        let currentRange = '30d';
+
+        function gradeLetter(p) { return p >= 90 ? 'A' : p >= 80 ? 'B' : p >= 70 ? 'C' : p >= 60 ? 'D' : 'F'; }
+        function gradeColor(p) { return p >= 90 ? '#22c55e' : p >= 80 ? '#6366f1' : p >= 70 ? '#f59e0b' : '#f87171'; }
+
+        // ── KPI ──────────────────────────────────────────────────────
+        function updateKPI(d) {
+            // Overall grade
+            const oa = document.getElementById('kpiOverall');
+            if (oa) oa.textContent = d.overallAvg ? d.overallAvg + '%' : '--';
+
+            // Class rank
+            const rn = document.getElementById('kpiRank');
+            if (rn) rn.textContent = d.classRank ? '#' + d.classRank : '--';
+            const rs = document.getElementById('kpiRankSub');
+            if (rs) rs.textContent = d.totalStudents ? 'of ' + d.totalStudents + ' students' : '';
+
+            // Streak
+            const sk = document.getElementById('kpiStreak');
+            if (sk) sk.textContent = (d.streak || 0) + ' wk';
+
+            // Predicted grade
+            const pg = document.getElementById('predGrade');
+            if (pg) pg.textContent = d.predictedGrade || '--';
+            const cf = document.getElementById('confFill');
+            if (cf) cf.style.width = (d.confidence || 0) + '%';
+            const cv = document.getElementById('confVal');
+            if (cv) cv.textContent = (d.confidence || 0) + '%';
+
+            // Percentile gauge
+            const pn = document.getElementById('percentileNum');
+            if (pn && d.percentile != null) {
+                pn.textContent = 'Top ' + (100 - d.percentile) + '%';
+                // Update gauge chart if it exists
+                if (charts.gauge) {
+                    charts.gauge.data.datasets[0].data = [d.percentile, 100 - d.percentile];
+                    charts.gauge.update();
                 }
-            });
-
-            // Subject Performance Radar Chart
-            const subjectRadarCtx = document.getElementById('subjectRadarChart').getContext('2d');
-            charts.subjectRadar = new Chart(subjectRadarCtx, {
-                type: 'radar',
-                data: {
-                    labels: ['Math', 'Science', 'English', 'History', 'Art'],
-                    datasets: [{
-                        label: 'Performance',
-                        data: [92, 88, 85, 90, 87],
-                        borderColor: '#a78bfa',
-                        backgroundColor: 'rgba(167, 139, 250, 0.2)',
-                        pointBackgroundColor: '#a78bfa'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
-
-            // Assignment Completion Bar Chart
-            const completionCtx = document.getElementById('completionChart').getContext('2d');
-            charts.completion = new Chart(completionCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    datasets: [{
-                        label: 'Completion %',
-                        data: [95, 88, 92, 100],
-                        backgroundColor: '#00ff88',
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
-
-            // Attendance Trend Line Chart
-            const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
-            charts.attendance = new Chart(attendanceCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    datasets: [{
-                        label: 'Attendance %',
-                        data: [100, 95, 100, 90],
-                        borderColor: '#ffaa00',
-                        backgroundColor: 'rgba(255, 170, 0, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
-
-            // Subject Grades Bar Chart
-            const subjectGradesCtx = document.getElementById('subjectGradesChart').getContext('2d');
-            charts.subjectGrades = new Chart(subjectGradesCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Mathematics', 'Science', 'English', 'History', 'Art', 'Physical Ed'],
-                    datasets: [{
-                        label: 'Current Grade',
-                        data: [92, 88, 85, 90, 87, 95],
-                        backgroundColor: [
-                            '#4da0ff',
-                            '#a78bfa',
-                            '#00ff88',
-                            '#ffaa00',
-                            '#ff4444',
-                            '#00d4ff'
-                        ],
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
-        }
-
-        // Change time range filter
-        function changeTimeRange(range) {
-            currentTimeRange = range;
-
-            // Update active button
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // TODO: Fetch new data based on time range
-            console.log('Changed time range to:', range);
-        }
-
-        // Load data from API
-        async function loadChartData() {
-            try {
-                const API_BASE = window.location.hostname === 'localhost'
-                    ? 'http://localhost:8081'
-                    : 'https://mindwave2.onrender.com';
-
-                const response = await fetch(`${API_BASE}/api/student/performance-charts?range=${currentTimeRange}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    // Update charts with real data
-                    updateChartsWithData(data);
-                } else {
-                    console.log('Using placeholder data');
-                }
-            } catch (error) {
-                console.error('Error loading chart data:', error);
-                console.log('Using placeholder data');
             }
         }
 
-        function updateChartsWithData(data) {
-            // TODO: Update charts with real data from API
-            console.log('Chart data:', data);
+        // ── Grade Trend chart ─────────────────────────────────────────
+        function buildTrendChart(trend) {
+            const ctx = document.getElementById('chtTrend').getContext('2d');
+            if (charts.trend) charts.trend.destroy();
+            const labels = trend.labels.length ? trend.labels : ['No data'];
+            const myData = trend.data.length ? trend.data : [0];
+            charts.trend = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'You', data: myData, borderColor: PURPLE, backgroundColor: PL + '0.15)', tension: .45, fill: true, borderWidth: 2.5, pointRadius: myData.length > 8 ? 2 : 4, pointBackgroundColor: PURPLE },
+                        { label: 'Class Avg', data: myData.map(() => null), borderColor: 'rgba(255,255,255,.2)', backgroundColor: 'transparent', tension: .45, fill: false, borderWidth: 1.5, pointRadius: 0, borderDash: [4, 3] }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1d2e', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1, padding: 10, cornerRadius: 8, callbacks: { label: c => ' ' + c.dataset.label + ': ' + c.raw + '%' } } }, scales: { y: { min: 50, max: 100, ticks: { count: 6, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,.05)' } }, x: { grid: { display: false } } } }
+            });
         }
 
-        // Initialize on page load
-        initializeCharts();
-        loadChartData();
+        // ── Percentile gauge ─────────────────────────────────────────
+        function buildGaugeChart(percentile) {
+            const ctx = document.getElementById('chtGauge').getContext('2d');
+            if (charts.gauge) charts.gauge.destroy();
+            charts.gauge = new Chart(ctx, {
+                type: 'doughnut',
+                data: { datasets: [{ data: [percentile || 75, 100 - (percentile || 75)], backgroundColor: [PURPLE, 'rgba(255,255,255,.06)'], borderWidth: 0, circumference: 270, rotation: 225, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+            });
+        }
+
+        // ── Radar ─────────────────────────────────────────────────────
+        function buildRadarChart(sp) {
+            const ctx = document.getElementById('chtRadar').getContext('2d');
+            if (charts.radar) charts.radar.destroy();
+            if (!sp.labels.length) { ctx.canvas.parentElement.innerHTML = '<div style="color:#9ea4b6;font-size:.8rem;text-align:center;padding-top:2rem">No subject data yet</div>'; return; }
+            charts.radar = new Chart(ctx, {
+                type: 'radar',
+                data: { labels: sp.labels, datasets: [{ label: 'You', data: sp.data, borderColor: PURPLE, backgroundColor: PL + '0.18)', pointBackgroundColor: PURPLE, borderWidth: 2, pointRadius: 3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { r: { grid: { color: 'rgba(255,255,255,.07)' }, angleLines: { color: 'rgba(255,255,255,.07)' }, ticks: { display: false }, pointLabels: { font: { size: 10, weight: '600' } } } } }
+            });
+        }
+
+        // ── Subject tiles ─────────────────────────────────────────────
+        function buildSubjectTiles(sp) {
+            const sg = document.getElementById('subjGrid');
+            if (!sp.labels.length) { sg.innerHTML = '<div style="color:#9ea4b6;font-size:.8rem;grid-column:1/-1;text-align:center;padding:1rem">No grade data yet</div>'; return; }
+            sg.innerHTML = '';
+            sp.labels.forEach((name, i) => {
+                const pct = sp.data[i], trend = sp.trends ? sp.trends[i] : 0;
+                const c = gradeColor(pct), L = gradeLetter(pct);
+                const arrow = trend > 0 ? 'trending-up' : trend < 0 ? 'trending-down' : 'minus';
+                const tc = trend > 0 ? 'trend-up' : trend < 0 ? 'trend-dn' : 'trend-nt';
+                sg.innerHTML += `<div class="subj-tile">
+        <div class="subj-name">${name}</div>
+        <div class="subj-row">
+          <div class="subj-pct" style="color:${c}">${pct}<span style="font-size:.7rem;color:#9ea4b6">%</span></div>
+          <span class="subj-letter" style="background:${c}22;color:${c}">${L}</span>
+        </div>
+        <div class="subj-bar"><div class="subj-bar-fill" style="width:${pct}%;background:${c}"></div></div>
+        <div class="subj-trend ${tc}"><i data-lucide="${arrow}" style="width:10px;height:10px;"></i> ${trend > 0 ? '+' : ''}${trend}% vs last</div>
+      </div>`;
+            });
+            lucide.createIcons();
+        }
+
+        // ── Weak area ─────────────────────────────────────────────────
+        function buildWeakArea(sp) {
+            const wl = document.getElementById('weakList');
+            // Sort subjects ascending by score, take worst 3
+            const pairs = sp.labels.map((n, i) => ({ name: n, pct: sp.data[i], trend: sp.trends ? sp.trends[i] : 0 }));
+            pairs.sort((a, b) => a.pct - b.pct);
+            const worst = pairs.slice(0, 3);
+            if (!worst.length) { wl.innerHTML = '<div style="color:#9ea4b6;font-size:.8rem;text-align:center;padding:1rem">No data yet</div>'; return; }
+            // Update badge
+            const badge = wl.closest('.card').querySelector('.card-badge');
+            if (badge) badge.textContent = worst.filter(w => w.pct < 85).length + ' flagged';
+            wl.innerHTML = '';
+            worst.forEach(w => {
+                const c = w.trend < 0 ? '#f87171' : w.pct < 80 ? '#f59e0b' : '#6366f1';
+                const arrow = w.trend < 0 ? 'trending-down' : w.trend === 0 ? 'minus' : 'trending-up';
+                const tc = w.trend < 0 ? 'trend-dn' : w.trend === 0 ? 'trend-nt' : 'trend-up';
+                wl.innerHTML += `<div class="weak-item">
+        <div class="w-icon" style="background:${c}18;color:${c}"><i data-lucide="book"></i></div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:baseline;gap:.4rem">
+            <div class="w-name">${w.name}</div>
+            <div class="w-grade" style="color:${c}">${w.pct}%</div>
+          </div>
+          <div class="w-bar-bg"><div class="w-bar-fill" style="width:${w.pct}%;background:${c}"></div></div>
+          <div class="w-trend ${tc}"><i data-lucide="${arrow}" style="width:10px;height:10px;"></i> ${w.trend > 0 ? '+' : ''}${w.trend}% this period</div>
+        </div>
+      </div>`;
+            });
+            lucide.createIcons();
+        }
+
+        // ── Completion donut ──────────────────────────────────────────
+        function buildCompletionChart(comp) {
+            const ctx = document.getElementById('chtCompletion').getContext('2d');
+            if (charts.completion) charts.completion.destroy();
+            charts.completion = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: ['Submitted', 'Pending', 'Missed'], datasets: [{ data: [comp.submitted || 0, comp.pending || 0, comp.missed || 0], backgroundColor: [PURPLE, 'rgba(245,158,11,.7)', 'rgba(248,113,113,.7)'], borderWidth: 0, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 11 } } }, tooltip: { backgroundColor: '#1a1d2e', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1, cornerRadius: 8 } } }
+            });
+        }
+
+        // ── Attendance bar ────────────────────────────────────────────
+        function buildAttendanceChart(att) {
+            const ctx = document.getElementById('chtAttendance').getContext('2d');
+            if (charts.attendance) charts.attendance.destroy();
+            const labels = att.labels.length ? att.labels : ['No data'];
+            const data = att.data.length ? att.data : [0];
+            charts.attendance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'Attendance %', data, backgroundColor: PL + '0.7)', borderRadius: 6, borderSkipped: false }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1d2e', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1, cornerRadius: 8, callbacks: { label: c => ' ' + c.raw + '%' } } }, scales: { y: { min: 0, max: 100, ticks: { count: 4, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,.05)' } }, x: { grid: { display: false } } } }
+            });
+        }
+
+        // ── Grade distribution bar ────────────────────────────────────
+        function buildDistChart(sp) {
+            const ctx = document.getElementById('chtDist').getContext('2d');
+            if (charts.dist) charts.dist.destroy();
+            // Count grades by letter
+            const counts = { A: 0, B: 0, C: 0, D: 0 };
+            sp.data.forEach(p => {
+                if (p >= 90) counts.A++;
+                else if (p >= 80) counts.B++;
+                else if (p >= 70) counts.C++;
+                else counts.D++;
+            });
+            charts.dist = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: ['A (90-100)', 'B (80-89)', 'C (70-79)', 'D (<70)'], datasets: [{ label: 'Subjects', data: [counts.A, counts.B, counts.C, counts.D], backgroundColor: [PL + '0.9)', PL + '0.65)', PL + '0.4)', PL + '0.2)'], borderRadius: 6, borderSkipped: false }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1d2e', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1, cornerRadius: 8 } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,.05)' } }, x: { grid: { display: false } } } }
+            });
+        }
+
+        // ── Heatmap ───────────────────────────────────────────────────
+        function buildHeatmap(hmData) {
+            const grid = document.getElementById('hmGrid');
+            const monthsEl = document.getElementById('hmMonths');
+            grid.innerHTML = '';
+            monthsEl.innerHTML = '';
+
+            const WEEKS = 26;
+            const colors = ['rgba(99,102,241,0.07)', 'rgba(99,102,241,0.22)', 'rgba(99,102,241,0.42)', 'rgba(99,102,241,0.65)', '#6366f1'];
+            const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            const today = new Date();
+            const startDate = new Date(today);
+            startDate.setDate(startDate.getDate() - WEEKS * 7);
+            const dow = startDate.getDay();
+            startDate.setDate(startDate.getDate() - ((dow + 6) % 7)); // align to Monday
+
+            const monthMap = {};
+            for (let w = 0; w < WEEKS; w++) {
+                for (let d = 0; d < 7; d++) {
+                    const date = new Date(startDate);
+                    date.setDate(startDate.getDate() + w * 7 + d);
+                    const cell = document.createElement('div');
+                    cell.className = 'hc';
+                    if (date > today) { cell.style.background = 'transparent'; grid.appendChild(cell); continue; }
+                    const dk = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                    const level = hmData[dk] != null ? hmData[dk] : 0;
+                    cell.style.background = colors[level];
+                    const ds = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const actLabels = ['No activity', 'Light activity', 'Moderate activity', 'Active', 'Very active'];
+                    cell.title = ds + ' — ' + actLabels[level];
+                    grid.appendChild(cell);
+                    if (d === 0 && !monthMap[w]) monthMap[w] = MONTHS[date.getMonth()];
+                }
+            }
+            for (let w = 0; w < WEEKS; w++) {
+                const span = document.createElement('div');
+                span.className = 'hm-month';
+                span.style.width = '17px';
+                span.textContent = monthMap[w] && (w === 0 || monthMap[w] !== monthMap[w - 1]) ? monthMap[w] : '';
+                monthsEl.appendChild(span);
+            }
+        }
+
+        // ── AI Insight ────────────────────────────────────────────────
+        async function loadInsight() {
+            try {
+                const r = await fetch(API + '/api/student/recommendations', { headers: H });
+                if (!r.ok) return;
+                const d = await r.json();
+                const el = document.querySelector('.insight-text');
+                if (el && d.aiInsight) el.innerHTML = '<strong>AI Insight:</strong> ' + d.aiInsight;
+            } catch (e) { }
+        }
+
+        // ── Main data loader ──────────────────────────────────────────
+        async function loadAll(range) {
+            try {
+                const [chartsRes, hmRes] = await Promise.all([
+                    fetch(API + '/api/student/performance-charts?range=' + range, { headers: H }),
+                    fetch(API + '/api/student/performance-charts/heatmap', { headers: H })
+                ]);
+
+                if (chartsRes.ok) {
+                    const d = await chartsRes.json();
+                    updateKPI(d);
+                    buildTrendChart(d.gradeTrends || { labels: [], data: [] });
+                    buildGaugeChart(d.percentile || 75);
+                    buildRadarChart(d.subjectPerformance || { labels: [], data: [], trends: [] });
+                    buildSubjectTiles(d.subjectPerformance || { labels: [], data: [], trends: [] });
+                    buildWeakArea(d.subjectPerformance || { labels: [], data: [], trends: [] });
+                    buildCompletionChart(d.completion || { submitted: 0, pending: 0, missed: 0 });
+                    buildAttendanceChart(d.attendance || { labels: [], data: [] });
+                    buildDistChart(d.subjectPerformance || { labels: [], data: [] });
+                }
+
+                if (hmRes.ok) {
+                    const hm = await hmRes.json();
+                    buildHeatmap(hm.heatmap || {});
+                } else {
+                    buildHeatmap({});
+                }
+            } catch (e) {
+                console.error('Failed to load performance data:', e);
+                buildHeatmap({});
+            }
+        }
+
+        // ── Initial load ──────────────────────────────────────────────
+        lucide.createIcons();
+        loadInsight();
+        loadAll('30d');
+
+        function setRange(btn, range) {
+            document.querySelectorAll('.fb').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRange = range;
+            loadAll(range);
+        }
     </script>
 </body>
 
