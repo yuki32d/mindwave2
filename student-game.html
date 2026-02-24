@@ -15,28 +15,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
@@ -44,21 +44,21 @@
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="theme-init.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="sidebar.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
@@ -987,24 +987,32 @@
 
             <div class="mw-sidebar-footer">
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
-                    <div class="mw-avatar" id="avatarInitials">ST</div>
+                    <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">?</span>
+                    <span class="mw-user-more">⋯</span>
+
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student � MindWave</div>
+                            <div class="role">Student · MindWave</div>
                         </div>
-                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
-                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
-                        <a href="student-notifications.html"><i data-lucide="bell"></i> Notifications</a>
+                        <a href="student-profile.html">
+                            <i data-lucide="user"></i> My Profile
+                        </a>
+                        <a href="student-settings.html">
+                            <i data-lucide="settings"></i> Settings
+                        </a>
+                        <a href="student-notifications.html">
+                            <i data-lucide="bell"></i> Notifications
+                        </a>
                     </div>
                 </div>
             </div>
         </aside>
+
 
         <!-- -- Main -- -->
         <div class="mw-main" id="mwMain">
@@ -1018,7 +1026,7 @@
 
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" id="gcSearch" placeholder="Search games�" autocomplete="off">
+                    <input type="text" id="gcSearch" placeholder="Search games" autocomplete="off">
                 </div>
 
                 <div class="mw-topbar-actions">
@@ -1059,11 +1067,11 @@
                     </div>
                     <div class="gc-stat-row">
                         <div class="gc-stat">
-                            <div class="gc-stat-val">?? <span id="streakCount">0</span></div>
+                            <div class="gc-stat-val"><span id="streakCount">0</span></div>
                             <div class="gc-stat-lbl">Streak</div>
                         </div>
                         <div class="gc-stat">
-                            <div class="gc-stat-val">?? <span id="totalWins">0</span></div>
+                            <div class="gc-stat-val"><span id="totalWins">0</span></div>
                             <div class="gc-stat-lbl">Wins</div>
                         </div>
                     </div>
@@ -1119,9 +1127,9 @@
     <script>
         // Auth guard
         if (!localStorage.getItem('token')) window.location.href = 'marketing-site/student-login.html';
-    
+
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
@@ -1129,35 +1137,35 @@
 
     <script src="anti-cheat.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="bug-injection.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="student-game-engine.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="chatbot.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="loading-spinner.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
@@ -1230,9 +1238,9 @@
                 });
             });
         });
-    
+
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
@@ -1245,26 +1253,131 @@
             <h3 class="mw-logout-title">Sign out?</h3>
             <p class="mw-logout-sub">You'll need to log back in to access your dashboard.</p>
             <div class="mw-logout-actions">
-                <button class="mw-logout-cancel" onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
+                <button class="mw-logout-cancel"
+                    onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
                 <button class="mw-logout-confirm" onclick="doLogout()"><i data-lucide="log-out"></i> Sign Out</button>
             </div>
         </div>
     </div>
     <style>
-        .mw-logout-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center}
-        .mw-logout-overlay.active{display:flex;animation:mwFadeIn .18s ease}
-        @keyframes mwFadeIn{from{opacity:0}to{opacity:1}}
-        .mw-logout-modal{background:var(--surface,#1e1e2e);border:1px solid var(--border,rgba(255,255,255,.1));border-radius:20px;padding:2.4rem 2rem 2rem;width:340px;max-width:90vw;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);animation:mwPopUp .22s cubic-bezier(.34,1.56,.64,1)}
-        @keyframes mwPopUp{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
-        .mw-logout-icon{width:64px;height:64px;border-radius:50%;background:rgba(255,92,92,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;color:#ff5c5c}
-        .mw-logout-icon svg{width:28px;height:28px}
-        .mw-logout-title{font-size:1.25rem;font-weight:700;margin:0 0 .5rem;color:var(--text,#fff)}
-        .mw-logout-sub{font-size:.875rem;color:var(--text-muted,#aaa);margin:0 0 2rem;line-height:1.5}
-        .mw-logout-actions{display:flex;gap:.75rem}
-        .mw-logout-cancel,.mw-logout-confirm{flex:1;padding:.75rem 1rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;transition:opacity .15s,transform .15s}
-        .mw-logout-cancel{background:var(--surface-2,#2a2a3e);color:var(--text,#fff)}
-        .mw-logout-confirm{background:linear-gradient(135deg,#ff5c5c,#ff2d2d);color:#fff;display:flex;align-items:center;justify-content:center;gap:.4rem}
-        .mw-logout-cancel:hover,.mw-logout-confirm:hover{opacity:.85;transform:translateY(-1px)}
+        .mw-logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center
+        }
+
+        .mw-logout-overlay.active {
+            display: flex;
+            animation: mwFadeIn .18s ease
+        }
+
+        @keyframes mwFadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .mw-logout-modal {
+            background: var(--surface, #1e1e2e);
+            border: 1px solid var(--border, rgba(255, 255, 255, .1));
+            border-radius: 20px;
+            padding: 2.4rem 2rem 2rem;
+            width: 340px;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+            animation: mwPopUp .22s cubic-bezier(.34, 1.56, .64, 1)
+        }
+
+        @keyframes mwPopUp {
+            from {
+                transform: scale(.88);
+                opacity: 0
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+
+        .mw-logout-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 92, 92, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            color: #ff5c5c
+        }
+
+        .mw-logout-icon svg {
+            width: 28px;
+            height: 28px
+        }
+
+        .mw-logout-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 .5rem;
+            color: var(--text, #fff)
+        }
+
+        .mw-logout-sub {
+            font-size: .875rem;
+            color: var(--text-muted, #aaa);
+            margin: 0 0 2rem;
+            line-height: 1.5
+        }
+
+        .mw-logout-actions {
+            display: flex;
+            gap: .75rem
+        }
+
+        .mw-logout-cancel,
+        .mw-logout-confirm {
+            flex: 1;
+            padding: .75rem 1rem;
+            border-radius: 12px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity .15s, transform .15s
+        }
+
+        .mw-logout-cancel {
+            background: var(--surface-2, #2a2a3e);
+            color: var(--text, #fff)
+        }
+
+        .mw-logout-confirm {
+            background: linear-gradient(135deg, #ff5c5c, #ff2d2d);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem
+        }
+
+        .mw-logout-cancel:hover,
+        .mw-logout-confirm:hover {
+            opacity: .85;
+            transform: translateY(-1px)
+        }
     </style>
 </body>
 
