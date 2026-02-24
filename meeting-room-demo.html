@@ -1,0 +1,287 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meeting Room Demo - MindWave</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden}
+    body{font-family:'Inter',system-ui,sans-serif;background:#0a0a0f;color:#f0f2ff}
+
+    /* Top bar */
+    .top-bar{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.25rem;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
+    .top-brand{display:flex;align-items:center;gap:.6rem;font-weight:800;font-size:1rem}
+    .top-brand-icon{width:30px;height:30px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff}
+    .top-brand-icon svg{width:15px;height:15px}
+    .mtitle{font-size:.85rem;color:#9ea4b6;font-weight:400}
+    .top-right{display:flex;align-items:center;gap:.75rem}
+    .live-tag{display:flex;align-items:center;gap:.4rem;font-size:.73rem;padding:.28rem .7rem;border-radius:20px;background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.25);font-weight:600}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:blink 1.5s ease-in-out infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .timer{font-size:.82rem;color:#9ea4b6;font-variant-numeric:tabular-nums}
+
+    /* Body layout */
+    .meeting-body{display:flex;height:calc(100vh - 53px - 72px);overflow:hidden}
+
+    /* Video grid */
+    .video-area{flex:1;display:flex;flex-direction:column;padding:.75rem;gap:.75rem;overflow:hidden;min-width:0}
+    #videoGrid{flex:1;display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:.75rem;overflow:hidden}
+    .vtile{background:#141625;border-radius:14px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;border:2px solid transparent;transition:border-color .3s}
+    .vtile.speaking{border-color:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.2)}
+    .vtile video{width:100%;height:100%;object-fit:cover;display:block}
+    .vtile-av{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:#fff}
+    .vtile-label{position:absolute;bottom:.6rem;left:.7rem;display:flex;align-items:center;gap:.4rem;font-size:.76rem;font-weight:600;color:#fff;background:rgba(0,0,0,.6);padding:.22rem .55rem;border-radius:6px;backdrop-filter:blur(4px)}
+    .vtile-label svg{width:11px;height:11px;color:#ff5c5c}
+    .vtile-host{position:absolute;top:.6rem;left:.7rem;font-size:.68rem;font-weight:700;padding:.18rem .5rem;border-radius:5px;background:rgba(99,102,241,.7);color:#c7d2fe}
+
+    /* Side panel */
+    .side-panel{width:300px;background:#111320;border-left:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;flex-shrink:0}
+    .ptabs{display:flex;border-bottom:1px solid rgba(255,255,255,.07)}
+    .ptab{flex:1;padding:.7rem;font-size:.8rem;font-weight:600;background:none;border:none;color:#9ea4b6;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;justify-content:center;gap:.35rem;transition:color .2s}
+    .ptab.active{color:#f0f2ff;border-bottom-color:#6366f1}
+    .ptab svg{width:13px;height:13px}
+    .pbody{flex:1;overflow:hidden;display:flex;flex-direction:column}
+    .tv{flex:1;overflow-y:auto;padding:.75rem;display:none;flex-direction:column;gap:.5rem}
+    .tv.active{display:flex}
+    .pi{display:flex;align-items:center;gap:.65rem;padding:.45rem .5rem;border-radius:9px;background:rgba(255,255,255,.04)}
+    .pi-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:700;color:#fff;flex-shrink:0}
+    .pi-name{font-size:.83rem;font-weight:600;flex:1}
+    .pi-role{font-size:.68rem;color:#9ea4b6;margin-top:.05rem}
+    .chat-msg{padding:.45rem .65rem;border-radius:9px;background:rgba(255,255,255,.05);max-width:88%;word-break:break-word}
+    .chat-msg.mine{align-self:flex-end;background:rgba(99,102,241,.18)}
+    .csender{font-size:.68rem;font-weight:700;color:#818cf8;margin-bottom:.15rem}
+    .ctext{font-size:.82rem;line-height:1.5}
+    .ctime{font-size:.63rem;color:#9ea4b6;margin-top:.15rem}
+    .chat-inp-row{display:flex;gap:.45rem;padding:.65rem}
+    .cinp{flex:1;padding:.55rem .8rem;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#f0f2ff;font-size:.83rem;outline:none;font-family:inherit}
+    .cinp:focus{border-color:#6366f1}
+    .csend{width:36px;height:36px;border-radius:9px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .csend svg{width:15px;height:15px}
+
+    /* Controls */
+    .controls{display:flex;align-items:center;justify-content:center;gap:.65rem;padding:.9rem 1.25rem;background:rgba(0,0,0,.7);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.07);flex-shrink:0;height:72px}
+    .cb{display:flex;flex-direction:column;align-items:center;gap:.26rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:13px;width:54px;height:54px;cursor:pointer;color:#f0f2ff;font-size:.6rem;transition:all .15s;padding:.45rem .25rem;justify-content:center}
+    .cb:hover{background:rgba(255,255,255,.15);transform:translateY(-1px)}
+    .cb.muted{background:rgba(255,92,92,.15);border-color:rgba(255,92,92,.3);color:#ff5c5c}
+    .cb.on{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.4);color:#a5b4fc}
+    .cb svg{width:19px;height:19px}
+    .cb-end{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.4);color:#f87171;min-width:76px;width:auto;padding:0 1rem;flex-direction:row;gap:.45rem;font-size:.8rem;font-weight:700}
+    .cb-end:hover{background:rgba(239,68,68,.32)}
+    .cb-end svg{width:17px;height:17px}
+    .sep{width:1px;height:36px;background:rgba(255,255,255,.1);margin:0 .25rem}
+
+    /* Participant count badge */
+    .pcnt{position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#6366f1;border-radius:50%;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff}
+    .ptab-wrap{position:relative;display:flex;align-items:center;justify-content:center;gap:.35rem}
+
+    /* Demo label */
+    .demo-badge{position:fixed;top:.75rem;right:.75rem;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);color:#fbbf24;font-size:.72rem;font-weight:700;padding:.3rem .75rem;border-radius:8px;z-index:999;display:flex;align-items:center;gap:.4rem}
+    .demo-badge svg{width:13px;height:13px}
+  </style>
+</head>
+<body>
+
+  <div class="demo-badge"><i data-lucide="flask-conical"></i> DEMO MODE</div>
+
+  <div class="top-bar">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <div class="top-brand">
+        <div class="top-brand-icon"><i data-lucide="brain-circuit"></i></div>
+        MindWave
+      </div>
+      <span class="mtitle">Advanced Web Technologies - CS301</span>
+    </div>
+    <div class="top-right">
+      <div class="live-tag"><div class="live-dot"></div>Live</div>
+      <span class="timer" id="timer">00:00</span>
+    </div>
+  </div>
+
+  <div class="meeting-body">
+    <div class="video-area">
+      <div id="videoGrid">
+        <!-- Tile: Faculty (host) with camera -->
+        <div class="vtile speaking">
+          <canvas id="cvFaculty" style="width:100%;height:100%;object-fit:cover;" width="640" height="360"></canvas>
+          <div class="vtile-host">HOST</div>
+          <div class="vtile-label"><span>Dr. Ramesh Kumar</span></div>
+        </div>
+        <!-- Tile: Student 1 cam off -->
+        <div class="vtile">
+          <div class="vtile-av" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">RK</div>
+          <div class="vtile-label"><i data-lucide="mic-off"></i><span>Raj Kumar (You)</span></div>
+        </div>
+        <!-- Tile: Student 2 with camera -->
+        <div class="vtile">
+          <canvas id="cvS2" style="width:100%;height:100%;object-fit:cover;" width="320" height="180"></canvas>
+          <div class="vtile-label"><span>Priya Sharma</span></div>
+        </div>
+        <!-- Tile: Student 3 cam off -->
+        <div class="vtile">
+          <div class="vtile-av" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">AS</div>
+          <div class="vtile-label"><span>Aryan Singh</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side panel -->
+    <div class="side-panel">
+      <div class="ptabs">
+        <button class="ptab active" id="tabChat" onclick="switchTab('chat')">
+          <i data-lucide="message-square"></i> Chat
+        </button>
+        <button class="ptab" id="tabParts" onclick="switchTab('participants')">
+          <div class="ptab-wrap"><i data-lucide="users"></i> People<div class="pcnt">4</div></div>
+        </button>
+      </div>
+      <div class="pbody">
+        <div class="tv active" id="chatView"></div>
+        <div class="tv" id="partsView">
+          <div class="pi"><div class="pi-av" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">DK</div><div><div class="pi-name">Dr. Ramesh Kumar</div><div class="pi-role">Faculty (Host)</div></div></div>
+          <div class="pi"><div class="pi-av" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">RK</div><div><div class="pi-name">Raj Kumar (You)</div><div class="pi-role">Student</div></div></div>
+          <div class="pi"><div class="pi-av" style="background:linear-gradient(135deg,#10b981,#0ea5e9)">PS</div><div><div class="pi-name">Priya Sharma</div><div class="pi-role">Student</div></div></div>
+          <div class="pi"><div class="pi-av" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">AS</div><div><div class="pi-name">Aryan Singh</div><div class="pi-role">Student</div></div></div>
+        </div>
+        <div id="chatInputArea">
+          <div class="chat-inp-row">
+            <input class="cinp" id="cinp" placeholder="Send a message..." autocomplete="off">
+            <button class="csend" id="csend" aria-label="Send message"><i data-lucide="send"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="cb muted" id="btnMic" onclick="toggleCtrl('mic')" aria-label="Toggle microphone">
+      <i data-lucide="mic-off" id="micIco"></i><span>Mic</span>
+    </button>
+    <button class="cb" id="btnCam" onclick="toggleCtrl('cam')" aria-label="Toggle camera">
+      <i data-lucide="video" id="camIco"></i><span>Camera</span>
+    </button>
+    <div class="sep"></div>
+    <button class="cb" id="btnScreen" onclick="toggleCtrl('screen')" aria-label="Share screen">
+      <i data-lucide="monitor" id="screenIco"></i><span>Share</span>
+    </button>
+    <button class="cb" id="btnHand" onclick="toggleCtrl('hand')" aria-label="Raise hand">
+      <i data-lucide="hand" id="handIco"></i><span>Hand</span>
+    </button>
+    <div class="sep"></div>
+    <button class="cb on" id="btnPanel" onclick="toggleCtrl('panel')" aria-label="Toggle panel">
+      <i data-lucide="layout-panel-right" id="panelIco"></i><span>Panel</span>
+    </button>
+    <div class="sep"></div>
+    <button class="cb cb-end" onclick="alert('This is a demo - in the real app this would end the meeting.')" aria-label="Leave meeting">
+      <i data-lucide="phone-off"></i>Leave
+    </button>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Timer
+    let secs=0;
+    setInterval(()=>{
+      secs++;
+      const m=Math.floor(secs/60).toString().padStart(2,'0');
+      const s=(secs%60).toString().padStart(2,'0');
+      document.getElementById('timer').textContent=m+':'+s;
+    },1000);
+
+    // Draw fake cam feed on canvases
+    function drawFakeCam(canvasId, hue, name) {
+      const cv = document.getElementById(canvasId);
+      if(!cv) return;
+      const ctx = cv.getContext('2d');
+      let phase=Math.random()*Math.PI*2;
+      function draw(){
+        const w=cv.width, h=cv.height;
+        const t=Date.now()/1000;
+        const grad = ctx.createLinearGradient(0,0,w,h);
+        grad.addColorStop(0, `hsl(${hue},40%,${12+2*Math.sin(t*0.4+phase)}%)`);
+        grad.addColorStop(1, `hsl(${hue+30},35%,${8+Math.sin(t*0.3)}%)`);
+        ctx.fillStyle=grad;
+        ctx.fillRect(0,0,w,h);
+        ctx.fillStyle=`hsl(${hue},50%,${65+3*Math.sin(t+phase)}%)`;
+        ctx.font=`bold ${Math.min(w,h)*0.28}px Inter,sans-serif`;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.globalAlpha=0.18;
+        ctx.fillText(name[0]||'?', w/2, h/2);
+        ctx.globalAlpha=1;
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+    drawFakeCam('cvFaculty', 260, 'Dr');
+    drawFakeCam('cvS2', 180, 'Priya');
+
+    // Speaking indicator rotation
+    const tiles = document.querySelectorAll('.vtile');
+    let si=0;
+    setInterval(()=>{
+      tiles.forEach(t=>t.classList.remove('speaking'));
+      tiles[si%tiles.length].classList.add('speaking');
+      si++;
+    }, 3500);
+
+    // Controls
+    const state={mic:false,cam:true,screen:false,hand:false,panel:true};
+    function toggleCtrl(key){
+      state[key]=!state[key];
+      const icons={mic:['mic','mic-off'],cam:['video','video-off'],screen:['monitor','monitor-stop'],hand:['hand','hand'],panel:['layout-panel-right','layout-panel-right']};
+      const btns={mic:'btnMic',cam:'btnCam',screen:'btnScreen',hand:'btnHand',panel:'btnPanel'};
+      const icos={mic:'micIco',cam:'camIco',screen:'screenIco',hand:'handIco',panel:'panelIco'};
+      const ico=document.getElementById(icos[key]);
+      const btn=document.getElementById(btns[key]);
+      if(key==='mic'||key==='cam') { btn.classList.toggle('muted',!state[key]); }
+      if(key==='screen'||key==='hand'||key==='panel') { btn.classList.toggle('on',state[key]); }
+      const lk=icons[key];
+      ico.setAttribute('data-lucide', state[key]?lk[0]:lk[1]);
+      lucide.createIcons();
+
+      if(key==='panel'){
+        document.querySelector('.side-panel').style.display=state[key]?'flex':'none';
+      }
+    }
+
+    // Chat
+    const msgs=[
+      {sender:'Dr. Ramesh Kumar',text:'Good morning everyone! Today we discuss REST APIs.',mine:false,delay:1500},
+      {sender:'Priya Sharma',text:'Good morning sir!',mine:false,delay:4000},
+      {sender:'Aryan Singh',text:'Ready sir!',mine:false,delay:6000},
+    ];
+    msgs.forEach(m=>setTimeout(()=>addMsg(m.sender,m.text,m.mine),m.delay));
+
+    function addMsg(sender,text,mine){
+      const view=document.getElementById('chatView');
+      const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      const d=document.createElement('div');
+      d.className='chat-msg'+(mine?' mine':'');
+      d.innerHTML=(mine?'':`<div class="csender">${sender}</div>`)+`<div class="ctext">${text}</div><div class="ctime">${t}</div>`;
+      view.appendChild(d);
+      view.scrollTop=view.scrollHeight;
+    }
+
+    document.getElementById('csend').onclick=()=>{
+      const v=document.getElementById('cinp').value.trim();
+      if(!v) return;
+      addMsg('Raj Kumar (You)',v,true);
+      document.getElementById('cinp').value='';
+    };
+    document.getElementById('cinp').addEventListener('keydown',e=>{
+      if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();document.getElementById('csend').click();}
+    });
+
+    function switchTab(t){
+      document.getElementById('chatView').classList.toggle('active',t==='chat');
+      document.getElementById('partsView').classList.toggle('active',t==='participants');
+      document.getElementById('chatInputArea').style.display=t==='chat'?'block':'none';
+      document.getElementById('tabChat').classList.toggle('active',t==='chat');
+      document.getElementById('tabParts').classList.toggle('active',t==='participants');
+    }
+  </script>
+</body>
+</html>
