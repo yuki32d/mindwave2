@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Login – Mindwave</title>
     <style>
         :root {
@@ -525,6 +526,13 @@
                         localStorage.setItem('role', data.user.role);
                         localStorage.setItem('email', data.user.email);
                         localStorage.setItem('token', data.token || 'authenticated');
+                        // Save name fields so all pages can show the student's real name
+                        const fullName = data.user.name || data.user.fullName || '';
+                        const firstName = data.user.firstName || fullName.split(' ')[0] || '';
+                        const lastName = data.user.lastName || fullName.split(' ').slice(1).join(' ') || '';
+                        localStorage.setItem('firstName', firstName);
+                        localStorage.setItem('lastName', lastName);
+                        localStorage.setItem('name', fullName || firstName);
                     }
                     // Redirect to student homepage
                     window.location.href = '../homepage.html';
@@ -537,6 +545,7 @@
                 errorMessage.classList.add('show');
             }
         });
-    </script></body>
+    </script>
+</body>
 
 </html>
