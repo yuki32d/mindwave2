@@ -3,463 +3,1077 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goals & Progress - MindWave</title>
-    <link rel="stylesheet" href="3d-depth-design.css">
+    <title>Goals &amp; Progress — MindWave</title>
+    <meta name="description" content="Set academic targets, track milestones, and achieve your goals in MindWave.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script src="theme-init.js"></script>
+    <script src="sidebar.js"></script>
 
     <style>
-        .goals-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        /* ── Goal cards ────────────────────────────────────────── */
+        .goals-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        /* Add Goal Button */
+        .goals-title-block h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 0 0 4px;
+            color: var(--text);
+        }
+
+        .goals-title-block p {
+            font-size: .85rem;
+            color: var(--muted);
+            margin: 0;
+        }
+
         .add-goal-btn {
-            padding: 14px 28px;
-            border-radius: 12px;
-            border: none;
-            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 32px;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            font-weight: 600;
+            font-size: .88rem;
+            cursor: pointer;
+            transition: opacity .2s, transform .2s;
+            font-family: inherit;
         }
 
         .add-goal-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 24px rgba(77, 160, 255, 0.4);
+            opacity: .9;
+            transform: translateY(-1px);
         }
 
-        /* Goals Grid */
+        .add-goal-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Empty state */
+        .goals-empty {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--muted);
+        }
+
+        .goals-empty svg {
+            width: 48px;
+            height: 48px;
+            opacity: .3;
+            margin-bottom: 16px;
+        }
+
+        .goals-empty h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: var(--text);
+        }
+
+        .goals-empty p {
+            font-size: .85rem;
+            margin: 0;
+        }
+
+        /* Goal card */
         .goals-grid {
             display: grid;
-            gap: 24px;
-            margin-bottom: 40px;
+            gap: 20px;
         }
 
         .goal-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--card, rgba(255, 255, 255, .03));
+            border: 1px solid var(--border);
             border-radius: 20px;
-            padding: 28px;
-            transition: all 0.3s;
+            padding: 24px 26px;
+            transition: border-color .2s, transform .2s;
         }
 
         .goal-card:hover {
-            border-color: rgba(77, 160, 255, 0.5);
-            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(99, 102, 241, .35);
+            transform: translateY(-1px);
         }
 
-        .goal-header {
+        .goal-card.completed {
+            border-color: rgba(34, 197, 94, .3);
+            background: rgba(34, 197, 94, .03);
+        }
+
+        .goal-top {
             display: flex;
             justify-content: space-between;
-            align-items: start;
-            margin-bottom: 20px;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 18px;
         }
 
-        .goal-title {
-            font-size: 20px;
+        .goal-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .goal-name {
+            font-size: 1.05rem;
             font-weight: 700;
-            margin-bottom: 8px;
+            color: var(--text);
+            margin-bottom: 4px;
         }
 
-        .goal-target {
-            font-size: 14px;
-            color: #9ea4b6;
+        .goal-sub {
+            font-size: .78rem;
+            color: var(--muted);
+        }
+
+        .goal-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .badge-gpa {
+            background: rgba(99, 102, 241, .12);
+            color: #a5b4fc;
+        }
+
+        .badge-grade {
+            background: rgba(34, 197, 94, .12);
+            color: #86efac;
+        }
+
+        .badge-attendance {
+            background: rgba(245, 158, 11, .12);
+            color: #fcd34d;
+        }
+
+        .badge-completion {
+            background: rgba(239, 68, 68, .12);
+            color: #fca5a5;
+        }
+
+        .badge-done {
+            background: rgba(34, 197, 94, .18);
+            color: #4ade80;
         }
 
         .goal-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
+            flex-shrink: 0;
         }
 
-        .action-btn {
+        .icon-btn {
             width: 32px;
             height: 32px;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
             cursor: pointer;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all .2s;
+            font-family: inherit;
         }
 
-        .action-btn:hover {
-            background: rgba(77, 160, 255, 0.2);
-            border-color: rgba(77, 160, 255, 0.5);
+        .icon-btn svg {
+            width: 14px;
+            height: 14px;
         }
 
-        /* Progress Bar */
-        .progress-section {
-            margin-bottom: 20px;
+        .icon-btn:hover {
+            background: rgba(99, 102, 241, .12);
+            border-color: rgba(99, 102, 241, .4);
+            color: #a5b4fc;
         }
 
-        .progress-header {
+        .icon-btn.del:hover {
+            background: rgba(239, 68, 68, .12);
+            border-color: rgba(239, 68, 68, .4);
+            color: #f87171;
+        }
+
+        /* Progress bar */
+        .progress-lbl {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 14px;
+            font-size: .78rem;
+            margin-bottom: 8px;
+            color: var(--muted);
         }
 
-        .progress-current {
-            font-weight: 600;
-            color: #4da0ff;
+        .progress-lbl strong {
+            color: #a5b4fc;
+            font-weight: 700;
         }
 
-        .progress-bar {
+        .prog-bar {
             width: 100%;
-            height: 12px;
-            background: rgba(255, 255, 255, 0.1);
+            height: 10px;
+            background: rgba(255, 255, 255, .07);
             border-radius: 999px;
             overflow: hidden;
-            position: relative;
         }
 
-        .progress-fill {
+        .prog-fill {
             height: 100%;
-            background: linear-gradient(90deg, #4da0ff 0%, #a78bfa 100%);
             border-radius: 999px;
-            transition: width 0.6s ease;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            transition: width .7s cubic-bezier(.4, 0, .2, 1);
             position: relative;
+            overflow: hidden;
         }
 
-        .progress-fill::after {
+        .prog-fill::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .25), transparent);
             animation: shimmer 2s infinite;
         }
 
         @keyframes shimmer {
             0% {
-                transform: translateX(-100%);
+                transform: translateX(-100%)
             }
 
             100% {
-                transform: translateX(100%);
+                transform: translateX(100%)
             }
         }
 
-        .progress-fill.complete {
-            background: linear-gradient(90deg, #00ff88 0%, #00d4ff 100%);
+        .prog-fill.done {
+            background: linear-gradient(90deg, #22c55e, #10b981);
         }
 
-        /* Goal Stats */
+        /* Stats row */
         .goal-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 18px;
         }
 
-        .stat-item {
+        .gstat {
             text-align: center;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 8px;
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
             border-radius: 12px;
         }
 
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #4da0ff;
-            margin-bottom: 4px;
+        .gstat-val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #6366f1;
+            margin-bottom: 3px;
         }
 
-        .stat-label {
-            font-size: 11px;
-            color: #9ea4b6;
+        .gstat-val.green {
+            color: #22c55e;
+        }
+
+        .gstat-val.amber {
+            color: #f59e0b;
+        }
+
+        .gstat-lbl {
+            font-size: .68rem;
             text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--muted);
+            font-weight: 600;
         }
 
-        /* Milestone Celebration */
-        .milestone-card {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 32px;
-            text-align: center;
+        /* ── Modal ─────────────────────────────────────────────── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .55);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
         }
 
-        .milestone-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
+        .modal-overlay.open {
+            display: flex;
+            animation: fadeIn .18s ease;
         }
 
-        .milestone-title {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .milestone-desc {
-            font-size: 14px;
-            color: #9ea4b6;
-        }
-
-        @media (max-width: 768px) {
-            .goal-header {
-                flex-direction: column;
-                gap: 16px;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(.96)
             }
 
-            .goal-stats {
-                grid-template-columns: repeat(2, 1fr);
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+
+        .modal-box {
+            background: var(--card, #1a1d2e);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, .5);
+        }
+
+        .modal-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-hdr h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, .06);
+        }
+
+        .modal-close svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 1.1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: .78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: .9rem;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color .2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            border-color: rgba(99, 102, 241, .5);
+        }
+
+        .form-select option {
+            background: #1a1d2e;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: .88rem;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, .05);
+        }
+
+        .btn-save {
+            flex: 2;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: .88rem;
+            cursor: pointer;
+            transition: opacity .2s;
+        }
+
+        .btn-save:hover {
+            opacity: .88;
+        }
+
+        /* ── Celebration banner ─────────────────────────────────── */
+        .celebrate-banner {
+            background: linear-gradient(135deg, rgba(34, 197, 94, .12), rgba(16, 185, 129, .12));
+            border: 1px solid rgba(34, 197, 94, .3);
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin-bottom: 24px;
+            display: none;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .celebrate-banner.show {
+            display: flex;
+        }
+
+        .celebrate-icon {
+            font-size: 2rem;
+        }
+
+        .celebrate-text h3 {
+            margin: 0 0 4px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #4ade80;
+        }
+
+        .celebrate-text p {
+            margin: 0;
+            font-size: .8rem;
+            color: var(--muted);
+        }
+
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .1) 50%, rgba(255, 255, 255, .05) 75%);
+            background-size: 200% 100%;
+            animation: skelAnim 1.4s infinite;
+            border-radius: 8px;
+            height: 20px;
+        }
+
+        @keyframes skelAnim {
+            0% {
+                background-position: 200% 0
+            }
+
+            100% {
+                background-position: -200% 0
             }
         }
     </style>
 </head>
 
-<body data-theme="dark">
-    <div class="page-shell">
-        <header class="hero">
-            <a class="ghost-link" href="student-performance.html">? Back to Performance</a>
-            <p class="eyebrow">TRACKING</p>
-            <h1>Goals & Progress</h1>
-            <p class="lede">Set targets, track milestones, and achieve your academic goals</p>
-        </header>
+<body>
+    <div class="mw-app" id="mwApp">
 
-        <div class="goals-container">
-            <!-- Milestone Celebration -->
-            <div class="milestone-card" style="display: none;" id="milestoneCard">
-                <div class="milestone-icon">??</div>
-                <div class="milestone-title">Goal Achieved!</div>
-                <div class="milestone-desc">Congratulations! You've reached your target.</div>
+        <!-- SIDEBAR -->
+        <aside class="mw-sidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
+            </div>
+            <div class="mw-sidebar-nav">
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="layout-dashboard"></i></span> Dashboard</a>
+                    <a href="student-courses.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="book-open"></i></span> My Courses</a>
+                    <a href="student-timetable.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="calendar-days"></i></span> Timetable</a>
+                    <a href="student-performance.html" class="mw-nav-item active"><span class="mw-nav-icon"><i
+                                data-lucide="bar-chart-2"></i></span> Performance</a>
+                    <a href="student-leaderboard.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="trophy"></i></span> Leaderboard</a>
+                </nav>
+                <div class="mw-divider"></div>
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="gamepad-2"></i></span> Play Games</a>
+                    <a href="student-community.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="users"></i></span> Community</a>
+                    <a href="student-achievements.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="award"></i></span> Achievements</a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="megaphone"></i></span> Events</a>
+                </nav>
+                <div class="mw-divider"></div>
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="terminal"></i></span> Code Practice</a>
+                    <a href="student-ai-tutor.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="bot"></i></span> AI Tutor</a>
+                    <a href="student-live-meeting.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="video"></i></span> Web Conf</a>
+                    <a href="student-reports.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="file-text"></i></span> Reports</a>
+                    <a href="student-settings.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="settings"></i></span> Settings</a>
+                </nav>
+                <div class="mw-divider"></div>
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
+            </div>
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                    <span class="mw-user-more">⋯</span>
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
+                        </div>
+                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
+                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
+                        <a href="student-notifications.html"><i data-lucide="bell"></i> Notifications</a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="mw-main">
+            <!-- TOPBAR -->
+            <header class="mw-topbar">
+                <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="mw-breadcrumb">Performance / <span>Goals &amp; Progress</span></div>
+                <div class="mw-topbar-actions">
+                    <div class="mw-notif-wrap">
+                        <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="mw-notif-dot hidden" id="notificationBadge"></span>
+                        </div>
+                        <div class="mw-notif-dropdown" id="notificationDropdown"></div>
+                    </div>
+                    <div class="mw-icon-btn" id="settingsBtn" title="Settings"><i data-lucide="settings"></i></div>
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <div class="mw-content">
+
+                <!-- Celebration banner -->
+                <div class="celebrate-banner" id="celebrateBanner">
+                    <div class="celebrate-icon">🎉</div>
+                    <div class="celebrate-text">
+                        <h3>Goal Achieved!</h3>
+                        <p id="celebrateMsg">You've reached one of your targets. Keep going!</p>
+                    </div>
+                </div>
+
+                <!-- Page header + Add button -->
+                <div class="goals-header">
+                    <div class="goals-title-block">
+                        <h1>Goals &amp; Progress</h1>
+                        <p>Set targets, track milestones, and achieve your academic goals</p>
+                    </div>
+                    <button class="add-goal-btn" onclick="openModal()">
+                        <i data-lucide="plus"></i> Add New Goal
+                    </button>
+                </div>
+
+                <!-- Goals list (rendered by JS) -->
+                <div class="goals-grid" id="goalsGrid">
+                    <!-- skeleton while loading -->
+                    <div class="goal-card" id="loadingSkeleton">
+                        <div style="display:flex;gap:12px;margin-bottom:16px">
+                            <div class="skeleton" style="flex:1;height:22px;border-radius:6px"></div>
+                            <div class="skeleton" style="width:80px;height:22px;border-radius:6px"></div>
+                        </div>
+                        <div class="skeleton" style="height:10px;border-radius:999px;margin-bottom:8px"></div>
+                        <div class="skeleton" style="height:10px;border-radius:999px;width:60%"></div>
+                    </div>
+                </div>
+
+            </div><!-- /mw-content -->
+        </div><!-- /mw-main -->
+    </div><!-- /mw-app -->
+
+    <!-- ── GOAL MODAL ──────────────────────────────────────── -->
+    <div class="modal-overlay" id="goalModal">
+        <div class="modal-box">
+            <div class="modal-hdr">
+                <h2 id="modalTitle">New Goal</h2>
+                <button class="modal-close" onclick="closeModal()"><i data-lucide="x"></i></button>
             </div>
 
-            <!-- Add Goal Button -->
-            <button class="add-goal-btn" onclick="addNewGoal()">
-                <span>?</span>
-                <span>Add New Goal</span>
-            </button>
+            <div class="form-group">
+                <label class="form-label">Goal Title</label>
+                <input class="form-input" id="fTitle" type="text" placeholder="e.g. Achieve A in Mathematics">
+            </div>
 
-            <!-- Goals List -->
-            <div class="goals-grid" id="goalsGrid">
-                <!-- Overall GPA Goal -->
-                <div class="goal-card">
-                    <div class="goal-header">
-                        <div>
-                            <div class="goal-title">Overall GPA Target</div>
-                            <div class="goal-target">Target: 3.8 / 4.0</div>
-                        </div>
-                        <div class="goal-actions">
-                            <button class="action-btn" onclick="editGoal('gpa')">??</button>
-                            <button class="action-btn" onclick="deleteGoal('gpa')">???</button>
-                        </div>
-                    </div>
-                    <div class="progress-section">
-                        <div class="progress-header">
-                            <span>Current Progress</span>
-                            <span class="progress-current">3.6 / 3.8 (95%)</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 95%"></div>
-                        </div>
-                    </div>
-                    <div class="goal-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">3.6</div>
-                            <div class="stat-label">Current</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">0.2</div>
-                            <div class="stat-label">To Go</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">2w</div>
-                            <div class="stat-label">Time Left</div>
-                        </div>
-                    </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Goal Type</label>
+                    <select class="form-select" id="fType" onchange="onTypeChange()">
+                        <option value="gpa">GPA</option>
+                        <option value="grade">Subject Grade</option>
+                        <option value="attendance">Attendance</option>
+                        <option value="completion">Completion Rate</option>
+                    </select>
                 </div>
+                <div class="form-group" id="subjectGroup" style="display:none">
+                    <label class="form-label">Subject</label>
+                    <input class="form-input" id="fSubject" type="text" placeholder="e.g. Mathematics">
+                </div>
+            </div>
 
-                <!-- Mathematics Goal -->
-                <div class="goal-card">
-                    <div class="goal-header">
-                        <div>
-                            <div class="goal-title">Mathematics Grade</div>
-                            <div class="goal-target">Target: 95% by End of Semester</div>
-                        </div>
-                        <div class="goal-actions">
-                            <button class="action-btn" onclick="editGoal('math')">??</button>
-                            <button class="action-btn" onclick="deleteGoal('math')">???</button>
-                        </div>
-                    </div>
-                    <div class="progress-section">
-                        <div class="progress-header">
-                            <span>Current Progress</span>
-                            <span class="progress-current">92 / 95 (97%)</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 97%"></div>
-                        </div>
-                    </div>
-                    <div class="goal-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">92%</div>
-                            <div class="stat-label">Current</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">3%</div>
-                            <div class="stat-label">To Go</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">1m</div>
-                            <div class="stat-label">Time Left</div>
-                        </div>
-                    </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" id="targetLabel">Target Value</label>
+                    <input class="form-input" id="fTarget" type="number" step="0.1" min="0" max="100"
+                        placeholder="e.g. 3.8">
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Deadline (optional)</label>
+                    <input class="form-input" id="fDeadline" type="date">
+                </div>
+            </div>
 
-                <!-- Attendance Goal -->
-                <div class="goal-card">
-                    <div class="goal-header">
-                        <div>
-                            <div class="goal-title">Attendance Rate</div>
-                            <div class="goal-target">Target: 95% Attendance</div>
-                        </div>
-                        <div class="goal-actions">
-                            <button class="action-btn" onclick="editGoal('attendance')">??</button>
-                            <button class="action-btn" onclick="deleteGoal('attendance')">???</button>
-                        </div>
-                    </div>
-                    <div class="progress-section">
-                        <div class="progress-header">
-                            <span>Current Progress</span>
-                            <span class="progress-current">96 / 95 (101%)</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill complete" style="width: 100%"></div>
-                        </div>
-                    </div>
-                    <div class="goal-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">96%</div>
-                            <div class="stat-label">Current</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">?</div>
-                            <div class="stat-label">Achieved</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">+50</div>
-                            <div class="stat-label">XP Earned</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Assignment Completion Goal -->
-                <div class="goal-card">
-                    <div class="goal-header">
-                        <div>
-                            <div class="goal-title">Assignment Completion</div>
-                            <div class="goal-target">Target: 100% On-Time Submission</div>
-                        </div>
-                        <div class="goal-actions">
-                            <button class="action-btn" onclick="editGoal('assignments')">??</button>
-                            <button class="action-btn" onclick="deleteGoal('assignments')">???</button>
-                        </div>
-                    </div>
-                    <div class="progress-section">
-                        <div class="progress-header">
-                            <span>Current Progress</span>
-                            <span class="progress-current">88 / 100 (88%)</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 88%"></div>
-                        </div>
-                    </div>
-                    <div class="goal-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">88%</div>
-                            <div class="stat-label">Current</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">12%</div>
-                            <div class="stat-label">To Go</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">Ongoing</div>
-                            <div class="stat-label">Status</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-save" id="saveBtn" onclick="saveGoal()">
+                    <i data-lucide="check"></i> Save Goal
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- LOGOUT MODAL -->
+    <div id="logoutModal" class="mw-logout-overlay">
+        <div class="mw-logout-modal">
+            <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
+            <h3 class="mw-logout-title">Sign out?</h3>
+            <p class="mw-logout-sub">You'll need to log back in to access your dashboard.</p>
+            <div class="mw-logout-actions">
+                <button class="mw-logout-cancel"
+                    onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
+                <button class="mw-logout-confirm" onclick="doLogout()"><i data-lucide="log-out"></i> Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .mw-logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mw-logout-overlay.active {
+            display: flex;
+        }
+
+        .mw-logout-modal {
+            background: var(--card, #1c1c2e);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: .75rem;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, .5);
+        }
+
+        .mw-logout-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 92, 92, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff5c5c;
+        }
+
+        .mw-logout-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .mw-logout-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 .5rem;
+            color: var(--text, #fff);
+        }
+
+        .mw-logout-sub {
+            font-size: .875rem;
+            color: var(--text-muted, #aaa);
+            margin: 0 0 2rem;
+            line-height: 1.5;
+        }
+
+        .mw-logout-actions {
+            display: flex;
+            gap: .75rem;
+            width: 100%;
+        }
+
+        .mw-logout-cancel,
+        .mw-logout-confirm {
+            flex: 1;
+            padding: .75rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: .9rem;
+            cursor: pointer;
+            border: none;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .mw-logout-cancel {
+            background: rgba(255, 255, 255, .06);
+            color: var(--text, #fff);
+        }
+
+        .mw-logout-confirm {
+            background: #ff5c5c;
+            color: #fff;
+        }
+    </style>
+
     <script>
-        // Authentication check
-        const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = 'marketing-site/student-login.html';
-        }
+        const TOKEN = localStorage.getItem('token') || localStorage.getItem('mindwave_token');
+        if (!TOKEN) window.location.replace('marketing-site/student-login.html');
 
-        // Add new goal
-        function addNewGoal() {
-            // TODO: Show modal to create new goal
-            alert('Add New Goal feature - Coming soon!');
-        }
+        const API = window.location.hostname === 'localhost' ? 'http://localhost:8081' : '';
+        const H = { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' };
 
-        // Edit goal
-        function editGoal(goalId) {
-            // TODO: Show modal to edit goal
-            console.log('Edit goal:', goalId);
-        }
+        let goals = [];        // live data from MongoDB
+        let editingId = null;  // null = create, string = edit existing
 
-        // Delete goal
-        function deleteGoal(goalId) {
-            if (confirm('Are you sure you want to delete this goal?')) {
-                console.log('Delete goal:', goalId);
-                // TODO: Delete goal via API
+        // ── Profile init ─────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const fn = localStorage.getItem('firstName') || '';
+            const ln = localStorage.getItem('lastName') || '';
+            const name = [fn, ln].filter(Boolean).join(' ') || 'Student';
+            const initials = ((fn[0] || '') + (ln[0] || '')).toUpperCase() || 'ST';
+
+            document.querySelectorAll('#sidebarUserName,#dropdownUserName').forEach(el => el && (el.textContent = fn || name));
+            const av = document.getElementById('avatarInitials'); if (av) av.textContent = initials;
+
+            const pt = document.getElementById('profileToggle'), pd = document.getElementById('profileDropdown');
+            if (pt && pd) {
+                pt.addEventListener('click', () => pd.style.display = pd.style.display === 'flex' ? 'none' : 'flex');
+                document.addEventListener('click', e => { if (!pt.contains(e.target) && !pd.contains(e.target)) pd.style.display = 'none'; });
             }
+            const sob = document.getElementById('signOutBtn');
+            if (sob) sob.addEventListener('click', () => document.getElementById('logoutModal').classList.add('active'));
+
+            const tt = document.getElementById('themeToggle');
+            if (tt) tt.addEventListener('click', () => {
+                const d = document.documentElement.getAttribute('data-theme') === 'dark';
+                document.documentElement.setAttribute('data-theme', d ? 'light' : 'dark');
+                localStorage.setItem('mw_theme', d ? 'light' : 'dark');
+            });
+
+            lucide.createIcons();
+            loadGoals();
+        });
+
+        function doLogout() { ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role'].forEach(k => localStorage.removeItem(k)); window.location.replace('marketing-site/student-login.html'); }
+
+        // ── Helpers ───────────────────────────────────────────────
+        function typeLabel(t) {
+            return { gpa: 'GPA', grade: 'Subject Grade', attendance: 'Attendance', completion: 'Completion' }[t] || t;
+        }
+        function typeBadgeClass(t) {
+            return { gpa: 'badge-gpa', grade: 'badge-grade', attendance: 'badge-attendance', completion: 'badge-completion' }[t] || 'badge-gpa';
+        }
+        function typeIcon(t) {
+            return { gpa: 'target', grade: 'book-open', attendance: 'calendar-check', completion: 'check-circle-2' }[t] || 'target';
+        }
+        function fmtTimeLeft(deadline) {
+            if (!deadline) return 'No deadline';
+            const days = Math.ceil((new Date(deadline) - Date.now()) / 86400000);
+            if (days < 0) return 'Overdue';
+            if (days === 0) return 'Today';
+            if (days < 7) return days + 'd';
+            if (days < 30) return Math.ceil(days / 7) + 'w';
+            return Math.ceil(days / 30) + 'mo';
         }
 
-        // Load goals from API
+        function goalCard(g) {
+            const pct = Math.min(100, g.progress || 0);
+            const done = g.completed || pct >= 100;
+            const toGo = Math.max(0, (g.target || 0) - (g.current || 0));
+            const timeLeft = g.stats?.timeLeft != null ? (g.stats.timeLeft < 0 ? 'Overdue' : g.stats.timeLeft + 'd') : fmtTimeLeft(g.deadline);
+
+            return `
+        <div class="goal-card ${done ? 'completed' : ''}" id="gc-${g.id}">
+          <div class="goal-top">
+            <div class="goal-meta">
+              <div class="goal-name">${g.title}</div>
+              <div class="goal-sub">Target: ${g.target}${g.type === 'gpa' ? ' / 4.0' : '%'} ${g.subject ? '· ' + g.subject : ''}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="goal-badge ${done ? 'badge-done' : typeBadgeClass(g.type)}">
+                <i data-lucide="${done ? 'check-circle-2' : typeIcon(g.type)}" style="width:10px;height:10px;"></i>
+                ${done ? 'Achieved' : typeLabel(g.type)}
+              </span>
+              <div class="goal-actions">
+                <button class="icon-btn" onclick="openModal('${g.id}')" title="Edit"><i data-lucide="pencil"></i></button>
+                <button class="icon-btn del" onclick="deleteGoal('${g.id}')" title="Delete"><i data-lucide="trash-2"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="progress-lbl">
+              <span>Current Progress</span>
+              <strong>${g.current ?? 0} / ${g.target} (${pct}%)</strong>
+            </div>
+            <div class="prog-bar">
+              <div class="prog-fill ${done ? 'done' : ''}" style="width:${pct}%"></div>
+            </div>
+          </div>
+
+          <div class="goal-stats">
+            <div class="gstat">
+              <div class="gstat-val">${g.current ?? '—'}</div>
+              <div class="gstat-lbl">Current</div>
+            </div>
+            <div class="gstat">
+              <div class="gstat-val ${done ? 'green' : 'amber'}">${done ? '✓' : toGo.toFixed(toGo < 1 ? 1 : 0)}</div>
+              <div class="gstat-lbl">${done ? 'Achieved' : 'To Go'}</div>
+            </div>
+            <div class="gstat">
+              <div class="gstat-val">${timeLeft}</div>
+              <div class="gstat-lbl">Time Left</div>
+            </div>
+          </div>
+        </div>`;
+        }
+
+        // ── Load goals from API ───────────────────────────────────
         async function loadGoals() {
             try {
-                const API_BASE = window.location.hostname === 'localhost'
-                    ? 'http://localhost:8081'
-                    : 'https://mindwave2.onrender.com';
-
-                const response = await fetch(`${API_BASE}/api/student/goals`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    // Update goals with real data
-                    console.log('Goals data:', data);
-                } else {
-                    console.log('Using placeholder goals');
-                }
-            } catch (error) {
-                console.error('Error loading goals:', error);
+                const r = await fetch(API + '/api/student/goals', { headers: H });
+                if (!r.ok) throw new Error('api');
+                goals = await r.json();
+                renderGoals();
+            } catch (e) {
+                // Show empty state — don't fake data
+                goals = [];
+                renderGoals();
             }
         }
 
-        // Initialize
-        loadGoals();
+        function renderGoals() {
+            const grid = document.getElementById('goalsGrid');
+            if (!goals.length) {
+                grid.innerHTML = `
+          <div class="goals-empty">
+            <div><i data-lucide="target"></i></div>
+            <h3>No goals yet</h3>
+            <p>Click <strong>Add New Goal</strong> to set your first academic target.</p>
+          </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            // Show celebration if any goal just completed
+            const achieved = goals.filter(g => g.completed || (g.progress || 0) >= 100);
+            if (achieved.length) {
+                document.getElementById('celebrateBanner').classList.add('show');
+                document.getElementById('celebrateMsg').textContent =
+                    `You've achieved ${achieved.length} goal${achieved.length > 1 ? 's' : ''}! Keep up the great work 🚀`;
+            }
+
+            grid.innerHTML = goals.map(goalCard).join('');
+            lucide.createIcons();
+        }
+
+        // ── Modal ─────────────────────────────────────────────────
+        function openModal(goalId) {
+            editingId = goalId || null;
+            const modal = document.getElementById('goalModal');
+            document.getElementById('modalTitle').textContent = editingId ? 'Edit Goal' : 'New Goal';
+
+            if (editingId) {
+                const g = goals.find(x => x.id === goalId);
+                if (g) {
+                    document.getElementById('fTitle').value = g.title || '';
+                    document.getElementById('fType').value = g.type || 'gpa';
+                    document.getElementById('fSubject').value = g.subject || '';
+                    document.getElementById('fTarget').value = g.target || '';
+                    document.getElementById('fDeadline').value = g.deadline ? g.deadline.split('T')[0] : '';
+                }
+            } else {
+                document.getElementById('fTitle').value = '';
+                document.getElementById('fType').value = 'gpa';
+                document.getElementById('fSubject').value = '';
+                document.getElementById('fTarget').value = '';
+                document.getElementById('fDeadline').value = '';
+            }
+
+            onTypeChange();
+            modal.classList.add('open');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('goalModal').classList.remove('open');
+            editingId = null;
+        }
+
+        function onTypeChange() {
+            const t = document.getElementById('fType').value;
+            const sg = document.getElementById('subjectGroup');
+            const tl = document.getElementById('targetLabel');
+            sg.style.display = t === 'grade' ? '' : 'none';
+            tl.textContent = t === 'gpa' ? 'Target GPA (0–4.0)' : 'Target (%)';
+            document.getElementById('fTarget').max = t === 'gpa' ? 4 : 100;
+            document.getElementById('fTarget').step = t === 'gpa' ? 0.1 : 1;
+            document.getElementById('fTarget').placeholder = t === 'gpa' ? 'e.g. 3.8' : 'e.g. 90';
+        }
+
+        async function saveGoal() {
+            const title = document.getElementById('fTitle').value.trim();
+            const type = document.getElementById('fType').value;
+            const subject = document.getElementById('fSubject').value.trim();
+            const target = parseFloat(document.getElementById('fTarget').value);
+            const deadline = document.getElementById('fDeadline').value;
+
+            if (!title || isNaN(target)) {
+                document.getElementById('fTitle').style.borderColor = title ? '' : '#f87171';
+                document.getElementById('fTarget').style.borderColor = isNaN(target) ? '#f87171' : '';
+                return;
+            }
+
+            const body = { title, type, target, ...(subject && { subject }), ...(deadline && { deadline }) };
+
+            const btn = document.getElementById('saveBtn');
+            btn.textContent = 'Saving…';
+            btn.disabled = true;
+
+            try {
+                let r;
+                if (editingId) {
+                    r = await fetch(API + '/api/student/goals/' + editingId, { method: 'PUT', headers: H, body: JSON.stringify(body) });
+                } else {
+                    r = await fetch(API + '/api/student/goals', { method: 'POST', headers: H, body: JSON.stringify(body) });
+                }
+                if (!r.ok) throw new Error('save failed');
+                closeModal();
+                await loadGoals();
+            } catch (e) {
+                alert('Failed to save goal. Please try again.');
+            } finally {
+                btn.innerHTML = '<i data-lucide="check"></i> Save Goal';
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        }
+
+        async function deleteGoal(goalId) {
+            if (!confirm('Delete this goal? This cannot be undone.')) return;
+            try {
+                const r = await fetch(API + '/api/student/goals/' + goalId, { method: 'DELETE', headers: H });
+                if (!r.ok) throw new Error('delete failed');
+                await loadGoals();
+            } catch (e) {
+                alert('Failed to delete goal.');
+            }
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('goalModal').addEventListener('click', e => {
+            if (e.target === e.currentTarget) closeModal();
+        });
     </script>
+
+    <script src="auth-guard.js"></script>
 </body>
 
 </html>
