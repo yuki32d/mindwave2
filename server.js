@@ -33,6 +33,8 @@ import pkg from 'agora-access-token';
 const { RtcTokenBuilder, RtcRole } = pkg;
 // Socket.IO for real-time chat
 import { Server } from 'socket.io';
+// LiveKit Video Conferencing
+import { AccessToken } from 'livekit-server-sdk';
 // Meeting Server removed - using Jitsi Meet instead
 // pdf-parse will be imported dynamically in the endpoint
 // Stripe will be imported conditionally based on environment variable
@@ -772,19 +774,7 @@ const projectSubmissionSchema = new mongoose.Schema({
 
 const ProjectSubmission = mongoose.model("ProjectSubmission", projectSubmissionSchema);
 
-// Schema for live meeting codes
-const meetingSchema = new mongoose.Schema({
-  code: { type: String, required: true, unique: true, length: 6 },
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  createdByName: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  expiresAt: { type: Date },
-  isActive: { type: Boolean, default: true },
-  facultyJoined: { type: Boolean, default: false }, // Track if faculty has joined
-  facultyJoinedAt: { type: Date } // When faculty joined
-});
-
-const Meeting = mongoose.model('Meeting', meetingSchema);
+// Meeting schema and model defined later in the LiveKit section
 
 // CONFIGURABLE: Super Admin Email (can be changed for different HODs)
 const SUPER_ADMIN_EMAIL = "rajkumarw88d@gmail.com"; // Change this to the HOD's email
@@ -11105,7 +11095,127 @@ app.post('/api/ai-tutor/chat', async (req, res) => {
   }
 });
 
+// ============================================
+// LIVEKIT VIDEO CONFERENCING
+// ============================================
+
+const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY || '';
+const LIVEKIT_API_SECRET = process.env.LIVEKIT_API_SECRET || '';
+const LIVEKIT_WS_URL = process.env.LIVEKIT_WS_URL || 'wss://mindwave-rcbmrzha.livekit.cloud';
+
+const meetingSchema = new mongoose.Schema({
+  code: { type: String, required: true, unique: true },
+  roomName: { type: String, required: true },
+  title: { type: String, default: 'MindWave Class' },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  active: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now, expires: 86400 }
+});
+const Meeting = mongoose.model('Meeting', meetingSchema);
+
+// ── Helper: extract user from cookie or Authorization header ──────────────────
+function verifyAnyToken(req) {
+  const cookieTok = req.cookies?.mindwave_token;
+  const bearerTok = req.headers.authorization?.startsWith('Bearer ')
+    ? req.headers.authorization.split(' ')[1] : null;
+  const raw = cookieTok || bearerTok;
+  if (!raw) return null;
+  try { return jwt.verify(raw, JWT_SECRET); } catch { return null; }
+}
+
+// ── POST /api/meeting/create  (faculty creates a room) ───────────────────────
+app.post('/api/meeting/create', async (req, res) => {
+  try {
+    const user = verifyAnyToken(req);
+    if (!user) return res.status(401).json({ ok: false, message: 'Unauthorized' });
+    if (!LIVEKIT_API_KEY || !LIVEKIT_API_SECRET)
+      return res.status(500).json({ ok: false, message: 'LiveKit not configured' });
+
+    const { title } = req.body || {};
+    let code, exists;
+    do {
+      code = Math.floor(100000 + Math.random() * 900000).toString();
+      exists = await Meeting.findOne({ code, active: true });
+    } while (exists);
+
+    const roomName = `mw-${code}`;
+    await new Meeting({ code, roomName, title: title || 'MindWave Class', createdBy: user.sub }).save();
+
+    const dbUser = await User.findById(user.sub).lean();
+    const name = dbUser?.displayName || dbUser?.name || 'Faculty';
+    const email = dbUser?.email || user.email || '';
+
+    const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
+      identity: `faculty-${user.sub}`, name,
+      metadata: JSON.stringify({ role: 'faculty', email })
+    });
+    at.addGrant({ roomJoin: true, room: roomName, roomAdmin: true, canPublish: true, canSubscribe: true, canPublishData: true });
+
+    const token = await at.toJwt();
+    res.json({ ok: true, code, token, wsUrl: LIVEKIT_WS_URL, roomName, displayName: name });
+  } catch (err) {
+    console.error('Meeting create error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// ── POST /api/meeting/token  (student joins with code) ───────────────────────
+app.post('/api/meeting/token', async (req, res) => {
+  try {
+    const user = verifyAnyToken(req);
+    if (!user) return res.status(401).json({ ok: false, message: 'Unauthorized' });
+    if (!LIVEKIT_API_KEY || !LIVEKIT_API_SECRET)
+      return res.status(500).json({ ok: false, message: 'LiveKit not configured' });
+
+    const { code } = req.body || {};
+    if (!code || !/^\d{6}$/.test(code))
+      return res.status(400).json({ ok: false, message: 'Invalid meeting code' });
+
+    const meeting = await Meeting.findOne({ code, active: true });
+    if (!meeting) return res.status(404).json({ ok: false, message: 'Meeting not found or has ended' });
+
+    const dbUser = await User.findById(user.sub).lean();
+    const name = dbUser?.displayName || dbUser?.name || 'Student';
+    const email = dbUser?.email || user.email || '';
+
+    const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
+      identity: `student-${user.sub}`, name,
+      metadata: JSON.stringify({ role: 'student', email })
+    });
+    at.addGrant({ roomJoin: true, room: meeting.roomName, roomAdmin: false, canPublish: true, canSubscribe: true, canPublishData: true });
+
+    const token = await at.toJwt();
+    res.json({ ok: true, token, wsUrl: LIVEKIT_WS_URL, roomName: meeting.roomName, displayName: name, meetingTitle: meeting.title });
+  } catch (err) {
+    console.error('LiveKit token error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// ── GET /api/meeting/check/:code  (lobby validates code before joining) ───────
+app.get('/api/meeting/check/:code', async (req, res) => {
+  try {
+    const meeting = await Meeting.findOne({ code: req.params.code, active: true });
+    res.json({ ok: !!meeting, title: meeting?.title || '' });
+  } catch {
+    res.status(500).json({ ok: false });
+  }
+});
+
+// ── POST /api/meeting/end/:code  (faculty ends the meeting) ──────────────────
+app.post('/api/meeting/end/:code', async (req, res) => {
+  try {
+    const user = verifyAnyToken(req);
+    if (!user) return res.status(401).json({ ok: false, message: 'Unauthorized' });
+    await Meeting.findOneAndUpdate({ code: req.params.code }, { active: false });
+    res.json({ ok: true });
+  } catch {
+    res.status(500).json({ ok: false });
+  }
+});
+
 app.get('/health', (req, res) => {
+
   res.json({
     status: 'ok',
     uptime: process.uptime(),

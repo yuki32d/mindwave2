@@ -25,6 +25,7 @@
     "googleapis": "^118.0.0",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.3",
+    "livekit-server-sdk": "^2.15.0",
     "mongoose": "^6.12.0",
     "multer": "^2.0.2",
     "node-cron": "^3.0.3",

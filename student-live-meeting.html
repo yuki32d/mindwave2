@@ -1,1097 +1,167 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Meeting - Student | MindWave</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Agora Web SDK -->
-    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
-            color: white;
-        }
-
-        .meeting-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .meeting-info h2 {
-            margin: 0;
-            font-size: 20px;
-        }
-
-        .meeting-code {
-            color: #00d4ff;
-            font-size: 18px;
-        }
-
-        .meeting-container {
-            width: 100%;
-            height: 100vh;
-            background: #000;
-            position: relative;
-            padding-top: 70px;
-        }
-
-        .local-video {
-            position: absolute;
-            top: 90px;
-            right: 20px;
-            width: 200px;
-            height: 150px;
-            border-radius: 12px;
-            overflow: hidden;
-            z-index: 10;
-            background: #1a1a1a;
-            border: 2px solid #00d4ff;
-        }
-
-        .remote-videos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 15px;
-            padding: 20px;
-            height: calc(100vh - 200px);
-            overflow-y: auto;
-        }
-
-        .remote-video {
-            border-radius: 12px;
-            overflow: hidden;
-            background: #1a1a1a;
-            position: relative;
-            min-height: 280px;
-            border: 1px solid #333;
-        }
-
-        .participant-name {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-
-        .faculty-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            margin-left: 8px;
-            font-weight: 600;
-        }
-
-        .controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            z-index: 100;
-            background: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 12px 20px;
-            border-radius: 50px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        }
-
-        .control-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: none;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            cursor: pointer;
-            font-size: 20px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-        }
-
-        .control-btn.active {
-            background: #00d4ff;
-            color: #000;
-        }
-
-        .control-btn.danger {
-            background: #ff4444;
-        }
-
-        .control-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
-        }
-
-        .control-separator {
-            width: 1px;
-            height: 48px;
-            background: rgba(255, 255, 255, 0.2);
-            margin: 0 4px;
-        }
-
-        .control-tooltip {
-            position: absolute;
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-
-        .control-btn:hover .control-tooltip {
-            opacity: 1;
-        }
-
-        .reactions-menu {
-            position: fixed;
-            bottom: 100px;
-            right: 50%;
-            transform: translateX(50%);
-            background: rgba(30, 30, 30, 0.98);
-            backdrop-filter: blur(10px);
-            border-radius: 50px;
-            padding: 12px 16px;
-            display: none;
-            gap: 8px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-            z-index: 200;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .reactions-menu.show {
-            display: flex;
-        }
-
-        .reaction-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: transparent;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .reaction-btn:hover {
-            transform: scale(1.3);
-        }
-
-        .loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
-
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid #00d4ff;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .toast {
-            background: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 16px 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 300px;
-            animation: slideIn 0.3s ease;
-            border-left: 4px solid #00d4ff;
-        }
-
-        .toast.success {
-            border-left-color: #00ff88;
-        }
-
-        .toast.error {
-            border-left-color: #ff4444;
-        }
-
-        .toast.warning {
-            border-left-color: #ffaa00;
-        }
-
-        .toast.info {
-            border-left-color: #00d4ff;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Side Panels */
-        .side-panel {
-            position: fixed;
-            top: 0;
-            right: -400px;
-            width: 400px;
-            height: 100vh;
-            background: rgba(20, 20, 20, 0.98);
-            backdrop-filter: blur(10px);
-            box-shadow: -4px 0 32px rgba(0, 0, 0, 0.5);
-            transition: right 0.3s ease;
-            z-index: 150;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .side-panel.open {
-            right: 0;
-        }
-
-        .panel-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .panel-close {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background 0.2s;
-        }
-
-        .panel-close:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .panel-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-
-        .participant-item {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .participant-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .participant-info {
-            flex: 1;
-        }
-
-        .participant-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .participant-role {
-            font-size: 12px;
-            color: #888;
-        }
-
-        .chat-messages {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .chat-message {
-            padding: 12px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .chat-sender {
-            font-weight: 600;
-            margin-bottom: 4px;
-            font-size: 14px;
-        }
-
-        .chat-text {
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .chat-input-container {
-            padding: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            gap: 10px;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 12px 16px;
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 14px;
-        }
-
-        .chat-send-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: none;
-            background: #00d4ff;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .chat-send-btn:hover {
-            background: #00b8e6;
-            transform: scale(1.05);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Meeting - MindWave</title>
+  <link rel="stylesheet" href="student-theme.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="theme-init.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg,#0f1117);color:var(--text-primary,#f0f2ff);min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 20% 20%,rgba(99,102,241,.12),transparent 70%),radial-gradient(ellipse 50% 40% at 80% 80%,rgba(139,92,246,.10),transparent 70%);pointer-events:none;z-index:0}
+    .lh{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:.75rem}
+    .ll{display:flex;align-items:center;gap:.75rem;font-size:1.5rem;font-weight:800;letter-spacing:-.5px}
+    .li{width:44px;height:44px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff}
+    .lt{font-size:.875rem;color:var(--text-muted,#9ea4b6)}
+    .card{position:relative;z-index:1;background:var(--surface,#1a1d2e);border:1px solid var(--border,rgba(255,255,255,.08));border-radius:24px;padding:2.5rem 2rem;width:calc(100% - 2rem);max-width:440px;box-shadow:0 32px 80px rgba(0,0,0,.4)}
+    .ci{width:56px;height:56px;background:rgba(99,102,241,.15);border-radius:16px;display:flex;align-items:center;justify-content:center;color:#6366f1;margin:0 auto .75rem}
+    .ci svg{width:26px;height:26px}
+    .ct{text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:.35rem}
+    .cs{text-align:center;font-size:.85rem;color:var(--text-muted,#9ea4b6);margin-bottom:1.75rem}
+    .fl{display:block;font-size:.78rem;font-weight:600;letter-spacing:.05em;color:var(--text-muted,#9ea4b6);text-transform:uppercase;margin-bottom:.65rem}
+    .cr{display:flex;gap:.45rem;margin-bottom:1.3rem}
+    .cd{flex:1;height:58px;border-radius:12px;border:2px solid var(--border,rgba(255,255,255,.1));background:rgba(255,255,255,.04);color:var(--text-primary,#f0f2ff);font-size:1.5rem;font-weight:700;text-align:center;outline:none;transition:border-color .2s,box-shadow .2s;caret-color:transparent}
+    .cd:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.2)}
+    .cd.filled{border-color:rgba(99,102,241,.45);background:rgba(99,102,241,.08)}
+    .eb{display:none;align-items:center;gap:.5rem;font-size:.83rem;color:#ff5c5c;background:rgba(255,92,92,.08);border:1px solid rgba(255,92,92,.2);border-radius:10px;padding:.7rem 1rem;margin-bottom:1.2rem}
+    .eb.show{display:flex}
+    .eb svg{width:15px;height:15px;flex-shrink:0}
+    .bj{width:100%;padding:.88rem;border-radius:12px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;transition:opacity .2s,transform .15s}
+    .bj:hover:not(:disabled){opacity:.88;transform:translateY(-1px)}
+    .bj:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .bj svg{width:18px;height:18px}
+    .sp{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .dl{display:flex;align-items:center;gap:1rem;margin:1.5rem 0}
+    .dl::before,.dl::after{content:'';flex:1;height:1px;background:var(--border,rgba(255,255,255,.08))}
+    .dl span{font-size:.75rem;color:var(--text-muted,#9ea4b6);white-space:nowrap}
+    .pr{display:flex;gap:.75rem}
+    .pb{flex:1;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;position:relative}
+    .pb video{width:100%;height:100%;object-fit:cover;display:block}
+    .po{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;background:rgba(255,255,255,.03);color:var(--text-muted,#9ea4b6);font-size:.78rem}
+    .po svg{width:26px;height:26px;opacity:.4}
+    .pbs{display:flex;flex-direction:column;gap:.5rem;justify-content:center}
+    .pvb{width:48px;height:48px;border-radius:12px;border:1px solid var(--border,rgba(255,255,255,.1));background:rgba(255,255,255,.04);color:var(--text-primary,#f0f2ff);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+    .pvb:hover{background:rgba(255,255,255,.1)}
+    .pvb.muted{background:rgba(255,92,92,.15);border-color:rgba(255,92,92,.3);color:#ff5c5c}
+    .pvb svg{width:20px;height:20px}
+    .ub{display:flex;align-items:center;gap:.75rem;margin-top:1.2rem;padding:.7rem;background:rgba(255,255,255,.04);border-radius:10px}
+    .ua{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
+    .un{font-size:.88rem;font-weight:600}
+    .ur{font-size:.72rem;color:var(--text-muted,#9ea4b6)}
+  </style>
 </head>
-
 <body>
-    <div class="meeting-header">
-        <div class="meeting-info">
-            <h2>Live Meeting</h2>
-            <div class="meeting-code">Meeting Code: <span id="meetingCodeDisplay"></span></div>
-        </div>
+  <div class="lh">
+    <div class="ll"><div class="li"><i data-lucide="brain-circuit" style="width:22px;height:22px;"></i></div>MindWave</div>
+    <div class="lt">Classroom Video Conferencing</div>
+  </div>
+  <div class="card">
+    <div class="ci"><i data-lucide="video"></i></div>
+    <div class="ct">Join a Meeting</div>
+    <div class="cs">Enter the 6-digit code shared by your faculty</div>
+    <label class="fl">Meeting Code</label>
+    <div class="cr">
+      <input class="cd" id="d1" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="Digit 1">
+      <input class="cd" id="d2" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="Digit 2">
+      <input class="cd" id="d3" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="Digit 3">
+      <input class="cd" id="d4" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="Digit 4">
+      <input class="cd" id="d5" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="Digit 5">
+      <input class="cd" id="d6" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="Digit 6">
     </div>
-
-    <div class="loading" id="loadingScreen">
-        <div class="spinner"></div>
-        <p>Joining meeting...</p>
+    <div class="eb" id="errBar" role="alert"><i data-lucide="alert-circle"></i><span id="errTxt">Invalid or expired meeting code.</span></div>
+    <button class="bj" id="joinBtn" disabled><i data-lucide="video"></i> Join Meeting</button>
+    <div class="dl"><span>Camera preview</span></div>
+    <div class="pr">
+      <div class="pb"><video id="pvVid" autoplay muted playsinline></video><div class="po" id="pvOff"><i data-lucide="video-off"></i><span>Camera off</span></div></div>
+      <div class="pbs">
+        <button class="pvb" id="camBtn" title="Toggle camera" aria-label="Toggle camera"><i data-lucide="video" id="camIco"></i></button>
+        <button class="pvb" id="micBtn" title="Toggle microphone" aria-label="Toggle microphone"><i data-lucide="mic" id="micIco"></i></button>
+      </div>
     </div>
-
-    <div class="meeting-container" id="meetingContainer" style="display: none;">
-        <div class="local-video" id="localVideo"></div>
-        <div class="remote-videos-grid" id="remoteVideos"></div>
-
-        <div class="controls">
-            <!-- Mute/Unmute -->
-            <button class="control-btn" id="muteBtn">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                    <path
-                        d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-                </svg>
-                <span class="control-tooltip">Mute</span>
-            </button>
-
-            <!-- Video On/Off -->
-            <button class="control-btn" id="videoBtn">
-                <svg viewBox="0 0 24 24">
-                    <path
-                        d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
-                </svg>
-                <span class="control-tooltip">Stop Video</span>
-            </button>
-
-            <div class="control-separator"></div>
-
-            <!-- Raise Hand -->
-            <button class="control-btn" id="raiseHandBtn">
-                <svg viewBox="0 0 24 24">
-                    <path
-                        d="M23 5.5V20c0 2.2-1.8 4-4 4h-7.3c-1.08 0-2.1-.43-2.85-1.19L1 14.83s1.26-1.23 1.3-1.25c.22-.19.49-.29.79-.29.22 0 .42.06.6.16.04.01 4.31 2.46 4.31 2.46V4c0-.83.67-1.5 1.5-1.5S11 3.17 11 4v7h1V1.5c0-.83.67-1.5 1.5-1.5S15 .67 15 1.5V11h1V2.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5V11h1V5.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5z" />
-                </svg>
-                <span class="control-tooltip">Raise Hand</span>
-            </button>
-
-            <!-- Reactions -->
-            <button class="control-btn" id="reactionsBtn">
-                <svg viewBox="0 0 24 24">
-                    <path
-                        d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
-                </svg>
-                <span class="control-tooltip">Reactions</span>
-            </button>
-
-            <div class="control-separator"></div>
-
-            <!-- Chat -->
-            <button class="control-btn" id="chatBtn">
-                <svg viewBox="0 0 24 24">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
-                </svg>
-                <span class="control-tooltip">Chat</span>
-            </button>
-
-            <!-- Participants -->
-            <button class="control-btn" id="participantsBtn">
-                <svg viewBox="0 0 24 24">
-                    <path
-                        d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-                </svg>
-                <span class="control-tooltip">Participants</span>
-            </button>
-
-            <!-- Settings -->
-            <button class="control-btn" id="settingsBtn">
-                <svg viewBox="0 0 24 24">
-                    <path
-                        d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
-                </svg>
-                <span class="control-tooltip">Settings</span>
-            </button>
-
-            <div class="control-separator"></div>
-
-            <!-- Leave Meeting -->
-            <button class="control-btn danger" id="leaveBtn">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z" />
-                </svg>
-                <span class="control-tooltip">Leave Meeting</span>
-            </button>
-        </div>
-
-        <!-- Reactions Menu -->
-        <div class="reactions-menu" id="reactionsMenu">
-            <button class="reaction-btn" data-reaction="??">??</button>
-            <button class="reaction-btn" data-reaction="??">??</button>
-            <button class="reaction-btn" data-reaction="??">??</button>
-            <button class="reaction-btn" data-reaction="??">??</button>
-            <button class="reaction-btn" data-reaction="??">??</button>
-        </div>
-    </div>
-
-
-    <!-- Toast Notifications Container -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Participants Side Panel -->
-    <div class="side-panel" id="participantsPanel">
-        <div class="panel-header">
-            <h3>Participants (<span id="participantCount">1</span>)</h3>
-            <button class="panel-close" id="closeParticipantsPanel">×</button>
-        </div>
-        <div class="panel-content" id="participantsList">
-            <!-- Participants will be added dynamically -->
-        </div>
-    </div>
-
-    <!-- Chat Side Panel -->
-    <div class="side-panel" id="chatPanel">
-        <div class="panel-header">
-            <h3>Chat</h3>
-            <button class="panel-close" id="closeChatPanel">×</button>
-        </div>
-        <div class="panel-content">
-            <div class="chat-messages" id="chatMessages">
-                <div class="chat-message">
-                    <div class="chat-sender">System</div>
-                    <div class="chat-text">Welcome to the meeting! ??</div>
-                </div>
-            </div>
-        </div>
-        <div class="chat-input-container">
-            <input type="text" class="chat-input" placeholder="Type a message..." id="chatInput">
-            <button class="chat-send-btn" id="chatSendBtn">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    <script>
-        // Get meeting code from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const meetingCode = urlParams.get('code');
-
-        if (!meetingCode) {
-            showToast('No meeting code provided', 'error');
-            setTimeout(() => {
-                window.location.href = 'student-community.html';
-            }, 1500);
+    <div class="ub"><div class="ua" id="av">--</div><div><div class="un" id="uname">Loading...</div><div class="ur">Student</div></div></div>
+  </div>
+  <script>
+    const jwt = localStorage.getItem('token');
+    if (!jwt) window.location.href = 'marketing-site/student-login.html';
+    const API = window.location.hostname === 'localhost' ? 'http://localhost:8081' : '';
+    fetch(API+'/api/me',{headers:{Authorization:'Bearer '+jwt}}).then(r=>r.ok?r.json():null).then(u=>{
+      if(!u) return;
+      const n=u.displayName||u.name||'Student';
+      document.getElementById('uname').textContent=n;
+      document.getElementById('av').textContent=n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    }).catch(()=>{});
+    const digs=[...document.querySelectorAll('.cd')];
+    const joinBtn=document.getElementById('joinBtn');
+    const getCode=()=>digs.map(d=>d.value).join('');
+    digs.forEach((inp,i)=>{
+      inp.addEventListener('input',()=>{
+        inp.value=inp.value.replace(/\D/g,'').slice(-1);
+        inp.classList.toggle('filled',!!inp.value);
+        if(inp.value&&i<5)digs[i+1].focus();
+        joinBtn.disabled=getCode().length!==6;
+        document.getElementById('errBar').classList.remove('show');
+      });
+      inp.addEventListener('keydown',e=>{
+        if(e.key==='Backspace'&&!inp.value&&i>0)digs[i-1].focus();
+        if(e.key==='Enter'&&getCode().length===6)doJoin();
+      });
+      inp.addEventListener('paste',e=>{
+        e.preventDefault();
+        const p=(e.clipboardData.getData('text')||'').replace(/\D/g,'').slice(0,6);
+        p.split('').forEach((ch,j)=>{if(digs[j]){digs[j].value=ch;digs[j].classList.add('filled');}});
+        joinBtn.disabled=getCode().length!==6;
+      });
+    });
+    digs[0].focus();
+    let stream=null,camOn=false,micOn=false;
+    const pvVid=document.getElementById('pvVid'),pvOff=document.getElementById('pvOff');
+    async function applyStream(vc,va){
+      try{
+        if(stream)stream.getTracks().forEach(t=>t.stop());
+        stream=await navigator.mediaDevices.getUserMedia({video:vc,audio:va});
+        pvVid.srcObject=stream;camOn=vc;micOn=va;
+        pvVid.style.display=vc?'block':'none';pvOff.style.display=vc?'none':'flex';
+        document.getElementById('camIco').setAttribute('data-lucide',vc?'video':'video-off');
+        document.getElementById('camBtn').classList.toggle('muted',!vc);
+        document.getElementById('micIco').setAttribute('data-lucide',va?'mic':'mic-off');
+        document.getElementById('micBtn').classList.toggle('muted',!va);
+        lucide.createIcons();
+      }catch(e){pvVid.style.display='none';pvOff.style.display='flex';}
+    }
+    document.getElementById('camBtn').onclick=()=>applyStream(!camOn,micOn);
+    document.getElementById('micBtn').onclick=()=>{
+      if(!stream)return;micOn=!micOn;
+      stream.getAudioTracks().forEach(t=>t.enabled=micOn);
+      document.getElementById('micIco').setAttribute('data-lucide',micOn?'mic':'mic-off');
+      document.getElementById('micBtn').classList.toggle('muted',!micOn);
+      lucide.createIcons();
+    };
+    applyStream(true,true);
+    async function doJoin(){
+      const code=getCode();if(code.length!==6)return;
+      joinBtn.disabled=true;joinBtn.innerHTML='<div class="sp"></div> Verifying...';
+      try{
+        const r=await fetch(API+'/api/meeting/token',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+jwt},body:JSON.stringify({code})});
+        const d=await r.json();
+        if(!d.ok){
+          document.getElementById('errTxt').textContent=d.message||'Invalid or expired meeting code.';
+          document.getElementById('errBar').classList.add('show');
+          joinBtn.innerHTML='<i data-lucide="video"></i> Join Meeting';joinBtn.disabled=false;lucide.createIcons();return;
         }
-
-        // Authentication
-        const token = localStorage.getItem('token');
-        const userName = localStorage.getItem('userName') || 'Student';
-        const userEmail = localStorage.getItem('userEmail') || '';
-
-        if (!token) {
-            window.location.href = 'marketing-site/student-login.html';
-        }
-
-        // Toast Notification System
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-
-            const icons = {
-                success: '?',
-                error: '?',
-                warning: '?',
-                info: '?'
-            };
-
-            toast.innerHTML = `
-                <div class="toast-icon">${icons[type] || icons.info}</div>
-                <div class="toast-message">${message}</div>
-            `;
-
-            container.appendChild(toast);
-
-            // Auto remove after 3 seconds
-            setTimeout(() => {
-                toast.style.animation = 'slideIn 0.3s ease reverse';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Side Panel Management
-        function openPanel(panelId) {
-            // Close all panels first
-            document.querySelectorAll('.side-panel').forEach(panel => {
-                panel.classList.remove('open');
-            });
-
-            // Open requested panel
-            const panel = document.getElementById(panelId);
-            if (panel) {
-                panel.classList.add('open');
-            }
-        }
-
-        function closePanel(panelId) {
-            const panel = document.getElementById(panelId);
-            if (panel) {
-                panel.classList.remove('open');
-            }
-        }
-
-        function updateParticipantsList() {
-            const list = document.getElementById('participantsList');
-            const count = Object.keys(remoteUsers).length + 1;
-
-            document.getElementById('participantCount').textContent = count;
-
-            list.innerHTML = `
-                <div class="participant-item">
-                    <div class="participant-avatar">${userName.charAt(0).toUpperCase()}</div>
-                    <div class="participant-info">
-                        <div class="participant-name">${userName} (You)</div>
-                        <div class="participant-role">Participant</div>
-                    </div>
-                </div>
-            `;
-
-            Object.keys(remoteUsers).forEach((uid, index) => {
-                const isHost = index === 0; // First user is typically the host
-                list.innerHTML += `
-                    <div class="participant-item">
-                        <div class="participant-avatar">${isHost ? 'F' : 'S' + index}</div>
-                        <div class="participant-info">
-                            <div class="participant-name">${isHost ? 'Faculty' : 'Student ' + index}</div>
-                            <div class="participant-role">${isHost ? 'Host' : 'Participant'}</div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        // Socket.IO Chat System
-        const API_BASE = window.location.hostname === 'localhost'
-            ? 'http://localhost:8081'
-            : 'https://mindwave2.onrender.com';
-
-        let socket = null;
-        let currentMeetingCode = null;
-
-        function initializeSocket(meetingCode) {
-            // Check if Socket.IO is available
-            if (typeof io === 'undefined') {
-                console.warn('Socket.IO not loaded - chat will be unavailable');
-                return;
-            }
-
-            try {
-                currentMeetingCode = meetingCode;
-                socket = io(API_BASE);
-
-                socket.on('connect', () => {
-                    console.log('?? Socket.IO connected');
-
-                    // Join meeting room
-                    socket.emit('join-meeting', {
-                        meetingCode,
-                        userName,
-                        userRole: 'student'
-                    });
-                });
-
-                // Listen for new messages
-                socket.on('new-message', ({ userName: senderName, message, timestamp }) => {
-                    addMessageToChat(senderName, message, timestamp);
-                });
-
-                // Listen for meeting ended by faculty
-                socket.on('meeting-ended', async () => {
-                    showToast('Meeting ended by host', 'warning');
-
-                    // Auto cleanup
-                    try {
-                        if (localAudioTrack) localAudioTrack.close();
-                        if (localVideoTrack) localVideoTrack.close();
-                        if (agoraClient) await agoraClient.leave();
-                        if (socket) socket.disconnect();
-                    } catch (error) {
-                        console.error('Error during cleanup:', error);
-                    }
-
-                    // Redirect to homepage after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = 'homepage.html';
-                    }, 2000);
-                });
-
-                socket.on('disconnect', () => {
-                    console.log('?? Socket.IO disconnected');
-                });
-            } catch (error) {
-                console.error('Error initializing Socket.IO:', error);
-                console.warn('Chat will be unavailable');
-            }
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-
-            if (!message || !socket || !currentMeetingCode) return;
-
-            socket.emit('send-message', {
-                meetingCode: currentMeetingCode,
-                userName,
-                message,
-                timestamp: new Date().toISOString()
-            });
-
-            input.value = '';
-        }
-
-        function addMessageToChat(senderName, message, timestamp) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message';
-
-            const time = new Date(timestamp).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            messageDiv.innerHTML = `
-                <div class="chat-sender">${senderName} <span style="font-size: 11px; color: #888;">${time}</span></div>
-                <div class="chat-text">${message}</div>
-            `;
-
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        // Panel close button event listeners
-        document.getElementById('closeParticipantsPanel').addEventListener('click', () => closePanel('participantsPanel'));
-        document.getElementById('closeChatPanel').addEventListener('click', () => closePanel('chatPanel'));
-
-        // Chat send button and Enter key
-        document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
-        document.getElementById('chatInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendChatMessage();
-            }
-        });
-
-
-        // Agora client and tracks
-        let agoraClient = null;
-        let localAudioTrack = null;
-        let localVideoTrack = null;
-        let remoteUsers = {};
-        let isMuted = false;
-        let isVideoOff = false;
-
-        // Initialize and join meeting
-        async function init() {
-            const API_BASE = window.location.hostname === 'localhost'
-                ? 'http://localhost:8081'
-                : 'https://mindwave2.onrender.com';
-
-            try {
-                // Display meeting code
-                document.getElementById('meetingCodeDisplay').textContent = meetingCode;
-
-                // Call backend to get Agora credentials
-                const response = await fetch(`${API_BASE}/api/meetings/${meetingCode}/join-agora`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        studentName: userName,
-                        studentEmail: userEmail
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    console.log('? Agora credentials received:', data);
-
-                    // Initialize Agora client
-                    agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-
-                    // Set up event listeners
-                    agoraClient.on('user-published', handleUserPublished);
-                    agoraClient.on('user-unpublished', handleUserUnpublished);
-                    agoraClient.on('user-left', handleUserLeft);
-
-                    // Join channel
-                    await agoraClient.join(
-                        data.appId,
-                        data.channelName,
-                        data.token,
-                        data.uid
-                    );
-
-                    console.log('? Joined Agora channel as AUDIENCE');
-
-                    // Create local tracks
-                    localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-                    localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-
-                    // Play local video
-                    localVideoTrack.play('localVideo');
-
-                    // Publish tracks (students can also publish in this setup)
-                    await agoraClient.publish([localAudioTrack, localVideoTrack]);
-
-                    console.log('? Published local tracks');
-
-                    // Hide loading, show meeting
-                    document.getElementById('loadingScreen').style.display = 'none';
-                    document.getElementById('meetingContainer').style.display = 'block';
-
-                } else {
-                    console.error('Failed to join Agora meeting:', data.error);
-                    showToast('Failed to join meeting. Please check the meeting code.', 'error');
-                    window.location.href = 'student-community.html';
-                }
-            } catch (error) {
-                console.error('Error joining Agora meeting:', error);
-                showToast('Failed to join meeting. Please try again.', 'error');
-                window.location.href = 'student-community.html';
-            }
-        }
-
-        // Handle remote user published
-        async function handleUserPublished(user, mediaType) {
-            console.log('?? User published:', user.uid, mediaType);
-
-            await agoraClient.subscribe(user, mediaType);
-
-            if (mediaType === 'video') {
-                const remoteVideoTrack = user.videoTrack;
-
-                // Create container for remote video
-                let playerContainer = document.getElementById(`player-${user.uid}`);
-                if (!playerContainer) {
-                    playerContainer = document.createElement('div');
-                    playerContainer.id = `player-${user.uid}`;
-                    playerContainer.className = 'remote-video';
-
-                    const nameTag = document.createElement('div');
-                    nameTag.className = 'participant-name';
-                    // First user is likely faculty
-                    const isFaculty = Object.keys(remoteUsers).length === 0;
-                    nameTag.innerHTML = isFaculty
-                        ? `Faculty <span class="faculty-badge">HOST</span>`
-                        : `Student ${user.uid}`;
-                    playerContainer.appendChild(nameTag);
-
-                    document.getElementById('remoteVideos').appendChild(playerContainer);
-                }
-
-                remoteVideoTrack.play(playerContainer);
-                remoteUsers[user.uid] = user;
-            }
-
-            if (mediaType === 'audio') {
-                const remoteAudioTrack = user.audioTrack;
-                remoteAudioTrack.play();
-            }
-        }
-
-        // Handle remote user unpublished
-        function handleUserUnpublished(user, mediaType) {
-            console.log('?? User unpublished:', user.uid, mediaType);
-
-            if (mediaType === 'video') {
-                const playerContainer = document.getElementById(`player-${user.uid}`);
-                if (playerContainer) {
-                    playerContainer.remove();
-                }
-            }
-        }
-
-        // Handle user left
-        function handleUserLeft(user) {
-            console.log('?? User left:', user.uid);
-
-            const playerContainer = document.getElementById(`player-${user.uid}`);
-            if (playerContainer) {
-                playerContainer.remove();
-            }
-
-            delete remoteUsers[user.uid];
-        }
-
-        // Toggle mute
-        async function toggleMute() {
-            if (!localAudioTrack) return;
-
-            isMuted = !isMuted;
-            await localAudioTrack.setEnabled(!isMuted);
-
-            const muteBtn = document.getElementById('muteBtn');
-            const muteText = document.getElementById('muteText');
-
-            if (isMuted) {
-                muteBtn.classList.add('active');
-                muteText.textContent = 'Unmute';
-            } else {
-                muteBtn.classList.remove('active');
-                muteText.textContent = 'Mute';
-            }
-        }
-
-        // Toggle video
-        async function toggleVideo() {
-            if (!localVideoTrack) return;
-
-            isVideoOff = !isVideoOff;
-            await localVideoTrack.setEnabled(!isVideoOff);
-
-            const videoBtn = document.getElementById('videoBtn');
-            const videoText = document.getElementById('videoText');
-
-            if (isVideoOff) {
-                videoBtn.classList.add('active');
-                videoText.textContent = 'Start Video';
-            } else {
-                videoBtn.classList.remove('active');
-                videoText.textContent = 'Stop Video';
-            }
-        }
-
-        // Leave meeting
-        async function leaveMeeting() {
-            try {
-                // Close local tracks
-                if (localAudioTrack) {
-                    localAudioTrack.close();
-                }
-                if (localVideoTrack) {
-                    localVideoTrack.close();
-                }
-
-                // Leave channel
-                if (agoraClient) {
-                    await agoraClient.leave();
-                }
-
-                console.log('? Left meeting');
-                window.location.href = 'student-community.html';
-            } catch (error) {
-                console.error('Error leaving meeting:', error);
-                window.location.href = 'student-community.html';
-            }
-        }
-
-        // Initialize on page load
-        window.addEventListener('load', init);
-
-        // Add event listeners for controls
-        document.getElementById('muteBtn').addEventListener('click', toggleMute);
-        document.getElementById('videoBtn').addEventListener('click', toggleVideo);
-        document.getElementById('leaveBtn').addEventListener('click', leaveMeeting);
-        document.getElementById('raiseHandBtn').addEventListener('click', toggleRaiseHand);
-        document.getElementById('reactionsBtn').addEventListener('click', toggleReactions);
-        document.getElementById('chatBtn').addEventListener('click', toggleChat);
-        document.getElementById('participantsBtn').addEventListener('click', showParticipants);
-        document.getElementById('settingsBtn').addEventListener('click', openSettings);
-
-        // Reaction buttons
-        document.querySelectorAll('.reaction-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                sendReaction(this.dataset.reaction);
-            });
-        });
-
-        // Student control functions
-        let isHandRaised = false;
-
-        function toggleRaiseHand() {
-            const btn = document.getElementById('raiseHandBtn');
-            isHandRaised = !isHandRaised;
-
-            if (isHandRaised) {
-                btn.classList.add('active');
-                // TODO: Send raise hand signal to faculty
-                console.log('? Hand raised');
-            } else {
-                btn.classList.remove('active');
-                console.log('? Hand lowered');
-            }
-        }
-
-        function toggleReactions() {
-            const menu = document.getElementById('reactionsMenu');
-            menu.classList.toggle('show');
-        }
-
-        function sendReaction(emoji) {
-            // TODO: Send reaction to all participants
-            console.log('Reaction sent:', emoji);
-
-            // Hide reactions menu
-            document.getElementById('reactionsMenu').classList.remove('show');
-
-            // Show reaction animation (optional)
-            alert(`Sent reaction: ${emoji}`);
-        }
-
-        function toggleChat() {
-            // TODO: Open chat panel
-            openPanel('chatPanel');
-        }
-
-        function showParticipants() {
-            const count = Object.keys(remoteUsers).length + 1;
-            updateParticipantsList();
-            openPanel('participantsPanel');
-        }
-
-        function openSettings() {
-            showToast('Settings - Audio/Video device selection coming soon!', 'info');
-        }
-
-        // Close reactions menu when clicking outside
-        document.addEventListener('click', function (e) {
-            const reactionsBtn = document.getElementById('reactionsBtn');
-            const reactionsMenu = document.getElementById('reactionsMenu');
-
-            if (!reactionsBtn.contains(e.target) && !reactionsMenu.contains(e.target)) {
-                reactionsMenu.classList.remove('show');
-            }
-        });
-
-        // Clean up on page unload
-        window.addEventListener('beforeunload', async () => {
-            if (localAudioTrack) localAudioTrack.close();
-            if (localVideoTrack) localVideoTrack.close();
-            if (agoraClient) await agoraClient.leave();
-        });
-    </script>
+        if(stream)stream.getTracks().forEach(t=>t.stop());
+        const p=new URLSearchParams({lkToken:d.token,wsUrl:d.wsUrl,room:d.roomName,name:d.displayName,title:d.meetingTitle||'MindWave Class',camOn:camOn?'1':'0',micOn:micOn?'1':'0'});
+        window.location.href='student-meeting-room.html?'+p;
+      }catch{
+        document.getElementById('errTxt').textContent='Network error - please try again.';
+        document.getElementById('errBar').classList.add('show');
+        joinBtn.innerHTML='<i data-lucide="video"></i> Join Meeting';joinBtn.disabled=false;lucide.createIcons();
+      }
+    }
+    joinBtn.addEventListener('click',doJoin);
+    lucide.createIcons();
+  </script>
 </body>
-
 </html>
