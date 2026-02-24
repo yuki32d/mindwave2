@@ -4,65 +4,82 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Join Meeting - MindWave</title>
-  <link rel="stylesheet" href="student-theme.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <script src="theme-init.js"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg,#0f1117);color:var(--text-primary,#f0f2ff);min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem}
-    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 20% 20%,rgba(99,102,241,.12),transparent 70%),radial-gradient(ellipse 50% 40% at 80% 80%,rgba(139,92,246,.10),transparent 70%);pointer-events:none;z-index:0}
-    .lh{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:.75rem}
-    .ll{display:flex;align-items:center;gap:.75rem;font-size:1.5rem;font-weight:800;letter-spacing:-.5px}
-    .li{width:44px;height:44px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff}
-    .lt{font-size:.875rem;color:var(--text-muted,#9ea4b6)}
-    .card{position:relative;z-index:1;background:var(--surface,#1a1d2e);border:1px solid var(--border,rgba(255,255,255,.08));border-radius:24px;padding:2.5rem 2rem;width:calc(100% - 2rem);max-width:440px;box-shadow:0 32px 80px rgba(0,0,0,.4)}
-    .ci{width:56px;height:56px;background:rgba(99,102,241,.15);border-radius:16px;display:flex;align-items:center;justify-content:center;color:#6366f1;margin:0 auto .75rem}
-    .ci svg{width:26px;height:26px}
-    .ct{text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:.35rem}
-    .cs{text-align:center;font-size:.85rem;color:var(--text-muted,#9ea4b6);margin-bottom:1.75rem}
-    .fl{display:block;font-size:.78rem;font-weight:600;letter-spacing:.05em;color:var(--text-muted,#9ea4b6);text-transform:uppercase;margin-bottom:.65rem}
-    .cr{display:flex;gap:.45rem;margin-bottom:1.3rem}
-    .cd{flex:1;height:58px;border-radius:12px;border:2px solid var(--border,rgba(255,255,255,.1));background:rgba(255,255,255,.04);color:var(--text-primary,#f0f2ff);font-size:1.5rem;font-weight:700;text-align:center;outline:none;transition:border-color .2s,box-shadow .2s;caret-color:transparent}
+    html,body{height:100%}
+    body{font-family:'Inter',system-ui,sans-serif;background:#0f1117;color:#f0f2ff;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.75rem;padding:1rem}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 20% 20%,rgba(99,102,241,.13),transparent 70%),radial-gradient(ellipse 50% 40% at 80% 80%,rgba(139,92,246,.10),transparent 70%);pointer-events:none;z-index:0}
+
+    .lh{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:.6rem}
+    .ll{display:flex;align-items:center;gap:.75rem;font-size:1.4rem;font-weight:800;letter-spacing:-.4px}
+    .li{width:42px;height:42px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+    .lt{font-size:.82rem;color:#9ea4b6}
+
+    .card{position:relative;z-index:1;background:#1a1d2e;border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:2rem 1.75rem;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.45)}
+
+    .ci{width:52px;height:52px;background:rgba(99,102,241,.15);border-radius:14px;display:flex;align-items:center;justify-content:center;color:#6366f1;margin:0 auto .7rem}
+    .ci svg{width:24px;height:24px}
+    .ct{text-align:center;font-size:1.15rem;font-weight:700;margin-bottom:.3rem}
+    .cs{text-align:center;font-size:.82rem;color:#9ea4b6;margin-bottom:1.6rem;line-height:1.5}
+
+    .fl{display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;color:#9ea4b6;text-transform:uppercase;margin-bottom:.6rem}
+    
+    /* 6 digit boxes - key fix: equal sizing within parent */
+    .cr{display:grid;grid-template-columns:repeat(6,1fr);gap:.4rem;margin-bottom:1.2rem}
+    .cd{width:100%;aspect-ratio:1;border-radius:10px;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#f0f2ff;font-size:1.35rem;font-weight:700;text-align:center;outline:none;transition:border-color .2s,box-shadow .2s;caret-color:transparent;padding:0}
     .cd:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.2)}
-    .cd.filled{border-color:rgba(99,102,241,.45);background:rgba(99,102,241,.08)}
-    .eb{display:none;align-items:center;gap:.5rem;font-size:.83rem;color:#ff5c5c;background:rgba(255,92,92,.08);border:1px solid rgba(255,92,92,.2);border-radius:10px;padding:.7rem 1rem;margin-bottom:1.2rem}
+    .cd.filled{border-color:rgba(99,102,241,.5);background:rgba(99,102,241,.09)}
+
+    .eb{display:none;align-items:center;gap:.5rem;font-size:.82rem;color:#ff5c5c;background:rgba(255,92,92,.08);border:1px solid rgba(255,92,92,.22);border-radius:10px;padding:.65rem .9rem;margin-bottom:1.1rem}
     .eb.show{display:flex}
-    .eb svg{width:15px;height:15px;flex-shrink:0}
-    .bj{width:100%;padding:.88rem;border-radius:12px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;transition:opacity .2s,transform .15s}
-    .bj:hover:not(:disabled){opacity:.88;transform:translateY(-1px)}
-    .bj:disabled{opacity:.4;cursor:not-allowed;transform:none}
-    .bj svg{width:18px;height:18px}
-    .sp{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+    .eb svg{width:14px;height:14px;flex-shrink:0}
+
+    .bj{width:100%;padding:.85rem;border-radius:11px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.55rem;transition:opacity .2s,transform .15s}
+    .bj:hover:not(:disabled){opacity:.87;transform:translateY(-1px)}
+    .bj:disabled{opacity:.38;cursor:not-allowed;transform:none}
+    .bj svg{width:17px;height:17px}
+    .sp{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .dl{display:flex;align-items:center;gap:1rem;margin:1.5rem 0}
-    .dl::before,.dl::after{content:'';flex:1;height:1px;background:var(--border,rgba(255,255,255,.08))}
-    .dl span{font-size:.75rem;color:var(--text-muted,#9ea4b6);white-space:nowrap}
-    .pr{display:flex;gap:.75rem}
-    .pb{flex:1;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;position:relative}
+
+    .dl{display:flex;align-items:center;gap:.85rem;margin:1.4rem 0}
+    .dl::before,.dl::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
+    .dl span{font-size:.73rem;color:#9ea4b6;white-space:nowrap}
+
+    /* Preview */
+    .pr{display:flex;gap:.65rem;align-items:stretch}
+    .pb{flex:1;background:#0a0a0f;border-radius:11px;overflow:hidden;aspect-ratio:16/9;position:relative;min-width:0}
     .pb video{width:100%;height:100%;object-fit:cover;display:block}
-    .po{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;background:rgba(255,255,255,.03);color:var(--text-muted,#9ea4b6);font-size:.78rem}
-    .po svg{width:26px;height:26px;opacity:.4}
-    .pbs{display:flex;flex-direction:column;gap:.5rem;justify-content:center}
-    .pvb{width:48px;height:48px;border-radius:12px;border:1px solid var(--border,rgba(255,255,255,.1));background:rgba(255,255,255,.04);color:var(--text-primary,#f0f2ff);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
-    .pvb:hover{background:rgba(255,255,255,.1)}
-    .pvb.muted{background:rgba(255,92,92,.15);border-color:rgba(255,92,92,.3);color:#ff5c5c}
-    .pvb svg{width:20px;height:20px}
-    .ub{display:flex;align-items:center;gap:.75rem;margin-top:1.2rem;padding:.7rem;background:rgba(255,255,255,.04);border-radius:10px}
-    .ua{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
-    .un{font-size:.88rem;font-weight:600}
-    .ur{font-size:.72rem;color:var(--text-muted,#9ea4b6)}
+    .po{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.45rem;background:rgba(255,255,255,.03);color:#9ea4b6;font-size:.75rem}
+    .po svg{width:22px;height:22px;opacity:.4}
+    .pbs{display:flex;flex-direction:column;gap:.5rem;justify-content:center;flex-shrink:0}
+    .pvb{width:44px;height:44px;border-radius:11px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#f0f2ff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+    .pvb:hover{background:rgba(255,255,255,.12)}
+    .pvb.muted{background:rgba(255,92,92,.14);border-color:rgba(255,92,92,.3);color:#ff5c5c}
+    .pvb svg{width:19px;height:19px}
+
+    .ub{display:flex;align-items:center;gap:.7rem;margin-top:1.1rem;padding:.65rem .8rem;background:rgba(255,255,255,.04);border-radius:10px}
+    .ua{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0}
+    .un{font-size:.86rem;font-weight:600}
+    .ur{font-size:.7rem;color:#9ea4b6}
   </style>
 </head>
 <body>
   <div class="lh">
-    <div class="ll"><div class="li"><i data-lucide="brain-circuit" style="width:22px;height:22px;"></i></div>MindWave</div>
+    <div class="ll">
+      <div class="li"><i data-lucide="brain-circuit" style="width:20px;height:20px;"></i></div>
+      MindWave
+    </div>
     <div class="lt">Classroom Video Conferencing</div>
   </div>
+
   <div class="card">
     <div class="ci"><i data-lucide="video"></i></div>
     <div class="ct">Join a Meeting</div>
     <div class="cs">Enter the 6-digit code shared by your faculty</div>
-    <label class="fl">Meeting Code</label>
+
+    <label class="fl" for="d1">Meeting Code</label>
     <div class="cr">
       <input class="cd" id="d1" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="Digit 1">
       <input class="cd" id="d2" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="Digit 2">
@@ -71,42 +88,65 @@
       <input class="cd" id="d5" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="Digit 5">
       <input class="cd" id="d6" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="Digit 6">
     </div>
-    <div class="eb" id="errBar" role="alert"><i data-lucide="alert-circle"></i><span id="errTxt">Invalid or expired meeting code.</span></div>
-    <button class="bj" id="joinBtn" disabled><i data-lucide="video"></i> Join Meeting</button>
+
+    <div class="eb" id="errBar" role="alert">
+      <i data-lucide="alert-circle"></i>
+      <span id="errTxt">Invalid or expired meeting code.</span>
+    </div>
+
+    <button class="bj" id="joinBtn" disabled aria-label="Join meeting">
+      <i data-lucide="video"></i> Join Meeting
+    </button>
+
     <div class="dl"><span>Camera preview</span></div>
+
     <div class="pr">
-      <div class="pb"><video id="pvVid" autoplay muted playsinline></video><div class="po" id="pvOff"><i data-lucide="video-off"></i><span>Camera off</span></div></div>
+      <div class="pb">
+        <video id="pvVid" autoplay muted playsinline></video>
+        <div class="po" id="pvOff"><i data-lucide="video-off"></i><span>Camera off</span></div>
+      </div>
       <div class="pbs">
         <button class="pvb" id="camBtn" title="Toggle camera" aria-label="Toggle camera"><i data-lucide="video" id="camIco"></i></button>
         <button class="pvb" id="micBtn" title="Toggle microphone" aria-label="Toggle microphone"><i data-lucide="mic" id="micIco"></i></button>
       </div>
     </div>
-    <div class="ub"><div class="ua" id="av">--</div><div><div class="un" id="uname">Loading...</div><div class="ur">Student</div></div></div>
+
+    <div class="ub">
+      <div class="ua" id="av">--</div>
+      <div>
+        <div class="un" id="uname">Loading...</div>
+        <div class="ur">Student</div>
+      </div>
+    </div>
   </div>
+
   <script>
     const jwt = localStorage.getItem('token');
     if (!jwt) window.location.href = 'marketing-site/student-login.html';
     const API = window.location.hostname === 'localhost' ? 'http://localhost:8081' : '';
+
     fetch(API+'/api/me',{headers:{Authorization:'Bearer '+jwt}}).then(r=>r.ok?r.json():null).then(u=>{
       if(!u) return;
       const n=u.displayName||u.name||'Student';
       document.getElementById('uname').textContent=n;
       document.getElementById('av').textContent=n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
     }).catch(()=>{});
+
     const digs=[...document.querySelectorAll('.cd')];
     const joinBtn=document.getElementById('joinBtn');
     const getCode=()=>digs.map(d=>d.value).join('');
+
     digs.forEach((inp,i)=>{
       inp.addEventListener('input',()=>{
         inp.value=inp.value.replace(/\D/g,'').slice(-1);
         inp.classList.toggle('filled',!!inp.value);
-        if(inp.value&&i<5)digs[i+1].focus();
+        if(inp.value&&i<5) digs[i+1].focus();
         joinBtn.disabled=getCode().length!==6;
         document.getElementById('errBar').classList.remove('show');
       });
       inp.addEventListener('keydown',e=>{
-        if(e.key==='Backspace'&&!inp.value&&i>0)digs[i-1].focus();
-        if(e.key==='Enter'&&getCode().length===6)doJoin();
+        if(e.key==='Backspace'&&!inp.value&&i>0) digs[i-1].focus();
+        if(e.key==='Enter'&&getCode().length===6) doJoin();
       });
       inp.addEventListener('paste',e=>{
         e.preventDefault();
@@ -116,14 +156,16 @@
       });
     });
     digs[0].focus();
+
     let stream=null,camOn=false,micOn=false;
     const pvVid=document.getElementById('pvVid'),pvOff=document.getElementById('pvOff');
+
     async function applyStream(vc,va){
       try{
-        if(stream)stream.getTracks().forEach(t=>t.stop());
+        if(stream) stream.getTracks().forEach(t=>t.stop());
         stream=await navigator.mediaDevices.getUserMedia({video:vc,audio:va});
-        pvVid.srcObject=stream;camOn=vc;micOn=va;
-        pvVid.style.display=vc?'block':'none';pvOff.style.display=vc?'none':'flex';
+        pvVid.srcObject=stream; camOn=vc; micOn=va;
+        pvVid.style.display=vc?'block':'none'; pvOff.style.display=vc?'none':'flex';
         document.getElementById('camIco').setAttribute('data-lucide',vc?'video':'video-off');
         document.getElementById('camBtn').classList.toggle('muted',!vc);
         document.getElementById('micIco').setAttribute('data-lucide',va?'mic':'mic-off');
@@ -133,31 +175,32 @@
     }
     document.getElementById('camBtn').onclick=()=>applyStream(!camOn,micOn);
     document.getElementById('micBtn').onclick=()=>{
-      if(!stream)return;micOn=!micOn;
+      if(!stream) return; micOn=!micOn;
       stream.getAudioTracks().forEach(t=>t.enabled=micOn);
       document.getElementById('micIco').setAttribute('data-lucide',micOn?'mic':'mic-off');
       document.getElementById('micBtn').classList.toggle('muted',!micOn);
       lucide.createIcons();
     };
     applyStream(true,true);
+
     async function doJoin(){
-      const code=getCode();if(code.length!==6)return;
-      joinBtn.disabled=true;joinBtn.innerHTML='<div class="sp"></div> Verifying...';
+      const code=getCode(); if(code.length!==6) return;
+      joinBtn.disabled=true; joinBtn.innerHTML='<div class="sp"></div> Verifying...';
       try{
         const r=await fetch(API+'/api/meeting/token',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+jwt},body:JSON.stringify({code})});
         const d=await r.json();
         if(!d.ok){
           document.getElementById('errTxt').textContent=d.message||'Invalid or expired meeting code.';
           document.getElementById('errBar').classList.add('show');
-          joinBtn.innerHTML='<i data-lucide="video"></i> Join Meeting';joinBtn.disabled=false;lucide.createIcons();return;
+          joinBtn.innerHTML='<i data-lucide="video"></i> Join Meeting'; joinBtn.disabled=false; lucide.createIcons(); return;
         }
-        if(stream)stream.getTracks().forEach(t=>t.stop());
-        const p=new URLSearchParams({lkToken:d.token,wsUrl:d.wsUrl,room:d.roomName,name:d.displayName,title:d.meetingTitle||'MindWave Class',camOn:camOn?'1':'0',micOn:micOn?'1':'0'});
-        window.location.href='student-meeting-room.html?'+p;
+        if(stream) stream.getTracks().forEach(t=>t.stop());
+        const ps=new URLSearchParams({lkToken:d.token,wsUrl:d.wsUrl,room:d.roomName,name:d.displayName,title:d.meetingTitle||'MindWave Class',camOn:camOn?'1':'0',micOn:micOn?'1':'0'});
+        window.location.href='student-meeting-room.html?'+ps;
       }catch{
         document.getElementById('errTxt').textContent='Network error - please try again.';
         document.getElementById('errBar').classList.add('show');
-        joinBtn.innerHTML='<i data-lucide="video"></i> Join Meeting';joinBtn.disabled=false;lucide.createIcons();
+        joinBtn.innerHTML='<i data-lucide="video"></i> Join Meeting'; joinBtn.disabled=false; lucide.createIcons();
       }
     }
     joinBtn.addEventListener('click',doJoin);
