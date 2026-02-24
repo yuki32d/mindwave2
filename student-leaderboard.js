@@ -1,4 +1,4 @@
-const currentUserEmail = localStorage.getItem('email') || 'student@example.com';
+// currentUserEmail removed — 'You' is now identified by studentId returned from /api/leaderboard (MongoDB)
 let currentTimeFilter = 'all';
 let currentGameFilter = 'all';
 
@@ -50,7 +50,7 @@ function getAccuracyClass(accuracy) {
     return 'low';
 }
 
-function renderPodium(leaderboard) {
+function renderPodium(leaderboard, currentUser) {
     const podium = document.getElementById('podium');
     const top3 = leaderboard.slice(0, 3);
 
@@ -62,9 +62,13 @@ function renderPodium(leaderboard) {
     const medals = ['🥇', '🥈', '🥉'];
     const classes = ['gold', 'silver', 'bronze'];
 
-    podium.innerHTML = top3.map((player, idx) => `
-        <div class="podium-card ${classes[idx]}">
+    podium.innerHTML = top3.map((player, idx) => {
+        const isYou = currentUser && player.studentId &&
+            player.studentId.toString() === currentUser.studentId;
+        return `
+        <div class="podium-card ${classes[idx]}${isYou ? ' current-user' : ''}">
             <span class="medal">${medals[idx]}</span>
+            ${isYou ? '<span class="you-badge">You</span>' : ''}
             <div class="podium-rank">#${idx + 1}</div>
             <div class="podium-name">${player.name}</div>
             <div class="podium-points">${player.totalPoints.toLocaleString()}</div>
@@ -79,10 +83,11 @@ function renderPodium(leaderboard) {
                 </div>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
-function renderLeaderboard(leaderboard) {
+function renderLeaderboard(leaderboard, currentUser) {
     const body = document.getElementById('leaderboardBody');
 
     if (leaderboard.length === 0) {
@@ -99,7 +104,9 @@ function renderLeaderboard(leaderboard) {
 
     body.innerHTML = leaderboard.map((player, idx) => {
         const rank = idx + 1;
-        const isCurrentUser = player.email === currentUserEmail;
+        // Compare by MongoDB studentId — immune to stale localStorage email
+        const isCurrentUser = currentUser && player.studentId &&
+            player.studentId.toString() === currentUser.studentId;
         const progressPercent = (player.totalPoints / maxPoints) * 100;
 
         return `
@@ -109,7 +116,7 @@ function renderLeaderboard(leaderboard) {
                 </div>
                 <div class="player-info">
                     <div class="player-avatar">${getInitials(player.name)}</div>
-                    <div class="player-name">${player.name}${isCurrentUser ? ' (You)' : ''}</div>
+                    <div class="player-name">${player.name}${isCurrentUser ? ' <span class="you-tag">You</span>' : ''}</div>
                 </div>
                 <div>
                     <div class="points-cell">${player.totalPoints.toLocaleString()}</div>
@@ -140,8 +147,8 @@ function updatePersonalStats(currentUser) {
 
 async function render() {
     const { leaderboard, currentUser } = await fetchLeaderboard();
-    renderPodium(leaderboard);
-    renderLeaderboard(leaderboard);
+    renderPodium(leaderboard, currentUser);
+    renderLeaderboard(leaderboard, currentUser);
     updatePersonalStats(currentUser);
 }
 

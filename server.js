@@ -4761,11 +4761,13 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
       ok: true,
       leaderboard: leaderboardData,
       currentUser: currentUserStats ? {
+        studentId: currentUserId,          // ← used by client to mark 'You' from MongoDB
         rank: currentUserRank,
         totalPoints: currentUserStats.totalPoints,
         gamesPlayed: currentUserStats.gamesPlayed,
         avgAccuracy: currentUserStats.avgAccuracy
       } : {
+        studentId: currentUserId,          // ← still expose ID even on no-games fallback
         rank: 0,
         totalPoints: 0,
         gamesPlayed: 0,

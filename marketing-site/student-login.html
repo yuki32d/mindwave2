@@ -521,12 +521,16 @@
                 const data = await response.json();
 
                 if (data.ok) {
-                    // Store authentication data in localStorage
+                    // Clear previous user's session data before storing new one
+                    ['role', 'email', 'token', 'auth_token', 'mindwave_token',
+                        'firstName', 'lastName', 'name', 'profilePhoto', 'student_activities',
+                        'readAnnouncements'].forEach(k => localStorage.removeItem(k));
+
+                    // Store new user's authentication data
                     if (data.user) {
                         localStorage.setItem('role', data.user.role);
                         localStorage.setItem('email', data.user.email);
                         localStorage.setItem('token', data.token || 'authenticated');
-                        // Save name fields so all pages can show the student's real name
                         const fullName = data.user.name || data.user.fullName || '';
                         const firstName = data.user.firstName || fullName.split(' ')[0] || '';
                         const lastName = data.user.lastName || fullName.split(' ').slice(1).join(' ') || '';
