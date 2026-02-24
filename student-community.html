@@ -1,30 +1,30 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community — MindWave</title>
+    <title>Community ï¿½ MindWave</title>
     <meta name="description" content="Share projects, collaborate, and connect with fellow students on MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="theme-init.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="sidebar.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
@@ -79,7 +79,7 @@
         /* -- Light mode: dark pills need light text & icons -- */
         [data-theme="light"] .cm-tab {
             color: #c8ccee;
-            /* light lavender — readable on dark pill */
+            /* light lavender ï¿½ readable on dark pill */
         }
 
         [data-theme="light"] .cm-tab:hover {
@@ -92,7 +92,7 @@
             color: #fff;
         }
 
-        /* Sort buttons also have dark bg — same fix */
+        /* Sort buttons also have dark bg ï¿½ same fix */
         [data-theme="light"] .cm-sort-btn {
             color: #c8ccee;
         }
@@ -245,7 +245,7 @@
             gap: 16px;
         }
 
-        /* Post cards rendered by JS — also make them look premium */
+        /* Post cards rendered by JS ï¿½ also make them look premium */
         #postsContainer .post-card,
         .post-card {
             background: var(--card, #161b2e);
@@ -720,22 +720,30 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loadingâ€¦</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">?</span>
+                    <span class="mw-user-more">â‹¯</span>
+
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student Â· MindWave</div>
                         </div>
-                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
-                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
-                        <a href="student-notifications.html"><i data-lucide="bell"></i> Notifications</a>
+                        <a href="student-profile.html">
+                            <i data-lucide="user"></i> My Profile
+                        </a>
+                        <a href="student-settings.html">
+                            <i data-lucide="settings"></i> Settings
+                        </a>
+                        <a href="student-notifications.html">
+                            <i data-lucide="bell"></i> Notifications
+                        </a>
                     </div>
                 </div>
             </div>
         </aside>
+
 
         <!-- -- MAIN -- -->
         <div class="mw-main" id="mwMain">
@@ -748,7 +756,7 @@
                 <div class="mw-breadcrumb">Dashboard / <span>Community</span></div>
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" id="searchInput" placeholder="Search posts…" autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Search postsï¿½" autocomplete="off">
                 </div>
                 <div class="mw-topbar-actions">
                     <div class="mw-notif-wrap">
@@ -810,7 +818,7 @@
                         <div class="cm-search">
                             <i data-lucide="search"></i>
                             <!-- NOTE: reusing the topbar #searchInput via JS; this is a visual duplicate handled by student-community.js -->
-                            <input type="text" id="searchInputAlt" placeholder="Search posts…" autocomplete="off">
+                            <input type="text" id="searchInputAlt" placeholder="Search postsï¿½" autocomplete="off">
                         </div>
                         <div class="cm-sort-group" id="sortBtns">
                             <button class="cm-sort-btn active" data-sort="recent"><i data-lucide="clock-4"></i>
@@ -924,12 +932,12 @@
                     <div class="cm-form-group">
                         <label for="postTitle">Title *</label>
                         <input type="text" id="postTitle" maxlength="300" required
-                            placeholder="Give your post a catchy title…">
+                            placeholder="Give your post a catchy titleï¿½">
                     </div>
                     <div class="cm-form-group">
                         <label for="postContent">Content *</label>
                         <textarea id="postContent" rows="6" maxlength="5000" required
-                            placeholder="Share your thoughts, project details, or ask a question…"></textarea>
+                            placeholder="Share your thoughts, project details, or ask a questionï¿½"></textarea>
                     </div>
                     <div class="cm-form-group">
                         <label for="postType">Post Type</label>
@@ -982,9 +990,9 @@
     <script>
         // Auth guard
         if (!localStorage.getItem('token')) window.location.href = 'marketing-site/student-login.html';
-    
+
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
@@ -1092,9 +1100,9 @@
 
             lucide.createIcons();
         });
-    
+
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
@@ -1102,14 +1110,14 @@
 
     <script src="student-community.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
     <script src="chatbot.js">
         function doLogout() {
-            ['token','mindwave_token','firstName','lastName','email','role']
+            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
             window.location.replace('marketing-site/student-login.html');
         }
@@ -1122,26 +1130,131 @@
             <h3 class="mw-logout-title">Sign out?</h3>
             <p class="mw-logout-sub">You'll need to log back in to access your dashboard.</p>
             <div class="mw-logout-actions">
-                <button class="mw-logout-cancel" onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
+                <button class="mw-logout-cancel"
+                    onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
                 <button class="mw-logout-confirm" onclick="doLogout()"><i data-lucide="log-out"></i> Sign Out</button>
             </div>
         </div>
     </div>
     <style>
-        .mw-logout-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center}
-        .mw-logout-overlay.active{display:flex;animation:mwFadeIn .18s ease}
-        @keyframes mwFadeIn{from{opacity:0}to{opacity:1}}
-        .mw-logout-modal{background:var(--surface,#1e1e2e);border:1px solid var(--border,rgba(255,255,255,.1));border-radius:20px;padding:2.4rem 2rem 2rem;width:340px;max-width:90vw;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);animation:mwPopUp .22s cubic-bezier(.34,1.56,.64,1)}
-        @keyframes mwPopUp{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
-        .mw-logout-icon{width:64px;height:64px;border-radius:50%;background:rgba(255,92,92,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;color:#ff5c5c}
-        .mw-logout-icon svg{width:28px;height:28px}
-        .mw-logout-title{font-size:1.25rem;font-weight:700;margin:0 0 .5rem;color:var(--text,#fff)}
-        .mw-logout-sub{font-size:.875rem;color:var(--text-muted,#aaa);margin:0 0 2rem;line-height:1.5}
-        .mw-logout-actions{display:flex;gap:.75rem}
-        .mw-logout-cancel,.mw-logout-confirm{flex:1;padding:.75rem 1rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;transition:opacity .15s,transform .15s}
-        .mw-logout-cancel{background:var(--surface-2,#2a2a3e);color:var(--text,#fff)}
-        .mw-logout-confirm{background:linear-gradient(135deg,#ff5c5c,#ff2d2d);color:#fff;display:flex;align-items:center;justify-content:center;gap:.4rem}
-        .mw-logout-cancel:hover,.mw-logout-confirm:hover{opacity:.85;transform:translateY(-1px)}
+        .mw-logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center
+        }
+
+        .mw-logout-overlay.active {
+            display: flex;
+            animation: mwFadeIn .18s ease
+        }
+
+        @keyframes mwFadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .mw-logout-modal {
+            background: var(--surface, #1e1e2e);
+            border: 1px solid var(--border, rgba(255, 255, 255, .1));
+            border-radius: 20px;
+            padding: 2.4rem 2rem 2rem;
+            width: 340px;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+            animation: mwPopUp .22s cubic-bezier(.34, 1.56, .64, 1)
+        }
+
+        @keyframes mwPopUp {
+            from {
+                transform: scale(.88);
+                opacity: 0
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+
+        .mw-logout-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 92, 92, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            color: #ff5c5c
+        }
+
+        .mw-logout-icon svg {
+            width: 28px;
+            height: 28px
+        }
+
+        .mw-logout-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 .5rem;
+            color: var(--text, #fff)
+        }
+
+        .mw-logout-sub {
+            font-size: .875rem;
+            color: var(--text-muted, #aaa);
+            margin: 0 0 2rem;
+            line-height: 1.5
+        }
+
+        .mw-logout-actions {
+            display: flex;
+            gap: .75rem
+        }
+
+        .mw-logout-cancel,
+        .mw-logout-confirm {
+            flex: 1;
+            padding: .75rem 1rem;
+            border-radius: 12px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity .15s, transform .15s
+        }
+
+        .mw-logout-cancel {
+            background: var(--surface-2, #2a2a3e);
+            color: var(--text, #fff)
+        }
+
+        .mw-logout-confirm {
+            background: linear-gradient(135deg, #ff5c5c, #ff2d2d);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem
+        }
+
+        .mw-logout-cancel:hover,
+        .mw-logout-confirm:hover {
+            opacity: .85;
+            transform: translateY(-1px)
+        }
     </style>
 </body>
 
