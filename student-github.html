@@ -3,215 +3,1105 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINDWAVE – GitHub Projects</title>
-    <link rel="stylesheet" href="3d-depth-design.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Projects — MindWave</title>
+    <meta name="description" content="Submit your mini projects and track faculty feedback in MindWave.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script src="theme-init.js"></script>
+    <script src="sidebar.js"></script>
     <style>
-        .submit-section {
-            background: linear-gradient(135deg, rgba(15, 98, 254, 0.1), rgba(138, 63, 252, 0.1));
-            border: 1px solid rgba(15, 98, 254, 0.3);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 32px;
+        /* ── Stats KPI pills ── */
+        .gh-stats-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
         }
 
-        .submit-btn {
-            background: linear-gradient(120deg, #0f62fe, #8a3ffc);
-            color: white;
-            border: none;
-            padding: 14px 28px;
+        .gh-stat-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 18px;
+            min-width: 130px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .gh-stat-pill:hover {
+            border-color: var(--border-2);
+            transform: translateY(-2px);
+        }
+
+        .gh-stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .gh-stat-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .gh-stat-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gh-stat-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .gh-stat-label {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+        }
+
+        /* ── Project cards ── */
+        .gh-cards-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .gh-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px 24px;
+            transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            animation: cardIn 0.3s ease both;
+        }
+
+        .gh-card:hover {
+            border-color: var(--border-2);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .gh-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .gh-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 8px;
+        }
+
+        .gh-card-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        /* Status badges */
+        .gh-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
             border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .gh-badge svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .gh-badge-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--orange, #f59e0b);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .gh-badge-reviewed {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent-2, #818cf8);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .gh-badge-graded {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--green, #22d3a5);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        /* Tech stack tags */
+        .gh-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .gh-tag {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 6px;
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--accent-2, #818cf8);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        /* Link buttons */
+        .gh-link-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .gh-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 12.5px;
+            font-weight: 600;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .gh-link-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .gh-link-btn:hover {
+            background: rgba(99, 102, 241, 0.12);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: var(--accent-2, #818cf8);
+        }
+
+        /* Grade chip */
+        .gh-grade {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--green, #22d3a5);
+            white-space: nowrap;
+        }
+
+        /* Delete button */
+        .gh-delete-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 13px;
+            background: rgba(244, 63, 94, 0.08);
+            border: 1px solid rgba(244, 63, 94, 0.25);
+            border-radius: 8px;
+            color: var(--red, #f43f5e);
+            font-size: 12.5px;
             font-weight: 600;
             cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: background 0.2s, border-color 0.2s;
+            flex-shrink: 0;
         }
 
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(15, 98, 254, 0.4);
+        .gh-delete-btn svg {
+            width: 14px;
+            height: 14px;
         }
 
-        .project-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            transition: all 0.3s;
+        .gh-delete-btn:hover {
+            background: rgba(244, 63, 94, 0.18);
+            border-color: rgba(244, 63, 94, 0.5);
         }
 
-        .project-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(15, 98, 254, 0.5);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        /* Feedback block */
+        .gh-feedback {
+            background: rgba(99, 102, 241, 0.07);
+            border-left: 3px solid var(--accent, #6366f1);
+            border-radius: 0 10px 10px 0;
+            padding: 12px 16px;
+            margin-bottom: 14px;
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-pending {
-            background: rgba(255, 159, 10, 0.2);
-            color: #ff9f0a;
-        }
-
-        .status-reviewed {
-            background: rgba(15, 98, 254, 0.2);
-            color: #0f62fe;
-        }
-
-        .status-graded {
-            background: rgba(52, 199, 89, 0.2);
-            color: #34c759;
-        }
-
-        .grade-display {
-            font-size: 32px;
+        .gh-feedback-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             font-weight: 700;
-            background: linear-gradient(120deg, #0f62fe, #8a3ffc);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 12px;
+            color: var(--accent-2, #818cf8);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
         }
 
-        .modal {
+        .gh-feedback-label svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .gh-feedback-text {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .gh-feedback-by {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 6px;
+            opacity: 0.7;
+        }
+
+        /* Timestamp */
+        .gh-timestamp {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .gh-timestamp svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        /* Empty state */
+        .gh-empty {
+            text-align: center;
+            padding: 64px 24px;
+            color: var(--muted);
+        }
+
+        .gh-empty-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: var(--accent-2, #818cf8);
+        }
+
+        .gh-empty-icon svg {
+            width: 34px;
+            height: 34px;
+        }
+
+        .gh-empty h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 8px;
+        }
+
+        .gh-empty p {
+            font-size: 13px;
+            max-width: 300px;
+            margin: 0 auto 24px;
+            line-height: 1.6;
+        }
+
+        /* ── Submit Modal ── */
+        .gh-modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9000;
             align-items: center;
             justify-content: center;
         }
 
-        .modal-content {
-            background: #1a1d2e;
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 600px;
+        .gh-modal-overlay.open {
+            display: flex;
+            animation: mwFadeIn 0.18s ease;
+        }
+
+        @keyframes mwFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .gh-modal {
+            background: var(--surface);
+            border: 1px solid var(--border-2);
+            border-radius: 20px;
+            padding: 28px;
             width: 90%;
+            max-width: 520px;
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: 0 28px 64px rgba(0, 0, 0, 0.5);
+            animation: mwPopUp 0.22s cubic-bezier(.34, 1.56, .64, 1);
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        @keyframes mwPopUp {
+            from {
+                transform: scale(0.88);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #f5f7ff;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #f5f7ff;
-            font-family: inherit;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .demo-preview {
-            width: 100%;
-            height: 400px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            margin-top: 16px;
-        }
-
-        .link-btn {
-            display: inline-flex;
+        .gh-modal-header {
+            display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #58a6ff;
-            text-decoration: none;
-            font-size: 14px;
-            transition: all 0.2s;
+            justify-content: space-between;
+            margin-bottom: 22px;
         }
 
-        .link-btn:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: #58a6ff;
+        .gh-modal-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .gh-modal-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--accent-2);
+        }
+
+        .gh-modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            transition: background 0.2s;
+        }
+
+        .gh-modal-close:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+        }
+
+        .gh-modal-close svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Form fields */
+        .gh-form-group {
+            margin-bottom: 18px;
+        }
+
+        .gh-form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 7px;
+        }
+
+        .gh-form-group input,
+        .gh-form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 13.5px;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .gh-form-group input:focus,
+        .gh-form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .gh-form-group textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .gh-form-hint {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 5px;
+            opacity: 0.75;
+        }
+
+        .gh-form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        /* ── Delete Confirm Modal ── */
+        .gh-confirm-modal {
+            background: var(--surface);
+            border: 1px solid var(--border-2);
+            border-radius: 20px;
+            padding: 28px 28px 24px;
+            width: 90%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 28px 64px rgba(0, 0, 0, 0.5);
+            animation: mwPopUp 0.22s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        .gh-confirm-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(244, 63, 94, 0.12);
+            color: var(--red, #f43f5e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .gh-confirm-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .gh-confirm-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+
+        .gh-confirm-sub {
+            font-size: 13px;
+            color: var(--muted);
+            margin: 0 0 22px;
+            line-height: 1.5;
+        }
+
+        .gh-confirm-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* ── Toast ── */
+        #gh-toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .gh-toast {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            pointer-events: all;
+            animation: toastIn 0.3s cubic-bezier(.34, 1.56, .64, 1);
+            min-width: 220px;
+            max-width: 340px;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .gh-toast.out {
+            animation: toastOut 0.25s ease forwards;
+        }
+
+        @keyframes toastOut {
+            to {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+        }
+
+        .gh-toast svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .gh-toast-success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            color: #22c55e;
+        }
+
+        .gh-toast-error {
+            background: rgba(244, 63, 94, 0.15);
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            color: #f43f5e;
+        }
+
+        .gh-toast-info {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: var(--accent-2, #818cf8);
+        }
+
+        /* Logout modal (shared pattern) */
+        .mw-logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mw-logout-overlay.active {
+            display: flex;
+            animation: mwFadeIn .18s ease;
+        }
+
+        .mw-logout-modal {
+            background: var(--surface, #1e1e2e);
+            border: 1px solid var(--border, rgba(255, 255, 255, .1));
+            border-radius: 20px;
+            padding: 2.4rem 2rem 2rem;
+            width: 340px;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+            animation: mwPopUp .22s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        .mw-logout-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 92, 92, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            color: #ff5c5c;
+        }
+
+        .mw-logout-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .mw-logout-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 .5rem;
+            color: var(--text, #fff);
+        }
+
+        .mw-logout-sub {
+            font-size: .875rem;
+            color: var(--muted, #aaa);
+            margin: 0 0 2rem;
+            line-height: 1.5;
+        }
+
+        .mw-logout-actions {
+            display: flex;
+            gap: .75rem;
+        }
+
+        .mw-logout-cancel,
+        .mw-logout-confirm {
+            flex: 1;
+            padding: .75rem 1rem;
+            border-radius: 12px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity .15s, transform .15s;
+        }
+
+        .mw-logout-cancel {
+            background: var(--surface-alt, rgba(255, 255, 255, .08));
+            color: var(--muted, #aaa);
+        }
+
+        .mw-logout-confirm {
+            background: #ff5c5c;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem;
+        }
+
+        .mw-logout-confirm svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Light mode form */
+        [data-theme="light"] .gh-form-group input,
+        [data-theme="light"] .gh-form-group textarea {
+            background: #f4f5f8;
         }
     </style>
 </head>
 
-<body data-theme="dark" data-role="student" data-section="github">
-    <div class="page-shell">
-        <header class="hero">
-            <p class="eyebrow">Student Space</p>
-            <h1>GitHub Projects</h1>
-            <p class="lede">Submit your mini projects and track faculty feedback - all within MindWave.</p>
-            <div class="hero-actions">
-                <button class="submit-btn" id="submitNewProjectBtn">📤 Submit New Project</button>
-                <a class="ghost-link" href="homepage.html">← Back to Dashboard</a>
-            </div>
-        </header>
+<body>
+    <div class="mw-app" id="mwApp">
 
-        <!-- My Submissions Section -->
-        <section style="margin-top: 48px;">
-            <h2 style="margin-bottom: 24px; font-size: 28px;">My Submissions</h2>
-            <div id="projectsList" style="display: grid; gap: 24px;">
-                <!-- Projects loaded via JS -->
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar" id="mwSidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
             </div>
-        </section>
-    </div>
 
-    <!-- Submit Project Modal -->
-    <div id="submitModal" class="modal">
-        <div class="modal-content">
-            <h2 style="margin-top: 0;">Submit New Project</h2>
+            <div class="mw-sidebar-nav">
+
+                <!-- Main Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+                    </a>
+                    <a href="student-courses.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
+                    </a>
+                    <a href="student-timetable.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
+                    </a>
+                    <a href="student-performance.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
+                    </a>
+                    <a href="student-leaderboard.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="trophy"></i></span> Leaderboard
+                        <span class="mw-nav-badge" style="font-size:10px;">HOT</span>
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Engage Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="gamepad-2"></i></span> Play Games
+                    </a>
+                    <a href="student-community.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Community
+                    </a>
+                    <a href="student-achievements.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="award"></i></span> Achievements
+                    </a>
+                    <a href="student-upcoming-events.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="megaphone"></i></span> Events
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Tools Nav -->
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
+                    </a>
+                    <a href="student-ai-tutor.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
+                    </a>
+                    <a href="student-github.html" class="mw-nav-item active">
+                        <span class="mw-nav-icon"><i data-lucide="github"></i></span> GitHub Projects
+                    </a>
+                    <a href="student-live-meeting.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="video"></i></span> Web Conf
+                    </a>
+                    <a href="student-reports.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
+                    </a>
+                    <a href="student-settings.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <!-- Logout -->
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#f43f5e);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
+
+            </div><!-- end mw-sidebar-nav -->
+
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                    <span class="mw-user-more">⋯</span>
+
+                    <div id="profileDropdown" class="mw-profile-dropdown">
+                        <div class="mw-profile-dropdown-header">
+                            <div class="name" id="dropdownUserName">Student</div>
+                            <div class="role">Student · MindWave</div>
+                        </div>
+                        <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
+                        <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
+                        <a href="student-notifications.html"><i data-lucide="bell"></i> Notifications</a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
+
+            <!-- TOPBAR -->
+            <header class="mw-topbar">
+                <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="mw-breadcrumb">Tools / <span>GitHub Projects</span></div>
+
+                <div class="mw-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search projects…" id="projectSearch">
+                </div>
+
+                <div class="mw-topbar-actions">
+                    <div class="mw-notif-wrap">
+                        <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="mw-notif-dot hidden" id="notificationBadge"></span>
+                        </div>
+                        <div class="mw-notif-dropdown" id="notificationDropdown"></div>
+                    </div>
+                    <div class="mw-icon-btn" id="settingsBtn" title="Settings">
+                        <i data-lucide="settings"></i>
+                    </div>
+                    <button class="mw-theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <div class="mw-content">
+
+                <!-- Page header row -->
+                <div
+                    style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+                    <div>
+                        <div style="font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;">GitHub Projects</div>
+                        <div style="font-size:13px;color:var(--muted);margin-top:3px;">Submit mini projects and track
+                            faculty feedback</div>
+                    </div>
+                    <button class="mw-btn mw-btn-primary" id="submitNewProjectBtn">
+                        <i data-lucide="upload"></i> Submit New Project
+                    </button>
+                </div>
+
+                <!-- Stats KPI pills -->
+                <div class="gh-stats-row" id="ghStatsRow">
+                    <div class="gh-stat-pill">
+                        <div class="gh-stat-icon"
+                            style="background:rgba(99,102,241,0.12);color:var(--accent-2,#818cf8);">
+                            <i data-lucide="folder-git-2"></i>
+                        </div>
+                        <div class="gh-stat-body">
+                            <div class="gh-stat-value" id="statTotal">—</div>
+                            <div class="gh-stat-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="gh-stat-pill">
+                        <div class="gh-stat-icon" style="background:rgba(245,158,11,0.12);color:var(--orange,#f59e0b);">
+                            <i data-lucide="clock"></i>
+                        </div>
+                        <div class="gh-stat-body">
+                            <div class="gh-stat-value" id="statPending">—</div>
+                            <div class="gh-stat-label">Pending</div>
+                        </div>
+                    </div>
+                    <div class="gh-stat-pill">
+                        <div class="gh-stat-icon"
+                            style="background:rgba(99,102,241,0.12);color:var(--accent-2,#818cf8);">
+                            <i data-lucide="eye"></i>
+                        </div>
+                        <div class="gh-stat-body">
+                            <div class="gh-stat-value" id="statReviewed">—</div>
+                            <div class="gh-stat-label">Reviewed</div>
+                        </div>
+                    </div>
+                    <div class="gh-stat-pill">
+                        <div class="gh-stat-icon" style="background:rgba(34,197,94,0.12);color:var(--green,#22d3a5);">
+                            <i data-lucide="check-circle-2"></i>
+                        </div>
+                        <div class="gh-stat-body">
+                            <div class="gh-stat-value" id="statGraded">—</div>
+                            <div class="gh-stat-label">Graded</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects list -->
+                <div id="projectsList" class="gh-cards-grid">
+                    <!-- Loading skeleton -->
+                    <div class="gh-card" style="opacity:0.4;">
+                        <div
+                            style="height:20px;width:40%;background:var(--surface-2);border-radius:6px;margin-bottom:12px;">
+                        </div>
+                        <div
+                            style="height:14px;width:70%;background:var(--surface-2);border-radius:6px;margin-bottom:8px;">
+                        </div>
+                        <div style="height:14px;width:55%;background:var(--surface-2);border-radius:6px;"></div>
+                    </div>
+                </div>
+
+            </div><!-- end mw-content -->
+        </div><!-- end mw-main -->
+    </div><!-- end mw-app -->
+
+    <!-- ── SUBMIT MODAL ── -->
+    <div id="submitModal" class="gh-modal-overlay">
+        <div class="gh-modal">
+            <div class="gh-modal-header">
+                <div class="gh-modal-title">
+                    <i data-lucide="upload"></i>
+                    Submit New Project
+                </div>
+                <button class="gh-modal-close" id="cancelSubmitBtn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
             <form id="submitForm">
-                <div class="form-group">
-                    <label for="projectName">Project Name *</label>
+                <div class="gh-form-group">
+                    <label>Project Name *</label>
                     <input type="text" id="projectName" required placeholder="My Awesome Project">
                 </div>
-                <div class="form-group">
-                    <label for="description">Description *</label>
-                    <textarea id="description" required placeholder="Describe your project..."></textarea>
+                <div class="gh-form-group">
+                    <label>Description *</label>
+                    <textarea id="description" required placeholder="What does your project do?"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="githubRepoUrl">GitHub Repository URL *</label>
+                <div class="gh-form-group">
+                    <label>GitHub Repository URL *</label>
                     <input type="url" id="githubRepoUrl" required placeholder="https://github.com/username/repo">
                 </div>
-                <div class="form-group">
-                    <label for="liveDemoUrl">Live Demo URL (Optional)</label>
+                <div class="gh-form-group">
+                    <label>Live Demo URL <span
+                            style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">(optional)</span></label>
                     <input type="url" id="liveDemoUrl" placeholder="https://yourproject.vercel.app">
-                    <small style="color: var(--text-muted); font-size: 12px;">Vercel, Netlify, GitHub Pages,
-                        etc.</small>
+                    <div class="gh-form-hint">Vercel, Netlify, GitHub Pages, etc.</div>
                 </div>
-                <div style="display: flex; gap: 12px; margin-top: 24px;">
-                    <button type="submit" class="submit-btn">Submit Project</button>
-                    <button type="button" class="ghost-link" id="cancelSubmitBtn"
-                        style="padding: 14px 28px;">Cancel</button>
+                <div class="gh-form-group">
+                    <label>Tech Stack Tags <span
+                            style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">(optional)</span></label>
+                    <input type="text" id="techTags" placeholder="React, Node.js, MongoDB">
+                    <div class="gh-form-hint">Comma-separated list of technologies used</div>
+                </div>
+                <div class="gh-form-actions">
+                    <button type="submit" class="mw-btn mw-btn-primary" id="submitProjectBtn">
+                        <i data-lucide="upload"></i> Submit Project
+                    </button>
+                    <button type="button" class="mw-btn mw-btn-ghost" id="cancelSubmitBtn2">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- ── DELETE CONFIRM MODAL ── -->
+    <div id="deleteModal" class="gh-modal-overlay">
+        <div class="gh-confirm-modal">
+            <div class="gh-confirm-icon">
+                <i data-lucide="trash-2"></i>
+            </div>
+            <div class="gh-confirm-title">Delete Project?</div>
+            <div class="gh-confirm-sub" id="deleteModalSub">This action cannot be undone.</div>
+            <div class="gh-confirm-actions">
+                <button class="mw-btn mw-btn-ghost" id="deleteCancelBtn" style="flex:1;">Cancel</button>
+                <button class="mw-btn" id="deleteConfirmBtn" style="flex:1;background:#f43f5e;color:#fff;border:none;">
+                    <i data-lucide="trash-2"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── LOGOUT MODAL ── -->
+    <div id="logoutModal" class="mw-logout-overlay">
+        <div class="mw-logout-modal">
+            <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
+            <h3 class="mw-logout-title">Sign out?</h3>
+            <p class="mw-logout-sub">You'll need to log back in to access your dashboard.</p>
+            <div class="mw-logout-actions">
+                <button class="mw-logout-cancel"
+                    onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
+                <button class="mw-logout-confirm" onclick="doLogout()">
+                    <i data-lucide="log-out"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="gh-toast-container"></div>
+
+    <!-- ── SCRIPTS ── -->
+    <script>
+        // Auth
+        function doLogout() {
+            ['token', 'mindwave_token', 'email', 'firstName', 'lastName', 'role', 'userId'].forEach(k => localStorage.removeItem(k));
+            sessionStorage.clear();
+            window.location.replace('marketing-site/student-login.html');
+        }
+        function performLogout() { document.getElementById('logoutModal').classList.add('active'); }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Profile init
+            const firstName = localStorage.getItem('firstName') || '';
+            const lastName = localStorage.getItem('lastName') || '';
+            const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Student';
+            const initials = (firstName[0] || '') + (lastName[0] || '') || 'ST';
+
+            ['sidebarUserName', 'dropdownUserName'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = firstName || fullName;
+            });
+            const avatarEl = document.getElementById('avatarInitials');
+            if (avatarEl) avatarEl.textContent = initials.toUpperCase();
+
+            // Profile dropdown
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', () => {
+                    const open = profileDropdown.style.display === 'flex';
+                    profileDropdown.style.display = open ? 'none' : 'flex';
+                });
+                document.addEventListener('click', e => {
+                    if (!profileToggle.contains(e.target) && !profileDropdown.contains(e.target))
+                        profileDropdown.style.display = 'none';
+                });
+            }
+
+            // Logout
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', performLogout);
+
+            // Theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    const html = document.documentElement;
+                    const isDark = html.getAttribute('data-theme') === 'dark';
+                    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+                    localStorage.setItem('mw_theme', isDark ? 'light' : 'dark');
+                });
+            }
+
+            // Settings btn → settings page
+            const settingsBtn = document.getElementById('settingsBtn');
+            if (settingsBtn) settingsBtn.addEventListener('click', () => window.location.href = 'student-settings.html');
+
+            // Live search filter
+            const searchInput = document.getElementById('projectSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    const q = searchInput.value.toLowerCase();
+                    document.querySelectorAll('.gh-card').forEach(card => {
+                        const text = card.textContent.toLowerCase();
+                        card.style.display = text.includes(q) ? '' : 'none';
+                    });
+                });
+            }
+
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
+
     <script src="student-github.js"></script>
-    <script src="chatbot.js"></script></body>
+
+    <script>lucide.createIcons();</script>
+</body>
 
 </html>

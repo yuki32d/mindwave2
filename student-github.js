@@ -1,241 +1,387 @@
-// Student GitHub Projects Page
+// Student GitHub Projects Page — Redesigned
+// Uses toast notifications and modal dialogs instead of browser alerts/confirms
 
 document.addEventListener('DOMContentLoaded', () => {
     loadMyProjects();
 
-    // Add event listeners for buttons
+    // Submit modal triggers
     document.getElementById('submitNewProjectBtn')?.addEventListener('click', openSubmitModal);
     document.getElementById('cancelSubmitBtn')?.addEventListener('click', closeSubmitModal);
+    document.getElementById('cancelSubmitBtn2')?.addEventListener('click', closeSubmitModal);
+
+    // Delete modal cancel
+    document.getElementById('deleteCancelBtn')?.addEventListener('click', () => {
+        document.getElementById('deleteModal').classList.remove('open');
+    });
+
+    // Submit form
+    document.getElementById('submitForm')?.addEventListener('submit', handleSubmit);
 });
 
-// Load student's submitted projects
+// ── Load Projects ──────────────────────────────────────────────────────────────
 async function loadMyProjects() {
     try {
-        const response = await fetch('/api/projects/my', {
-            credentials: 'include'
-        });
-
+        const response = await fetch('/api/projects/my', { credentials: 'include' });
         const data = await response.json();
 
         if (data.ok) {
             renderProjects(data.projects);
+            updateStats(data.projects);
         } else {
-            showError('Failed to load projects');
+            showPageError('Failed to load projects. Please refresh.');
         }
     } catch (error) {
         console.error('Load projects error:', error);
-        showError('Network error');
+        showPageError('Network error — check your connection.');
     }
 }
 
-// Render projects list
+// ── Stats Bar ─────────────────────────────────────────────────────────────────
+function updateStats(projects) {
+    const total = projects.length;
+    const pending = projects.filter(p => p.status === 'pending').length;
+    const reviewed = projects.filter(p => p.status === 'reviewed').length;
+    const graded = projects.filter(p => p.status === 'graded').length;
+
+    setStatEl('statTotal', total);
+    setStatEl('statPending', pending);
+    setStatEl('statReviewed', reviewed);
+    setStatEl('statGraded', graded);
+}
+
+function setStatEl(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+}
+
+// ── Render Projects ───────────────────────────────────────────────────────────
 function renderProjects(projects) {
     const container = document.getElementById('projectsList');
 
     if (projects.length === 0) {
         container.innerHTML = `
-            <div style="text-align: center; padding: 48px; color: var(--text-muted);">
-                <div style="font-size: 48px; margin-bottom: 16px;">📦</div>
+            <div class="gh-empty">
+                <div class="gh-empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+                        <path d="M9 18c-4.51 2-5-2-7-2"/>
+                    </svg>
+                </div>
                 <h3>No Projects Yet</h3>
-                <p>Submit your first project to get started!</p>
+                <p>Submit your first project and get feedback from your faculty.</p>
+                <button class="mw-btn mw-btn-primary" onclick="openSubmitModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Submit First Project
+                </button>
             </div>
         `;
         return;
     }
 
-    container.innerHTML = projects.map(project => `
-        <div class="project-card">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+    container.innerHTML = projects.map((project, i) => `
+        <div class="gh-card" style="animation-delay:${i * 0.05}s">
+            <div class="gh-card-top">
                 <div>
-                    <h3 style="margin: 0 0 8px; font-size: 20px;">${escapeHtml(project.projectName)}</h3>
-                    <span class="status-badge status-${project.status}">${formatStatus(project.status)}</span>
+                    <h3 class="gh-card-title">${escapeHtml(project.projectName)}</h3>
+                    <span class="gh-badge ${getBadgeClass(project.status)}">
+                        ${getStatusIcon(project.status)} ${formatStatus(project.status)}
+                    </span>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    ${project.grade !== null && project.grade !== undefined ? `
-                        <div class="grade-display">${project.grade}/100</div>
-                    ` : ''}
-                    <button class="delete-project-btn" data-project-id="${project._id}" data-project-name="${escapeHtml(project.projectName)}" style="background: rgba(255, 59, 48, 0.2); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.3); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s; font-weight: 600;" title="Delete project">
-                        🗑️ Delete
+                <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+                    ${project.grade !== null && project.grade !== undefined
+            ? `<div class="gh-grade">${project.grade}<span style="font-size:.9rem;opacity:.6;">/100</span></div>`
+            : ''}
+                    <button class="gh-delete-btn" data-project-id="${project._id}" data-project-name="${escapeHtml(project.projectName)}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                        Delete
                     </button>
                 </div>
             </div>
 
-            <p style="color: var(--text-muted); margin-bottom: 16px;">${escapeHtml(project.description)}</p>
+            <p class="gh-card-desc">${escapeHtml(project.description)}</p>
 
-            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
-                <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" class="link-btn">
-                    🐙 View on GitHub
+            ${renderTags(project.techTags)}
+
+            <div class="gh-link-row">
+                <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" rel="noopener" class="gh-link-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+                        <path d="M9 18c-4.51 2-5-2-7-2"/>
+                    </svg>
+                    View on GitHub
                 </a>
                 ${project.liveDemoUrl ? `
-                    <a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" class="link-btn">
-                        🚀 View Live Demo
+                    <a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" rel="noopener" class="gh-link-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            <polyline points="15 3 21 3 21 9"/>
+                            <line x1="10" y1="14" x2="21" y2="3"/>
+                        </svg>
+                        Live Demo
                     </a>
                 ` : ''}
             </div>
 
             ${project.feedback ? `
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 12px; border-left: 3px solid #0f62fe;">
-                    <div style="font-weight: 600; margin-bottom: 8px; color: #0f62fe;">Faculty Feedback</div>
-                    <p style="margin: 0; color: var(--text-muted);">${escapeHtml(project.feedback)}</p>
+                <div class="gh-feedback">
+                    <div class="gh-feedback-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        Faculty Feedback
+                    </div>
+                    <div class="gh-feedback-text">${escapeHtml(project.feedback)}</div>
                     ${project.reviewedBy ? `
-                        <small style="color: var(--text-muted); margin-top: 8px; display: block;">
+                        <div class="gh-feedback-by">
                             Reviewed by ${escapeHtml(project.reviewedBy.name || project.reviewedBy.email)}
-                        </small>
+                        </div>
                     ` : ''}
                 </div>
             ` : ''}
 
-            <div style="margin-top: 16px; font-size: 12px; color: var(--text-muted);">
+            <div class="gh-timestamp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
                 Submitted ${formatDate(project.submittedAt)}
             </div>
         </div>
     `).join('');
 
-    // Add event listeners to delete buttons
-    document.querySelectorAll('.delete-project-btn').forEach(btn => {
+    // Wire delete buttons
+    document.querySelectorAll('.gh-delete-btn').forEach(btn => {
         btn.addEventListener('click', function () {
-            const projectId = this.getAttribute('data-project-id');
-            const projectName = this.getAttribute('data-project-name');
-            deleteProject(projectId, projectName);
+            openDeleteModal(this.dataset.projectId, this.dataset.projectName);
         });
     });
 }
 
-// Open submit modal
-function openSubmitModal() {
-    document.getElementById('submitModal').style.display = 'flex';
+// ── Tag Rendering ─────────────────────────────────────────────────────────────
+function renderTags(tags) {
+    if (!tags || (Array.isArray(tags) && tags.length === 0)) return '';
+    const tagList = Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(Boolean);
+    if (tagList.length === 0) return '';
+    return `<div class="gh-tags">${tagList.map(t => `<span class="gh-tag">${escapeHtml(t)}</span>`).join('')}</div>`;
 }
 
-// Close submit modal
+// ── Submit Modal ──────────────────────────────────────────────────────────────
+function openSubmitModal() {
+    document.getElementById('submitModal').classList.add('open');
+}
+
 function closeSubmitModal() {
-    document.getElementById('submitModal').style.display = 'none';
+    document.getElementById('submitModal').classList.remove('open');
     document.getElementById('submitForm').reset();
 }
 
-// Handle form submission
-document.getElementById('submitForm')?.addEventListener('submit', async (e) => {
+async function handleSubmit(e) {
     e.preventDefault();
 
     const projectName = document.getElementById('projectName').value.trim();
     const description = document.getElementById('description').value.trim();
     const githubRepoUrl = document.getElementById('githubRepoUrl').value.trim();
     const liveDemoUrl = document.getElementById('liveDemoUrl').value.trim();
+    const techTagsRaw = document.getElementById('techTags').value.trim();
+    const techTags = techTagsRaw ? techTagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
 
-    // Validate GitHub URL
     if (!githubRepoUrl.includes('github.com')) {
-        alert('Please enter a valid GitHub repository URL');
+        showToast('Please enter a valid GitHub repository URL', 'error');
         return;
     }
+
+    const btn = document.getElementById('submitProjectBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        style="animation:spin 1s linear infinite">
+        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+        <path d="M21 3v5h-5"/>
+    </svg> Submitting…`;
 
     try {
         const response = await fetch('/api/projects/submit', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({
-                projectName,
-                description,
-                githubRepoUrl,
-                liveDemoUrl: liveDemoUrl || null
-            })
+            body: JSON.stringify({ projectName, description, githubRepoUrl, liveDemoUrl: liveDemoUrl || null, techTags })
         });
 
         const data = await response.json();
 
         if (data.ok) {
-            alert('✅ Project submitted successfully!');
+            showToast('Project submitted successfully!', 'success');
             closeSubmitModal();
-            loadMyProjects(); // Reload projects list
+            loadMyProjects();
         } else {
-            alert('❌ ' + (data.message || 'Failed to submit project'));
+            showToast(data.message || 'Failed to submit project', 'error');
         }
     } catch (error) {
         console.error('Submit error:', error);
-        alert('❌ Network error. Please try again.');
+        showToast('Network error — please try again.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg> Submit Project`;
     }
-});
-
-// View live demo in modal
-function viewDemo(url, projectName) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.style.display = 'flex';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 1200px; width: 95%;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 style="margin: 0;">${escapeHtml(projectName)} - Live Demo</h2>
-                <button onclick="this.closest('.modal').remove()" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
-            </div>
-            <iframe src="${escapeHtml(url)}" class="demo-preview" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-            <div style="margin-top: 16px;">
-                <a href="${escapeHtml(url)}" target="_blank" class="link-btn">🔗 Open in New Tab</a>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.remove();
-        }
-    });
 }
 
-// Delete a project
-async function deleteProject(projectId, projectName) {
-    const confirmed = confirm(`Are you sure you want to delete "${projectName}"?\n\nThis action cannot be undone.`);
+// ── Delete Modal ──────────────────────────────────────────────────────────────
+let _deleteId = null;
+let _deleteName = null;
 
-    if (!confirmed) {
-        return;
-    }
+function openDeleteModal(projectId, projectName) {
+    _deleteId = projectId;
+    _deleteName = projectName;
+
+    const sub = document.getElementById('deleteModalSub');
+    if (sub) sub.textContent = `"${projectName}" will be permanently removed.`;
+
+    document.getElementById('deleteModal').classList.add('open');
+
+    // Wire confirm button (replace to remove old listeners)
+    const confirmBtn = document.getElementById('deleteConfirmBtn');
+    const newBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+    newBtn.addEventListener('click', () => deleteProject(_deleteId, _deleteName));
+}
+
+async function deleteProject(projectId, projectName) {
+    document.getElementById('deleteModal').classList.remove('open');
+    showToast('Deleting project…', 'info');
 
     try {
         const response = await fetch(`/api/projects/${projectId}`, {
             method: 'DELETE',
             credentials: 'include'
         });
-
         const data = await response.json();
 
         if (data.ok) {
-            alert('✅ Project deleted successfully!');
-            loadMyProjects(); // Reload the projects list
+            showToast('Project deleted successfully', 'success');
+            loadMyProjects();
         } else {
-            alert('❌ ' + (data.message || 'Failed to delete project'));
+            showToast(data.message || 'Failed to delete project', 'error');
         }
     } catch (error) {
         console.error('Delete project error:', error);
-        alert('❌ Network error. Please try again.');
+        showToast('Network error — please try again.', 'error');
     }
 }
 
-// Helper functions
-function formatStatus(status) {
-    const statusMap = {
-        'pending': '⏳ Pending Review',
-        'reviewed': '👀 Reviewed',
-        'graded': '✅ Graded'
+// ── Toast System ──────────────────────────────────────────────────────────────
+function showToast(message, type = 'info') {
+    const container = document.getElementById('gh-toast-container');
+    if (!container) return;
+
+    const icons = {
+        success: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>`,
+        error: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>`,
+        info: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>`
     };
-    return statusMap[status] || status;
+
+    const toast = document.createElement('div');
+    toast.className = `gh-toast gh-toast-${type}`;
+    toast.innerHTML = `${icons[type] || icons.info}<span>${message}</span>`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('out');
+        toast.addEventListener('animationend', () => toast.remove());
+    }, 3500);
+}
+
+// ── Page Error ─────────────────────────────────────────────────────────────────
+function showPageError(message) {
+    const container = document.getElementById('projectsList');
+    container.innerHTML = `
+        <div class="gh-empty">
+            <div class="gh-empty-icon" style="background:rgba(244,63,94,0.1);color:#f43f5e;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <h3>Something went wrong</h3>
+            <p>${escapeHtml(message)}</p>
+            <button class="mw-btn mw-btn-primary" onclick="loadMyProjects()">Retry</button>
+        </div>
+    `;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function getBadgeClass(status) {
+    return { pending: 'gh-badge-pending', reviewed: 'gh-badge-reviewed', graded: 'gh-badge-graded' }[status] || '';
+}
+
+function getStatusIcon(status) {
+    const icons = {
+        pending: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+        </svg>`,
+        reviewed: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+        </svg>`,
+        graded: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>`
+    };
+    return icons[status] || '';
+}
+
+function formatStatus(status) {
+    return { pending: 'Pending Review', reviewed: 'Reviewed', graded: 'Graded' }[status] || status;
 }
 
 function formatDate(dateString) {
     const date = new Date(dateString);
     const now = new Date();
-    const diffMs = now - date;
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffDays = Math.floor((now - date) / 86400000);
 
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
 
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function escapeHtml(text) {
@@ -245,21 +391,18 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-function showError(message) {
-    const container = document.getElementById('projectsList');
-    container.innerHTML = `
-        <div style="text-align: center; padding: 48px; color: #ff3b30;">
-            <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
-            <h3>Error</h3>
-            <p>${escapeHtml(message)}</p>
-            <button onclick="loadMyProjects()" class="submit-btn" style="margin-top: 16px;">Retry</button>
-        </div>
-    `;
-}
+// Close modals on overlay click
+['submitModal', 'deleteModal'].forEach(id => {
+    document.getElementById(id)?.addEventListener('click', function (e) {
+        if (e.target === this) this.classList.remove('open');
+    });
+});
 
-// Close modal on escape key
-document.addEventListener('keydown', (e) => {
+// Escape key closes top-most open modal
+document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-        closeSubmitModal();
+        ['deleteModal', 'submitModal'].forEach(id => {
+            document.getElementById(id)?.classList.remove('open');
+        });
     }
 });
