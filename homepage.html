@@ -239,7 +239,11 @@
                     <a href="student-ai-tutor.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
                     </a>
-                <a href="student-live-meeting.html" class="mw-nav-item"><span class="mw-nav-icon"><i data-lucide="video"></i></span> Web Conf</a>
+                    <a href="student-github.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="github"></i></span> GitHub Projects
+                    </a>
+                    <a href="student-live-meeting.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="video"></i></span> Web Conf</a>
 
                     <a href="student-reports.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
@@ -639,15 +643,15 @@
                 if (!json.ok || !json.user) return;
                 const u = json.user;
 
-                const fullName  = u.name || u.fullName || '';
+                const fullName = u.name || u.fullName || '';
                 const firstName = u.firstName || fullName.split(' ')[0] || '';
-                const lastName  = u.lastName  || fullName.split(' ').slice(1).join(' ') || '';
-                const display   = firstName || fullName || 'Student';
+                const lastName = u.lastName || fullName.split(' ').slice(1).join(' ') || '';
+                const display = firstName || fullName || 'Student';
 
                 if (firstName) {
                     localStorage.setItem('firstName', firstName);
-                    localStorage.setItem('lastName',  lastName);
-                    localStorage.setItem('name',      fullName || firstName);
+                    localStorage.setItem('lastName', lastName);
+                    localStorage.setItem('name', fullName || firstName);
                 }
 
                 const hh = new Date().getHours();
@@ -655,18 +659,18 @@
                 const greetEl = document.querySelector('.greeting-name');
                 if (greetEl) greetEl.innerHTML = gr + ', <span>' + display + '</span> \u{1F44B}';
 
-                ['sidebarUserName', 'dropdownUserName'].forEach(function(id) {
+                ['sidebarUserName', 'dropdownUserName'].forEach(function (id) {
                     const el = document.getElementById(id);
                     if (el) el.textContent = display;
                 });
 
                 const parts = (fullName || display).trim().split(' ').filter(Boolean);
-                const init  = parts.length > 1
+                const init = parts.length > 1
                     ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
                     : display.substring(0, 2).toUpperCase();
                 const avEl = document.getElementById('avatarInitials');
                 if (avEl) avEl.textContent = init;
-            } catch (_) {}
+            } catch (_) { }
         })();
 
         // ── ACTIVE NAV HIGHLIGHT ──
@@ -883,7 +887,7 @@
             height: 16px;
         }
     </style>
-<script src="sidebar.js"></script>
+    <script src="sidebar.js"></script>
 </body>
 
 </html>
