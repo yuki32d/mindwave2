@@ -921,8 +921,21 @@
         }
 
         .template-icon {
-            font-size: 26px;
-            margin-bottom: 8px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--accent-lo);
+            border: 1px solid var(--accent-bdr);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+        }
+
+        .template-icon svg {
+            width: 20px;
+            height: 20px;
+            color: var(--accent);
         }
 
         .game-template-card h3 {
@@ -1314,28 +1327,12 @@
             </div>
 
             <div class="side-foot">
-                <div class="user-card" id="adminProfileToggle">
+                <div class="user-card">
                     <div class="user-av" id="adminAvatarInitials">AD</div>
                     <div>
                         <div class="user-name" id="adminDisplayName">Faculty Admin</div>
                         <div class="user-role">Administrator</div>
                     </div>
-                    <i data-lucide="more-horizontal"
-                        style="width:14px;height:14px;color:var(--s-muted);margin-left:auto;"></i>
-                </div>
-                <div id="adminProfileDropdown"
-                    style="display:none;flex-direction:column;gap:4px;margin-top:6px;padding:6px;background:rgba(255,255,255,0.05);border-radius:10px;border:1px solid var(--s-border);">
-                    <a href="faculty-profile.html"
-                        style="display:block;padding:8px 10px;border-radius:7px;font-size:12px;color:var(--s-text);transition:background .13s;"
-                        onmouseover="this.style.background='rgba(255,255,255,0.07)'"
-                        onmouseout="this.style.background='transparent'">My Profile</a>
-                    <a href="faculty-settings.html"
-                        style="display:block;padding:8px 10px;border-radius:7px;font-size:12px;color:var(--s-text);transition:background .13s;"
-                        onmouseover="this.style.background='rgba(255,255,255,0.07)'"
-                        onmouseout="this.style.background='transparent'">Settings</a>
-                    <a id="signOutBtn" href="marketing-site/admin-login.html"
-                        style="display:block;padding:8px 10px;border-radius:7px;font-size:12px;color:#f87171;">Sign
-                        Out</a>
                 </div>
             </div>
         </aside>
@@ -1716,6 +1713,30 @@
             </div>
             <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:8px;">
                 Last updated: <span id="statusLastUpdated">—</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── SIGN-OUT CONFIRMATION MODAL ── -->
+    <div class="modal-overlay" id="signoutModal" style="display:none;opacity:0;">
+        <div class="modal-box" style="max-width:400px;text-align:center;padding:36px 32px;">
+            <div
+                style="width:56px;height:56px;border-radius:16px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                <i data-lucide="log-out" style="width:24px;height:24px;color:var(--red);"></i>
+            </div>
+            <h2 style="font-size:18px;font-weight:800;margin-bottom:8px;">Sign out?</h2>
+            <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:28px;">You'll be signed out of the
+                MindWave admin console. Any unsaved work will be lost.</p>
+            <div style="display:flex;gap:10px;">
+                <button
+                    onclick="const m=document.getElementById('signoutModal');m.style.opacity='0';setTimeout(()=>m.style.display='none',200);"
+                    style="flex:1;padding:11px;border-radius:9px;border:1px solid var(--border);background:var(--surface);font-size:13px;font-weight:700;color:var(--text);cursor:pointer;transition:all .14s;">
+                    Cancel
+                </button>
+                <button onclick="window._doLogout && window._doLogout();"
+                    style="flex:1;padding:11px;border-radius:9px;border:none;background:var(--red);color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .14s;">
+                    Sign Out
+                </button>
             </div>
         </div>
     </div>

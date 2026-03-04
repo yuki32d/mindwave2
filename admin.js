@@ -1,16 +1,16 @@
 const GAME_LIBRARY = [
-    { icon: '🐛', title: 'Debug the Monolith', description: 'Find the bug in the code snippet.', brief: 'Identify logic errors, syntax bugs, or runtime issues in real code.', type: 'bug-hunt' },
-    { icon: '❓', title: 'Quiz', description: 'Multiple choice blitz with instant feedback.', brief: '5-question pulse check on lecture concepts.', type: 'trivia-challenge' },
-    { icon: '🃏', title: 'Flash cards', description: 'Prompt on the front, answer on the back.', brief: 'Build card deck for revision sprints.', type: 'memory-match' },
-    { icon: '🎡', title: 'Spin the wheel', description: 'Randomize the next topic or challenge.', brief: 'Assign teams to a random debugging prompt.', type: 'brain-teasers' },
-    { icon: '🗣️', title: 'Speaking cards', description: 'Deal prompts from a shuffled stack.', brief: 'Async speaking practice or stand-up topics.', type: 'strategy-games' },
-    { icon: '🗂️', title: 'Tech Stack Sorter', description: 'Categorize technologies (Frontend vs Backend).', brief: 'Sort frameworks and libraries into correct stacks.', type: 'logic-games' },
-    { icon: '🔍', title: 'Find the match', description: 'Eliminate answers until all tiles clear.', brief: 'Match issue tickets to fixes.', type: 'memory-match' },
-    { icon: '⌨️', title: 'Syntax Fill-in', description: 'Drag keywords into code blanks.', brief: 'Test mastery of async/await or class syntax.', type: 'word-puzzle' },
-    { icon: '🔤', title: 'Anagram', description: 'Unscramble letters to reveal key terms.', brief: 'Reinforce terminology with playful anagrams.', type: 'word-puzzle' },
-    { icon: '🧩', title: 'Code Logic Unjumble', description: 'Reorder lines to fix the algorithm.', brief: 'Sequence logic for Binary Search or API calls.', type: 'logic-games' },
-    { icon: '🕸️', title: 'SQL Query Builder', description: 'Drag blocks to build valid queries.', brief: 'Construct complex JOINs and subqueries.', type: 'brain-teasers' },
-    { icon: '🧠', title: 'Matching pairs', description: 'Flip tiles to find every pair.', brief: 'Match bug reports with owners.', type: 'memory-match' }
+    { icon: 'bug', title: 'Debug the Monolith', description: 'Find the bug in the code snippet.', brief: 'Identify logic errors, syntax bugs, or runtime issues in real code.', type: 'bug-hunt' },
+    { icon: 'circle-help', title: 'Quiz', description: 'Multiple choice blitz with instant feedback.', brief: '5-question pulse check on lecture concepts.', type: 'trivia-challenge' },
+    { icon: 'layers', title: 'Flash cards', description: 'Prompt on the front, answer on the back.', brief: 'Build card deck for revision sprints.', type: 'memory-match' },
+    { icon: 'refresh-cw', title: 'Spin the wheel', description: 'Randomize the next topic or challenge.', brief: 'Assign teams to a random debugging prompt.', type: 'brain-teasers' },
+    { icon: 'mic', title: 'Speaking cards', description: 'Deal prompts from a shuffled stack.', brief: 'Async speaking practice or stand-up topics.', type: 'strategy-games' },
+    { icon: 'layout-grid', title: 'Tech Stack Sorter', description: 'Categorize technologies (Frontend vs Backend).', brief: 'Sort frameworks and libraries into correct stacks.', type: 'logic-games' },
+    { icon: 'search', title: 'Find the match', description: 'Eliminate answers until all tiles clear.', brief: 'Match issue tickets to fixes.', type: 'memory-match' },
+    { icon: 'code', title: 'Syntax Fill-in', description: 'Drag keywords into code blanks.', brief: 'Test mastery of async/await or class syntax.', type: 'word-puzzle' },
+    { icon: 'type', title: 'Anagram', description: 'Unscramble letters to reveal key terms.', brief: 'Reinforce terminology with playful anagrams.', type: 'word-puzzle' },
+    { icon: 'git-branch', title: 'Code Logic Unjumble', description: 'Reorder lines to fix the algorithm.', brief: 'Sequence logic for Binary Search or API calls.', type: 'logic-games' },
+    { icon: 'database', title: 'SQL Query Builder', description: 'Drag blocks to build valid queries.', brief: 'Construct complex JOINs and subqueries.', type: 'brain-teasers' },
+    { icon: 'sparkles', title: 'Matching pairs', description: 'Flip tiles to find every pair.', brief: 'Match bug reports with owners.', type: 'memory-match' }
 ];
 
 const announcementForm = document.getElementById('announcementForm');
@@ -289,21 +289,21 @@ function renderGameTemplates() {
     container.innerHTML = GAME_LIBRARY.map(template => {
         const redirectUrl = redirects[template.title];
         const onclickAttr = redirectUrl ? `onclick="window.location.href='${redirectUrl}'"` : '';
-
         return `
-            <article class="game-template-card" 
-                     data-title="${template.title}" 
-                     data-brief="${template.brief}" 
+            <article class="game-template-card"
+                     data-title="${template.title}"
+                     data-brief="${template.brief}"
                      data-type="${template.type}"
                      ${onclickAttr}
                      style="cursor: pointer;">
-                <div class="template-icon">${template.icon}</div>
+                <div class="template-icon"><i data-lucide="${template.icon}"></i></div>
                 <h3>${template.title}</h3>
                 <p>${template.description}</p>
             </article>
         `;
     }).join('');
-
+    // Re-render Lucide icons after dynamic content is injected
+    if (window.lucide) lucide.createIcons();
     console.log('Game templates rendered:', GAME_LIBRARY.length, 'cards');
 }
 renderGameTemplates();
@@ -381,16 +381,27 @@ if (adminProfileToggle && adminProfileDropdown) {
 }
 
 async function performLogout() {
-    if (confirm('Are you sure you want to sign out?')) {
-        try {
-            await fetch(`${API_BASE}/api/logout`, { method: 'POST', credentials: 'include' });
-        } catch (error) { console.error('Logout failed', error); }
-        finally {
-            localStorage.clear(); // Clear all local storage on logout
-            window.location.href = 'marketing-site/admin-login.html';
-        }
+    // Show custom sign-out modal instead of browser confirm()
+    const modal = document.getElementById('signoutModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => modal.style.opacity = '1', 10);
+        return;
+    }
+    // Fallback if modal doesn't exist
+    _doLogout();
+}
+
+async function _doLogout() {
+    try {
+        await fetch(`${API_BASE}/api/logout`, { method: 'POST', credentials: 'include' });
+    } catch (error) { console.error('Logout failed', error); }
+    finally {
+        localStorage.clear();
+        window.location.href = 'marketing-site/admin-login.html';
     }
 }
+window._doLogout = _doLogout;
 
 if (signOutControl) signOutControl.addEventListener('click', performLogout);
 if (gamesNavBtn) gamesNavBtn.addEventListener('click', () => document.getElementById('gamesPanel')?.scrollIntoView({ behavior: 'smooth' }));
