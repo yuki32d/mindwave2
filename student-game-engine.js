@@ -278,10 +278,29 @@ function filterGames(type, targetBtn) {
     renderGameList(filtered);
 }
 
-function updatePlayerStats() {
-    const activities = loadData(activityKey);
-    const totalScore = activities.reduce((acc, curr) => acc + (curr.score || curr.rawScore || 0), 0);
-    const wins = activities.filter(a => a.status === 'completed').length;
+async function updatePlayerStats() {
+    let totalScore = 0;
+    let wins = 0;
+
+    try {
+        // Fetch real XP and wins from the backend
+        const token = localStorage.getItem('token');
+        if (token) {
+            const res = await fetch('/api/leaderboard', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.ok && data.currentUser) {
+                totalScore = data.currentUser.totalPoints || 0;
+                wins = data.currentUser.gamesPlayed || 0;
+            }
+        }
+    } catch (e) {
+        // Fallback to localStorage
+        const activities = loadData(activityKey);
+        totalScore = activities.reduce((acc, curr) => acc + (curr.rawScore || 0), 0);
+        wins = activities.filter(a => a.status === 'completed').length;
+    }
 
     const level = Math.floor(Math.sqrt(totalScore / 100)) + 1;
     const nextLevelXP = Math.pow(level, 2) * 100;
@@ -302,7 +321,21 @@ function updatePlayerStats() {
     const rankEl = document.getElementById('playerRank');
     if (rankEl) rankEl.textContent = ranks[Math.min(level - 1, ranks.length - 1)];
     const streakEl = document.getElementById('streakCount');
-    if (streakEl) streakEl.textContent = 0; // placeholder
+    if (streakEl) {
+        // Simple streak: count consecutive completed games from most recent
+        try {
+            const acts = loadData(activityKey);
+            const sorted = acts.filter(a => a.status === 'completed').sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+            let streak = 0;
+            let lastDate = null;
+            for (const a of sorted) {
+                const d = new Date(a.completedAt).toDateString();
+                if (!lastDate || d === lastDate) { streak++; lastDate = d; }
+                else break;
+            }
+            streakEl.textContent = streak;
+        } catch { streakEl.textContent = 0; }
+    }
 }
 
 
@@ -1254,6 +1287,9 @@ function showResult(container, score, totalPoints, startTime, gameId) {
     if (percentage >= 70) {
         fireConfetti();
     }
+
+    // Refresh hero strip with real XP from the server
+    updatePlayerStats();
 }
 
 function startTimer(durationMinutes, containerSelector, onFinish) {
