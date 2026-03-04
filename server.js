@@ -4663,6 +4663,162 @@ app.delete("/api/reset-season", authMiddleware, async (req, res) => {
 });
 
 
+
+// ============================================
+// Student Goals Endpoints
+// ============================================
+
+const StudentGoalSchema = new mongoose.Schema({
+  studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  title: { type: String, required: true },
+  type: { type: String, enum: ['gpa', 'grade', 'attendance', 'completion'], default: 'gpa' },
+  subject: { type: String },
+  target: { type: Number, required: true },
+  current: { type: Number, default: 0 },
+  deadline: { type: Date },
+  completed: { type: Boolean, default: false },
+  progress: { type: Number, default: 0 }
+}, { timestamps: true });
+
+const StudentGoal = mongoose.models.StudentGoal || mongoose.model('StudentGoal', StudentGoalSchema);
+
+// GET all goals for current student
+app.get('/api/student/goals', authMiddleware, async (req, res) => {
+  try {
+    const studentId = req.user.sub;
+    const goals = await StudentGoal.find({ studentId }).sort({ createdAt: -1 });
+    const formatted = goals.map(g => ({
+      id: g._id.toString(),
+      title: g.title,
+      type: g.type,
+      subject: g.subject || null,
+      target: g.target,
+      current: g.current,
+      progress: g.target > 0 ? Math.round((g.current / g.target) * 100) : 0,
+      completed: g.completed || g.current >= g.target,
+      deadline: g.deadline ? g.deadline.toISOString() : null,
+      createdAt: g.createdAt
+    }));
+    res.json(formatted);
+  } catch (err) {
+    console.error('Goals GET error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// POST create a new goal
+app.post('/api/student/goals', authMiddleware, async (req, res) => {
+  try {
+    const studentId = req.user.sub;
+    const { title, type, subject, target, deadline } = req.body;
+    if (!title || target == null) {
+      return res.status(400).json({ ok: false, message: 'title and target are required' });
+    }
+    const goal = await StudentGoal.create({
+      studentId, title, type: type || 'gpa',
+      subject: subject || undefined,
+      target: parseFloat(target), current: 0,
+      deadline: deadline ? new Date(deadline) : undefined
+    });
+    res.status(201).json({ ok: true, id: goal._id.toString() });
+  } catch (err) {
+    console.error('Goals POST error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// PUT update a goal
+app.put('/api/student/goals/:id', authMiddleware, async (req, res) => {
+  try {
+    const studentId = req.user.sub;
+    const { title, type, subject, target, current, deadline } = req.body;
+    const update = {};
+    if (title != null) update.title = title;
+    if (type != null) update.type = type;
+    if (subject != null) update.subject = subject;
+    if (target != null) { update.target = parseFloat(target); }
+    if (current != null) { update.current = parseFloat(current); }
+    if (deadline !== undefined) update.deadline = deadline ? new Date(deadline) : null;
+    if (update.target != null && update.current != null) {
+      update.completed = update.current >= update.target;
+    }
+    const updated = await StudentGoal.findOneAndUpdate(
+      { _id: req.params.id, studentId },
+      { $set: update }, { new: true }
+    );
+    if (!updated) return res.status(404).json({ ok: false, message: 'Goal not found' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Goals PUT error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// DELETE a goal
+app.delete('/api/student/goals/:id', authMiddleware, async (req, res) => {
+  try {
+    const studentId = req.user.sub;
+    const del = await StudentGoal.findOneAndDelete({ _id: req.params.id, studentId });
+    if (!del) return res.status(404).json({ ok: false, message: 'Goal not found' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Goals DELETE error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+
+// ============================================
+// Timetable Endpoints (teacher-uploaded images)
+// ============================================
+
+const TimetableSchema = new mongoose.Schema({
+  type: { type: String, enum: ['semester', 'class', 'exam', 'personal'], required: true },
+  imageUrl: { type: String },
+  uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+const Timetable = mongoose.models.Timetable || mongoose.model('Timetable', TimetableSchema);
+
+// GET a timetable by type — accessible by all authenticated users
+app.get('/api/timetables/:type', authMiddleware, async (req, res) => {
+  try {
+    const { type } = req.params;
+    const tt = await Timetable.findOne({ type });
+    if (!tt || !tt.imageUrl) {
+      return res.json({ ok: true, imageUrl: null, updatedAt: null });
+    }
+    res.json({ ok: true, imageUrl: tt.imageUrl, updatedAt: tt.updatedAt });
+  } catch (err) {
+    console.error('Timetable GET error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// PUT upload/update a timetable (admin only)
+app.put('/api/timetables/:type', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: 'Admin access required' });
+    }
+    const { type } = req.params;
+    const { imageUrl } = req.body;
+    if (!imageUrl) return res.status(400).json({ ok: false, message: 'imageUrl is required' });
+    const tt = await Timetable.findOneAndUpdate(
+      { type },
+      { imageUrl, uploadedBy: req.user.sub, updatedAt: new Date() },
+      { upsert: true, new: true }
+    );
+    res.json({ ok: true, timetable: tt });
+  } catch (err) {
+    console.error('Timetable PUT error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+
 // ============================================
 // Leaderboard Endpoint
 // ============================================
