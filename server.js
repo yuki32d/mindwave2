@@ -4708,19 +4708,30 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
     }
 
     // Aggregate leaderboard data
+    // Step 1: group by (studentId, gameId) to get best score per unique game
+    // Step 2: group by studentId to sum those best scores — prevents replay inflation
     const leaderboardData = await GameSubmission.aggregate([
-      {
-        $match: { ...dateFilter, ...gameTypeFilter }
-      },
+      // Filter by time/game type
+      { $match: { ...dateFilter, ...gameTypeFilter } },
+      // Step 1 — best score per (student, game)
       {
         $group: {
-          _id: '$studentId',
-          totalPoints: { $sum: '$score' },
-          gamesPlayed: { $sum: 1 },
-          totalAccuracy: { $avg: '$score' },
+          _id: { studentId: '$studentId', gameId: '$gameId' },
+          bestScore: { $max: '$score' },
           lastActivity: { $max: '$submittedAt' }
         }
       },
+      // Step 2 — roll up per student
+      {
+        $group: {
+          _id: '$_id.studentId',
+          totalPoints: { $sum: '$bestScore' },
+          gamesPlayed: { $sum: 1 },            // unique games, not total plays
+          avgAccuracy: { $avg: '$bestScore' },
+          lastActivity: { $max: '$lastActivity' }
+        }
+      },
+      // Join user info
       {
         $lookup: {
           from: 'users',
@@ -4729,23 +4740,21 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
           as: 'userInfo'
         }
       },
-      {
-        $unwind: '$userInfo'
-      },
+      { $unwind: '$userInfo' },
+      // Exclude admins from the leaderboard
+      { $match: { 'userInfo.role': { $ne: 'admin' } } },
       {
         $project: {
           studentId: '$_id',
           name: { $ifNull: ['$userInfo.displayName', '$userInfo.name'] },
           email: '$userInfo.email',
-          totalPoints: 1,
+          totalPoints: { $round: ['$totalPoints', 0] },
           gamesPlayed: 1,
-          avgAccuracy: { $round: ['$totalAccuracy', 0] },
+          avgAccuracy: { $round: ['$avgAccuracy', 0] },
           lastActivity: 1
         }
       },
-      {
-        $sort: { totalPoints: -1 }
-      }
+      { $sort: { totalPoints: -1 } }
     ]);
 
     // Find current user's stats
