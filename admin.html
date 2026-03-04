@@ -1723,14 +1723,23 @@
     <script src="admin.js"></script>
     <script src="loading-spinner.js"></script>
     <script>
+        // ── Restore saved theme before render (prevents flash) ──
+        const savedTheme = localStorage.getItem('mw_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
         // ── Theme toggle ──
         document.getElementById('themeToggle').addEventListener('click', () => {
             const html = document.documentElement;
-            html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('mw_theme', next);
             lucide.createIcons();
         });
 
-        // ── Page header Announce button scrolls to form ──
+        // ── Render all Lucide icons on page load ──
+        lucide.createIcons();
+
+        // ── Page header buttons ──
         document.getElementById('announceHeaderBtn')?.addEventListener('click', () =>
             document.getElementById('announcementSection')?.scrollIntoView({ behavior: 'smooth' }));
         document.getElementById('previewStudentBtnHeader')?.addEventListener('click', () =>
