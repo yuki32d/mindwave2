@@ -4665,6 +4665,103 @@ app.delete("/api/reset-season", authMiddleware, async (req, res) => {
 
 
 // ============================================
+// Dashboard Sparklines Endpoint
+// Returns 7-day daily breakdown for XP, games, rank
+// ============================================
+
+app.get('/api/dashboard/sparklines', authMiddleware, async (req, res) => {
+  try {
+    const studentId = req.user.sub;
+    const now = new Date();
+
+    // Build last 7 days array (today inclusive)
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      days.push({
+        label: i === 0 ? 'Today' : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()],
+        start: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0),
+        end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999)
+      });
+    }
+
+    // Fetch all submissions in the last 14 days (7 current + 7 prior for % change)
+    const fourteenAgo = new Date(now);
+    fourteenAgo.setDate(now.getDate() - 13);
+
+    const submissions = await GameSubmission.find({
+      studentId: mongoose.Types.ObjectId(studentId),
+      submittedAt: { $gte: fourteenAgo }
+    }).select('score submittedAt gameId').lean();
+
+    // Helper: group submissions by day range
+    const forDay = (start, end) => submissions.filter(s => {
+      const t = new Date(s.submittedAt);
+      return t >= start && t <= end;
+    });
+
+    // Build per-day data for the last 7 days
+    const xpDays = [];
+    const gameDays = [];
+
+    for (const day of days) {
+      const daySubs = forDay(day.start, day.end);
+      // XP = best score per unique game that day
+      const byGame = {};
+      daySubs.forEach(s => {
+        const gid = String(s.gameId);
+        if (!byGame[gid] || s.score > byGame[gid]) byGame[gid] = s.score;
+      });
+      const xp = Object.values(byGame).reduce((a, b) => a + b, 0);
+      xpDays.push({ label: day.label, value: Math.round(xp) });
+      gameDays.push({ label: day.label, value: daySubs.length });
+    }
+
+    // This week vs last week XP totals (for % change badge)
+    const sevenAgo = new Date(now); sevenAgo.setDate(now.getDate() - 6);
+    const fourteenBack = new Date(now); fourteenBack.setDate(now.getDate() - 13);
+
+    const thisWeekSubs = submissions.filter(s => new Date(s.submittedAt) >= sevenAgo);
+    const lastWeekSubs = submissions.filter(s => {
+      const t = new Date(s.submittedAt);
+      return t >= fourteenBack && t < sevenAgo;
+    });
+
+    const sumXP = (subs) => {
+      const byGame = {};
+      subs.forEach(s => {
+        const gid = String(s.gameId);
+        if (!byGame[gid] || s.score > byGame[gid]) byGame[gid] = s.score;
+      });
+      return Object.values(byGame).reduce((a, b) => a + b, 0);
+    };
+
+    const thisWeekXP = sumXP(thisWeekSubs);
+    const lastWeekXP = sumXP(lastWeekSubs);
+    const xpChange = lastWeekXP > 0
+      ? Math.round(((thisWeekXP - lastWeekXP) / lastWeekXP) * 100)
+      : (thisWeekXP > 0 ? 100 : 0);
+
+    const thisWeekGames = thisWeekSubs.length;
+    const lastWeekGames = lastWeekSubs.length;
+    const gamesChange = lastWeekGames > 0
+      ? Math.round(((thisWeekGames - lastWeekGames) / lastWeekGames) * 100)
+      : (thisWeekGames > 0 ? 100 : 0);
+
+    res.json({
+      ok: true,
+      xp: { days: xpDays, thisWeek: thisWeekXP, lastWeek: lastWeekXP, change: xpChange },
+      games: { days: gameDays, thisWeek: thisWeekGames, lastWeek: lastWeekGames, change: gamesChange }
+    });
+  } catch (err) {
+    console.error('Sparklines error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+
+// ============================================
 // Student Goals Endpoints
 // ============================================
 

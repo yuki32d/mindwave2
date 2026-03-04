@@ -363,14 +363,78 @@ if (document.readyState === 'loading') {
 // === REAL-TIME STATS & SPARKLINES ===
 async function fetchDashboardSparklines() {
     const token = localStorage.getItem('token');
-    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    if (!token) return;
+    const headers = { 'Authorization': `Bearer ${token}` };
 
     const xpEl = document.getElementById('totalXP');
     const gamesEl = document.getElementById('gamesPlayed');
     const rankEl = document.getElementById('studentRank');
     const courseEl = document.getElementById('courseCount');
 
-    // ── 1. Leaderboard  →  XP, games played, rank ──────────────
+    // ── Helper: render a spark chart from real daily data ──────────────
+    function renderSpark(card, dayData, colorVar, unit) {
+        if (!card || !dayData || !dayData.length) return;
+        const bars = card.querySelectorAll('.mw-spark-bar');
+        const max = Math.max(...dayData.map(d => d.value), 1);
+        bars.forEach((bar, i) => {
+            const day = dayData[i];
+            if (!day) return;
+            const pct = max > 0 ? Math.max(4, Math.round((day.value / max) * 100)) : 4;
+            bar.style.height = pct + '%';
+            bar.setAttribute('data-label', day.label);
+            bar.setAttribute('data-value', day.value > 0
+                ? `${day.value.toLocaleString()} ${unit}`
+                : `No ${unit.toLowerCase()} ${day.label === 'Today' ? 'today' : 'this day'}`);
+        });
+    }
+
+    // ── Helper: update the change badge ────────────────────────────────
+    function setChange(card, change, noDataMsg) {
+        if (!card) return;
+        const badge = card.querySelector('.mw-kpi-change');
+        if (!badge) return;
+        if (change === null || change === undefined) {
+            badge.innerHTML = noDataMsg;
+            badge.className = 'mw-kpi-change';
+            return;
+        }
+        const abs = Math.abs(change);
+        if (change > 0) {
+            badge.innerHTML = `▲ ${abs}% <span class="mw-kpi-sub">vs last week</span>`;
+            badge.className = 'mw-kpi-change up';
+        } else if (change < 0) {
+            badge.innerHTML = `▼ ${abs}% <span class="mw-kpi-sub">vs last week</span>`;
+            badge.className = 'mw-kpi-change down';
+        } else {
+            badge.innerHTML = `― Same as last week`;
+            badge.className = 'mw-kpi-change';
+        }
+    }
+
+    // ── 1. Sparklines (7-day daily XP + games) ─────────────────────────
+    try {
+        const res = await fetch(`${API_BASE}/api/dashboard/sparklines`, { headers });
+        const data = await res.json();
+
+        if (data.ok) {
+            const xpCard = xpEl?.closest('.mw-kpi-card');
+            const gamesCard = gamesEl?.closest('.mw-kpi-card');
+
+            // XP spark
+            renderSpark(xpCard, data.xp?.days, 'var(--accent)', 'XP');
+            const xpChange = (data.xp?.lastWeek > 0 || data.xp?.thisWeek > 0) ? data.xp?.change : null;
+            setChange(xpCard, xpChange, 'Play games to earn XP');
+
+            // Games spark
+            renderSpark(gamesCard, data.games?.days, 'var(--orange)', 'games');
+            const gamesChange = (data.games?.lastWeek > 0 || data.games?.thisWeek > 0) ? data.games?.change : null;
+            setChange(gamesCard, gamesChange, '▲ Play your first game!');
+        }
+    } catch (err) {
+        console.error('Sparklines fetch failed:', err);
+    }
+
+    // ── 2. Leaderboard → XP total, games total, rank ───────────────────
     try {
         const res = await fetch(`${API_BASE}/api/leaderboard`, { headers });
         const data = await res.json();
@@ -380,41 +444,62 @@ async function fetchDashboardSparklines() {
 
             if (xpEl && u.totalPoints != null) xpEl.textContent = Number(u.totalPoints).toLocaleString();
             if (gamesEl && u.gamesPlayed != null) gamesEl.textContent = u.gamesPlayed;
-            if (rankEl && u.rank != null) rankEl.textContent = `#${u.rank}`;
 
-            // Update tooltip on today's XP bar
-            const xpHiBar = xpEl?.closest('.mw-kpi-card')?.querySelector('.mw-spark-bar.hi');
-            if (xpHiBar) xpHiBar.setAttribute('data-value', `${Number(u.totalPoints).toLocaleString()} XP Total`);
-
-            // Update tooltip on today's Rank bar
-            const rankHiBar = rankEl?.closest('.mw-kpi-card')?.querySelector('.mw-spark-bar.hi');
-            if (rankHiBar) rankHiBar.setAttribute('data-value', `Rank #${u.rank} 🏆`);
-
-            // Update tooltip on today's Games bar
-            const gamesHiBar = gamesEl?.closest('.mw-kpi-card')?.querySelector('.mw-spark-bar.hi');
-            if (gamesHiBar) gamesHiBar.setAttribute('data-value', `${u.gamesPlayed} games total`);
+            // Rank: show — when student has no games yet (rank 0)
+            if (rankEl) {
+                const rankCard = rankEl.closest('.mw-kpi-card');
+                const rankBadge = rankCard?.querySelector('.mw-kpi-change');
+                if (u.rank && u.rank > 0) {
+                    rankEl.textContent = `#${u.rank}`;
+                    if (rankBadge) {
+                        rankBadge.innerHTML = '▲ Climbing!';
+                        rankBadge.className = 'mw-kpi-change up';
+                    }
+                } else {
+                    rankEl.textContent = '—';
+                    if (rankBadge) {
+                        rankBadge.innerHTML = 'Play games to get ranked';
+                        rankBadge.className = 'mw-kpi-change';
+                    }
+                    // Flatten rank spark bars to equal low heights (no fake data)
+                    rankCard?.querySelectorAll('.mw-spark-bar').forEach((bar, i) => {
+                        bar.style.height = '8%';
+                        bar.setAttribute('data-value', 'Not ranked yet');
+                    });
+                }
+            }
         }
     } catch (err) {
         console.error('Leaderboard fetch failed:', err);
     }
 
-    // ── 2. Courses ────────────────────────────────────────────
+    // ── 3. Courses ──────────────────────────────────────────────────────
     try {
         const res = await fetch(`${API_BASE}/api/classroom/courses`, { headers });
         const data = await res.json();
         const count = data.ok && data.courses ? data.courses.length : null;
 
         if (courseEl && count != null) {
-            courseEl.textContent = count > 0 ? count : '0';
-            // Update all course sparkline bar tooltips to real count
-            courseEl.closest('.mw-kpi-card')?.querySelectorAll('.mw-spark-bar').forEach(bar => {
-                bar.setAttribute('data-value', `${count} course${count !== 1 ? 's' : ''} enrolled`);
+            courseEl.textContent = count;
+            const courseCard = courseEl.closest('.mw-kpi-card');
+            // Set all course bars to equal height (courses don't change daily)
+            courseCard?.querySelectorAll('.mw-spark-bar').forEach(bar => {
+                bar.style.height = count > 0 ? '80%' : '8%';
+                bar.setAttribute('data-value', count > 0
+                    ? `${count} course${count !== 1 ? 's' : ''} enrolled`
+                    : 'No courses yet');
             });
+            const badge = courseCard?.querySelector('.mw-kpi-change');
+            if (badge) {
+                badge.innerHTML = count > 0 ? '▲ Active this semester' : 'Enroll in a course';
+                badge.className = count > 0 ? 'mw-kpi-change up' : 'mw-kpi-change';
+            }
         }
     } catch (err) {
         console.error('Courses fetch failed:', err);
     }
 }
+
 
 renderAnnouncements();
 renderUpdates();
