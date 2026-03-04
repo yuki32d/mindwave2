@@ -18,6 +18,16 @@ const updateForm = document.getElementById('updateForm');
 const gameForm = document.getElementById('gameForm');
 const API_BASE = window.location.origin;
 
+// ── Toast notification (replaces alert) ──
+function toast(msg, type = 'ok') {
+    const el = document.getElementById('toast');
+    if (!el) { console.log(msg); return; }
+    el.textContent = msg;
+    el.className = `show ${type}`;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.className = ''; }, 3500);
+}
+
 // --- API Helpers ---
 async function fetchAPI(endpoint, options = {}) {
     try {
@@ -98,9 +108,9 @@ if (announcementForm) {
             });
             announcementForm.reset();
             loadAnnouncements();
-            alert('✅ Announcement published and students notified!');
+            toast('✅ Announcement published — students notified!');
         } else {
-            alert('Failed to publish: ' + (res ? res.message : 'Unknown error'));
+            toast('Failed to publish: ' + (res ? res.message : 'Unknown error'), 'err');
         }
     });
 }
@@ -108,7 +118,7 @@ if (announcementForm) {
 window.deleteAnnouncement = async function (id) {
     if (!confirm("Delete this announcement?")) return;
     const res = await fetchAPI(`/api/announcements/${id}`, { method: 'DELETE' });
-    if (res && res.ok) loadAnnouncements();
+    if (res && res.ok) { loadAnnouncements(); toast('Announcement deleted.'); }
 };
 
 // --- Updates (Mock for now) ---
@@ -155,7 +165,7 @@ if (updateForm) {
 
         updateForm.reset();
         loadUpdates();
-        alert('✅ Update posted and students notified!');
+        toast('✅ Update posted — students notified!');
     });
 }
 
@@ -207,9 +217,9 @@ if (gameForm) {
         if (res && res.ok) {
             gameForm.reset();
             loadGames();
-            alert('Game created successfully!');
+            toast('Game created successfully!');
         } else {
-            alert('Failed to create game: ' + (res ? res.message : 'Unknown error'));
+            toast('Failed to create game: ' + (res ? res.message : 'Unknown error'), 'err');
         }
     });
 }
@@ -219,8 +229,9 @@ window.deleteGame = async function (id) {
         const res = await fetchAPI(`/api/games/${id}`, { method: 'DELETE' });
         if (res && res.ok) {
             loadGames();
+            toast('Game deleted.');
         } else {
-            alert('Failed to delete: ' + (res ? res.message : 'Unknown error'));
+            toast('Failed to delete: ' + (res ? res.message : 'Unknown error'), 'err');
         }
     }
 };
@@ -248,6 +259,14 @@ if (filterDifficulty) filterDifficulty.addEventListener('change', applyFilters);
 loadUpdates();
 loadGames();
 loadEngagement();
+loadAnnouncements();
+
+// ── Real-time auto-refresh every 30 seconds ──
+setInterval(() => {
+    loadGames();
+    loadAnnouncements();
+    loadEngagement();
+}, 30000);
 
 // --- Templates & Tools (Static/Local for now) ---
 function renderGameTemplates() {

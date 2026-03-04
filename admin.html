@@ -1275,20 +1275,24 @@
                 <div class="nav-section">
                     <div class="nav-label">Control Center</div>
                     <a href="admin.html" class="nav-item active"><i data-lucide="gauge"></i> Overview</a>
-                    <a href="#" class="nav-item"><i data-lucide="users"></i> Students</a>
-                    <a href="faculty-dataanalytics.html" class="nav-item" id="dataAnalyticsBtn"><i
-                            data-lucide="bar-chart-2"></i> Analytics</a>
+                    <a href="faculty-classroom.html" class="nav-item"><i data-lucide="users"></i> Students</a>
+                    <a href="faculty-dataanalytics.html" class="nav-item"><i data-lucide="bar-chart-2"></i>
+                        Analytics</a>
                 </div>
                 <div class="side-divider"></div>
                 <div class="nav-section">
                     <div class="nav-label">Content</div>
                     <a href="faculty-classroom.html" class="nav-item"><i data-lucide="book-open"></i> Courses</a>
-                    <a href="interactive-tools-selector.html" class="nav-item" id="newGameBtn"><i
-                            data-lucide="gamepad-2"></i> Game Tools</a>
-                    <a href="ai-game-builder.html" class="nav-item" id="aiGameBuilderBtn"><i data-lucide="bot"></i> AI
+                    <a href="interactive-tools-selector.html" class="nav-item"><i data-lucide="gamepad-2"></i> Game
+                        Tools</a>
+                    <a href="ai-game-builder.html" class="nav-item"><i data-lucide="bot"></i> AI
                         Builder</a>
-                    <a href="#" class="nav-item" id="announceBtn"><i data-lucide="megaphone"></i> Announcements</a>
-                    <a href="#" class="nav-item" id="updateBtn"><i data-lucide="file-pen-line"></i> Post Update</a>
+                    <a href="#" class="nav-item"
+                        onclick="document.getElementById('announcementSection').scrollIntoView({behavior:'smooth'});return false;"><i
+                            data-lucide="megaphone"></i> Announcements</a>
+                    <a href="#" class="nav-item"
+                        onclick="document.getElementById('updateSection').scrollIntoView({behavior:'smooth'});return false;"><i
+                            data-lucide="file-pen-line"></i> Post Update</a>
                 </div>
                 <div class="side-divider"></div>
                 <div class="nav-section">
@@ -1297,13 +1301,12 @@
                             class="nav-badge badge-green">Live</span></a>
                     <a href="faculty-git-student.html" class="nav-item"><i data-lucide="git-branch"></i> GitHub</a>
                     <a href="faculty-community.html" class="nav-item"><i data-lucide="message-square"></i> Community</a>
-                    <a href="#" class="nav-item" id="previewStudentBtn"><i data-lucide="eye"></i> Student View</a>
+                    <a href="homepage.html" class="nav-item"><i data-lucide="eye"></i> Student View</a>
                 </div>
                 <div class="side-divider"></div>
                 <div class="nav-section">
                     <div class="nav-label">System</div>
-                    <a href="faculty-settings.html" class="nav-item" id="adminSettingsBtn"><i
-                            data-lucide="settings-2"></i> Settings</a>
+                    <a href="faculty-settings.html" class="nav-item"><i data-lucide="settings-2"></i> Settings</a>
                     <button class="nav-item" id="systemStatusBtn"><i data-lucide="activity"></i> System Status</button>
                     <button class="nav-item" id="signOutControl" style="color:#f87171;"><i data-lucide="log-out"></i>
                         Logout</button>
@@ -1538,8 +1541,8 @@
                             </div>
                         </div>
 
-                        <!-- Engagement card (clickable — wired in admin.js) -->
-                        <div class="card" id="engagementCard" style="cursor:pointer;">
+                        <!-- Engagement card (clickable — wired in admin.js via engagementPulseCard) -->
+                        <div class="card" id="engagementPulseCard" style="cursor:pointer;">
                             <div class="card-head">
                                 <div class="card-title"><i data-lucide="trending-up"></i> Engagement Analytics</div>
                                 <span style="font-size:11px;color:var(--green);">↗ Tap to expand</span>
