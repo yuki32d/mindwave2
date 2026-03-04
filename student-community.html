@@ -701,7 +701,8 @@
                     <a href="student-github.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="github"></i></span> GitHub Projects
                     </a>
-                <a href="student-live-meeting.html" class="mw-nav-item"><span class="mw-nav-icon"><i data-lucide="video"></i></span> Web Conf</a>
+                    <a href="student-live-meeting.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="video"></i></span> Web Conf</a>
 
                     <a href="student-reports.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
@@ -846,7 +847,8 @@
                     <div id="postsContainer">
                         <!-- Default empty state; replaced by JS -->
                         <div class="cm-empty">
-                            <div class="cm-empty-icon">??</div>
+                            <div class="cm-empty-icon"><i data-lucide="message-square-plus"
+                                    style="width:56px;height:56px;color:var(--accent,#6366f1);opacity:.5;"></i></div>
                             <h3>No posts yet</h3>
                             <p>Be the first to share something with the community!</p>
                         </div>
@@ -861,7 +863,9 @@
                 <!-- ------------------- POLL SECTION ------------------- -->
                 <div id="pollSection" class="cm-section">
                     <div class="cm-feature-card">
-                        <div class="cf-icon" style="background:rgba(99,102,241,.12);">?</div>
+                        <div class="cf-icon" style="background:rgba(99,102,241,.12);">
+                            <i data-lucide="clock" style="width:36px;height:36px;color:#6366f1;"></i>
+                        </div>
                         <h2>Waiting for Poll</h2>
                         <p>Your instructor will launch a poll soon. Stay tuned!</p>
                         <div class="pulse-indicator">
@@ -873,29 +877,36 @@
                 <!-- ------------------- FEEDBACK SECTION ------------------- -->
                 <div id="feedbackSection" class="cm-section">
                     <div class="cm-feature-card">
-                        <div class="cf-icon" style="background:rgba(168,85,247,.12);">??</div>
+                        <div class="cf-icon" style="background:rgba(168,85,247,.12);">
+                            <i data-lucide="heart-handshake" style="width:36px;height:36px;color:#a855f7;"></i>
+                        </div>
                         <h2>How are you feeling?</h2>
                         <p>Your feedback is anonymous and helps improve the lesson.</p>
                         <div class="confidence-selector">
                             <div class="emoji-options">
                                 <button class="emoji-btn" data-value="1">
-                                    <span class="emoji">??</span>
+                                    <span class="emoji"><i data-lucide="frown"
+                                            style="width:28px;height:28px;color:#ef4444;"></i></span>
                                     <span class="label">Very Confused</span>
                                 </button>
                                 <button class="emoji-btn" data-value="2">
-                                    <span class="emoji">??</span>
+                                    <span class="emoji"><i data-lucide="alert-circle"
+                                            style="width:28px;height:28px;color:#f59e0b;"></i></span>
                                     <span class="label">Confused</span>
                                 </button>
                                 <button class="emoji-btn" data-value="3">
-                                    <span class="emoji">??</span>
+                                    <span class="emoji"><i data-lucide="meh"
+                                            style="width:28px;height:28px;color:#94a3b8;"></i></span>
                                     <span class="label">Neutral</span>
                                 </button>
                                 <button class="emoji-btn" data-value="4">
-                                    <span class="emoji">??</span>
+                                    <span class="emoji"><i data-lucide="smile"
+                                            style="width:28px;height:28px;color:#22c55e;"></i></span>
                                     <span class="label">Confident</span>
                                 </button>
                                 <button class="emoji-btn" data-value="5">
-                                    <span class="emoji">??</span>
+                                    <span class="emoji"><i data-lucide="star"
+                                            style="width:28px;height:28px;color:#6366f1;"></i></span>
                                     <span class="label">Very Confident</span>
                                 </button>
                             </div>
@@ -909,7 +920,9 @@
                 <!-- ------------------- QUIZ SECTION ------------------- -->
                 <div id="quizSection" class="cm-section">
                     <div class="cm-feature-card">
-                        <div class="cf-icon" style="background:rgba(251,191,36,.12);font-size:2rem;">??</div>
+                        <div class="cf-icon" style="background:rgba(251,191,36,.12);">
+                            <i data-lucide="zap" style="width:36px;height:36px;color:#fbbf24;"></i>
+                        </div>
                         <h2>Join Live Quiz</h2>
                         <p>Enter the 6-letter code from your instructor to join instantly.</p>
                         <input type="text" id="quizCodeInput" class="quiz-code-input" placeholder="ABCDEF"
@@ -1261,6 +1274,13 @@
             transform: translateY(-1px)
         }
     </style>
+    <script>
+        // Initialise all Lucide icons on the community page
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
 </body>
+
 
 </html>
