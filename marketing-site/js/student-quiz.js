@@ -116,16 +116,18 @@ async function fetchAndDisplayQuestion(questionIndex) {
     try {
         const res = await fetch(`/api/quiz/${quizCode}`);
         const data = await res.json();
-        if (data.ok && data.quiz.currentQuestion) {
+        if (data.ok && data.quiz && data.quiz.currentQuestion) {
             const q = data.quiz.currentQuestion;
             totalQuestionsCount = data.quiz.questions?.length || totalQuestionsCount || 10;
             displayQuestion({
                 questionIndex,
-                question: q.text,
-                options: q.options,
+                question: q.text || q.question || '',
+                options: Array.isArray(q.options) ? q.options : [],
                 timeLimit: q.timeLimit || 15,
                 points: q.points || 1000
             });
+        } else {
+            console.warn('No currentQuestion in response:', data);
         }
     } catch (e) {
         console.error('Fetch question error:', e);
@@ -185,9 +187,11 @@ function displayQuestion(data) {
         btn.style.opacity = '0';
     });
 
-    // Hide feedback, show timer
-    document.getElementById('answerFeedback').style.display = 'none';
-    document.getElementById('distributionBar').style.display = 'none';
+    // Hide feedback, hide distribution
+    const fb = document.getElementById('answerFeedback');
+    if (fb) fb.style.display = 'none';
+    const db = document.getElementById('distributionBar');
+    if (db) db.style.display = 'none';
     startTimer();
 }
 
