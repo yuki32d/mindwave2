@@ -1720,6 +1720,8 @@
         </div>
     </div>
 
+    <script src="admin.js"></script>
+    <script src="loading-spinner.js"></script>
     <script>
         // ── Theme toggle ──
         document.getElementById('themeToggle').addEventListener('click', () => {
@@ -1728,25 +1730,12 @@
             lucide.createIcons();
         });
 
-        // ── Profile name from localStorage ──
-        const firstName = localStorage.getItem('firstName') || 'Admin';
-        const initials = firstName.charAt(0).toUpperCase() + (localStorage.getItem('lastName') || '').charAt(0).toUpperCase();
-        document.querySelectorAll('.profile-av, .user-av').forEach(el => el.textContent = initials || 'AD');
-        const nameEl = document.getElementById('adminDisplayName');
-        if (nameEl) nameEl.textContent = firstName;
-        const smallEl = document.getElementById('profileToggle')?.querySelector('small');
-        if (smallEl) smallEl.textContent = firstName;
-
-        // ── Page header quick buttons scroll to sections ──
+        // ── Page header Announce button scrolls to form ──
         document.getElementById('announceHeaderBtn')?.addEventListener('click', () =>
             document.getElementById('announcementSection')?.scrollIntoView({ behavior: 'smooth' }));
         document.getElementById('previewStudentBtnHeader')?.addEventListener('click', () =>
             window.location.href = 'homepage.html');
-
-        lucide.createIcons();
     </script>
-    <script src="admin.js"></script>
-    <script src="loading-spinner.js"></script>
 </body>
 
 </html>
