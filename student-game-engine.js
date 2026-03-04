@@ -70,21 +70,21 @@ async function initGameLobby() {
 // ── Type metadata ──
 function getTypeInfo(type) {
     const map = {
-        'quiz': { icon: '🧠', label: 'Quiz', color: '#6366f1', bg: 'rgba(99,102,241,.14)', accent: 'linear-gradient(90deg,#6366f1,#a855f7)' },
-        'trivia-challenge': { icon: '🧠', label: 'Trivia', color: '#6366f1', bg: 'rgba(99,102,241,.14)', accent: 'linear-gradient(90deg,#6366f1,#a855f7)' },
-        'unjumble': { icon: '🔀', label: 'Code Unjumble', color: '#3b82f6', bg: 'rgba(59,130,246,.14)', accent: 'linear-gradient(90deg,#3b82f6,#60a5fa)' },
-        'code-unjumble': { icon: '🔀', label: 'Code Unjumble', color: '#3b82f6', bg: 'rgba(59,130,246,.14)', accent: 'linear-gradient(90deg,#3b82f6,#60a5fa)' },
-        'sorter': { icon: '⚡', label: 'Tech Sorter', color: '#f59e0b', bg: 'rgba(245,158,11,.14)', accent: 'linear-gradient(90deg,#f59e0b,#fbbf24)' },
-        'tech-sorter': { icon: '⚡', label: 'Tech Sorter', color: '#f59e0b', bg: 'rgba(245,158,11,.14)', accent: 'linear-gradient(90deg,#f59e0b,#fbbf24)' },
-        'fillin': { icon: '✏️', label: 'Fill in Blank', color: '#22c55e', bg: 'rgba(34,197,94,.14)', accent: 'linear-gradient(90deg,#22c55e,#4ade80)' },
-        'syntax-fill': { icon: '✏️', label: 'Fill in Blank', color: '#22c55e', bg: 'rgba(34,197,94,.14)', accent: 'linear-gradient(90deg,#22c55e,#4ade80)' },
-        'sql': { icon: '🗄️', label: 'SQL Builder', color: '#14b8a6', bg: 'rgba(20,184,166,.14)', accent: 'linear-gradient(90deg,#14b8a6,#2dd4bf)' },
-        'sql-builder': { icon: '🗄️', label: 'SQL Builder', color: '#14b8a6', bg: 'rgba(20,184,166,.14)', accent: 'linear-gradient(90deg,#14b8a6,#2dd4bf)' },
-        'bug-hunt': { icon: '🐛', label: 'Debug the Code', color: '#ef4444', bg: 'rgba(239,68,68,.14)', accent: 'linear-gradient(90deg,#ef4444,#f87171)' },
-        'scenario': { icon: '📖', label: 'Scenario', color: '#8b5cf6', bg: 'rgba(139,92,246,.14)', accent: 'linear-gradient(90deg,#8b5cf6,#c084fc)' },
-        'poll': { icon: '📊', label: 'Poll', color: '#f97316', bg: 'rgba(249,115,22,.14)', accent: 'linear-gradient(90deg,#f97316,#fb923c)' },
+        'quiz': { icon: 'brain', label: 'Quiz', color: '#6366f1', bg: 'rgba(99,102,241,.14)', accent: 'linear-gradient(90deg,#6366f1,#a855f7)' },
+        'trivia-challenge': { icon: 'brain', label: 'Trivia', color: '#6366f1', bg: 'rgba(99,102,241,.14)', accent: 'linear-gradient(90deg,#6366f1,#a855f7)' },
+        'unjumble': { icon: 'shuffle', label: 'Code Unjumble', color: '#3b82f6', bg: 'rgba(59,130,246,.14)', accent: 'linear-gradient(90deg,#3b82f6,#60a5fa)' },
+        'code-unjumble': { icon: 'shuffle', label: 'Code Unjumble', color: '#3b82f6', bg: 'rgba(59,130,246,.14)', accent: 'linear-gradient(90deg,#3b82f6,#60a5fa)' },
+        'sorter': { icon: 'zap', label: 'Tech Sorter', color: '#f59e0b', bg: 'rgba(245,158,11,.14)', accent: 'linear-gradient(90deg,#f59e0b,#fbbf24)' },
+        'tech-sorter': { icon: 'zap', label: 'Tech Sorter', color: '#f59e0b', bg: 'rgba(245,158,11,.14)', accent: 'linear-gradient(90deg,#f59e0b,#fbbf24)' },
+        'fillin': { icon: 'pencil', label: 'Fill in Blank', color: '#22c55e', bg: 'rgba(34,197,94,.14)', accent: 'linear-gradient(90deg,#22c55e,#4ade80)' },
+        'syntax-fill': { icon: 'pencil', label: 'Fill in Blank', color: '#22c55e', bg: 'rgba(34,197,94,.14)', accent: 'linear-gradient(90deg,#22c55e,#4ade80)' },
+        'sql': { icon: 'database', label: 'SQL Builder', color: '#14b8a6', bg: 'rgba(20,184,166,.14)', accent: 'linear-gradient(90deg,#14b8a6,#2dd4bf)' },
+        'sql-builder': { icon: 'database', label: 'SQL Builder', color: '#14b8a6', bg: 'rgba(20,184,166,.14)', accent: 'linear-gradient(90deg,#14b8a6,#2dd4bf)' },
+        'bug-hunt': { icon: 'bug', label: 'Debug the Code', color: '#ef4444', bg: 'rgba(239,68,68,.14)', accent: 'linear-gradient(90deg,#ef4444,#f87171)' },
+        'scenario': { icon: 'book-open', label: 'Scenario', color: '#8b5cf6', bg: 'rgba(139,92,246,.14)', accent: 'linear-gradient(90deg,#8b5cf6,#c084fc)' },
+        'poll': { icon: 'bar-chart-3', label: 'Poll', color: '#f97316', bg: 'rgba(249,115,22,.14)', accent: 'linear-gradient(90deg,#f97316,#fb923c)' },
     };
-    return map[type] || { icon: '🎮', label: 'Game', color: '#6366f1', bg: 'rgba(99,102,241,.14)', accent: 'linear-gradient(90deg,#6366f1,#a855f7)' };
+    return map[type] || { icon: 'gamepad-2', label: 'Game', color: '#6366f1', bg: 'rgba(99,102,241,.14)', accent: 'linear-gradient(90deg,#6366f1,#a855f7)' };
 }
 
 function getGameMeta(game) {
@@ -121,23 +121,39 @@ function renderGameList(games) {
     container.innerHTML = `<div class="gc-grid">${games.map(game => {
         const ti = getTypeInfo(game.type);
         const meta = getGameMeta(game);
+        const xp = game.totalPoints || 100;
+        const diff = game.difficulty || 'Normal';
+        const diffColor = diff === 'Beginner' ? '#22c55e' : diff === 'Hard' ? '#ef4444' : diff === 'Expert' ? '#8b5cf6' : '#f59e0b';
+        const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${ti.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="${ti.icon}"></svg>`;
         return `
         <article class="gc-card" data-id="${game._id || game.id}"
             style="--card-accent:${ti.accent}">
-            <div class="gc-card-top">
-                <div class="gc-card-icon" style="background:${ti.bg}">${ti.icon}</div>
-                <span class="gc-card-meta"
-                    style="background:${ti.bg};color:${ti.color}">${meta}</span>
+            <div class="gc-card-play-overlay">
+                <div class="gc-play-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Play Now
+                </div>
             </div>
-            <div class="gc-card-title">${game.title}</div>
-            <div class="gc-card-desc">${game.brief || game.description || 'Complete the challenge to earn XP.'}</div>
-            <div class="gc-card-footer">
-                <span class="gc-chip">⏱️ ${game.duration || 10} min</span>
-                <span class="gc-chip">🏆 ${game.difficulty || 'Normal'}</span>
-                <span class="gc-chip" style="color:${ti.color}">${ti.label}</span>
+            <div class="gc-card-inner">
+                <div class="gc-card-top">
+                    <div class="gc-card-icon" style="background:${ti.bg}" id="icon-${game._id || game.id}">
+                        ${iconSvg}
+                    </div>
+                    <span class="gc-card-meta" style="background:${ti.bg};color:${ti.color}">${meta}</span>
+                </div>
+                <div class="gc-card-title">${game.title}</div>
+                <div class="gc-card-desc">${game.brief || game.description || 'Complete the challenge to earn XP.'}</div>
+                <div class="gc-card-footer">
+                    <span class="gc-chip"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${game.duration || 10} min</span>
+                    <span class="gc-chip" style="color:${diffColor};border-color:${diffColor}33;background:${diffColor}11">${diff}</span>
+                    <span class="gc-xp-chip"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${xp} XP</span>
+                </div>
             </div>
         </article>`;
     }).join('')}</div>`;
+
+    // Init Lucide icons on all card icons
+    if (window.lucide) lucide.createIcons({ el: container });
 
     container.querySelectorAll('.gc-card').forEach(card => {
         card.addEventListener('click', () => {
@@ -177,7 +193,7 @@ function showGamePreview(game) {
         <button class="gc-preview-back" id="previewBackBtn">← Back to All Games</button>
         <div class="gc-preview-card">
             <div class="gc-preview-banner" style="background:${ti.bg}">
-                <div class="gc-preview-icon" style="background:rgba(255,255,255,.12)">${ti.icon}</div>
+                <div class="gc-preview-icon" style="background:rgba(255,255,255,.12)">                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${ti.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="${ti.icon}"></svg></div>
                 <div class="gc-preview-type" style="color:${ti.color}">${ti.label}</div>
                 <div class="gc-preview-title">${game.title}</div>
                 <div class="gc-preview-desc">${game.brief || game.description || ''}</div>
@@ -201,12 +217,12 @@ function showGamePreview(game) {
                 </div>
             </div>
             <div style="padding:20px 32px; border-bottom:1px solid var(--border)">
-                <div style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">📌 How to play</div>
+                <div style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> How to play</div>
                 <p style="font-size:.9rem;color:var(--text);line-height:1.6;margin:0">${ruleText}</p>
             </div>
             <div class="gc-preview-actions">
-                <button class="gc-start-btn" id="startGameBtn" style="background:${ti.accent}">
-                    ▶️&nbsp; Start Game
+                <button class="gc-start-btn" id="startGameBtn" style="background:${ti.accent};display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start Game
                 </button>
             </div>
         </div>
