@@ -1359,7 +1359,9 @@
                     <div class="profile-dropdown" id="profileDropdown">
                         <a href="faculty-profile.html">Profile</a>
                         <a href="faculty-settings.html">Settings</a>
-                        <a href="marketing-site/admin-login.html" class="danger">Sign out</a>
+                        <a href="#" class="danger"
+                            onclick="event.preventDefault(); typeof performLogout==='function' && performLogout();">Sign
+                            out</a>
                     </div>
                 </div>
             </div>
