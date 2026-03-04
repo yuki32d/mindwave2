@@ -1540,73 +1540,84 @@
                             </div>
                         </div>
 
-                        <!-- Engagement card (clickable — wired in admin.js via engagementPulseCard) -->
-                        <div class="card" id="engagementPulseCard" style="cursor:pointer;">
-                            <div class="card-head">
+                        <!-- Engagement card – inline expand/collapse -->
+                        <div class="card" id="engagementPulseCard">
+                            <div class="card-head" id="engagementCardHead" style="cursor:pointer;"
+                                onclick="toggleEngagementExpand()">
                                 <div class="card-title"><i data-lucide="trending-up"></i> Engagement Analytics</div>
-                                <span style="font-size:11px;color:var(--green);">↗ Tap to expand</span>
+                                <span id="engagementToggleLabel"
+                                    style="font-size:11px;color:var(--green);font-weight:700;">↗ Tap to expand</span>
                             </div>
-                            <div class="form-body" style="padding:14px 18px;">
-                                <div style="font-size:13px;color:var(--muted);">Click to view detailed student
-                                    engagement breakdown — active users, game plays, avg score, peak hours and 7-day
-                                    trend.</div>
+                            <!-- collapsed summary -->
+                            <div id="engagementCollapsed" style="padding:12px 18px;">
+                                <div style="font-size:13px;color:var(--muted);">Engagement rate: <strong
+                                        id="engagementPulse" style="color:var(--green);">—</strong> &nbsp;· Last 7 days
+                                </div>
                             </div>
-                        </div>
-
-                        <!-- Approval Queue (static, future API) -->
+                            <!-- expanded metrics (hidden by default) -->
+                            <div id="engagementExpanded"
+                                style="display:none;padding:16px 18px;border-top:1px solid var(--border);">
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                    <div
+                                        style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;">
+                                        <div
+                                            style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;">
+                                            Active Users</div>
+                                        <div id="inlineActiveStudents"
+                                            style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--green);">
+                                            —</div>
+                                    </div>
+                                    <div
+                                        style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;">
+                                        <div
+                                            style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;">
+                                            Game Plays</div>
+                                        <div id="inlineTotalPlays"
+                                            style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--blue);">
+                                            —</div>
+                                    </div>
+                                    <div
+                                        style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;">
+                                        <div
+                                            style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;">
+                                            Avg Score</div>
+                                        <div id="inlineAvgScore"
+                                            style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--accent);">
+                                            —</div>
+                                    </div>
+                                    <div
+                                        style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;">
+                                        <div
+                                            style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;">
+                                            Peak Hour</div>
+                                        <div id="inlinePeakHour"
+                                            style="font-size:20px;font-weight:800;font-family:var(--mono);">—</div>
+                                    </div>
+                                </div>
+                                <div
+                                    style="margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between;">
+                                    <div
+                                        style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);">
+                                        7-Day Trend</div>
+                                    <div id="inlineTrend"
+                                        style="font-size:18px;font-weight:800;font-family:var(--mono);">—</div>
+                                </div>
+                            </div>
+                        </div><!-- Pending Teacher Approvals – real-time from /api/admin/pending-signups -->
                         <div class="card">
                             <div class="card-head">
-                                <div class="card-title"><i data-lucide="clipboard-check"></i> Pending Approvals</div>
-                                <span
-                                    style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(220,38,38,.10);color:var(--red);">4
+                                <div class="card-title"><i data-lucide="user-check"></i> Teacher Sign-up Approvals</div>
+                                <span id="pendingApprovalsCount"
+                                    style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(220,38,38,.10);color:var(--red);display:none;">0
                                     pending</span>
                             </div>
-                            <div class="approval-item">
-                                <div class="a-icon" style="background:var(--accent);"><i data-lucide="user-plus"></i>
-                                </div>
-                                <div>
-                                    <div class="a-title">New Student Registration</div>
-                                    <div class="a-sub">Kiran Patel · CSE-A</div>
-                                </div>
-                                <div class="a-actions">
-                                    <button class="a-btn a-ok"><i data-lucide="check"></i></button>
-                                    <button class="a-btn a-no"><i data-lucide="x"></i></button>
-                                </div>
-                            </div>
-                            <div class="approval-item">
-                                <div class="a-icon" style="background:var(--blue);"><i data-lucide="gamepad-2"></i>
-                                </div>
-                                <div>
-                                    <div class="a-title">Game Publish Request</div>
-                                    <div class="a-sub">SQL Challenge v2</div>
-                                </div>
-                                <div class="a-actions">
-                                    <button class="a-btn a-ok"><i data-lucide="check"></i></button>
-                                    <button class="a-btn a-no"><i data-lucide="x"></i></button>
-                                </div>
-                            </div>
-                            <div class="approval-item">
-                                <div class="a-icon" style="background:var(--green);"><i data-lucide="file-text"></i>
-                                </div>
-                                <div>
-                                    <div class="a-title">Course Material Upload</div>
-                                    <div class="a-sub">OS Notes Week 5</div>
-                                </div>
-                                <div class="a-actions">
-                                    <button class="a-btn a-ok"><i data-lucide="check"></i></button>
-                                    <button class="a-btn a-no"><i data-lucide="x"></i></button>
-                                </div>
-                            </div>
-                            <div class="approval-item">
-                                <div class="a-icon" style="background:var(--red);"><i data-lucide="alert-triangle"></i>
-                                </div>
-                                <div>
-                                    <div class="a-title">Flagged Community Post</div>
-                                    <div class="a-sub">Reported content</div>
-                                </div>
-                                <div class="a-actions">
-                                    <button class="a-btn a-ok"><i data-lucide="check"></i></button>
-                                    <button class="a-btn a-no"><i data-lucide="x"></i></button>
+                            <div id="pendingApprovalsList">
+                                <div style="padding:22px 18px;text-align:center;color:var(--muted);"
+                                    id="pendingApprovalsEmpty">
+                                    <i data-lucide="check-circle"
+                                        style="width:28px;height:28px;color:var(--green);margin-bottom:8px;"></i>
+                                    <div style="font-size:13px;font-weight:700;">All caught up!</div>
+                                    <div style="font-size:12px;margin-top:4px;">No pending teacher sign-ups.</div>
                                 </div>
                             </div>
                         </div>

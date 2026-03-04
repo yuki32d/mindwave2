@@ -259,12 +259,14 @@ loadUpdates();
 loadGames();
 loadEngagement();
 loadAnnouncements();
+loadPendingApprovals();
 
 // ── Real-time auto-refresh every 30 seconds ──
 setInterval(() => {
     loadGames();
     loadAnnouncements();
     loadEngagement();
+    loadPendingApprovals();
 }, 30000);
 
 // --- Templates & Tools (Static/Local for now) ---
@@ -458,152 +460,145 @@ async function loadEngagement() {
     const data = await fetchAPI('/api/engagement');
     if (data && data.ok && data.summary) {
         document.getElementById('engagementPulse').textContent = `${data.summary.engagementRate}%`;
-
-        // Store full data for modal
+        // Store full data for inline expand
         window.engagementData = data;
+        // If already expanded, refresh the inline values
+        populateInlineEngagement(data);
     }
 }
 
-// Show engagement analytics modal
-function showEngagementAnalytics() {
-    const data = window.engagementData;
-    if (!data) {
-        alert('Loading engagement data...');
+function populateInlineEngagement(data) {
+    const safe = (el, val) => { const e = document.getElementById(el); if (e) e.textContent = val; };
+    safe('inlineActiveStudents', data.students?.active ?? '—');
+    safe('inlineTotalPlays', data.games?.totalPlays ?? '—');
+    safe('inlineAvgScore', data.games?.avgScore != null ? `${data.games.avgScore}%` : '—');
+    safe('inlinePeakHour', data.timing?.peakHour ?? '—');
+    const trend = data.timing?.trend ?? '—';
+    const trendEl = document.getElementById('inlineTrend');
+    if (trendEl) {
+        trendEl.textContent = trend;
+        trendEl.style.color = trend.startsWith('+') ? 'var(--green)' : trend.startsWith('-') ? 'var(--red)' : 'var(--accent)';
+    }
+}
+
+// Toggle engagement card expand/collapse
+window.toggleEngagementExpand = function () {
+    const expanded = document.getElementById('engagementExpanded');
+    const collapsed = document.getElementById('engagementCollapsed');
+    const label = document.getElementById('engagementToggleLabel');
+    if (!expanded) return;
+    const isOpen = expanded.style.display !== 'none';
+    expanded.style.display = isOpen ? 'none' : 'block';
+    collapsed.style.display = isOpen ? 'block' : 'none';
+    label.textContent = isOpen ? '↗ Tap to expand' : '↓ Tap to minimize';
+    label.style.color = isOpen ? 'var(--green)' : 'var(--muted)';
+    // populate on first expand
+    if (!isOpen && window.engagementData) populateInlineEngagement(window.engagementData);
+};
+
+// --- Pending Approvals (Teacher sign-ups needing super admin approval) ---
+async function loadPendingApprovals() {
+    const data = await fetchAPI('/api/admin/pending-signups');
+    const list = document.getElementById('pendingApprovalsList');
+    const empty = document.getElementById('pendingApprovalsEmpty');
+    const badge = document.getElementById('pendingApprovalsCount');
+    if (!list) return;
+
+    if (!data || !data.ok || !data.pendingSignups || data.pendingSignups.length === 0) {
+        if (empty) empty.style.display = 'block';
+        if (badge) badge.style.display = 'none';
         return;
     }
 
-    // Populate modal with data
-    document.getElementById('modalActiveStudents').textContent = data.students.active;
-    document.getElementById('modalNewStudents').textContent = data.students.new;
-    document.getElementById('modalReturningStudents').textContent = data.students.returning;
-    document.getElementById('modalInactiveStudents').textContent = data.students.inactive;
+    const items = data.pendingSignups;
+    if (empty) empty.style.display = 'none';
+    if (badge) { badge.textContent = `${items.length} pending`; badge.style.display = 'inline'; }
 
-    document.getElementById('modalTotalPlays').textContent = data.games.totalPlays;
-    document.getElementById('modalAvgCompletion').textContent = `${data.games.avgCompletion}%`;
-    document.getElementById('modalAvgScore').textContent = `${data.games.avgScore}%`;
+    // Build rows
+    const rows = items.map(s => {
+        const name = s.name || s.email.split('@')[0];
+        const time = new Date(s.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        return `
+        <div class="approval-item" id="approval-${s._id}">
+            <div class="a-icon" style="background:var(--accent);"><i data-lucide="user-plus"></i></div>
+            <div style="flex:1;min-width:0;">
+                <div class="a-title">${name}</div>
+                <div class="a-sub">${s.email} &middot; ${time}</div>
+            </div>
+            <div class="a-actions">
+                <button class="a-btn a-ok" title="Approve" onclick="handleApproval('${s._id}','approve')"><i data-lucide="check"></i></button>
+                <button class="a-btn a-no" title="Reject"  onclick="handleApproval('${s._id}','reject')"><i data-lucide="x"></i></button>
+            </div>
+        </div>`;
+    }).join('');
 
-    // Top games list
-    const topGamesHtml = data.games.topGames.length > 0
-        ? data.games.topGames.map((game, i) => `${i + 1}. ${game.name} (${game.plays} plays)`).join('<br>')
-        : 'No games played yet';
-    document.getElementById('modalTopGames').innerHTML = topGamesHtml;
-
-    document.getElementById('modalPeakHour').textContent = data.timing.peakHour;
-
-    // Color code the trend
-    const trendEl = document.getElementById('modalTrend');
-    trendEl.textContent = data.timing.trend;
-    if (data.timing.trend.startsWith('+')) {
-        trendEl.style.color = '#34c759'; // Green for positive
-    } else if (data.timing.trend.startsWith('-')) {
-        trendEl.style.color = '#ff3b30'; // Red for negative
-    } else {
-        trendEl.style.color = '#ff9f0a'; // Orange for neutral
-    }
-
-    // Show modal using class instead of inline style
-    const modal = document.getElementById('engagementModal');
-    modal.style.display = 'flex';
-    // Force a reflow to ensure the modal is visible
-    setTimeout(() => {
-        modal.style.opacity = '1';
-    }, 10);
+    // Keep the empty placeholder in DOM, just hide it; inject rows before it
+    list.innerHTML = rows + (empty ? empty.outerHTML : '');
+    if (window.lucide) lucide.createIcons();
 }
 
-// Add click handler for engagement pulse card
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize all section-content elements to be visible by default
-    document.querySelectorAll('.section-content').forEach(section => {
-        section.style.display = 'block';
+window.handleApproval = async function (id, action) {
+    const endpoint = action === 'approve'
+        ? `/api/admin/approve-signup/${id}`
+        : `/api/admin/reject-signup/${id}`;
+    const res = await fetchAPI(endpoint, { method: 'POST' });
+    if (res && res.ok) {
+        toast(action === 'approve' ? '✅ Teacher approved!' : 'Teacher sign-up rejected.');
+        // Animate out
+        const row = document.getElementById(`approval-${id}`);
+        if (row) { row.style.opacity = '0'; row.style.transition = 'opacity .3s'; setTimeout(() => loadPendingApprovals(), 350); }
+    } else {
+        toast('Action failed — try again.', 'err');
+    }
+};
+
+// Action card click handlers
+const announceBtn = document.getElementById('announceBtn');
+if (announceBtn) {
+    announceBtn.addEventListener('click', () => {
+        document.getElementById('announcementForm').scrollIntoView({ behavior: 'smooth' });
     });
+}
 
-    // Add event listeners to all section headers for toggle functionality
-    document.querySelectorAll('.panel h2[onclick]').forEach(header => {
-        header.style.cursor = 'pointer';
-        // Add programmatic listener as backup to inline onclick
-        header.addEventListener('click', function () {
-            window.toggleSection(this);
-        });
+const updateBtn = document.getElementById('updateBtn');
+if (updateBtn) {
+    updateBtn.addEventListener('click', () => {
+        document.getElementById('updateForm').scrollIntoView({ behavior: 'smooth' });
     });
+}
 
-    const engagementCard = document.getElementById('engagementPulseCard');
-    if (engagementCard) {
-        engagementCard.addEventListener('click', showEngagementAnalytics);
-    }
+const systemStatusBtn = document.getElementById('systemStatusBtn');
+if (systemStatusBtn) {
+    systemStatusBtn.addEventListener('click', showSystemStatus);
+}
 
-    // Add close button handler
-    const closeBtn = document.getElementById('closeEngagementModal');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            const modal = document.getElementById('engagementModal');
-            modal.style.opacity = '0';
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 200);
-        });
-    }
+const newGameBtn = document.getElementById('newGameBtn');
+if (newGameBtn) {
+    newGameBtn.addEventListener('click', () => {
+        window.location.href = 'interactive-tools-selector.html';
+    });
+}
 
-    // Close modal when clicking outside
-    const modal = document.getElementById('engagementModal');
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.opacity = '0';
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                }, 200);
-            }
-        });
-    }
+const aiGameBuilderBtn = document.getElementById('aiGameBuilderBtn');
+if (aiGameBuilderBtn) {
+    aiGameBuilderBtn.addEventListener('click', () => {
+        window.location.href = 'ai-game-builder.html';
+    });
+}
 
-    // Action card click handlers
-    const announceBtn = document.getElementById('announceBtn');
-    if (announceBtn) {
-        announceBtn.addEventListener('click', () => {
-            document.getElementById('announcementForm').scrollIntoView({ behavior: 'smooth' });
-        });
-    }
+const dataAnalyticsBtn = document.getElementById('dataAnalyticsBtn');
+if (dataAnalyticsBtn) {
+    dataAnalyticsBtn.addEventListener('click', () => {
+        window.location.href = 'faculty-dataanalytics.html';
+    });
+}
 
-    const updateBtn = document.getElementById('updateBtn');
-    if (updateBtn) {
-        updateBtn.addEventListener('click', () => {
-            document.getElementById('updateForm').scrollIntoView({ behavior: 'smooth' });
-        });
-    }
-
-    const systemStatusBtn = document.getElementById('systemStatusBtn');
-    if (systemStatusBtn) {
-        systemStatusBtn.addEventListener('click', showSystemStatus);
-    }
-
-    const newGameBtn = document.getElementById('newGameBtn');
-    if (newGameBtn) {
-        newGameBtn.addEventListener('click', () => {
-            window.location.href = 'interactive-tools-selector.html';
-        });
-    }
-
-    const aiGameBuilderBtn = document.getElementById('aiGameBuilderBtn');
-    if (aiGameBuilderBtn) {
-        aiGameBuilderBtn.addEventListener('click', () => {
-            window.location.href = 'ai-game-builder.html';
-        });
-    }
-
-    const dataAnalyticsBtn = document.getElementById('dataAnalyticsBtn');
-    if (dataAnalyticsBtn) {
-        dataAnalyticsBtn.addEventListener('click', () => {
-            window.location.href = 'faculty-dataanalytics.html';
-        });
-    }
-
-    const previewStudentBtn = document.getElementById('previewStudentBtn');
-    if (previewStudentBtn) {
-        previewStudentBtn.addEventListener('click', () => {
-            window.location.href = 'homepage.html';
-        });
-    }
-});
+const previewStudentBtn = document.getElementById('previewStudentBtn');
+if (previewStudentBtn) {
+    previewStudentBtn.addEventListener('click', () => {
+        window.location.href = 'homepage.html';
+    });
+}
 
 // Initialize
 loadAnnouncements();
