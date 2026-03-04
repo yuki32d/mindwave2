@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Updates — MindWave</title>
+    <title>Updates � MindWave</title>
     <meta name="description" content="Grade updates, faculty feedback, and announcements for MindWave students.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -13,7 +14,7 @@
     <script src="sidebar.js"></script>
 
     <style>
-        /* ── Updates layout ──────────────────────────────────────── */
+        /* -- Updates layout ---------------------------------------- */
         .upd-toolbar {
             display: flex;
             align-items: center;
@@ -521,14 +522,14 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -541,6 +542,7 @@
         <!-- MAIN -->
         <div class="mw-main">
             <header class="mw-topbar">
+    <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle"
                     aria-label="Toggle sidebar"><span></span><span></span><span></span></button>
                 <div class="mw-breadcrumb">Performance / <span>Updates</span></div>
@@ -577,7 +579,7 @@
                 <div class="upd-toolbar">
                     <div class="upd-search">
                         <i data-lucide="search"></i>
-                        <input type="text" id="searchInput" placeholder="Search updates…" oninput="applyFilters()">
+                        <input type="text" id="searchInput" placeholder="Search updates�" oninput="applyFilters()">
                     </div>
                     <button class="mark-all-btn" onclick="markAllRead()">
                         <i data-lucide="check-check"></i> Mark All Read
@@ -739,7 +741,7 @@
         let activeFilter = 'all';
         let searchQuery = '';
 
-        // ── Helpers ────────────────────────────────────────────────
+        // -- Helpers ------------------------------------------------
         function timeAgo(ts) {
             const s = Math.floor((Date.now() - new Date(ts)) / 1000);
             if (s < 60) return 'Just now';
@@ -799,7 +801,7 @@
         </div>`;
         }
 
-        // ── Render ─────────────────────────────────────────────────
+        // -- Render -------------------------------------------------
         function renderTimeline(data) {
             const tl = document.getElementById('updTimeline');
 
@@ -860,7 +862,7 @@
             applyFilters();
         }
 
-        // ── API actions ────────────────────────────────────────────
+        // -- API actions --------------------------------------------
         async function markRead(id, cardEl) {
             if (!cardEl.classList.contains('unread')) return;
             cardEl.classList.remove('unread');
@@ -891,7 +893,7 @@
             ));
         }
 
-        // ── Load ───────────────────────────────────────────────────
+        // -- Load ---------------------------------------------------
         async function loadUpdates() {
             try {
                 const r = await fetch(API + '/api/student/updates', { headers: H });
@@ -905,7 +907,7 @@
             applyFilters();
         }
 
-        // ── Profile init ───────────────────────────────────────────
+        // -- Profile init -------------------------------------------
         document.addEventListener('DOMContentLoaded', () => {
             const fn = localStorage.getItem('firstName') || '';
             const ln = localStorage.getItem('lastName') || '';

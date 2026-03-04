@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timetable — MindWave</title>
+    <title>Timetable � MindWave</title>
     <meta name="description" content="View your personal, semester, class, and exam timetables in MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -16,7 +17,7 @@
 <body>
     <div class="mw-app" id="mwApp">
 
-        <!-- ── SIDEBAR ── -->
+        <!-- -- SIDEBAR -- -->
         <aside class="mw-sidebar">
             <div class="mw-logo">
                 <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
@@ -106,15 +107,15 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
 
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html">
                             <i data-lucide="user"></i> My Profile
@@ -130,11 +131,12 @@
             </div>
         </aside>
 
-        <!-- ── MAIN ── -->
+        <!-- -- MAIN -- -->
         <div class="mw-main">
 
             <!-- TOPBAR -->
             <header class="mw-topbar">
+    <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
                     <span></span><span></span><span></span>
                 </button>
@@ -143,7 +145,7 @@
 
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search timetable…" id="ttSearch">
+                    <input type="text" placeholder="Search timetable�" id="ttSearch">
                 </div>
 
                 <div class="mw-topbar-actions">
@@ -172,11 +174,11 @@
                 <div class="greeting-row" style="margin-bottom:28px;">
                     <div>
                         <div class="greeting-name" style="font-size:1.6rem;">Timetable</div>
-                        <div class="greeting-date">Schedules · personal, class &amp; exams</div>
+                        <div class="greeting-date">Schedules � personal, class &amp; exams</div>
                     </div>
                 </div>
 
-                <!-- ── TAB BAR ── -->
+                <!-- -- TAB BAR -- -->
                 <div class="tt-tab-bar">
                     <button class="tt-tab active" data-tab="my">
                         <i data-lucide="user-check"></i> My Timetable
@@ -192,7 +194,7 @@
                     </button>
                 </div>
 
-                <!-- ── TAB PANELS ── -->
+                <!-- -- TAB PANELS -- -->
 
                 <!-- MY TIMETABLE -->
                 <div class="tt-panel" id="tab-my">
@@ -285,7 +287,7 @@
         </div><!-- end mw-main -->
     </div><!-- end mw-app -->
 
-    <!-- ── ADD SLOT MODAL ── -->
+    <!-- -- ADD SLOT MODAL -- -->
     <div id="addSlotModal" class="mw-logout-overlay">
         <div class="mw-logout-modal" style="max-width:440px;text-align:left;gap:0;">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
@@ -298,7 +300,7 @@
                     <div style="font-size:.82rem;color:var(--muted);">Add to your personal timetable</div>
                 </div>
                 <button onclick="closeAddSlot()"
-                    style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.2rem;">✕</button>
+                    style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.2rem;">?</button>
             </div>
 
             <div class="tt-form-group">
@@ -358,7 +360,7 @@
         </div>
     </div>
 
-    <!-- ── LOGOUT MODAL ── -->
+    <!-- -- LOGOUT MODAL -- -->
     <div id="logoutModal" class="mw-logout-overlay">
         <div class="mw-logout-modal">
             <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
@@ -375,7 +377,7 @@
     </div>
 
     <style>
-        /* ── Timetable page-specific styles ── */
+        /* -- Timetable page-specific styles -- */
 
         /* Tab bar */
         .tt-tab-bar {
@@ -437,7 +439,7 @@
             gap: 12px;
         }
 
-        /* ── My Timetable Grid ── */
+        /* -- My Timetable Grid -- */
         .tt-grid-wrap {
             background: var(--surface, rgba(255, 255, 255, .03));
             border: 1px solid var(--border);
@@ -828,7 +830,7 @@
     </style>
 
     <script>
-        // ── Auth ─────────────────────────────────────────────────────────────
+        // -- Auth -------------------------------------------------------------
         function clearAuthAndCache() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role'].forEach(k => localStorage.removeItem(k));
         }
@@ -838,7 +840,7 @@
             if (modal) modal.classList.add('active');
         }
 
-        // ── Profile init ─────────────────────────────────────────────────────
+        // -- Profile init -----------------------------------------------------
         document.addEventListener('DOMContentLoaded', () => {
             const firstName = localStorage.getItem('firstName') || '';
             const lastName = localStorage.getItem('lastName') || '';
@@ -908,7 +910,7 @@
             if (window.lucide) lucide.createIcons();
         });
 
-        // ── MY TIMETABLE ──────────────────────────────────────────────────────
+        // -- MY TIMETABLE ------------------------------------------------------
         const HOURS_START = 8;   // 8 AM
         const HOURS_END = 18;  // 6 PM
         const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -925,7 +927,7 @@
         function buildMyTimetable() {
             // Day headers with today highlight
             const today = new Date();
-            const dayIdx = today.getDay(); // 0=Sun, 1=Mon…
+            const dayIdx = today.getDay(); // 0=Sun, 1=Mon�
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
             DAYS.forEach((d, i) => {
@@ -994,8 +996,8 @@
                 card.style.cssText = `top:${top}px;height:${height}px;background:${slot.color}22;border-left:3px solid ${slot.color};color:${slot.color};`;
                 card.innerHTML = `
                     <div class="tt-slot-name">${slot.subject}</div>
-                    <div class="tt-slot-meta">${fmtTime(slot.start)}–${fmtTime(slot.end)}${slot.teacher ? ' · ' + slot.teacher : ''}${slot.room ? ' · ' + slot.room : ''}</div>
-                    <button class="tt-slot-del" onclick="deleteSlot(${idx},event)" title="Delete">✕</button>
+                    <div class="tt-slot-meta">${fmtTime(slot.start)}�${fmtTime(slot.end)}${slot.teacher ? ' � ' + slot.teacher : ''}${slot.room ? ' � ' + slot.room : ''}</div>
+                    <button class="tt-slot-del" onclick="deleteSlot(${idx},event)" title="Delete">?</button>
                 `;
                 wrap.appendChild(card);
             });
@@ -1016,7 +1018,7 @@
         }
 
         function setMyView(v) {
-            // TODO: Day view — for now just highlight button
+            // TODO: Day view � for now just highlight button
             document.getElementById('myTTViewWeek').classList.toggle('mw-btn-primary', v === 'week');
             document.getElementById('myTTViewWeek').classList.toggle('mw-btn-ghost', v !== 'week');
             document.getElementById('myTTViewDay').classList.toggle('mw-btn-primary', v === 'day');
@@ -1062,7 +1064,7 @@
             document.getElementById('slotRoom').value = '';
         }
 
-        // ── TEACHER TIMETABLES ──────────────────────────────────────────────
+        // -- TEACHER TIMETABLES ----------------------------------------------
         async function fetchTeacherTimetables() {
             const token = localStorage.getItem('token') || localStorage.getItem('mindwave_token');
             if (!token) return;
@@ -1083,7 +1085,7 @@
                     if (data.ok && data.imageUrl) {
                         renderUploadedTimetable(t.id, data.imageUrl, data.updatedAt);
                     }
-                } catch (_) { /* no endpoint yet — empty state shown */ }
+                } catch (_) { /* no endpoint yet � empty state shown */ }
             }
         }
 
@@ -1094,7 +1096,7 @@
             container.innerHTML = `
                 <div class="tt-image-view">
                     <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-                        <span style="font-size:.82rem;color:var(--muted);">Updated${date ? ' · ' + date : ''}</span>
+                        <span style="font-size:.82rem;color:var(--muted);">Updated${date ? ' � ' + date : ''}</span>
                         <a href="${imageUrl}" target="_blank" class="mw-btn mw-btn-ghost" style="padding:6px 14px;font-size:.8rem;">
                             <i data-lucide="external-link" style="width:13px;height:13px;"></i> Open
                         </a>

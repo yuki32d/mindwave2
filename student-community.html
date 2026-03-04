@@ -1,7 +1,8 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Community | MindWave</title>
@@ -79,7 +80,7 @@
         /* -- Light mode: dark pills need light text & icons -- */
         [data-theme="light"] .cm-tab {
             color: #c8ccee;
-            /* light lavender â€“ readable on dark pill */
+            /* light lavender – readable on dark pill */
         }
 
         [data-theme="light"] .cm-tab:hover {
@@ -92,7 +93,7 @@
             color: #fff;
         }
 
-        /* Sort buttons also have dark bg â€“ same fix */
+        /* Sort buttons also have dark bg – same fix */
         [data-theme="light"] .cm-sort-btn {
             color: #c8ccee;
         }
@@ -245,7 +246,7 @@
             gap: 16px;
         }
 
-        /* Post cards rendered by JS ï¿½ also make them look premium */
+        /* Post cards rendered by JS ? also make them look premium */
         #postsContainer .post-card,
         .post-card {
             background: var(--card, #161b2e);
@@ -732,15 +733,15 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loadingâ€¦</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">â‹¯</span>
+                    <span class="mw-user-more">?</span>
 
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student Â· MindWave</div>
+                            <div class="role">Student · MindWave</div>
                         </div>
                         <a href="student-profile.html">
                             <i data-lucide="user"></i> My Profile
@@ -762,6 +763,7 @@
 
             <!-- Topbar -->
             <header class="mw-topbar">
+    <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
                     <span></span><span></span><span></span>
                 </button>
@@ -956,12 +958,12 @@
                     <div class="cm-form-group">
                         <label for="postTitle">Title *</label>
                         <input type="text" id="postTitle" maxlength="300" required
-                            placeholder="Give your post a catchy titleï¿½">
+                            placeholder="Give your post a catchy title?">
                     </div>
                     <div class="cm-form-group">
                         <label for="postContent">Content *</label>
                         <textarea id="postContent" rows="6" maxlength="5000" required
-                            placeholder="Share your thoughts, project details, or ask a questionï¿½"></textarea>
+                            placeholder="Share your thoughts, project details, or ask a question?"></textarea>
                     </div>
                     <div class="cm-form-group">
                         <label for="postType">Post Type</label>

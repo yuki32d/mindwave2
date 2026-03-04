@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile — MindWave</title>
+    <title>My Profile � MindWave</title>
     <meta name="description" content="View your MindWave profile, stats, skills and recent activity.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +23,7 @@
     </script>
 
     <style>
-        /* ── PROFILE LAYOUT ── */
+        /* -- PROFILE LAYOUT -- */
         .pf-body {
             padding: 28px 36px;
             max-width: 960px;
@@ -677,7 +678,7 @@
 <body>
     <div class="mw-app" id="mwApp">
 
-        <!-- ── SIDEBAR ── -->
+        <!-- -- SIDEBAR -- -->
         <aside class="mw-sidebar" id="mwSidebar">
             <div class="mw-logo">
                 <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
@@ -741,14 +742,14 @@
                 <div class="mw-user-card" id="profileToggle" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div class="mw-user-info">
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -758,16 +759,17 @@
             </div>
         </aside>
 
-        <!-- ── MAIN ── -->
+        <!-- -- MAIN -- -->
         <div class="mw-main">
             <header class="mw-topbar">
+    <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar">
                     <span></span><span></span><span></span>
                 </button>
                 <div class="mw-breadcrumb">Dashboard / <span>My Profile</span></div>
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search…" id="globalSearch">
+                    <input type="text" placeholder="Search�" id="globalSearch">
                 </div>
                 <div class="mw-topbar-actions">
                     <div class="mw-notif-wrap">
@@ -794,15 +796,15 @@
                             <img id="pfAvatarImg" alt="Profile photo">
                         </div>
                         <div class="pf-hero-info">
-                            <h1 id="pfName">Loading…</h1>
+                            <h1 id="pfName">Loading�</h1>
                             <p class="pf-hero-email" id="pfEmail"></p>
                             <div class="pf-hero-chips">
                                 <span class="pf-chip pf-chip-gold" id="pfRankChip"><i data-lucide="trophy"></i> Rank
-                                    #—</span>
+                                    #�</span>
                                 <span class="pf-chip pf-chip-blue" id="pfDeptChip" style="display:none;"><i
-                                        data-lucide="graduation-cap"></i> —</span>
+                                        data-lucide="graduation-cap"></i> �</span>
                                 <span class="pf-chip pf-chip-green" id="pfStreakChip" style="display:none;"><i
-                                        data-lucide="flame"></i> — day streak</span>
+                                        data-lucide="flame"></i> � day streak</span>
                             </div>
                         </div>
                         <div class="pf-hero-actions">
@@ -840,7 +842,7 @@
                         </button>
                     </div>
 
-                    <!-- ── OVERVIEW PANEL ── -->
+                    <!-- -- OVERVIEW PANEL -- -->
                     <div class="pf-panel active" id="panel-overview">
 
                         <!-- Bio / info card -->
@@ -859,32 +861,32 @@
                         <div class="pf-stats-grid">
                             <div class="pf-stat-card">
                                 <div class="pf-stat-icon pf-icon-blue"><i data-lucide="zap"></i></div>
-                                <div class="pf-stat-value" id="pfPoints">—</div>
+                                <div class="pf-stat-value" id="pfPoints">�</div>
                                 <div class="pf-stat-label">Total Points</div>
                             </div>
                             <div class="pf-stat-card">
                                 <div class="pf-stat-icon pf-icon-gold"><i data-lucide="trophy"></i></div>
-                                <div class="pf-stat-value" id="pfRank">—</div>
+                                <div class="pf-stat-value" id="pfRank">�</div>
                                 <div class="pf-stat-label">Current Rank</div>
                             </div>
                             <div class="pf-stat-card">
                                 <div class="pf-stat-icon pf-icon-green"><i data-lucide="gamepad-2"></i></div>
-                                <div class="pf-stat-value" id="pfGames">—</div>
+                                <div class="pf-stat-value" id="pfGames">�</div>
                                 <div class="pf-stat-label">Games Completed</div>
                             </div>
                             <div class="pf-stat-card">
                                 <div class="pf-stat-icon pf-icon-cyan"><i data-lucide="target"></i></div>
-                                <div class="pf-stat-value" id="pfAccuracy">—</div>
+                                <div class="pf-stat-value" id="pfAccuracy">�</div>
                                 <div class="pf-stat-label">Avg Accuracy</div>
                             </div>
                             <div class="pf-stat-card">
                                 <div class="pf-stat-icon pf-icon-purple"><i data-lucide="clock"></i></div>
-                                <div class="pf-stat-value" id="pfTime">—</div>
+                                <div class="pf-stat-value" id="pfTime">�</div>
                                 <div class="pf-stat-label">Time Spent</div>
                             </div>
                             <div class="pf-stat-card">
                                 <div class="pf-stat-icon pf-icon-red"><i data-lucide="flame"></i></div>
-                                <div class="pf-stat-value" id="pfStreak">—</div>
+                                <div class="pf-stat-value" id="pfStreak">�</div>
                                 <div class="pf-stat-label">Day Streak</div>
                             </div>
                         </div>
@@ -902,7 +904,7 @@
                         </div>
                     </div>
 
-                    <!-- ── ACTIVITY PANEL ── -->
+                    <!-- -- ACTIVITY PANEL -- -->
                     <div class="pf-panel" id="panel-activity">
                         <div class="pf-section-hdr">
                             <div class="pf-section-title"><i data-lucide="clock"></i> Recent Games</div>
@@ -911,12 +913,12 @@
                         <div class="pf-activity-list" id="pfActivityList">
                             <div class="pf-empty">
                                 <i data-lucide="gamepad-2"></i>
-                                <p>No activity yet — start playing!</p>
+                                <p>No activity yet � start playing!</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ── ACHIEVEMENTS PANEL ── -->
+                    <!-- -- ACHIEVEMENTS PANEL -- -->
                     <div class="pf-panel" id="panel-achievements">
                         <div class="pf-section-hdr">
                             <div class="pf-section-title"><i data-lucide="award"></i> Achievements</div>
@@ -964,11 +966,11 @@
     <script src="theme-init.js"></script>
     <script src="sidebar.js"></script>
     <script>
-        // ── CONSTANTS ──
+        // -- CONSTANTS --
         const PF_API = window.location.origin;
         const PF_TOKEN = localStorage.getItem('token') || localStorage.getItem('auth_token');
 
-        // ── HELPERS ──
+        // -- HELPERS --
         function pfInitials(name) {
             return (name || 'ST').trim().split(' ').map(w => w[0] || '').join('').toUpperCase().slice(0, 2);
         }
@@ -988,7 +990,7 @@
             return `${m}m ${s}s`;
         }
 
-        // ── TAB SWITCHING ──
+        // -- TAB SWITCHING --
         document.querySelectorAll('.pf-tab-btn').forEach(btn => {
             btn.addEventListener('click', function () {
                 document.querySelectorAll('.pf-tab-btn').forEach(b => b.classList.remove('active'));
@@ -998,7 +1000,7 @@
             });
         });
 
-        // ── LOAD ALL DATA ──
+        // -- LOAD ALL DATA --
         async function loadProfile() {
             try {
                 // Parallel fetch all 3 endpoints
@@ -1016,7 +1018,7 @@
                 const results = (resultsData.ok && resultsData.results) ? resultsData.results : [];
                 const leaderboard = (lbData.ok && lbData.leaderboard) ? lbData.leaderboard : [];
 
-                // ── HERO ──
+                // -- HERO --
                 if (user) {
                     const name = user.displayName || user.name || 'Student';
                     document.getElementById('pfName').textContent = name;
@@ -1059,11 +1061,11 @@
                     document.getElementById('pfCompleteBar').style.width = pct + '%';
                     document.getElementById('pfCompletePct').textContent = pct + '%';
                     document.getElementById('pfCompleteHint').textContent = pct < 100
-                        ? `Missing: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? '…' : ''} — complete in Settings`
+                        ? `Missing: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? '�' : ''} � complete in Settings`
                         : 'Your profile is fully complete!';
                 }
 
-                // ── STATS ──
+                // -- STATS --
                 const totalPoints = results.reduce((s, r) => s + (r.rawScore || 0), 0);
                 const gamesCompleted = results.length;
                 const avgAccuracy = gamesCompleted > 0 ? Math.round(results.reduce((s, r) => s + (r.score || 0), 0) / gamesCompleted) : 0;
@@ -1083,7 +1085,7 @@
                 }
 
                 // Rank
-                let rank = '—';
+                let rank = '�';
                 if (user && leaderboard.length) {
                     const idx = leaderboard.findIndex(p => p.email === user.email);
                     if (idx >= 0) rank = `#${idx + 1}`;
@@ -1099,14 +1101,14 @@
                 document.getElementById('pfStreak').textContent = streak;
 
                 // Update hero chips
-                document.getElementById('pfRankChip').innerHTML = `<i data-lucide="trophy"></i> ${rank === '—' ? 'Unranked' : 'Rank ' + rank}`;
+                document.getElementById('pfRankChip').innerHTML = `<i data-lucide="trophy"></i> ${rank === '�' ? 'Unranked' : 'Rank ' + rank}`;
                 if (streak > 0) {
                     const sc = document.getElementById('pfStreakChip');
                     sc.style.display = '';
                     sc.innerHTML = `<i data-lucide="flame"></i> ${streak}-day streak`;
                 }
 
-                // ── SKILLS ──
+                // -- SKILLS --
                 const gameTypeMap = { quiz: 'Quiz', unjumble: 'Logic Unjumble', 'code-unjumble': 'Logic Unjumble', sorter: 'Tech Sorter', 'tech-sorter': 'Tech Sorter', fillin: 'Syntax Fill-in', 'syntax-fill': 'Syntax Fill-in', sql: 'SQL Builder', 'sql-builder': 'SQL Builder' };
                 const skillsMap = {};
                 results.forEach(r => {
@@ -1137,7 +1139,7 @@
                     });
                 }
 
-                // ── ACTIVITY ──
+                // -- ACTIVITY --
                 const sorted = [...results].sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt)).slice(0, 15);
                 document.getElementById('pfActivityCount').textContent = `${sorted.length} recent entries`;
                 if (sorted.length) {
@@ -1159,7 +1161,7 @@
                     }).join('');
                 }
 
-                // ── ACHIEVEMENTS ──
+                // -- ACHIEVEMENTS --
                 const achs = [
                     { name: 'First Steps', desc: 'Complete your first game', icon: 'star', unlocked: results.length > 0 },
                     { name: 'Perfect Score', desc: 'Score 100% on any game', icon: 'check-circle', unlocked: results.some(r => r.score === 100) },
@@ -1176,7 +1178,7 @@
                     <div class="pf-ach-icon"><i data-lucide="${a.icon}"></i></div>
                     <div class="pf-ach-name">${a.name}</div>
                     <div class="pf-ach-desc">${a.desc}</div>
-                    <div class="pf-ach-status ${a.unlocked ? 'ok' : 'no'}">${a.unlocked ? '✓ Unlocked' : 'Locked'}</div>
+                    <div class="pf-ach-status ${a.unlocked ? 'ok' : 'no'}">${a.unlocked ? '? Unlocked' : 'Locked'}</div>
                 </div>`).join('');
 
                 // Update achievements tab button badge
@@ -1192,7 +1194,7 @@
             }
         }
 
-        // ── THEME TOGGLE ──
+        // -- THEME TOGGLE --
         document.getElementById('themeToggle').addEventListener('click', function () {
             const cur = document.documentElement.getAttribute('data-theme') || 'dark';
             const next = cur === 'dark' ? 'light' : 'dark';
@@ -1201,7 +1203,7 @@
             localStorage.setItem('theme', next);
         });
 
-        // ── LOGOUT MODAL ──
+        // -- LOGOUT MODAL --
         document.getElementById('signOutBtn').addEventListener('click', e => {
             e.stopPropagation();
             document.getElementById('logoutModal').style.display = 'flex';
@@ -1219,13 +1221,13 @@
             if (e.target === this) this.style.display = 'none';
         });
 
-        // ── REFRESH BTN ──
+        // -- REFRESH BTN --
         document.getElementById('pfRefreshBtn').addEventListener('click', () => {
-            document.getElementById('pfPoints').textContent = '—';
+            document.getElementById('pfPoints').textContent = '�';
             loadProfile();
         });
 
-        // ── SIDEBAR DROPDOWN ──
+        // -- SIDEBAR DROPDOWN --
         document.addEventListener('DOMContentLoaded', function () {
             lucide.createIcons();
             loadProfile();

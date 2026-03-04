@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Courses — MindWave</title>
+    <title>My Courses � MindWave</title>
     <meta name="description" content="View your Google Classroom courses, assignments, and materials in MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -16,7 +17,7 @@
 <body>
     <div class="mw-app" id="mwApp">
 
-        <!-- ── SIDEBAR ── -->
+        <!-- -- SIDEBAR -- -->
         <aside class="mw-sidebar">
             <div class="mw-logo">
                 <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
@@ -107,15 +108,15 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
 
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html">
                             <i data-lucide="user"></i> My Profile
@@ -131,11 +132,12 @@
             </div>
         </aside>
 
-        <!-- ── MAIN ── -->
+        <!-- -- MAIN -- -->
         <div class="mw-main">
 
             <!-- TOPBAR -->
             <header class="mw-topbar">
+    <script src="student-theme-init.js"></script>
                 <!-- Hamburger -->
                 <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
                     <span></span><span></span><span></span>
@@ -145,7 +147,7 @@
 
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search courses…" id="courseSearch">
+                    <input type="text" placeholder="Search courses�" id="courseSearch">
                 </div>
 
                 <div class="mw-topbar-actions">
@@ -174,7 +176,7 @@
                 <div class="greeting-row" style="margin-bottom:28px;">
                     <div>
                         <div class="greeting-name" style="font-size:1.6rem;">My Courses</div>
-                        <div class="greeting-date">Google Classroom · your enrolled subjects</div>
+                        <div class="greeting-date">Google Classroom � your enrolled subjects</div>
                     </div>
                 </div>
 
@@ -197,7 +199,7 @@
         </div>
     </div>
 
-    <!-- ── LOGOUT MODAL ── -->
+    <!-- -- LOGOUT MODAL -- -->
     <div id="logoutModal" class="mw-logout-overlay">
         <div class="mw-logout-modal">
             <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
@@ -213,7 +215,7 @@
         </div>
     </div>
 
-    <!-- ── DISCONNECT GCR MODAL ── -->
+    <!-- -- DISCONNECT GCR MODAL -- -->
     <div id="disconnectModal" class="mw-logout-overlay">
         <div class="mw-logout-modal">
             <div class="mw-logout-icon" style="background:rgba(255,92,92,.12);color:#ff5c5c;">
@@ -232,7 +234,7 @@
     </div>
 
     <style>
-        /* ── Logout modal (same as homepage) ── */
+        /* -- Logout modal (same as homepage) -- */
         .mw-logout-overlay {
             display: none;
             position: fixed;
@@ -353,7 +355,7 @@
     </style>
 
     <script>
-        // ── Auth utilities ──────────────────────────────────────────────
+        // -- Auth utilities ----------------------------------------------
         function clearAuthAndCache() {
             const keys = ['token', 'mindwave_token', 'email', 'firstName', 'lastName', 'role', 'userId'];
             keys.forEach(k => localStorage.removeItem(k));
@@ -366,7 +368,7 @@
         }
         function getStudentEmail() { return localStorage.getItem('email') || ''; }
 
-        // ── Profile init ──────────────────────────────────────────────
+        // -- Profile init ----------------------------------------------
         document.addEventListener('DOMContentLoaded', () => {
             // Name / avatar
             const firstName = localStorage.getItem('firstName') || '';
@@ -440,7 +442,7 @@
 
         async function doDisconnectGcr() {
             const btn = document.querySelector('#disconnectModal .mw-logout-confirm');
-            if (btn) { btn.textContent = 'Disconnecting…'; btn.disabled = true; }
+            if (btn) { btn.textContent = 'Disconnecting�'; btn.disabled = true; }
 
             const token = localStorage.getItem('token') || localStorage.getItem('mindwave_token');
             try {
@@ -450,7 +452,7 @@
                 });
                 const data = await res.json();
                 if (!data.ok) throw new Error(data.message || 'Server error');
-                // Success — close modal and reload to show the "Connect GCR" prompt
+                // Success � close modal and reload to show the "Connect GCR" prompt
                 document.getElementById('disconnectModal').classList.remove('active');
                 window.location.reload();
             } catch (e) {

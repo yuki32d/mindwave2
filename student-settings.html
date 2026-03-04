@@ -2,9 +2,10 @@
 <html lang="en" data-theme="dark">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings — MindWave</title>
+    <title>Settings � MindWave</title>
     <meta name="description" content="Manage your MindWave profile and preferences.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +23,7 @@
     </script>
 
     <style>
-        /* ── SETTINGS LAYOUT ── */
+        /* -- SETTINGS LAYOUT -- */
         .st-body {
             display: flex;
             gap: 0;
@@ -562,7 +563,7 @@
 <body>
     <div class="mw-app" id="mwApp">
 
-        <!-- ── SIDEBAR ── -->
+        <!-- -- SIDEBAR -- -->
         <aside class="mw-sidebar" id="mwSidebar">
             <div class="mw-logo">
                 <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
@@ -646,14 +647,14 @@
                 <div class="mw-user-card" id="profileToggle" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div class="mw-user-info">
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -663,18 +664,19 @@
             </div>
         </aside>
 
-        <!-- ── MAIN ── -->
+        <!-- -- MAIN -- -->
         <div class="mw-main">
 
             <!-- TOPBAR -->
             <header class="mw-topbar">
+    <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
                     <span></span><span></span><span></span>
                 </button>
                 <div class="mw-breadcrumb">Dashboard / <span>Settings</span></div>
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search settings…" id="settingsSearch">
+                    <input type="text" placeholder="Search settings�" id="settingsSearch">
                 </div>
                 <div class="mw-topbar-actions">
                     <div class="mw-notif-wrap">
@@ -712,6 +714,18 @@
                             <i data-lucide="bot"></i> AI Tutor
                         </button>
                         <button class="st-tab-btn" data-tab="appearance">
+<div class="st-section-title">Theme</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;">
+    <div class="theme-card" data-theme-choice="dark" style="border:2px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:14px;">
+        <div style="width:44px;height:36px;background:#0d0e14;border-radius:8px;border:1px solid rgba(255,255,255,.12);flex-shrink:0;"></div>
+        <div><div style="font-weight:700;font-size:14px;">Dark</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Easy on the eyes</div></div>
+    </div>
+    <div class="theme-card" data-theme-choice="light" style="border:2px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:14px;">
+        <div style="width:44px;height:36px;background:#eef0f8;border-radius:8px;border:1px solid rgba(0,0,0,.1);flex-shrink:0;"></div>
+        <div><div style="font-weight:700;font-size:14px;">Light</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Clean and bright</div></div>
+    </div>
+</div>
+<style>.theme-card.active{border-color:var(--accent)!important;background:rgba(99,102,241,.08);}.theme-card:hover:not(.active){border-color:var(--border-2)!important;}</style>
                             <i data-lucide="palette"></i> Appearance
                         </button>
                     </nav>
@@ -719,7 +733,7 @@
                     <!-- RIGHT PANELS -->
                     <div class="st-content">
 
-                        <!-- ── PROFILE ── -->
+                        <!-- -- PROFILE -- -->
                         <div class="st-panel active" id="tab-profile">
                             <div class="st-panel-title">Profile</div>
                             <div class="st-panel-sub">Your public identity on MindWave</div>
@@ -734,7 +748,7 @@
                                     </div>
                                     <div class="st-photo-info">
                                         <h4>Profile Picture</h4>
-                                        <p>JPG, PNG or GIF — max 2 MB</p>
+                                        <p>JPG, PNG or GIF � max 2 MB</p>
                                         <div class="st-photo-btns">
                                             <input type="file" id="photoInput" accept="image/*" style="display:none;">
                                             <button class="st-btn st-btn-ghost st-btn-sm"
@@ -760,7 +774,7 @@
                                     <div class="st-field">
                                         <label>Bio / About Me</label>
                                         <textarea id="bio"
-                                            placeholder="Tell your classmates something about yourself…"></textarea>
+                                            placeholder="Tell your classmates something about yourself�"></textarea>
                                     </div>
                                     <div class="st-two-col">
                                         <div class="st-field">
@@ -818,7 +832,7 @@
                             </div>
                         </div>
 
-                        <!-- ── ACCOUNT & SECURITY ── -->
+                        <!-- -- ACCOUNT & SECURITY -- -->
                         <div class="st-panel" id="tab-security">
                             <div class="st-panel-title">Account &amp; Security</div>
                             <div class="st-panel-sub">Manage your password and account security</div>
@@ -864,7 +878,7 @@
                             </div>
                         </div>
 
-                        <!-- ── NOTIFICATIONS ── -->
+                        <!-- -- NOTIFICATIONS -- -->
                         <div class="st-panel" id="tab-notifications">
                             <div class="st-panel-title">Notifications</div>
                             <div class="st-panel-sub">Choose what alerts you'd like to receive</div>
@@ -930,7 +944,7 @@
                             </div>
                         </div>
 
-                        <!-- ── AI TUTOR ── -->
+                        <!-- -- AI TUTOR -- -->
                         <div class="st-panel" id="tab-ai">
                             <div class="st-panel-title">AI Tutor</div>
                             <div class="st-panel-sub">Personalise how your AI Tutor behaves</div>
@@ -946,15 +960,15 @@
                                     <div class="st-field">
                                         <label>Default Mode</label>
                                         <select id="aiDefaultMode">
-                                            <option value="tutor">Tutor — explain concepts step-by-step</option>
-                                            <option value="quiz">Quiz — test my knowledge</option>
-                                            <option value="socratic">Socratic — guide me with questions</option>
-                                            <option value="practice">Practice — give me problems to solve</option>
+                                            <option value="tutor">Tutor � explain concepts step-by-step</option>
+                                            <option value="quiz">Quiz � test my knowledge</option>
+                                            <option value="socratic">Socratic � guide me with questions</option>
+                                            <option value="practice">Practice � give me problems to solve</option>
                                         </select>
                                     </div>
                                     <div class="st-field">
                                         <label>Tutor Name / Persona</label>
-                                        <input type="text" id="aiPersonaName" placeholder="e.g. Sage, Nova, Max…">
+                                        <input type="text" id="aiPersonaName" placeholder="e.g. Sage, Nova, Max�">
                                         <span class="st-hint">Give your AI Tutor a custom name</span>
                                     </div>
                                 </div>
@@ -1001,7 +1015,7 @@
                             </div>
                         </div>
 
-                        <!-- ── APPEARANCE ── -->
+                        <!-- -- APPEARANCE -- -->
                         <div class="st-panel" id="tab-appearance">
                             <div class="st-panel-title">Appearance</div>
                             <div class="st-panel-sub">Customise the look of MindWave</div>
@@ -1060,7 +1074,7 @@
                                 <div class="st-toggle-row">
                                     <div class="st-toggle-info">
                                         <h4>Compact text</h4>
-                                        <p>Slightly smaller font size — fits more content on screen</p>
+                                        <p>Slightly smaller font size � fits more content on screen</p>
                                     </div>
                                     <label class="st-switch">
                                         <input type="checkbox" id="compactMode">
@@ -1095,7 +1109,7 @@
     <script src="theme-init.js"></script>
     <script src="sidebar.js"></script>
     <script>
-        // ━━━━━━━━━━━━━━━━━━ HELPERS ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? HELPERS ??????????????????
         const token = localStorage.getItem('token');
 
         function getInitials(name) {
@@ -1111,7 +1125,7 @@
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        // ━━━━━━━━━━━━━━━━━━ TAB NAV ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? TAB NAV ??????????????????
         document.querySelectorAll('.st-tab-btn').forEach(btn => {
             btn.addEventListener('click', function () {
                 document.querySelectorAll('.st-tab-btn').forEach(b => b.classList.remove('active'));
@@ -1121,7 +1135,7 @@
             });
         });
 
-        // ━━━━━━━━━━━━━━━━━━ LOAD USER DATA ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? LOAD USER DATA ??????????????????
         async function loadProfile() {
             try {
                 const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -1187,7 +1201,7 @@
             if (el) el.checked = !!val;
         }
 
-        // ━━━━━━━━━━━━━━━━━━ SAVE PROFILE ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? SAVE PROFILE ??????????????????
         document.getElementById('saveProfileBtn').addEventListener('click', async function () {
             const displayName = document.getElementById('displayName').value.trim();
             if (!displayName) { showToast('Display name is required', true); return; }
@@ -1218,7 +1232,7 @@
             }
         });
 
-        // ━━━━━━━━━━━━━━━━━━ SAVE PASSWORD ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? SAVE PASSWORD ??????????????????
         document.getElementById('savePasswordBtn').addEventListener('click', async function () {
             const cur = document.getElementById('currentPassword').value;
             const nw = document.getElementById('newPassword').value;
@@ -1261,7 +1275,7 @@
             lbl.style.color = c;
         });
 
-        // ━━━━━━━━━━━━━━━━━━ SAVE NOTIFICATIONS ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? SAVE NOTIFICATIONS ??????????????????
         document.getElementById('saveNotifBtn').addEventListener('click', async function () {
             const notifPrefs = {
                 announcements: document.getElementById('notifAnnouncements').checked,
@@ -1281,13 +1295,13 @@
                 if (!data.ok) throw new Error(data.message || 'Failed');
                 showToast('Notification preferences saved');
             } catch (e) {
-                // Graceful fallback — store in localStorage if API doesn't support field yet
+                // Graceful fallback � store in localStorage if API doesn't support field yet
                 localStorage.setItem('notifPrefs', JSON.stringify(notifPrefs));
                 showToast('Preferences saved locally');
             }
         });
 
-        // ━━━━━━━━━━━━━━━━━━ SAVE AI PREFS ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? SAVE AI PREFS ??????????????????
         document.getElementById('saveAiBtn').addEventListener('click', async function () {
             const aiPrefs = {
                 defaultSubject: document.getElementById('aiDefaultSubject').value,
@@ -1313,7 +1327,7 @@
             }
         });
 
-        // ━━━━━━━━━━━━━━━━━━ THEME ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? THEME ??????????????????
         function updateThemeCards(theme) {
             document.getElementById('themeCardDark').classList.toggle('selected', theme === 'dark');
             document.getElementById('themeCardLight').classList.toggle('selected', theme === 'light');
@@ -1335,7 +1349,7 @@
             });
         }
 
-        // ━━━━━━━━━━━━━━━━━━ ACCENT COLOUR ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? ACCENT COLOUR ??????????????????
         function applyAccent(color, save = true) {
             document.documentElement.style.setProperty('--accent', color);
             document.documentElement.style.setProperty('--blue', color);
@@ -1354,7 +1368,7 @@
             if (swatch) applyAccent(swatch.dataset.color);
         });
 
-        // ━━━━━━━━━━━━━━━━━━ COMPACT / REDUCE MOTION ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? COMPACT / REDUCE MOTION ??????????????????
         document.getElementById('compactMode').addEventListener('change', function () {
             localStorage.setItem('compactMode', this.checked ? '1' : '0');
             document.documentElement.style.fontSize = this.checked ? '13px' : '';
@@ -1367,7 +1381,7 @@
             showToast(this.checked ? 'Animations reduced' : 'Animations restored');
         });
 
-        // ━━━━━━━━━━━━━━━━━━ PHOTO UPLOAD ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? PHOTO UPLOAD ??????????????????
         document.getElementById('photoInput').addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1390,7 +1404,7 @@
             document.getElementById('photoInput').value = '';
         });
 
-        // ━━━━━━━━━━━━━━━━━━ SIDEBAR LOGOUT / DROPDOWN ━━━━━━━━━━━━━━━━━━
+        // ?????????????????? SIDEBAR LOGOUT / DROPDOWN ??????????????????
         document.addEventListener('DOMContentLoaded', function () {
             lucide.createIcons();
             loadProfile();
@@ -1407,7 +1421,7 @@
                 document.addEventListener('click', () => profileDropdown.classList.remove('show'));
             }
 
-            // Settings search — highlight matching tab
+            // Settings search � highlight matching tab
             document.getElementById('settingsSearch').addEventListener('input', function () {
                 const q = this.value.toLowerCase();
                 if (!q) return;
@@ -1429,7 +1443,7 @@
             // Reflect compact / reduce-motion prefs
             if (localStorage.getItem('compactMode') === '1') document.documentElement.style.fontSize = '13px';
 
-            // ── LOGOUT — show confirmation modal ──
+            // -- LOGOUT � show confirmation modal --
             const signOutBtn = document.getElementById('signOutBtn');
             if (signOutBtn) {
                 signOutBtn.addEventListener('click', function (e) {
@@ -1451,7 +1465,7 @@
         });
     </script>
 
-    <!-- ── LOGOUT CONFIRMATION MODAL ── -->
+    <!-- -- LOGOUT CONFIRMATION MODAL -- -->
     <div id="logoutModal"
         style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
         <div

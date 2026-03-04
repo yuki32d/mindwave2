@@ -47,12 +47,12 @@ async function loadSettings() {
         console.error('Error loading settings:', error);
     }
 
-    // Load theme
-    const theme = localStorage.getItem('theme') || 'dark';
-    if (theme === 'light') {
-        document.body.classList.add('light-theme');
-        document.getElementById('themeToggle').classList.add('active');
-    }
+    // Load theme — the html[data-theme] is already applied by student-theme-init.js,
+    // but we sync the settings cards here in case they load after DOMContentLoaded.
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.querySelectorAll('[data-theme-choice]').forEach(card => {
+        card.classList.toggle('active', card.getAttribute('data-theme-choice') === savedTheme);
+    });
 }
 
 async function saveSettings() {
@@ -213,14 +213,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Theme toggle
-    document.getElementById('themeToggle').addEventListener('click', function () {
-        this.classList.toggle('active');
-        document.body.classList.toggle('light-theme');
-
-        const theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
-        localStorage.setItem('theme', theme);
-    });
+    // Theme is handled globally by student-theme-init.js via [data-theme-choice] cards.
 
     // Initialize settings
     loadSettings();

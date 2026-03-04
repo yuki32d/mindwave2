@@ -1,7 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -894,7 +895,7 @@
         function gradeLetter(p) { return p >= 90 ? 'A' : p >= 80 ? 'B' : p >= 70 ? 'C' : p >= 60 ? 'D' : 'F'; }
         function gradeColor(p) { return p >= 90 ? '#22c55e' : p >= 80 ? '#6366f1' : p >= 70 ? '#f59e0b' : '#f87171'; }
 
-        // ── KPI ──────────────────────────────────────────────────────
+        // -- KPI ------------------------------------------------------
         function updateKPI(d) {
             // Overall grade
             const oa = document.getElementById('kpiOverall');
@@ -930,7 +931,7 @@
             }
         }
 
-        // ── Grade Trend chart ─────────────────────────────────────────
+        // -- Grade Trend chart -----------------------------------------
         function buildTrendChart(trend) {
             const ctx = document.getElementById('chtTrend').getContext('2d');
             if (charts.trend) charts.trend.destroy();
@@ -949,7 +950,7 @@
             });
         }
 
-        // ── Percentile gauge ─────────────────────────────────────────
+        // -- Percentile gauge -----------------------------------------
         function buildGaugeChart(percentile) {
             const ctx = document.getElementById('chtGauge').getContext('2d');
             if (charts.gauge) charts.gauge.destroy();
@@ -960,7 +961,7 @@
             });
         }
 
-        // ── Radar ─────────────────────────────────────────────────────
+        // -- Radar -----------------------------------------------------
         function buildRadarChart(sp) {
             const ctx = document.getElementById('chtRadar').getContext('2d');
             if (charts.radar) charts.radar.destroy();
@@ -972,7 +973,7 @@
             });
         }
 
-        // ── Subject tiles ─────────────────────────────────────────────
+        // -- Subject tiles ---------------------------------------------
         function buildSubjectTiles(sp) {
             const sg = document.getElementById('subjGrid');
             if (!sp.labels.length) { sg.innerHTML = '<div style="color:#9ea4b6;font-size:.8rem;grid-column:1/-1;text-align:center;padding:1rem">No grade data yet</div>'; return; }
@@ -995,7 +996,7 @@
             lucide.createIcons();
         }
 
-        // ── Weak area ─────────────────────────────────────────────────
+        // -- Weak area -------------------------------------------------
         function buildWeakArea(sp) {
             const wl = document.getElementById('weakList');
             // Sort subjects ascending by score, take worst 3
@@ -1026,7 +1027,7 @@
             lucide.createIcons();
         }
 
-        // ── Completion donut ──────────────────────────────────────────
+        // -- Completion donut ------------------------------------------
         function buildCompletionChart(comp) {
             const ctx = document.getElementById('chtCompletion').getContext('2d');
             if (charts.completion) charts.completion.destroy();
@@ -1037,7 +1038,7 @@
             });
         }
 
-        // ── Attendance bar ────────────────────────────────────────────
+        // -- Attendance bar --------------------------------------------
         function buildAttendanceChart(att) {
             const ctx = document.getElementById('chtAttendance').getContext('2d');
             if (charts.attendance) charts.attendance.destroy();
@@ -1050,7 +1051,7 @@
             });
         }
 
-        // ── Grade distribution bar ────────────────────────────────────
+        // -- Grade distribution bar ------------------------------------
         function buildDistChart(sp) {
             const ctx = document.getElementById('chtDist').getContext('2d');
             if (charts.dist) charts.dist.destroy();
@@ -1069,7 +1070,7 @@
             });
         }
 
-        // ── Heatmap ───────────────────────────────────────────────────
+        // -- Heatmap ---------------------------------------------------
         function buildHeatmap(hmData) {
             const grid = document.getElementById('hmGrid');
             const monthsEl = document.getElementById('hmMonths');
@@ -1099,7 +1100,7 @@
                     cell.style.background = colors[level];
                     const ds = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                     const actLabels = ['No activity', 'Light activity', 'Moderate activity', 'Active', 'Very active'];
-                    cell.title = ds + ' — ' + actLabels[level];
+                    cell.title = ds + ' � ' + actLabels[level];
                     grid.appendChild(cell);
                     if (d === 0 && !monthMap[w]) monthMap[w] = MONTHS[date.getMonth()];
                 }
@@ -1113,7 +1114,7 @@
             }
         }
 
-        // ── AI Insight ────────────────────────────────────────────────
+        // -- AI Insight ------------------------------------------------
         async function loadInsight() {
             try {
                 const r = await fetch(API + '/api/student/recommendations', { headers: H });
@@ -1124,7 +1125,7 @@
             } catch (e) { }
         }
 
-        // ── Main data loader ──────────────────────────────────────────
+        // -- Main data loader ------------------------------------------
         async function loadAll(range) {
             try {
                 const [chartsRes, hmRes] = await Promise.all([
@@ -1157,7 +1158,7 @@
             }
         }
 
-        // ── Initial load ──────────────────────────────────────────────
+        // -- Initial load ----------------------------------------------
         lucide.createIcons();
         loadInsight();
         loadAll('30d');

@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports – MindWave</title>
+    <title>Reports � MindWave</title>
     <meta name="description" content="Generate and download your academic and activity reports on MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,13 +24,13 @@
     </script>
 
     <style>
-        /* ── PAGE LAYOUT ── */
+        /* -- PAGE LAYOUT -- */
         .rp-content {
             padding: 28px 32px;
             max-width: 1100px;
         }
 
-        /* ── PAGE HEADER ── */
+        /* -- PAGE HEADER -- */
         .rp-header {
             margin-bottom: 28px;
         }
@@ -56,7 +57,7 @@
             color: var(--muted);
         }
 
-        /* ── SECTION LABEL ── */
+        /* -- SECTION LABEL -- */
         .rp-section-label {
             font-size: 11px;
             font-weight: 700;
@@ -76,7 +77,7 @@
             background: var(--border);
         }
 
-        /* ── REPORT CARDS GRID ── */
+        /* -- REPORT CARDS GRID -- */
         .rp-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -258,7 +259,7 @@
             }
         }
 
-        /* ── RECENT REPORTS ── */
+        /* -- RECENT REPORTS -- */
         .rp-recent-panel {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -410,7 +411,7 @@
             height: 12px;
         }
 
-        /* ── TOAST ── */
+        /* -- TOAST -- */
         .rp-toast {
             position: fixed;
             bottom: 24px;
@@ -447,7 +448,7 @@
             color: var(--red);
         }
 
-        /* ── SKELETON ROWS ── */
+        /* -- SKELETON ROWS -- */
         .rp-skeleton {
             animation: pulse 1.4s ease-in-out infinite;
         }
@@ -495,7 +496,7 @@
 <body>
     <div class="mw-app" id="mwApp">
 
-        <!-- ── SIDEBAR ── -->
+        <!-- -- SIDEBAR -- -->
         <aside class="mw-sidebar">
             <div class="mw-logo">
                 <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
@@ -577,14 +578,14 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -593,11 +594,12 @@
             </div>
         </aside>
 
-        <!-- ── MAIN ── -->
+        <!-- -- MAIN -- -->
         <div class="mw-main">
 
             <!-- TOPBAR -->
             <header class="mw-topbar">
+    <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
                     <span></span><span></span><span></span>
                 </button>
@@ -605,11 +607,11 @@
 
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search reports…" id="globalSearch">
+                    <input type="text" placeholder="Search reports�" id="globalSearch">
                 </div>
 
                 <div class="mw-topbar-actions">
-                    <!-- Notification bell — IDs required by homepage.js -->
+                    <!-- Notification bell � IDs required by homepage.js -->
                     <div class="mw-notif-wrap">
                         <div class="mw-icon-btn" id="notificationBtn" title="Notifications">
                             <i data-lucide="bell"></i>
@@ -623,7 +625,7 @@
                         <i data-lucide="settings"></i>
                     </div>
 
-                    <!-- Theme toggle — IDs required by homepage.js -->
+                    <!-- Theme toggle � IDs required by homepage.js -->
                     <button class="mw-theme-toggle" id="themeToggle" title="Toggle light/dark mode"
                         aria-label="Toggle theme">
                         <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
@@ -657,7 +659,7 @@
                             <div class="rp-card-desc">Games played, quiz scores, Time Attack sessions, and overall
                                 platform engagement stats.</div>
                             <div class="rp-card-meta">
-                                <div class="rp-meta-chip"><i data-lucide="file"></i> 2–3 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 2�3 pages</div>
                                 <div class="rp-meta-chip"><i data-lucide="clock"></i> Instant</div>
                             </div>
                             <button class="rp-gen-btn" onclick="generateReport('engagement')">
@@ -675,7 +677,7 @@
                             <div class="rp-card-desc">All submitted projects with grades, faculty feedback, and review
                                 status from MongoDB.</div>
                             <div class="rp-card-meta">
-                                <div class="rp-meta-chip"><i data-lucide="file"></i> 1–2 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 1�2 pages</div>
                                 <div class="rp-meta-chip"><i data-lucide="clock"></i> Instant</div>
                             </div>
                             <button class="rp-gen-btn" onclick="generateReport('projects')">
@@ -693,7 +695,7 @@
                             <div class="rp-card-desc">Leaderboard rank, XP earned, code challenges solved, and quiz
                                 participation metrics.</div>
                             <div class="rp-card-meta">
-                                <div class="rp-meta-chip"><i data-lucide="file"></i> 1–2 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 1�2 pages</div>
                                 <div class="rp-meta-chip"><i data-lucide="clock"></i> Instant</div>
                             </div>
                             <button class="rp-gen-btn" onclick="generateReport('platform')">
@@ -711,7 +713,7 @@
                             <div class="rp-card-desc">IAT 1, IAT 2, and semester exam marks per subject, entered by your
                                 faculty.</div>
                             <div class="rp-card-meta">
-                                <div class="rp-meta-chip"><i data-lucide="file"></i> 2–3 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 2�3 pages</div>
                                 <div class="rp-meta-chip"><i data-lucide="clock"></i> ~5 sec</div>
                             </div>
                             <button class="rp-gen-btn" onclick="generateReport('iat')">
@@ -729,7 +731,7 @@
                             <div class="rp-card-desc">Subject-wise attendance percentages with danger alerts for
                                 subjects below 75%.</div>
                             <div class="rp-card-meta">
-                                <div class="rp-meta-chip"><i data-lucide="file"></i> 1–2 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 1�2 pages</div>
                                 <div class="rp-meta-chip"><i data-lucide="clock"></i> ~5 sec</div>
                             </div>
                             <button class="rp-gen-btn" onclick="generateReport('attendance')">
@@ -744,10 +746,10 @@
                                 <span class="rp-card-badge">Combined</span>
                             </div>
                             <div class="rp-card-title">Semester Summary</div>
-                            <div class="rp-card-desc">Full semester rollup — marks, attendance, projects, and platform
+                            <div class="rp-card-desc">Full semester rollup � marks, attendance, projects, and platform
                                 activity in one PDF.</div>
                             <div class="rp-card-meta">
-                                <div class="rp-meta-chip"><i data-lucide="file"></i> 6–8 pages</div>
+                                <div class="rp-meta-chip"><i data-lucide="file"></i> 6�8 pages</div>
                                 <div class="rp-meta-chip"><i data-lucide="clock"></i> ~10 sec</div>
                             </div>
                             <button class="rp-gen-btn" onclick="generateReport('semester')">
@@ -782,7 +784,7 @@
         <span id="rpToastMsg">Report generated!</span>
     </div>
 
-    <!-- ── LOGOUT CONFIRMATION MODAL ── -->
+    <!-- -- LOGOUT CONFIRMATION MODAL -- -->
     <div id="logoutModal"
         style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
         <div
@@ -808,7 +810,7 @@
     <script src="theme-init.js"></script>
     <script src="sidebar.js"></script>
     <script>
-        // ── LOGOUT ──
+        // -- LOGOUT --
         document.addEventListener('DOMContentLoaded', function () {
             const signOutBtn = document.getElementById('signOutBtn');
             if (signOutBtn) {
@@ -842,15 +844,15 @@
                 });
             }
 
-            // Settings button → settings page
+            // Settings button ? settings page
             const settingsBtn = document.getElementById('settingsBtn');
             if (settingsBtn) settingsBtn.addEventListener('click', () => window.location.href = 'student-settings.html');
 
-            // Notification button → notifications page
+            // Notification button ? notifications page
             const notifBtn = document.getElementById('notificationBtn');
             if (notifBtn) notifBtn.addEventListener('click', () => window.location.href = 'student-notifications.html');
 
-            // ── THEME TOGGLE ──
+            // -- THEME TOGGLE --
             const themeToggleBtn = document.getElementById('themeToggle');
             if (themeToggleBtn) {
                 themeToggleBtn.addEventListener('click', function () {
@@ -866,13 +868,13 @@
         });
     </script>
     <script>
-        // ── CONSTANTS ── (prefixed to avoid conflict with homepage.js's API_BASE)
+        // -- CONSTANTS -- (prefixed to avoid conflict with homepage.js's API_BASE)
         const RP_API_BASE = window.location.hostname === 'localhost'
             ? 'http://localhost:8081'
             : 'https://mindwave2.onrender.com';
         const token = localStorage.getItem('token');
 
-        // ── REPORT META ──
+        // -- REPORT META --
         const REPORT_META = {
             engagement: { label: 'Activity & Engagement', icon: 'zap', color: 'icon-indigo' },
             projects: { label: 'Project Submissions', icon: 'folder-git-2', color: 'icon-green' },
@@ -882,7 +884,7 @@
             semester: { label: 'Semester Summary', icon: 'book-open', color: 'icon-purple' },
         };
 
-        // ── TOAST ──
+        // -- TOAST --
         function showToast(msg, isError = false) {
             const el = document.getElementById('rpToast');
             const icon = el.querySelector('[data-lucide]');
@@ -894,7 +896,7 @@
             setTimeout(() => el.classList.remove('show'), 3500);
         }
 
-        // ── API HELPERS (with graceful fallback) ──
+        // -- API HELPERS (with graceful fallback) --
         async function fetchWithFallback(url, fallback) {
             try {
                 const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token || ''}` } });
@@ -921,15 +923,15 @@
             return await fetchWithFallback(`${RP_API_BASE}/api/student/attendance`, null);
         }
 
-        // ── GET USER INFO ──
+        // -- GET USER INFO --
         function getUserInfo() {
             const name = document.getElementById('sidebarUserName')?.textContent || 'Student';
-            const roll = localStorage.getItem('mw_roll') || '—';
-            const dept = localStorage.getItem('mw_dept') || '—';
+            const roll = localStorage.getItem('mw_roll') || '�';
+            const dept = localStorage.getItem('mw_dept') || '�';
             return { name, roll, dept };
         }
 
-        // ── jsPDF HELPERS ──
+        // -- jsPDF HELPERS --
         function makePDF() {
             const { jsPDF } = window.jspdf;
             return new jsPDF({ unit: 'mm', format: 'a4' });
@@ -948,7 +950,7 @@
             doc.text('MindWave', 14, 10);
             doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
-            doc.text(`Student Report — ${title}`, 14, 16);
+            doc.text(`Student Report � ${title}`, 14, 16);
             doc.text(`Generated: ${now}`, 196, 16, { align: 'right' });
 
             // Student info row
@@ -995,7 +997,7 @@
                     doc.setFillColor(250, 250, 255);
                     doc.rect(14, y - 5, 182, rowH, 'F');
                 }
-                row.forEach((cell, i) => doc.text(String(cell ?? '—'), colX[i] || (14 + i * 40), y));
+                row.forEach((cell, i) => doc.text(String(cell ?? '�'), colX[i] || (14 + i * 40), y));
                 y += rowH;
                 if (y > 270) { doc.addPage(); y = 20; }
             });
@@ -1013,7 +1015,7 @@
             return y + 18;
         }
 
-        // ── PDF BUILDERS ──
+        // -- PDF BUILDERS --
         async function buildEngagementPDF() {
             const { submissions, profile } = await fetchEngagementData();
             const doc = makePDF();
@@ -1032,7 +1034,7 @@
                     ['Games Attempted', submissions.length],
                     ['Avg Game Score (%)', submissions.length
                         ? Math.round(submissions.reduce((s, g) => s + (g.score || 0), 0) / submissions.length)
-                        : '—'],
+                        : '�'],
                 ],
                 y
             );
@@ -1043,9 +1045,9 @@
                     ['Game Type', 'Score (%)', 'Time Taken', 'Date'],
                     submissions.slice(0, 20).map(s => [
                         s.gameType || s.type || 'Quiz',
-                        s.score ?? '—',
-                        s.durationSeconds ? `${Math.round(s.durationSeconds / 60)}m ${s.durationSeconds % 60}s` : '—',
-                        s.submittedAt ? new Date(s.submittedAt).toLocaleDateString('en-IN') : '—'
+                        s.score ?? '�',
+                        s.durationSeconds ? `${Math.round(s.durationSeconds / 60)}m ${s.durationSeconds % 60}s` : '�',
+                        s.submittedAt ? new Date(s.submittedAt).toLocaleDateString('en-IN') : '�'
                     ]),
                     y
                 );
@@ -1066,10 +1068,10 @@
                 y = addTable(doc,
                     ['Project Name', 'Status', 'Grade (/100)', 'Submitted'],
                     projects.map(p => [
-                        p.projectName || '—',
-                        p.status || '—',
+                        p.projectName || '�',
+                        p.status || '�',
                         p.grade ?? 'Not graded',
-                        p.submittedAt ? new Date(p.submittedAt).toLocaleDateString('en-IN') : '—'
+                        p.submittedAt ? new Date(p.submittedAt).toLocaleDateString('en-IN') : '�'
                     ]),
                     y
                 );
@@ -1086,7 +1088,7 @@
 
             const cpSolved = parseInt(localStorage.getItem('cp_solved') || '0');
             const xp = parseInt(localStorage.getItem('mw_xp') || '0');
-            const rank = localStorage.getItem('mw_rank') || '—';
+            const rank = localStorage.getItem('mw_rank') || '�';
             const atSessions = parseInt(localStorage.getItem('at_session_count') || '0');
 
             y = addSectionTitle(doc, 'Performance Summary', y);
@@ -1115,10 +1117,10 @@
             let y = addHeader(doc, 'IAT & Exam Marks');
 
             if (marks && Array.isArray(marks.subjects) && marks.subjects.length) {
-                y = addSectionTitle(doc, `IAT Results — ${marks.semester || 'Current Semester'}`, y);
+                y = addSectionTitle(doc, `IAT Results � ${marks.semester || 'Current Semester'}`, y);
                 y = addTable(doc,
                     ['Subject', 'IAT 1 (/30)', 'IAT 2 (/30)', 'Max Marks'],
-                    marks.subjects.map(s => [s.name, s.iat1 ?? '—', s.iat2 ?? '—', s.maxMarks ?? 30]),
+                    marks.subjects.map(s => [s.name, s.iat1 ?? '�', s.iat2 ?? '�', s.maxMarks ?? 30]),
                     y
                 );
             } else {
@@ -1141,9 +1143,9 @@
                     ['Subject', 'Classes Held', 'Attended', 'Percentage'],
                     data.subjects.map(s => [
                         s.name,
-                        s.total ?? '—',
-                        s.attended ?? '—',
-                        s.total ? `${Math.round((s.attended / s.total) * 100)}%` : '—'
+                        s.total ?? '�',
+                        s.attended ?? '�',
+                        s.total ? `${Math.round((s.attended / s.total) * 100)}%` : '�'
                     ]),
                     y
                 );
@@ -1151,7 +1153,7 @@
                 const danger = data.subjects.filter(s => s.total && (s.attended / s.total) < 0.75);
                 if (danger.length) {
                     y = addNotice(doc,
-                        `⚠ ${danger.map(s => s.name).join(', ')} — below 75% attendance. Immediate attention required.`,
+                        `? ${danger.map(s => s.name).join(', ')} � below 75% attendance. Immediate attention required.`,
                         y, [244, 63, 94]);
                 }
             } else {
@@ -1177,7 +1179,7 @@
             y = addSectionTitle(doc, '1. IAT & Exam Marks', y);
             if (marks && Array.isArray(marks.subjects) && marks.subjects.length) {
                 y = addTable(doc, ['Subject', 'IAT 1', 'IAT 2'],
-                    marks.subjects.map(s => [s.name, s.iat1 ?? '—', s.iat2 ?? '—']), y);
+                    marks.subjects.map(s => [s.name, s.iat1 ?? '�', s.iat2 ?? '�']), y);
             } else {
                 y = addNotice(doc, 'IAT marks not yet entered by faculty.', y, [34, 211, 165]);
             }
@@ -1186,8 +1188,8 @@
             y = addSectionTitle(doc, '2. Attendance', y);
             if (attendance && Array.isArray(attendance.subjects) && attendance.subjects.length) {
                 y = addTable(doc, ['Subject', 'Attended', 'Total', '%'],
-                    attendance.subjects.map(s => [s.name, s.attended ?? '—', s.total ?? '—',
-                    s.total ? `${Math.round((s.attended / s.total) * 100)}%` : '—']), y);
+                    attendance.subjects.map(s => [s.name, s.attended ?? '�', s.total ?? '�',
+                    s.total ? `${Math.round((s.attended / s.total) * 100)}%` : '�']), y);
             } else {
                 y = addNotice(doc, 'Attendance records not yet entered by faculty.', y, [34, 211, 165]);
             }
@@ -1197,7 +1199,7 @@
             y = addSectionTitle(doc, '3. Project Submissions', y);
             if (Array.isArray(projects) && projects.length) {
                 y = addTable(doc, ['Project', 'Status', 'Grade'],
-                    projects.map(p => [p.projectName || '—', p.status || '—', p.grade ?? 'Not graded']), y);
+                    projects.map(p => [p.projectName || '�', p.status || '�', p.grade ?? 'Not graded']), y);
             } else {
                 y = addNotice(doc, 'No project submissions found.', y);
             }
@@ -1215,7 +1217,7 @@
             return doc;
         }
 
-        // ── GENERATE REPORT ──
+        // -- GENERATE REPORT --
         async function generateReport(type) {
             const meta = REPORT_META[type];
             const card = document.getElementById(`card-${type}`);
@@ -1224,7 +1226,7 @@
 
             btn.disabled = true;
             btn.classList.add('loading');
-            btn.innerHTML = `<i data-lucide="loader"></i> Generating…`;
+            btn.innerHTML = `<i data-lucide="loader"></i> Generating�`;
             lucide.createIcons();
 
             try {
@@ -1255,7 +1257,7 @@
             }
         }
 
-        // ── RECENT REPORTS (localStorage) ──
+        // -- RECENT REPORTS (localStorage) --
         const RECENT_KEY = 'mw_reports';
 
         function saveToRecent(entry) {
@@ -1303,7 +1305,7 @@
             lucide.createIcons();
         }
 
-        // ── INIT ──
+        // -- INIT --
         lucide.createIcons();
         renderRecentReports();
     </script>

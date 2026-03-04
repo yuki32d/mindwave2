@@ -1,11 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Achievements � MindWave</title>
+    <title>Achievements ? MindWave</title>
     <meta name="description" content="Track your badges, XP, level, and class rank on MindWave.">
     <link rel="stylesheet" href="student-theme.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
@@ -391,7 +392,7 @@
             color: var(--muted);
         }
 
-        /* -- Topbar icon buttons � ensure visible in both modes -- */
+        /* -- Topbar icon buttons ? ensure visible in both modes -- */
         .mw-icon-btn {
             color: var(--text);
         }
@@ -576,15 +577,15 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
 
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html">
                             <i data-lucide="user"></i> My Profile
@@ -606,6 +607,7 @@
 
             <!-- Top bar -->
             <header class="mw-topbar">
+    <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
                     <span></span><span></span><span></span>
                 </button>
@@ -755,7 +757,7 @@
         /* ------------------- BADGE DEFINITIONS ------------------- */
         // Each badge has: id, icon, name, desc, xp, check(stats)?boolean
         const BADGE_DEFS = [
-            // � Easy �
+            // ? Easy ?
             {
                 id: 'first_game', lucide: 'gamepad-2', name: 'First Game', xp: 50,
                 desc: 'Complete your first game', check: s => s.gamesPlayed >= 1
@@ -772,7 +774,7 @@
                 id: 'five_games', lucide: 'layers', name: 'Game Veteran', xp: 100,
                 desc: 'Play 5 or more games', check: s => s.gamesPlayed >= 5
             },
-            // � Medium �
+            // ? Medium ?
             {
                 id: 'bookworm', lucide: 'book-open', name: 'Bookworm', xp: 200,
                 desc: 'Play 10+ games across all types', check: s => s.gamesPlayed >= 10

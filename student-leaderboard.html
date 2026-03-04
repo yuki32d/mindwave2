@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaderboard — MindWave</title>
+    <title>Leaderboard � MindWave</title>
     <meta name="description" content="See where you rank among your peers in MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -50,7 +51,7 @@
 <body>
     <div class="mw-app" id="mwApp">
 
-        <!-- ── SIDEBAR ── -->
+        <!-- -- SIDEBAR -- -->
         <aside class="mw-sidebar">
             <div class="mw-logo">
                 <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
@@ -135,14 +136,14 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -152,18 +153,19 @@
             </div>
         </aside>
 
-        <!-- ── MAIN ── -->
+        <!-- -- MAIN -- -->
         <div class="mw-main">
 
             <!-- TOPBAR -->
             <header class="mw-topbar">
+    <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
                     <span></span><span></span><span></span>
                 </button>
                 <div class="mw-breadcrumb">Dashboard / <span>Leaderboard</span></div>
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search players…" id="lbSearch">
+                    <input type="text" placeholder="Search players�" id="lbSearch">
                 </div>
                 <div class="mw-topbar-actions">
                     <div class="mw-notif-wrap">
@@ -191,34 +193,34 @@
                 <div class="greeting-row" style="margin-bottom:24px;">
                     <div>
                         <div class="greeting-name" style="font-size:1.6rem;">Leaderboard</div>
-                        <div class="greeting-date">Rankings · games &amp; academic performance</div>
+                        <div class="greeting-date">Rankings � games &amp; academic performance</div>
                     </div>
                 </div>
 
-                <!-- ── MY STATS BANNER ── -->
+                <!-- -- MY STATS BANNER -- -->
                 <div class="lb-banner">
                     <div class="lb-banner-stat">
-                        <div class="lb-banner-val" id="myRank">#—</div>
+                        <div class="lb-banner-val" id="myRank">#�</div>
                         <div class="lb-banner-lbl">Your Rank</div>
                     </div>
                     <div class="lb-banner-divider"></div>
                     <div class="lb-banner-stat">
-                        <div class="lb-banner-val" id="myPoints">—</div>
+                        <div class="lb-banner-val" id="myPoints">�</div>
                         <div class="lb-banner-lbl">Total Points</div>
                     </div>
                     <div class="lb-banner-divider"></div>
                     <div class="lb-banner-stat">
-                        <div class="lb-banner-val" id="myGames">—</div>
+                        <div class="lb-banner-val" id="myGames">�</div>
                         <div class="lb-banner-lbl">Games Played</div>
                     </div>
                     <div class="lb-banner-divider"></div>
                     <div class="lb-banner-stat">
-                        <div class="lb-banner-val" id="myAccuracy">—</div>
+                        <div class="lb-banner-val" id="myAccuracy">�</div>
                         <div class="lb-banner-lbl">Avg Accuracy</div>
                     </div>
                 </div>
 
-                <!-- ── FILTER BAR ── -->
+                <!-- -- FILTER BAR -- -->
                 <div class="lb-filter-bar">
                     <div class="lb-filter-group" id="timeFilters">
                         <button class="lb-filter-btn active" data-time="all">All Time</button>
@@ -236,12 +238,12 @@
                     </div>
                 </div>
 
-                <!-- ── PODIUM ── -->
+                <!-- -- PODIUM -- -->
                 <div class="lb-podium" id="lbPodium">
                     <!-- Filled by JS -->
                 </div>
 
-                <!-- ── RANKINGS TABLE ── -->
+                <!-- -- RANKINGS TABLE -- -->
                 <div class="lb-table-wrap">
                     <div class="lb-table-head">
                         <span>Rank</span>
@@ -259,7 +261,7 @@
         </div><!-- end mw-main -->
     </div><!-- end mw-app -->
 
-    <!-- ── LOGOUT MODAL ── -->
+    <!-- -- LOGOUT MODAL -- -->
     <div id="logoutModal" class="mw-logout-overlay">
         <div class="mw-logout-modal">
             <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
@@ -275,7 +277,7 @@
         </div>
     </div>
 
-    <!-- ─────────────────────────────── STYLES ─────────────────────────────── -->
+    <!-- ------------------------------- STYLES ------------------------------- -->
     <style>
         /* Banner */
         .lb-banner {
@@ -374,7 +376,7 @@
             font-weight: 600;
         }
 
-        /* ── Podium ── */
+        /* -- Podium -- */
         .lb-podium-wrap {
             display: flex;
             justify-content: center;
@@ -910,14 +912,14 @@
     </style>
 
     <script>
-        // ── Auth ─────────────────────────────────────────────────────────────────
+        // -- Auth -----------------------------------------------------------------
         function clearAuthAndCache() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role'].forEach(k => localStorage.removeItem(k));
         }
         function doLogout() { clearAuthAndCache(); window.location.replace('marketing-site/student-login.html'); }
         function performLogout() { document.getElementById('logoutModal').classList.add('active'); }
 
-        // ── Avatar colour palette ───────────────────────────────────────────────
+        // -- Avatar colour palette -----------------------------------------------
         const AVATAR_COLORS = ['#6366f1', '#a855f7', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#f43f5e', '#10b981', '#3b82f6'];
         function avatarColor(name) {
             let h = 0;
@@ -929,7 +931,7 @@
             return (p[0]?.[0] || '') + (p[1]?.[0] || '');
         }
 
-        // ── Leaderboard data ────────────────────────────────────────────────────
+        // -- Leaderboard data ----------------------------------------------------
         let allData = [];
         let myId = null;
         let activeTime = 'all';
@@ -1027,7 +1029,7 @@
                         document.getElementById('myGames').textContent = cu.gamesPlayed ?? 0;
                         document.getElementById('myAccuracy').textContent = `${cu.avgAccuracy ?? 0}%`;
                     } else {
-                        document.getElementById('myRank').textContent = '—';
+                        document.getElementById('myRank').textContent = '�';
                         document.getElementById('myPoints').textContent = '0';
                         document.getElementById('myGames').textContent = '0';
                         document.getElementById('myAccuracy').textContent = '0%';
@@ -1045,7 +1047,7 @@
         function useFallbackData() {
             allData = [];
             myId = null;
-            document.getElementById('myRank').textContent = '—';
+            document.getElementById('myRank').textContent = '�';
             document.getElementById('myPoints').textContent = '0';
             document.getElementById('myGames').textContent = '0';
             document.getElementById('myAccuracy').textContent = '0%';
@@ -1091,7 +1093,7 @@
                 const col = avatarColor(p.name || '?');
                 const isMe = p.isMe || String(p.id || p._id) === String(myId);
                 const accCol = acc >= 80 ? '#22c55e' : acc >= 50 ? '#f59e0b' : '#ef4444';
-                const crown = rankNum === 1 ? '<div class="lb-crown">👑</div>' : '';
+                const crown = rankNum === 1 ? '<div class="lb-crown">??</div>' : '';
                 return `
 <div class="lb-podium-lane rank-${rankNum}">
     <div class="lb-podium-card">

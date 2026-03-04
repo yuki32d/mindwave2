@@ -1,7 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Center | MindWave</title>
@@ -1129,15 +1130,15 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
 
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html">
                             <i data-lucide="user"></i> My Profile
@@ -1159,6 +1160,7 @@
 
             <!-- Topbar -->
             <header class="mw-topbar">
+    <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
                     <span></span><span></span><span></span>
                 </button>
@@ -1348,7 +1350,7 @@
                 });
             }
 
-            // Sign out � direct logout, no modal
+            // Sign out ? direct logout, no modal
             const signOutBtn = document.getElementById('signOutBtn');
             if (signOutBtn) signOutBtn.addEventListener('click', () => { document.getElementById('logoutModal').classList.add('active'); });
 
@@ -1365,7 +1367,7 @@
             const settingsBtn = document.getElementById('settingsBtn');
             if (settingsBtn) settingsBtn.addEventListener('click', () => window.location.href = 'student-settings.html');
 
-            // Search bar � live filter games
+            // Search bar ? live filter games
             const searchInput = document.getElementById('gcSearch');
             if (searchInput) {
                 searchInput.addEventListener('input', e => {

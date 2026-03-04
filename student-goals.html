@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
+    <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goals &amp; Progress — MindWave</title>
+    <title>Goals &amp; Progress � MindWave</title>
     <meta name="description" content="Set academic targets, track milestones, and achieve your goals in MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -13,7 +14,7 @@
     <script src="sidebar.js"></script>
 
     <style>
-        /* ── Goal cards ────────────────────────────────────────── */
+        /* -- Goal cards ------------------------------------------ */
         .goals-header {
             display: flex;
             align-items: center;
@@ -304,7 +305,7 @@
             font-weight: 600;
         }
 
-        /* ── Modal ─────────────────────────────────────────────── */
+        /* -- Modal ----------------------------------------------- */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -467,7 +468,7 @@
             opacity: .88;
         }
 
-        /* ── Celebration banner ─────────────────────────────────── */
+        /* -- Celebration banner ----------------------------------- */
         .celebrate-banner {
             background: linear-gradient(135deg, rgba(34, 197, 94, .12), rgba(16, 185, 129, .12));
             border: 1px solid rgba(34, 197, 94, .3);
@@ -586,14 +587,14 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -607,6 +608,7 @@
         <div class="mw-main">
             <!-- TOPBAR -->
             <header class="mw-topbar">
+    <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
                     <span></span><span></span><span></span>
                 </button>
@@ -632,7 +634,7 @@
 
                 <!-- Celebration banner -->
                 <div class="celebrate-banner" id="celebrateBanner">
-                    <div class="celebrate-icon">🎉</div>
+                    <div class="celebrate-icon">??</div>
                     <div class="celebrate-text">
                         <h3>Goal Achieved!</h3>
                         <p id="celebrateMsg">You've reached one of your targets. Keep going!</p>
@@ -667,7 +669,7 @@
         </div><!-- /mw-main -->
     </div><!-- /mw-app -->
 
-    <!-- ── GOAL MODAL ──────────────────────────────────────── -->
+    <!-- -- GOAL MODAL ---------------------------------------- -->
     <div class="modal-overlay" id="goalModal">
         <div class="modal-box">
             <div class="modal-hdr">
@@ -835,7 +837,7 @@
         let goals = [];        // live data from MongoDB
         let editingId = null;  // null = create, string = edit existing
 
-        // ── Profile init ─────────────────────────────────────────
+        // -- Profile init -----------------------------------------
         document.addEventListener('DOMContentLoaded', () => {
             const fn = localStorage.getItem('firstName') || '';
             const ln = localStorage.getItem('lastName') || '';
@@ -866,7 +868,7 @@
 
         function doLogout() { ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role'].forEach(k => localStorage.removeItem(k)); window.location.replace('marketing-site/student-login.html'); }
 
-        // ── Helpers ───────────────────────────────────────────────
+        // -- Helpers -----------------------------------------------
         function typeLabel(t) {
             return { gpa: 'GPA', grade: 'Subject Grade', attendance: 'Attendance', completion: 'Completion' }[t] || t;
         }
@@ -897,7 +899,7 @@
           <div class="goal-top">
             <div class="goal-meta">
               <div class="goal-name">${g.title}</div>
-              <div class="goal-sub">Target: ${g.target}${g.type === 'gpa' ? ' / 4.0' : '%'} ${g.subject ? '· ' + g.subject : ''}</div>
+              <div class="goal-sub">Target: ${g.target}${g.type === 'gpa' ? ' / 4.0' : '%'} ${g.subject ? '� ' + g.subject : ''}</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
               <span class="goal-badge ${done ? 'badge-done' : typeBadgeClass(g.type)}">
@@ -923,11 +925,11 @@
 
           <div class="goal-stats">
             <div class="gstat">
-              <div class="gstat-val">${g.current ?? '—'}</div>
+              <div class="gstat-val">${g.current ?? '�'}</div>
               <div class="gstat-lbl">Current</div>
             </div>
             <div class="gstat">
-              <div class="gstat-val ${done ? 'green' : 'amber'}">${done ? '✓' : toGo.toFixed(toGo < 1 ? 1 : 0)}</div>
+              <div class="gstat-val ${done ? 'green' : 'amber'}">${done ? '?' : toGo.toFixed(toGo < 1 ? 1 : 0)}</div>
               <div class="gstat-lbl">${done ? 'Achieved' : 'To Go'}</div>
             </div>
             <div class="gstat">
@@ -938,7 +940,7 @@
         </div>`;
         }
 
-        // ── Load goals from API ───────────────────────────────────
+        // -- Load goals from API -----------------------------------
         async function loadGoals() {
             try {
                 const r = await fetch(API + '/api/student/goals', { headers: H });
@@ -946,7 +948,7 @@
                 goals = await r.json();
                 renderGoals();
             } catch (e) {
-                // Show empty state — don't fake data
+                // Show empty state � don't fake data
                 goals = [];
                 renderGoals();
             }
@@ -970,14 +972,14 @@
             if (achieved.length) {
                 document.getElementById('celebrateBanner').classList.add('show');
                 document.getElementById('celebrateMsg').textContent =
-                    `You've achieved ${achieved.length} goal${achieved.length > 1 ? 's' : ''}! Keep up the great work 🚀`;
+                    `You've achieved ${achieved.length} goal${achieved.length > 1 ? 's' : ''}! Keep up the great work ??`;
             }
 
             grid.innerHTML = goals.map(goalCard).join('');
             lucide.createIcons();
         }
 
-        // ── Modal ─────────────────────────────────────────────────
+        // -- Modal -------------------------------------------------
         function openModal(goalId) {
             editingId = goalId || null;
             const modal = document.getElementById('goalModal');
@@ -1015,7 +1017,7 @@
             const sg = document.getElementById('subjectGroup');
             const tl = document.getElementById('targetLabel');
             sg.style.display = t === 'grade' ? '' : 'none';
-            tl.textContent = t === 'gpa' ? 'Target GPA (0–4.0)' : 'Target (%)';
+            tl.textContent = t === 'gpa' ? 'Target GPA (0�4.0)' : 'Target (%)';
             document.getElementById('fTarget').max = t === 'gpa' ? 4 : 100;
             document.getElementById('fTarget').step = t === 'gpa' ? 0.1 : 1;
             document.getElementById('fTarget').placeholder = t === 'gpa' ? 'e.g. 3.8' : 'e.g. 90';
@@ -1037,7 +1039,7 @@
             const body = { title, type, target, ...(subject && { subject }), ...(deadline && { deadline }) };
 
             const btn = document.getElementById('saveBtn');
-            btn.textContent = 'Saving…';
+            btn.textContent = 'Saving�';
             btn.disabled = true;
 
             try {
