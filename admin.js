@@ -191,7 +191,6 @@ function renderGames(list) {
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <button onclick="deleteGame('${item._id}')" style="background: rgba(255, 59, 48, 0.1); color: #ff3b30; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px;">Delete</button>
-                    <button onclick="window.open('student-game.html?id=${item._id}', '_blank')" style="background: rgba(255, 255, 255, 0.1); color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px;">Preview</button>
                 </div>
             </div>
             <p style="margin-top: 8px;">${item.brief}</p>
