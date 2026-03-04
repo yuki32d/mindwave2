@@ -5,52 +5,65 @@ let socket;
 let currentQuestion = null;
 let timeRemaining = 0;
 let timerInterval = null;
-let score = 0; // Will be initialized from localStorage
+let timerAnimFrame = null;
+let score = 0;
 let correctAnswers = 0;
-let totalQuestions = 0;
+let totalQuestionsCount = 0;
 let hasAnswered = false;
 let quizCode = null;
+let streak = 0;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // Get quiz code from URL
     const urlParams = new URLSearchParams(window.location.search);
     quizCode = urlParams.get('code');
 
     if (!quizCode) {
-        alert('No quiz code provided');
-        window.location.href = 'student-community.html';
+        showError('No quiz code provided');
         return;
     }
 
-    // Initialize or reset score for this quiz session
-    const storedScore = localStorage.getItem(`quizScore_${quizCode}`);
-    if (storedScore) {
-        score = parseInt(storedScore);
-        console.log('📊 Restored score from localStorage:', score);
-    } else {
-        // Reset score for new quiz
-        score = 0;
-        localStorage.setItem(`quizScore_${quizCode}`, '0');
-        console.log('📊 Initialized new quiz score:', score);
-    }
-
+    score = 0;
+    document.getElementById('currentScore').textContent = '0';
     initializeWebSocket();
 });
 
+// ── REST join (persists student in DB as participant) ──
+async function joinQuizREST() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const res = await fetch(`/api/quiz/${quizCode}/join`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const data = await res.json();
+        if (data.ok) {
+            // Update participant count if shown
+            const pcEl = document.getElementById('participantCount');
+            if (pcEl) pcEl.textContent = data.participantCount || '—';
+        }
+    } catch (e) {
+        console.warn('REST join failed (non-fatal):', e);
+    }
+}
+
 // WebSocket Setup
 function initializeWebSocket() {
-    // Determine WebSocket URL based on current location
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
-    const wsUrl = `${protocol}//${host}/ws/quiz`;
+    const wsUrl = `${protocol}//${window.location.host}/ws/quiz`;
 
     socket = new WebSocket(wsUrl);
 
-    socket.onopen = () => {
-        console.log('Connected to quiz server');
+    socket.onopen = async () => {
+        // 1. Register in DB via REST
+        await joinQuizREST();
 
-        // Join the quiz session
+        // 2. Join the WS session room
         socket.send(JSON.stringify({
             type: 'join',
             sessionCode: quizCode,
@@ -60,329 +73,387 @@ function initializeWebSocket() {
 
     socket.onmessage = (event) => {
         try {
-            const message = JSON.parse(event.data);
-
-            switch (message.type) {
+            const msg = JSON.parse(event.data);
+            switch (msg.type) {
                 case 'joined':
-                    console.log('Successfully joined quiz:', message.sessionCode);
+                    updateWaitingStatus('Connected! Waiting for teacher...', true);
                     break;
-
                 case 'participant-count':
-                    console.log('Participants:', message.count);
+                    const pcEl = document.getElementById('participantCount');
+                    if (pcEl) pcEl.textContent = msg.count;
                     break;
-
                 case 'quiz-started':
-                    console.log('Quiz started!');
-                    showWaitingRoom(false);
-                    showQuizPlay(true);
-                    // The first question will come via 'question-shown' event
+                    showSection('waitingRoom', false);
+                    showSection('quizPlay', true);
                     break;
-
                 case 'question-shown':
-                    console.log('New question:', message.questionIndex);
-                    fetchAndDisplayQuestion(message.questionIndex);
+                    fetchAndDisplayQuestion(msg.questionIndex);
                     break;
-
+                case 'answer-distribution':
+                    updateAnswerDistribution(msg.distribution);
+                    break;
                 case 'quiz-ended':
-                    console.log('Quiz ended');
                     showResults();
                     break;
-
                 case 'leaderboard-shown':
-                    updateLeaderboard(message.leaderboard);
+                    updateLeaderboard(msg.leaderboard);
                     break;
-
                 case 'error':
-                    console.error('WebSocket error:', message.message);
+                    console.warn('WS error:', msg.message);
                     break;
             }
-        } catch (error) {
-            console.error('Error parsing message:', error);
+        } catch (e) {
+            console.error('WS parse error:', e);
         }
     };
 
-    socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
-
-    socket.onclose = () => {
-        console.log('Disconnected from quiz server');
-    };
+    socket.onerror = () => updateWaitingStatus('Connection error — retrying...', false);
+    socket.onclose = () => setTimeout(initializeWebSocket, 3000);
 }
 
-// Fetch and display question from API
+// ── Fetch question from server ──
 async function fetchAndDisplayQuestion(questionIndex) {
     try {
-        const response = await fetch(`/api/quiz/${quizCode}`);
-        const data = await response.json();
-
+        const res = await fetch(`/api/quiz/${quizCode}`);
+        const data = await res.json();
         if (data.ok && data.quiz.currentQuestion) {
-            const question = data.quiz.currentQuestion;
+            const q = data.quiz.currentQuestion;
+            totalQuestionsCount = data.quiz.questions?.length || totalQuestionsCount || 10;
             displayQuestion({
-                questionIndex: questionIndex,
-                question: question.text,
-                options: question.options,
-                timeLimit: question.timeLimit,
-                correctAnswer: question.correctIndex,
-                points: question.points
+                questionIndex,
+                question: q.text,
+                options: q.options,
+                timeLimit: q.timeLimit || 15,
+                points: q.points || 1000
             });
         }
-    } catch (error) {
-        console.error('Error fetching question:', error);
+    } catch (e) {
+        console.error('Fetch question error:', e);
     }
 }
 
-// Show/Hide Sections
-function showWaitingRoom(show) {
-    document.getElementById('waitingRoom').style.display = show ? 'block' : 'none';
+// ── Section helpers ──
+function showSection(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = show ? 'flex' : 'none';
 }
 
-function showQuizPlay(show) {
-    document.getElementById('quizPlay').style.display = show ? 'flex' : 'none';
+function updateWaitingStatus(msg, connected) {
+    const el = document.getElementById('waitingStatus');
+    if (el) el.textContent = msg;
+    const dot = document.getElementById('connectionDot');
+    if (dot) dot.className = 'conn-dot ' + (connected ? 'connected' : 'disconnected');
 }
 
-function showResultsScreen(show) {
-    document.getElementById('quizResults').style.display = show ? 'flex' : 'none';
-}
-
-// Display Question
+// ── Display Question ──
 function displayQuestion(data) {
     currentQuestion = data;
     hasAnswered = false;
     timeRemaining = data.timeLimit;
-    totalQuestions = totalQuestions || data.totalQuestions || 10;
 
-    // Update question number
-    document.getElementById('questionNumber').textContent =
-        `Question ${data.questionIndex + 1} of ${totalQuestions}`;
+    // Progress bar
+    const prog = document.getElementById('questionProgress');
+    if (prog) prog.textContent = `${data.questionIndex + 1} / ${totalQuestionsCount}`;
+    const progBar = document.getElementById('progressBar');
+    if (progBar) {
+        const pct = ((data.questionIndex) / totalQuestionsCount) * 100;
+        progBar.style.width = pct + '%';
+    }
 
-    // Update score display
-    document.getElementById('currentScore').textContent = score;
+    // Question text with enter animation
+    const qt = document.getElementById('questionText');
+    if (qt) { qt.style.opacity = '0'; qt.textContent = data.question; setTimeout(() => qt.style.opacity = '1', 50); }
 
-    // Set question text
-    document.getElementById('questionText').textContent = data.question;
+    // Points badge
+    const pb = document.getElementById('pointsBadge');
+    if (pb) pb.textContent = `${data.points} pts`;
 
-    // Set answer options
-    const answers = ['answerA', 'answerB', 'answerC', 'answerD'];
-    data.options.forEach((option, index) => {
-        document.getElementById(answers[index]).textContent = option;
-    });
-
-    // Enable answer buttons
-    const buttons = document.querySelectorAll('.answer-btn');
-    buttons.forEach((btn, index) => {
+    // Answer buttons
+    const btns = document.querySelectorAll('.answer-btn');
+    const labels = ['A', 'B', 'C', 'D'];
+    btns.forEach((btn, i) => {
         btn.disabled = false;
-        btn.onclick = () => submitAnswer(index);
-        btn.classList.remove('correct', 'incorrect');
-        btn.style.boxShadow = '';
+        btn.classList.remove('correct', 'incorrect', 'dimmed', 'selected');
+        const textEl = btn.querySelector('.answer-text');
+        if (textEl && data.options[i] !== undefined) textEl.textContent = data.options[i];
+        btn.onclick = () => submitAnswer(i);
+
+        // staggered entrance
+        btn.style.animation = 'none';
+        btn.offsetHeight; // reflow
+        btn.style.animation = `answerSlideIn 0.4s ease ${0.1 + i * 0.08}s forwards`;
+        btn.style.opacity = '0';
     });
 
-    // Hide feedback
+    // Hide feedback, show timer
     document.getElementById('answerFeedback').style.display = 'none';
-
-    // Start timer
+    document.getElementById('distributionBar').style.display = 'none';
     startTimer();
 }
 
-// Timer
+// ── Timer ──
 function startTimer() {
     clearInterval(timerInterval);
 
+    const circle = document.getElementById('timerCircle');
+    const timeEl = document.getElementById('timeRemaining');
+    const totalTime = currentQuestion.timeLimit;
+
     timerInterval = setInterval(() => {
         timeRemaining--;
+        if (timeEl) timeEl.textContent = timeRemaining;
 
-        // Update timer display
-        document.getElementById('timeRemaining').textContent = timeRemaining;
+        const pct = (timeRemaining / totalTime) * 360;
+        const urgentColor = timeRemaining <= 5 ? '#FF5A5F' : timeRemaining <= 10 ? '#FFD700' : '#00D9FF';
+        if (circle) {
+            circle.style.background = `conic-gradient(${urgentColor} ${pct}deg, #1E2433 ${pct}deg)`;
+            circle.style.boxShadow = `0 0 30px ${urgentColor}66, 0 0 60px ${urgentColor}33`;
+        }
+        if (timeEl) timeEl.style.color = timeRemaining <= 5 ? '#FF5A5F' : '';
 
-        // Update timer circle (conic gradient)
-        const percentage = (timeRemaining / currentQuestion.timeLimit) * 360;
-        document.getElementById('timerCircle').style.background =
-            `conic-gradient(var(--cyan-bright) ${percentage}deg, var(--card-dark) ${percentage}deg)`;
-
-        // Time's up
         if (timeRemaining <= 0) {
             clearInterval(timerInterval);
-            if (!hasAnswered) {
-                submitAnswer(null); // No answer
-            }
+            if (!hasAnswered) submitAnswer(null);
         }
     }, 1000);
 }
 
-// Submit Answer
+// ── Submit Answer ──
 async function submitAnswer(answerIndex) {
     if (hasAnswered) return;
-
     hasAnswered = true;
     clearInterval(timerInterval);
 
-    // Disable all buttons
-    const buttons = document.querySelectorAll('.answer-btn');
-    buttons.forEach(btn => btn.disabled = true);
+    const timeTaken = (currentQuestion.timeLimit - timeRemaining) * 1000;
+    const btns = document.querySelectorAll('.answer-btn');
 
-    // Calculate time taken
-    const timeToAnswer = (currentQuestion.timeLimit - timeRemaining) * 1000; // in milliseconds
+    // Mark selected
+    btns.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === answerIndex) btn.classList.add('selected');
+        else btn.classList.add('dimmed');
+    });
+
+    if (answerIndex === null) {
+        showFeedback(false, 0, '⏰ Time\'s up!', null);
+        return;
+    }
 
     try {
-        // Submit answer to server API
-        const response = await fetch(`/api/quiz/${quizCode}/answer`, {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/quiz/${quizCode}/answer`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({
                 questionIndex: currentQuestion.questionIndex,
                 selectedIndex: answerIndex,
-                timeToAnswer: timeToAnswer
+                timeToAnswer: timeTaken
             })
         });
-
-        const data = await response.json();
-
-        console.log('✅ Server response:', data);
+        const data = await res.json();
 
         if (data.ok) {
             const isCorrect = data.isCorrect;
-            const points = data.pointsEarned;
-
-            console.log(`${isCorrect ? '✅ CORRECT' : '❌ INCORRECT'} - Points: ${points}`);
+            const pts = data.pointsEarned || 0;
 
             if (isCorrect) {
-                const oldScore = score;
-                score += points;
+                score += pts;
                 correctAnswers++;
-
-                // Save to localStorage immediately
-                localStorage.setItem(`quizScore_${quizCode}`, score.toString());
-                console.log(`💰 Score updated: ${oldScore} → ${score} (+${points})`);
+                streak++;
+            } else {
+                streak = 0;
             }
 
-            // Visual feedback
-            buttons.forEach((btn, index) => {
-                if (index === data.correctAnswer) {
-                    btn.classList.add('correct');
-                    btn.style.boxShadow = '0 0 30px rgba(0, 208, 132, 0.6)';
-                } else if (index === answerIndex && !isCorrect) {
-                    btn.classList.add('incorrect');
-                    btn.style.boxShadow = '0 0 30px rgba(255, 90, 95, 0.6)';
-                }
+            // Color the buttons
+            btns.forEach((btn, i) => {
+                btn.classList.remove('dimmed', 'selected');
+                if (i === data.correctAnswer) btn.classList.add('correct');
+                else if (i === answerIndex && !isCorrect) btn.classList.add('incorrect');
+                else btn.classList.add('dimmed');
             });
 
-            // Update score display immediately with animation
-            const scoreElement = document.getElementById('currentScore');
-            scoreElement.textContent = score;
-            scoreElement.style.transform = 'scale(1.3)';
-            scoreElement.style.color = isCorrect ? 'var(--quiz-green)' : 'var(--quiz-red)';
-            setTimeout(() => {
-                scoreElement.style.transform = 'scale(1)';
-                scoreElement.style.color = '';
-            }, 500);
+            // Animate score
+            animateScore(pts, isCorrect);
+            showFeedback(isCorrect, pts, isCorrect ? getCorrectMsg() : 'Not quite!', data.correctAnswer);
 
-            // Show feedback
-            showFeedback(isCorrect, points);
-
-            // Notify server via WebSocket
-            if (socket && socket.readyState === WebSocket.OPEN) {
+            // WS notify (for distribution)
+            if (socket?.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({
                     type: 'submit-answer',
                     questionIndex: currentQuestion.questionIndex,
                     selectedAnswer: answerIndex
                 }));
             }
+        } else {
+            console.warn('Answer rejected:', data.message);
+            showFeedback(false, 0, data.message || 'Could not submit', null);
         }
-    } catch (error) {
-        console.error('Error submitting answer:', error);
+    } catch (e) {
+        console.error('Submit error:', e);
+        showFeedback(false, 0, 'Network error', null);
     }
 }
 
-// Show Feedback
-function showFeedback(isCorrect, points) {
-    const feedback = document.getElementById('answerFeedback');
+function getCorrectMsg() {
+    const msgs = ['Correct! 🔥', 'Nailed it! ⚡', 'Brilliant! 🎯', 'Awesome! ✨', 'Perfect! 🌟'];
+    if (streak >= 3) return `${streak}x Streak! 🔥`;
+    return msgs[Math.floor(Math.random() * msgs.length)];
+}
+
+function animateScore(pts, isCorrect) {
+    const el = document.getElementById('currentScore');
+    if (!el) return;
+    el.textContent = score;
+    el.style.transform = 'scale(1.4)';
+    el.style.color = isCorrect ? '#00D084' : '#FF5A5F';
+    if (pts > 0) {
+        // floating +pts
+        const pip = document.createElement('span');
+        pip.className = 'score-pip';
+        pip.textContent = `+${pts}`;
+        el.parentElement.appendChild(pip);
+        setTimeout(() => pip.remove(), 1200);
+    }
+    setTimeout(() => { el.style.transform = ''; el.style.color = ''; }, 600);
+}
+
+// ── Feedback ──
+function showFeedback(isCorrect, pts, msg, correctIdx) {
+    const fb = document.getElementById('answerFeedback');
     const icon = document.getElementById('feedbackIcon');
     const text = document.getElementById('feedbackText');
-    const pointsElem = document.getElementById('pointsEarned');
+    const ptsEl = document.getElementById('pointsEarned');
+    const streakEl = document.getElementById('streakBadge');
 
-    if (isCorrect) {
-        icon.innerHTML = '<i class="fas fa-check-circle" style="color: var(--quiz-green); font-size: 4rem;"></i>';
-        text.textContent = 'Correct!';
-        text.style.color = 'var(--quiz-green)';
-        pointsElem.textContent = `+${points} points`;
-    } else {
-        icon.innerHTML = '<i class="fas fa-times-circle" style="color: var(--quiz-red); font-size: 4rem;"></i>';
-        text.textContent = 'Incorrect';
-        text.style.color = 'var(--quiz-red)';
-        pointsElem.textContent = '0 points';
+    icon.innerHTML = isCorrect
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#00D084" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
+        : (msg.includes('up') ? '<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+            : '<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#FF5A5F" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>');
+
+    text.textContent = msg;
+    text.style.color = isCorrect ? '#00D084' : '#FF5A5F';
+    ptsEl.textContent = pts > 0 ? `+${pts} points` : '—';
+    ptsEl.style.color = pts > 0 ? '#00D084' : 'var(--text-gray)';
+
+    if (streakEl) {
+        streakEl.style.display = streak >= 2 ? 'inline-flex' : 'none';
+        streakEl.textContent = `🔥 ${streak}x streak`;
     }
 
-    feedback.style.display = 'block';
+    fb.style.display = 'block';
 }
 
-// Show Results
+// ── Answer Distribution bar (live) ──
+function updateAnswerDistribution(dist) {
+    if (!hasAnswered) return;
+    const bar = document.getElementById('distributionBar');
+    if (!bar) return;
+    bar.style.display = 'flex';
+    const total = dist.total || 1;
+    ['A', 'B', 'C', 'D'].forEach((letter, i) => {
+        const pct = Math.round(((dist[letter] || 0) / total) * 100);
+        const fillEl = bar.querySelector(`[data-letter="${letter}"] .dist-fill`);
+        const pctEl = bar.querySelector(`[data-letter="${letter}"] .dist-pct`);
+        if (fillEl) fillEl.style.width = pct + '%';
+        if (pctEl) pctEl.textContent = pct + '%';
+    });
+}
+
+// ── Results ──
 async function showResults() {
-    showQuizPlay(false);
-    showResultsScreen(true);
+    showSection('quizPlay', false);
+    showSection('quizResults', true);
 
-    // Display final score
-    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalScore').textContent = score.toLocaleString();
     document.getElementById('correctAnswers').textContent = correctAnswers;
-    document.getElementById('totalQuestions').textContent = totalQuestions;
+    document.getElementById('totalQuestionsResult').textContent = totalQuestionsCount;
 
-    // Fetch leaderboard
+    const pct = totalQuestionsCount > 0 ? Math.round((correctAnswers / totalQuestionsCount) * 100) : 0;
+    const accEl = document.getElementById('accuracy');
+    if (accEl) accEl.textContent = pct + '%';
+
+    // Animate score counter
+    animateCounter('finalScore', score);
+
     try {
-        const response = await fetch(`/api/quiz/${quizCode}/leaderboard`);
-        const data = await response.json();
-
-        if (data.ok) {
-            updateLeaderboard(data.leaderboard);
-        }
-    } catch (error) {
-        console.error('Error fetching leaderboard:', error);
-    }
+        const res = await fetch(`/api/quiz/${quizCode}/leaderboard`);
+        const data = await res.json();
+        if (data.ok) updateLeaderboard(data.leaderboard);
+    } catch (e) { }
 }
 
-// Update Leaderboard with Podium
+function animateCounter(id, target) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let cur = 0;
+    const step = Math.ceil(target / 40);
+    const t = setInterval(() => {
+        cur = Math.min(cur + step, target);
+        el.textContent = cur.toLocaleString();
+        if (cur >= target) clearInterval(t);
+    }, 40);
+}
+
 function updateLeaderboard(leaderboard) {
-    if (!leaderboard || leaderboard.length === 0) return;
+    if (!leaderboard?.length) return;
 
-    // Find your rank
-    const studentName = localStorage.getItem('firstName') || 'You';
-    const yourRank = leaderboard.findIndex(entry => entry.name === studentName) + 1;
+    const myName = localStorage.getItem('firstName') || '';
+    const myEmail = localStorage.getItem('email') || '';
+    const myRank = leaderboard.findIndex(e => e.name === myName || e.email === myEmail) + 1;
 
-    if (yourRank > 0) {
-        document.getElementById('yourRank').textContent = `#${yourRank}`;
+    const rankEl = document.getElementById('yourRank');
+    if (rankEl) rankEl.textContent = myRank > 0 ? `#${myRank}` : '—';
+
+    const rankMsgEl = document.getElementById('rankMessage');
+    if (rankMsgEl) {
+        rankMsgEl.textContent = myRank === 1 ? '🏆 You\'re #1!' : myRank <= 3 ? '🎉 Top 3!' : myRank > 0 ? `Keep it up!` : '';
     }
 
-    // Create podium for top 3
     const podium = document.getElementById('podium');
+    if (!podium) return;
+
     const top3 = leaderboard.slice(0, 3);
-
-    if (top3.length === 0) {
-        podium.innerHTML = '<p style="text-align: center; color: var(--text-gray);">No participants yet</p>';
-        return;
-    }
-
-    // Podium order: 2nd, 1st, 3rd (visual arrangement)
-    const podiumOrder = [
-        top3[1], // 2nd place (left)
-        top3[0], // 1st place (center, tallest)
-        top3[2]  // 3rd place (right)
-    ];
-
+    const order = [top3[1], top3[0], top3[2]]; // 2nd, 1st, 3rd
     const medals = ['🥈', '🥇', '🥉'];
     const heights = ['medium', 'tall', 'short'];
+    const colors = ['rgba(192,192,192,0.2)', 'rgba(255,215,0,0.25)', 'rgba(205,127,50,0.2)'];
     const positions = [2, 1, 3];
 
-    podium.innerHTML = podiumOrder.map((entry, index) => {
-        if (!entry) return '';
+    podium.innerHTML = order.map((e, i) => {
+        if (!e) return `<div class="podium-place ${heights[i]} empty"></div>`;
+        const initials = (e.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
         return `
-            <div class="podium-place ${heights[index]}">
-                <div class="podium-medal">${medals[index]}</div>
-                <div class="podium-name">${entry.name}</div>
-                <div class="podium-score">${entry.score}</div>
-                <div class="podium-rank">#${positions[index]}</div>
-                <div class="podium-stand">
-                    <div class="stand-number">${positions[index]}</div>
-                </div>
+        <div class="podium-place ${heights[i]}" style="animation-delay:${0.1 + i * 0.15}s">
+            <div class="podium-medal">${medals[i]}</div>
+            <div class="podium-avatar" style="background:${colors[i]}">${initials}</div>
+            <div class="podium-name">${e.name || 'Player'}</div>
+            <div class="podium-score">${(e.score || 0).toLocaleString()}</div>
+            <div class="podium-stand" style="background:${colors[i]}">
+                <div class="stand-number">${positions[i]}</div>
             </div>
-        `;
+        </div>`;
     }).join('');
+
+    // Full leaderboard list
+    const list = document.getElementById('leaderboardList');
+    if (list) {
+        list.innerHTML = leaderboard.slice(0, 10).map((e, i) => {
+            const isMe = e.name === myName || e.email === myEmail;
+            return `<div class="lb-row${isMe ? ' lb-you' : ''}">
+                <span class="lb-rank">${i < 3 ? ['🥇', '🥈', '🥉'][i] : `#${i + 1}`}</span>
+                <span class="lb-name">${e.name || 'Player'}${isMe ? ' (You)' : ''}</span>
+                <span class="lb-points">${(e.score || 0).toLocaleString()} pts</span>
+            </div>`;
+        }).join('');
+    }
+}
+
+function showError(msg) {
+    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;color:#fff;font-family:sans-serif;">
+        <div style="font-size:3rem">⚠️</div><h2>${msg}</h2>
+        <button onclick="window.history.back()" style="padding:12px 28px;border-radius:99px;background:#6366f1;color:#fff;border:none;font-size:1rem;cursor:pointer;">Go Back</button>
+    </div>`;
 }

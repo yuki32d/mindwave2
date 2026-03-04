@@ -3,116 +3,1238 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Quiz - MindWave</title>
-    <link rel="stylesheet" href="../3d-depth-design.css">
-    <link rel="stylesheet" href="marketing-site/css/live-quiz.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Quiz | MindWave</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #08090e;
+            --card: #10131f;
+            --card2: #181d2e;
+            --border: rgba(255, 255, 255, .07);
+            --text: #f0f2ff;
+            --muted: #7b82a0;
+            --cyan: #00d9ff;
+            --purple: #8b5cf6;
+            --green: #00d084;
+            --red: #ff5a5f;
+            --yellow: #ffd700;
+            --orange: #ff9f0a;
+            --A: #ff5a5f;
+            --B: #1e90ff;
+            --C: #ffd700;
+            --D: #00d084;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Starfield background ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 20%, rgba(99, 102, 241, .07) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 80% 80%, rgba(168, 85, 247, .06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ───────────────────────────────────────
+           WAITING ROOM
+        ─────────────────────────────────────── */
+        #waitingRoom {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 2rem;
+            gap: 2rem;
+        }
+
+        .quiz-code-pill {
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            padding: 8px 20px;
+            font-size: .8rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quiz-code-pill .code {
+            color: var(--cyan);
+            font-size: .95rem;
+        }
+
+        .waiting-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 3.5rem 3rem;
+            text-align: center;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, .5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .waiting-card::before {
+            content: '';
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0, 217, 255, .08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .trophy-aura {
+            width: 110px;
+            height: 110px;
+            background: linear-gradient(135deg, #ffd700, #ff9f0a);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            box-shadow: 0 0 40px rgba(255, 215, 0, .3), 0 0 80px rgba(255, 215, 0, .15);
+            animation: trophyPulse 2.5s ease-in-out infinite;
+        }
+
+        .trophy-aura svg {
+            width: 52px;
+            height: 52px;
+        }
+
+        @keyframes trophyPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 40px rgba(255, 215, 0, .3);
+            }
+
+            50% {
+                transform: scale(1.07);
+                box-shadow: 0 0 60px rgba(255, 215, 0, .5);
+            }
+        }
+
+        .waiting-card h1 {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: var(--text);
+            margin-bottom: .75rem;
+        }
+
+        .waiting-card p {
+            font-size: 1.1rem;
+            color: var(--muted);
+            margin-bottom: 2.5rem;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: .85rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        .conn-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--muted);
+        }
+
+        .conn-dot.connected {
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        .conn-dot.disconnected {
+            background: var(--red);
+            animation: blink .8s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .participants-info {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 217, 255, .08);
+            border: 1px solid rgba(0, 217, 255, .2);
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: .9rem;
+            font-weight: 600;
+        }
+
+        .participants-info svg {
+            color: var(--cyan);
+        }
+
+        .waiting-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 2rem;
+        }
+
+        .waiting-dots span {
+            width: 10px;
+            height: 10px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: dotBounce 1.4s ease-in-out infinite;
+        }
+
+        .waiting-dots span:nth-child(2) {
+            animation-delay: .18s;
+        }
+
+        .waiting-dots span:nth-child(3) {
+            animation-delay: .36s;
+        }
+
+        .waiting-dots span:nth-child(4) {
+            animation-delay: .54s;
+        }
+
+        @keyframes dotBounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(.5);
+                opacity: .4;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* ───────────────────────────────────────
+           QUIZ PLAY
+        ─────────────────────────────────────── */
+        #quizPlay {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Top bar */
+        .quiz-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background: rgba(16, 19, 31, .95);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .qprog-info {
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #questionProgress {
+            font-size: 1rem;
+            color: var(--cyan);
+            font-weight: 800;
+        }
+
+        .score-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .score-label {
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        #currentScore {
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: transform .3s, color .3s;
+        }
+
+        .score-pip {
+            position: absolute;
+            top: -8px;
+            right: -20px;
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--green);
+            animation: pipFloat 1.2s ease forwards;
+            pointer-events: none;
+        }
+
+        @keyframes pipFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-32px);
+            }
+        }
+
+        /* Progress bar */
+        .progress-rail {
+            height: 4px;
+            background: rgba(255, 255, 255, .06);
+            position: relative;
+        }
+
+        #progressBar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            border-radius: 2px;
+            transition: width .5s ease;
+            box-shadow: 0 0 8px rgba(0, 217, 255, .4);
+        }
+
+        /* Question area */
+        .quiz-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            gap: 1.5rem;
+        }
+
+        /* Timer + question header */
+        .question-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .points-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 215, 0, .12);
+            border: 1px solid rgba(255, 215, 0, .25);
+            border-radius: 99px;
+            padding: 5px 14px;
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--yellow);
+        }
+
+        /* Timer */
+        .timer-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        #timerCircle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: conic-gradient(var(--cyan) 360deg, var(--card2) 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 24px rgba(0, 217, 255, .4);
+            transition: background .1s linear, box-shadow .3s;
+        }
+
+        #timeRemaining {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--text);
+            transition: color .3s;
+            z-index: 1;
+        }
+
+        /* Inner circle cutout */
+        #timerCircle::after {
+            content: '';
+            position: absolute;
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            background: var(--card2);
+            z-index: 0;
+        }
+
+        #timeRemaining {
+            z-index: 1;
+            position: relative;
+        }
+
+        /* Question box */
+        .question-box {
+            background: linear-gradient(135deg, rgba(139, 92, 246, .1), rgba(0, 217, 255, .08));
+            border: 1.5px solid rgba(139, 92, 246, .25);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            animation: qAppear .35s ease;
+        }
+
+        @keyframes qAppear {
+            from {
+                opacity: 0;
+                transform: scale(.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        #questionText {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1.45;
+            transition: opacity .25s;
+        }
+
+        /* Answer Grid - Kahoot style 2×2 */
+        .answer-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .answer-btn {
+            padding: 1.8rem 1.5rem;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .75rem;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transition: transform .2s cubic-bezier(.34, 1.56, .64, 1), box-shadow .2s, opacity .2s, filter .2s;
+        }
+
+        .answer-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, .12);
+            opacity: 0;
+            transition: opacity .2s;
+        }
+
+        .answer-btn:hover:not(:disabled)::after {
+            opacity: 1;
+        }
+
+        .answer-btn:hover:not(:disabled) {
+            transform: scale(1.04) translateY(-3px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, .4);
+        }
+
+        .answer-btn:active:not(:disabled) {
+            transform: scale(.98);
+        }
+
+        @keyframes answerSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .answer-btn[data-index="0"] {
+            background: linear-gradient(135deg, #ff5a5f, #e63946);
+        }
+
+        .answer-btn[data-index="1"] {
+            background: linear-gradient(135deg, #1e90ff, #0077b6);
+        }
+
+        .answer-btn[data-index="2"] {
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+        }
+
+        .answer-btn[data-index="3"] {
+            background: linear-gradient(135deg, #00d084, #10b981);
+        }
+
+        .answer-btn.correct {
+            box-shadow: 0 0 0 3px #00d084, 0 0 40px rgba(0, 208, 132, .5) !important;
+            filter: brightness(1.1);
+        }
+
+        .answer-btn.incorrect {
+            box-shadow: 0 0 0 3px #ff5a5f, 0 0 30px rgba(255, 90, 95, .4) !important;
+            filter: brightness(.9);
+        }
+
+        .answer-btn.dimmed {
+            filter: brightness(.45) saturate(.5);
+            transform: none !important;
+        }
+
+        .answer-btn.selected {
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, .7), 0 12px 30px rgba(0, 0, 0, .35) !important;
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .answer-letter-box {
+            width: 52px;
+            height: 52px;
+            background: rgba(255, 255, 255, .22);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .2);
+        }
+
+        .answer-btn[data-index="2"] .answer-letter-box {
+            color: #333;
+        }
+
+        .answer-btn[data-index="2"] .answer-text {
+            color: #333 !important;
+        }
+
+        .answer-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+            line-height: 1.35;
+        }
+
+        /* Feedback */
+        #answerFeedback {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1.5rem 2rem;
+            display: none;
+            animation: slideUp .4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback-row {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .feedback-icon {
+            flex-shrink: 0;
+        }
+
+        .feedback-main {
+            flex: 1;
+        }
+
+        #feedbackText {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        #pointsEarned {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        #streakBadge {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 159, 10, .15);
+            border: 1px solid rgba(255, 159, 10, .3);
+            border-radius: 99px;
+            padding: 4px 12px;
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--orange);
+        }
+
+        /* Answer distribution bar */
+        #distributionBar {
+            display: none;
+            justify-content: space-around;
+            gap: .5rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.2rem 1.5rem;
+        }
+
+        .dist-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dist-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, .07);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .dist-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width .6s ease;
+        }
+
+        .dist-col[data-letter="A"] .dist-fill {
+            background: var(--A);
+        }
+
+        .dist-col[data-letter="B"] .dist-fill {
+            background: var(--B);
+        }
+
+        .dist-col[data-letter="C"] .dist-fill {
+            background: var(--C);
+        }
+
+        .dist-col[data-letter="D"] .dist-fill {
+            background: var(--D);
+        }
+
+        .dist-label {
+            font-size: .7rem;
+            font-weight: 700;
+            color: var(--muted);
+        }
+
+        .dist-pct {
+            font-size: .75rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* ───────────────────────────────────────
+           RESULTS SCREEN
+        ─────────────────────────────────────── */
+        #quizResults {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 3rem 1.5rem;
+            gap: 1.5rem;
+        }
+
+        .results-hero {
+            text-align: center;
+            margin-bottom: .5rem;
+        }
+
+        .results-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--yellow), var(--orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: .5rem;
+        }
+
+        .results-hero p {
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .results-stat {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .results-stat-val {
+            font-size: 2.2rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .results-stat-lbl {
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+        }
+
+        .rank-card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, .2), rgba(99, 102, 241, .15));
+            border: 1px solid rgba(139, 92, 246, .3);
+            border-radius: 20px;
+            padding: 1.5rem 2.5rem;
+            text-align: center;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .rank-card-label {
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--purple);
+            margin-bottom: 6px;
+        }
+
+        #yourRank {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #c084fc;
+        }
+
+        #rankMessage {
+            font-size: .9rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* Podium */
+        .podium-section {
+            width: 100%;
+            max-width: 700px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .podium-section::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 215, 0, .1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .podium-section h3 {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--yellow);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .podium {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: .5rem;
+        }
+
+        .podium-place {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            animation: podiumRise .6s cubic-bezier(.34, 1.5, .64, 1) backwards;
+        }
+
+        @keyframes podiumRise {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+        }
+
+        .podium-medal {
+            font-size: 1.8rem;
+        }
+
+        .podium-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .9rem;
+            font-weight: 700;
+            border: 2px solid rgba(255, 255, 255, .15);
+        }
+
+        .podium-name {
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--text);
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .podium-score {
+            font-size: .7rem;
+            color: var(--muted);
+        }
+
+        .podium-stand {
+            width: 100%;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, .08);
+        }
+
+        .stand-number {
+            font-size: 1.2rem;
+            font-weight: 900;
+            padding: .6rem;
+            color: var(--text);
+        }
+
+        .podium-place.tall .podium-stand {
+            height: 90px;
+        }
+
+        .podium-place.medium .podium-stand {
+            height: 70px;
+        }
+
+        .podium-place.short .podium-stand {
+            height: 52px;
+        }
+
+        /* Full leaderboard list */
+        .lb-list-section {
+            width: 100%;
+            max-width: 700px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .lb-list-header {
+            padding: 1rem 1.5rem;
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .lb-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: .85rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-size: .9rem;
+        }
+
+        .lb-row:last-child {
+            border-bottom: none;
+        }
+
+        .lb-row.lb-you {
+            background: rgba(99, 102, 241, .1);
+        }
+
+        .lb-rank {
+            width: 28px;
+            font-size: 1rem;
+        }
+
+        .lb-name {
+            flex: 1;
+            font-weight: 600;
+        }
+
+        .lb-points {
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--purple), #6366f1);
+            color: #fff;
+            border: none;
+            border-radius: 99px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .15s, transform .15s;
+            text-decoration: none;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn:hover {
+            opacity: .88;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .answer-grid {
+                gap: .75rem;
+            }
+
+            .answer-btn {
+                padding: 1.2rem 1rem;
+            }
+
+            .answer-text {
+                font-size: .9rem;
+            }
+
+            #questionText {
+                font-size: 1.2rem;
+            }
+
+            .waiting-card {
+                padding: 2.5rem 1.5rem;
+            }
+        }
+    </style>
 </head>
 
-<body data-theme="dark">
-    <!-- Main Content -->
-    <main class="quiz-play-container">
-        <!-- Waiting Room -->
-        <section class="waiting-room" id="waitingRoom">
+<body>
+    <main>
+        <!-- ── WAITING ROOM ── -->
+        <section id="waitingRoom">
+            <div class="quiz-code-pill">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.72 16" />
+                </svg>
+                Quiz Code: <span class="code" id="displayCode">—</span>
+            </div>
+
             <div class="waiting-card">
-                <div class="quiz-icon">
-                    <i class="fas fa-trophy"></i>
+                <div class="trophy-aura">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none"
+                        stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 0 0 5H6" />
+                        <path d="M18 9h1.5a2.5 2.5 0 0 1 0 5H18" />
+                        <path d="M4 22h16" />
+                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                    </svg>
                 </div>
-                <h1>Get Ready!</h1>
+                <h1>Get Ready! ⚡</h1>
                 <p>Waiting for your teacher to start the quiz...</p>
-                <div class="pulse-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+
+                <div class="connection-status">
+                    <div class="conn-dot disconnected" id="connectionDot"></div>
+                    <span id="waitingStatus">Connecting...</span>
+                </div>
+
+                <div class="participants-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="#00d9ff" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    <span id="participantCount">0</span>&nbsp;joined
+                </div>
+
+                <div class="waiting-dots">
+                    <span></span><span></span><span></span><span></span>
                 </div>
             </div>
         </section>
 
-        <!-- Quiz Play -->
-        <section class="quiz-play" id="quizPlay" style="display: none;">
-            <!-- Question Header -->
-            <div class="question-header">
-                <div class="question-info">
-                    <span class="question-number" id="questionNumber">Question 1 of 5</span>
-                    <span class="your-score">Score: <span id="currentScore">0</span></span>
+        <!-- ── QUIZ PLAY ── -->
+        <section id="quizPlay">
+            <!-- Top bar -->
+            <div class="quiz-topbar">
+                <div class="qprog-info">
+                    Question <span id="questionProgress">1 / ?</span>
                 </div>
-                <div class="timer-container">
-                    <div class="timer-circle" id="timerCircle">
-                        <span id="timeRemaining">15</span>
+                <div class="score-display">
+                    <div class="score-label">Score</div>
+                    <div id="currentScore">0</div>
+                </div>
+            </div>
+            <div class="progress-rail">
+                <div id="progressBar" style="width:0%"></div>
+            </div>
+
+            <div class="quiz-body">
+                <!-- Question header row -->
+                <div class="question-header-row">
+                    <div class="points-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                            fill="#ffd700" stroke="none">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                        <span id="pointsBadge">1000 pts</span>
+                    </div>
+                    <div class="timer-wrap">
+                        <div id="timerCircle">
+                            <span id="timeRemaining">15</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Question Display -->
-            <div class="question-display">
-                <h2 id="questionText">What is 2 + '2' in JavaScript?</h2>
-            </div>
+                <!-- Question text -->
+                <div class="question-box">
+                    <h2 id="questionText">Loading question...</h2>
+                </div>
 
-            <!-- Answer Grid -->
-            <div class="answer-grid" id="answerGrid">
-                <button class="answer-btn red" data-index="0">
-                    <div class="answer-letter">A</div>
-                    <div class="answer-text" id="answerA">For loop</div>
-                </button>
-                <button class="answer-btn blue" data-index="1">
-                    <div class="answer-letter">B</div>
-                    <div class="answer-text" id="answerB">While loop</div>
-                </button>
-                <button class="answer-btn yellow" data-index="2">
-                    <div class="answer-letter">C</div>
-                    <div class="answer-text" id="answerC">Do-while loop</div>
-                </button>
-                <button class="answer-btn green" data-index="3">
-                    <div class="answer-letter">D</div>
-                    <div class="answer-text" id="answerD">If-else statement</div>
-                </button>
-            </div>
+                <!-- Answer grid -->
+                <div class="answer-grid" id="answerGrid">
+                    <button class="answer-btn" data-index="0">
+                        <div class="answer-letter-box">A</div>
+                        <div class="answer-text" id="answerA">Option A</div>
+                    </button>
+                    <button class="answer-btn" data-index="1">
+                        <div class="answer-letter-box">B</div>
+                        <div class="answer-text" id="answerB">Option B</div>
+                    </button>
+                    <button class="answer-btn" data-index="2">
+                        <div class="answer-letter-box">C</div>
+                        <div class="answer-text" id="answerC">Option C</div>
+                    </button>
+                    <button class="answer-btn" data-index="3">
+                        <div class="answer-letter-box">D</div>
+                        <div class="answer-text" id="answerD">Option D</div>
+                    </button>
+                </div>
 
-            <!-- Feedback Message -->
-            <div class="answer-feedback" id="answerFeedback" style="display: none;">
-                <div class="feedback-icon" id="feedbackIcon"></div>
-                <div class="feedback-text" id="feedbackText"></div>
-                <div class="points-earned" id="pointsEarned"></div>
+                <!-- Feedback -->
+                <div id="answerFeedback">
+                    <div class="feedback-row">
+                        <div class="feedback-icon" id="feedbackIcon"></div>
+                        <div class="feedback-main">
+                            <div id="feedbackText"></div>
+                            <div id="pointsEarned"></div>
+                        </div>
+                        <span id="streakBadge"></span>
+                    </div>
+                </div>
+
+                <!-- Distribution bar -->
+                <div id="distributionBar">
+                    <div class="dist-col" data-letter="A">
+                        <div class="dist-pct">0%</div>
+                        <div class="dist-track">
+                            <div class="dist-fill" style="width:0%"></div>
+                        </div>
+                        <div class="dist-label">A</div>
+                    </div>
+                    <div class="dist-col" data-letter="B">
+                        <div class="dist-pct">0%</div>
+                        <div class="dist-track">
+                            <div class="dist-fill" style="width:0%"></div>
+                        </div>
+                        <div class="dist-label">B</div>
+                    </div>
+                    <div class="dist-col" data-letter="C">
+                        <div class="dist-pct">0%</div>
+                        <div class="dist-track">
+                            <div class="dist-fill" style="width:0%"></div>
+                        </div>
+                        <div class="dist-label">C</div>
+                    </div>
+                    <div class="dist-col" data-letter="D">
+                        <div class="dist-pct">0%</div>
+                        <div class="dist-track">
+                            <div class="dist-fill" style="width:0%"></div>
+                        </div>
+                        <div class="dist-label">D</div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Results Screen -->
-        <section class="quiz-results" id="quizResults" style="display: none;">
-            <div class="results-card">
-                <div class="trophy-icon">
-                    <i class="fas fa-trophy"></i>
-                </div>
-                <h1>Quiz Complete!</h1>
-                <div class="final-score">
-                    <div class="score-label">Your Score</div>
-                    <div class="score-value" id="finalScore">0</div>
-                    <div class="score-details">
-                        <span id="correctAnswers">0</span> correct out of <span id="totalQuestions">0</span>
-                    </div>
-                </div>
-
-                <!-- Personal Leaderboard Position -->
-                <div class="rank-display">
-                    <div class="rank-label">Your Rank</div>
-                    <div class="rank-value" id="yourRank">#1</div>
-                </div>
-
-                <!-- Top 3 Podium -->
-                <div class="podium-container">
-                    <h3><i class="fas fa-trophy"></i> Top 3</h3>
-                    <div class="podium" id="podium">
-                        <!-- Podium will be populated by JavaScript -->
-                    </div>
-                </div>
-
-                <button class="btn-primary" onclick="window.location.href='student-community.html'">
-                    <i class="fas fa-home"></i> Back to Community
-                </button>
+        <!-- ── RESULTS ── -->
+        <section id="quizResults">
+            <div class="results-hero">
+                <h1>Quiz Complete! 🎉</h1>
+                <p>Here's how you did</p>
             </div>
+
+            <div class="results-grid">
+                <div class="results-stat">
+                    <div class="results-stat-val" id="finalScore"
+                        style="background:linear-gradient(135deg,#00d9ff,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                        0</div>
+                    <div class="results-stat-lbl">Total Score</div>
+                </div>
+                <div class="results-stat">
+                    <div class="results-stat-val" style="color:#00d084;"><span id="correctAnswers">0</span>/<span
+                            id="totalQuestionsResult">0</span></div>
+                    <div class="results-stat-lbl">Correct</div>
+                </div>
+                <div class="results-stat">
+                    <div class="results-stat-val" id="accuracy" style="color:#ffd700;">0%</div>
+                    <div class="results-stat-lbl">Accuracy</div>
+                </div>
+            </div>
+
+            <div class="rank-card">
+                <div class="rank-card-label">Your Rank</div>
+                <div id="yourRank">—</div>
+                <div id="rankMessage"></div>
+            </div>
+
+            <!-- Podium -->
+            <div class="podium-section">
+                <h3>🏆 Top 3</h3>
+                <div class="podium" id="podium"></div>
+            </div>
+
+            <!-- Full list -->
+            <div class="lb-list-section">
+                <div class="lb-list-header">Leaderboard</div>
+                <div id="leaderboardList"></div>
+            </div>
+
+            <a href="student-community.html" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+                Back to Community
+            </a>
         </section>
     </main>
 
-    <script src="marketing-site/js/student-quiz.js"></script></body>
+    <script>
+        // Show quiz code in waiting room
+        document.addEventListener('DOMContentLoaded', () => {
+            const code = new URLSearchParams(window.location.search).get('code');
+            const el = document.getElementById('displayCode');
+            if (el && code) el.textContent = code;
+        });
+    </script>
+    <script src="marketing-site/js/student-quiz.js"></script>
+</body>
 
 </html>
