@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community � MindWave</title>
+    <title>Community | MindWave</title>
     <meta name="description" content="Share projects, collaborate, and connect with fellow students on MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -79,7 +79,7 @@
         /* -- Light mode: dark pills need light text & icons -- */
         [data-theme="light"] .cm-tab {
             color: #c8ccee;
-            /* light lavender � readable on dark pill */
+            /* light lavender – readable on dark pill */
         }
 
         [data-theme="light"] .cm-tab:hover {
@@ -92,7 +92,7 @@
             color: #fff;
         }
 
-        /* Sort buttons also have dark bg � same fix */
+        /* Sort buttons also have dark bg – same fix */
         [data-theme="light"] .cm-sort-btn {
             color: #c8ccee;
         }
@@ -353,6 +353,12 @@
             40% {
                 transform: scale(1);
                 opacity: 1
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
             }
         }
 
@@ -762,7 +768,7 @@
                 <div class="mw-breadcrumb">Dashboard / <span>Community</span></div>
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" id="searchInput" placeholder="Search posts�" autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Search posts..." autocomplete="off">
                 </div>
                 <div class="mw-topbar-actions">
                     <div class="mw-notif-wrap">
@@ -824,7 +830,7 @@
                         <div class="cm-search">
                             <i data-lucide="search"></i>
                             <!-- NOTE: reusing the topbar #searchInput via JS; this is a visual duplicate handled by student-community.js -->
-                            <input type="text" id="searchInputAlt" placeholder="Search posts�" autocomplete="off">
+                            <input type="text" id="searchInputAlt" placeholder="Search posts..." autocomplete="off">
                         </div>
                         <div class="cm-sort-group" id="sortBtns">
                             <button class="cm-sort-btn active" data-sort="recent"><i data-lucide="clock-4"></i>

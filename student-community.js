@@ -115,12 +115,13 @@ async function loadPosts(reset = true) {
 
             if (data.posts.length === 0 && reset) {
                 postsContainer.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
+                    <div class="cm-empty">
+                        <div class="cm-empty-icon"><i data-lucide="message-square" style="width:52px;height:52px;color:var(--accent,#6366f1);opacity:.45;"></i></div>
                         <h3>No posts yet</h3>
                         <p>Be the first to share something with the community!</p>
                     </div>
                 `;
+                if (window.lucide) lucide.createIcons();
                 loadMoreContainer.style.display = 'none';
             } else {
                 data.posts.forEach(post => renderPost(post));
@@ -133,12 +134,13 @@ async function loadPosts(reset = true) {
     } catch (error) {
         console.error('Error loading posts:', error);
         postsContainer.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">⚠️</div>
+            <div class="cm-empty">
+                <div class="cm-empty-icon"><i data-lucide="alert-triangle" style="width:52px;height:52px;color:#f59e0b;opacity:.8;"></i></div>
                 <h3>Error loading posts</h3>
                 <p>Please try again later.</p>
             </div>
         `;
+        if (window.lucide) lucide.createIcons();
     } finally {
         isLoading = false;
     }
@@ -169,7 +171,7 @@ function renderPost(post) {
     }
 
     postCard.innerHTML = `
-        ${post.isPinned ? '<div style="color: #ff9f0a; font-size: 12px; font-weight: 600; margin-bottom: 8px;">📌 PINNED POST</div>' : ''}
+        ${post.isPinned ? '<div style="display:flex;align-items:center;gap:5px;color:#f59e0b;font-size:12px;font-weight:600;margin-bottom:8px;"><i data-lucide=\'pin\' style=\'width:13px;height:13px;\'></i> PINNED</div>' : ''}
         <div class="post-header">
             <div class="post-avatar">${authorInitial}</div>
             <div class="post-author-info">
@@ -184,19 +186,20 @@ function renderPost(post) {
         ${tagsHTML}
         <div class="post-footer">
             <div class="post-action" onclick="toggleLike('${post._id}', event)">
-                <span class="post-action-icon">❤️</span>
+                <span class="post-action-icon"><i data-lucide="heart" style="width:15px;height:15px;"></i></span>
                 <span class="like-count">${post.likeCount || 0}</span>
             </div>
             <div class="post-action">
-                <span class="post-action-icon">💬</span>
+                <span class="post-action-icon"><i data-lucide="message-circle" style="width:15px;height:15px;"></i></span>
                 <span>${post.commentCount || 0}</span>
             </div>
             <div class="post-action">
-                <span class="post-action-icon">👁️</span>
+                <span class="post-action-icon"><i data-lucide="eye" style="width:15px;height:15px;"></i></span>
                 <span>${post.viewCount || 0}</span>
             </div>
         </div>
     `;
+    if (window.lucide) lucide.createIcons({ el: postCard });
 
     postCard.addEventListener('click', (e) => {
         // Don't open detail if clicking on action buttons
@@ -292,15 +295,15 @@ function renderPostDetail(post, comments) {
             ${tagsHTML}
             <div class="post-footer">
                 <div class="post-action" onclick="toggleLike('${post._id}', event)">
-                    <span class="post-action-icon">❤️</span>
+                    <span class="post-action-icon"><i data-lucide="heart" style="width:15px;height:15px;"></i></span>
                     <span class="like-count">${post.likeCount || 0}</span>
                 </div>
                 <div class="post-action">
-                    <span class="post-action-icon">💬</span>
+                    <span class="post-action-icon"><i data-lucide="message-circle" style="width:15px;height:15px;"></i></span>
                     <span>${post.commentCount || 0}</span>
                 </div>
                 <div class="post-action">
-                    <span class="post-action-icon">👁️</span>
+                    <span class="post-action-icon"><i data-lucide="eye" style="width:15px;height:15px;"></i></span>
                     <span>${post.viewCount || 0}</span>
                 </div>
             </div>
@@ -316,6 +319,7 @@ function renderPostDetail(post, comments) {
             </div>
         </div>
     `;
+    if (window.lucide) lucide.createIcons({ el: detailContent });
 }
 
 // Render Comment
@@ -340,7 +344,7 @@ function renderComment(comment) {
             </div>
             <div class="comment-content">${escapeHtml(comment.content)}</div>
             <div class="comment-actions">
-                <span class="comment-action" onclick="toggleCommentLike('${comment._id}')">❤️ ${comment.likeCount || 0}</span>
+                <span class="comment-action" onclick="toggleCommentLike('${comment._id}')"><i data-lucide="heart" style="width:13px;height:13px;display:inline;"></i> ${comment.likeCount || 0}</span>
                 <span class="comment-action" onclick="replyToComment('${comment._id}')">Reply</span>
             </div>
             ${repliesHTML}
@@ -469,12 +473,13 @@ async function showMyPosts() {
                 postsContainer.innerHTML = '';
                 if (data.posts.length === 0) {
                     postsContainer.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📝</div>
+                        <div class="cm-empty">
+                            <div class="cm-empty-icon"><i data-lucide="pencil" style="width:52px;height:52px;color:var(--accent,#6366f1);opacity:.45;"></i></div>
                             <h3>No posts yet</h3>
                             <p>Create your first post to get started!</p>
                         </div>
                     `;
+                    if (window.lucide) lucide.createIcons();
                 } else {
                     data.posts.forEach(post => renderPost(post));
                 }
@@ -567,7 +572,8 @@ function setupQuizJoin() {
 
             // Disable button and show loading
             joinQuizBtn.disabled = true;
-            joinQuizBtn.textContent = '🔄 Joining...';
+            joinQuizBtn.innerHTML = '<i data-lucide="loader" style="width:15px;height:15px;animation:spin 1s linear infinite;"></i> Joining...';
+            if (window.lucide) lucide.createIcons({ el: joinQuizBtn });
             quizError.style.display = 'none';
 
             try {
@@ -592,14 +598,16 @@ function setupQuizJoin() {
                 } else {
                     showQuizError(data.message || 'Invalid quiz code. Please check and try again.');
                     joinQuizBtn.disabled = false;
-                    joinQuizBtn.textContent = '🎯 Join Quiz';
+                    joinQuizBtn.innerHTML = '<i data-lucide="zap" style="width:15px;height:15px;"></i> Join Quiz';
+                    if (window.lucide) lucide.createIcons({ el: joinQuizBtn });
                 }
 
             } catch (error) {
                 console.error('Error joining quiz:', error);
                 showQuizError('Failed to connect. Please try again.');
                 joinQuizBtn.disabled = false;
-                joinQuizBtn.textContent = '🎯 Join Quiz';
+                joinQuizBtn.innerHTML = '<i data-lucide="zap" style="width:15px;height:15px;"></i> Join Quiz';
+                if (window.lucide) lucide.createIcons({ el: joinQuizBtn });
             }
         });
 
