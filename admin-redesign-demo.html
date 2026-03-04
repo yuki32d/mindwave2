@@ -1,46 +1,33 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindWave – Admin Panel</title>
+    <title>MindWave – Admin Console</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
         rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --bg: #0a0c12;
-            --surface: #10141f;
-            --surface-2: #161c2a;
-            --surface-3: #1d2438;
-            --border: rgba(255, 255, 255, 0.06);
-            --border-2: rgba(255, 255, 255, 0.12);
-            --text: #e8eaf2;
-            --muted: #6b7694;
-            --accent: #f59e0b;
-            --accent-2: #fbbf24;
-            --accent-dim: rgba(245, 158, 11, 0.12);
-            --green: #22c55e;
-            --red: #f43f5e;
-            --blue: #3b82f6;
-            --purple: #a855f7;
-            --cyan: #06b6d4;
-            --sidebar-w: 220px;
-            --topbar-h: 56px;
-        }
-
-        [data-theme="light"] {
-            --bg: #f0f2f8;
-            --surface: #fff;
-            --surface-2: #f5f7fc;
-            --surface-3: #eef0f8;
-            --border: rgba(0, 0, 0, 0.07);
-            --border-2: rgba(0, 0, 0, 0.13);
-            --text: #0f1623;
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e5e9f2;
+            --accent: #d08000;
+            --accent-lo: rgba(208, 128, 0, 0.10);
+            --accent-border: rgba(208, 128, 0, 0.25);
+            --text: #111827;
             --muted: #6b7280;
-            --accent-dim: rgba(245, 158, 11, 0.10);
+            --green: #16a34a;
+            --red: #dc2626;
+            --blue: #2563eb;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.07), 0 4px 16px rgba(0, 0, 0, 0.05);
+            --radius: 14px;
+            --mono: 'JetBrains Mono', monospace;
+            --sidebar-w: 240px;
+            --topbar-h: 58px;
         }
 
         *,
@@ -62,7 +49,6 @@
             font-size: 14px;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.5;
         }
 
         a {
@@ -75,79 +61,79 @@
             cursor: pointer;
         }
 
-        input,
-        textarea,
-        select {
-            font-family: inherit;
-            font-size: 13px;
-        }
-
-        /* ── SHELL ── */
+        /* ── LAYOUT ── */
         .shell {
             display: grid;
             grid-template-columns: var(--sidebar-w) 1fr;
             grid-template-rows: var(--topbar-h) 1fr;
             height: 100vh;
-            overflow: hidden;
         }
 
         /* ── SIDEBAR ── */
         .sidebar {
-            grid-row: 1/3;
-            background: var(--surface);
-            border-right: 1px solid var(--border);
+            --s-bg: #0f1c2e;
+            --s-border: rgba(255, 255, 255, 0.08);
+            --s-text: #cbd5e1;
+            --s-muted: #64748b;
+            --s-hover: rgba(255, 255, 255, 0.06);
+            --s-active-bg: rgba(245, 166, 35, 0.18);
+            --s-active-text: #f5a623;
+            grid-row: 1 / 3;
+            background: var(--s-bg);
+            border-right: 1px solid var(--s-border);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
         .logo {
+            height: var(--topbar-h);
             display: flex;
             align-items: center;
-            gap: 9px;
-            height: var(--topbar-h);
-            padding: 0 16px;
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
+            gap: 10px;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--s-border);
         }
 
-        .logo-icon {
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            border-radius: 7px;
+        .logo-mark {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: var(--accent);
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .logo-mark svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .logo-name {
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: -.02em;
             color: #fff;
         }
 
-        .logo-icon svg {
-            width: 15px;
-            height: 15px;
-        }
-
-        .logo-text {
-            font-size: 14px;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-        }
-
-        .logo-badge {
+        .logo-tag {
+            margin-left: auto;
             font-size: 9px;
-            font-weight: 700;
-            letter-spacing: .06em;
+            font-weight: 800;
             text-transform: uppercase;
-            padding: 2px 6px;
+            letter-spacing: .06em;
+            padding: 3px 7px;
             border-radius: 4px;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: #000;
+            background: var(--accent-lo);
+            color: var(--accent);
+            border: 1px solid var(--accent-border);
         }
 
         .nav-scroll {
             flex: 1;
             overflow-y: auto;
-            padding: 10px 0;
+            padding: 14px 10px;
             scrollbar-width: none;
         }
 
@@ -156,31 +142,33 @@
         }
 
         .nav-section {
-            padding: 0 8px;
-            margin-bottom: 2px;
+            margin-bottom: 6px;
         }
 
         .nav-label {
             font-size: 10px;
             font-weight: 700;
-            letter-spacing: .08em;
             text-transform: uppercase;
-            color: var(--muted);
-            padding: 10px 8px 5px;
+            letter-spacing: .08em;
+            color: var(--s-muted);
+            padding: 8px 10px 5px;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             gap: 9px;
-            padding: 8px 10px;
-            border-radius: 7px;
+            padding: 9px 10px;
+            border-radius: 9px;
             font-size: 13px;
             font-weight: 500;
-            color: var(--muted);
-            transition: background .14s, color .14s;
-            cursor: pointer;
+            color: var(--s-text);
+            transition: all .15s;
             position: relative;
+        }
+
+        a.nav-item,
+        button.nav-item {
             border: none;
             background: none;
             width: 100%;
@@ -188,112 +176,100 @@
         }
 
         .nav-item:hover {
-            background: var(--surface-2);
-            color: var(--text);
+            background: var(--s-hover);
+            color: #fff;
         }
 
         .nav-item.active {
-            background: var(--accent-dim);
-            color: var(--accent-2);
-            font-weight: 600;
+            background: var(--s-active-bg);
+            color: var(--s-active-text);
+            font-weight: 700;
+            border: 1px solid rgba(245, 166, 35, 0.3);
         }
 
         .nav-item.active::before {
             content: '';
             position: absolute;
             left: 0;
-            top: 22%;
-            bottom: 22%;
+            top: 25%;
+            bottom: 25%;
             width: 3px;
             background: var(--accent);
             border-radius: 0 3px 3px 0;
         }
 
-        .nav-icon {
+        .nav-item svg {
             width: 16px;
             height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             flex-shrink: 0;
-        }
-
-        .nav-icon svg {
-            width: 15px;
-            height: 15px;
         }
 
         .nav-badge {
             margin-left: auto;
             font-size: 9px;
-            font-weight: 700;
+            font-weight: 800;
             padding: 2px 6px;
             border-radius: 20px;
         }
 
-        .badge-warn {
-            background: rgba(244, 63, 94, .18);
+        .badge-red {
+            background: rgba(220, 38, 38, .12);
             color: var(--red);
         }
 
-        .badge-live {
-            background: rgba(34, 197, 94, .18);
+        .badge-green {
+            background: rgba(22, 163, 74, .12);
             color: var(--green);
         }
 
         .divider {
             height: 1px;
-            background: var(--border);
-            margin: 6px 14px;
+            background: var(--s-border);
+            margin: 8px 10px;
         }
 
-        .sidebar-footer {
-            border-top: 1px solid var(--border);
-            padding: 10px;
-            flex-shrink: 0;
+        .sidebar-foot {
+            border-top: 1px solid var(--s-border);
+            padding: 12px;
         }
 
         .user-card {
             display: flex;
             align-items: center;
-            gap: 9px;
-            padding: 7px;
-            border-radius: 7px;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: background .14s;
         }
 
         .user-card:hover {
-            background: var(--surface-2);
+            background: var(--s-hover);
         }
 
-        .avatar {
-            width: 30px;
-            height: 30px;
+        .user-av {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
+            background: var(--accent);
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 800;
-            color: #000;
             flex-shrink: 0;
         }
 
         .user-name {
             font-size: 12px;
             font-weight: 700;
+            color: #fff;
         }
 
         .user-role {
             font-size: 11px;
-            color: var(--muted);
-        }
-
-        .user-more {
-            margin-left: auto;
-            color: var(--muted);
+            color: var(--s-muted);
         }
 
         /* ── TOPBAR ── */
@@ -302,135 +278,81 @@
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 0 20px;
+            gap: 14px;
+            padding: 0 24px;
+            box-shadow: 0 1px 0 var(--border);
         }
 
         .breadcrumb {
             font-size: 12px;
             color: var(--muted);
-            white-space: nowrap;
         }
 
         .breadcrumb span {
             color: var(--text);
-            font-weight: 600;
+            font-weight: 700;
         }
 
-        .topbar-search {
-            flex: 1;
-            max-width: 320px;
+        .search {
             margin-left: auto;
+            flex: 1;
+            max-width: 300px;
             display: flex;
             align-items: center;
             gap: 8px;
-            background: var(--surface-2);
+            background: var(--bg);
             border: 1px solid var(--border);
-            border-radius: 7px;
-            padding: 0 11px;
-            height: 33px;
+            border-radius: 8px;
+            padding: 0 12px;
+            height: 34px;
         }
 
-        .topbar-search svg {
+        .search svg {
             width: 14px;
             height: 14px;
             color: var(--muted);
-            flex-shrink: 0;
         }
 
-        .topbar-search input {
+        .search input {
             background: none;
             border: none;
             outline: none;
+            font-size: 13px;
             color: var(--text);
             width: 100%;
-            font-size: 13px;
         }
 
-        .topbar-search input::placeholder {
+        .search input::placeholder {
             color: var(--muted);
         }
 
-        .topbar-actions {
+        .topbar-right {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
-        .icon-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 7px;
+        .t-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--muted);
-            cursor: pointer;
-            transition: background .14s, color .14s;
-            background: none;
-            border: none;
+            transition: all .14s;
         }
 
-        .icon-btn:hover {
-            background: var(--surface-2);
-            color: var(--text);
+        .t-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
-        .icon-btn svg {
+        .t-btn svg {
             width: 16px;
             height: 16px;
-        }
-
-        /* Admin role chip — amber, distinct from student's indigo */
-        .role-chip {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, rgba(245, 158, 11, .18), rgba(217, 119, 6, .18));
-            color: var(--accent-2);
-            border: 1px solid rgba(245, 158, 11, .3);
-            text-transform: uppercase;
-            letter-spacing: .04em;
-        }
-
-        .role-chip svg {
-            width: 11px;
-            height: 11px;
-        }
-
-        .theme-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 7px;
-            border: none;
-            background: var(--surface-2);
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: color .14s;
-        }
-
-        .theme-btn:hover {
-            color: var(--text);
-        }
-
-        .theme-btn svg {
-            width: 15px;
-            height: 15px;
-        }
-
-        [data-theme="dark"] .sun-icon {
-            display: none;
-        }
-
-        [data-theme="light"] .moon-icon {
-            display: none;
         }
 
         /* ── MAIN ── */
@@ -443,23 +365,71 @@
         .content {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+            align-content: start;
             scrollbar-width: thin;
-            scrollbar-color: var(--border) transparent;
         }
 
-        /* ── PAGE HEADER ── */
-        .page-header {
+        /* ── CARD ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 18px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .card-title svg {
+            width: 15px;
+            height: 15px;
+            color: var(--accent);
+        }
+
+        .card-link {
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .card-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            grid-column: 1 / -1;
+            margin-bottom: 4px;
         }
 
         .page-title {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 800;
             letter-spacing: -.02em;
         }
@@ -467,7 +437,7 @@
         .page-sub {
             font-size: 12px;
             color: var(--muted);
-            margin-top: 2px;
+            margin-top: 3px;
         }
 
         .page-actions {
@@ -479,13 +449,12 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 7px 14px;
-            border-radius: 7px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
             border: none;
-            cursor: pointer;
-            transition: all .14s;
+            transition: all .15s;
         }
 
         .btn svg {
@@ -495,542 +464,342 @@
 
         .btn-primary {
             background: var(--accent);
-            color: #000;
+            color: #fff;
         }
 
         .btn-primary:hover {
-            background: var(--accent-2);
+            background: #b87000;
             transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(245, 158, 11, .35);
+            box-shadow: 0 6px 20px rgba(208, 128, 0, .3);
         }
 
         .btn-ghost {
-            background: var(--surface-2);
+            background: var(--surface);
             color: var(--text);
             border: 1px solid var(--border);
         }
 
         .btn-ghost:hover {
-            border-color: var(--border-2);
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
-        /* ── SYSTEM STATUS BAR ── */
-        .status-bar {
+        /* ── STATS ROW ── */
+        .stats-row {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 18px;
-        }
-
-        .status-pill {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 14px;
-            flex: 1;
-            min-width: 140px;
-        }
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .status-dot.ok {
-            background: var(--green);
-            box-shadow: 0 0 6px var(--green);
-        }
-
-        .status-dot.warn {
-            background: var(--accent);
-            box-shadow: 0 0 6px var(--accent);
-        }
-
-        .status-dot.err {
-            background: var(--red);
-            box-shadow: 0 0 6px var(--red);
-        }
-
-        .status-label {
-            font-size: 11px;
-            color: var(--muted);
-        }
-
-        .status-val {
-            font-size: 13px;
-            font-weight: 700;
-            margin-left: auto;
-        }
-
-        /* ── KPI ROW ── */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-
-        .kpi-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px;
-        }
-
-        .kpi-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .kpi-label {
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .07em;
-            color: var(--muted);
-        }
-
-        .kpi-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 7px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .kpi-icon svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        .kpi-value {
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: -.03em;
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-
-        .kpi-change {
-            font-size: 11px;
-            color: var(--muted);
-        }
-
-        .kpi-change.up {
-            color: var(--green);
-        }
-
-        .kpi-change.down {
-            color: var(--red);
-        }
-
-        .sparkline {
-            display: flex;
-            align-items: flex-end;
-            gap: 2px;
-            height: 30px;
-            margin-top: 10px;
-        }
-
-        .spark-bar {
-            flex: 1;
-            border-radius: 2px 2px 0 0;
-            min-height: 3px;
-            transition: filter .1s;
-        }
-
-        .spark-bar:hover {
-            filter: brightness(1.5);
-        }
-
-        .spark-bar.hi {
-            filter: brightness(1.2);
-        }
-
-        /* ── MAIN GRID ── */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 14px;
-        }
-
-        /* ── PANEL ── */
-        .panel {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 14px;
-        }
-
-        .panel-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 13px 16px;
+            gap: 0;
             border-bottom: 1px solid var(--border);
         }
 
-        .panel-title {
-            font-size: 13px;
+        .stat-box {
+            flex: 1;
+            padding: 18px 20px;
+            border-right: 1px solid var(--border);
+        }
+
+        .stat-box:last-child {
+            border-right: none;
+        }
+
+        .stat-key {
+            font-size: 11px;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--muted);
+            margin-bottom: 5px;
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 6px;
         }
 
-        .panel-title svg {
-            width: 14px;
-            height: 14px;
-            color: var(--muted);
+        .stat-key svg {
+            width: 13px;
+            height: 13px;
         }
 
-        .panel-action {
+        .stat-val {
+            font-family: var(--mono);
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .stat-change {
             font-size: 11px;
-            color: var(--accent-2);
-            font-weight: 500;
+            margin-top: 3px;
         }
 
-        .panel-action:hover {
-            color: var(--text);
+        /* ── PULSE FEED ── */
+        .pulse-item {
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            transition: background .14s;
         }
 
-        .panel-body {
-            padding: 16px;
+        .pulse-item:last-child {
+            border-bottom: none;
         }
 
-        /* ── TABLE ── */
-        .data-table {
+        .pulse-item:hover {
+            background: var(--bg);
+        }
+
+        .p-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .p-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .p-body h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .p-body p {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .p-meta {
+            margin-top: 8px;
+            display: flex;
+            gap: 14px;
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--mono);
+        }
+
+        .p-meta a {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* ── ROSTER TABLE ── */
+        .roster-table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        .data-table th {
+        .roster-table th {
             font-size: 10px;
-            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: .07em;
             color: var(--muted);
-            padding: 8px 12px;
+            font-weight: 700;
+            padding: 10px 20px;
             border-bottom: 1px solid var(--border);
             text-align: left;
         }
 
-        .data-table td {
-            padding: 10px 12px;
+        .roster-table td {
+            padding: 11px 20px;
+            font-size: 13px;
             border-bottom: 1px solid var(--border);
-            font-size: 12px;
         }
 
-        .data-table tr:last-child td {
+        .roster-table tr:last-child td {
             border-bottom: none;
         }
 
-        .data-table tbody tr:hover {
-            background: var(--surface-2);
+        .roster-table tbody tr:hover {
+            background: var(--bg);
         }
 
-        .student-avatar {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
+        .row-name {
             font-weight: 700;
-            color: #fff;
-            flex-shrink: 0;
         }
 
-        .student-row-name {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .row-sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 1px;
         }
 
+        /* ── STATUS TAGS ── */
         .tag {
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
-            padding: 2px 8px;
+            padding: 3px 9px;
             border-radius: 20px;
         }
 
-        .tag-green {
-            background: rgba(34, 197, 94, .15);
+        .tag-live {
+            background: rgba(208, 128, 0, .12);
+            color: var(--accent);
+        }
+
+        .tag-idle {
+            background: rgba(22, 163, 74, .12);
             color: var(--green);
         }
 
-        .tag-amber {
-            background: rgba(245, 158, 11, .15);
-            color: var(--accent-2);
+        .tag-off {
+            background: rgba(107, 114, 128, .1);
+            color: var(--muted);
         }
 
         .tag-red {
-            background: rgba(244, 63, 94, .15);
+            background: rgba(220, 38, 38, .10);
             color: var(--red);
         }
 
         .tag-blue {
-            background: rgba(59, 130, 246, .15);
+            background: rgba(37, 99, 235, .10);
             color: var(--blue);
-        }
-
-        .tag-purple {
-            background: rgba(168, 85, 247, .15);
-            color: var(--purple);
         }
 
         /* ── APPROVAL QUEUE ── */
         .approval-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 0;
+            gap: 12px;
+            padding: 14px 20px;
             border-bottom: 1px solid var(--border);
+            transition: background .14s;
+        }
+
+        .approval-item:hover {
+            background: var(--bg);
         }
 
         .approval-item:last-child {
             border-bottom: none;
         }
 
-        .approval-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 8px;
+        .a-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
 
-        .approval-icon svg {
+        .a-icon svg {
             width: 16px;
             height: 16px;
             color: #fff;
         }
 
-        .approval-meta {
+        .a-title {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .a-sub {
             font-size: 11px;
             color: var(--muted);
             margin-top: 2px;
         }
 
-        .approval-title {
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .approval-actions {
+        .a-actions {
             margin-left: auto;
             display: flex;
             gap: 5px;
         }
 
-        .mini-btn {
+        .a-btn {
             width: 28px;
             height: 28px;
-            border-radius: 6px;
-            border: none;
+            border-radius: 7px;
+            border: 1px solid var(--border);
+            background: var(--surface);
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: background .14s;
+            transition: all .14s;
         }
 
-        .mini-btn svg {
+        .a-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .a-btn svg {
             width: 13px;
             height: 13px;
         }
 
-        .mini-btn-ok {
-            background: rgba(34, 197, 94, .15);
+        .a-ok {
             color: var(--green);
         }
 
-        .mini-btn-ok:hover {
-            background: rgba(34, 197, 94, .3);
-        }
-
-        .mini-btn-no {
-            background: rgba(244, 63, 94, .12);
+        .a-no {
             color: var(--red);
         }
 
-        .mini-btn-no:hover {
-            background: rgba(244, 63, 94, .25);
+        .a-ok:hover {
+            background: rgba(22, 163, 74, .1);
+            border-color: var(--green);
         }
 
-        /* ── FORM ── */
-        .form-group {
-            margin-bottom: 12px;
+        .a-no:hover {
+            background: rgba(220, 38, 38, .1);
+            border-color: var(--red);
         }
 
-        .form-group label {
-            display: block;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .07em;
-            color: var(--muted);
-            margin-bottom: 5px;
+        /* ── OPS GRID ── */
+        .ops-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 16px;
         }
 
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            background: var(--surface-2);
-            border: 1px solid var(--border-2);
-            border-radius: 7px;
-            padding: 8px 11px;
-            color: var(--text);
-            outline: none;
-            transition: border-color .14s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: var(--accent);
-        }
-
-        .form-group input::placeholder,
-        .form-group textarea::placeholder {
-            color: var(--muted);
-        }
-
-        .form-group select option {
-            background: var(--surface);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .submit-btn {
-            width: 100%;
+        .op-btn {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            padding: 9px;
-            border-radius: 7px;
-            border: none;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            background: var(--accent);
-            color: #000;
-            transition: all .14s;
-        }
-
-        .submit-btn:hover {
-            background: var(--accent-2);
-            transform: translateY(-1px);
-        }
-
-        .submit-btn svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        /* ── ANALYTICS MINI CHART BAR ── */
-        .mini-chart {
-            display: flex;
-            gap: 4px;
-            align-items: flex-end;
-            height: 50px;
-            padding-top: 4px;
-        }
-
-        .mc-col {
-            flex: 1;
-            border-radius: 3px 3px 0 0;
-            opacity: .8;
-            transition: opacity .14s;
-            cursor: default;
-        }
-
-        .mc-col:hover {
-            opacity: 1;
-        }
-
-        /* ── QUICK ACTIONS (horizontal pills, different from student's big cards) ── */
-        .cmd-bar {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 18px;
-        }
-
-        .cmd-btn {
-            display: flex;
+            flex-direction: column;
             align-items: center;
             gap: 7px;
-            padding: 8px 14px;
-            border-radius: 8px;
+            padding: 16px 8px;
+            border-radius: 10px;
             border: 1px solid var(--border);
-            background: var(--surface);
+            background: var(--bg);
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text);
-            cursor: pointer;
-            transition: all .14s;
+            transition: all .15s;
         }
 
-        .cmd-btn:hover {
+        .op-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .op-btn:hover {
             border-color: var(--accent);
-            color: var(--accent-2);
-            background: var(--accent-dim);
+            color: var(--accent);
+            background: var(--accent-lo);
         }
 
-        .cmd-btn svg {
-            width: 14px;
-            height: 14px;
-            color: var(--muted);
+        .op-btn.primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
         }
 
-        .cmd-btn:hover svg {
-            color: var(--accent-2);
+        .op-btn.primary svg {
+            color: #fff;
         }
 
-        .cmd-shortcut {
-            margin-left: 4px;
-            font-size: 10px;
-            color: var(--muted);
-            background: var(--surface-3);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 1px 5px;
-            font-weight: 500;
-        }
-
-        /* ── SCROLLBAR ── */
-        .content::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .content::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .content::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
+        .op-btn.primary:hover {
+            background: #b87000;
         }
 
         @keyframes fadeUp {
@@ -1045,24 +814,79 @@
             }
         }
 
-        .kpi-card {
-            animation: fadeUp .3s ease both;
+        .card {
+            animation: fadeUp .25s ease both;
         }
 
-        .kpi-card:nth-child(1) {
-            animation-delay: .04s;
+        .card:nth-child(1) {
+            animation-delay: .06s;
         }
 
-        .kpi-card:nth-child(2) {
-            animation-delay: .08s;
-        }
-
-        .kpi-card:nth-child(3) {
+        .card:nth-child(2) {
             animation-delay: .12s;
         }
 
-        .kpi-card:nth-child(4) {
-            animation-delay: .16s;
+        .card:nth-child(3) {
+            animation-delay: .18s;
+        }
+
+        /* ── DARK THEME ── */
+        [data-theme="dark"] {
+            --bg: #0d1117;
+            --surface: #161b27;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #e2e8f0;
+            --muted: #6b7694;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .topbar {
+            background: #161b27;
+        }
+
+        [data-theme="dark"] .search {
+            background: #1c2233;
+        }
+
+        /* ── THEME TOGGLE BTN ── */
+        .theme-toggle {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .14s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .theme-toggle svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .theme-toggle .icon-sun {
+            display: block;
+        }
+
+        .theme-toggle .icon-moon {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-sun {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-moon {
+            display: block;
         }
     </style>
 </head>
@@ -1070,586 +894,301 @@
 <body>
     <div class="shell">
 
-        <!-- ══ SIDEBAR ══ -->
+        <!-- ── SIDEBAR ── -->
         <aside class="sidebar">
             <div class="logo">
-                <div class="logo-icon"><i data-lucide="layout-dashboard"></i></div>
-                <span class="logo-text">MindWave</span>
-                <span class="logo-badge">Admin</span>
+                <div class="logo-mark"><i data-lucide="shield-check"></i></div>
+                <span class="logo-name">MindWave</span>
+                <span class="logo-tag">Admin</span>
             </div>
-
             <div class="nav-scroll">
-                <nav class="nav-section">
+                <div class="nav-section">
                     <div class="nav-label">Control Center</div>
-                    <a href="#" class="nav-item active">
-                        <span class="nav-icon"><i data-lucide="gauge"></i></span> Overview
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span class="nav-icon"><i data-lucide="users"></i></span> Students
-                        <span class="nav-badge badge-warn">218</span>
-                    </a>
-                    <a href="faculty-dataanalytics.html" class="nav-item">
-                        <span class="nav-icon"><i data-lucide="bar-chart-2"></i></span> Analytics
-                    </a>
-                    <a href="admin-approvals.html" class="nav-item">
-                        <span class="nav-icon"><i data-lucide="clipboard-check"></i></span> Approvals
-                        <span class="nav-badge badge-warn">4</span>
-                    </a>
-                </nav>
-
+                    <a href="#" class="nav-item active"><i data-lucide="gauge"></i> Overview</a>
+                    <a href="#" class="nav-item"><i data-lucide="users"></i> Students <span
+                            class="nav-badge badge-red">4</span></a>
+                    <a href="#" class="nav-item"><i data-lucide="bar-chart-2"></i> Analytics</a>
+                    <a href="#" class="nav-item"><i data-lucide="clipboard-check"></i> Approvals <span
+                            class="nav-badge badge-red">4</span></a>
+                </div>
                 <div class="divider"></div>
-
-                <nav class="nav-section">
+                <div class="nav-section">
                     <div class="nav-label">Content</div>
-                    <a href="faculty-classroom.html" class="nav-item">
-                        <span class="nav-icon"><i data-lucide="book-open"></i></span> Courses
-                    </a>
-                    <a href="interactive-tools-selector.html" class="nav-item">
-                        <span class="nav-icon"><i data-lucide="gamepad-2"></i></span> Games &amp; Tools
-                    </a>
-                    <a href="ai-game-builder.html" class="nav-item">
-                        <span class="nav-icon"><i data-lucide="bot"></i></span> AI Builder
-                    </a>
-                    <a href="announcements.html" class="nav-item">
-                        <span class="nav-icon"><i data-lucide="megaphone"></i></span> Announcements
-                    </a>
-                </nav>
-
+                    <a href="#" class="nav-item"><i data-lucide="book-open"></i> Courses</a>
+                    <a href="#" class="nav-item"><i data-lucide="gamepad-2"></i> Games &amp; Tools</a>
+                    <a href="#" class="nav-item"><i data-lucide="bot"></i> AI Builder</a>
+                    <a href="#" class="nav-item"><i data-lucide="megaphone"></i> Announcements</a>
+                </div>
                 <div class="divider"></div>
-
-                <nav class="nav-section">
+                <div class="nav-section">
                     <div class="nav-label">Platform</div>
-                    <a href="faculty-live-meeting.html" class="nav-item">
-                        <span class="nav-icon"><i data-lucide="video"></i></span> Live Meeting
-                        <span class="nav-badge badge-live">Live</span>
-                    </a>
-                    <a href="faculty-git-student.html" class="nav-item">
-                        <span class="nav-icon"><i data-lucide="git-branch"></i></span> GitHub
-                    </a>
-                    <a href="faculty-community.html" class="nav-item">
-                        <span class="nav-icon"><i data-lucide="message-square"></i></span> Community
-                    </a>
-                </nav>
-
+                    <a href="#" class="nav-item"><i data-lucide="video"></i> Live Meeting <span
+                            class="nav-badge badge-green">Live</span></a>
+                    <a href="#" class="nav-item"><i data-lucide="git-branch"></i> GitHub</a>
+                    <a href="#" class="nav-item"><i data-lucide="settings-2"></i> Settings</a>
+                </div>
                 <div class="divider"></div>
-
-                <nav class="nav-section">
-                    <div class="nav-label">System</div>
-                    <a href="faculty-settings.html" class="nav-item">
-                        <span class="nav-icon"><i data-lucide="settings-2"></i></span> Settings
-                    </a>
-                    <button class="nav-item" style="color:var(--red);">
-                        <span class="nav-icon"><i data-lucide="log-out"></i></span> Logout
-                    </button>
-                </nav>
+                <div class="nav-section">
+                    <button class="nav-item" style="color: var(--red); cursor: pointer;"><i data-lucide="log-out"></i>
+                        Logout</button>
+                </div>
             </div>
-
-            <div class="sidebar-footer">
+            <div class="sidebar-foot">
                 <div class="user-card">
-                    <div class="avatar">DR</div>
+                    <div class="user-av">RK</div>
                     <div>
                         <div class="user-name">Dr. Ramesh K.</div>
                         <div class="user-role">Faculty Admin</div>
                     </div>
-                    <span class="user-more"><i data-lucide="more-horizontal" style="width:14px;height:14px;"></i></span>
                 </div>
             </div>
         </aside>
 
-        <!-- ══ TOPBAR ══ -->
+        <!-- ── TOPBAR ── -->
         <header class="topbar">
             <div class="breadcrumb">Admin / <span>Overview</span></div>
-            <div class="topbar-search">
+            <div class="search">
                 <i data-lucide="search"></i>
-                <input type="text" placeholder="Search students, courses, games…">
+                <input type="text" placeholder="Search students, games, courses…">
             </div>
-            <div class="topbar-actions">
-                <div class="role-chip"><i data-lucide="shield"></i> Faculty Admin</div>
-                <button class="icon-btn" title="Notifications"><i data-lucide="bell"></i></button>
-                <button class="icon-btn" title="Activity log"><i data-lucide="activity"></i></button>
-                <button class="theme-btn" id="themeToggle">
-                    <span class="moon-icon"><i data-lucide="moon"></i></span>
-                    <span class="sun-icon"><i data-lucide="sun"></i></span>
+            <div class="topbar-right">
+                <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                    <span class="icon-sun"><i data-lucide="sun"></i></span>
+                    <span class="icon-moon"><i data-lucide="moon"></i></span>
                 </button>
+                <button class="t-btn" title="Notifications"><i data-lucide="bell"></i></button>
+                <button class="t-btn" title="Activity log"><i data-lucide="activity"></i></button>
             </div>
         </header>
 
-        <!-- ══ MAIN ══ -->
+        <!-- ── MAIN ── -->
         <div class="main">
             <div class="content">
 
-                <!-- PAGE HEADER -->
-                <div class="page-header">
+                <!-- Page heading -->
+                <div class="page-head">
                     <div>
                         <div class="page-title">Admin Overview</div>
-                        <div class="page-sub">Tuesday, 25 Feb 2026 · CMRIT MindWave Platform</div>
+                        <div class="page-sub">Tuesday, 4 Mar 2026 · CMRIT MindWave Platform</div>
                     </div>
                     <div class="page-actions">
-                        <button class="btn btn-ghost"><i data-lucide="download"></i> Export Report</button>
+                        <button class="btn btn-ghost"><i data-lucide="download"></i> Export</button>
                         <button class="btn btn-primary"><i data-lucide="plus"></i> New Announcement</button>
                     </div>
                 </div>
 
-                <!-- SYSTEM STATUS BAR -->
-                <div class="status-bar">
-                    <div class="status-pill">
-                        <div class="status-dot ok"></div>
-                        <div>
-                            <div class="status-label">API Server</div>
-                            <div class="status-val" style="color:var(--green);">Operational</div>
-                        </div>
-                    </div>
-                    <div class="status-pill">
-                        <div class="status-dot ok"></div>
-                        <div>
-                            <div class="status-label">DB Connection</div>
-                            <div class="status-val" style="color:var(--green);">Healthy</div>
-                        </div>
-                    </div>
-                    <div class="status-pill">
-                        <div class="status-dot warn"></div>
-                        <div>
-                            <div class="status-label">Active Sessions</div>
-                            <div class="status-val" style="color:var(--accent-2);">218</div>
-                        </div>
-                    </div>
-                    <div class="status-pill">
-                        <div class="status-dot ok"></div>
-                        <div>
-                            <div class="status-label">Live Meetings</div>
-                            <div class="status-val" style="color:var(--cyan);">2 Running</div>
-                        </div>
-                    </div>
-                    <div class="status-pill">
-                        <div class="status-dot warn"></div>
-                        <div>
-                            <div class="status-label">Pending Approvals</div>
-                            <div class="status-val" style="color:var(--accent-2);">4</div>
-                        </div>
-                    </div>
-                </div>
+                <!-- LEFT COLUMN -->
+                <div>
 
-                <!-- COMMAND BAR (admin-specific UX, not in student page) -->
-                <div class="cmd-bar">
-                    <button class="cmd-btn"><i data-lucide="megaphone"></i> Announce <span
-                            class="cmd-shortcut">⌘A</span></button>
-                    <button class="cmd-btn"><i data-lucide="file-pen-line"></i> Post Update <span
-                            class="cmd-shortcut">⌘U</span></button>
-                    <button class="cmd-btn"><i data-lucide="gamepad-2"></i> New Game <span
-                            class="cmd-shortcut">⌘G</span></button>
-                    <button class="cmd-btn"><i data-lucide="user-plus"></i> Add Student</button>
-                    <button class="cmd-btn"><i data-lucide="mail"></i> Bulk Email</button>
-                    <button class="cmd-btn"><i data-lucide="download"></i> Export CSV</button>
-                </div>
-
-                <!-- KPI CARDS -->
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <div class="kpi-header">
-                            <span class="kpi-label">Total Students</span>
-                            <span class="kpi-icon" style="background:rgba(245,158,11,.15);color:var(--accent-2);"><i
-                                    data-lucide="users"></i></span>
-                        </div>
-                        <div class="kpi-value" style="color:var(--accent-2);">348</div>
-                        <div class="kpi-change up">▲ 12 new this week</div>
-                        <div class="sparkline">
-                            <div class="spark-bar" style="height:45%;background:rgba(245,158,11,.25)"></div>
-                            <div class="spark-bar" style="height:55%;background:rgba(245,158,11,.25)"></div>
-                            <div class="spark-bar" style="height:50%;background:rgba(245,158,11,.25)"></div>
-                            <div class="spark-bar" style="height:70%;background:rgba(245,158,11,.25)"></div>
-                            <div class="spark-bar" style="height:65%;background:rgba(245,158,11,.25)"></div>
-                            <div class="spark-bar" style="height:85%;background:rgba(245,158,11,.25)"></div>
-                            <div class="spark-bar hi" style="height:100%;background:var(--accent)"></div>
-                        </div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-header">
-                            <span class="kpi-label">Engagement Rate</span>
-                            <span class="kpi-icon" style="background:rgba(34,197,94,.15);color:var(--green);"><i
-                                    data-lucide="trending-up"></i></span>
-                        </div>
-                        <div class="kpi-value" style="color:var(--green);">74%</div>
-                        <div class="kpi-change up">▲ 8% vs last week</div>
-                        <div class="sparkline">
-                            <div class="spark-bar" style="height:50%;background:rgba(34,197,94,.22)"></div>
-                            <div class="spark-bar" style="height:58%;background:rgba(34,197,94,.22)"></div>
-                            <div class="spark-bar" style="height:55%;background:rgba(34,197,94,.22)"></div>
-                            <div class="spark-bar" style="height:72%;background:rgba(34,197,94,.22)"></div>
-                            <div class="spark-bar" style="height:68%;background:rgba(34,197,94,.22)"></div>
-                            <div class="spark-bar" style="height:80%;background:rgba(34,197,94,.22)"></div>
-                            <div class="spark-bar hi" style="height:100%;background:var(--green)"></div>
-                        </div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-header">
-                            <span class="kpi-label">Games Published</span>
-                            <span class="kpi-icon" style="background:rgba(59,130,246,.15);color:var(--blue);"><i
-                                    data-lucide="gamepad-2"></i></span>
-                        </div>
-                        <div class="kpi-value" style="color:var(--blue);">38</div>
-                        <div class="kpi-change up">▲ 5 this semester</div>
-                        <div class="sparkline">
-                            <div class="spark-bar" style="height:30%;background:rgba(59,130,246,.22)"></div>
-                            <div class="spark-bar" style="height:40%;background:rgba(59,130,246,.22)"></div>
-                            <div class="spark-bar" style="height:55%;background:rgba(59,130,246,.22)"></div>
-                            <div class="spark-bar" style="height:62%;background:rgba(59,130,246,.22)"></div>
-                            <div class="spark-bar" style="height:75%;background:rgba(59,130,246,.22)"></div>
-                            <div class="spark-bar" style="height:88%;background:rgba(59,130,246,.22)"></div>
-                            <div class="spark-bar hi" style="height:100%;background:var(--blue)"></div>
-                        </div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-header">
-                            <span class="kpi-label">Avg. Score</span>
-                            <span class="kpi-icon" style="background:rgba(168,85,247,.15);color:var(--purple);"><i
-                                    data-lucide="award"></i></span>
-                        </div>
-                        <div class="kpi-value" style="color:var(--purple);">82%</div>
-                        <div class="kpi-change up">▲ 4% improvement</div>
-                        <div class="sparkline">
-                            <div class="spark-bar" style="height:60%;background:rgba(168,85,247,.22)"></div>
-                            <div class="spark-bar" style="height:65%;background:rgba(168,85,247,.22)"></div>
-                            <div class="spark-bar" style="height:70%;background:rgba(168,85,247,.22)"></div>
-                            <div class="spark-bar" style="height:72%;background:rgba(168,85,247,.22)"></div>
-                            <div class="spark-bar" style="height:80%;background:rgba(168,85,247,.22)"></div>
-                            <div class="spark-bar" style="height:88%;background:rgba(168,85,247,.22)"></div>
-                            <div class="spark-bar hi" style="height:100%;background:var(--purple)"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- MAIN GRID -->
-                <div class="main-grid">
-
-                    <!-- LEFT: STUDENT ROSTER TABLE -->
-                    <div>
-                        <div class="panel">
-                            <div class="panel-header">
-                                <div class="panel-title"><i data-lucide="users"></i> Student Roster</div>
-                                <a href="manage-students.html" class="panel-action">Manage all →</a>
+                    <!-- Stats card -->
+                    <div class="card">
+                        <div class="stats-row">
+                            <div class="stat-box">
+                                <div class="stat-key"><i data-lucide="users"></i> Active Students</div>
+                                <div class="stat-val" style="color:var(--accent);">218</div>
+                                <div class="stat-change" style="color:var(--green);">▲ 12 this week</div>
                             </div>
-                            <div class="panel-body" style="padding:0;">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Student</th>
-                                            <th>Course</th>
-                                            <th>XP</th>
-                                            <th>Status</th>
-                                            <th>Last Active</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <div class="student-row-name">
-                                                    <div class="student-avatar" style="background:#6366f1;">AK</div>
-                                                    Aryan Kumar
-                                                </div>
-                                            </td>
-                                            <td>DBMS, OS</td>
-                                            <td>4,820</td>
-                                            <td><span class="tag tag-green">Active</span></td>
-                                            <td style="color:var(--muted);">2 min ago</td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="student-row-name">
-                                                    <div class="student-avatar" style="background:#10b981;">PS</div>
-                                                    Priya Singh
-                                                </div>
-                                            </td>
-                                            <td>Networks</td>
-                                            <td>3,640</td>
-                                            <td><span class="tag tag-green">Active</span></td>
-                                            <td style="color:var(--muted);">15 min ago</td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="student-row-name">
-                                                    <div class="student-avatar" style="background:#f59e0b;">RV</div>
-                                                    Rahul Verma
-                                                </div>
-                                            </td>
-                                            <td>DS, Algo</td>
-                                            <td>2,910</td>
-                                            <td><span class="tag tag-amber">Idle</span></td>
-                                            <td style="color:var(--muted);">1 hour ago</td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="student-row-name">
-                                                    <div class="student-avatar" style="background:#ec4899;">MJ</div>
-                                                    Meera Joshi
-                                                </div>
-                                            </td>
-                                            <td>OS, COA</td>
-                                            <td>5,200</td>
-                                            <td><span class="tag tag-green">Active</span></td>
-                                            <td style="color:var(--muted);">Just now</td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="student-row-name">
-                                                    <div class="student-avatar" style="background:#f43f5e;">SK</div>
-                                                    Sanjay Kaur
-                                                </div>
-                                            </td>
-                                            <td>DBMS</td>
-                                            <td>1,150</td>
-                                            <td><span class="tag tag-red">Inactive</span></td>
-                                            <td style="color:var(--muted);">3 days ago</td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="student-row-name">
-                                                    <div class="student-avatar" style="background:#06b6d4;">NR</div>
-                                                    Neha Reddy
-                                                </div>
-                                            </td>
-                                            <td>Networks, OS</td>
-                                            <td>3,980</td>
-                                            <td><span class="tag tag-blue">In Meeting</span></td>
-                                            <td style="color:var(--muted);">Now</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="stat-box">
+                                <div class="stat-key"><i data-lucide="trending-up"></i> Engagement</div>
+                                <div class="stat-val" style="color:var(--green);">74%</div>
+                                <div class="stat-change" style="color:var(--green);">▲ 8% vs last week</div>
                             </div>
-                        </div>
-
-                        <!-- PUBLISH ANNOUNCEMENT FORM -->
-                        <div class="panel">
-                            <div class="panel-header">
-                                <div class="panel-title"><i data-lucide="megaphone"></i> Publish Announcement</div>
+                            <div class="stat-box">
+                                <div class="stat-key"><i data-lucide="gamepad-2"></i> Published Games</div>
+                                <div class="stat-val" style="color:var(--blue);">38</div>
+                                <div class="stat-change" style="color:var(--muted);">5 new this month</div>
                             </div>
-                            <div class="panel-body">
-                                <div class="form-group">
-                                    <label>Title</label>
-                                    <input type="text" placeholder="e.g., Sprint Week Kickoff">
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                                    <div class="form-group">
-                                        <label>Audience</label>
-                                        <select>
-                                            <option>All Students</option>
-                                            <option>Cohort Alpha</option>
-                                            <option>Cohort Beta</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Priority</label>
-                                        <select>
-                                            <option>Normal</option>
-                                            <option>High</option>
-                                            <option>Urgent</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Message</label>
-                                    <textarea placeholder="Add context, timeline, and CTA…"></textarea>
-                                </div>
-                                <button class="submit-btn"><i data-lucide="send"></i> Publish Now</button>
+                            <div class="stat-box">
+                                <div class="stat-key"><i data-lucide="clipboard-check"></i> Pending</div>
+                                <div class="stat-val" style="color:var(--red);">4</div>
+                                <div class="stat-change" style="color:var(--red);">Needs review</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- RIGHT COLUMN -->
-                    <div>
-
-                        <!-- APPROVAL QUEUE -->
-                        <div class="panel">
-                            <div class="panel-header">
-                                <div class="panel-title"><i data-lucide="clipboard-check"></i> Pending Approvals</div>
-                                <span class="tag tag-amber" style="font-size:10px;">4 pending</span>
-                            </div>
-                            <div class="panel-body">
-                                <div class="approval-item">
-                                    <div class="approval-icon"
-                                        style="background:linear-gradient(135deg,#6366f1,#a855f7);"><i
-                                            data-lucide="user-plus"></i></div>
-                                    <div>
-                                        <div class="approval-title">New Student Registration</div>
-                                        <div class="approval-meta">Kiran Patel · CSE-A · 10 min ago</div>
-                                    </div>
-                                    <div class="approval-actions">
-                                        <button class="mini-btn mini-btn-ok"><i data-lucide="check"></i></button>
-                                        <button class="mini-btn mini-btn-no"><i data-lucide="x"></i></button>
-                                    </div>
-                                </div>
-                                <div class="approval-item">
-                                    <div class="approval-icon"
-                                        style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i
-                                            data-lucide="gamepad-2"></i></div>
-                                    <div>
-                                        <div class="approval-title">Game Publish Request</div>
-                                        <div class="approval-meta">SQL Challenge v2 · 30 min ago</div>
-                                    </div>
-                                    <div class="approval-actions">
-                                        <button class="mini-btn mini-btn-ok"><i data-lucide="check"></i></button>
-                                        <button class="mini-btn mini-btn-no"><i data-lucide="x"></i></button>
-                                    </div>
-                                </div>
-                                <div class="approval-item">
-                                    <div class="approval-icon"
-                                        style="background:linear-gradient(135deg,#10b981,#059669);"><i
-                                            data-lucide="file-text"></i></div>
-                                    <div>
-                                        <div class="approval-title">Course Material Upload</div>
-                                        <div class="approval-meta">OS Notes Week 5 · 1 hr ago</div>
-                                    </div>
-                                    <div class="approval-actions">
-                                        <button class="mini-btn mini-btn-ok"><i data-lucide="check"></i></button>
-                                        <button class="mini-btn mini-btn-no"><i data-lucide="x"></i></button>
-                                    </div>
-                                </div>
-                                <div class="approval-item">
-                                    <div class="approval-icon"
-                                        style="background:linear-gradient(135deg,#f43f5e,#e11d48);"><i
-                                            data-lucide="alert-triangle"></i></div>
-                                    <div>
-                                        <div class="approval-title">Flagged Content Report</div>
-                                        <div class="approval-meta">Community post · 2 hr ago</div>
-                                    </div>
-                                    <div class="approval-actions">
-                                        <button class="mini-btn mini-btn-ok"><i data-lucide="check"></i></button>
-                                        <button class="mini-btn mini-btn-no"><i data-lucide="x"></i></button>
-                                    </div>
-                                </div>
+                    <!-- Pulse Feed -->
+                    <div class="card">
+                        <div class="card-head">
+                            <div class="card-title"><i data-lucide="activity"></i> System Pulse</div>
+                            <span style="font-size:11px;font-family:var(--mono);color:var(--accent);">● Streaming</span>
+                        </div>
+                        <div class="pulse-item">
+                            <div class="p-icon" style="background:var(--accent-lo);"><i data-lucide="megaphone"
+                                    style="color:var(--accent);"></i></div>
+                            <div class="p-body">
+                                <h4>Announcement Broadcasted</h4>
+                                <p>"Sprint Week Kickoff" delivered to 248 students. Read rate at 61% and climbing.</p>
+                                <div class="p-meta"><span>2 min ago</span><span>Admin: Dr. Ramesh</span></div>
                             </div>
                         </div>
-
-                        <!-- ENGAGEMENT BY HOUR MINI-CHART -->
-                        <div class="panel">
-                            <div class="panel-header">
-                                <div class="panel-title"><i data-lucide="activity"></i> Engagement Today</div>
-                                <span style="font-size:11px;color:var(--green);">▲ 74% avg</span>
-                            </div>
-                            <div class="panel-body">
-                                <div
-                                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                                    <span style="font-size:11px;color:var(--muted);">Hourly active students</span>
-                                    <span style="font-size:10px;color:var(--muted);">Peak: 3 PM</span>
-                                </div>
-                                <div class="mini-chart">
-                                    <div class="mc-col"
-                                        style="height:30%;background:linear-gradient(to top,var(--accent),rgba(245,158,11,.3));border-radius:3px;">
-                                    </div>
-                                    <div class="mc-col"
-                                        style="height:20%;background:linear-gradient(to top,var(--accent),rgba(245,158,11,.3));border-radius:3px;">
-                                    </div>
-                                    <div class="mc-col"
-                                        style="height:40%;background:linear-gradient(to top,var(--accent),rgba(245,158,11,.3));border-radius:3px;">
-                                    </div>
-                                    <div class="mc-col"
-                                        style="height:55%;background:linear-gradient(to top,var(--accent),rgba(245,158,11,.3));border-radius:3px;">
-                                    </div>
-                                    <div class="mc-col"
-                                        style="height:70%;background:linear-gradient(to top,var(--accent),rgba(245,158,11,.3));border-radius:3px;">
-                                    </div>
-                                    <div class="mc-col"
-                                        style="height:85%;background:linear-gradient(to top,var(--accent),rgba(245,158,11,.3));border-radius:3px;">
-                                    </div>
-                                    <div class="mc-col"
-                                        style="height:100%;background:linear-gradient(to top,var(--accent-2),var(--accent));border-radius:3px;opacity:1;">
-                                    </div>
-                                    <div class="mc-col"
-                                        style="height:90%;background:linear-gradient(to top,var(--accent),rgba(245,158,11,.3));border-radius:3px;">
-                                    </div>
-                                    <div class="mc-col"
-                                        style="height:75%;background:linear-gradient(to top,var(--accent),rgba(245,158,11,.3));border-radius:3px;">
-                                    </div>
-                                    <div class="mc-col"
-                                        style="height:60%;background:linear-gradient(to top,var(--accent),rgba(245,158,11,.3));border-radius:3px;">
-                                    </div>
-                                    <div class="mc-col"
-                                        style="height:45%;background:linear-gradient(to top,var(--accent),rgba(245,158,11,.3));border-radius:3px;">
-                                    </div>
-                                    <div class="mc-col"
-                                        style="height:35%;background:linear-gradient(to top,var(--accent),rgba(245,158,11,.3));border-radius:3px;">
-                                    </div>
-                                </div>
-                                <div style="display:flex;justify-content:space-between;margin-top:6px;">
-                                    <span style="font-size:10px;color:var(--muted);">8 AM</span>
-                                    <span style="font-size:10px;color:var(--muted);">3 PM</span>
-                                    <span style="font-size:10px;color:var(--muted);">8 PM</span>
-                                </div>
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
-                                    <div
-                                        style="background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px;">
-                                        <div
-                                            style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">
-                                            Peak Hour</div>
-                                        <div
-                                            style="font-size:16px;font-weight:800;color:var(--accent-2);margin-top:2px;">
-                                            3:00 PM</div>
-                                    </div>
-                                    <div
-                                        style="background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px;">
-                                        <div
-                                            style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">
-                                            7-Day Trend</div>
-                                        <div style="font-size:16px;font-weight:800;color:var(--green);margin-top:2px;">▲
-                                            Up</div>
-                                    </div>
-                                </div>
+                        <div class="pulse-item">
+                            <div class="p-icon" style="background:rgba(22,163,74,.10);"><i data-lucide="user-plus"
+                                    style="color:var(--green);"></i></div>
+                            <div class="p-body">
+                                <h4>Pending Admission Request</h4>
+                                <p>Kiran Patel is requesting access to Cohort Alpha. Credentials verified.</p>
+                                <div class="p-meta"><span>14 min ago</span><a href="#">Review Now →</a></div>
                             </div>
                         </div>
-
-                        <!-- RECENT ACTIONS LOG -->
-                        <div class="panel">
-                            <div class="panel-header">
-                                <div class="panel-title"><i data-lucide="scroll-text"></i> Activity Log</div>
-                                <a href="#" class="panel-action">Full log →</a>
-                            </div>
-                            <div class="panel-body" style="padding:12px 16px;">
-                                <div class="approval-item">
-                                    <div class="approval-icon"
-                                        style="background:rgba(245,158,11,.15);width:28px;height:28px;border-radius:6px;">
-                                        <i data-lucide="send" style="width:13px;height:13px;color:var(--accent-2);"></i>
-                                    </div>
-                                    <div>
-                                        <div class="approval-title">Announcement published</div>
-                                        <div class="approval-meta">Week 5 Review · You · 2h ago</div>
-                                    </div>
-                                </div>
-                                <div class="approval-item">
-                                    <div class="approval-icon"
-                                        style="background:rgba(59,130,246,.15);width:28px;height:28px;border-radius:6px;">
-                                        <i data-lucide="gamepad-2"
-                                            style="width:13px;height:13px;color:var(--blue);"></i></div>
-                                    <div>
-                                        <div class="approval-title">Game published</div>
-                                        <div class="approval-meta">SQL Challenge v1 · You · 5h ago</div>
-                                    </div>
-                                </div>
-                                <div class="approval-item" style="border-bottom:none;">
-                                    <div class="approval-icon"
-                                        style="background:rgba(34,197,94,.15);width:28px;height:28px;border-radius:6px;">
-                                        <i data-lucide="user-check"
-                                            style="width:13px;height:13px;color:var(--green);"></i></div>
-                                    <div>
-                                        <div class="approval-title">3 students approved</div>
-                                        <div class="approval-meta">Cohort Beta · Yesterday</div>
-                                    </div>
-                                </div>
+                        <div class="pulse-item">
+                            <div class="p-icon" style="background:rgba(37,99,235,.08);"><i data-lucide="gamepad-2"
+                                    style="color:var(--blue);"></i></div>
+                            <div class="p-body">
+                                <h4>Game Template Updated</h4>
+                                <p>"SQL Challenge v2.0" — 5 new query scenarios added. Ready to publish.</p>
+                                <div class="p-meta"><span>1 hr ago</span><span>Content Lab</span></div>
                             </div>
                         </div>
+                        <div class="pulse-item">
+                            <div class="p-icon" style="background:rgba(220,38,38,.08);"><i data-lucide="alert-triangle"
+                                    style="color:var(--red);"></i></div>
+                            <div class="p-body">
+                                <h4>Unusual Login Activity</h4>
+                                <p>Multiple failed logins from 192.168.1.45. Account flagged for review.</p>
+                                <div class="p-meta"><span>3 hr ago</span><span
+                                        style="color:var(--red);font-weight:700;">SEC: HIGH</span></div>
+                            </div>
+                        </div>
+                    </div>
 
-                    </div><!-- end right col -->
-                </div><!-- end main-grid -->
+                    <!-- Student Roster -->
+                    <div class="card">
+                        <div class="card-head">
+                            <div class="card-title"><i data-lucide="users"></i> Active Roster</div>
+                            <a href="#" class="card-link">Manage all →</a>
+                        </div>
+                        <table class="roster-table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Course</th>
+                                    <th>XP</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="row-name">Aryan Kumar</div>
+                                    </td>
+                                    <td style="color:var(--muted);font-size:12px;">DBMS, OS</td>
+                                    <td style="font-family:var(--mono);font-size:12px;">4,820</td>
+                                    <td><span class="tag tag-live">Live</span></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="row-name">Priya Singh</div>
+                                    </td>
+                                    <td style="color:var(--muted);font-size:12px;">Networks</td>
+                                    <td style="font-family:var(--mono);font-size:12px;">3,640</td>
+                                    <td><span class="tag tag-idle">Idle</span></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="row-name">Meera Joshi</div>
+                                    </td>
+                                    <td style="color:var(--muted);font-size:12px;">OS, COA</td>
+                                    <td style="font-family:var(--mono);font-size:12px;">5,200</td>
+                                    <td><span class="tag tag-blue">In Meeting</span></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="row-name">Rahul Verma</div>
+                                    </td>
+                                    <td style="color:var(--muted);font-size:12px;">DS, Algo</td>
+                                    <td style="font-family:var(--mono);font-size:12px;">2,910</td>
+                                    <td><span class="tag tag-off">Offline</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-            </div><!-- end content -->
+                </div><!-- end left -->
+
+                <!-- RIGHT COLUMN -->
+                <div>
+
+                    <!-- Quick Ops -->
+                    <div class="card">
+                        <div class="card-head">
+                            <div class="card-title"><i data-lucide="zap"></i> Quick Actions</div>
+                        </div>
+                        <div class="ops-grid">
+                            <button class="op-btn primary"><i data-lucide="megaphone"></i> Announce</button>
+                            <button class="op-btn"><i data-lucide="file-pen-line"></i> Post Update</button>
+                            <button class="op-btn"><i data-lucide="user-plus"></i> Add Student</button>
+                            <button class="op-btn"><i data-lucide="download"></i> Export CSV</button>
+                        </div>
+                    </div>
+
+                    <!-- Approval Queue -->
+                    <div class="card">
+                        <div class="card-head">
+                            <div class="card-title"><i data-lucide="clipboard-check"></i> Pending Approvals</div>
+                            <span class="tag tag-red">4 pending</span>
+                        </div>
+                        <div class="approval-item">
+                            <div class="a-icon" style="background:var(--accent);"><i data-lucide="user-plus"></i></div>
+                            <div>
+                                <div class="a-title">New Student Registration</div>
+                                <div class="a-sub">Kiran Patel · CSE-A · 10 min ago</div>
+                            </div>
+                            <div class="a-actions">
+                                <button class="a-btn a-ok"><i data-lucide="check"></i></button>
+                                <button class="a-btn a-no"><i data-lucide="x"></i></button>
+                            </div>
+                        </div>
+                        <div class="approval-item">
+                            <div class="a-icon" style="background:var(--blue);"><i data-lucide="gamepad-2"></i></div>
+                            <div>
+                                <div class="a-title">Game Publish Request</div>
+                                <div class="a-sub">SQL Challenge v2 · 30 min ago</div>
+                            </div>
+                            <div class="a-actions">
+                                <button class="a-btn a-ok"><i data-lucide="check"></i></button>
+                                <button class="a-btn a-no"><i data-lucide="x"></i></button>
+                            </div>
+                        </div>
+                        <div class="approval-item">
+                            <div class="a-icon" style="background:var(--green);"><i data-lucide="file-text"></i></div>
+                            <div>
+                                <div class="a-title">Course Material Upload</div>
+                                <div class="a-sub">OS Notes Week 5 · 1 hr ago</div>
+                            </div>
+                            <div class="a-actions">
+                                <button class="a-btn a-ok"><i data-lucide="check"></i></button>
+                                <button class="a-btn a-no"><i data-lucide="x"></i></button>
+                            </div>
+                        </div>
+                        <div class="approval-item">
+                            <div class="a-icon" style="background:var(--red);"><i data-lucide="alert-triangle"></i>
+                            </div>
+                            <div>
+                                <div class="a-title">Flagged Community Post</div>
+                                <div class="a-sub">Reported content · 2 hr ago</div>
+                            </div>
+                            <div class="a-actions">
+                                <button class="a-btn a-ok"><i data-lucide="check"></i></button>
+                                <button class="a-btn a-no"><i data-lucide="x"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- end right -->
+
+            </div><!-- end content grid -->
         </div><!-- end main -->
 
     </div><!-- end shell -->
 
     <script>
-        const root = document.documentElement;
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-        });
         lucide.createIcons();
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const html = document.documentElement;
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            lucide.createIcons();
+        });
     </script>
 </body>
 

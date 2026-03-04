@@ -6,312 +6,1742 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="loading-spinner.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindWave – Creator Hub</title>
-    <link rel="stylesheet" href="3d-depth-design.css">
+    <title>MindWave – Admin Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="auth-guard.js"></script>
     <script>
-        // Check admin authentication on page load
-        if (!checkAdminAuth()) {
-            // Will redirect if not authenticated as admin
-        }
-
-        // Remove login page from history if we just came from there
+        if (!checkAdminAuth()) { /* will redirect */ }
         if (document.referrer.includes('login.html')) {
             window.history.replaceState(null, null, window.location.href);
         }
     </script>
+    <style>
+        /* ── TOKENS ── */
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e5e9f2;
+            --accent: #d08000;
+            --accent-lo: rgba(208, 128, 0, 0.10);
+            --accent-bdr: rgba(208, 128, 0, 0.25);
+            --text: #111827;
+            --muted: #6b7280;
+            --green: #16a34a;
+            --red: #dc2626;
+            --blue: #2563eb;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.07), 0 4px 16px rgba(0, 0, 0, 0.05);
+            --radius: 14px;
+            --mono: 'JetBrains Mono', monospace;
+            --sidebar-w: 240px;
+            --topbar-h: 58px;
+            /* sidebar always dark navy */
+            --s-bg: #0f1c2e;
+            --s-border: rgba(255, 255, 255, 0.08);
+            --s-text: #cbd5e1;
+            --s-muted: #4a5e7a;
+            --s-hover: rgba(255, 255, 255, 0.06);
+            --s-active-bg: rgba(245, 166, 35, 0.18);
+            --s-active-txt: #f5a623;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0d1117;
+            --surface: #161b27;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #e2e8f0;
+            --muted: #6b7694;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .topbar {
+            background: #161b27;
+        }
+
+        [data-theme="dark"] .search-bar {
+            background: #1c2233;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        input,
+        textarea,
+        select {
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        /* ── SHELL ── */
+        .shell {
+            display: grid;
+            grid-template-columns: var(--sidebar-w) 1fr;
+            grid-template-rows: var(--topbar-h) 1fr;
+            height: 100vh;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            grid-row: 1 / 3;
+            background: var(--s-bg);
+            border-right: 1px solid var(--s-border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-logo {
+            height: var(--topbar-h);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--s-border);
+            flex-shrink: 0;
+        }
+
+        .side-logo-mark {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .side-logo-mark svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .side-logo-name {
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: -.02em;
+            color: #fff;
+        }
+
+        .side-logo-tag {
+            margin-left: auto;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            padding: 3px 7px;
+            border-radius: 4px;
+            background: var(--s-active-bg);
+            color: var(--s-active-txt);
+            border: 1px solid rgba(245, 166, 35, 0.3);
+        }
+
+        .side-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px 10px;
+            scrollbar-width: none;
+        }
+
+        .side-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-section {
+            margin-bottom: 6px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--s-muted);
+            padding: 8px 10px 5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 10px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--s-text);
+            transition: all .15s;
+            position: relative;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .nav-item:hover {
+            background: var(--s-hover);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: var(--s-active-bg);
+            color: var(--s-active-txt);
+            font-weight: 700;
+            border: 1px solid rgba(245, 166, 35, 0.3);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 25%;
+            bottom: 25%;
+            width: 3px;
+            background: var(--accent);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 20px;
+        }
+
+        .badge-red {
+            background: rgba(220, 38, 38, .2);
+            color: #f87171;
+        }
+
+        .badge-green {
+            background: rgba(22, 163, 74, .2);
+            color: #4ade80;
+        }
+
+        .side-divider {
+            height: 1px;
+            background: var(--s-border);
+            margin: 8px 10px;
+        }
+
+        .side-foot {
+            border-top: 1px solid var(--s-border);
+            padding: 12px;
+            flex-shrink: 0;
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background .14s;
+        }
+
+        .user-card:hover {
+            background: var(--s-hover);
+        }
+
+        .user-av {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .user-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: var(--s-muted);
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 22px;
+        }
+
+        .breadcrumb {
+            font-size: 12px;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .breadcrumb span {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 300px;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0 12px;
+            height: 34px;
+        }
+
+        .search-bar svg {
+            width: 14px;
+            height: 14px;
+            color: var(--muted);
+        }
+
+        .search-bar input {
+            background: none;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            color: var(--text);
+            width: 100%;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--muted);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .t-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            transition: all .14s;
+            position: relative;
+        }
+
+        .t-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .t-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* theme toggle */
+        .theme-toggle {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .14s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .theme-toggle svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .theme-toggle .icon-sun {
+            display: block;
+        }
+
+        .theme-toggle .icon-moon {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-sun {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-moon {
+            display: block;
+        }
+
+        /* profile area */
+        .profile-wrap {
+            position: relative;
+        }
+
+        .profile-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px 5px 5px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: border-color .14s;
+        }
+
+        .profile-toggle:hover {
+            border-color: var(--accent);
+        }
+
+        .profile-av {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .profile-toggle small {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 6px;
+            min-width: 160px;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .profile-dropdown a {
+            display: block;
+            padding: 8px 12px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            transition: background .12s;
+        }
+
+        .profile-dropdown a:hover {
+            background: var(--bg);
+        }
+
+        .profile-dropdown a.danger {
+            color: var(--red);
+        }
+
+        /* ── MAIN ── */
+        .main {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 22px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -.02em;
+        }
+
+        .page-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            transition: all .15s;
+        }
+
+        .btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #b87000;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(208, 128, 0, .3);
+        }
+
+        .btn-ghost {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── 2-COL LAYOUT ── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 18px;
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+
+        .card:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .card-title svg {
+            width: 15px;
+            height: 15px;
+            color: var(--accent);
+        }
+
+        .card-link {
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .card-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ── STATS STRIP ── */
+        .stats-strip {
+            display: flex;
+            gap: 0;
+        }
+
+        .stat-box {
+            flex: 1;
+            padding: 16px 18px;
+            border-right: 1px solid var(--border);
+        }
+
+        .stat-box:last-child {
+            border-right: none;
+        }
+
+        .stat-key {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--muted);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-key svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .stat-val {
+            font-family: var(--mono);
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .stat-change {
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        /* ── PULSE FEED ── */
+        .pulse-item {
+            display: flex;
+            gap: 14px;
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border);
+            transition: background .13s;
+        }
+
+        .pulse-item:last-child {
+            border-bottom: none;
+        }
+
+        .pulse-item:hover {
+            background: var(--bg);
+        }
+
+        .p-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .p-icon svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .p-body h4 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .p-body p {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .p-meta {
+            margin-top: 7px;
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--mono);
+        }
+
+        .p-meta a {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* ── FORM PANEL ── */
+        .form-body {
+            padding: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 11px;
+            color: var(--text);
+            outline: none;
+            transition: border-color .14s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--muted);
+        }
+
+        .form-group select option {
+            background: var(--surface);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            background: var(--accent);
+            color: #fff;
+            transition: all .14s;
+        }
+
+        .submit-btn:hover {
+            background: #b87000;
+            transform: translateY(-1px);
+        }
+
+        .submit-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ── LIST (rendered by JS) ── */
+        .list {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .list-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+
+        .list-item h4 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .list-item small {
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--mono);
+        }
+
+        .list-item p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .tag {
+            display: inline-flex;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 8px;
+        }
+
+        .tag.green {
+            background: rgba(22, 163, 74, .12);
+            color: var(--green);
+        }
+
+        .tag.orange {
+            background: rgba(208, 128, 0, .12);
+            color: var(--accent);
+        }
+
+        .tag.pink {
+            background: rgba(220, 38, 38, .10);
+            color: var(--red);
+        }
+
+        /* ── GAME TEMPLATES ── */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            padding: 18px;
+        }
+
+        .game-template-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all .15s;
+            text-align: center;
+        }
+
+        .game-template-card:hover {
+            border-color: var(--accent);
+            background: var(--accent-lo);
+            transform: translateY(-2px);
+        }
+
+        .game-template-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-lo);
+        }
+
+        .template-icon {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .game-template-card h3 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .game-template-card p {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        /* ── GAME LIST FILTERS ── */
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .filter-row select {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .filter-row select:focus {
+            border-color: var(--accent);
+        }
+
+        /* ── QUICK OPS GRID ── */
+        .ops-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 16px;
+        }
+
+        .op-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 7px;
+            padding: 16px 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+            transition: all .15s;
+        }
+
+        .op-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .op-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-lo);
+        }
+
+        .op-btn.primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .op-btn.primary svg {
+            color: #fff;
+        }
+
+        .op-btn.primary:hover {
+            background: #b87000;
+        }
+
+        /* ── APPROVAL QUEUE ── */
+        .approval-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 18px;
+            border-bottom: 1px solid var(--border);
+            transition: background .13s;
+        }
+
+        .approval-item:hover {
+            background: var(--bg);
+        }
+
+        .approval-item:last-child {
+            border-bottom: none;
+        }
+
+        .a-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .a-icon svg {
+            width: 15px;
+            height: 15px;
+            color: #fff;
+        }
+
+        .a-title {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .a-sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 1px;
+        }
+
+        .a-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 5px;
+        }
+
+        .a-btn {
+            width: 27px;
+            height: 27px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .13s;
+        }
+
+        .a-btn svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .a-ok {
+            color: var(--green);
+        }
+
+        .a-no {
+            color: var(--red);
+        }
+
+        .a-ok:hover {
+            background: rgba(22, 163, 74, .10);
+            border-color: var(--green);
+        }
+
+        .a-no:hover {
+            background: rgba(220, 38, 38, .10);
+            border-color: var(--red);
+        }
+
+        /* ── ENGAGEMENT CARD (clickable, wired by admin.js) ── */
+        #engagementPulseCard {
+            cursor: pointer;
+            transition: border-color .14s;
+        }
+
+        #engagementPulseCard:hover {
+            border-color: var(--accent);
+        }
+
+        /* ── TOAST NOTIFICATION ── */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            background: #1e2d3d;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all .25s;
+            pointer-events: none;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #toast.ok {
+            border-left: 4px solid var(--green);
+        }
+
+        #toast.err {
+            border-left: 4px solid var(--red);
+        }
+
+        /* ── MODALS ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            max-width: 820px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .modal-header h2 {
+            font-size: 17px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-header h2 svg {
+            width: 18px;
+            height: 18px;
+            color: var(--accent);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 4px;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .modal-stat {
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .modal-stat-val {
+            font-size: 22px;
+            font-weight: 800;
+            font-family: var(--mono);
+        }
+
+        .modal-stat-key {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section h3 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .modal-section h3 svg {
+            width: 14px;
+            height: 14px;
+            color: var(--accent);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeUp .22s ease both;
+        }
+    </style>
 </head>
 
-<body data-theme="dark">
-    <div class="app-shell">
-        <!-- Card-Based Floating Header -->
-        <header class="topbar">
-            <!-- Logo Card -->
-            <div class="topbar-brand">
-                <span>🌊</span>
-                <span>MindwaveIo</span>
+<body>
+    <div class="shell">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="sidebar">
+            <div class="side-logo">
+                <div class="side-logo-mark"><i data-lucide="shield-check"></i></div>
+                <span class="side-logo-name">MindWave</span>
+                <span class="side-logo-tag">Admin</span>
             </div>
 
-            <!-- Search Card -->
-            <div class="topbar-search">
-                <span>🔍</span>
-                <input type="text" placeholder="Search courses, games, students...">
-            </div>
-
-            <!-- Actions Card -->
-            <div class="topbar-actions">
-                <span id="adminNotificationBtn" style="cursor: pointer;" title="Notifications">🔔</span>
-                <span id="adminSettingsBtn" style="cursor: pointer;" title="Settings">⚙️</span>
-                <div class="profile-toggle" id="profileToggle">
-                    <span>👤</span>
-                    <small>Account</small>
+            <div class="side-scroll">
+                <div class="nav-section">
+                    <div class="nav-label">Control Center</div>
+                    <a href="admin.html" class="nav-item active"><i data-lucide="gauge"></i> Overview</a>
+                    <a href="#" class="nav-item"><i data-lucide="users"></i> Students</a>
+                    <a href="faculty-dataanalytics.html" class="nav-item" id="dataAnalyticsBtn"><i
+                            data-lucide="bar-chart-2"></i> Analytics</a>
                 </div>
-                <div class="profile-dropdown" id="profileDropdown">
-                    <a href="faculty-profile.html">Profile</a>
-                    <a href="marketing-site/admin-login.html">Sign out</a>
+                <div class="side-divider"></div>
+                <div class="nav-section">
+                    <div class="nav-label">Content</div>
+                    <a href="faculty-classroom.html" class="nav-item"><i data-lucide="book-open"></i> Courses</a>
+                    <a href="interactive-tools-selector.html" class="nav-item" id="newGameBtn"><i
+                            data-lucide="gamepad-2"></i> Game Tools</a>
+                    <a href="ai-game-builder.html" class="nav-item" id="aiGameBuilderBtn"><i data-lucide="bot"></i> AI
+                        Builder</a>
+                    <a href="#" class="nav-item" id="announceBtn"><i data-lucide="megaphone"></i> Announcements</a>
+                    <a href="#" class="nav-item" id="updateBtn"><i data-lucide="file-pen-line"></i> Post Update</a>
+                </div>
+                <div class="side-divider"></div>
+                <div class="nav-section">
+                    <div class="nav-label">Platform</div>
+                    <a href="faculty-live-meeting.html" class="nav-item"><i data-lucide="video"></i> Live Meeting <span
+                            class="nav-badge badge-green">Live</span></a>
+                    <a href="faculty-git-student.html" class="nav-item"><i data-lucide="git-branch"></i> GitHub</a>
+                    <a href="faculty-community.html" class="nav-item"><i data-lucide="message-square"></i> Community</a>
+                    <a href="#" class="nav-item" id="previewStudentBtn"><i data-lucide="eye"></i> Student View</a>
+                </div>
+                <div class="side-divider"></div>
+                <div class="nav-section">
+                    <div class="nav-label">System</div>
+                    <a href="faculty-settings.html" class="nav-item" id="adminSettingsBtn"><i
+                            data-lucide="settings-2"></i> Settings</a>
+                    <button class="nav-item" id="systemStatusBtn"><i data-lucide="activity"></i> System Status</button>
+                    <button class="nav-item" id="signOutControl" style="color:#f87171;"><i data-lucide="log-out"></i>
+                        Logout</button>
+                </div>
+            </div>
+
+            <div class="side-foot">
+                <div class="user-card" id="adminProfileToggle">
+                    <div class="user-av" id="adminAvatarInitials">AD</div>
+                    <div>
+                        <div class="user-name" id="adminDisplayName">Faculty Admin</div>
+                        <div class="user-role">Administrator</div>
+                    </div>
+                    <i data-lucide="more-horizontal"
+                        style="width:14px;height:14px;color:var(--s-muted);margin-left:auto;"></i>
+                </div>
+                <div id="adminProfileDropdown"
+                    style="display:none;flex-direction:column;gap:4px;margin-top:6px;padding:6px;background:rgba(255,255,255,0.05);border-radius:10px;border:1px solid var(--s-border);">
+                    <a href="faculty-profile.html"
+                        style="display:block;padding:8px 10px;border-radius:7px;font-size:12px;color:var(--s-text);transition:background .13s;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.07)'"
+                        onmouseout="this.style.background='transparent'">My Profile</a>
+                    <a href="faculty-settings.html"
+                        style="display:block;padding:8px 10px;border-radius:7px;font-size:12px;color:var(--s-text);transition:background .13s;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.07)'"
+                        onmouseout="this.style.background='transparent'">Settings</a>
+                    <a id="signOutBtn" href="marketing-site/admin-login.html"
+                        style="display:block;padding:8px 10px;border-radius:7px;font-size:12px;color:#f87171;">Sign
+                        Out</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── TOPBAR ── -->
+        <header class="topbar">
+            <div class="breadcrumb">Admin / <span>Overview</span></div>
+            <div class="search-bar">
+                <i data-lucide="search"></i>
+                <input type="text" placeholder="Search students, games, courses…">
+            </div>
+            <div class="topbar-right">
+                <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                    <span class="icon-sun"><i data-lucide="sun"></i></span>
+                    <span class="icon-moon"><i data-lucide="moon"></i></span>
+                </button>
+                <button class="t-btn" id="adminNotificationBtn" title="Notifications"><i
+                        data-lucide="bell"></i></button>
+                <div class="profile-wrap">
+                    <div class="profile-toggle" id="profileToggle">
+                        <div class="profile-av">AD</div>
+                        <small>Account</small>
+                    </div>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="faculty-profile.html">Profile</a>
+                        <a href="faculty-settings.html">Settings</a>
+                        <a href="marketing-site/admin-login.html" class="danger">Sign out</a>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <div class="layout">
-            <!-- 3D Floating Sidebar -->
-            <nav class="sidebar">
-                <ul class="menu">
-                    <li class="active"><a href="admin.html">⚡ Creator Tools</a></li>
-                    <li><a href="faculty-dashboard.html">🏠 Dashboard</a></li>
-                    <li><a href="faculty-dataanalytics.html">📈 Data Analytics</a></li>
-                    <li><a href="faculty-classroom.html">📚 Courses</a></li>
-                    <li><a href="faculty-community.html">👥 Community</a></li>
-                    <li><a href="faculty-live-meeting.html">🎥 Live Meeting</a></li>
-                    <li><a href="faculty-git-student.html">🐙 GitHub</a></li>
-                    <li><a href="faculty-settings.html">⚙️ Settings</a></li>
-                </ul>
+        <!-- ── MAIN ── -->
+        <div class="main">
+            <div class="content">
 
-                <div class="sidebar-footer">
-                    <a class="ghost-btn" href="faculty-help.html">❔ Help Center</a>
-                </div>
-            </nav>
-
-            <!-- Main Content -->
-            <main>
-                <!-- Header Section -->
-                <div class="main-header">
+                <!-- Page Header -->
+                <div class="page-head">
                     <div>
-                        <h1>Creator Workspace</h1>
-                        <p>Plan announcements, updates, and playful learning tools.</p>
+                        <div class="page-title">Creator Workspace</div>
+                        <div class="page-sub">MindWave Admin · Plan announcements, games, and updates</div>
                     </div>
-                    <div class="header-actions">
-                        <button class="secondary-btn" id="dataAnalyticsBtn">📊
-                            Data Analytics</button>
-                        <button class="primary-btn" id="previewStudentBtn">Preview Student
+                    <div class="page-actions">
+                        <button class="btn btn-ghost" id="previewStudentBtnHeader"><i data-lucide="eye"></i> Student
                             View</button>
+                        <button class="btn btn-primary" id="announceHeaderBtn"><i data-lucide="megaphone"></i>
+                            Announce</button>
                     </div>
                 </div>
 
-                <!-- Quick Action Cards -->
-                <div class="quick-actions">
-                    <button class="action-card" id="newGameBtn"
-                        style="background: linear-gradient(135deg, #FF375F 0%, #FF9F0A 100%);">
-                        <span>🎮</span>
-                        <span>Interactive Tools</span>
-                    </button>
-                    <button class="action-card" id="aiGameBuilderBtn"
-                        style="background: linear-gradient(135deg, #9F7AEA 0%, #6B46C1 100%);">
-                        <span>🤖</span>
-                        <span>AI Game Builder</span>
-                    </button>
-                    <button class="action-card" id="announceBtn"
-                        style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
-                        <span>📢</span>
-                        <span>Announce</span>
-                    </button>
-                    <button class="action-card" id="updateBtn"
-                        style="background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);">
-                        <span>📝</span>
-                        <span>Update</span>
-                    </button>
-                    <button class="action-card" id="systemStatusBtn"
-                        style="background: linear-gradient(135deg, #374151 0%, #1F2937 100%);">
-                        <span>⚙️</span>
-                        <span>System Status</span>
-                    </button>
-                </div>
+                <!-- Two-column layout -->
+                <div class="two-col">
 
-                <!-- Stats Row -->
-                <div class="pill-row">
-                    <div class="pill-stat">
-                        <h3>Active Campaigns</h3>
-                        <strong id="campaignCount">0</strong>
-                        <span class="tag green">Announcements</span>
-                    </div>
-                    <div class="pill-stat" id="engagementPulseCard" style="cursor: pointer;">
-                        <h3>Engagement Pulse</h3>
-                        <strong id="engagementPulse">0%</strong>
-                        <span class="tag orange">Last 7 days</span>
-                    </div>
-                    <div class="pill-stat">
-                        <h3>Games Published</h3>
-                        <strong id="gamesCount">0</strong>
-                        <span class="tag pink">Interactive</span>
-                    </div>
-                </div>
+                    <!-- ── LEFT COLUMN ── -->
+                    <div>
 
-                <!-- Content Grid -->
-                <div class="grid two">
-                    <!-- Publish Announcement -->
-                    <section class="panel">
-                        <h2>📢 Publish Announcement</h2>
-                        <p style="color: #9ea4b6; margin-bottom: 16px;">Share news, reminders, or course-wide updates
-                            with every learner. Students will be notified instantly!</p>
-                        <form id="announcementForm">
-                            <div>
-                                <label for="announcementTitle">Title</label>
-                                <input id="announcementTitle" name="announcementTitle" type="text" required
-                                    placeholder="e.g., Sprint Week Kickoff">
+                        <!-- Stats Strip -->
+                        <div class="card">
+                            <div class="stats-strip">
+                                <div class="stat-box">
+                                    <div class="stat-key"><i data-lucide="megaphone"></i> Campaigns</div>
+                                    <div class="stat-val" id="campaignCount" style="color:var(--accent);">0</div>
+                                </div>
+                                <div class="stat-box" id="engagementPulseCard">
+                                    <div class="stat-key"><i data-lucide="trending-up"></i> Engagement</div>
+                                    <div class="stat-val" id="engagementPulse" style="color:var(--green);">0%</div>
+                                    <div class="stat-change" style="color:var(--muted);font-size:10px;">Last 7 days ↗
+                                    </div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-key"><i data-lucide="gamepad-2"></i> Games</div>
+                                    <div class="stat-val" id="gamesCount" style="color:var(--blue);">0</div>
+                                </div>
                             </div>
-                            <div>
-                                <label for="announcementAudience">Audience</label>
-                                <select id="announcementAudience" name="announcementAudience" required>
-                                    <option value="All Students">All Students</option>
-                                    <option value="Cohort Alpha">Cohort Alpha</option>
-                                    <option value="Cohort Beta">Cohort Beta</option>
+                        </div>
+
+                        <!-- Publish Announcement -->
+                        <div class="card" id="announcementSection">
+                            <div class="card-head">
+                                <div class="card-title"><i data-lucide="megaphone"></i> Publish Announcement</div>
+                            </div>
+                            <div class="form-body">
+                                <form id="announcementForm">
+                                    <div class="form-group">
+                                        <label for="announcementTitle">Title</label>
+                                        <input id="announcementTitle" name="announcementTitle" type="text" required
+                                            placeholder="e.g., Sprint Week Kickoff">
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="announcementAudience">Audience</label>
+                                            <select id="announcementAudience" name="announcementAudience" required>
+                                                <option value="All Students">All Students</option>
+                                                <option value="Cohort Alpha">Cohort Alpha</option>
+                                                <option value="Cohort Beta">Cohort Beta</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Priority</label>
+                                            <select>
+                                                <option>Normal</option>
+                                                <option>High</option>
+                                                <option>Urgent</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="announcementBody">Message</label>
+                                        <textarea id="announcementBody" name="announcementBody" required
+                                            placeholder="Add context, timeline, and CTA…"></textarea>
+                                    </div>
+                                    <button class="submit-btn" type="submit"><i data-lucide="send"></i> Publish
+                                        Announcement</button>
+                                </form>
+                                <div class="list" id="announcementList"></div>
+                            </div>
+                        </div>
+
+                        <!-- Post Update -->
+                        <div class="card" id="updateSection">
+                            <div class="card-head">
+                                <div class="card-title"><i data-lucide="file-pen-line"></i> Post Update</div>
+                            </div>
+                            <div class="form-body">
+                                <form id="updateForm">
+                                    <div class="form-group">
+                                        <label for="updateHeadline">Headline</label>
+                                        <input id="updateHeadline" name="updateHeadline" type="text" required
+                                            placeholder="e.g., Week 4 Progress Snapshot">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="updateSummary">Summary</label>
+                                        <textarea id="updateSummary" name="updateSummary" required
+                                            placeholder="Key highlights, blockers, next steps…"></textarea>
+                                    </div>
+                                    <button class="submit-btn" type="submit"><i data-lucide="file-pen-line"></i> Post
+                                        Update</button>
+                                </form>
+                                <div class="list" id="updateList"></div>
+                            </div>
+                        </div>
+
+                        <!-- Game Templates -->
+                        <div class="card">
+                            <div class="card-head">
+                                <div class="card-title"><i data-lucide="gamepad-2"></i> Game Templates</div>
+                                <a href="interactive-tools-selector.html" class="card-link">Browse all →</a>
+                            </div>
+                            <div id="gameTemplateGrid" class="template-grid"></div>
+                        </div>
+
+                        <!-- Published Games -->
+                        <div class="card" id="gamesPanel">
+                            <div class="card-head">
+                                <div class="card-title"><i data-lucide="layers"></i> Published Games</div>
+                            </div>
+                            <div class="filter-row">
+                                <select id="filterType">
+                                    <option value="all">All Types</option>
+                                    <option value="trivia-challenge">Trivia</option>
+                                    <option value="memory-match">Memory Match</option>
+                                    <option value="bug-hunt">Bug Hunt</option>
+                                    <option value="word-puzzle">Word Puzzle</option>
+                                    <option value="logic-games">Logic</option>
+                                    <option value="brain-teasers">Brain Teasers</option>
+                                    <option value="strategy-games">Strategy</option>
+                                </select>
+                                <select id="filterDifficulty">
+                                    <option value="all">All Difficulties</option>
+                                    <option value="easy">Easy</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="hard">Hard</option>
                                 </select>
                             </div>
-                            <div>
-                                <label for="announcementBody">Message</label>
-                                <textarea id="announcementBody" name="announcementBody" required
-                                    placeholder="Add context, timeline, and CTA..." rows="4"></textarea>
+                            <div class="form-body">
+                                <div class="list" id="gameList"></div>
                             </div>
-                            <button class="submit-btn" type="submit">📢 Publish Announcement</button>
-                        </form>
-                        <div class="list" id="announcementList" style="margin-top: 24px;"></div>
-                    </section>
-
-                    <!-- Post Update -->
-                    <section class="panel">
-                        <h2>📝 Post Update</h2>
-                        <p style="color: #9ea4b6; margin-bottom: 16px;">Log release notes, classroom reflections, or
-                            weekly digests. Students will be notified!</p>
-                        <form id="updateForm">
-                            <div>
-                                <label for="updateHeadline">Headline</label>
-                                <input id="updateHeadline" name="updateHeadline" type="text" required
-                                    placeholder="e.g., Week 4 Progress Snapshot">
-                            </div>
-                            <div>
-                                <label for="updateSummary">Summary</label>
-                                <textarea id="updateSummary" name="updateSummary" required
-                                    placeholder="Key highlights, blockers, next steps..." rows="4"></textarea>
-                            </div>
-                            <button class="submit-btn" type="submit">📝 Post Update</button>
-                        </form>
-                        <div class="list" id="updateList" style="margin-top: 24px;"></div>
-                    </section>
-                </div>
-
-                <!-- Advanced Game Tools -->
-                <section class="panel" style="margin-top: 24px;">
-                    <h2>⚙️ Advanced Game Tools</h2>
-                    <p>Attach supporting assets or embed external tools for richer interactions.</p>
-                    <form id="gameToolsForm">
-                        <div>
-                            <label for="assetLink">Asset or Deck URL</label>
-                            <input type="url" id="assetLink" placeholder="https://example.com/game-assets" required>
                         </div>
-                        <div>
-                            <label for="instructions">Facilitator Notes</label>
-                            <textarea id="instructions"
-                                placeholder="Share timing, scoring rules, or facilitation tips..." rows="4"
-                                required></textarea>
+
+                    </div><!-- end left -->
+
+                    <!-- ── RIGHT COLUMN ── -->
+                    <div>
+
+                        <!-- Quick Actions -->
+                        <div class="card">
+                            <div class="card-head">
+                                <div class="card-title"><i data-lucide="zap"></i> Quick Actions</div>
+                            </div>
+                            <div class="ops-grid">
+                                <button class="op-btn primary" id="announceBtn"><i data-lucide="megaphone"></i>
+                                    Announce</button>
+                                <button class="op-btn" id="updateBtn"><i data-lucide="file-pen-line"></i> Post
+                                    Update</button>
+                                <button class="op-btn" id="newGameBtn"><i data-lucide="gamepad-2"></i> Game
+                                    Tools</button>
+                                <button class="op-btn" id="aiGameBuilderBtn"><i data-lucide="bot"></i> AI
+                                    Builder</button>
+                                <button class="op-btn" id="dataAnalyticsBtn"><i data-lucide="bar-chart-2"></i>
+                                    Analytics</button>
+                                <button class="op-btn" id="systemStatusBtn"><i data-lucide="activity"></i>
+                                    Status</button>
+                            </div>
                         </div>
-                        <button class="submit-btn" type="submit">Attach Tool</button>
-                    </form>
-                    <div class="list" id="gameToolsList"></div>
-                </section>
 
-                <!-- Game Templates Gallery -->
-                <section class="panel" style="margin-top: 24px;">
-                    <h2>🎮 Game Templates Gallery</h2>
-                    <p>Quick-start templates for popular game types</p>
-                    <div id="gameTemplateGrid"
-                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 24px;">
-                        <!-- Templates will be rendered here by admin.js -->
-                    </div>
-                </section>
-            </main>
-        </div>
-    </div>
+                        <!-- Engagement card (clickable — wired in admin.js) -->
+                        <div class="card" id="engagementCard" style="cursor:pointer;">
+                            <div class="card-head">
+                                <div class="card-title"><i data-lucide="trending-up"></i> Engagement Analytics</div>
+                                <span style="font-size:11px;color:var(--green);">↗ Tap to expand</span>
+                            </div>
+                            <div class="form-body" style="padding:14px 18px;">
+                                <div style="font-size:13px;color:var(--muted);">Click to view detailed student
+                                    engagement breakdown — active users, game plays, avg score, peak hours and 7-day
+                                    trend.</div>
+                            </div>
+                        </div>
 
-    <!-- Engagement Analytics Modal -->
-    <div id="engagementModal"
-        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s ease;">
-        <div
-            style="background: #1a1d2e; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 32px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h2 style="margin: 0; color: #f5f7ff;">📊 Engagement Analytics</h2>
-                <button id="closeEngagementModal"
-                    style="background: none; border: none; color: #9ea4b6; font-size: 28px; cursor: pointer; padding: 0; width: 32px; height: 32px;">×</button>
+                        <!-- Approval Queue (static, future API) -->
+                        <div class="card">
+                            <div class="card-head">
+                                <div class="card-title"><i data-lucide="clipboard-check"></i> Pending Approvals</div>
+                                <span
+                                    style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(220,38,38,.10);color:var(--red);">4
+                                    pending</span>
+                            </div>
+                            <div class="approval-item">
+                                <div class="a-icon" style="background:var(--accent);"><i data-lucide="user-plus"></i>
+                                </div>
+                                <div>
+                                    <div class="a-title">New Student Registration</div>
+                                    <div class="a-sub">Kiran Patel · CSE-A</div>
+                                </div>
+                                <div class="a-actions">
+                                    <button class="a-btn a-ok"><i data-lucide="check"></i></button>
+                                    <button class="a-btn a-no"><i data-lucide="x"></i></button>
+                                </div>
+                            </div>
+                            <div class="approval-item">
+                                <div class="a-icon" style="background:var(--blue);"><i data-lucide="gamepad-2"></i>
+                                </div>
+                                <div>
+                                    <div class="a-title">Game Publish Request</div>
+                                    <div class="a-sub">SQL Challenge v2</div>
+                                </div>
+                                <div class="a-actions">
+                                    <button class="a-btn a-ok"><i data-lucide="check"></i></button>
+                                    <button class="a-btn a-no"><i data-lucide="x"></i></button>
+                                </div>
+                            </div>
+                            <div class="approval-item">
+                                <div class="a-icon" style="background:var(--green);"><i data-lucide="file-text"></i>
+                                </div>
+                                <div>
+                                    <div class="a-title">Course Material Upload</div>
+                                    <div class="a-sub">OS Notes Week 5</div>
+                                </div>
+                                <div class="a-actions">
+                                    <button class="a-btn a-ok"><i data-lucide="check"></i></button>
+                                    <button class="a-btn a-no"><i data-lucide="x"></i></button>
+                                </div>
+                            </div>
+                            <div class="approval-item">
+                                <div class="a-icon" style="background:var(--red);"><i data-lucide="alert-triangle"></i>
+                                </div>
+                                <div>
+                                    <div class="a-title">Flagged Community Post</div>
+                                    <div class="a-sub">Reported content</div>
+                                </div>
+                                <div class="a-actions">
+                                    <button class="a-btn a-ok"><i data-lucide="check"></i></button>
+                                    <button class="a-btn a-no"><i data-lucide="x"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- end right -->
+
+                </div><!-- end two-col -->
+            </div><!-- end content -->
+        </div><!-- end main -->
+
+    </div><!-- end shell -->
+
+    <!-- ── TOAST ── -->
+    <div id="toast"></div>
+
+    <!-- ── ENGAGEMENT MODAL ── -->
+    <div class="modal-overlay" id="engagementModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2><i data-lucide="bar-chart-2"></i> Engagement Analytics</h2>
+                <button class="modal-close" id="closeEngagementModal">&times;</button>
             </div>
-
-            <!-- Student Activity -->
-            <div style="margin-bottom: 24px;">
-                <h3 style="color: #f5f7ff; font-size: 16px; margin-bottom: 16px;">👥 Student Activity</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
-                    <div
-                        style="background: rgba(52, 199, 89, 0.1); border: 1px solid rgba(52, 199, 89, 0.2); border-radius: 12px; padding: 16px;">
-                        <div style="color: #34c759; font-size: 24px; font-weight: bold;" id="modalActiveStudents">0
-                        </div>
-                        <div style="color: #9ea4b6; font-size: 13px; margin-top: 4px;">Active</div>
+            <div class="modal-section">
+                <h3><i data-lucide="users"></i> Student Activity</h3>
+                <div class="modal-grid">
+                    <div class="modal-stat" style="border-color:rgba(22,163,74,.3);">
+                        <div class="modal-stat-val" id="modalActiveStudents" style="color:var(--green);">0</div>
+                        <div class="modal-stat-key">Active</div>
                     </div>
-                    <div
-                        style="background: rgba(15, 98, 254, 0.1); border: 1px solid rgba(15, 98, 254, 0.2); border-radius: 12px; padding: 16px;">
-                        <div style="color: #0f62fe; font-size: 24px; font-weight: bold;" id="modalNewStudents">0</div>
-                        <div style="color: #9ea4b6; font-size: 13px; margin-top: 4px;">New</div>
+                    <div class="modal-stat" style="border-color:rgba(37,99,235,.3);">
+                        <div class="modal-stat-val" id="modalNewStudents" style="color:var(--blue);">0</div>
+                        <div class="modal-stat-key">New</div>
                     </div>
-                    <div
-                        style="background: rgba(255, 159, 10, 0.1); border: 1px solid rgba(255, 159, 10, 0.2); border-radius: 12px; padding: 16px;">
-                        <div style="color: #ff9f0a; font-size: 24px; font-weight: bold;" id="modalReturningStudents">0
-                        </div>
-                        <div style="color: #9ea4b6; font-size: 13px; margin-top: 4px;">Returning</div>
+                    <div class="modal-stat" style="border-color:rgba(208,128,0,.3);">
+                        <div class="modal-stat-val" id="modalReturningStudents" style="color:var(--accent);">0</div>
+                        <div class="modal-stat-key">Returning</div>
                     </div>
-                    <div
-                        style="background: rgba(255, 59, 48, 0.1); border: 1px solid rgba(255, 59, 48, 0.2); border-radius: 12px; padding: 16px;">
-                        <div style="color: #ff3b30; font-size: 24px; font-weight: bold;" id="modalInactiveStudents">0
-                        </div>
-                        <div style="color: #9ea4b6; font-size: 13px; margin-top: 4px;">Inactive</div>
+                    <div class="modal-stat" style="border-color:rgba(220,38,38,.3);">
+                        <div class="modal-stat-val" id="modalInactiveStudents" style="color:var(--red);">0</div>
+                        <div class="modal-stat-key">Inactive</div>
                     </div>
                 </div>
             </div>
-
-            <!-- Game Statistics -->
-            <div style="margin-bottom: 24px;">
-                <h3 style="color: #f5f7ff; font-size: 16px; margin-bottom: 16px;">🎮 Game Statistics</h3>
+            <div class="modal-section">
+                <h3><i data-lucide="gamepad-2"></i> Game Statistics</h3>
+                <div class="modal-grid">
+                    <div class="modal-stat">
+                        <div class="modal-stat-val" id="modalTotalPlays">0</div>
+                        <div class="modal-stat-key">Total Plays</div>
+                    </div>
+                    <div class="modal-stat">
+                        <div class="modal-stat-val" id="modalAvgCompletion">0%</div>
+                        <div class="modal-stat-key">Avg Completion</div>
+                    </div>
+                    <div class="modal-stat">
+                        <div class="modal-stat-val" id="modalAvgScore">0%</div>
+                        <div class="modal-stat-key">Avg Score</div>
+                    </div>
+                </div>
                 <div
-                    style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
+                    style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:10px;">
                     <div
-                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
-                        <div>
-                            <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 4px;">Total Plays</div>
-                            <div style="color: #f5f7ff; font-size: 20px; font-weight: bold;" id="modalTotalPlays">0
-                            </div>
-                        </div>
-                        <div>
-                            <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 4px;">Avg Completion</div>
-                            <div style="color: #f5f7ff; font-size: 20px; font-weight: bold;" id="modalAvgCompletion">0%
-                            </div>
-                        </div>
-                        <div>
-                            <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 4px;">Avg Score</div>
-                            <div style="color: #f5f7ff; font-size: 20px; font-weight: bold;" id="modalAvgScore">0%</div>
-                        </div>
-                    </div>
-                    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
-                        <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 8px;">Top Games</div>
-                        <div style="color: #f5f7ff; font-size: 14px; line-height: 1.6;" id="modalTopGames">No games
-                            played yet</div>
-                    </div>
+                        style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;">
+                        Top Games</div>
+                    <div style="font-size:13px;color:var(--text);line-height:1.7;" id="modalTopGames">No games played
+                        yet</div>
                 </div>
             </div>
-
-            <!-- Timing Data -->
-            <div>
-                <h3 style="color: #f5f7ff; font-size: 16px; margin-bottom: 16px;">⏰ Timing Data</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                    <div
-                        style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px;">
-                        <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 4px;">Peak Hour</div>
-                        <div style="color: #f5f7ff; font-size: 18px; font-weight: bold;" id="modalPeakHour">N/A</div>
+            <div class="modal-section">
+                <h3><i data-lucide="clock"></i> Timing Data</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div class="modal-stat">
+                        <div class="modal-stat-val" id="modalPeakHour">N/A</div>
+                        <div class="modal-stat-key">Peak Hour</div>
                     </div>
-                    <div
-                        style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px;">
-                        <div style="color: #9ea4b6; font-size: 13px; margin-bottom: 4px;">7-Day Trend</div>
-                        <div style="font-size: 18px; font-weight: bold;" id="modalTrend">N/A</div>
+                    <div class="modal-stat">
+                        <div class="modal-stat-val" id="modalTrend">N/A</div>
+                        <div class="modal-stat-key">7-Day Trend</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- ── SYSTEM STATUS MODAL ── -->
+    <div class="modal-overlay" id="statusModal">
+        <div class="modal-box" style="max-width:480px;">
+            <div class="modal-header">
+                <h2><i data-lucide="activity"></i> System Status</h2>
+                <button class="modal-close"
+                    onclick="document.getElementById('statusModal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-grid">
+                <div class="modal-stat" style="border-color:rgba(22,163,74,.3);">
+                    <div class="modal-stat-val" id="statusTotalUsers" style="color:var(--green);">—</div>
+                    <div class="modal-stat-key">Online Users</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-val" id="statusActiveGames">—</div>
+                    <div class="modal-stat-key">Active Games</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-val" id="statusAnnouncements">—</div>
+                    <div class="modal-stat-key">Announcements</div>
+                </div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:8px;">
+                Last updated: <span id="statusLastUpdated">—</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── Theme toggle ──
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const html = document.documentElement;
+            html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+            lucide.createIcons();
+        });
+
+        // ── Profile name from localStorage ──
+        const firstName = localStorage.getItem('firstName') || 'Admin';
+        const initials = firstName.charAt(0).toUpperCase() + (localStorage.getItem('lastName') || '').charAt(0).toUpperCase();
+        document.querySelectorAll('.profile-av, .user-av').forEach(el => el.textContent = initials || 'AD');
+        const nameEl = document.getElementById('adminDisplayName');
+        if (nameEl) nameEl.textContent = firstName;
+        const smallEl = document.getElementById('profileToggle')?.querySelector('small');
+        if (smallEl) smallEl.textContent = firstName;
+
+        // ── Page header quick buttons scroll to sections ──
+        document.getElementById('announceHeaderBtn')?.addEventListener('click', () =>
+            document.getElementById('announcementSection')?.scrollIntoView({ behavior: 'smooth' }));
+        document.getElementById('previewStudentBtnHeader')?.addEventListener('click', () =>
+            window.location.href = 'homepage.html');
+
+        lucide.createIcons();
+    </script>
     <script src="admin.js"></script>
     <script src="loading-spinner.js"></script>
 </body>
