@@ -213,7 +213,31 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Theme is handled globally by student-theme-init.js via [data-theme-choice] cards.
+    // ── Theme cards: wire both [data-theme-choice] and .st-theme-card (index 0=dark, 1=light) ──
+    const themeMap = ['dark', 'light'];
+    const stCards = document.querySelectorAll('.st-theme-card');
+    const choiceCards = document.querySelectorAll('[data-theme-choice]');
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+
+    // Sync active/selected state on load
+    stCards.forEach((card, i) => {
+        card.classList.toggle('selected', themeMap[i] === savedTheme);
+        card.addEventListener('click', () => {
+            const chosen = themeMap[i];
+            stCards.forEach((c, j) => c.classList.toggle('selected', themeMap[j] === chosen));
+            choiceCards.forEach(c => c.classList.toggle('active', c.getAttribute('data-theme-choice') === chosen));
+            applyTheme(chosen);
+        });
+    });
+    choiceCards.forEach(card => {
+        card.classList.toggle('active', card.getAttribute('data-theme-choice') === savedTheme);
+        card.addEventListener('click', () => {
+            const chosen = card.getAttribute('data-theme-choice');
+            choiceCards.forEach(c => c.classList.toggle('active', c.getAttribute('data-theme-choice') === chosen));
+            stCards.forEach((c, j) => c.classList.toggle('selected', themeMap[j] === chosen));
+            applyTheme(chosen);
+        });
+    });
 
     // Initialize settings
     loadSettings();

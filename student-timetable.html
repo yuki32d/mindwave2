@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timetable — MindWave</title>
+    <title>Timetable ï¿½ MindWave</title>
     <meta name="description" content="View your personal, semester, class, and exam timetables in MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -107,15 +107,15 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loadingï¿½</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">?</span>
+                    <span class="mw-user-more">&#x22EF;</span>
 
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student ï¿½ MindWave</div>
                         </div>
                         <a href="student-profile.html">
                             <i data-lucide="user"></i> My Profile
@@ -145,7 +145,7 @@
 
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search timetable…" id="ttSearch">
+                    <input type="text" placeholder="Search timetableï¿½" id="ttSearch">
                 </div>
 
                 <div class="mw-topbar-actions">
@@ -174,7 +174,7 @@
                 <div class="greeting-row" style="margin-bottom:28px;">
                     <div>
                         <div class="greeting-name" style="font-size:1.6rem;">Timetable</div>
-                        <div class="greeting-date">Schedules · personal, class &amp; exams</div>
+                        <div class="greeting-date">Schedules ï¿½ personal, class &amp; exams</div>
                     </div>
                 </div>
 
@@ -927,7 +927,7 @@
         function buildMyTimetable() {
             // Day headers with today highlight
             const today = new Date();
-            const dayIdx = today.getDay(); // 0=Sun, 1=Mon…
+            const dayIdx = today.getDay(); // 0=Sun, 1=Monï¿½
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
             DAYS.forEach((d, i) => {
@@ -996,7 +996,7 @@
                 card.style.cssText = `top:${top}px;height:${height}px;background:${slot.color}22;border-left:3px solid ${slot.color};color:${slot.color};`;
                 card.innerHTML = `
                     <div class="tt-slot-name">${slot.subject}</div>
-                    <div class="tt-slot-meta">${fmtTime(slot.start)}–${fmtTime(slot.end)}${slot.teacher ? ' · ' + slot.teacher : ''}${slot.room ? ' · ' + slot.room : ''}</div>
+                    <div class="tt-slot-meta">${fmtTime(slot.start)}ï¿½${fmtTime(slot.end)}${slot.teacher ? ' ï¿½ ' + slot.teacher : ''}${slot.room ? ' ï¿½ ' + slot.room : ''}</div>
                     <button class="tt-slot-del" onclick="deleteSlot(${idx},event)" title="Delete">?</button>
                 `;
                 wrap.appendChild(card);
@@ -1018,7 +1018,7 @@
         }
 
         function setMyView(v) {
-            // TODO: Day view — for now just highlight button
+            // TODO: Day view ï¿½ for now just highlight button
             document.getElementById('myTTViewWeek').classList.toggle('mw-btn-primary', v === 'week');
             document.getElementById('myTTViewWeek').classList.toggle('mw-btn-ghost', v !== 'week');
             document.getElementById('myTTViewDay').classList.toggle('mw-btn-primary', v === 'day');
@@ -1085,7 +1085,7 @@
                     if (data.ok && data.imageUrl) {
                         renderUploadedTimetable(t.id, data.imageUrl, data.updatedAt);
                     }
-                } catch (_) { /* no endpoint yet — empty state shown */ }
+                } catch (_) { /* no endpoint yet ï¿½ empty state shown */ }
             }
         }
 
@@ -1096,7 +1096,7 @@
             container.innerHTML = `
                 <div class="tt-image-view">
                     <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-                        <span style="font-size:.82rem;color:var(--muted);">Updated${date ? ' · ' + date : ''}</span>
+                        <span style="font-size:.82rem;color:var(--muted);">Updated${date ? ' ï¿½ ' + date : ''}</span>
                         <a href="${imageUrl}" target="_blank" class="mw-btn mw-btn-ghost" style="padding:6px 14px;font-size:.8rem;">
                             <i data-lucide="external-link" style="width:13px;height:13px;"></i> Open
                         </a>
