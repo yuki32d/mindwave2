@@ -5,7 +5,7 @@
     <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance � MindWave</title>
+    <title>Performance  |  MindWave</title>
     <meta name="description"
         content="Track your academic performance, grades, attendance, and achievements in MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
@@ -103,14 +103,14 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading</div>
                         <div class="mw-user-role">Student</div>
                     </div>
                     <span class="mw-user-more">&#x22EF;</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student � MindWave</div>
+                            <div class="role">Student  MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -132,7 +132,7 @@
                 <div class="mw-breadcrumb">Dashboard / <span>Performance</span></div>
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search performance�" id="perfSearch">
+                    <input type="text" placeholder="Search performance" id="perfSearch">
                 </div>
                 <div class="mw-topbar-actions">
                     <div class="mw-notif-wrap">
@@ -171,7 +171,7 @@
                             <i data-lucide="target"></i>
                         </div>
                         <div class="perf-stat-body">
-                            <div class="perf-stat-value" id="overallGPA">�</div>
+                            <div class="perf-stat-value" id="overallGPA"></div>
                             <div class="perf-stat-label">Overall GPA</div>
                         </div>
                         <div class="perf-stat-ring" id="gpaRing" style="--pct:0;--c:#6366f1;">
@@ -190,7 +190,7 @@
                             <i data-lucide="calendar-check"></i>
                         </div>
                         <div class="perf-stat-body">
-                            <div class="perf-stat-value" id="attendanceRate">�</div>
+                            <div class="perf-stat-value" id="attendanceRate"></div>
                             <div class="perf-stat-label">Attendance Rate</div>
                         </div>
                         <div class="perf-stat-ring" id="attRing" style="--pct:0;--c:#22c55e;">
@@ -209,7 +209,7 @@
                             <i data-lucide="check-circle-2"></i>
                         </div>
                         <div class="perf-stat-body">
-                            <div class="perf-stat-value" id="completionRate">�</div>
+                            <div class="perf-stat-value" id="completionRate"></div>
                             <div class="perf-stat-label">Completion Rate</div>
                         </div>
                         <div class="perf-stat-ring" id="compRing" style="--pct:0;--c:#f59e0b;">
@@ -228,7 +228,7 @@
                             <i data-lucide="flame"></i>
                         </div>
                         <div class="perf-stat-body">
-                            <div class="perf-stat-value" id="currentStreak">�</div>
+                            <div class="perf-stat-value" id="currentStreak"></div>
                             <div class="perf-stat-label">Day Streak</div>
                         </div>
                         <div class="perf-stat-ring" id="streakRing" style="--pct:0;--c:#ef4444;">
@@ -755,10 +755,10 @@
                 const streakVal = d.streak != null ? Number(d.streak) : null;
 
                 // Update text
-                document.getElementById('overallGPA').textContent = gpaVal != null ? gpaVal.toFixed(1) : '�';
-                document.getElementById('attendanceRate').textContent = attVal != null ? attVal + '%' : '�';
-                document.getElementById('completionRate').textContent = compVal != null ? compVal + '%' : '�';
-                document.getElementById('currentStreak').textContent = streakVal != null ? streakVal : '�';
+                document.getElementById('overallGPA').textContent = gpaVal != null ? gpaVal.toFixed(1) : '';
+                document.getElementById('attendanceRate').textContent = attVal != null ? attVal + '%' : '';
+                document.getElementById('completionRate').textContent = compVal != null ? compVal + '%' : '';
+                document.getElementById('currentStreak').textContent = streakVal != null ? streakVal : '';
 
                 // Update ring gauges with real values
                 setRing('gpaRing', gpaVal != null ? (gpaVal / 4.0) * 100 : 0); // 4.0 = max GPA
@@ -767,9 +767,9 @@
                 setRing('streakRing', streakVal != null ? Math.min((streakVal / 30) * 100, 100) : 0); // 30 days = full ring
 
             } catch (_) {
-                // On error show dashes � no fake numbers
+                // On error show dashes  no fake numbers
                 ['overallGPA', 'attendanceRate', 'completionRate', 'currentStreak']
-                    .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '�'; });
+                    .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ''; });
             }
         }
     </script>

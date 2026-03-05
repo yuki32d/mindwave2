@@ -5,7 +5,7 @@
     <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings � MindWave</title>
+    <title>Settings  |  MindWave</title>
     <meta name="description" content="Manage your MindWave profile and preferences.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -647,14 +647,14 @@
                 <div class="mw-user-card" id="profileToggle" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div class="mw-user-info">
-                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading</div>
                         <div class="mw-user-role">Student</div>
                     </div>
                     <span class="mw-user-more">&#x22EF;</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student � MindWave</div>
+                            <div class="role">Student  MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -676,7 +676,7 @@
                 <div class="mw-breadcrumb">Dashboard / <span>Settings</span></div>
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search settings�" id="settingsSearch">
+                    <input type="text" placeholder="Search settings..." id="settingsSearch">
                 </div>
                 <div class="mw-topbar-actions">
                     <div class="mw-notif-wrap">
@@ -736,7 +736,7 @@
                                     </div>
                                     <div class="st-photo-info">
                                         <h4>Profile Picture</h4>
-                                        <p>JPG, PNG or GIF � max 2 MB</p>
+                                        <p>JPG, PNG or GIF  max 2 MB</p>
                                         <div class="st-photo-btns">
                                             <input type="file" id="photoInput" accept="image/*" style="display:none;">
                                             <button class="st-btn st-btn-ghost st-btn-sm"
@@ -762,7 +762,7 @@
                                     <div class="st-field">
                                         <label>Bio / About Me</label>
                                         <textarea id="bio"
-                                            placeholder="Tell your classmates something about yourself�"></textarea>
+                                            placeholder="Tell your classmates something about yourself"></textarea>
                                     </div>
                                     <div class="st-two-col">
                                         <div class="st-field">
@@ -948,15 +948,15 @@
                                     <div class="st-field">
                                         <label>Default Mode</label>
                                         <select id="aiDefaultMode">
-                                            <option value="tutor">Tutor � explain concepts step-by-step</option>
-                                            <option value="quiz">Quiz � test my knowledge</option>
-                                            <option value="socratic">Socratic � guide me with questions</option>
-                                            <option value="practice">Practice � give me problems to solve</option>
+                                            <option value="tutor">Tutor  explain concepts step-by-step</option>
+                                            <option value="quiz">Quiz  test my knowledge</option>
+                                            <option value="socratic">Socratic  guide me with questions</option>
+                                            <option value="practice">Practice  give me problems to solve</option>
                                         </select>
                                     </div>
                                     <div class="st-field">
                                         <label>Tutor Name / Persona</label>
-                                        <input type="text" id="aiPersonaName" placeholder="e.g. Sage, Nova, Max�">
+                                        <input type="text" id="aiPersonaName" placeholder="e.g. Sage, Nova, Max">
                                         <span class="st-hint">Give your AI Tutor a custom name</span>
                                     </div>
                                 </div>
@@ -1062,7 +1062,7 @@
                                 <div class="st-toggle-row">
                                     <div class="st-toggle-info">
                                         <h4>Compact text</h4>
-                                        <p>Slightly smaller font size � fits more content on screen</p>
+                                        <p>Slightly smaller font size  fits more content on screen</p>
                                     </div>
                                     <label class="st-switch">
                                         <input type="checkbox" id="compactMode">
@@ -1283,7 +1283,7 @@
                 if (!data.ok) throw new Error(data.message || 'Failed');
                 showToast('Notification preferences saved');
             } catch (e) {
-                // Graceful fallback � store in localStorage if API doesn't support field yet
+                // Graceful fallback  store in localStorage if API doesn't support field yet
                 localStorage.setItem('notifPrefs', JSON.stringify(notifPrefs));
                 showToast('Preferences saved locally');
             }
@@ -1409,7 +1409,7 @@
                 document.addEventListener('click', () => profileDropdown.classList.remove('show'));
             }
 
-            // Settings search � highlight matching tab
+            // Settings search  highlight matching tab
             document.getElementById('settingsSearch').addEventListener('input', function () {
                 const q = this.value.toLowerCase();
                 if (!q) return;
@@ -1431,7 +1431,7 @@
             // Reflect compact / reduce-motion prefs
             if (localStorage.getItem('compactMode') === '1') document.documentElement.style.fontSize = '13px';
 
-            // -- LOGOUT � show confirmation modal --
+            // -- LOGOUT  show confirmation modal --
             const signOutBtn = document.getElementById('signOutBtn');
             if (signOutBtn) {
                 signOutBtn.addEventListener('click', function (e) {

@@ -5,7 +5,7 @@
     <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goals &amp; Progress � MindWave</title>
+    <title>Goals &amp; Progress  |  MindWave</title>
     <meta name="description" content="Set academic targets, track milestones, and achieve your goals in MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -587,14 +587,14 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading</div>
                         <div class="mw-user-role">Student</div>
                     </div>
                     <span class="mw-user-more">&#x22EF;</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student � MindWave</div>
+                            <div class="role">Student  MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -899,7 +899,7 @@
           <div class="goal-top">
             <div class="goal-meta">
               <div class="goal-name">${g.title}</div>
-              <div class="goal-sub">Target: ${g.target}${g.type === 'gpa' ? ' / 4.0' : '%'} ${g.subject ? '� ' + g.subject : ''}</div>
+              <div class="goal-sub">Target: ${g.target}${g.type === 'gpa' ? ' / 4.0' : '%'} ${g.subject ? ' ' + g.subject : ''}</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
               <span class="goal-badge ${done ? 'badge-done' : typeBadgeClass(g.type)}">
@@ -925,7 +925,7 @@
 
           <div class="goal-stats">
             <div class="gstat">
-              <div class="gstat-val">${g.current ?? '�'}</div>
+              <div class="gstat-val">${g.current ?? ''}</div>
               <div class="gstat-lbl">Current</div>
             </div>
             <div class="gstat">
@@ -948,7 +948,7 @@
                 goals = await r.json();
                 renderGoals();
             } catch (e) {
-                // Show empty state � don't fake data
+                // Show empty state  don't fake data
                 goals = [];
                 renderGoals();
             }
@@ -1017,7 +1017,7 @@
             const sg = document.getElementById('subjectGroup');
             const tl = document.getElementById('targetLabel');
             sg.style.display = t === 'grade' ? '' : 'none';
-            tl.textContent = t === 'gpa' ? 'Target GPA (0�4.0)' : 'Target (%)';
+            tl.textContent = t === 'gpa' ? 'Target GPA (04.0)' : 'Target (%)';
             document.getElementById('fTarget').max = t === 'gpa' ? 4 : 100;
             document.getElementById('fTarget').step = t === 'gpa' ? 0.1 : 1;
             document.getElementById('fTarget').placeholder = t === 'gpa' ? 'e.g. 3.8' : 'e.g. 90';
@@ -1039,7 +1039,7 @@
             const body = { title, type, target, ...(subject && { subject }), ...(deadline && { deadline }) };
 
             const btn = document.getElementById('saveBtn');
-            btn.textContent = 'Saving�';
+            btn.textContent = 'Saving';
             btn.disabled = true;
 
             try {

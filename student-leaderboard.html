@@ -5,7 +5,7 @@
     <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaderboard � MindWave</title>
+    <title>Leaderboard | MindWave</title>
     <meta name="description" content="See where you rank among your peers in MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -136,14 +136,14 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading</div>
                         <div class="mw-user-role">Student</div>
                     </div>
                     <span class="mw-user-more">&#x22EF;</span>
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student � MindWave</div>
+                            <div class="role">Student MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -158,14 +158,14 @@
 
             <!-- TOPBAR -->
             <header class="mw-topbar">
-    <script src="student-theme-init.js"></script>
+                <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
                     <span></span><span></span><span></span>
                 </button>
                 <div class="mw-breadcrumb">Dashboard / <span>Leaderboard</span></div>
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search players�" id="lbSearch">
+                    <input type="text" placeholder="Search players" id="lbSearch">
                 </div>
                 <div class="mw-topbar-actions">
                     <div class="mw-notif-wrap">
@@ -193,29 +193,29 @@
                 <div class="greeting-row" style="margin-bottom:24px;">
                     <div>
                         <div class="greeting-name" style="font-size:1.6rem;">Leaderboard</div>
-                        <div class="greeting-date">Rankings � games &amp; academic performance</div>
+                        <div class="greeting-date">Rankings games &amp; academic performance</div>
                     </div>
                 </div>
 
                 <!-- -- MY STATS BANNER -- -->
                 <div class="lb-banner">
                     <div class="lb-banner-stat">
-                        <div class="lb-banner-val" id="myRank">#�</div>
+                        <div class="lb-banner-val" id="myRank">#</div>
                         <div class="lb-banner-lbl">Your Rank</div>
                     </div>
                     <div class="lb-banner-divider"></div>
                     <div class="lb-banner-stat">
-                        <div class="lb-banner-val" id="myPoints">�</div>
+                        <div class="lb-banner-val" id="myPoints"></div>
                         <div class="lb-banner-lbl">Total Points</div>
                     </div>
                     <div class="lb-banner-divider"></div>
                     <div class="lb-banner-stat">
-                        <div class="lb-banner-val" id="myGames">�</div>
+                        <div class="lb-banner-val" id="myGames"></div>
                         <div class="lb-banner-lbl">Games Played</div>
                     </div>
                     <div class="lb-banner-divider"></div>
                     <div class="lb-banner-stat">
-                        <div class="lb-banner-val" id="myAccuracy">�</div>
+                        <div class="lb-banner-val" id="myAccuracy"></div>
                         <div class="lb-banner-lbl">Avg Accuracy</div>
                     </div>
                 </div>
@@ -1029,7 +1029,7 @@
                         document.getElementById('myGames').textContent = cu.gamesPlayed ?? 0;
                         document.getElementById('myAccuracy').textContent = `${cu.avgAccuracy ?? 0}%`;
                     } else {
-                        document.getElementById('myRank').textContent = '�';
+                        document.getElementById('myRank').textContent = '';
                         document.getElementById('myPoints').textContent = '0';
                         document.getElementById('myGames').textContent = '0';
                         document.getElementById('myAccuracy').textContent = '0%';
@@ -1047,7 +1047,7 @@
         function useFallbackData() {
             allData = [];
             myId = null;
-            document.getElementById('myRank').textContent = '�';
+            document.getElementById('myRank').textContent = '';
             document.getElementById('myPoints').textContent = '0';
             document.getElementById('myGames').textContent = '0';
             document.getElementById('myAccuracy').textContent = '0%';
@@ -1093,7 +1093,7 @@
                 const col = avatarColor(p.name || '?');
                 const isMe = p.isMe || String(p.id || p._id) === String(myId);
                 const accCol = acc >= 80 ? '#22c55e' : acc >= 50 ? '#f59e0b' : '#ef4444';
-                const crown = rankNum === 1 ? '<div class="lb-crown">??</div>' : '';
+                const crown = rankNum === 1 ? '<div class="lb-crown"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"><path d="M2 20h20M5 20V10l7-6 7 6v10"/><path d="m5 10 7 4 7-4"/></svg></div>' : '';
                 return `
 <div class="lb-podium-lane rank-${rankNum}">
     <div class="lb-podium-card">
