@@ -1,66 +1,58 @@
-// Authentication Guard Utility
-// Prevents unauthorized access to protected pages via browser navigation
+/**
+ * MindWave Auth Guard
+ * Load as the FIRST script (after student-theme-init.js) on every student or faculty page.
+ *
+ * Usage:
+ *   Student pages: <script src="auth-guard.js" data-role="student"></script>
+ *   Faculty pages: <script src="auth-guard.js" data-role="faculty"></script>
+ *
+ * What it does:
+ * 1. Checks that a token exists in localStorage — redirects to login if not.
+ * 2. Decodes the JWT role claim (without a library — just base64 decodes the payload).
+ * 3. If the page requires "student" but the user is "faculty" → redirects to faculty homepage.
+ * 4. If the page requires "faculty" but the user is "student" → redirects to student homepage.
+ */
+(function () {
+    var scriptEl = document.currentScript;
+    var requiredRole = scriptEl ? scriptEl.getAttribute('data-role') : null;
 
-function checkAuth() {
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-
-    if (!token || !role) {
-        // No authentication found, redirect to marketing login
-        window.location.replace('/marketing-site/website-login.html');
-        return false;
+    var token = localStorage.getItem('token');
+    if (!token) {
+        window.location.replace('login.html');
+        return;
     }
 
-    return true;
-}
+    try {
+        var payloadB64 = token.split('.')[1];
+        var base64 = payloadB64.replace(/-/g, '+').replace(/_/g, '/');
+        var padding = base64.length % 4 === 0 ? '' : '===='.slice(base64.length % 4);
+        var payload = JSON.parse(atob(base64 + padding));
 
-function checkAdminAuth() {
-    if (!checkAuth()) return false;
+        // Check token expiry
+        if (payload.exp && Date.now() / 1000 > payload.exp) {
+            localStorage.removeItem('token');
+            window.location.replace('login.html');
+            return;
+        }
 
-    const role = localStorage.getItem('role');
-    if (role !== 'admin') {
-        // Not an admin, redirect to appropriate page
-        window.location.replace(role === 'student' ? '/homepage.html' : '/marketing-site/website-login.html');
-        return false;
+        var userRole = payload.role; // 'student' | 'faculty' | 'admin'
+
+        if (requiredRole === 'student' && userRole !== 'student') {
+            window.location.replace('homepage.html');
+            return;
+        }
+
+        if (requiredRole === 'faculty' && userRole !== 'faculty' && userRole !== 'admin') {
+            window.location.replace('homepage.html');
+            return;
+        }
+
+        // Expose for other scripts
+        window.MW_USER_ROLE = userRole;
+        window.MW_USER_ID = payload.sub;
+
+    } catch (e) {
+        localStorage.removeItem('token');
+        window.location.replace('login.html');
     }
-
-    return true;
-}
-
-function checkStudentAuth() {
-    if (!checkAuth()) return false;
-
-    const role = localStorage.getItem('role');
-    if (role !== 'student') {
-        // Not a student, redirect to appropriate page
-        window.location.replace(role === 'admin' ? '/admin.html' : '/marketing-site/website-login.html');
-        return false;
-    }
-
-    return true;
-}
-
-// Prevent browser back button after logout
-function preventBackNavigation() {
-    window.history.pushState(null, null, window.location.href);
-    window.onpopstate = function () {
-        window.history.pushState(null, null, window.location.href);
-    };
-}
-
-// Clear browser cache on logout
-function clearAuthAndCache() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('email');
-    localStorage.removeItem('firstName');
-    localStorage.removeItem('lastName');
-
-    // Clear session storage
-    sessionStorage.clear();
-
-    // Prevent caching
-    if (window.performance && window.performance.navigation.type === 2) {
-        window.location.reload();
-    }
-}
+})();

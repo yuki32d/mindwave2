@@ -1,4 +1,4 @@
-import express from "express";
+﻿import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import helmet from "helmet";
@@ -1310,7 +1310,14 @@ function signToken(user) {
 }
 
 function authMiddleware(req, res, next) {
-  const token = req.cookies && req.cookies.mindwave_token;
+  // Accept both Authorization: Bearer <token> header and mindwave_token cookie
+  let token = null;
+  const authHeader = req.headers && req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.slice(7);
+  } else {
+    token = req.cookies && req.cookies.mindwave_token;
+  }
   if (!token) return res.status(401).json({ ok: false, message: "Unauthorized" });
   try {
     req.user = jwt.verify(token, JWT_SECRET);
@@ -1319,6 +1326,18 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ ok: false, message: "Invalid token" });
   }
 }
+
+// ── Role guards (must come after authMiddleware) ──
+function requireFaculty(req, res, next) {
+  if (req.user && req.user.role === 'faculty') return next();
+  return res.status(403).json({ ok: false, message: "Faculty access required" });
+}
+
+function requireStudent(req, res, next) {
+  if (req.user && req.user.role === 'student') return next();
+  return res.status(403).json({ ok: false, message: "Student access required" });
+}
+
 
 // Super Admin Middleware
 function superAdminMiddleware(req, res, next) {
@@ -3292,7 +3311,7 @@ app.post("/api/password/reset", authLimiter, async (req, res) => {
 });
 
 // Game endpoints
-app.post("/api/games", authMiddleware, async (req, res) => {
+app.post("/api/games", authMiddleware, requireFaculty, async (req, res) => {
   const body = req.body || {};
   const { title, type } = body;
 
@@ -3349,7 +3368,7 @@ app.post("/api/games", authMiddleware, async (req, res) => {
   }
 });
 
-app.put("/api/games/:id/publish", authMiddleware, async (req, res) => {
+app.put("/api/games/:id/publish", authMiddleware, requireFaculty, async (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ ok: false, message: "Only admins can publish games" });
   }
@@ -3428,7 +3447,7 @@ app.get("/api/games/my", authMiddleware, async (req, res) => {
   }
 });
 
-app.delete("/api/games/:id", authMiddleware, async (req, res) => {
+app.delete("/api/games/:id", authMiddleware, requireFaculty, async (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ ok: false, message: "Only admins can delete games" });
   }
@@ -3468,7 +3487,7 @@ app.get("/api/games/debug", async (req, res) => {
 });
 
 // Game Submission Endpoint - Save student game results
-app.post("/api/game-submissions", authMiddleware, async (req, res) => {
+app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, res) => {
   try {
     const { gameId, score, isCorrect, studentAnswers, startedAt, completedAt, durationSeconds } = req.body;
 
@@ -3611,7 +3630,7 @@ app.get("/api/games/:id/leaderboard", authMiddleware, async (req, res) => {
 
 
 // Announcement Endpoints
-app.post("/api/announcements", authMiddleware, async (req, res) => {
+app.post("/api/announcements", authMiddleware, requireFaculty, async (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ ok: false, message: "Only admins can create announcements" });
   }
@@ -3674,7 +3693,7 @@ app.get("/api/announcements", authMiddleware, async (req, res) => {
   }
 });
 
-app.delete("/api/announcements/:id", authMiddleware, async (req, res) => {
+app.delete("/api/announcements/:id", authMiddleware, requireFaculty, async (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ ok: false, message: "Only admins can delete announcements" });
   }
@@ -3692,7 +3711,7 @@ app.delete("/api/announcements/:id", authMiddleware, async (req, res) => {
 // ============================================
 
 // Sync announcements from Google Classroom to MindWave
-app.post("/api/google-classroom/sync-announcements", authMiddleware, async (req, res) => {
+app.post("/api/google-classroom/sync-announcements", authMiddleware, requireFaculty, async (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ ok: false, message: "Only admins can sync announcements" });
   }
@@ -4610,7 +4629,7 @@ app.get("/api/games/:gameId/leaderboard", authMiddleware, async (req, res) => {
 // Game Submission Endpoint
 // ============================================
 
-app.post("/api/game-submissions", authMiddleware, async (req, res) => {
+app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, res) => {
   try {
     const { gameId, score, isCorrect, studentAnswers, startedAt, completedAt, durationSeconds } = req.body;
     const studentId = req.user.sub;
@@ -4804,7 +4823,7 @@ app.get('/api/student/goals', authMiddleware, async (req, res) => {
 });
 
 // POST create a new goal
-app.post('/api/student/goals', authMiddleware, async (req, res) => {
+app.post('/api/student/goals', authMiddleware, requireStudent, async (req, res) => {
   try {
     const studentId = req.user.sub;
     const { title, type, subject, target, deadline } = req.body;
@@ -4825,7 +4844,7 @@ app.post('/api/student/goals', authMiddleware, async (req, res) => {
 });
 
 // PUT update a goal
-app.put('/api/student/goals/:id', authMiddleware, async (req, res) => {
+app.put('/api/student/goals/:id', authMiddleware, requireStudent, async (req, res) => {
   try {
     const studentId = req.user.sub;
     const { title, type, subject, target, current, deadline } = req.body;
@@ -4852,7 +4871,7 @@ app.put('/api/student/goals/:id', authMiddleware, async (req, res) => {
 });
 
 // DELETE a goal
-app.delete('/api/student/goals/:id', authMiddleware, async (req, res) => {
+app.delete('/api/student/goals/:id', authMiddleware, requireStudent, async (req, res) => {
   try {
     const studentId = req.user.sub;
     const del = await StudentGoal.findOneAndDelete({ _id: req.params.id, studentId });
@@ -6108,7 +6127,7 @@ app.get("/api/community/tags/trending", async (req, res) => {
 // Time Attack endpoints
 const TIME_ATTACK_QUESTION_COUNT = 5;
 
-app.post("/api/time-attack/start", authMiddleware, async (req, res) => {
+app.post("/api/time-attack/start", authMiddleware, requireStudent, async (req, res) => {
   try {
     const { type, difficulty } = req.body || {};
     const query = { published: true };
@@ -6142,7 +6161,7 @@ app.post("/api/time-attack/start", authMiddleware, async (req, res) => {
   }
 });
 
-app.post("/api/time-attack/submit", authMiddleware, async (req, res) => {
+app.post("/api/time-attack/submit", authMiddleware, requireStudent, async (req, res) => {
   try {
     const { sessionId, isCorrect } = req.body;
     if (!sessionId || isCorrect === undefined) {
@@ -6254,7 +6273,7 @@ app.get("/api/materials/:subjectId", authMiddleware, async (req, res) => {
 // Configure Multer for preserving extensions
 
 
-app.post("/api/materials", authMiddleware, uploadWithExt.single('file'), async (req, res) => {
+app.post("/api/materials", authMiddleware, requireFaculty, uploadWithExt.single('file'), async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ ok: false, message: "Only admins can upload" });
   }
@@ -6294,7 +6313,7 @@ app.post("/api/materials", authMiddleware, uploadWithExt.single('file'), async (
 });
 
 // Delete material
-app.delete("/api/materials/:id", authMiddleware, async (req, res) => {
+app.delete("/api/materials/:id", authMiddleware, requireFaculty, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ ok: false, message: "Only admins can delete materials" });
   }
@@ -6320,7 +6339,7 @@ app.delete("/api/materials/:id", authMiddleware, async (req, res) => {
 });
 
 // Update material metadata
-app.put("/api/materials/:id", authMiddleware, async (req, res) => {
+app.put("/api/materials/:id", authMiddleware, requireFaculty, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ ok: false, message: "Only admins can update materials" });
   }
@@ -6346,7 +6365,7 @@ app.put("/api/materials/:id", authMiddleware, async (req, res) => {
 });
 
 // Bulk upload materials
-app.post("/api/materials/bulk", authMiddleware, uploadWithExt.array('files', 10), async (req, res) => {
+app.post("/api/materials/bulk", authMiddleware, requireFaculty, uploadWithExt.array('files', 10), async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ ok: false, message: "Only admins can upload" });
   }
@@ -8427,7 +8446,7 @@ app.get('/api/events', authMiddleware, async (req, res) => {
 });
 
 // POST /api/events — create new event (faculty/admin only)
-app.post('/api/events', authMiddleware, async (req, res) => {
+app.post('/api/events', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const user = await User.findById(req.user.sub);
     if (!user || !['admin', 'faculty'].includes(user.role)) {
@@ -8478,7 +8497,7 @@ app.post('/api/events', authMiddleware, async (req, res) => {
 });
 
 // PUT /api/events/:id — update event (creator or admin only)
-app.put('/api/events/:id', authMiddleware, async (req, res) => {
+app.put('/api/events/:id', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const user = await User.findById(req.user.sub);
     const event = await SchoolEvent.findById(req.params.id);
@@ -8520,7 +8539,7 @@ app.put('/api/events/:id', authMiddleware, async (req, res) => {
 });
 
 // DELETE /api/events/:id — delete event (creator or admin only)
-app.delete('/api/events/:id', authMiddleware, async (req, res) => {
+app.delete('/api/events/:id', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const user = await User.findById(req.user.sub);
     const event = await SchoolEvent.findById(req.params.id);
@@ -8621,7 +8640,7 @@ app.get('/api/google-classroom/courses/:courseId/announcements', authMiddleware,
   }
 });
 // Upload material to Google Classroom
-app.post('/api/google-classroom/courses/:courseId/materials', authMiddleware, async (req, res) => {
+app.post('/api/google-classroom/courses/:courseId/materials', authMiddleware, requireFaculty, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ ok: false, message: 'Admin access required' });
   }
@@ -8636,7 +8655,7 @@ app.post('/api/google-classroom/courses/:courseId/materials', authMiddleware, as
   }
 });
 // Create assignment in Google Classroom
-app.post('/api/google-classroom/courses/:courseId/assignments', authMiddleware, async (req, res) => {
+app.post('/api/google-classroom/courses/:courseId/assignments', authMiddleware, requireFaculty, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ ok: false, message: 'Admin access required' });
   }
@@ -8762,7 +8781,7 @@ function generateSessionCode() {
 }
 
 // AI-Powered PDF Quiz Generation (using Qwork AI)
-app.post('/api/quiz/generate-from-pdf', authMiddleware, upload.single('pdf'), async (req, res) => {
+app.post('/api/quiz/generate-from-pdf', authMiddleware, requireFaculty, upload.single('pdf'), async (req, res) => {
   try {
     const currentUser = await User.findById(req.user.sub);
 
@@ -8915,7 +8934,7 @@ Return ONLY the JSON array, no additional text or explanation.`;
 });
 
 // AI-Powered Quiz Generation from Text Topic (using Groq AI)
-app.post('/api/quiz/generate-from-text', authMiddleware, async (req, res) => {
+app.post('/api/quiz/generate-from-text', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const currentUser = await User.findById(req.user.sub);
 
@@ -9033,7 +9052,7 @@ Return ONLY the JSON array, no additional text or explanation.`;
 });
 
 // Create new quiz session
-app.post('/api/quiz/create', authMiddleware, async (req, res) => {
+app.post('/api/quiz/create', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const currentUser = await User.findById(req.user.sub);
 
@@ -9153,7 +9172,7 @@ app.post('/api/quiz/validate', async (req, res) => {
 });
 
 // Join quiz session (student)
-app.post('/api/quiz/:code/join', authMiddleware, async (req, res) => {
+app.post('/api/quiz/:code/join', authMiddleware, requireStudent, async (req, res) => {
   try {
     const { code } = req.params;
     const currentUser = await User.findById(req.user.sub);
@@ -9200,7 +9219,7 @@ app.post('/api/quiz/:code/join', authMiddleware, async (req, res) => {
 });
 
 // Start quiz (faculty only)
-app.post('/api/quiz/:code/start', authMiddleware, async (req, res) => {
+app.post('/api/quiz/:code/start', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const { code } = req.params;
     const currentUser = await User.findById(req.user.sub);
@@ -9232,7 +9251,7 @@ app.post('/api/quiz/:code/start', authMiddleware, async (req, res) => {
 });
 
 // Show next question (faculty only)
-app.post('/api/quiz/:code/next', authMiddleware, async (req, res) => {
+app.post('/api/quiz/:code/next', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const { code } = req.params;
     const currentUser = await User.findById(req.user.sub);
@@ -9282,7 +9301,7 @@ app.post('/api/quiz/:code/next', authMiddleware, async (req, res) => {
 });
 
 // Submit answer (student)
-app.post('/api/quiz/:code/answer', authMiddleware, async (req, res) => {
+app.post('/api/quiz/:code/answer', authMiddleware, requireStudent, async (req, res) => {
   try {
     const { code } = req.params;
     const { questionIndex, selectedIndex, timeToAnswer } = req.body;
@@ -9384,7 +9403,7 @@ app.get('/api/quiz/:code/leaderboard', async (req, res) => {
 });
 
 // End quiz (faculty only)
-app.post('/api/quiz/:code/end', authMiddleware, async (req, res) => {
+app.post('/api/quiz/:code/end', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const { code } = req.params;
     const currentUser = await User.findById(req.user.sub);
@@ -10770,7 +10789,7 @@ app.post('/api/notifications', authMiddleware, async (req, res) => {
 // ============================================
 
 // Create a new meeting code (Faculty only)
-app.post('/api/meetings/create', authMiddleware, async (req, res) => {
+app.post('/api/meetings/create', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const userId = req.user.sub;
     const user = await User.findById(userId);
@@ -10856,7 +10875,7 @@ app.get('/api/meetings/active', authMiddleware, async (req, res) => {
 });
 
 // End/deactivate a meeting
-app.post('/api/meetings/:code/end', authMiddleware, async (req, res) => {
+app.post('/api/meetings/:code/end', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const { code } = req.params;
     const userId = req.user.sub;
@@ -10879,7 +10898,7 @@ app.post('/api/meetings/:code/end', authMiddleware, async (req, res) => {
 });
 
 // Mark that faculty has joined the meeting
-app.post('/api/meetings/:code/faculty-joined', authMiddleware, async (req, res) => {
+app.post('/api/meetings/:code/faculty-joined', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const { code } = req.params;
     const userId = req.user.sub;
@@ -10930,7 +10949,7 @@ app.get('/api/meetings/:code/status', authMiddleware, async (req, res) => {
 // ============================================
 
 // Faculty creates a Jitsi meeting - gets moderator token
-app.post('/api/meetings/create-jitsi', authMiddleware, async (req, res) => {
+app.post('/api/meetings/create-jitsi', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const { meetingCode, facultyName, facultyEmail } = req.body;
     // JWT uses 'sub' (subject) field for user ID
@@ -10995,7 +11014,7 @@ app.post('/api/meetings/create-jitsi', authMiddleware, async (req, res) => {
 });
 
 // Student joins a Jitsi meeting - gets participant token
-app.post('/api/meetings/:code/join-jitsi', authMiddleware, async (req, res) => {
+app.post('/api/meetings/:code/join-jitsi', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const { code } = req.params;
     const { studentName, studentEmail } = req.body;
@@ -11042,7 +11061,7 @@ app.post('/api/meetings/:code/join-jitsi', authMiddleware, async (req, res) => {
 // ============================================
 
 // Generate meeting code
-app.post('/api/meetings/generate-code', authMiddleware, async (req, res) => {
+app.post('/api/meetings/generate-code', authMiddleware, requireFaculty, async (req, res) => {
   try {
     // Generate 6-digit meeting code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -11054,7 +11073,7 @@ app.post('/api/meetings/generate-code', authMiddleware, async (req, res) => {
 });
 
 // Faculty creates an Agora meeting - gets host token
-app.post('/api/meetings/create-agora', authMiddleware, async (req, res) => {
+app.post('/api/meetings/create-agora', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const { meetingCode, facultyName, facultyEmail } = req.body;
     const userId = req.user.sub || req.user.userId || req.user.id;
@@ -11100,7 +11119,7 @@ app.post('/api/meetings/create-agora', authMiddleware, async (req, res) => {
 });
 
 // Student joins an Agora meeting - gets audience token
-app.post('/api/meetings/:code/join-agora', authMiddleware, async (req, res) => {
+app.post('/api/meetings/:code/join-agora', authMiddleware, requireFaculty, async (req, res) => {
   try {
     const { code } = req.params;
     const { studentName, studentEmail } = req.body;
