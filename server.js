@@ -5202,7 +5202,45 @@ app.delete("/api/admin/students/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// Block or unblock a student (admin only)
+app.put("/api/admin/students/:id/block", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+    const student = await User.findById(req.params.id);
+    if (!student) return res.status(404).json({ ok: false, message: "Student not found" });
+    student.isBlocked = !student.isBlocked;
+    await student.save();
+    res.json({ ok: true, isBlocked: student.isBlocked, message: student.isBlocked ? "Student blocked" : "Student unblocked" });
+  } catch (err) {
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Reset student password (admin sets a temporary password)
+app.put("/api/admin/students/:id/reset-password", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+    const student = await User.findById(req.params.id);
+    if (!student) return res.status(404).json({ ok: false, message: "Student not found" });
+    const bcrypt = require('bcryptjs');
+    const tempPassword = `MW_${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    student.password = await bcrypt.hash(tempPassword, 10);
+    student.mustChangePassword = true;
+    await student.save();
+    res.json({ ok: true, tempPassword, message: "Password reset — share this with the student" });
+  } catch (err) {
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 // ============ PENDING ADMIN SIGNUP MANAGEMENT ============
+
 
 // Get all pending admin signup requests (admin only)
 app.get("/api/admin/pending-signups", authMiddleware, async (req, res) => {
