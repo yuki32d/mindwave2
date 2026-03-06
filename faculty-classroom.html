@@ -996,10 +996,10 @@
                                 <span>View existing materials and assignments for each course</span>
                             </div>
                         </div>
-                        <a href="/auth/google/classroom" class="btn btn-primary"
+                        <button onclick="connectToGoogle()" class="btn btn-primary"
                             style="display:inline-flex;justify-content:center;width:100%;padding:12px;">
                             <i data-lucide="link-2"></i> Connect Google Account
-                        </a>
+                        </button>
                     </div>
                 </div>
 
@@ -1174,6 +1174,26 @@
         };
     </script>
     <script src="faculty-classroom.js"></script>
-</body>
+    <script>
+        // ── Override faculty-classroom.js functions to work with new HTML structure ──
 
-</html>
+        // showConnectionPrompt: show #connectState instead of replacing .classroom-container
+        window.showConnectionPrompt = function () {
+            document.getElementById('connectState').style.display = '';
+            document.getElementById('classroomState').style.display = 'none';
+        };
+
+        // initializeInterface: show workspace and load data
+        window.initializeInterface = function () {
+            document.getElementById('connectState').style.display = 'none';
+            document.getElementById('classroomState').style.display = '';
+            if (typeof loadCourses === 'function') loadCourses();
+            if (typeof setupEventListeners === 'function') setupEventListeners();
+        };
+
+        // connectToGoogle: use the correct OAuth route from faculty-classroom.js
+        window.connectToGoogle = function () {
+            window.location.href = '/auth/google?scope=classroom';
+        };
+    </script>
+</body>
