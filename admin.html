@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="admin-theme-init.js"></script>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="loading-spinner.css">
@@ -55,6 +56,28 @@
             --text: #e2e8f0;
             --muted: #6b7694;
             --shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg: #f4f6fa;
+            --surface: #ffffff;
+            --border: rgba(0, 0, 0, 0.08);
+            --text: #111827;
+            --muted: #6b7280;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .topbar {
+            background: #ffffff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .search-bar {
+            background: #f0f2f5;
+        }
+
+        [data-theme="light"] .search-bar input::placeholder {
+            color: #9ca3af;
         }
 
         [data-theme="dark"] .topbar {
@@ -1339,6 +1362,7 @@
 
         <!-- ── TOPBAR ── -->
         <header class="topbar">
+            <script src="admin-theme-init.js"></script>
             <div class="breadcrumb">Admin / <span>Overview</span></div>
             <div class="search-bar">
                 <i data-lucide="search"></i>
