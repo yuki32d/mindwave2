@@ -1108,20 +1108,89 @@
     <script src="faculty-dataanalytics.js"></script>
 
     <script>
-        // Intercept fetchAPI to feed our KPI elements + charts
-        const _origFetch = window.fetchAPI;
-        if (_origFetch) {
-            window.fetchAPI = async function (ep) {
-                const res = await _origFetch(ep);
-                if (ep.includes('/api/analytics/overview') && res?.ok) window.__patchKPI(res);
-                if (ep.includes('/api/analytics/games') && res?.ok) setTimeout(() => window.__patchGames(res.games), 80);
-                if (ep.includes('/api/analytics/students') && !ep.includes('/activities') && res?.ok) {
-                    const sorted = [...(res.students || [])].sort((a, b) => b.avgScore - a.avgScore);
-                    setTimeout(() => window.__patchPerformers(sorted), 160);
+        // ── Override renderAnalytics so it populates our styled KPI elements
+        // instead of replacing #analyticsGrid with old insight-card HTML ──
+        window.renderAnalytics = async function () {
+            const data = await fetchAPI('/api/analytics/overview');
+            if (!data || !data.ok) return;
+            const { gamesPlayed, totalEngagement, activeStudents, totalStudents, topPerformer, consistentStudents } = data;
+            document.getElementById('kpi-gamesPlayed').textContent = gamesPlayed ?? '—';
+            document.getElementById('kpi-engagement').textContent = totalEngagement != null ? totalEngagement + '%' : '—';
+            document.getElementById('kpi-engagementSub').textContent = `${activeStudents ?? 0} of ${totalStudents ?? 0} students active`;
+            document.getElementById('kpi-topPerformer').textContent = topPerformer?.name ?? 'N/A';
+            document.getElementById('kpi-topPerformerSub').textContent = topPerformer ? `${topPerformer.totalScore} completions` : '';
+            document.getElementById('kpi-consistent').textContent = consistentStudents ?? '—';
+        };
+
+        // ── Override renderGameBreakdown to also build the score chart ──
+        const _origGameBreakdown = window.renderGameBreakdown;
+        window.renderGameBreakdown = async function () {
+            await _origGameBreakdown();
+            // Rebuild chart from current table data
+            const rows = document.querySelectorAll('#gameBreakdownTable tr:not(.empty-row)');
+            const labels = [], values = [];
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 3) {
+                    const title = cells[0]?.textContent?.replace(/[^a-zA-Z0-9 ]/g, '').trim();
+                    const score = parseFloat(cells[2]?.textContent) || 0;
+                    labels.push(title);
+                    // scores might be 0-1 decimals or 0-100 percentages
+                    values.push(score <= 1 ? score * 100 : score);
                 }
-                return res;
-            };
-        }
+            });
+            if (labels.length) buildScoreChart(labels, values);
+
+            // Re-style game table cells
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells[0] && !cells[0].querySelector('.tag')) {
+                    cells[0].innerHTML = `<span class="tag tag-blue">${cells[0].textContent.trim()}</span>`;
+                }
+                if (cells[2] && !cells[2].querySelector('.tag')) {
+                    const pct = parseFloat(cells[2].textContent);
+                    const cls = pct >= 70 ? 'tag-green' : pct >= 40 ? 'tag-amber' : 'tag-red';
+                    cells[2].innerHTML = `<span class="tag ${cls}">${cells[2].textContent.trim()}</span>`;
+                }
+            });
+        };
+
+        // ── Override renderTopPerformers to also build the student chart ──
+        const _origTopPerformers = window.renderTopPerformers;
+        window.renderTopPerformers = async function () {
+            await _origTopPerformers();
+            // Build student chart from table data
+            const rows = document.querySelectorAll('#topPerformersTable tr.student-row');
+            const labels = [], values = [];
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 4) {
+                    const name = cells[0]?.querySelector('strong')?.textContent?.trim() || cells[0]?.textContent?.trim();
+                    const score = parseFloat(cells[3]?.textContent) || 0;
+                    labels.push(name.split(' ')[0]);
+                    values.push(score <= 1 ? score * 100 : score);
+                }
+            });
+            if (labels.length) buildStudentChart(labels.slice(0, 8), values.slice(0, 8));
+
+            // Add rank badges + avatars
+            const avColors = ['#6366f1', '#ec4899', '#f59e0b', '#22d3a5', '#3b82f6', '#a855f7', '#ef4444', '#10b981'];
+            rows.forEach((row, i) => {
+                if (row.querySelector('.rank')) return; // already patched
+                const rankMark = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1;
+                const rankCls = ['rank-1', 'rank-2', 'rank-3'][i] || 'rank-n';
+                const td = document.createElement('td');
+                td.innerHTML = `<span class="rank ${rankCls}">${rankMark}</span>`;
+                row.insertBefore(td, row.firstChild);
+
+                const nameTd = row.cells[1];
+                if (nameTd && !nameTd.querySelector('.av')) {
+                    const name = nameTd.querySelector('strong')?.textContent?.trim() || nameTd.textContent?.replace('▼', '').trim();
+                    const ini = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+                    nameTd.innerHTML = `<span class="av" style="background:${avColors[i % avColors.length]}">${ini}</span><strong>${name}</strong><span class="chevron">▾</span>`;
+                }
+            });
+        };
     </script>
 
 </body>
