@@ -1329,7 +1329,7 @@ function authMiddleware(req, res, next) {
 
 // ── Role guards (must come after authMiddleware) ──
 function requireFaculty(req, res, next) {
-  if (req.user && req.user.role === 'faculty') return next();
+  if (req.user && (req.user.role === 'faculty' || req.user.role === 'admin')) return next();
   return res.status(403).json({ ok: false, message: "Faculty access required" });
 }
 
@@ -3319,8 +3319,8 @@ app.post("/api/games", authMiddleware, requireFaculty, async (req, res) => {
     return res.status(400).json({ ok: false, message: "Title and Type are required" });
   }
 
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ ok: false, message: "Only admins can create games" });
+  if (req.user.role !== "admin" && req.user.role !== "faculty") {
+    return res.status(403).json({ ok: false, message: "Faculty or admin access required" });
   }
 
   try {
@@ -3369,8 +3369,8 @@ app.post("/api/games", authMiddleware, requireFaculty, async (req, res) => {
 });
 
 app.put("/api/games/:id/publish", authMiddleware, requireFaculty, async (req, res) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ ok: false, message: "Only admins can publish games" });
+  if (req.user.role !== "admin" && req.user.role !== "faculty") {
+    return res.status(403).json({ ok: false, message: "Faculty or admin access required" });
   }
   try {
     const game = await Game.findById(req.params.id);
