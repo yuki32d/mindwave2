@@ -1,17 +1,61 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics | MindWave</title>
+    <title>Analytics | MindWave Admin</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <script src="admin-theme-init.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <style>
+        /* ── Exact admin.html design tokens ── */
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e5e9f2;
+            --accent: #f5a623;
+            --accent-lo: rgba(245, 166, 35, .10);
+            --accent-bdr: rgba(245, 166, 35, .25);
+            --text: #111827;
+            --muted: #6b7280;
+            --green: #16a34a;
+            --red: #dc2626;
+            --blue: #2563eb;
+            --shadow: 0 1px 4px rgba(0, 0, 0, .07), 0 4px 16px rgba(0, 0, 0, .05);
+            --radius: 14px;
+            --mono: 'JetBrains Mono', monospace;
+            --topbar-h: 58px;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0d1117;
+            --surface: #161b27;
+            --border: rgba(255, 255, 255, .08);
+            --text: #e2e8f0;
+            --muted: #6b7694;
+            --green: #22d3a5;
+            --red: #f43f5e;
+            --blue: #60a5fa;
+            --shadow: 0 1px 4px rgba(0, 0, 0, .4), 0 4px 16px rgba(0, 0, 0, .3);
+        }
+
+        [data-theme="light"] {
+            --bg: #f4f6fa;
+            --surface: #ffffff;
+            --border: rgba(0, 0, 0, .08);
+            --text: #111827;
+            --muted: #6b7280;
+            --green: #16a34a;
+            --red: #dc2626;
+            --shadow: 0 1px 4px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .06);
+        }
+
         *,
         *::before,
         *::after {
@@ -20,44 +64,16 @@
             padding: 0;
         }
 
-        :root {
-            --accent: #f5a623;
-            --accent2: #fbbf24;
-            --green: #22d3a5;
-            --red: #f43f5e;
-            --blue: #60a5fa;
-            --purple: #a78bfa;
-            --tr: 0.18s ease;
-            --r: 14px;
-        }
-
-        [data-theme="dark"] {
-            --bg: #0d1117;
-            --surface: #161b27;
-            --surf2: #1c2337;
-            --border: rgba(255, 255, 255, .07);
-            --border2: rgba(255, 255, 255, .13);
-            --text: #e2e8f0;
-            --muted: #6b7694;
-        }
-
-        [data-theme="light"] {
-            --bg: #f4f6fa;
-            --surface: #ffffff;
-            --surf2: #f0f2f7;
-            --border: rgba(0, 0, 0, .07);
-            --border2: rgba(0, 0, 0, .13);
-            --text: #111827;
-            --muted: #6b7280;
-        }
-
-        html,
-        body {
+        html {
             height: 100%;
+        }
+
+        body {
             font-family: 'Inter', sans-serif;
+            font-size: 14px;
             background: var(--bg);
             color: var(--text);
-            font-size: 14px;
+            min-height: 100vh;
         }
 
         a {
@@ -70,53 +86,40 @@
             cursor: pointer;
         }
 
-        /* ── Page shell (full-screen) ── */
-        .page {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* ── Topbar ── */
+        /* ── Topbar (exact admin.html style) ── */
         .topbar {
             position: sticky;
             top: 0;
             z-index: 100;
-            height: 56px;
+            height: var(--topbar-h);
             background: var(--surface);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
-            padding: 0 32px;
-            gap: 16px;
-            flex-shrink: 0;
+            padding: 0 28px;
+            gap: 14px;
+            box-shadow: var(--shadow);
         }
 
-        .topbar-back {
+        [data-theme="dark"] .topbar {
+            background: #161b27;
+        }
+
+        .breadcrumb {
+            font-size: 12px;
+            color: var(--muted);
             display: flex;
             align-items: center;
             gap: 6px;
-            color: var(--muted);
-            font-size: 13px;
-            font-weight: 500;
-            padding: 6px 10px;
-            border-radius: 8px;
-            transition: all var(--tr);
         }
 
-        .topbar-back:hover {
-            background: var(--surf2);
+        .breadcrumb a:hover {
             color: var(--text);
         }
 
-        .topbar-sep {
-            color: var(--muted);
-            font-size: 16px;
-        }
-
-        .topbar-page {
+        .breadcrumb span {
             font-weight: 700;
-            font-size: 14px;
+            color: var(--text);
         }
 
         .topbar-right {
@@ -126,8 +129,9 @@
             margin-left: auto;
         }
 
-        .t-btn {
-            display: flex;
+        /* ── Same button styles as admin.html ── */
+        .btn {
+            display: inline-flex;
             align-items: center;
             gap: 6px;
             padding: 7px 14px;
@@ -137,42 +141,73 @@
             border: 1px solid var(--border);
             background: var(--surface);
             color: var(--text);
-            transition: all var(--tr);
+            transition: all .15s;
             white-space: nowrap;
+            cursor: pointer;
         }
 
-        .t-btn:hover {
-            border-color: var(--border2);
-            background: var(--surf2);
+        .btn:hover {
+            background: var(--bg);
+            border-color: var(--accent-bdr);
         }
 
-        .t-btn.accent {
+        .btn svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .btn-primary {
             background: var(--accent);
-            color: #1a0e00;
+            color: #fff;
             border-color: var(--accent);
         }
 
-        .t-btn.accent:hover {
-            filter: brightness(1.1);
+        .btn-primary:hover {
+            filter: brightness(1.08);
         }
 
+        /* Theme toggle */
+        .t-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            transition: all .14s;
+        }
+
+        .t-btn:hover {
+            color: var(--text);
+            border-color: var(--accent-bdr);
+        }
+
+        .t-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        /* Live badge */
         .live-badge {
             display: flex;
             align-items: center;
             gap: 5px;
-            background: rgba(34, 211, 165, .1);
-            border: 1px solid rgba(34, 211, 165, .25);
+            background: var(--accent-lo);
+            border: 1px solid var(--accent-bdr);
             border-radius: 999px;
-            padding: 4px 12px;
+            padding: 4px 11px;
             font-size: 11px;
             font-weight: 700;
-            color: var(--green);
+            color: var(--accent);
         }
 
         .live-dot {
             width: 6px;
             height: 6px;
-            background: var(--green);
+            background: var(--accent);
             border-radius: 50%;
             animation: pulse 1.8s infinite;
         }
@@ -191,170 +226,185 @@
             }
         }
 
-        /* ── Dropdown panels ── */
-        .dropdown-wrap {
+        /* Dropdown */
+        .dd-wrap {
             position: relative;
         }
 
-        .dropdown-panel {
+        .dd-panel {
             display: none;
             position: absolute;
             top: calc(100% + 8px);
             right: 0;
             background: var(--surface);
-            border: 1px solid var(--border2);
-            border-radius: 14px;
-            padding: 20px;
-            min-width: 260px;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, .4);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px;
+            min-width: 240px;
+            box-shadow: var(--shadow);
             z-index: 200;
         }
 
-        .dropdown-panel.open {
+        .dd-panel.open {
             display: block;
-            animation: fadeDown .18s ease;
+            animation: fadeDown .15s ease;
         }
 
         @keyframes fadeDown {
             from {
                 opacity: 0;
-                transform: translateY(-6px);
+                transform: translateY(-4px)
             }
 
             to {
                 opacity: 1;
-                transform: none;
+                transform: none
             }
         }
 
-        .dp-title {
+        .dd-title {
             font-size: 13px;
             font-weight: 700;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
-        .dp-label {
+        .dd-label {
             display: block;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--muted);
             font-weight: 600;
-            margin-bottom: 6px;
-            margin-top: 12px;
+            margin-bottom: 5px;
+            margin-top: 10px;
             text-transform: uppercase;
             letter-spacing: .06em;
         }
 
-        .dp-select {
+        .dd-select {
             width: 100%;
-            padding: 8px 12px;
-            background: var(--surf2);
-            border: 1px solid var(--border2);
+            padding: 7px 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
             border-radius: 8px;
             color: var(--text);
             font: 13px 'Inter', sans-serif;
             outline: none;
         }
 
-        .dp-check {
+        .dd-check {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-top: 10px;
+            margin-top: 9px;
             font-size: 13px;
             color: var(--muted);
             cursor: pointer;
         }
 
-        .dp-check input {
+        .dd-check input {
             accent-color: var(--accent);
-            cursor: pointer;
         }
 
-        .dp-btn {
+        .dd-btn {
             width: 100%;
-            padding: 9px;
-            border-radius: 9px;
+            padding: 8px;
+            border-radius: 8px;
             font: 600 13px 'Inter', sans-serif;
             border: 1px solid;
             cursor: pointer;
             margin-top: 8px;
-            transition: all var(--tr);
+            transition: all .14s;
         }
 
-        .dp-btn.green {
-            background: rgba(34, 211, 165, .12);
-            border-color: rgba(34, 211, 165, .3);
+        .dd-btn.green {
+            background: rgba(22, 163, 74, .1);
+            border-color: rgba(22, 163, 74, .3);
             color: var(--green);
         }
 
-        .dp-btn.blue {
-            background: rgba(96, 165, 250, .12);
-            border-color: rgba(96, 165, 250, .3);
+        .dd-btn.blue {
+            background: rgba(37, 99, 235, .1);
+            border-color: rgba(37, 99, 235, .3);
             color: var(--blue);
         }
 
-        .dp-btn:hover {
-            filter: brightness(1.12);
+        [data-theme="dark"] .dd-btn.green {
+            background: rgba(34, 211, 165, .1);
+            border-color: rgba(34, 211, 165, .3);
+            color: #22d3a5;
         }
 
-        /* ── Main content ── */
+        [data-theme="dark"] .dd-btn.blue {
+            background: rgba(96, 165, 250, .1);
+            border-color: rgba(96, 165, 250, .3);
+            color: #60a5fa;
+        }
+
+        .dd-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        /* ── Page layout ── */
         .content {
-            flex: 1;
-            padding: 32px 36px;
-            max-width: 1400px;
+            max-width: 1380px;
             margin: 0 auto;
-            width: 100%;
+            padding: 28px 32px;
         }
 
         /* ── Section heading ── */
-        .section-head {
-            margin-bottom: 20px;
+        .page-head {
+            margin-bottom: 24px;
         }
 
-        .section-head h2 {
-            font-size: 20px;
+        .page-head h1 {
+            font-size: 22px;
             font-weight: 800;
             letter-spacing: -.02em;
         }
 
-        .section-head p {
+        .page-head p {
             color: var(--muted);
             font-size: 13px;
             margin-top: 4px;
         }
 
-        /* ── KPI strip ── */
+        /* ── KPI cards (same as admin.html stat cards) ── */
         .kpi-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            margin-bottom: 28px;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .kpi-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--r);
-            padding: 22px 24px;
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            box-shadow: var(--shadow);
             display: flex;
             align-items: center;
-            gap: 18px;
-            transition: border-color var(--tr), box-shadow var(--tr);
+            gap: 16px;
+            transition: border-color .15s, box-shadow .15s;
         }
 
         .kpi-card:hover {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(245, 166, 35, .07);
+            border-color: var(--accent-bdr);
+            box-shadow: 0 0 0 3px var(--accent-lo);
         }
 
         .kpi-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+        }
+
+        .kpi-icon svg {
+            width: 20px;
+            height: 20px;
         }
 
         .kpi-label {
@@ -366,50 +416,48 @@
         }
 
         .kpi-value {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 800;
-            line-height: 1;
-            letter-spacing: -.03em;
-            margin-top: 4px;
+            line-height: 1.1;
+            letter-spacing: -.02em;
+            margin-top: 3px;
         }
 
         .kpi-sub {
             font-size: 12px;
             color: var(--green);
-            margin-top: 5px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            margin-top: 4px;
         }
 
         /* ── Charts row ── */
         .charts-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin-bottom: 28px;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .chart-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--r);
-            padding: 24px;
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            box-shadow: var(--shadow);
         }
 
-        .chart-card-head {
+        .chart-head {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
-        .chart-card-head h3 {
-            font-size: 15px;
+        .chart-head h3 {
+            font-size: 14px;
             font-weight: 700;
         }
 
-        .chart-card-head p {
+        .chart-head p {
             font-size: 12px;
             color: var(--muted);
             margin-top: 2px;
@@ -417,38 +465,33 @@
 
         .chart-wrap {
             position: relative;
-            height: 220px;
+            height: 200px;
         }
 
-        /* ── Table sections ── */
-        .table-section {
+        /* ── Table panels (same as admin.html .card panels) ── */
+        .table-panel {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--r);
-            margin-bottom: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
             overflow: hidden;
         }
 
-        .table-section-head {
-            padding: 20px 24px 0;
+        .panel-head {
+            padding: 18px 22px 14px;
+            border-bottom: 1px solid var(--border);
         }
 
-        .table-section-head h2 {
-            font-size: 16px;
-            font-weight: 800;
+        .panel-head h2 {
+            font-size: 15px;
+            font-weight: 700;
         }
 
-        .table-section-head p {
+        .panel-head p {
             font-size: 12px;
             color: var(--muted);
             margin-top: 3px;
-            margin-bottom: 16px;
-        }
-
-        .divider {
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: 0;
         }
 
         table {
@@ -456,12 +499,8 @@
             border-collapse: collapse;
         }
 
-        thead {
-            background: var(--surf2);
-        }
-
         th {
-            padding: 12px 20px;
+            padding: 10px 18px;
             font-size: 10px;
             font-weight: 700;
             color: var(--muted);
@@ -469,78 +508,90 @@
             letter-spacing: .09em;
             text-align: left;
             white-space: nowrap;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
         }
 
         td {
-            padding: 15px 20px;
+            padding: 13px 18px;
             font-size: 13px;
-            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
             vertical-align: middle;
         }
 
-        tr:hover td {
-            background: rgba(255, 255, 255, .018);
+        tr:last-child td {
+            border-bottom: none;
         }
 
-        [data-theme="light"] tr:hover td {
-            background: rgba(0, 0, 0, .018);
+        tbody tr:hover td {
+            background: var(--accent-lo);
         }
 
-        /* Inline progress bar */
+        /* Mini progress bar */
         .mini-bar {
-            background: var(--surf2);
-            border-radius: 999px;
-            height: 6px;
-            width: 80px;
-            overflow: hidden;
             display: inline-block;
             vertical-align: middle;
             margin-left: 8px;
+            width: 64px;
+            height: 5px;
+            background: var(--border);
+            border-radius: 999px;
+            overflow: hidden;
         }
 
         .mini-fill {
             height: 100%;
             border-radius: 999px;
-            background: linear-gradient(90deg, var(--accent), #f97316);
+            background: var(--accent);
         }
 
-        /* Badges */
+        /* Tags/badges */
         .tag {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 3px 10px;
+            padding: 3px 9px;
             border-radius: 999px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
         }
 
-        .tag.blue {
-            background: rgba(96, 165, 250, .12);
+        .tag-blue {
+            background: rgba(37, 99, 235, .1);
             color: var(--blue);
         }
 
-        .tag.green {
-            background: rgba(34, 211, 165, .12);
+        .tag-green {
+            background: rgba(22, 163, 74, .1);
             color: var(--green);
         }
 
-        .tag.red {
-            background: rgba(244, 63, 94, .12);
+        .tag-red {
+            background: rgba(220, 38, 38, .1);
             color: var(--red);
         }
 
-        .tag.purple {
-            background: rgba(167, 139, 250, .12);
-            color: var(--purple);
-        }
-
-        .tag.amber {
-            background: rgba(245, 158, 11, .12);
+        .tag-amber {
+            background: var(--accent-lo);
             color: var(--accent);
+            border: 1px solid var(--accent-bdr);
         }
 
-        /* Rank badge */
+        [data-theme="dark"] .tag-blue {
+            background: rgba(96, 165, 250, .12);
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] .tag-green {
+            background: rgba(34, 211, 165, .12);
+            color: #22d3a5;
+        }
+
+        [data-theme="dark"] .tag-red {
+            background: rgba(244, 63, 94, .12);
+            color: #f43f5e;
+        }
+
+        /* Rank circles */
         .rank {
             display: inline-flex;
             align-items: center;
@@ -553,32 +604,40 @@
         }
 
         .rank-1 {
-            background: rgba(245, 166, 35, .18);
+            background: rgba(245, 166, 35, .15);
             color: var(--accent);
         }
 
         .rank-2 {
-            background: rgba(100, 116, 139, .18);
+            background: rgba(100, 116, 139, .15);
             color: #94a3b8;
         }
 
         .rank-3 {
-            background: rgba(180, 83, 9, .18);
+            background: rgba(180, 83, 9, .15);
             color: #c2855a;
         }
 
         .rank-n {
-            background: var(--surf2);
+            background: var(--bg);
             color: var(--muted);
         }
 
         /* Highlight rows */
-        .highlight-green td {
-            background: rgba(34, 211, 165, .035) !important;
+        .hl-green td {
+            background: rgba(22, 163, 74, .04) !important;
         }
 
-        .highlight-red td {
-            background: rgba(244, 63, 94, .035) !important;
+        .hl-red td {
+            background: rgba(220, 38, 38, .04) !important;
+        }
+
+        [data-theme="dark"] .hl-green td {
+            background: rgba(34, 211, 165, .04) !important;
+        }
+
+        [data-theme="dark"] .hl-red td {
+            background: rgba(244, 63, 94, .04) !important;
         }
 
         /* Expandable detail row */
@@ -586,15 +645,15 @@
             cursor: pointer;
         }
 
-        .student-row td:first-child .chevron {
-            display: inline-block;
-            margin-left: 6px;
+        .chevron {
             font-size: 10px;
             color: var(--muted);
-            transition: transform var(--tr);
+            margin-left: 5px;
+            display: inline-block;
+            transition: transform .15s;
         }
 
-        .student-row.open td:first-child .chevron {
+        .student-row.open .chevron {
             transform: rotate(180deg);
         }
 
@@ -603,25 +662,25 @@
         }
 
         .detail-inner {
-            padding: 16px 20px 16px 40px;
+            padding: 14px 18px 14px 36px;
             border-left: 3px solid var(--accent);
-            background: var(--surf2);
+            background: var(--bg);
         }
 
-        .detail-inner table {
-            margin: 0;
+        .detail-inner table th {
+            background: var(--surface);
+            font-size: 10px;
         }
 
-        .detail-inner th,
-        .detail-inner td {
-            padding: 8px 12px;
+        .detail-inner table td {
+            padding: 9px 14px;
             font-size: 12px;
         }
 
         /* Avatar */
         .av {
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
@@ -630,23 +689,25 @@
             font-size: 11px;
             color: #fff;
             flex-shrink: 0;
+            vertical-align: middle;
+            margin-right: 8px;
         }
 
-        /* Empty/loading state */
-        .empty-row td {
+        /* Empty/loading */
+        .empty-cell {
             text-align: center;
-            padding: 60px 20px;
-            color: var(--muted);
+            padding: 50px 20px !important;
+            color: var(--muted) !important;
         }
 
         .spinner {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border: 3px solid var(--border);
             border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin .8s linear infinite;
-            margin: 0 auto 12px;
+            margin: 0 auto 10px;
         }
 
         @keyframes spin {
@@ -656,7 +717,7 @@
         }
 
         /* Responsive */
-        @media (max-width: 900px) {
+        @media (max-width: 960px) {
             .kpi-row {
                 grid-template-columns: 1fr 1fr;
             }
@@ -664,323 +725,311 @@
             .charts-row {
                 grid-template-columns: 1fr;
             }
-
-            .content {
-                padding: 20px;
-            }
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 540px) {
             .kpi-row {
                 grid-template-columns: 1fr;
+            }
+
+            .content {
+                padding: 16px;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="page">
 
-        <!-- ── Topbar ── -->
-        <div class="topbar">
-            <a href="admin.html" class="topbar-back">
-                <i data-lucide="chevron-left" style="width:14px;height:14px"></i> Admin
-            </a>
-            <span class="topbar-sep">/</span>
-            <span class="topbar-page">Analytics</span>
+    <!-- ── Topbar ── -->
+    <div class="topbar">
+        <div class="breadcrumb">
+            <a href="admin.html">Admin</a>
+            <i data-lucide="chevron-right" style="width:12px;height:12px"></i>
+            <span>Analytics</span>
+        </div>
 
-            <div class="topbar-right">
-                <div class="live-badge"><span class="live-dot"></span> Live · 30s</div>
+        <div class="topbar-right">
+            <div class="live-badge"><span class="live-dot"></span> Live · 30s</div>
 
-                <!-- Filter dropdown -->
-                <div class="dropdown-wrap">
-                    <button class="t-btn" id="filterToggleBtn">
-                        <i data-lucide="sliders-horizontal" style="width:13px;height:13px"></i> Filter
-                    </button>
-                    <div class="dropdown-panel" id="filterPanel">
-                        <div class="dp-title">Filter Data</div>
-                        <form id="filterForm">
-                            <span class="dp-label">Time Range</span>
-                            <select class="dp-select" id="timeRange" name="timeRange">
-                                <option value="all">All Time</option>
-                                <option value="7">Last 7 Days</option>
-                                <option value="30">Last 30 Days</option>
-                            </select>
-                            <label class="dp-check"><input type="checkbox" id="topPerformerOnly"
-                                    name="topPerformerOnly"> Top Performers Only (≥70%)</label>
-                            <label class="dp-check"><input type="checkbox" id="engagementDetails"
-                                    name="engagementDetails"> Highly Engaged (&gt;70%)</label>
-                            <label class="dp-check"><input type="checkbox" id="bottomLiners" name="bottomLiners"> Bottom
-                                Performers</label>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Export dropdown -->
-                <div class="dropdown-wrap">
-                    <button class="t-btn" id="exportToggleBtn">
-                        <i data-lucide="download" style="width:13px;height:13px"></i> Export
-                    </button>
-                    <div class="dropdown-panel" id="exportPanel">
-                        <div class="dp-title">Export Student Activity</div>
-                        <button class="dp-btn green" id="exportCSVBtn">
-                            <i data-lucide="file-text"
-                                style="width:13px;height:13px;vertical-align:middle;margin-right:6px"></i> Export as CSV
-                        </button>
-                        <button class="dp-btn blue" id="exportExcelBtn">
-                            <i data-lucide="table"
-                                style="width:13px;height:13px;vertical-align:middle;margin-right:6px"></i> Export as
-                            Excel
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Theme toggle -->
-                <button class="t-btn" id="themeToggle" title="Toggle theme">
-                    <i data-lucide="sun" style="width:14px;height:14px"></i>
+            <!-- Filter -->
+            <div class="dd-wrap">
+                <button class="btn" id="filterToggleBtn">
+                    <i data-lucide="sliders-horizontal"></i> Filter
                 </button>
+                <div class="dd-panel" id="filterPanel">
+                    <div class="dd-title">Filter Data</div>
+                    <form id="filterForm">
+                        <span class="dd-label">Time Range</span>
+                        <select class="dd-select" id="timeRange" name="timeRange">
+                            <option value="all">All Time</option>
+                            <option value="7">Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                        </select>
+                        <label class="dd-check"><input type="checkbox" id="topPerformerOnly" name="topPerformerOnly">
+                            Top Performers Only (≥70%)</label>
+                        <label class="dd-check"><input type="checkbox" id="engagementDetails" name="engagementDetails">
+                            Highly Engaged (&gt;70%)</label>
+                        <label class="dd-check"><input type="checkbox" id="bottomLiners" name="bottomLiners"> Bottom
+                            Performers</label>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Export -->
+            <div class="dd-wrap">
+                <button class="btn" id="exportToggleBtn">
+                    <i data-lucide="download"></i> Export
+                </button>
+                <div class="dd-panel" id="exportPanel">
+                    <div class="dd-title">Export Student Activity</div>
+                    <button class="dd-btn green" id="exportCSVBtn">
+                        <i data-lucide="file-text"
+                            style="width:13px;height:13px;vertical-align:middle;margin-right:5px"></i>Export as CSV
+                    </button>
+                    <button class="dd-btn blue" id="exportExcelBtn">
+                        <i data-lucide="table"
+                            style="width:13px;height:13px;vertical-align:middle;margin-right:5px"></i>Export as Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Theme toggle -->
+            <button class="t-btn" id="themeToggle" title="Toggle theme">
+                <i data-lucide="sun"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Content ── -->
+    <div class="content">
+
+        <!-- Page heading -->
+        <div class="page-head">
+            <h1>Data &amp; Engagement Analytics</h1>
+            <p>Monitor how every student interacts with MindWave — activity adoption, participation, and spotlight
+                performers.</p>
+        </div>
+
+        <!-- KPI Strip -->
+        <div class="kpi-row" id="analyticsGrid">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:rgba(37,99,235,.1)">
+                    <i data-lucide="gamepad-2" style="color:#2563eb"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">Games Played</div>
+                    <div class="kpi-value" id="kpi-gamesPlayed">—</div>
+                    <div class="kpi-sub">Total attempts</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:var(--accent-lo)">
+                    <i data-lucide="activity" style="color:var(--accent)"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">Engagement</div>
+                    <div class="kpi-value" id="kpi-engagement">—</div>
+                    <div class="kpi-sub" id="kpi-engagementSub">students active</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:rgba(22,163,74,.1)">
+                    <i data-lucide="trophy" style="color:var(--green)"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">Top Performer</div>
+                    <div class="kpi-value" id="kpi-topPerformer" style="font-size:18px;margin-top:5px">—</div>
+                    <div class="kpi-sub" id="kpi-topPerformerSub"></div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:rgba(124,58,237,.1)">
+                    <i data-lucide="users-round" style="color:#7c3aed"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">Consistent Students</div>
+                    <div class="kpi-value" id="kpi-consistent">—</div>
+                    <div class="kpi-sub">Completed 3+ games</div>
+                </div>
             </div>
         </div>
 
-        <!-- ── Main ── -->
-        <div class="content">
-
-            <!-- KPI Strip -->
-            <div class="kpi-row" id="analyticsGrid">
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background:rgba(96,165,250,.12)"><i data-lucide="gamepad-2"
-                            style="width:20px;height:20px;color:#60a5fa"></i></div>
+        <!-- Charts -->
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-head">
                     <div>
-                        <div class="kpi-label">Games Played</div>
-                        <div class="kpi-value" id="kpi-gamesPlayed">—</div>
-                        <div class="kpi-sub"><i data-lucide="trending-up" style="width:11px;height:11px"></i> Total
-                            attempts</div>
+                        <h3>Score Distribution by Game</h3>
+                        <p>Average % score per activity across all students</p>
                     </div>
+                    <span class="tag tag-blue">Bar</span>
                 </div>
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background:rgba(245,166,35,.12)"><i data-lucide="activity"
-                            style="width:20px;height:20px;color:#f5a623"></i></div>
+                <div class="chart-wrap"><canvas id="scoreChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-head">
                     <div>
-                        <div class="kpi-label">Engagement</div>
-                        <div class="kpi-value" id="kpi-engagement">—</div>
-                        <div class="kpi-sub" id="kpi-engagementSub">of all students active</div>
+                        <h3>Student Performance Ranking</h3>
+                        <p>Top 8 students by average score</p>
                     </div>
+                    <span class="tag tag-amber">Bars</span>
                 </div>
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background:rgba(34,211,165,.12)"><i data-lucide="trophy"
-                            style="width:20px;height:20px;color:#22d3a5"></i></div>
-                    <div>
-                        <div class="kpi-label">Top Performer</div>
-                        <div class="kpi-value" id="kpi-topPerformer" style="font-size:22px;letter-spacing:-.01em">—
-                        </div>
-                        <div class="kpi-sub" id="kpi-topPerformerSub"></div>
-                    </div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background:rgba(167,139,250,.12)"><i data-lucide="users-round"
-                            style="width:20px;height:20px;color:#a78bfa"></i></div>
-                    <div>
-                        <div class="kpi-label">Consistent Students</div>
-                        <div class="kpi-value" id="kpi-consistent">—</div>
-                        <div class="kpi-sub">Completed 3+ games</div>
-                    </div>
-                </div>
+                <div class="chart-wrap"><canvas id="studentChart"></canvas></div>
             </div>
+        </div>
 
-            <!-- Charts Row -->
-            <div class="charts-row">
-                <div class="chart-card">
-                    <div class="chart-card-head">
-                        <div>
-                            <h3>Score Distribution by Game</h3>
-                            <p>Average score per activity across all students</p>
-                        </div>
-                        <span class="tag blue">Bar</span>
-                    </div>
-                    <div class="chart-wrap"><canvas id="scoreChart"></canvas></div>
-                </div>
-                <div class="chart-card">
-                    <div class="chart-card-head">
-                        <div>
-                            <h3>Student Performance Ranking</h3>
-                            <p>Top 8 students by average score</p>
-                        </div>
-                        <span class="tag amber">Bars</span>
-                    </div>
-                    <div class="chart-wrap"><canvas id="studentChart"></canvas></div>
-                </div>
+        <!-- Game Performance Table -->
+        <div class="table-panel">
+            <div class="panel-head">
+                <h2>Game Performance Breakdown</h2>
+                <p>Track which experiences drive the most meaningful practice time.</p>
             </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Activity</th>
+                        <th>Completions</th>
+                        <th>Avg. Score</th>
+                        <th>Avg. Time</th>
+                        <th>Top Scorer</th>
+                    </tr>
+                </thead>
+                <tbody id="gameBreakdownTable">
+                    <tr>
+                        <td class="empty-cell" colspan="5">
+                            <div class="spinner"></div>Loading...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-            <!-- Game Performance Table -->
-            <div class="table-section">
-                <div class="table-section-head">
-                    <h2>Game Performance Breakdown</h2>
-                    <p>Track which experiences drive the most meaningful practice time.</p>
-                </div>
-                <hr class="divider">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Activity</th>
-                            <th>Completions</th>
-                            <th>Avg. Score</th>
-                            <th>Avg. Time</th>
-                            <th>Top Scorer</th>
-                        </tr>
-                    </thead>
-                    <tbody id="gameBreakdownTable">
-                        <tr class="empty-row">
-                            <td colspan="5">
-                                <div class="spinner"></div>Loading...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Top Performers Table -->
+        <div class="table-panel">
+            <div class="panel-head">
+                <h2>Top Performers</h2>
+                <p>Students leading by completions, scores, and participation. Click a row to expand activity details.
+                </p>
             </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Email</th>
+                        <th>Activities</th>
+                        <th>Avg. Score</th>
+                        <th>Total Time</th>
+                    </tr>
+                </thead>
+                <tbody id="topPerformersTable">
+                    <tr>
+                        <td class="empty-cell" colspan="6">
+                            <div class="spinner"></div>Loading...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-            <!-- Top Performers Table -->
-            <div class="table-section">
-                <div class="table-section-head">
-                    <h2>Top Performers</h2>
-                    <p>Students leading by completions, scores, and participation. Click a row to expand activity
-                        details.</p>
-                </div>
-                <hr class="divider">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Student</th>
-                            <th>Email</th>
-                            <th>Activities</th>
-                            <th>Avg. Score</th>
-                            <th>Total Time</th>
-                        </tr>
-                    </thead>
-                    <tbody id="topPerformersTable">
-                        <tr class="empty-row">
-                            <td colspan="6">
-                                <div class="spinner"></div>Loading...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Individual Activity Table -->
+        <div class="table-panel">
+            <div class="panel-head">
+                <h2>Individual Student Activity</h2>
+                <p>Complete breakdown of every student's engagement. Click a row to expand.</p>
             </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Email</th>
+                        <th>Last Active</th>
+                        <th>Games Played</th>
+                        <th>Completion Rate</th>
+                    </tr>
+                </thead>
+                <tbody id="studentActivityTable">
+                    <tr>
+                        <td class="empty-cell" colspan="5">
+                            <div class="spinner"></div>Loading...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-            <!-- Individual Activity Table -->
-            <div class="table-section">
-                <div class="table-section-head">
-                    <h2>Individual Student Activity</h2>
-                    <p>Complete breakdown of every student's engagement and completion metrics. Click a row to expand.
-                    </p>
-                </div>
-                <hr class="divider">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Student</th>
-                            <th>Email</th>
-                            <th>Last Active</th>
-                            <th>Games Played</th>
-                            <th>Completion Rate</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentActivityTable">
-                        <tr class="empty-row">
-                            <td colspan="5">
-                                <div class="spinner"></div>Loading...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </div><!-- /content -->
-    </div><!-- /page -->
+    </div>
 
     <script>
-        // ── Lucide icons ──
         lucide.createIcons();
 
-        // ── Chart.js defaults ──
-        Chart.defaults.font.family = "'Inter', sans-serif";
-        Chart.defaults.font.size = 12;
-        Chart.defaults.color = '#6b7694';
-
-        let scoreChartInst, studentChartInst;
-
-        function chartColors() {
-            const dark = document.documentElement.getAttribute('data-theme') !== 'light';
+        // ── Chart.js theme-aware config ──
+        function chartCfg() {
+            const dark = document.documentElement.getAttribute('data-theme') === 'dark';
             return {
                 grid: dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)',
-                text: dark ? '#6b7694' : '#9ca3af',
-                bg: dark ? '#161b27' : '#ffffff',
+                tick: dark ? '#6b7694' : '#9ca3af',
+                label: dark ? '#e2e8f0' : '#111827',
             };
         }
 
+        let scoreChart, studentChart;
+
         function buildScoreChart(labels, values) {
-            const c = chartColors();
+            const c = chartCfg();
             const ctx = document.getElementById('scoreChart').getContext('2d');
-            if (scoreChartInst) scoreChartInst.destroy();
-            scoreChartInst = new Chart(ctx, {
+            if (scoreChart) scoreChart.destroy();
+            const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#f5a623';
+            const palette = ['#60a5fa', '#a78bfa', '#22d3a5', '#f5a623', '#f43f5e', '#fb923c'];
+            scoreChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels,
                     datasets: [{
-                        label: 'Avg Score %',
-                        data: values,
-                        backgroundColor: labels.map((_, i) => [
-                            'rgba(96,165,250,.75)', 'rgba(167,139,250,.75)', 'rgba(34,211,165,.75)',
-                            'rgba(245,166,35,.75)', 'rgba(244,63,94,.75)', 'rgba(251,146,60,.75)'
-                        ][i % 6]),
-                        borderRadius: 6,
-                        borderSkipped: false,
+                        label: 'Avg Score %', data: values,
+                        backgroundColor: labels.map((_, i) => palette[i % palette.length] + 'bb'),
+                        borderRadius: 6, borderSkipped: false
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y}%` } } },
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.parsed.y}%` } } },
                     scales: {
-                        x: { grid: { color: c.grid }, ticks: { color: c.text } },
-                        y: { min: 0, max: 100, grid: { color: c.grid }, ticks: { color: c.text, callback: v => v + '%' } }
+                        x: { grid: { color: c.grid }, ticks: { color: c.tick } },
+                        y: { min: 0, max: 100, grid: { color: c.grid }, ticks: { color: c.tick, callback: v => v + '%' } }
                     }
                 }
             });
         }
 
         function buildStudentChart(labels, values) {
-            const c = chartColors();
+            const c = chartCfg();
             const ctx = document.getElementById('studentChart').getContext('2d');
-            if (studentChartInst) studentChartInst.destroy();
-            studentChartInst = new Chart(ctx, {
-                type: 'bar',
-                indexAxis: 'y',
+            if (studentChart) studentChart.destroy();
+            studentChart = new Chart(ctx, {
+                type: 'bar', indexAxis: 'y',
                 data: {
                     labels,
                     datasets: [{
-                        label: 'Avg Score %',
-                        data: values,
-                        backgroundColor: 'rgba(245,166,35,.72)',
-                        borderRadius: 6,
-                        borderSkipped: false,
+                        label: 'Avg Score %', data: values,
+                        backgroundColor: 'rgba(245,166,35,.75)', borderRadius: 5, borderSkipped: false
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x}%` } } },
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.parsed.x}%` } } },
                     scales: {
-                        x: { min: 0, max: 100, grid: { color: c.grid }, ticks: { color: c.text, callback: v => v + '%' } },
-                        y: { grid: { display: false }, ticks: { color: c.text } }
+                        x: { min: 0, max: 100, grid: { color: c.grid }, ticks: { color: c.tick, callback: v => v + '%' } },
+                        y: { grid: { display: false }, ticks: { color: c.tick } }
                     }
                 }
             });
         }
 
-        // ── Override KPI rendering from faculty-dataanalytics.js ──
-        // We don't use analyticsGrid innerHTML — we use individual KPI elements.
-        // Patch: override the function after the external script loads.
-        window.__patchAnalytics = function (data) {
-            if (!data || !data.ok) return;
+        // ── Patch KPI elements (called after fetchAPI intercept) ──
+        window.__patchKPI = function (data) {
+            if (!data?.ok) return;
             const { gamesPlayed, totalEngagement, activeStudents, totalStudents, topPerformer, consistentStudents } = data;
             document.getElementById('kpi-gamesPlayed').textContent = gamesPlayed ?? '—';
             document.getElementById('kpi-engagement').textContent = totalEngagement != null ? totalEngagement + '%' : '—';
@@ -990,122 +1039,91 @@
             document.getElementById('kpi-consistent').textContent = consistentStudents ?? '—';
         };
 
-        // ── Override game breakdown to also feed chart ──
+        // ── Rebuild game table with proper tags ──
         window.__patchGames = function (games) {
-            if (!games || !games.length) return;
+            if (!games?.length) return;
             buildScoreChart(games.map(g => g.title), games.map(g => g.avgScore));
-
-            // Restyle game table rows
             const tbody = document.getElementById('gameBreakdownTable');
             if (!tbody) return;
-            const rows = tbody.querySelectorAll('tr:not(.empty-row)');
-            rows.forEach(row => {
+            tbody.querySelectorAll('tr:not(.empty-row)').forEach(row => {
                 const cells = row.querySelectorAll('td');
-                if (cells[0]) {
-                    const txt = cells[0].textContent.trim();
-                    cells[0].innerHTML = `<span class="tag blue">${txt}</span>`;
-                }
+                if (cells[0]) cells[0].innerHTML = `<span class="tag tag-blue">${cells[0].textContent.trim()}</span>`;
                 if (cells[2]) {
                     const pct = parseFloat(cells[2].textContent);
-                    const color = pct >= 70 ? 'green' : pct >= 40 ? 'amber' : 'red';
-                    cells[2].innerHTML = `<span class="tag ${color}">${cells[2].textContent}</span>`;
+                    const cls = pct >= 70 ? 'tag-green' : pct >= 40 ? 'tag-amber' : 'tag-red';
+                    cells[2].innerHTML = `<span class="tag ${cls}">${cells[2].textContent.trim()}</span>`;
                 }
             });
         };
 
-        // ── Override top performers to add rank badges + chart ──
+        // ── Rebuild top-performers with rank badges + chart ──
         window.__patchPerformers = function (students) {
-            if (!students || !students.length) return;
-            buildStudentChart(
-                students.slice(0, 8).map(s => s.name.split(' ')[0]),
-                students.slice(0, 8).map(s => s.avgScore)
-            );
+            if (!students?.length) return;
+            const top8 = students.slice(0, 8);
+            buildStudentChart(top8.map(s => s.name.split(' ')[0]), top8.map(s => s.avgScore));
 
-            // Add rank badges
             const tbody = document.getElementById('topPerformersTable');
             if (!tbody) return;
-            const colors = ['#6366f1', '#ec4899', '#f59e0b', '#22d3a5', '#3b82f6', '#a855f7', '#ef4444', '#10b981'];
-            let idx = 0;
+            const avColors = ['#6366f1', '#ec4899', '#f59e0b', '#22d3a5', '#3b82f6', '#a855f7', '#ef4444', '#10b981'];
             tbody.querySelectorAll('tr.student-row').forEach((row, i) => {
-                const cells = row.querySelectorAll('td');
-                // Insert rank cell at start if not there
-                const name = cells[0]?.querySelector('strong')?.textContent || cells[0]?.textContent?.trim() || '';
-                const ini = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-                const col = colors[idx % colors.length]; idx++;
-                const rankCls = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
-                const rankNum = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1;
-                // Prepend rank cell
-                const rankTd = document.createElement('td');
-                rankTd.innerHTML = `<span class="rank ${rankCls}">${rankNum}</span>`;
-                row.insertBefore(rankTd, row.firstChild);
-                // Style name cell
+                const rankMark = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1;
+                const rankCls = ['rank-1', 'rank-2', 'rank-3'][i] || 'rank-n';
+                // Insert rank cell if not added
+                if (!row.querySelector('.rank')) {
+                    const td = document.createElement('td');
+                    td.innerHTML = `<span class="rank ${rankCls}">${rankMark}</span>`;
+                    row.insertBefore(td, row.firstChild);
+                }
+                // Style the name cell (now cells[1])
                 const nameTd = row.cells[1];
-                if (nameTd) {
-                    const chevron = nameTd.querySelector('span') || document.createElement('span');
-                    chevron.className = 'chevron';
-                    chevron.textContent = '▾';
-                    const strong = nameTd.querySelector('strong');
-                    if (strong) {
-                        nameTd.innerHTML = '';
-                        const wrap = document.createElement('div');
-                        wrap.style.cssText = 'display:flex;align-items:center;gap:8px';
-                        const av = document.createElement('div');
-                        av.className = 'av';
-                        av.style.background = col;
-                        av.textContent = ini;
-                        wrap.appendChild(av);
-                        const nameSpan = document.createElement('span');
-                        nameSpan.innerHTML = `<strong>${name}</strong> <span class="chevron">▾</span>`;
-                        wrap.appendChild(nameSpan);
-                        nameTd.appendChild(wrap);
-                    }
+                if (nameTd && !nameTd.querySelector('.av')) {
+                    const name = nameTd.querySelector('strong')?.textContent?.trim() || nameTd.textContent?.trim().replace('▼', '').trim();
+                    const ini = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+                    const col = avColors[i % avColors.length];
+                    const chevron = nameTd.querySelector('span');
+                    nameTd.innerHTML = `<span class="av" style="background:${col}">${ini}</span><strong>${name}</strong><span class="chevron">▾</span>`;
                 }
             });
         };
 
-        // Dropdown toggle logic
+        // ── Dropdown logic ──
         ['filterToggleBtn', 'exportToggleBtn'].forEach(id => {
             const btn = document.getElementById(id);
             const panelId = id === 'filterToggleBtn' ? 'filterPanel' : 'exportPanel';
             const otherId = id === 'filterToggleBtn' ? 'exportPanel' : 'filterPanel';
             btn?.addEventListener('click', e => {
                 e.stopPropagation();
-                document.getElementById(panelId).classList.toggle('open');
-                document.getElementById(otherId).classList.remove('open');
+                document.getElementById(panelId)?.classList.toggle('open');
+                document.getElementById(otherId)?.classList.remove('open');
             });
         });
         document.addEventListener('click', () => {
             document.getElementById('filterPanel')?.classList.remove('open');
             document.getElementById('exportPanel')?.classList.remove('open');
         });
-        ['filterPanel', 'exportPanel'].forEach(id => {
-            document.getElementById(id)?.addEventListener('click', e => e.stopPropagation());
-        });
+        ['filterPanel', 'exportPanel'].forEach(id => document.getElementById(id)?.addEventListener('click', e => e.stopPropagation()));
     </script>
 
-    <!-- External data + export logic (unchanged) -->
+    <!-- Data + export logic (unchanged) -->
     <script src="faculty-dataanalytics.js"></script>
 
     <script>
-        // After external script loads, monkey-patch renderAnalytics & renderGameBreakdown
-        // to also call our chart builders
-        const _origUpdateDashboard = window.updateDashboard;
-
-        // Intercept fetchAPI calls via overriding render functions
-        const _fetchOrig = window.fetchAPI;
-        if (_fetchOrig) {
-            window.fetchAPI = async function (endpoint) {
-                const result = await _fetchOrig(endpoint);
-                if (endpoint.includes('/api/analytics/overview') && result?.ok) window.__patchAnalytics(result);
-                if (endpoint.includes('/api/analytics/games') && result?.ok) setTimeout(() => window.__patchGames(result.games), 100);
-                if (endpoint.includes('/api/analytics/students') && !endpoint.includes('/activities') && result?.ok) {
-                    const sorted = [...(result.students || [])].sort((a, b) => b.avgScore - a.avgScore).slice(0, 8);
-                    setTimeout(() => window.__patchPerformers(sorted), 200);
+        // Intercept fetchAPI to feed our KPI elements + charts
+        const _origFetch = window.fetchAPI;
+        if (_origFetch) {
+            window.fetchAPI = async function (ep) {
+                const res = await _origFetch(ep);
+                if (ep.includes('/api/analytics/overview') && res?.ok) window.__patchKPI(res);
+                if (ep.includes('/api/analytics/games') && res?.ok) setTimeout(() => window.__patchGames(res.games), 80);
+                if (ep.includes('/api/analytics/students') && !ep.includes('/activities') && res?.ok) {
+                    const sorted = [...(res.students || [])].sort((a, b) => b.avgScore - a.avgScore);
+                    setTimeout(() => window.__patchPerformers(sorted), 160);
                 }
-                return result;
+                return res;
             };
         }
     </script>
+
 </body>
 
 </html>
