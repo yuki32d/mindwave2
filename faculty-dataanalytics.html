@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -1108,88 +1108,101 @@
     <script src="faculty-dataanalytics.js"></script>
 
     <script>
-        // ── Override renderAnalytics so it populates our styled KPI elements
-        // instead of replacing #analyticsGrid with old insight-card HTML ──
+        const API_BASE_URL = window.location.origin;
+
+        async function apiGet(endpoint) {
+            try {
+                const r = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                if (!r.ok) return null;
+                return await r.json();
+            } catch(e) { return null; }
+        }
+
+        // Override renderAnalytics: populate #kpi-* elements instead of replacing #analyticsGrid
         window.renderAnalytics = async function () {
-            const data = await fetchAPI('/api/analytics/overview');
+            const data = await apiGet('/api/analytics/overview');
             if (!data || !data.ok) return;
             const { gamesPlayed, totalEngagement, activeStudents, totalStudents, topPerformer, consistentStudents } = data;
-            document.getElementById('kpi-gamesPlayed').textContent = gamesPlayed ?? '—';
-            document.getElementById('kpi-engagement').textContent = totalEngagement != null ? totalEngagement + '%' : '—';
-            document.getElementById('kpi-engagementSub').textContent = `${activeStudents ?? 0} of ${totalStudents ?? 0} students active`;
-            document.getElementById('kpi-topPerformer').textContent = topPerformer?.name ?? 'N/A';
-            document.getElementById('kpi-topPerformerSub').textContent = topPerformer ? `${topPerformer.totalScore} completions` : '';
-            document.getElementById('kpi-consistent').textContent = consistentStudents ?? '—';
+            document.getElementById('kpi-gamesPlayed').textContent   = gamesPlayed != null ? gamesPlayed : '—';
+            document.getElementById('kpi-engagement').textContent    = totalEngagement != null ? totalEngagement + '%' : '—';
+            document.getElementById('kpi-engagementSub').textContent = (activeStudents || 0) + ' of ' + (totalStudents || 0) + ' students active';
+            document.getElementById('kpi-topPerformer').textContent  = topPerformer ? topPerformer.name : 'N/A';
+            document.getElementById('kpi-topPerformerSub').textContent = topPerformer ? topPerformer.totalScore + ' completions' : '';
+            document.getElementById('kpi-consistent').textContent   = consistentStudents != null ? consistentStudents : '—';
         };
 
-        // ── Override renderGameBreakdown to also build the score chart ──
-        const _origGameBreakdown = window.renderGameBreakdown;
+        // Override renderGameBreakdown: run original table logic, then fetch games to build chart
+        var _origGB = window.renderGameBreakdown;
         window.renderGameBreakdown = async function () {
-            await _origGameBreakdown();
-            // Rebuild chart from current table data
-            const rows = document.querySelectorAll('#gameBreakdownTable tr:not(.empty-row)');
-            const labels = [], values = [];
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 3) {
-                    const title = cells[0]?.textContent?.replace(/[^a-zA-Z0-9 ]/g, '').trim();
-                    const score = parseFloat(cells[2]?.textContent) || 0;
-                    labels.push(title);
-                    // scores might be 0-1 decimals or 0-100 percentages
-                    values.push(score <= 1 ? score * 100 : score);
-                }
-            });
-            if (labels.length) buildScoreChart(labels, values);
+            await _origGB();
 
-            // Re-style game table cells
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
+            // Style game table cells with tags
+            document.querySelectorAll('#gameBreakdownTable tr').forEach(function(row) {
+                var cells = row.querySelectorAll('td');
+                if (!cells.length) return;
                 if (cells[0] && !cells[0].querySelector('.tag')) {
-                    cells[0].innerHTML = `<span class="tag tag-blue">${cells[0].textContent.trim()}</span>`;
+                    var txt = cells[0].textContent.trim();
+                    cells[0].innerHTML = '<span class="tag tag-blue">' + txt + '</span>';
                 }
                 if (cells[2] && !cells[2].querySelector('.tag')) {
-                    const pct = parseFloat(cells[2].textContent);
-                    const cls = pct >= 70 ? 'tag-green' : pct >= 40 ? 'tag-amber' : 'tag-red';
-                    cells[2].innerHTML = `<span class="tag ${cls}">${cells[2].textContent.trim()}</span>`;
+                    var pct = parseFloat(cells[2].textContent) || 0;
+                    var cls = pct >= 70 ? 'tag-green' : pct >= 40 ? 'tag-amber' : 'tag-red';
+                    cells[2].innerHTML = '<span class="tag ' + cls + '">' + pct + '%</span>';
                 }
             });
+
+            // Fetch game data directly for chart
+            var gamesData = await apiGet('/api/analytics/games');
+            if (!gamesData || !gamesData.ok || !gamesData.games || !gamesData.games.length) return;
+
+            var labels = gamesData.games.map(function(g) { return g.title || 'Unknown'; });
+            var values = gamesData.games.map(function(g) {
+                var s = parseFloat(g.avgScore) || 0;
+                return s <= 1 ? parseFloat((s * 100).toFixed(1)) : parseFloat(s.toFixed(1));
+            });
+            buildScoreChart(labels, values);
         };
 
-        // ── Override renderTopPerformers to also build the student chart ──
-        const _origTopPerformers = window.renderTopPerformers;
+        // Override renderTopPerformers: run original table logic, add rank badges, build student chart
+        var _origTP = window.renderTopPerformers;
         window.renderTopPerformers = async function () {
-            await _origTopPerformers();
-            // Build student chart from table data
-            const rows = document.querySelectorAll('#topPerformersTable tr.student-row');
-            const labels = [], values = [];
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 4) {
-                    const name = cells[0]?.querySelector('strong')?.textContent?.trim() || cells[0]?.textContent?.trim();
-                    const score = parseFloat(cells[3]?.textContent) || 0;
-                    labels.push(name.split(' ')[0]);
-                    values.push(score <= 1 ? score * 100 : score);
-                }
-            });
-            if (labels.length) buildStudentChart(labels.slice(0, 8), values.slice(0, 8));
+            await _origTP();
 
             // Add rank badges + avatars
-            const avColors = ['#6366f1', '#ec4899', '#f59e0b', '#22d3a5', '#3b82f6', '#a855f7', '#ef4444', '#10b981'];
-            rows.forEach((row, i) => {
-                if (row.querySelector('.rank')) return; // already patched
-                const rankMark = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1;
-                const rankCls = ['rank-1', 'rank-2', 'rank-3'][i] || 'rank-n';
-                const td = document.createElement('td');
-                td.innerHTML = `<span class="rank ${rankCls}">${rankMark}</span>`;
+            var avColors = ['#6366f1','#ec4899','#f59e0b','#22d3a5','#3b82f6','#a855f7','#ef4444','#10b981'];
+            document.querySelectorAll('#topPerformersTable tr.student-row').forEach(function(row, i) {
+                if (row.querySelector('.rank')) return;
+                var rankMark = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : (i+1).toString();
+                var rankCls  = i < 3 ? 'rank-' + (i+1) : 'rank-n';
+                var td = document.createElement('td');
+                td.innerHTML = '<span class="rank ' + rankCls + '">' + rankMark + '</span>';
                 row.insertBefore(td, row.firstChild);
 
-                const nameTd = row.cells[1];
+                var nameTd = row.cells[1];
                 if (nameTd && !nameTd.querySelector('.av')) {
-                    const name = nameTd.querySelector('strong')?.textContent?.trim() || nameTd.textContent?.replace('▼', '').trim();
-                    const ini = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-                    nameTd.innerHTML = `<span class="av" style="background:${avColors[i % avColors.length]}">${ini}</span><strong>${name}</strong><span class="chevron">▾</span>`;
+                    var strong = nameTd.querySelector('strong');
+                    var name = strong ? strong.textContent.trim()
+                             : nameTd.textContent.replace(/[▼▾]/g, '').trim();
+                    var ini  = name.split(' ').map(function(w){ return w[0]||''; }).join('').toUpperCase().slice(0,2) || '??';
+                    nameTd.innerHTML = '<span class="av" style="background:' + avColors[i%avColors.length] + '">' + ini + '</span>'
+                                     + '<strong>' + name + '</strong>'
+                                     + '<span class="chevron">▾</span>';
                 }
             });
+
+            // Fetch student data directly for chart
+            var studentData = await apiGet('/api/analytics/students?timeRange=all');
+            if (!studentData || !studentData.ok || !studentData.students || !studentData.students.length) return;
+
+            var sorted = studentData.students.slice().sort(function(a,b){ return b.avgScore - a.avgScore; }).slice(0, 8);
+            var chartLabels = sorted.map(function(s){ return (s.name || s.email || '?').split(' ')[0]; });
+            var chartValues = sorted.map(function(s){
+                var v = parseFloat(s.avgScore) || 0;
+                return v <= 1 ? parseFloat((v * 100).toFixed(1)) : parseFloat(v.toFixed(1));
+            });
+            buildStudentChart(chartLabels, chartValues);
         };
     </script>
 
