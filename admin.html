@@ -15,7 +15,17 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="auth-guard.js"></script>
     <script>
-        if (!checkAdminAuth()) { /* will redirect */ }
+        // Inline admin guard — checkAdminAuth() was never defined, so we inline it
+        (function () {
+            var t = localStorage.getItem('token');
+            if (!t) { window.location.replace('login.html'); return; }
+            try {
+                var p = JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+                if (p.exp && Date.now() / 1000 > p.exp) { localStorage.removeItem('token'); window.location.replace('login.html'); return; }
+                if (p.role !== 'admin' && p.role !== 'faculty') { window.location.replace('homepage.html'); return; }
+                window.MW_USER_ROLE = p.role; window.MW_USER_ID = p.sub;
+            } catch (e) { localStorage.removeItem('token'); window.location.replace('login.html'); }
+        })();
         if (document.referrer.includes('login.html')) {
             window.history.replaceState(null, null, window.location.href);
         }
