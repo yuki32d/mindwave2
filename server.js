@@ -4383,54 +4383,71 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
   try {
     const { timeRange = 'all' } = req.query;
 
-    // Calculate date filter
-    let dateFilter = {};
+    // Date filter for submissions
+    let submissionDateMatch = {};
     if (timeRange !== 'all') {
       const daysAgo = parseInt(timeRange);
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
-      dateFilter = { submittedAt: { $gte: cutoffDate } };
+      submissionDateMatch = { submittedAt: { $gte: cutoffDate } };
     }
 
-    const studentsData = await GameSubmission.aggregate([
-      { $match: dateFilter },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'studentId',
-          foreignField: '_id',
-          as: 'student'
-        }
-      },
-      { $unwind: '$student' },
-      // Filter to exclude admin users and super admin email from student analytics
+    // Start from ALL students so those with zero activity still appear
+    const studentsData = await User.aggregate([
       {
         $match: {
-          'student.role': { $ne: 'admin' },
-          'student.email': { $ne: SUPER_ADMIN_EMAIL }
+          role: 'student',
+          email: { $ne: SUPER_ADMIN_EMAIL }
+        }
+      },
+      // Left-join their game submissions (filtered by time range)
+      {
+        $lookup: {
+          from: 'gamesubmissions',
+          let: { sid: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$studentId', '$$sid'] },
+                ...submissionDateMatch
+              }
+            }
+          ],
+          as: 'submissions'
+        }
+      },
+      // Compute stats
+      {
+        $addFields: {
+          gamesPlayed: { $size: '$submissions' },
+          gamesCompleted: {
+            $size: {
+              $filter: { input: '$submissions', as: 's', cond: { $eq: ['$$s.isCorrect', true] } }
+            }
+          },
+          lastActive: { $max: '$submissions.submittedAt' },
+          totalTime: { $sum: '$submissions.durationSeconds' }
         }
       },
       {
-        $group: {
-          _id: '$studentId',
-          name: { $first: { $ifNull: ['$student.displayName', '$student.name'] } },
-          email: { $first: '$student.email' },
-          gamesPlayed: { $sum: 1 },
-          gamesCompleted: {
-            $sum: { $cond: [{ $eq: ['$isCorrect', true] }, 1, 0] }
-          },
-          lastActive: { $max: '$submittedAt' },
-          totalTime: { $sum: '$durationSeconds' }
+        $project: {
+          _id: 1,
+          name: { $ifNull: ['$displayName', '$name'] },
+          email: 1,
+          gamesPlayed: 1,
+          gamesCompleted: 1,
+          lastActive: 1,
+          totalTime: 1
         }
       },
-      { $sort: { lastActive: -1 } }
+      { $sort: { lastActive: -1, name: 1 } }
     ]);
 
     const students = studentsData.map(student => {
       const completionRate = student.gamesPlayed > 0
         ? Math.round((student.gamesCompleted / student.gamesPlayed) * 100)
         : 0;
-      const avgScore = student.gamesCompleted > 0
+      const avgScore = student.gamesPlayed > 0
         ? Math.round((student.gamesCompleted / student.gamesPlayed) * 100)
         : 0;
 
@@ -4442,7 +4459,7 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
         gamesCompleted: student.gamesCompleted,
         avgScore,
         totalTime: student.totalTime || 0,
-        lastActive: student.lastActive,
+        lastActive: student.lastActive || null,
         completionRate
       };
     });
@@ -4454,7 +4471,9 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
   }
 });
 
+
 // Get detailed activities for a specific student
+
 app.get("/api/analytics/students/:studentId/activities", authMiddleware, async (req, res) => {
   try {
     const { studentId } = req.params;
