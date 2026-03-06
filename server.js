@@ -3631,8 +3631,8 @@ app.get("/api/games/:id/leaderboard", authMiddleware, async (req, res) => {
 
 // Announcement Endpoints
 app.post("/api/announcements", authMiddleware, requireFaculty, async (req, res) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ ok: false, message: "Only admins can create announcements" });
+  if (req.user.role !== "admin" && req.user.role !== "faculty") {
+    return res.status(403).json({ ok: false, message: "Faculty or admin access required" });
   }
   const { title, body, audience, targetClasses, isPublic } = req.body;
   if (!title || !body) {
@@ -3666,10 +3666,9 @@ app.post("/api/announcements", authMiddleware, requireFaculty, async (req, res) 
 
 app.get("/api/announcements", authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.sub);
-
-    // Faculty/Admin see all their own announcements
-    if (user.role === 'admin' || user.orgRole === 'faculty' || user.orgRole === 'owner') {
+    // Faculty/Admin see all their own announcements (use token role — avoids null crash)
+    const userRole = req.user.role;
+    if (userRole === 'admin' || userRole === 'faculty') {
       const announcements = await Announcement.find({ createdBy: req.user.sub })
         .sort({ createdAt: -1 })
         .limit(20);
@@ -3677,6 +3676,8 @@ app.get("/api/announcements", authMiddleware, async (req, res) => {
     }
 
     // Students see announcements for their class
+    const user = await User.findById(req.user.sub);
+    if (!user) return res.json({ ok: true, announcements: [] });
     const studentClass = `${user.department}-${user.batch}-${user.section}`;
     const announcements = await Announcement.find({
       $or: [
@@ -3694,8 +3695,8 @@ app.get("/api/announcements", authMiddleware, async (req, res) => {
 });
 
 app.delete("/api/announcements/:id", authMiddleware, requireFaculty, async (req, res) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ ok: false, message: "Only admins can delete announcements" });
+  if (req.user.role !== "admin" && req.user.role !== "faculty") {
+    return res.status(403).json({ ok: false, message: "Faculty or admin access required" });
   }
   try {
     await Announcement.findByIdAndDelete(req.params.id);
