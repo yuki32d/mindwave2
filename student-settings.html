@@ -5,7 +5,7 @@
     <script src="student-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings  |  MindWave</title>
+    <title>Settings | MindWave</title>
     <meta name="description" content="Manage your MindWave profile and preferences.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,6 @@
         rel="stylesheet">
     <link rel="stylesheet" href="student-theme.css">
     <script src="auth-guard.js"></script>
-    <script>if (!checkStudentAuth()) { }</script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script>
         (function () {
@@ -623,7 +622,8 @@
                     <a href="student-github.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="github"></i></span> GitHub Projects
                     </a>
-                <a href="student-live-meeting.html" class="mw-nav-item"><span class="mw-nav-icon"><i data-lucide="video"></i></span> Web Conf</a>
+                    <a href="student-live-meeting.html" class="mw-nav-item"><span class="mw-nav-icon"><i
+                                data-lucide="video"></i></span> Web Conf</a>
 
                     <a href="student-reports.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
@@ -654,7 +654,7 @@
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student  MindWave</div>
+                            <div class="role">Student MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -669,7 +669,7 @@
 
             <!-- TOPBAR -->
             <header class="mw-topbar">
-    <script src="student-theme-init.js"></script>
+                <script src="student-theme-init.js"></script>
                 <button class="mw-hamburger" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar">
                     <span></span><span></span><span></span>
                 </button>
@@ -736,7 +736,7 @@
                                     </div>
                                     <div class="st-photo-info">
                                         <h4>Profile Picture</h4>
-                                        <p>JPG, PNG or GIF  max 2 MB</p>
+                                        <p>JPG, PNG or GIF max 2 MB</p>
                                         <div class="st-photo-btns">
                                             <input type="file" id="photoInput" accept="image/*" style="display:none;">
                                             <button class="st-btn st-btn-ghost st-btn-sm"
@@ -948,10 +948,10 @@
                                     <div class="st-field">
                                         <label>Default Mode</label>
                                         <select id="aiDefaultMode">
-                                            <option value="tutor">Tutor  explain concepts step-by-step</option>
-                                            <option value="quiz">Quiz  test my knowledge</option>
-                                            <option value="socratic">Socratic  guide me with questions</option>
-                                            <option value="practice">Practice  give me problems to solve</option>
+                                            <option value="tutor">Tutor explain concepts step-by-step</option>
+                                            <option value="quiz">Quiz test my knowledge</option>
+                                            <option value="socratic">Socratic guide me with questions</option>
+                                            <option value="practice">Practice give me problems to solve</option>
                                         </select>
                                     </div>
                                     <div class="st-field">
@@ -1020,7 +1020,8 @@
                                             <div class="st-theme-sub">Easy on the eyes</div>
                                         </div>
                                     </div>
-                                    <div class="st-theme-card" data-theme-choice="dark" id="themeCardLight" onclick="selectTheme('light')">
+                                    <div class="st-theme-card" data-theme-choice="dark" id="themeCardLight"
+                                        onclick="selectTheme('light')">
                                         <div class="st-theme-preview light-prev"></div>
                                         <div>
                                             <div class="st-theme-label">Light</div>
@@ -1062,7 +1063,7 @@
                                 <div class="st-toggle-row">
                                     <div class="st-toggle-info">
                                         <h4>Compact text</h4>
-                                        <p>Slightly smaller font size  fits more content on screen</p>
+                                        <p>Slightly smaller font size fits more content on screen</p>
                                     </div>
                                     <label class="st-switch">
                                         <input type="checkbox" id="compactMode">

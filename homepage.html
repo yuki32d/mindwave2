@@ -14,7 +14,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="auth-guard.js"></script>
     <script>
-        if (!checkStudentAuth()) { /* redirects */ }
         if (document.referrer.includes('login.html')) {
             window.history.replaceState(null, null, window.location.href);
         }
