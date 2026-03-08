@@ -93,8 +93,25 @@ async function saveSettings() {
             alert('Password must be at least 8 characters long!');
             return;
         }
-        // In a real app, you would verify current password and update it here
-        console.log('Password would be updated in a real implementation');
+        try {
+            const pwRes = await fetch(`${window.location.origin}/api/users/password`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+            const pwData = await pwRes.json();
+            if (!pwData.ok) {
+                alert(pwData.message || 'Failed to update password.');
+                return;
+            }
+        } catch (e) {
+            alert('Password change failed. Please try again.');
+            return;
+        }
+
     }
 
     try {

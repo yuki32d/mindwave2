@@ -2311,7 +2311,39 @@ app.put("/api/users/profile", authMiddleware, async (req, res) => {
   }
 });
 
-// Get faculty's classes (based on department extracted from email)
+// ── Change Password ──────────────────────────────────────────────────────────
+app.put("/api/users/password", authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ ok: false, message: "Current and new password are required." });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ ok: false, message: "New password must be at least 8 characters." });
+    }
+
+    const user = await User.findById(req.user.sub);
+    if (!user) {
+      return res.status(404).json({ ok: false, message: "User not found." });
+    }
+
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) {
+      return res.status(401).json({ ok: false, message: "Current password is incorrect." });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 12);
+    await user.save();
+
+    res.json({ ok: true, message: "Password updated successfully." });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({ ok: false, message: "Server error. Please try again." });
+  }
+});
+
+
 app.get("/api/faculty/classes", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.sub);
