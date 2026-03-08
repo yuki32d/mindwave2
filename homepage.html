@@ -481,31 +481,32 @@
                                     <svg width="120" height="120" viewBox="0 0 120 120">
                                         <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.07)"
                                             stroke-width="10" />
-                                        <circle cx="60" cy="60" r="50" fill="none" stroke="url(#xpGrad)"
+                                        <circle id="xpRingArc" cx="60" cy="60" r="50" fill="none" stroke="url(#xpGrad)"
                                             stroke-width="10" stroke-linecap="round" stroke-dasharray="314"
-                                            stroke-dashoffset="70" transform="rotate(-90 60 60)" />
+                                            stroke-dashoffset="314" transform="rotate(-90 60 60)" />
                                         <defs>
                                             <linearGradient id="xpGrad" x1="0" y1="0" x2="1" y2="0">
                                                 <stop offset="0%" stop-color="#6366f1" />
                                                 <stop offset="100%" stop-color="#a78bfa" />
                                             </linearGradient>
                                         </defs>
-                                        <text x="60" y="54" text-anchor="middle" font-size="22" font-weight="800"
-                                            fill="currentColor">12</text>
+                                        <text id="xpLevelNum" x="60" y="54" text-anchor="middle" font-size="22"
+                                            font-weight="800" fill="currentColor">—</text>
                                         <text x="60" y="70" text-anchor="middle" font-size="11"
                                             fill="#8b90a8">Level</text>
                                     </svg>
                                 </div>
                                 <div class="mw-xp-bar-wrap">
                                     <div class="mw-xp-bar-labels">
-                                        <span>4,820 XP</span>
-                                        <span>5,000 XP</span>
+                                        <span id="xpCurrent">— XP</span>
+                                        <span id="xpNext">— XP</span>
                                     </div>
                                     <div class="mw-xp-track">
-                                        <div class="mw-xp-fill" style="width:78%"></div>
+                                        <div id="xpFill" class="mw-xp-fill" style="width:0%"></div>
                                     </div>
-                                    <div style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted);">180
-                                        XP to Level 13</div>
+                                    <div id="xpToNext"
+                                        style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted);">
+                                        Loading…</div>
                                 </div>
                             </div>
                         </div>

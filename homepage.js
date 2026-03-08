@@ -364,7 +364,41 @@ if (document.readyState === 'loading') {
     initDataHrefButtons();
 }
 
-// === REAL-TIME STATS & SPARKLINES ===
+// ── XP LEVEL RING (real-time) ──────────────────────────────────────────
+function renderXPLevel(totalXP) {
+    const XP_PER_LEVEL = 400;
+    const level = Math.floor(totalXP / XP_PER_LEVEL) + 1;
+    const xpIntoLevel = totalXP % XP_PER_LEVEL;
+    const xpToNext = XP_PER_LEVEL - xpIntoLevel;
+    const pct = xpIntoLevel / XP_PER_LEVEL; // 0–1
+    const CIRCUMFERENCE = 314; // 2π × r(50)
+    const offset = CIRCUMFERENCE * (1 - pct);
+
+    const ringArc = document.getElementById('xpRingArc');
+    const levelNum = document.getElementById('xpLevelNum');
+    const xpCurrent = document.getElementById('xpCurrent');
+    const xpNext = document.getElementById('xpNext');
+    const xpFill = document.getElementById('xpFill');
+    const xpToNextEl = document.getElementById('xpToNext');
+
+    if (ringArc) {
+        ringArc.style.transition = 'stroke-dashoffset 0.8s ease';
+        ringArc.setAttribute('stroke-dashoffset', offset.toFixed(1));
+    }
+    if (levelNum) levelNum.textContent = level;
+    if (xpCurrent) xpCurrent.textContent = totalXP.toLocaleString() + ' XP';
+    if (xpNext) xpNext.textContent = (level * XP_PER_LEVEL).toLocaleString() + ' XP';
+    if (xpFill) {
+        xpFill.style.transition = 'width 0.8s ease';
+        xpFill.style.width = (pct * 100).toFixed(1) + '%';
+    }
+    if (xpToNextEl) {
+        xpToNextEl.textContent = xpToNext > 0
+            ? `${xpToNext} XP to Level ${level + 1}`
+            : `🎉 Level ${level} complete!`;
+    }
+}
+
 async function fetchDashboardSparklines() {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -448,6 +482,9 @@ async function fetchDashboardSparklines() {
 
             if (xpEl && u.totalPoints != null) xpEl.textContent = Number(u.totalPoints).toLocaleString();
             if (gamesEl && u.gamesPlayed != null) gamesEl.textContent = u.gamesPlayed;
+
+            // Update XP Level ring
+            if (u.totalPoints != null) renderXPLevel(Number(u.totalPoints));
 
             // Rank: show — when student has no games yet (rank 0)
             if (rankEl) {
