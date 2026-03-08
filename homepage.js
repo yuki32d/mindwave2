@@ -169,6 +169,10 @@ function performLogout() {
     if (modal) modal.classList.add('active');
 }
 
+function clearAuthAndCache() {
+    ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role', 'name'].forEach(k => localStorage.removeItem(k));
+}
+
 function doLogout() {
     clearAuthAndCache();
     window.location.replace('marketing-site/student-login.html');
