@@ -9,7 +9,7 @@ async function loadSettings() {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
-            window.location.href = 'login.html';
+            window.location.replace('marketing-site/student-login.html');
             return;
         }
 
@@ -101,7 +101,7 @@ async function saveSettings() {
         const token = localStorage.getItem('token');
         if (!token) {
             alert('Please log in again');
-            window.location.href = 'login.html';
+            window.location.replace('marketing-site/student-login.html');
             return;
         }
 

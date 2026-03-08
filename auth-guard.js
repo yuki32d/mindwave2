@@ -18,7 +18,7 @@
 
     var token = localStorage.getItem('token');
     if (!token) {
-        window.location.replace('login.html');
+        window.location.replace('marketing-site/student-login.html');
         return;
     }
 
@@ -31,7 +31,7 @@
         // Check token expiry
         if (payload.exp && Date.now() / 1000 > payload.exp) {
             localStorage.removeItem('token');
-            window.location.replace('login.html');
+            window.location.replace('marketing-site/student-login.html');
             return;
         }
 
@@ -53,6 +53,6 @@
 
     } catch (e) {
         localStorage.removeItem('token');
-        window.location.replace('login.html');
+        window.location.replace('marketing-site/student-login.html');
     }
 })();
