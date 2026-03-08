@@ -1256,8 +1256,6 @@
 
     <!-- TOPBAR -->
     <header class="cp-topbar">
-    <script src="student-theme-init.js"></script>
-    <script src="auth-guard.js" data-role="student"></script>
         <a href="javascript:history.back()" class="cp-back">
             <i data-lucide="arrow-left"></i> Back
         </a>
@@ -1696,7 +1694,13 @@
 
         // ── MONACO EDITOR ──
         function initMonaco() {
-            require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
+            require.config({
+                paths: {
+                    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs',
+                    stackframe: 'https://cdn.jsdelivr.net/npm/stackframe@1.3.4/stackframe.min',
+                    'error-stack-parser': 'https://cdn.jsdelivr.net/npm/error-stack-parser@2.1.4/error-stack-parser.min'
+                }
+            });
             require(['vs/editor/editor.main'], function () {
                 editor = monaco.editor.create(document.getElementById('monacoContainer'), {
                     value: '// Select a challenge to begin…',
