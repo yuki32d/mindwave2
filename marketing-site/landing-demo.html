@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindWave — Transform Learning into Epic Adventures</title>
+<meta name="description" content="AI-powered gamification platform for modern education.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --p: #4F46E5;
+  --p2: #7C3AED;
+  --p3: #06B6D4;
+  --dark: #F8F7FF;
+  --dark2: #F1F0FF;
+  --dark3: #EAE8FF;
+  --text: #18181B;
+  --muted: #6B7280;
+  --border: rgba(79,70,229,0.12);
+  --card: #FFFFFF;
+  --glow: rgba(79,70,229,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+/* Subtle mesh gradient background */
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(167,139,250,0.1) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 80% 90%,rgba(99,102,241,0.07) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 60% 40%,rgba(6,182,212,0.05) 0%,transparent 60%),#F8F7FF;}
+
+/* ── CANVAS BACKGROUND ── */
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.18;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 5%;height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(248,247,255,.82);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:all .3s;}
+nav.scrolled{background:rgba(248,247,255,.96);box-shadow:0 1px 24px rgba(79,70,229,0.07);}
+.nav-logo{display:flex;align-items:center;gap:10px;font-size:1.35rem;font-weight:800;color:var(--text);text-decoration:none;}
+.nav-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--p),var(--p2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:500;transition:color .2s;}
+.nav-links a:hover{color:var(--p);}
+.nav-cta{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff!important;padding:10px 22px;border-radius:10px;font-weight:600!important;transition:all .3s!important;box-shadow:0 0 20px var(--glow);}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 0 30px var(--glow);}
+.mobile-toggle{display:none;background:none;border:none;color:var(--text);font-size:1.4rem;cursor:pointer;}
+
+/* ── HERO ── */
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 5% 80px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.25);color:#5B5BDE;padding:8px 18px;border-radius:100px;font-size:.82rem;font-weight:600;margin-bottom:32px;animation:fadeUp .8s ease both;}
+.hero-badge-dot{width:7px;height:7px;background:#4F46E5;border-radius:50%;animation:pulse-dot 2s ease infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.4);}}
+.hero h1{font-size:clamp(2.8rem,6vw,5.5rem);font-weight:900;line-height:1.08;letter-spacing:-0.03em;margin-bottom:28px;animation:fadeUp .8s .1s ease both;color:var(--text);}
+.hero h1 .line2{background:linear-gradient(135deg,var(--p),var(--p2),var(--p3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200%;animation:shimmer 4s linear infinite;}
+@keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
+.hero-sub{font-size:clamp(1rem,2vw,1.2rem);color:#52525B;max-width:600px;margin:0 auto 44px;line-height:1.7;animation:fadeUp .8s .2s ease both;}
+.hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeUp .8s .3s ease both;}
+.btn-primary{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;padding:15px 32px;border-radius:12px;font-size:1rem;font-weight:700;text-decoration:none;transition:all .3s;box-shadow:0 10px 40px var(--glow);}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 20px 50px var(--glow);}
+.btn-ghost{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px solid rgba(79,70,229,.2);color:var(--text);padding:15px 32px;border-radius:12px;font-size:1rem;font-weight:600;text-decoration:none;transition:all .3s;box-shadow:0 2px 12px rgba(79,70,229,0.07);}
+.btn-ghost:hover{background:#fff;border-color:var(--p);color:var(--p);transform:translateY(-3px);box-shadow:0 8px 24px rgba(79,70,229,0.12);}
+.hero-scroll{margin-top:80px;animation:fadeUp .8s .5s ease both;}
+.hero-scroll span{display:block;font-size:.75rem;color:var(--muted);margin-bottom:12px;letter-spacing:.1em;text-transform:uppercase;}
+.scroll-indicator{width:24px;height:40px;border:2px solid rgba(79,70,229,.3);border-radius:20px;margin:0 auto;position:relative;}
+.scroll-dot{width:4px;height:8px;background:linear-gradient(var(--p),var(--p2));border-radius:4px;position:absolute;top:6px;left:50%;transform:translateX(-50%);animation:scroll-bounce 2s ease infinite;}
+@keyframes scroll-bounce{0%,100%{top:6px;opacity:1}50%{top:22px;opacity:.3}}
+
+/* ── BROWSER MOCKUP ── */
+.hero-mockup{position:relative;z-index:1;padding:0 5% 100px;}
+.mockup-wrap{max-width:980px;margin:0 auto;position:relative;animation:fadeUp .9s .4s ease both;}
+.mockup-glow{position:absolute;inset:-60px;background:radial-gradient(ellipse at center,rgba(79,70,229,.25) 0%,transparent 70%);z-index:-1;border-radius:50%;}
+.browser{background:#fff;border:1px solid rgba(79,70,229,.14);border-radius:18px;overflow:hidden;box-shadow:0 24px 80px rgba(79,70,229,.1),0 0 0 1px rgba(79,70,229,.06);}
+.browser-bar{display:flex;align-items:center;gap:14px;padding:14px 18px;background:#F5F4FF;border-bottom:1px solid rgba(79,70,229,.1);}
+.dots{display:flex;gap:7px;}.dots span{width:12px;height:12px;border-radius:50%;}
+.dots span:nth-child(1){background:#ff5f57;}.dots span:nth-child(2){background:#ffbd2e;}.dots span:nth-child(3){background:#28ca42;}
+.url-bar{flex:1;background:#fff;border:1px solid rgba(79,70,229,.12);border-radius:8px;padding:7px 14px;font-size:.8rem;color:var(--muted);}
+.browser-body{padding:32px;background:linear-gradient(180deg,#F8F7FF 0%,#F1F0FF 100%);min-height:360px;}
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.dash-stat{background:#fff;border:1px solid rgba(79,70,229,.12);border-radius:12px;padding:18px;transition:all .4s;box-shadow:0 2px 8px rgba(79,70,229,.06);}
+.dash-stat:hover{background:rgba(79,70,229,.04);border-color:rgba(79,70,229,.3);}
+.dash-stat .val{font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,var(--p),var(--p2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.dash-stat .lbl{font-size:.72rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;}
+.dash-charts{display:grid;grid-template-columns:2fr 1fr;gap:14px;}
+.chart-card{background:#fff;border:1px solid rgba(79,70,229,.12);border-radius:12px;padding:18px;box-shadow:0 2px 8px rgba(79,70,229,.05);}
+.chart-title{font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:.05em;}
+.bar-viz{display:flex;align-items:flex-end;gap:6px;height:80px;}
+.bar-viz div{flex:1;background:linear-gradient(to top,var(--p),var(--p2));border-radius:4px 4px 0 0;opacity:.8;animation:bar-grow 1.2s ease both;}
+@keyframes bar-grow{from{height:0%!important;}to{}}
+.activity-list{display:flex;flex-direction:column;gap:10px;}
+.act-item{display:flex;align-items:center;gap:10px;font-size:.75rem;}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.act-text{color:var(--muted);}
+
+/* ── SECTION BASE ── */
+section{position:relative;z-index:1;}
+.section-tag{display:inline-block;background:rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.2);color:#4F46E5;padding:6px 16px;border-radius:100px;font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px;}
+.section-title{font-size:clamp(2rem,4vw,3.2rem);font-weight:900;letter-spacing:-0.02em;line-height:1.1;margin-bottom:16px;color:var(--text);}
+.section-sub{font-size:1.1rem;color:#52525B;line-height:1.7;max-width:580px;}
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ── STATS STRIP ── */
+.stats-strip{padding:60px 5%;background:#fff;border-top:1px solid rgba(79,70,229,.1);border-bottom:1px solid rgba(79,70,229,.1);box-shadow:0 1px 0 rgba(79,70,229,.06);}
+.stats-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center;}
+.stat-num{font-size:2.8rem;font-weight:900;background:linear-gradient(135deg,var(--p),var(--p2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.stat-label{font-size:.88rem;color:var(--muted);margin-top:8px;}
+.stat-divider{border-left:1px solid rgba(79,70,229,.1);}
+
+/* ── FEATURES ── */
+.features{padding:120px 5%;}
+.features-inner{max-width:1100px;margin:0 auto;}
+.features-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:64px;gap:40px;flex-wrap:wrap;}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.feat-card{background:#fff;border:1px solid rgba(79,70,229,.12);border-radius:20px;padding:36px;cursor:pointer;transition:all .4s cubic-bezier(.175,.885,.32,1.275);position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(79,70,229,.06);}
+.feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(79,70,229,.04),rgba(124,58,237,.03));opacity:0;transition:opacity .4s;}
+.feat-card:hover{transform:translateY(-8px);border-color:rgba(79,70,229,.3);box-shadow:0 24px 60px rgba(79,70,229,.12),0 4px 16px rgba(79,70,229,.08);}
+.feat-card:hover::before{opacity:1;}
+.feat-card.featured{grid-column:span 2;background:linear-gradient(135deg,#EEF2FF,#F5F3FF);border-color:rgba(79,70,229,.2);}
+.feat-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:22px;}
+.feat-card h3{font-size:1.15rem;font-weight:700;margin-bottom:10px;color:var(--text);}
+.feat-card p{font-size:.9rem;color:#52525B;line-height:1.7;}
+.feat-arrow{margin-top:20px;color:rgba(79,70,229,.5);font-size:.85rem;display:flex;align-items:center;gap:6px;transition:all .3s;font-weight:600;}
+.feat-card:hover .feat-arrow{color:var(--p);gap:10px;}
+
+/* ── HOW IT WORKS ── */
+.how{padding:120px 5%;background:linear-gradient(180deg,#F8F7FF 0%,#EEF2FF 50%,#F8F7FF 100%);}
+.how-inner{max-width:900px;margin:0 auto;}
+.how-header{text-align:center;margin-bottom:80px;}
+.steps{display:flex;flex-direction:column;gap:0;}
+.step-item{display:grid;grid-template-columns:80px 1fr;gap:32px;position:relative;padding-bottom:60px;}
+.step-item:last-child{padding-bottom:0;}
+.step-item::before{content:'';position:absolute;left:39px;top:80px;bottom:0;width:2px;background:linear-gradient(to bottom,rgba(79,70,229,.5),rgba(124,58,237,.1));display:block;}
+.step-item:last-child::before{display:none;}
+.step-num{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;flex-shrink:0;box-shadow:0 8px 30px var(--glow);color:#fff;}
+.step-content{padding-top:18px;}
+.step-content h3{font-size:1.3rem;font-weight:700;margin-bottom:10px;color:var(--text);}
+.step-content p{color:#52525B;line-height:1.7;font-size:.95rem;}
+
+/* ── TESTIMONIALS ── */
+.testimonials{padding:120px 5%;}
+.test-inner{max-width:1100px;margin:0 auto;}
+.test-header{text-align:center;margin-bottom:64px;}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.test-card{background:#fff;border:1px solid rgba(79,70,229,.1);border-radius:20px;padding:32px;transition:all .4s;box-shadow:0 2px 12px rgba(79,70,229,.05);}
+.test-card:hover{border-color:rgba(79,70,229,.25);transform:translateY(-5px);box-shadow:0 20px 50px rgba(79,70,229,.1);}
+.stars{display:flex;gap:4px;margin-bottom:18px;}
+.stars i{color:#f59e0b;font-size:.85rem;}
+.test-text{font-size:.95rem;color:#52525B;line-height:1.8;margin-bottom:24px;font-style:italic;}
+.test-author{display:flex;align-items:center;gap:12px;}
+.test-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;color:#fff;}
+.test-name{font-size:.9rem;font-weight:600;color:var(--text);}
+.test-role{font-size:.78rem;color:var(--muted);}
+
+/* ── PRICING ── */
+.pricing{padding:120px 5%;}
+.pricing-inner{max-width:1100px;margin:0 auto;}
+.pricing-header{text-align:center;margin-bottom:64px;}
+.pricing-toggle{display:inline-flex;align-items:center;gap:12px;margin-top:16px;font-size:.9rem;color:var(--muted);}
+.toggle-switch{width:44px;height:24px;background:linear-gradient(135deg,var(--p),var(--p2));border-radius:12px;position:relative;cursor:pointer;}
+.toggle-switch::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .3s;}
+.toggle-switch.on::after{transform:translateX(20px);}
+.save-badge{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:2px 10px;border-radius:100px;font-size:.72rem;font-weight:600;}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.price-card{background:#fff;border:1px solid rgba(79,70,229,.12);border-radius:22px;padding:36px;transition:all .4s;position:relative;box-shadow:0 2px 12px rgba(79,70,229,.06);}
+.price-card.popular{background:linear-gradient(145deg,#EEF2FF,#F5F3FF);border-color:rgba(79,70,229,.35);transform:scale(1.04);box-shadow:0 8px 40px rgba(79,70,229,.14);}
+.price-card.popular:hover{transform:scale(1.04) translateY(-8px);}
+.price-card:not(.popular):hover{transform:translateY(-8px);border-color:rgba(79,70,229,.25);box-shadow:0 16px 40px rgba(79,70,229,.1);}
+.popular-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;padding:5px 18px;border-radius:100px;font-size:.76rem;font-weight:700;white-space:nowrap;box-shadow:0 4px 20px var(--glow);}
+.price-name{font-size:.85rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+.price-amount{font-size:3rem;font-weight:900;line-height:1;color:var(--text);}
+.price-amount sup{font-size:1.2rem;font-weight:700;vertical-align:top;margin-top:8px;}
+.price-period{font-size:.85rem;color:var(--muted);}
+.price-desc{font-size:.88rem;color:#52525B;margin:16px 0 28px;line-height:1.6;}
+.price-divider{height:1px;background:rgba(79,70,229,.1);margin-bottom:24px;}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:32px;}
+.price-features li{display:flex;align-items:center;gap:10px;font-size:.88rem;color:#52525B;}
+.price-features li i{color:#22C55E;font-size:.8rem;width:16px;}
+.price-features li.muted i{color:#CBD5E1;}
+.price-features li.muted{opacity:.55;}
+.price-btn{display:block;text-align:center;padding:13px;border-radius:12px;font-weight:700;font-size:.95rem;text-decoration:none;transition:all .3s;}
+.price-btn.outline{border:1.5px solid rgba(79,70,229,.25);color:var(--p);background:rgba(79,70,229,.04);}
+.price-btn.outline:hover{border-color:var(--p);background:rgba(79,70,229,.08);}
+.price-btn.solid{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;box-shadow:0 8px 30px var(--glow);}
+.price-btn.solid:hover{box-shadow:0 12px 40px var(--glow);transform:translateY(-2px);}
+
+/* ── CTA BAND ── */
+.cta-band{padding:120px 5%;text-align:center;}
+.cta-box{max-width:720px;margin:0 auto;background:linear-gradient(135deg,#4F46E5,#7C3AED);border-radius:32px;padding:80px 60px;position:relative;overflow:hidden;box-shadow:0 24px 80px rgba(79,70,229,.3);}
+.cta-box::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.15) 0%,transparent 70%);}
+.cta-box h2{font-size:clamp(1.8rem,4vw,3rem);font-weight:900;letter-spacing:-0.02em;margin-bottom:16px;position:relative;color:#fff;}
+.cta-box p{color:rgba(255,255,255,.8);font-size:1.05rem;margin-bottom:36px;position:relative;}
+.cta-box .btn-primary{font-size:1.05rem;padding:16px 36px;position:relative;background:#fff;color:var(--p);box-shadow:0 8px 30px rgba(0,0,0,.15);}
+.cta-box .btn-primary:hover{background:#fff;transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,.2);}
+
+/* ── FOOTER ── */
+footer{padding:60px 5% 36px;border-top:1px solid rgba(79,70,229,.1);background:#fff;}
+.footer-inner{max-width:1100px;margin:0 auto;}
+.footer-top{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:60px;margin-bottom:48px;}
+.footer-logo{display:flex;align-items:center;gap:10px;font-size:1.2rem;font-weight:800;text-decoration:none;color:var(--text);margin-bottom:16px;}
+.footer-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--p),var(--p2));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+.footer-desc{font-size:.88rem;color:var(--muted);line-height:1.7;}
+.footer-col h4{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A1A1AA;margin-bottom:16px;}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.footer-col ul li a{font-size:.88rem;color:var(--muted);text-decoration:none;transition:color .2s;}
+.footer-col ul li a:hover{color:var(--p);}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:24px;border-top:1px solid rgba(79,70,229,.08);font-size:.82rem;color:var(--muted);}
+.social-links{display:flex;gap:12px;}
+.social-links a{width:34px;height:34px;border-radius:8px;background:rgba(79,70,229,.05);border:1px solid rgba(79,70,229,.12);display:flex;align-items:center;justify-content:center;color:var(--muted);text-decoration:none;transition:all .3s;font-size:.85rem;}
+.social-links a:hover{background:rgba(79,70,229,.1);border-color:rgba(79,70,229,.3);color:var(--p);}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes float-slow{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+
+/* ── NAV LINK UNDERLINE ── */
+.nav-links a:not(.nav-cta){position:relative;}
+.nav-links a:not(.nav-cta)::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--p),var(--p2));border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.nav-links a:not(.nav-cta):hover::after{transform:scaleX(1);}
+
+/* ── CURSOR SPOTLIGHT ── */
+#cursor-glow{position:fixed;width:400px;height:400px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(79,70,229,.06) 0%,transparent 70%);transform:translate(-50%,-50%);transition:left .12s ease,top .12s ease;}
+
+/* ── FLOATING HERO BADGES ── */
+.hero-floats{position:absolute;inset:0;pointer-events:none;z-index:0;}
+.float-badge{position:absolute;background:#fff;border:1px solid rgba(79,70,229,.15);border-radius:14px;padding:10px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(79,70,229,.1);font-size:.82rem;font-weight:600;color:var(--text);animation:float-badge-anim 6s ease-in-out infinite;white-space:nowrap;}
+.float-badge .badge-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.float-badge .badge-label{display:flex;flex-direction:column;}
+.float-badge .badge-label span{font-size:.72rem;color:var(--muted);font-weight:400;}
+.fb1{top:18%;left:4%;animation-delay:0s;}
+.fb2{top:30%;right:3%;animation-delay:1.5s;}
+.fb3{bottom:28%;left:2%;animation-delay:3s;}
+.fb4{bottom:15%;right:4%;animation-delay:2s;}
+@keyframes float-badge-anim{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+@media(max-width:1100px){.float-badge{display:none;}}
+
+/* ── LOGOS MARQUEE ── */
+.marquee-section{padding:48px 0;background:#fff;border-top:1px solid rgba(79,70,229,.08);border-bottom:1px solid rgba(79,70,229,.08);overflow:hidden;}
+.marquee-label{text-align:center;font-size:.75rem;font-weight:600;color:#A1A1AA;text-transform:uppercase;letter-spacing:.12em;margin-bottom:28px;}
+.marquee-track{display:flex;gap:80px;width:max-content;animation:marquee-scroll 24s linear infinite;align-items:center;}
+.marquee-track:hover{animation-play-state:paused;}
+.marquee-logo{font-size:1.05rem;font-weight:800;color:#D1D5DB;letter-spacing:-.02em;transition:color .3s;cursor:default;user-select:none;white-space:nowrap;}
+.marquee-logo:hover{color:#6B7280;}
+@keyframes marquee-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ── FEATURE TABS ── */
+.ftabs{padding:100px 5%;background:linear-gradient(180deg,#fff 0%,#F8F7FF 100%);}
+.ftabs-inner{max-width:1100px;margin:0 auto;}
+.ftabs-head{text-align:center;margin-bottom:56px;}
+.tab-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:48px;}
+.tab-btn{display:flex;align-items:center;gap:8px;padding:10px 22px;border-radius:100px;font-size:.88rem;font-weight:600;border:1.5px solid rgba(79,70,229,.15);background:#fff;color:var(--muted);cursor:pointer;transition:all .25s;box-shadow:0 1px 4px rgba(79,70,229,.06);}
+.tab-btn i{font-size:.9rem;transition:color .25s;}
+.tab-btn.active{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;border-color:transparent;box-shadow:0 6px 24px var(--glow);}
+.tab-btn:not(.active):hover{border-color:rgba(79,70,229,.35);color:var(--p);}
+.tab-panel{display:none;}
+.tab-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;animation:fadeUp .4s ease both;}
+.tab-content h3{font-size:1.8rem;font-weight:800;color:var(--text);letter-spacing:-.02em;margin-bottom:14px;}
+.tab-content p{font-size:1rem;color:#52525B;line-height:1.75;margin-bottom:28px;}
+.tab-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;}
+.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(79,70,229,.07);border:1px solid rgba(79,70,229,.14);color:#4F46E5;padding:5px 13px;border-radius:100px;font-size:.78rem;font-weight:600;}
+.chip i{font-size:.72rem;}
+.tab-cta{display:inline-flex;align-items:center;gap:8px;color:var(--p);font-weight:700;font-size:.92rem;text-decoration:none;transition:gap .25s;}
+.tab-cta:hover{gap:14px;}
+.tab-visual{border-radius:24px;overflow:hidden;box-shadow:0 20px 70px rgba(79,70,229,.13);border:1px solid rgba(79,70,229,.1);position:relative;}
+.tab-visual-inner{background:linear-gradient(145deg,#F5F4FF,#EEF2FF);padding:32px;min-height:320px;display:flex;flex-direction:column;gap:14px;}
+.tv-bar{height:10px;border-radius:8px;background:linear-gradient(90deg,var(--p),var(--p2));animation:tv-bar-grow 1s ease both;}
+.tv-card{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 12px rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.08);}
+.tv-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.tv-dot{width:8px;height:8px;border-radius:50%;}
+.tv-line{height:8px;border-radius:6px;background:#E5E7EB;flex:1;}
+.tv-line.accent{background:linear-gradient(90deg,var(--p),var(--p2));width:60%;flex:none;}
+.tv-badge-row{display:flex;gap:8px;flex-wrap:wrap;}
+.tv-badge{padding:4px 12px;border-radius:100px;font-size:.72rem;font-weight:700;}
+@keyframes tv-bar-grow{from{width:0%;}to{width:100%;}}
+@media(max-width:900px){.tab-panel.active{grid-template-columns:1fr;}.tab-visual{display:none;}}
+
+/* ── GRADIENT BORDER ON CARDS (hover glow ring) ── */
+.feat-card{isolation:isolate;}
+.feat-card::after{content:'';position:absolute;inset:-1px;border-radius:21px;background:linear-gradient(135deg,rgba(79,70,229,.5),rgba(6,182,212,.4),rgba(124,58,237,.5));opacity:0;z-index:-1;transition:opacity .4s;}
+.feat-card:hover::after{opacity:1;}
+
+/* ── MAGNETIC BUTTON ── */
+.btn-primary,.btn-ghost{will-change:transform;}
+
+/* ── ANIMATED COUNTER BADGE ── */
+.live-indicator{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#059669;padding:5px 14px;border-radius:100px;font-size:.75rem;font-weight:700;margin-top:12px;}
+.live-dot{width:7px;height:7px;background:#10B981;border-radius:50%;animation:pulse-dot 1.5s ease infinite;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .nav-links{display:none;}.mobile-toggle{display:block;}
+  .features-grid{grid-template-columns:1fr;}.feat-card.featured{grid-column:span 1;}
+  .dash-grid{grid-template-columns:repeat(2,1fr);}.dash-charts{grid-template-columns:1fr;}
+  .test-grid{grid-template-columns:1fr;}.pricing-grid{grid-template-columns:1fr;}
+  .price-card.popular{transform:scale(1);}
+  .footer-top{grid-template-columns:1fr 1fr;gap:32px;}
+  .stats-inner{grid-template-columns:repeat(2,1fr);}
+  .stat-divider:nth-child(2){border-left:none;}
+}
+@media(max-width:600px){
+  .features-header{flex-direction:column;}.step-item{grid-template-columns:60px 1fr;}
+  .step-num{width:60px;height:60px;font-size:1rem;}.hero-btns{flex-direction:column;align-items:center;}
+  .footer-top{grid-template-columns:1fr;}.footer-bottom{flex-direction:column;gap:16px;text-align:center;}
+  .stats-inner{grid-template-columns:1fr 1fr;}
+  .cta-box{padding:50px 28px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Particle Canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon"><i class="fas fa-brain" style="color:#fff"></i></div>
+    Mind<span style="background:linear-gradient(135deg,#4F46E5,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Wave</span>
+  </a>
+  <div class="nav-links" id="navLinks">
+    <a href="#features">Features</a>
+    <a href="#how">How it Works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="website-login.html">Log in</a>
+    <a href="website-signup.html" class="nav-cta">Get Started Free</a>
+  </div>
+  <button class="mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
+</nav>
+
+<!-- Cursor Glow -->
+<div id="cursor-glow"></div>
+
+<!-- HERO -->
+<section class="hero" style="position:relative;overflow:hidden;">
+  <!-- Floating Badges -->
+  <div class="hero-floats">
+    <div class="float-badge fb1">
+      <div class="badge-icon" style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);">🏆</div>
+      <div class="badge-label"><strong>Arya scored 100%</strong><span>Live Quiz · just now</span></div>
+    </div>
+    <div class="float-badge fb2">
+      <div class="badge-icon" style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);">🤖</div>
+      <div class="badge-label"><strong>Quiz generated!</strong><span>AI Builder · 3s</span></div>
+    </div>
+    <div class="float-badge fb3">
+      <div class="badge-icon" style="background:linear-gradient(135deg,#FFF7ED,#FED7AA);">📊</div>
+      <div class="badge-label"><strong>94% engagement</strong><span>This week</span></div>
+    </div>
+    <div class="float-badge fb4">
+      <div class="badge-icon" style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);">⚡</div>
+      <div class="badge-label"><strong>312 students live</strong><span>Right now</span></div>
+    </div>
+  </div>
+
+  <div style="position:relative;z-index:1;">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Now with Gemini 2.0 AI — smarter than ever
+    </div>
+    <h1>
+      Turn Every Lesson Into<br>
+      <span class="line2">An Epic Adventure</span>
+    </h1>
+    <p class="hero-sub">MindWave is the AI-powered gamification platform that transforms static curricula into immersive, high-impact learning experiences — in minutes, not months.</p>
+    <div class="hero-btns">
+      <a href="website-signup.html" class="btn-primary mag-btn" id="heroCta">
+        Start Free Trial <i class="fas fa-arrow-right"></i>
+      </a>
+      <a href="#how" class="btn-ghost mag-btn">
+        <i class="fas fa-play-circle"></i> See How It Works
+      </a>
+    </div>
+    <div class="live-indicator">
+      <span class="live-dot"></span> 312 educators online right now
+    </div>
+    <div class="hero-scroll" style="margin-top:48px;">
+      <span>Scroll to explore</span>
+      <div class="scroll-indicator"><div class="scroll-dot"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BROWSER MOCKUP -->
+<div class="hero-mockup reveal">
+  <div class="mockup-wrap">
+    <div class="mockup-glow"></div>
+    <div class="browser">
+      <div class="browser-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="url-bar">🔒 app.mindwave.in/dashboard</div>
+        <i class="fas fa-rotate-right" style="color:var(--muted);font-size:.85rem;"></i>
+      </div>
+      <div class="browser-body">
+        <div class="dash-grid">
+          <div class="dash-stat"><div class="val">2,847</div><div class="lbl">Active Students</div></div>
+          <div class="dash-stat"><div class="val">94%</div><div class="lbl">Engagement Rate</div></div>
+          <div class="dash-stat"><div class="val">312</div><div class="lbl">Quizzes Today</div></div>
+          <div class="dash-stat"><div class="val">+28%</div><div class="lbl">Score Improvement</div></div>
+        </div>
+        <div class="dash-charts">
+          <div class="chart-card">
+            <div class="chart-title">Weekly Engagement</div>
+            <div class="bar-viz">
+              <div style="height:60%"></div><div style="height:75%"></div><div style="height:55%"></div>
+              <div style="height:90%"></div><div style="height:70%"></div><div style="height:85%"></div><div style="height:95%"></div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Recent Activity</div>
+            <div class="activity-list">
+              <div class="act-item"><div class="act-dot" style="background:#4F46E5"></div><div class="act-text">Quiz "Math Ch.5" launched</div></div>
+              <div class="act-item"><div class="act-dot" style="background:#7C3AED"></div><div class="act-text">Arya scored 98/100 🏆</div></div>
+              <div class="act-item"><div class="act-dot" style="background:#06B6D4"></div><div class="act-text">Word Cloud submitted</div></div>
+              <div class="act-item"><div class="act-dot" style="background:#10B981"></div><div class="act-text">New class "CS-301" created</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGOS MARQUEE -->
+<div class="marquee-section reveal">
+  <p class="marquee-label">Trusted by institutions across India & beyond</p>
+  <div style="overflow:hidden;">
+    <div class="marquee-track">
+      <span class="marquee-logo">DPS Bengaluru</span>
+      <span class="marquee-logo">VJTI Mumbai</span>
+      <span class="marquee-logo">Amity International</span>
+      <span class="marquee-logo">IIT Madras</span>
+      <span class="marquee-logo">Manipal Academy</span>
+      <span class="marquee-logo">Christ University</span>
+      <span class="marquee-logo">KV Schools IIT</span>
+      <span class="marquee-logo">Symbiosis Pune</span>
+      <!-- duplicated for seamless loop -->
+      <span class="marquee-logo">DPS Bengaluru</span>
+      <span class="marquee-logo">VJTI Mumbai</span>
+      <span class="marquee-logo">Amity International</span>
+      <span class="marquee-logo">IIT Madras</span>
+      <span class="marquee-logo">Manipal Academy</span>
+      <span class="marquee-logo">Christ University</span>
+      <span class="marquee-logo">KV Schools IIT</span>
+      <span class="marquee-logo">Symbiosis Pune</span>
+    </div>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<section class="stats-strip reveal">
+  <div class="stats-inner">
+    <div>
+      <div class="stat-num" data-target="10000">0</div>
+      <div class="stat-label">Active Students</div>
+    </div>
+    <div class="stat-divider">
+      <div class="stat-num" data-target="500">0</div>
+      <div class="stat-label">Schools &amp; Colleges</div>
+    </div>
+    <div class="stat-divider">
+      <div class="stat-num" data-target="50000">0</div>
+      <div class="stat-label">Quizzes Created</div>
+    </div>
+    <div class="stat-divider">
+      <div class="stat-num" data-target="98">0</div>
+      <div class="stat-label">% Satisfaction Rate</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="features-inner">
+    <div class="features-header reveal">
+      <div>
+        <div class="section-tag">Features</div>
+        <h2 class="section-title">Everything you need<br>to engage students</h2>
+      </div>
+      <p class="section-sub">Powerful tools built for modern educators — from AI quiz generation to live leaderboards.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card featured reveal" style="transition-delay:.05s">
+        <div class="feat-icon" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">
+          <i class="fas fa-wand-magic-sparkles" style="color:#fff"></i>
+        </div>
+        <h3>AI Quiz Builder</h3>
+        <p>Describe your topic — "Photosynthesis for 9th grade" — and our Gemini-powered AI instantly generates quiz questions, multiple-choice options, hints, and detailed explanations tailored to your curriculum. Edit freely or regenerate in one click.</p>
+        <div class="feat-arrow">Try it now <i class="fas fa-arrow-right"></i></div>
+      </div>
+      <div class="feat-card reveal" style="transition-delay:.1s">
+        <div class="feat-icon" style="background:linear-gradient(135deg,#0EA5E9,#06B6D4)">
+          <i class="fas fa-trophy" style="color:#fff"></i>
+        </div>
+        <h3>Live Competitions</h3>
+        <p>Kahoot-style real-time quizzes with live leaderboards, power-ups, and streaks. Students love competing.</p>
+        <div class="feat-arrow">Learn more <i class="fas fa-arrow-right"></i></div>
+      </div>
+      <div class="feat-card reveal" style="transition-delay:.15s">
+        <div class="feat-icon" style="background:linear-gradient(135deg,#10B981,#059669)">
+          <i class="fas fa-chart-line" style="color:#fff"></i>
+        </div>
+        <h3>Real-time Analytics</h3>
+        <p>Track every student's progress, identify learning gaps, and export beautiful reports instantly.</p>
+        <div class="feat-arrow">Learn more <i class="fas fa-arrow-right"></i></div>
+      </div>
+      <div class="feat-card reveal" style="transition-delay:.2s">
+        <div class="feat-icon" style="background:linear-gradient(135deg,#F59E0B,#D97706)">
+          <i class="fas fa-robot" style="color:#fff"></i>
+        </div>
+        <h3>24/7 AI Tutor</h3>
+        <p>Students get instant, personalized help anytime — reducing teacher overload while boosting outcomes.</p>
+        <div class="feat-arrow">Learn more <i class="fas fa-arrow-right"></i></div>
+      </div>
+      <div class="feat-card reveal" style="transition-delay:.25s">
+        <div class="feat-icon" style="background:linear-gradient(135deg,#EF4444,#DC2626)">
+          <i class="fas fa-shield-alt" style="color:#fff"></i>
+        </div>
+        <h3>Anti-Cheat System</h3>
+        <p>Tab detection, behavior monitoring, and AI proctoring — exam integrity guaranteed.</p>
+        <div class="feat-arrow">Learn more <i class="fas fa-arrow-right"></i></div>
+      </div>
+      <div class="feat-card reveal" style="transition-delay:.3s">
+        <div class="feat-icon" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED)">
+          <i class="fas fa-plug" style="color:#fff"></i>
+        </div>
+        <h3>LMS Integration</h3>
+        <p>Works with Canvas, Blackboard, Moodle, and Google Classroom. Seamless grade sync and SSO.</p>
+        <div class="feat-arrow">Learn more <i class="fas fa-arrow-right"></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE TABS -->
+<section class="ftabs" id="product">
+  <div class="ftabs-inner">
+    <div class="ftabs-head reveal">
+      <div class="section-tag">Deep Dive</div>
+      <h2 class="section-title">One platform, every tool you need</h2>
+      <p class="section-sub" style="margin:0 auto;">Explore MindWave's core capabilities that make modern classrooms come alive.</p>
+    </div>
+    <div class="tab-btns">
+      <button class="tab-btn active" data-tab="ai"><i class="fas fa-wand-magic-sparkles"></i> AI Builder</button>
+      <button class="tab-btn" data-tab="live"><i class="fas fa-bolt"></i> Live Quiz</button>
+      <button class="tab-btn" data-tab="analytics"><i class="fas fa-chart-bar"></i> Analytics</button>
+      <button class="tab-btn" data-tab="tutor"><i class="fas fa-robot"></i> AI Tutor</button>
+    </div>
+
+    <!-- AI Builder Tab -->
+    <div class="tab-panel active" id="tab-ai">
+      <div class="tab-content">
+        <h3>Generate quizzes in seconds with AI</h3>
+        <p>Just type a topic — "Newton's Laws for Class 9" — and our Gemini-powered engine creates a full quiz with questions, options, hints, and explanations. No prep time. No blank page anxiety.</p>
+        <div class="tab-chips">
+          <span class="chip"><i class="fas fa-check"></i> 20 question types</span>
+          <span class="chip"><i class="fas fa-check"></i> Difficulty control</span>
+          <span class="chip"><i class="fas fa-check"></i> Instant edit</span>
+          <span class="chip"><i class="fas fa-check"></i> PDF export</span>
+        </div>
+        <a href="website-signup.html" class="tab-cta">Try the AI Builder <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="tab-visual">
+        <div class="tab-visual-inner">
+          <div style="font-size:.72rem;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">AI Generating Quiz…</div>
+          <div class="tv-bar" style="width:88%"></div>
+          <div class="tv-card">
+            <div style="font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:10px;">Q1 — Newton's First Law</div>
+            <div class="tv-row"><div class="tv-dot" style="background:#4F46E5"></div><div class="tv-line accent"></div></div>
+            <div class="tv-row"><div class="tv-dot" style="background:#E5E7EB"></div><div class="tv-line"></div></div>
+            <div class="tv-row"><div class="tv-dot" style="background:#E5E7EB"></div><div class="tv-line" style="width:75%"></div></div>
+            <div class="tv-row"><div class="tv-dot" style="background:#E5E7EB"></div><div class="tv-line" style="width:50%"></div></div>
+          </div>
+          <div class="tv-card">
+            <div style="font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:8px;">Q2 — Inertia Definition</div>
+            <div class="tv-badge-row">
+              <span class="tv-badge" style="background:#EEF2FF;color:#4F46E5;">MCQ</span>
+              <span class="tv-badge" style="background:#F0FDF4;color:#16A34A;">Medium</span>
+              <span class="tv-badge" style="background:#FFF7ED;color:#EA580C;">+Hint</span>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:8px;">
+            <span style="font-size:.78rem;color:var(--muted);">✨ 18 more questions generated</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Quiz Tab -->
+    <div class="tab-panel" id="tab-live">
+      <div class="tab-content">
+        <h3>Real-time battles students actually love</h3>
+        <p>Launch a live quiz to 300 students simultaneously. Watch the leaderboard shift in real-time. Students earn XP, unlock streaks, and compete on live leaderboards — turning a boring class into a sold-out arena.</p>
+        <div class="tab-chips">
+          <span class="chip"><i class="fas fa-check"></i> 300 concurrent players</span>
+          <span class="chip"><i class="fas fa-check"></i> Live leaderboard</span>
+          <span class="chip"><i class="fas fa-check"></i> XP & streaks</span>
+          <span class="chip"><i class="fas fa-check"></i> Power-ups</span>
+        </div>
+        <a href="website-signup.html" class="tab-cta">See Live Demo <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="tab-visual">
+        <div class="tab-visual-inner" style="background:linear-gradient(145deg,#1e1b4b,#2e1065);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <span style="font-size:.78rem;font-weight:700;color:#a78bfa;">🏆 LIVE LEADERBOARD</span>
+            <span class="live-indicator" style="font-size:.7rem;"><span class="live-dot"></span>312 playing</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="tv-card" style="background:rgba(255,255,255,.08);border-color:rgba(167,139,250,.3);display:flex;align-items:center;gap:12px;">
+              <span style="font-size:1.1rem;">🥇</span>
+              <div style="flex:1">
+                <div style="font-size:.82rem;font-weight:700;color:#fff;">Arya K.</div>
+                <div style="height:5px;background:linear-gradient(90deg,#a78bfa,#7c3aed);border-radius:4px;width:95%;"></div>
+              </div>
+              <span style="font-size:.85rem;font-weight:800;color:#a78bfa;">2,840</span>
+            </div>
+            <div class="tv-card" style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);display:flex;align-items:center;gap:12px;">
+              <span style="font-size:1.1rem;">🥈</span>
+              <div style="flex:1">
+                <div style="font-size:.82rem;font-weight:700;color:#fff;">Ravi M.</div>
+                <div style="height:5px;background:linear-gradient(90deg,#60a5fa,#3b82f6);border-radius:4px;width:80%;"></div>
+              </div>
+              <span style="font-size:.85rem;font-weight:800;color:#60a5fa;">2,640</span>
+            </div>
+            <div class="tv-card" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);display:flex;align-items:center;gap:12px;">
+              <span style="font-size:1.1rem;">🥉</span>
+              <div style="flex:1">
+                <div style="font-size:.82rem;font-weight:700;color:#fff;">Priya S.</div>
+                <div style="height:5px;background:linear-gradient(90deg,#34d399,#10b981);border-radius:4px;width:72%;"></div>
+              </div>
+              <span style="font-size:.85rem;font-weight:800;color:#34d399;">2,480</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div class="tab-panel" id="tab-analytics">
+      <div class="tab-content">
+        <h3>Data that actually changes how you teach</h3>
+        <p>Instantly see which students struggled on which questions, spot learning gaps before they compound, and get AI-generated improvement suggestions — all in a dashboard that takes 30 seconds to read.</p>
+        <div class="tab-chips">
+          <span class="chip"><i class="fas fa-check"></i> Per-student heatmaps</span>
+          <span class="chip"><i class="fas fa-check"></i> AI insights</span>
+          <span class="chip"><i class="fas fa-check"></i> CSV/PDF export</span>
+          <span class="chip"><i class="fas fa-check"></i> LMS sync</span>
+        </div>
+        <a href="website-signup.html" class="tab-cta">Explore Analytics <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="tab-visual">
+        <div class="tab-visual-inner">
+          <div style="font-size:.72rem;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Class Performance — This Week</div>
+          <div style="display:flex;align-items:flex-end;gap:8px;height:100px;margin-bottom:14px;">
+            <div style="flex:1;background:linear-gradient(to top,#4F46E5,#818cf8);border-radius:6px 6px 0 0;height:55%;"></div>
+            <div style="flex:1;background:linear-gradient(to top,#4F46E5,#818cf8);border-radius:6px 6px 0 0;height:72%;"></div>
+            <div style="flex:1;background:linear-gradient(to top,#4F46E5,#818cf8);border-radius:6px 6px 0 0;height:48%;"></div>
+            <div style="flex:1;background:linear-gradient(to top,#7C3AED,#a78bfa);border-radius:6px 6px 0 0;height:90%;box-shadow:0 0 16px rgba(79,70,229,.3);"></div>
+            <div style="flex:1;background:linear-gradient(to top,#4F46E5,#818cf8);border-radius:6px 6px 0 0;height:68%;"></div>
+            <div style="flex:1;background:linear-gradient(to top,#4F46E5,#818cf8);border-radius:6px 6px 0 0;height:82%;"></div>
+            <div style="flex:1;background:linear-gradient(to top,#10B981,#34d399);border-radius:6px 6px 0 0;height:95%;box-shadow:0 0 16px rgba(16,185,129,.2);"></div>
+          </div>
+          <div class="tv-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:.78rem;color:var(--muted);">⚠️ Needs attention: Quadratic Equations</span>
+              <span style="font-size:.72rem;font-weight:700;color:#EF4444;">38% pass</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Tutor Tab -->
+    <div class="tab-panel" id="tab-tutor">
+      <div class="tab-content">
+        <h3>A personal tutor for every student, 24/7</h3>
+        <p>Students ask questions at midnight, get step-by-step explanations tailored to their level, and never feel embarrassed to ask "why". Teachers wake up to students who already understood the concept.</p>
+        <div class="tab-chips">
+          <span class="chip"><i class="fas fa-check"></i> Socratic method</span>
+          <span class="chip"><i class="fas fa-check"></i> Multilingual</span>
+          <span class="chip"><i class="fas fa-check"></i> Step-by-step hints</span>
+          <span class="chip"><i class="fas fa-check"></i> Context-aware</span>
+        </div>
+        <a href="website-signup.html" class="tab-cta">Meet the AI Tutor <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="tab-visual">
+        <div class="tab-visual-inner" style="gap:8px;">
+          <div style="display:flex;gap:10px;align-items:flex-end;">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#fff;flex-shrink:0;">🤖</div>
+            <div style="background:#fff;border:1px solid rgba(79,70,229,.1);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:.78rem;color:#52525B;line-height:1.5;max-width:220px;box-shadow:0 2px 8px rgba(79,70,229,.06);">Hey! I see you got Q3 wrong. Let me explain the concept step by step 👀</div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;">
+            <div style="background:linear-gradient(135deg,#4F46E5,#7C3AED);border-radius:14px 14px 4px 14px;padding:10px 14px;font-size:.78rem;color:#fff;line-height:1.5;max-width:200px;">ok but why does the object keep moving if no force is applied?</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-end;">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#fff;flex-shrink:0;">🤖</div>
+            <div style="background:#fff;border:1px solid rgba(79,70,229,.1);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:.78rem;color:#52525B;line-height:1.5;max-width:220px;box-shadow:0 2px 8px rgba(79,70,229,.06);">Great question! Think of it this way — in space there's nothing to <em>stop</em> it. That's Newton's 1st Law: objects resist changes in motion. This is called <strong>inertia</strong> ✨</div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+            <div style="background:#F1F5F9;border-radius:100px;padding:8px 16px;font-size:.75rem;color:#64748B;">💡 That actually makes sense!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="how-inner">
+    <div class="how-header reveal">
+      <div class="section-tag">How It Works</div>
+      <h2 class="section-title">Up and running in<br>under 5 minutes</h2>
+    </div>
+    <div class="steps">
+      <div class="step-item reveal">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Create your classroom</h3>
+          <p>Sign up, set up your institution, invite your students via a link or Google Classroom — that's it. Zero IT overhead, zero setup complexity.</p>
+        </div>
+      </div>
+      <div class="step-item reveal" style="transition-delay:.1s">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Build with AI in seconds</h3>
+          <p>Type a topic or paste content. Our AI auto-generates quizzes, polls, word clouds, flashcards, and more. Customize to your taste in seconds.</p>
+        </div>
+      </div>
+      <div class="step-item reveal" style="transition-delay:.2s">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Launch &amp; engage live</h3>
+          <p>Hit publish and watch students join in real-time. Live leaderboards, XP points, and streaks keep energy high throughout every session.</p>
+        </div>
+      </div>
+      <div class="step-item reveal" style="transition-delay:.3s">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Measure what matters</h3>
+          <p>Deep analytics reveal exactly where students struggle. Automated insights help you improve your next lesson before it even starts.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="test-inner">
+    <div class="test-header reveal">
+      <div class="section-tag">Testimonials</div>
+      <h2 class="section-title">Loved by educators worldwide</h2>
+    </div>
+    <div class="test-grid">
+      <div class="test-card reveal">
+        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p class="test-text">"MindWave transformed my classroom. Students who never raised a hand are now competing to answer questions. Engagement is through the roof!"</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">S</div>
+          <div><div class="test-name">Sneha Kulkarni</div><div class="test-role">Chemistry Teacher, DPS Bengaluru</div></div>
+        </div>
+      </div>
+      <div class="test-card reveal" style="transition-delay:.1s">
+        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p class="test-text">"The AI quiz builder saves me 3 hours every week. I describe the chapter, it generates 20 questions instantly. The quality is genuinely impressive."</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:linear-gradient(135deg,#0EA5E9,#06B6D4)">R</div>
+          <div><div class="test-name">Rahul Desai</div><div class="test-role">CS Lecturer, VJTI Mumbai</div></div>
+        </div>
+      </div>
+      <div class="test-card reveal" style="transition-delay:.2s">
+        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p class="test-text">"We rolled MindWave out across all 14 departments. The analytics dashboard alone has changed how our academic board makes decisions."</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:linear-gradient(135deg,#10B981,#059669)">P</div>
+          <div><div class="test-name">Priya Sharma</div><div class="test-role">Principal, Amity International School</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="pricing-header reveal">
+      <div class="section-tag">Pricing</div>
+      <h2 class="section-title">Simple, transparent pricing</h2>
+      <div class="pricing-toggle">
+        Monthly
+        <div class="toggle-switch on" id="billingToggle"></div>
+        Annually <span class="save-badge">Save 30%</span>
+      </div>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card reveal">
+        <div class="price-name">Starter</div>
+        <div class="price-amount"><sup>₹</sup>0</div>
+        <div class="price-period">free forever</div>
+        <div class="price-desc">Perfect for individual teachers exploring gamified learning.</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> Up to 30 students</li>
+          <li><i class="fas fa-check"></i> 5 quizzes / month</li>
+          <li><i class="fas fa-check"></i> Basic analytics</li>
+          <li><i class="fas fa-check"></i> Community support</li>
+          <li class="muted"><i class="fas fa-times"></i> AI Quiz Builder</li>
+          <li class="muted"><i class="fas fa-times"></i> Live competitions</li>
+        </ul>
+        <a href="website-signup.html" class="price-btn outline">Get Started Free</a>
+      </div>
+      <div class="price-card popular reveal" style="transition-delay:.1s">
+        <div class="popular-badge">⭐ Most Popular</div>
+        <div class="price-name">Pro</div>
+        <div class="price-amount"><sup>₹</sup><span id="proPrice">299</span></div>
+        <div class="price-period">per teacher / month</div>
+        <div class="price-desc">The full MindWave experience for active educators.</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> Unlimited students</li>
+          <li><i class="fas fa-check"></i> Unlimited quizzes</li>
+          <li><i class="fas fa-check"></i> AI Quiz Builder</li>
+          <li><i class="fas fa-check"></i> Live competitions</li>
+          <li><i class="fas fa-check"></i> Advanced analytics</li>
+          <li><i class="fas fa-check"></i> Priority support</li>
+        </ul>
+        <a href="website-signup.html" class="price-btn solid">Start Free Trial</a>
+      </div>
+      <div class="price-card reveal" style="transition-delay:.2s">
+        <div class="price-name">Institution</div>
+        <div class="price-amount" style="font-size:2rem;padding-top:8px">Custom</div>
+        <div class="price-period">volume pricing</div>
+        <div class="price-desc">For schools, universities, and enterprise deployments.</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> Everything in Pro</li>
+          <li><i class="fas fa-check"></i> Multi-campus management</li>
+          <li><i class="fas fa-check"></i> SSO / LMS integration</li>
+          <li><i class="fas fa-check"></i> Custom branding</li>
+          <li><i class="fas fa-check"></i> SLA guarantee</li>
+          <li><i class="fas fa-check"></i> Dedicated success manager</li>
+        </ul>
+        <a href="#" class="price-btn outline">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<section class="cta-band">
+  <div class="cta-box reveal">
+    <h2>Ready to transform your classroom?</h2>
+    <p>Join 10,000+ students and teachers already learning smarter with MindWave.</p>
+    <a href="website-signup.html" class="btn-primary">
+      Get Started for Free <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="#" class="footer-logo">
+          <div class="footer-logo-icon"><i class="fas fa-brain" style="color:#fff"></i></div>
+          MindWave
+        </a>
+        <p class="footer-desc">AI-powered gamification platform for modern education. Turning learning into an adventure, one lesson at a time.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#">AI Quiz Builder</a></li>
+          <li><a href="#">Live Quizzes</a></li>
+          <li><a href="#">Analytics</a></li>
+          <li><a href="#">AI Tutor</a></li>
+          <li><a href="#">All Tools</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="cookies.html">Cookie Policy</a></li>
+          <li><a href="refund-policy.html">Refund Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 MindWave. All rights reserved.</span>
+      <div class="social-links">
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-youtube"></i></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── CURSOR SPOTLIGHT ──
+const glow = document.getElementById('cursor-glow');
+document.addEventListener('mousemove', e => {
+  glow.style.left = e.clientX + 'px';
+  glow.style.top = e.clientY + 'px';
+});
+
+// ── MAGNETIC BUTTONS ──
+document.querySelectorAll('.mag-btn').forEach(btn => {
+  btn.addEventListener('mousemove', e => {
+    const r = btn.getBoundingClientRect();
+    const x = e.clientX - r.left - r.width / 2;
+    const y = e.clientY - r.top - r.height / 2;
+    btn.style.transform = `translate(${x * 0.22}px, ${y * 0.22}px)`;
+  });
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = '';
+    btn.style.transition = 'transform .4s cubic-bezier(.34,1.56,.64,1)';
+    setTimeout(() => btn.style.transition = '', 400);
+  });
+});
+
+// ── 3D CARD TILT ──
+document.querySelectorAll('.feat-card, .test-card, .price-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    card.style.transform = `perspective(600px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateY(-8px)`;
+    card.style.transition = 'transform .15s ease, box-shadow .15s ease';
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+    card.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1), box-shadow .5s ease';
+    setTimeout(() => card.style.transition = '', 500);
+  });
+});
+
+// ── FEATURE TABS ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panel = document.getElementById('tab-' + btn.dataset.tab);
+    if (panel) panel.classList.add('active');
+  });
+});
+
+// ── PARTICLE CANVAS ──
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+function resize(){W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight;}
+resize(); window.addEventListener('resize', resize);
+function mkParticle(){
+  return {
+    x: Math.random()*W, y: Math.random()*H,
+    r: Math.random()*1.5+0.3,
+    vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3,
+    alpha: Math.random()*0.5+0.1
+  };
+}
+for(let i=0;i<120;i++) particles.push(mkParticle());
+function drawParticles(){
+  ctx.clearRect(0,0,W,H);
+  particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0||p.x>W) p.vx*=-1;
+    if(p.y<0||p.y>H) p.vy*=-1;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(99,102,241,${p.alpha * 0.4})`;
+    ctx.fill();
+  });
+  // draw connections
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<100){
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x,particles[i].y);
+        ctx.lineTo(particles[j].x,particles[j].y);
+        ctx.strokeStyle=`rgba(99,102,241,${0.06*(1-dist/100)})`;
+        ctx.lineWidth=0.5;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// ── NAVBAR SCROLL ──
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// ── SCROLL REVEAL ──
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
+},{threshold:0.12});
+revealEls.forEach(el=>observer.observe(el));
+
+// ── COUNT-UP ANIMATION ──
+function countUp(el, target){
+  let val=0, dur=1800, start=performance.now();
+  const suffix = target>=1000 ? (target>=10000?'+':'+') : (el.dataset.target==='98'?'%':'');
+  function step(now){
+    const t=Math.min((now-start)/dur,1);
+    const ease=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    val=Math.floor(ease*target);
+    el.textContent=(target>=1000?(val>=1000?(val/1000).toFixed(0)+'K':val):val)+suffix;
+    if(t<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+const statObserver = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const t=parseInt(e.target.dataset.target);
+      countUp(e.target,t);
+      statObserver.unobserve(e.target);
+    }
+  });
+},{threshold:0.5});
+document.querySelectorAll('[data-target]').forEach(el=>statObserver.observe(el));
+
+// ── PRICING TOGGLE ──
+const toggle = document.getElementById('billingToggle');
+const proPrice = document.getElementById('proPrice');
+let annual = true;
+toggle.addEventListener('click',()=>{
+  annual=!annual;
+  toggle.classList.toggle('on',annual);
+  proPrice.textContent = annual?'209':'299';
+});
+
+// ── MOBILE MENU ──
+document.getElementById('mobileToggle').addEventListener('click',()=>{
+  const links=document.getElementById('navLinks');
+  const open=links.style.display==='flex';
+  links.style.display=open?'none':'flex';
+  links.style.flexDirection='column';
+  links.style.position='absolute';
+  links.style.top='72px';links.style.left='0';links.style.right='0';
+  links.style.background='rgba(248,247,255,.98)';
+  links.style.padding='24px 5%';links.style.gap='20px';
+  links.style.borderBottom='1px solid rgba(79,70,229,.1)';
+});
+</script>
+</body>
+</html>
