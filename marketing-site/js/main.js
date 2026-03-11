@@ -46,15 +46,9 @@ document.addEventListener('DOMContentLoaded', function () {
     let lastScrollTop = 0;
 
     window.addEventListener('scroll', function () {
+        if (!navbar) return;
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        // Add shadow when scrolled
-        if (scrollTop > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-
+        navbar.classList.toggle('scrolled', scrollTop > 50);
         lastScrollTop = scrollTop;
     });
 
@@ -87,16 +81,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     faqItems.forEach(item => {
         const question = item.querySelector('.faq-question');
+        if (!question) return; // new homepage uses inline onclick — skip
 
         question.addEventListener('click', function () {
-            // Close other items
             faqItems.forEach(otherItem => {
                 if (otherItem !== item && otherItem.classList.contains('active')) {
                     otherItem.classList.remove('active');
                 }
             });
-
-            // Toggle current item
             item.classList.toggle('active');
         });
     });
@@ -198,17 +190,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const hero = document.querySelector('.hero');
     const heroCircles = document.querySelectorAll('.hero-bg-circle');
 
-    window.addEventListener('scroll', function () {
-        const scrolled = window.pageYOffset;
-        const heroHeight = hero.offsetHeight;
-
-        if (scrolled < heroHeight) {
-            heroCircles.forEach((circle, index) => {
-                const speed = (index + 1) * 0.3;
-                circle.style.transform = `translateY(${scrolled * speed}px)`;
-            });
-        }
-    });
+    if (hero && heroCircles.length) {
+        window.addEventListener('scroll', function () {
+            const scrolled = window.pageYOffset;
+            const heroHeight = hero.offsetHeight;
+            if (scrolled < heroHeight) {
+                heroCircles.forEach((circle, index) => {
+                    circle.style.transform = `translateY(${scrolled * (index + 1) * 0.3}px)`;
+                });
+            }
+        });
+    }
 
     // ===================================
     // Add Ripple Effect Styles Dynamically
