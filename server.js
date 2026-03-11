@@ -74,8 +74,11 @@ const {
   CLEANUP_ENABLED = "true",
   // Stripe Configuration
   STRIPE_SECRET_KEY,
-  STRIPE_WEBHOOK_SECRET
+  STRIPE_WEBHOOK_SECRET,
+  // Groq API for marketing chatbot
+  GROQ_API_KEY
 } = process.env;
+
 
 // Initialize Stripe (dynamic import to prevent deployment failures)
 let stripe = null;
@@ -1251,6 +1254,50 @@ app.use('/api/live-sessions', liveSessionsRouter);
 app.use('/api/student', authMiddleware, studentPerformanceRoutes);
 // Peer Review System Routes
 setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission);
+
+// ============================================
+// MARKETING CHATBOT — GROQ PROXY
+// Keeps the API key server-side; browser calls /api/chat
+// ============================================
+app.post('/api/chat', async (req, res) => {
+  if (!GROQ_API_KEY) {
+    return res.status(503).json({ ok: false, message: 'Chatbot not configured (missing GROQ_API_KEY).' });
+  }
+  const { message, systemPrompt } = req.body || {};
+  if (!message) return res.status(400).json({ ok: false, message: 'message is required' });
+
+  try {
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+          { role: 'user', content: message }
+        ],
+        temperature: 0.7,
+        max_tokens: 200
+      })
+    });
+
+    if (!groqRes.ok) {
+      const err = await groqRes.text();
+      console.error('Groq error:', err);
+      return res.status(groqRes.status).json({ ok: false, message: 'Groq API error' });
+    }
+
+    const data = await groqRes.json();
+    res.json({ ok: true, reply: data.choices[0].message.content });
+  } catch (err) {
+    console.error('Chat proxy error:', err);
+    res.status(500).json({ ok: false, message: 'Internal server error' });
+  }
+});
+
 
 const authLimiter = rateLimit({
   windowMs: 60 * 1000,
