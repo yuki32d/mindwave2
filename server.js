@@ -77,8 +77,10 @@ const {
   STRIPE_WEBHOOK_SECRET,
   // Groq API for marketing chatbot
   GROQ_API_KEY,
-  // Resend email API
-  RESEND_API_KEY
+  // Brevo (Sendinblue) email API
+  BREVO_API_KEY,
+  BREVO_SENDER_EMAIL = 'rajkumarw88d@gmail.com',
+  BREVO_SENDER_NAME = 'MindWave'
 } = process.env;
 
 
@@ -1837,8 +1839,8 @@ app.post("/api/forgot-password", authLimiter, async (req, res) => {
     const baseUrl = CLIENT_ORIGIN || `https://${req.headers.host}`;
     const resetUrl = `${baseUrl}/marketing-site/student-reset-password.html?token=${rawToken}&email=${encodeURIComponent(email)}`;
 
-    // Send email via Resend API (works on Render — no SMTP port blocking)
-    if (RESEND_API_KEY) {
+    // Send email via Brevo API (HTTPS — works on Render)
+    if (BREVO_API_KEY) {
       const emailHtml = `
         <div style="font-family:Inter,sans-serif;max-width:480px;margin:auto;padding:32px;">
           <h2 style="color:#4F46E5;margin-bottom:8px;">Reset your password</h2>
@@ -1853,27 +1855,27 @@ app.post("/api/forgot-password", authLimiter, async (req, res) => {
           </p>
         </div>
       `;
-      const resendRes = await fetch('https://api.resend.com/emails', {
+      const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
+          'api-key': BREVO_API_KEY,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: 'MindWave <onboarding@resend.dev>',
-          to: [email],
+          sender: { name: BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
+          to: [{ email }],
           subject: 'MindWave – Reset your password',
-          html: emailHtml
+          htmlContent: emailHtml
         })
       });
-      const resendData = await resendRes.json();
-      if (!resendRes.ok) {
-        console.error('[MAIL] Resend error:', resendData);
+      const brevoData = await brevoRes.json();
+      if (!brevoRes.ok) {
+        console.error('[MAIL] Brevo error:', JSON.stringify(brevoData));
       } else {
-        console.log(`[MAIL] Reset link sent to ${email} via Resend`);
+        console.log(`[MAIL] Reset link sent to ${email} via Brevo (id: ${brevoData.messageId})`);
       }
     } else {
-      console.warn(`[WARN] RESEND_API_KEY not set. Reset link for ${email}: ${resetUrl}`);
+      console.warn(`[WARN] BREVO_API_KEY not set. Reset link for ${email}: ${resetUrl}`);
     }
   } catch (err) {
     console.error("Forgot-password error:", err);
