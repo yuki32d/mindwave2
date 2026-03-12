@@ -1812,6 +1812,98 @@ app.post("/api/logout", (_req, res) => {
     .json({ ok: true });
 });
 
+// ── Forgot Password ─────────────────────────────────────────────
+app.post("/api/forgot-password", authLimiter, async (req, res) => {
+  const { email } = req.body || {};
+  if (!email) return res.status(400).json({ ok: false, message: "Email is required" });
+
+  // Always respond OK to avoid leaking whether the email exists
+  res.json({ ok: true, message: "If that email is registered, a reset link has been sent." });
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) return; // silent – don't reveal account existence
+
+    // Generate a secure random token (raw) and store its hash
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+    user.resetToken = hashedToken;
+    user.resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+    await user.save();
+
+    // Build reset URL
+    const baseUrl = CLIENT_ORIGIN || `https://${req.headers.host}`;
+    const resetUrl = `${baseUrl}/marketing-site/student-reset-password.html?token=${rawToken}&email=${encodeURIComponent(email)}`;
+
+    // Send email via nodemailer if SMTP is configured
+    if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+      const nodemailer = (await import("nodemailer")).default;
+      const transporter = nodemailer.createTransport({
+        host: SMTP_HOST,
+        port: Number(SMTP_PORT) || 587,
+        secure: Number(SMTP_PORT) === 465,
+        auth: { user: SMTP_USER, pass: SMTP_PASS }
+      });
+
+      await transporter.sendMail({
+        from: SMTP_FROM,
+        to: email,
+        subject: "MindWave – Reset your password",
+        html: `
+          <div style="font-family:Inter,sans-serif;max-width:480px;margin:auto;padding:32px;">
+            <h2 style="color:#4F46E5;margin-bottom:8px;">Reset your password</h2>
+            <p style="color:#6B7280;margin-bottom:24px;">
+              Click the button below to set a new password. This link expires in <strong>15 minutes</strong>.
+            </p>
+            <a href="${resetUrl}" style="display:inline-block;padding:13px 28px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;">
+              Reset Password
+            </a>
+            <p style="color:#9CA3AF;font-size:12px;margin-top:24px;">
+              If you didn't request this, you can safely ignore this email.
+            </p>
+          </div>
+        `
+      });
+    } else {
+      console.log(`[DEV] Password reset link for ${email}: ${resetUrl}`);
+    }
+  } catch (err) {
+    console.error("Forgot-password error:", err);
+  }
+});
+
+// ── Reset Password (consume token) ───────────────────────────────
+app.post("/api/reset-password", authLimiter, async (req, res) => {
+  const { email, token, newPassword } = req.body || {};
+  if (!email || !token || !newPassword) {
+    return res.status(400).json({ ok: false, message: "Email, token and new password are required" });
+  }
+  if (!validatePassword(newPassword)) {
+    return res.status(400).json({ ok: false, message: "Password must be at least 6 characters" });
+  }
+  try {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+      resetToken: hashedToken,
+      resetTokenExpiry: { $gt: new Date() }
+    });
+    if (!user) {
+      return res.status(400).json({ ok: false, message: "Reset link is invalid or has expired" });
+    }
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+    res.json({ ok: true, message: "Password updated successfully" });
+  } catch (err) {
+    console.error("Reset-password error:", err);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+
+
 // ===================================
 // SUPER ADMIN API ENDPOINTS
 // ===================================
