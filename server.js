@@ -1837,7 +1837,6 @@ app.post("/api/forgot-password", authLimiter, async (req, res) => {
 
     // Send email via nodemailer if SMTP is configured
     if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
-      const nodemailer = (await import("nodemailer")).default;
       const transporter = nodemailer.createTransport({
         host: SMTP_HOST,
         port: Number(SMTP_PORT) || 587,
@@ -1864,8 +1863,9 @@ app.post("/api/forgot-password", authLimiter, async (req, res) => {
           </div>
         `
       });
+      console.log(`[MAIL] Reset link sent to ${email}`);
     } else {
-      console.log(`[DEV] Password reset link for ${email}: ${resetUrl}`);
+      console.warn(`[WARN] SMTP not configured. Reset link for ${email}: ${resetUrl}`);
     }
   } catch (err) {
     console.error("Forgot-password error:", err);
