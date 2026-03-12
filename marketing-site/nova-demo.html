@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Premium Demo — MindWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --p: #4F46E5;
+            --p2: #7C3AED;
+            --bg: #F8F7FF;
+            --text: #18181B;
+            --muted: #6B7280;
+            --border: rgba(79, 70, 229, 0.12);
+            --glow: rgba(79, 70, 229, 0.22);
+            --glass: rgba(255, 255, 255, 0.7);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mock background content to show blur */
+        .bg-dots {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(79, 70, 229, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(124, 58, 237, 0.1) 0%, transparent 40%);
+            z-index: -1;
+        }
+
+        .demo-layout {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
+        p { color: var(--muted); margin-bottom: 2rem; }
+
+        /* --- REDESIGNED CHATBOT STYLES --- */
+
+        .nova-window {
+            width: 380px;
+            height: 520px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(79, 70, 229, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            text-align: left;
+            position: relative;
+        }
+
+        .nova-header {
+            background: linear-gradient(135deg, var(--p) 0%, var(--p2) 100%);
+            padding: 20px 24px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nova-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nova-avatar {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .nova-title h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .nova-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10B981;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            border: 1px solid #10B981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        .nova-messages {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            border-radius: 16px;
+        }
+
+        .msg.bot {
+            background: white;
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid rgba(79, 70, 229, 0.05);
+        }
+
+        .msg.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--p), var(--p2));
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 8px 20px var(--glow);
+        }
+
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .chip {
+            padding: 8px 16px;
+            background: white;
+            border: 1.5px solid var(--border);
+            color: var(--p);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip:hover {
+            border-color: var(--p);
+            background: rgba(79, 70, 229, 0.04);
+            transform: translateY(-2px);
+        }
+
+        .nova-input-area {
+            padding: 20px 24px;
+            background: rgba(255, 255, 255, 0.5);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+
+        .nova-input {
+            flex: 1;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .nova-input:focus {
+            border-color: var(--p);
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--p), var(--p2));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px var(--glow);
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-dots"></div>
+
+    <div class="demo-layout">
+        <h1>Nova Premium Demo</h1>
+        <p>A professional, glass-morphic redesign that natively matches the MindWave brand theme.</p>
+        
+        <div class="nova-window">
+            <div class="nova-header">
+                <div class="nova-info">
+                    <div class="nova-avatar"><i class="fas fa-brain"></i></div>
+                    <div class="nova-title">
+                        <h3>Nova</h3>
+                        <div class="nova-status">
+                            <div class="status-dot"></div>
+                            Online • Ready to help
+                        </div>
+                    </div>
+                </div>
+                <div style="opacity: 0.7; font-size: 1.2rem; cursor: pointer;"><i class="fas fa-times"></i></div>
+            </div>
+
+            <div class="nova-messages">
+                <div class="msg bot">
+                    Hi there! 👋 I'm Nova, your MindWave assistant. How can I help you today?
+                </div>
+                <div class="quick-replies">
+                    <div class="chip">Pricing & Plans</div>
+                    <div class="chip">Features</div>
+                    <div class="chip">Get Started</div>
+                </div>
+                <div class="msg user">
+                    Tell me about AI features.
+                </div>
+                <div class="msg bot">
+                    MindWave's AI features include an <b>Instant Quiz Builder</b>, a <b>24/7 AI Tutor</b>, and <b>Smart Analytics</b> to track student progress.
+                </div>
+            </div>
+
+            <div class="nova-input-area">
+                <input type="text" class="nova-input" placeholder="Type your message...">
+                <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

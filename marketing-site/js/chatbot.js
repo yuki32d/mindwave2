@@ -7,7 +7,7 @@ class MarketingChatbot {
         this.messages = [];
         this.groqApiKey = null; // Will be set from environment or config
         this.botName = "Nova";
-        this.botAvatar = "✨";
+        this.botAvatar = '<i class="fas fa-brain"></i>';
 
         this.quickReplies = [
             "What is MindWave?",
@@ -53,7 +53,10 @@ class MarketingChatbot {
                             <div class="chatbot-avatar">${this.botAvatar}</div>
                             <div class="chatbot-info">
                                 <h3>${this.botName}</h3>
-                                <p>Online • Ready to help</p>
+                                <div class="status-dot-container">
+                                    <div class="status-dot"></div>
+                                    <p>Online • Ready to help</p>
+                                </div>
                             </div>
                         </div>
                         <div class="chatbot-header-right">
@@ -125,7 +128,7 @@ class MarketingChatbot {
                             autocomplete="off"
                         />
                         <button class="chatbot-send-btn" id="chatbotSend">
-                            <svg viewBox="0 0 24 24">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                             </svg>
                         </button>
@@ -379,7 +382,7 @@ YOUR ROLE AS NOVA:
 
         const messageHTML = `
             <div class="message user">
-                <div class="message-avatar">👤</div>
+                <div class="message-avatar"><i class="fas fa-user"></i></div>
                 <div class="message-content">
                     <div class="message-bubble">${this.escapeHtml(text)}</div>
                     <div class="message-time">${time}</div>
