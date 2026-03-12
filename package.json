@@ -33,6 +33,7 @@
     "openai": "^6.9.1",
     "pdf-parse": "^2.4.5",
     "razorpay": "^2.9.6",
+    "resend": "^6.9.3",
     "simple-peer": "^9.11.1",
     "socket.io": "^4.8.3",
     "stripe": "^20.1.0",

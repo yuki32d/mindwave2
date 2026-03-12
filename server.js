@@ -76,7 +76,9 @@ const {
   STRIPE_SECRET_KEY,
   STRIPE_WEBHOOK_SECRET,
   // Groq API for marketing chatbot
-  GROQ_API_KEY
+  GROQ_API_KEY,
+  // Resend email API
+  RESEND_API_KEY
 } = process.env;
 
 
@@ -1835,37 +1837,43 @@ app.post("/api/forgot-password", authLimiter, async (req, res) => {
     const baseUrl = CLIENT_ORIGIN || `https://${req.headers.host}`;
     const resetUrl = `${baseUrl}/marketing-site/student-reset-password.html?token=${rawToken}&email=${encodeURIComponent(email)}`;
 
-    // Send email via nodemailer if SMTP is configured
-    if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
-      const transporter = nodemailer.createTransport({
-        host: SMTP_HOST,
-        port: Number(SMTP_PORT) || 587,
-        secure: Number(SMTP_PORT) === 465,
-        auth: { user: SMTP_USER, pass: SMTP_PASS }
+    // Send email via Resend API (works on Render — no SMTP port blocking)
+    if (RESEND_API_KEY) {
+      const emailHtml = `
+        <div style="font-family:Inter,sans-serif;max-width:480px;margin:auto;padding:32px;">
+          <h2 style="color:#4F46E5;margin-bottom:8px;">Reset your password</h2>
+          <p style="color:#6B7280;margin-bottom:24px;">
+            Click the button below to set a new password. This link expires in <strong>15 minutes</strong>.
+          </p>
+          <a href="${resetUrl}" style="display:inline-block;padding:13px 28px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;">
+            Reset Password
+          </a>
+          <p style="color:#9CA3AF;font-size:12px;margin-top:24px;">
+            If you didn't request this, you can safely ignore this email.
+          </p>
+        </div>
+      `;
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: SMTP_FROM || 'MindWave <onboarding@resend.dev>',
+          to: [email],
+          subject: 'MindWave – Reset your password',
+          html: emailHtml
+        })
       });
-
-      await transporter.sendMail({
-        from: SMTP_FROM,
-        to: email,
-        subject: "MindWave – Reset your password",
-        html: `
-          <div style="font-family:Inter,sans-serif;max-width:480px;margin:auto;padding:32px;">
-            <h2 style="color:#4F46E5;margin-bottom:8px;">Reset your password</h2>
-            <p style="color:#6B7280;margin-bottom:24px;">
-              Click the button below to set a new password. This link expires in <strong>15 minutes</strong>.
-            </p>
-            <a href="${resetUrl}" style="display:inline-block;padding:13px 28px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;">
-              Reset Password
-            </a>
-            <p style="color:#9CA3AF;font-size:12px;margin-top:24px;">
-              If you didn't request this, you can safely ignore this email.
-            </p>
-          </div>
-        `
-      });
-      console.log(`[MAIL] Reset link sent to ${email}`);
+      const resendData = await resendRes.json();
+      if (!resendRes.ok) {
+        console.error('[MAIL] Resend error:', resendData);
+      } else {
+        console.log(`[MAIL] Reset link sent to ${email} via Resend`);
+      }
     } else {
-      console.warn(`[WARN] SMTP not configured. Reset link for ${email}: ${resetUrl}`);
+      console.warn(`[WARN] RESEND_API_KEY not set. Reset link for ${email}: ${resetUrl}`);
     }
   } catch (err) {
     console.error("Forgot-password error:", err);
