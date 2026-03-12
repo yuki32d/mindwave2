@@ -1841,20 +1841,83 @@ app.post("/api/forgot-password", authLimiter, async (req, res) => {
 
     // Send email via Brevo API (HTTPS — works on Render)
     if (BREVO_API_KEY) {
-      const emailHtml = `
-        <div style="font-family:Inter,sans-serif;max-width:480px;margin:auto;padding:32px;">
-          <h2 style="color:#4F46E5;margin-bottom:8px;">Reset your password</h2>
-          <p style="color:#6B7280;margin-bottom:24px;">
-            Click the button below to set a new password. This link expires in <strong>15 minutes</strong>.
+      const firstName = user.name ? user.name.split(' ')[0] : 'Student';
+      const emailHtml = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F4F4F7;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F4F4F7;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+        <!-- Header -->
+        <tr><td style="background:#4F46E5;padding:32px 40px;text-align:center;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="text-align:center;">
+                <div style="display:inline-flex;align-items:center;gap:10px;">
+                  <span style="display:inline-block;width:36px;height:36px;background:#fff;border-radius:10px;text-align:center;line-height:36px;font-size:18px;">🧠</span>
+                  <span style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;vertical-align:middle;margin-left:8px;">MindWave</span>
+                </div>
+                <p style="color:rgba(255,255,255,0.75);font-size:12px;margin:6px 0 0;letter-spacing:0.5px;text-transform:uppercase;">Student Portal</p>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+
+        <!-- Body -->
+        <tr><td style="padding:40px 40px 32px;">
+          <h1 style="font-size:24px;font-weight:800;color:#111827;margin:0 0 8px;letter-spacing:-0.5px;">Reset your password</h1>
+          <p style="font-size:15px;color:#6B7280;margin:0 0 28px;line-height:1.6;">
+            Hi <strong style="color:#111827;">${firstName}</strong>, we received a request to reset your MindWave password. Click the button below to set a new one.
           </p>
-          <a href="${resetUrl}" style="display:inline-block;padding:13px 28px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;">
-            Reset Password
-          </a>
-          <p style="color:#9CA3AF;font-size:12px;margin-top:24px;">
-            If you didn't request this, you can safely ignore this email.
+
+          <!-- CTA Button -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+            <tr><td align="center">
+              <a href="${resetUrl}" style="display:inline-block;background:#4F46E5;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:15px 36px;border-radius:10px;letter-spacing:0.2px;">
+                Reset Password &rarr;
+              </a>
+            </td></tr>
+          </table>
+
+          <!-- Expiry note -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#EEF2FF;border-radius:10px;margin-bottom:28px;">
+            <tr><td style="padding:14px 18px;">
+              <p style="margin:0;font-size:13px;color:#4F46E5;">
+                ⏱ This link expires in <strong>15 minutes</strong>. If it expires, you can request a new one from the login page.
+              </p>
+            </td></tr>
+          </table>
+
+          <!-- Fallback link -->
+          <p style="font-size:12px;color:#9CA3AF;margin:0 0 6px;">If the button doesn't work, copy and paste this link into your browser:</p>
+          <p style="font-size:11px;color:#6B7280;word-break:break-all;margin:0 0 28px;">
+            <a href="${resetUrl}" style="color:#4F46E5;text-decoration:none;">${resetUrl}</a>
           </p>
-        </div>
-      `;
+
+          <hr style="border:none;border-top:1px solid #E5E7EB;margin:0;">
+
+          <!-- Security notice -->
+          <p style="font-size:12px;color:#9CA3AF;margin:20px 0 0;line-height:1.6;">
+            🔒 If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+          </p>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="background:#F9FAFB;padding:20px 40px;border-top:1px solid #E5E7EB;text-align:center;">
+          <p style="font-size:12px;color:#9CA3AF;margin:0;">
+            &copy; 2025 MindWave Inc. &bull; CMR Institute of Technology<br>
+            This is an automated message — please do not reply.
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
       const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: {
