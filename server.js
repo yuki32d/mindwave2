@@ -1860,7 +1860,7 @@ app.post("/api/forgot-password", authLimiter, async (req, res) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: SMTP_FROM || 'MindWave <onboarding@resend.dev>',
+          from: 'MindWave <onboarding@resend.dev>',
           to: [email],
           subject: 'MindWave – Reset your password',
           html: emailHtml
