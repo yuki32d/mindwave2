@@ -1818,14 +1818,16 @@ app.post("/api/logout", (_req, res) => {
 
 // ── Forgot Password ─────────────────────────────────────────────
 app.post("/api/forgot-password", authLimiter, async (req, res) => {
-  const { email } = req.body || {};
+  const { email, role } = req.body || {};
   if (!email) return res.status(400).json({ ok: false, message: "Email is required" });
+
+  const safeRole = (role === 'admin' || role === 'teacher' || role === 'student') ? role : 'student';
 
   // Always respond OK to avoid leaking whether the email exists
   res.json({ ok: true, message: "If that email is registered, a reset link has been sent." });
 
   try {
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase(), role: safeRole });
     if (!user) return; // silent – don't reveal account existence
 
     // Generate a secure random token (raw) and store its hash
@@ -1835,13 +1837,16 @@ app.post("/api/forgot-password", authLimiter, async (req, res) => {
     user.resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
     await user.save();
 
-    // Build reset URL
+    // Build reset URL based on role
     const baseUrl = CLIENT_ORIGIN || `https://${req.headers.host}`;
-    const resetUrl = `${baseUrl}/marketing-site/student-reset-password.html?token=${rawToken}&email=${encodeURIComponent(email)}`;
+    const page = safeRole === 'admin' ? 'admin-reset-password.html' : 'student-reset-password.html';
+    const resetUrl = `${baseUrl}/marketing-site/${page}?token=${rawToken}&email=${encodeURIComponent(email)}`;
 
-    // Send email via Brevo API (HTTPS — works on Render)
+    // Send email via Brevo API
     if (BREVO_API_KEY) {
-      const firstName = user.name ? user.name.split(' ')[0] : 'Student';
+      const firstName = user.name ? user.name.split(' ')[0] : (safeRole === 'admin' ? 'Admin' : 'Student');
+      const portalLabel = safeRole.charAt(0).toUpperCase() + safeRole.slice(1) + ' Portal';
+
       const emailHtml = `<!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -1859,7 +1864,7 @@ app.post("/api/forgot-password", authLimiter, async (req, res) => {
                   <span style="display:inline-block;width:36px;height:36px;background:#fff;border-radius:10px;text-align:center;line-height:36px;font-size:18px;">🧠</span>
                   <span style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;vertical-align:middle;margin-left:8px;">MindWave</span>
                 </div>
-                <p style="color:rgba(255,255,255,0.75);font-size:12px;margin:6px 0 0;letter-spacing:0.5px;text-transform:uppercase;">Student Portal</p>
+                <p style="color:rgba(255,255,255,0.75);font-size:12px;margin:6px 0 0;letter-spacing:0.5px;text-transform:uppercase;">${portalLabel}</p>
               </td>
             </tr>
           </table>
@@ -1947,10 +1952,13 @@ app.post("/api/forgot-password", authLimiter, async (req, res) => {
 
 // ── Reset Password (consume token) ───────────────────────────────
 app.post("/api/reset-password", authLimiter, async (req, res) => {
-  const { email, token, newPassword } = req.body || {};
+  const { email, token, newPassword, role } = req.body || {};
   if (!email || !token || !newPassword) {
     return res.status(400).json({ ok: false, message: "Email, token and new password are required" });
   }
+
+  const safeRole = (role === 'admin' || role === 'teacher' || role === 'student') ? role : 'student';
+
   if (!validatePassword(newPassword)) {
     return res.status(400).json({ ok: false, message: "Password must be at least 6 characters" });
   }
@@ -1958,6 +1966,7 @@ app.post("/api/reset-password", authLimiter, async (req, res) => {
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
     const user = await User.findOne({
       email: email.toLowerCase(),
+      role: safeRole,
       resetToken: hashedToken,
       resetTokenExpiry: { $gt: new Date() }
     });
