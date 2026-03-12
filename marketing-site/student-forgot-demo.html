@@ -12,30 +12,57 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
-:root{--p:#4F46E5;--p2:#7C3AED;--text:#111827;--muted:#6B7280;--border:#E5E7EB;--danger:#EF4444;}
+:root{--p:#4F46E5;--p2:#7C3AED;--text:#111827;--muted:#6B7280;--border:#E5E7EB;--danger:#EF4444;--success:#10B981;}
 body{display:flex;min-height:100vh;}
-.form-panel{width:440px;flex-shrink:0;background:#fff;display:flex;flex-direction:column;padding:52px 52px 40px;position:relative;z-index:2;box-shadow:4px 0 40px rgba(0,0,0,.06);}
-.illus-panel{flex:1;position:relative;background:linear-gradient(135deg,#EEF2FF 0%,#F5F3FF 50%,#EDE9FE 100%);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+
+.form-panel{
+  width:440px;flex-shrink:0;background:#fff;
+  display:flex;flex-direction:column;padding:52px 52px 40px;
+  position:relative;z-index:2;box-shadow:4px 0 40px rgba(0,0,0,.06);
+}
+.illus-panel{
+  flex:1;position:relative;
+  background:linear-gradient(135deg,#EEF2FF 0%,#F5F3FF 50%,#EDE9FE 100%);
+  overflow:hidden;display:flex;align-items:center;justify-content:center;
+}
 .blob{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;}
 .blob1{width:420px;height:420px;background:rgba(99,102,241,.13);top:-60px;right:-80px;}
 .blob2{width:300px;height:300px;background:rgba(139,92,246,.10);bottom:40px;left:20px;}
 .college-bg{position:absolute;inset:0;background:url('../background.jpg') center/cover no-repeat;opacity:.08;}
 .illus-img{position:relative;z-index:1;width:min(520px,86%);filter:drop-shadow(0 20px 40px rgba(79,70,229,.14));}
 .right-brand{position:absolute;top:32px;left:52px;z-index:3;font-size:.82rem;font-weight:700;color:rgba(79,70,229,.5);letter-spacing:.04em;text-transform:uppercase;}
+
 .logo{display:flex;align-items:center;gap:10px;margin-bottom:48px;}
 .logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--p2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;}
 .logo-name{font-size:1.2rem;font-weight:800;color:var(--text);letter-spacing:-.02em;}
 .logo-name span{background:linear-gradient(135deg,var(--p),var(--p2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.icon-circle{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,rgba(79,70,229,.12),rgba(124,58,237,.12));border:1.5px solid rgba(79,70,229,.18);display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--p);margin-bottom:24px;}
+
+/* Icon circle */
+.icon-circle{
+  width:64px;height:64px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(79,70,229,.12),rgba(124,58,237,.12));
+  border:1.5px solid rgba(79,70,229,.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;color:var(--p);margin-bottom:24px;
+}
+
 .form-title{font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-.03em;margin-bottom:6px;}
 .form-sub{font-size:.88rem;color:var(--muted);margin-bottom:32px;line-height:1.6;}
+
 .field{margin-bottom:20px;}
 .field label{display:block;font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:7px;}
 .input-wrap{position:relative;}
 .input-wrap .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:.83rem;pointer-events:none;}
-.field input{width:100%;padding:13px 13px 13px 36px;border:1.5px solid var(--border);border-radius:10px;font-size:.92rem;color:var(--text);font-family:'Inter',sans-serif;background:#fff;transition:border-color .2s,box-shadow .2s;}
+.field input{
+  width:100%;padding:13px 13px 13px 36px;
+  border:1.5px solid var(--border);border-radius:10px;
+  font-size:.92rem;color:var(--text);font-family:'Inter',sans-serif;
+  background:#fff;transition:border-color .2s,box-shadow .2s;
+}
 .field input::placeholder{color:#C4C9D4;}
 .field input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.1);}
+
+/* Success state */
 .success-state{display:none;text-align:center;animation:fadeUp .5s ease both;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
 .success-icon{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#10B981,#059669);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.8rem;margin:0 auto 20px;}
@@ -43,31 +70,44 @@ body{display:flex;min-height:100vh;}
 .success-state p{font-size:.87rem;color:var(--muted);line-height:1.6;margin-bottom:28px;}
 .back-btn{display:inline-flex;align-items:center;gap:7px;color:var(--p);font-size:.87rem;font-weight:600;text-decoration:none;}
 .back-btn:hover{text-decoration:underline;}
+
 .err-msg{background:#FEF2F2;border:1px solid #FECACA;color:var(--danger);border-radius:8px;padding:10px 13px;font-size:.82rem;margin-bottom:16px;display:none;align-items:center;gap:8px;animation:shake .35s ease;}
 .err-msg.show{display:flex;}
 @keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-5px);}40%,80%{transform:translateX(5px);}}
-.submit-btn{width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-size:.93rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(79,70,229,.28);transition:all .3s;margin-bottom:20px;}
+
+.submit-btn{
+  width:100%;padding:13px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,var(--p),var(--p2));
+  color:#fff;font-size:.93rem;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 20px rgba(79,70,229,.28);transition:all .3s;margin-bottom:20px;
+}
 .submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.36);}
 .spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.submit-btn.loading .btn-lbl{display:none;}.submit-btn.loading .spin{display:block;}
+.submit-btn.loading .btn-lbl{display:none;} .submit-btn.loading .spin{display:block;}
+
 .links-row{display:flex;justify-content:space-between;font-size:.82rem;}
 .links-row a{color:var(--muted);text-decoration:none;transition:color .2s;}
 .links-row a:hover{color:var(--p);}
 .links-row a.em{color:var(--p);font-weight:600;}
+
 .bottom-bar{margin-top:auto;padding-top:32px;font-size:.72rem;color:#D1D5DB;text-align:center;}
 .bottom-bar a{color:#9CA3AF;text-decoration:none;}
+
 @media(max-width:860px){.illus-panel{display:none;}.form-panel{width:100%;max-width:440px;margin:auto;box-shadow:none;padding:40px 28px;}body{background:#FAFAFA;}}
 </style>
 </head>
 <body>
 
+<!-- FORM PANEL -->
 <div class="form-panel">
   <div class="logo">
     <div class="logo-icon"><i class="fas fa-brain"></i></div>
     <div class="logo-name">Mind<span>Wave</span></div>
   </div>
 
+  <!-- Default state -->
   <div id="formState">
     <div class="icon-circle"><i class="fas fa-lock-open"></i></div>
     <div class="form-title">Reset your password</div>
@@ -90,18 +130,18 @@ body{display:flex;min-height:100vh;}
       </button>
 
       <div class="links-row">
-        <a href="student-login.html"><i class="fas fa-chevron-left" style="font-size:.68rem;margin-right:4px;"></i>Back to sign in</a>
-        <a href="student-signup.html" class="em">Create account</a>
+        <a href="student-login-demo.html"><i class="fas fa-chevron-left" style="font-size:.68rem;margin-right:4px;"></i>Back to sign in</a>
+        <a href="student-signup-demo.html" class="em">Create account</a>
       </div>
     </form>
   </div>
 
-  <!-- Success state shown after email sent -->
+  <!-- Success state -->
   <div class="success-state" id="successState">
     <div class="success-icon"><i class="fas fa-envelope-circle-check"></i></div>
     <h3>Check your inbox!</h3>
     <p>We've sent a password reset link to <strong id="sentEmail"></strong>.<br>It expires in 15 minutes.</p>
-    <a href="student-login.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to sign in</a>
+    <a href="student-login-demo.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to sign in</a>
   </div>
 
   <div class="bottom-bar">
@@ -109,6 +149,7 @@ body{display:flex;min-height:100vh;}
   </div>
 </div>
 
+<!-- ILLUS PANEL -->
 <div class="illus-panel">
   <div class="college-bg"></div>
   <div class="blob blob1"></div>
@@ -118,22 +159,32 @@ body{display:flex;min-height:100vh;}
 </div>
 
 <script>
-document.getElementById('reset-form').addEventListener('submit',async function(e){
+document.getElementById('reset-form').addEventListener('submit', async function(e){
   e.preventDefault();
   const email=document.getElementById('email').value.trim();
-  const err=document.getElementById('errMsg'),errTxt=document.getElementById('errTxt'),btn=document.getElementById('submitBtn');
+  const err=document.getElementById('errMsg'),errTxt=document.getElementById('errTxt');
+  const btn=document.getElementById('submitBtn');
   err.classList.remove('show');
 
-  if(!email||!email.includes('@')){errTxt.textContent='Please enter a valid college email address.';err.classList.add('show');return;}
+  if(!email||!email.includes('@')){
+    errTxt.textContent='Please enter a valid college email address.';
+    err.classList.add('show');return;
+  }
 
   btn.classList.add('loading');
   try{
+    // Try the API — fall back gracefully if no endpoint
     try{
-      const res=await fetch('/api/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+      const res=await fetch('/api/forgot-password',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email})
+      });
       const data=await res.json();
-      if(!data.ok&&data.message){errTxt.textContent=data.message;err.classList.add('show');btn.classList.remove('loading');return;}
+      if(!data.ok&&data.message){
+        errTxt.textContent=data.message;err.classList.add('show');return;
+      }
     }catch(_){}
-    // Always show success for security (don't reveal whether email exists)
+    // Show success regardless (security best practice — don't leak if email exists)
     document.getElementById('sentEmail').textContent=email;
     document.getElementById('formState').style.display='none';
     document.getElementById('successState').style.display='block';
