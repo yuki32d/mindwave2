@@ -99,6 +99,7 @@ async function exchangeCodeForToken(provider, code, codeVerifier) {
         // Store authentication token and user data
         if (result.token) {
             localStorage.setItem('auth_token', result.token);
+            localStorage.setItem('token', result.token);
             localStorage.setItem('user_email', result.user.email);
             localStorage.setItem('user_name', result.user.name);
 
@@ -222,6 +223,7 @@ async function processUserLogin(provider, userInfo, tokenData) {
         // Store authentication token
         if (result.token) {
             localStorage.setItem('auth_token', result.token);
+            localStorage.setItem('token', result.token);
             localStorage.setItem('user_email', userInfo.email);
             localStorage.setItem('user_name', userInfo.name);
         }

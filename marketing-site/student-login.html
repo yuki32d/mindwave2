@@ -193,6 +193,7 @@ document.getElementById('login-form').addEventListener('submit',async function(e
         localStorage.setItem('role',data.user.role);
         localStorage.setItem('email',data.user.email);
         localStorage.setItem('token',data.token||'authenticated');
+        localStorage.setItem('auth_token',data.token||'authenticated');
         const full=data.user.name||data.user.fullName||'';
         localStorage.setItem('firstName',data.user.firstName||full.split(' ')[0]||'');
         localStorage.setItem('lastName',data.user.lastName||full.split(' ').slice(1).join(' ')||'');

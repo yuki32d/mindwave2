@@ -290,6 +290,7 @@ document.getElementById('login-form').addEventListener('submit',async function(e
         localStorage.setItem('role','admin');
         localStorage.setItem('email',data.user.email);
         localStorage.setItem('token',data.token||'authenticated');
+        localStorage.setItem('auth_token',data.token||'authenticated');
         localStorage.setItem('name',data.user.name||data.user.fullName||'Admin');
       }
       window.location.href='../admin.html';

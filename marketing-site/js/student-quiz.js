@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── REST join (persists student in DB as participant) ──
 async function joinQuizREST() {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
         if (!token) return;
 
         const res = await fetch(`/api/quiz/${quizCode}/join`, {
@@ -244,7 +244,7 @@ async function submitAnswer(answerIndex) {
     }
 
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
         const res = await fetch(`/api/quiz/${quizCode}/answer`, {
             method: 'POST',
             headers: {

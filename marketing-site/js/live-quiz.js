@@ -63,7 +63,7 @@ async function generateQuestionsWithAI() {
         generateBtn.disabled = true;
         generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
 
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
         const response = await fetch('/api/quiz/generate-from-text', {
             method: 'POST',
             headers: {
@@ -298,7 +298,7 @@ async function launchQuiz() {
     }
 
     try {
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
         const response = await fetch('/api/quiz/create', {
             method: 'POST',
             headers: {
@@ -428,7 +428,7 @@ async function startQuiz() {
     if (!currentQuiz) return;
 
     try {
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
         const response = await fetch(`/api/quiz/${currentQuiz.sessionCode}/start`, {
             method: 'POST',
             headers: {
@@ -461,7 +461,7 @@ async function showNextQuestion() {
     if (!currentQuiz) return;
 
     try {
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
         const response = await fetch(`/api/quiz/${currentQuiz.sessionCode}/next`, {
             method: 'POST',
             headers: {
@@ -677,7 +677,7 @@ async function endQuiz() {
     if (!confirm('Are you sure you want to end this quiz?')) return;
 
     try {
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
         const response = await fetch(`/api/quiz/${currentQuiz.sessionCode}/end`, {
             method: 'POST',
             headers: {
