@@ -24,7 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const targetSection = document.getElementById(targetId);
 
             if (targetSection) {
-                const navHeight = document.querySelector('.navbar').offsetHeight;
+                const navEl = document.querySelector('.navbar') || document.querySelector('nav');
+                const navHeight = navEl ? navEl.offsetHeight : 70;
                 const targetPosition = targetSection.offsetTop - navHeight;
 
                 window.scrollTo({
@@ -34,8 +35,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Close mobile menu if open
                 const navLinksContainer = document.getElementById('navLinks');
-                navLinksContainer.classList.remove('active');
+                if (navLinksContainer) navLinksContainer.classList.remove('active');
             }
+
         });
     });
 
