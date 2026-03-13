@@ -7624,9 +7624,7 @@ app.post("/api/ai-game-builder", async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Message is required' });
     }
 
-    // Use admin-specific API key if available, otherwise fall back to regular key
-    const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_ADMIN_API_KEY || process.env.HUGGINGFACE_API_KEY;
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+
 
     // Enhanced System prompt for AI Game Builder
     const GAME_BUILDER_PROMPT = `You are an AI Game Builder assistant for the MindWave educational platform. Your job is to help faculty create high-quality educational games through conversation.
@@ -8148,86 +8146,40 @@ Be conversational, helpful, and generate high-quality educational content. Alway
     let gameData = null;
     let action = 'chat';
 
-    // Try Hugging Face first
-    if (HUGGINGFACE_API_KEY) {
-      try {
-        const hfResponse = await fetch(
-          'https://router.huggingface.co/v1/chat/completions',
-          {
-            headers: {
-              'Authorization': `Bearer ${HUGGINGFACE_API_KEY}`,
-              'Content-Type': 'application/json'
-            },
-            method: 'POST',
-            body: JSON.stringify({
-              model: "meta-llama/Meta-Llama-3-8B-Instruct",
-              messages: [
-                { role: "system", content: GAME_BUILDER_PROMPT },
-                ...(context.history || []).map(msg => ({
-                  role: msg.role === 'model' ? 'assistant' : msg.role,
-                  content: msg.parts ? msg.parts[0].text : msg.content
-                })),
-                { role: "user", content: message }
-              ],
-              max_tokens: 1500,
-              temperature: 0.7
-            })
-          }
-        );
-
-        if (hfResponse.ok) {
-          const data = await hfResponse.json();
-          reply = (data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
-        } else {
-          throw new Error('Hugging Face failed');
-        }
-      } catch (hfError) {
-        console.log('HF failed, trying Gemini...');
-
-        if (!GEMINI_API_KEY) {
-          throw new Error('No AI API available');
-        }
-
-        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({
-          model: 'gemini-pro',
-          systemInstruction: GAME_BUILDER_PROMPT
-        });
-
-        const chat = model.startChat({
-          history: context.history || [],
-          generationConfig: {
-            maxOutputTokens: 1500,
-            temperature: 0.7,
-          },
-        });
-
-        const result = await chat.sendMessage(message);
-        reply = result.response.text();
-      }
-    } else if (GEMINI_API_KEY) {
-      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-pro',
-        systemInstruction: GAME_BUILDER_PROMPT
-      });
-
-      const chat = model.startChat({
-        history: context.history || [],
-        generationConfig: {
-          maxOutputTokens: 1500,
-          temperature: 0.7,
-        },
-      });
-
-      const result = await chat.sendMessage(message);
-      reply = result.response.text();
-    } else {
-      return res.status(500).json({
-        ok: false,
-        error: 'No AI API configured'
-      });
+    // Use Groq API (fast, capable, already configured)
+    const GROQ_KEY = process.env.GROQ_API_KEY;
+    if (!GROQ_KEY) {
+      return res.status(500).json({ ok: false, error: 'No AI API available — please set GROQ_API_KEY' });
     }
+
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${GROQ_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: GAME_BUILDER_PROMPT },
+          ...(context.history || []).map(msg => ({
+            role: msg.role === 'model' ? 'assistant' : 'user',
+            content: (msg.parts && msg.parts[0] && msg.parts[0].text) || msg.content || ''
+          })),
+          { role: 'user', content: message }
+        ],
+        max_tokens: 4000,
+        temperature: 0.7
+      })
+    });
+
+    if (!groqResponse.ok) {
+      const errText = await groqResponse.text();
+      throw new Error(`Groq API error: ${groqResponse.status} — ${errText}`);
+    }
+
+    const groqData = await groqResponse.json();
+    reply = (groqData.choices && groqData.choices[0] && groqData.choices[0].message && groqData.choices[0].message.content) || '';
 
     // Try to extract JSON from response
     const jsonMatch = reply.match(/\{[\s\S]*\}/);
