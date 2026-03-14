@@ -118,6 +118,21 @@
     /* Main + panel layout */
     .meeting-body{display:flex;flex:1;overflow:hidden}
     .panel-closed .side-panel{display:none}
+
+    /* Custom Confirm Modal */
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; animation: fadeIn .2s ease; }
+    .confirm-card { background: #1a1d2e; border: 1px solid rgba(255,255,255,.08); border-radius: 20px; padding: 1.75rem; width: calc(100% - 2rem); max-width: 380px; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 20px 40px rgba(0,0,0,.4); transform: scale(.95); animation: scaleUp .2s ease forwards; text-align: left; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleUp { to { transform: scale(1); } }
+    .confirm-title { font-size: 1.1rem; font-weight: 700; color: #f0f2ff; display: flex; align-items: center; gap: .75rem; }
+    .confirm-title i { color: #6366f1; width: 22px; height: 22px; }
+    .confirm-msg { font-size: .92rem; color: #9ea4b6; line-height: 1.6; }
+    .confirm-btns { display: flex; gap: .75rem; justify-content: flex-end; margin-top: .5rem; }
+    .c-btn { padding: .65rem 1.25rem; border-radius: 10px; font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .2s; border: none; }
+    .c-btn-cancel { background: rgba(255,255,255,.05); color: #9ea4b6; border: 1px solid rgba(255,255,255,.1); }
+    .c-btn-cancel:hover { background: rgba(255,255,255,.1); color: #f0f2ff; }
+    .c-btn-ok { background: linear-gradient(135deg,#6366f1,#8b5cf6); color: #fff; box-shadow: 0 4px 12px rgba(99,102,241,.3); }
+    .c-btn-ok:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(99,102,241,.4); }
   </style>
 </head>
 <body>
@@ -216,6 +231,18 @@
         Leave
       </button>
     </div>
+
+    <!-- Custom Confirm Modal -->
+    <div class="confirm-overlay" id="confirmModal">
+      <div class="confirm-card">
+        <div class="confirm-title"><i data-lucide="help-circle"></i>Confirm Action</div>
+        <div class="confirm-msg" id="confirmMsg">Are you sure you want to proceed?</div>
+        <div class="confirm-btns">
+          <button class="c-btn c-btn-cancel" id="confirmCancel">Cancel</button>
+          <button class="c-btn c-btn-ok" id="confirmOk">Confirm</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -229,7 +256,13 @@
     const START_CAM = p.get('camOn')   !== '0';
     const START_MIC = p.get('micOn')   !== '0';
 
-    if (!LK_TOKEN) { alert('No meeting token. Returning to lobby.'); window.location.href = 'student-live-meeting.html'; }
+    if (!LK_TOKEN) { 
+      setTimeout(() => {
+        showConfirm('No meeting token. Returning to lobby.', () => { window.location.href = 'student-live-meeting.html'; });
+        // Override cancel to also redirect
+        document.getElementById('confirmCancel').onclick = () => { window.location.href = 'student-live-meeting.html'; };
+      }, 500);
+    }
 
     document.getElementById('meetingTitle').textContent = TITLE;
     document.getElementById('wrName').textContent = MY_NAME;
@@ -290,8 +323,8 @@
       try {
         await room.connect(LK_WS_URL, LK_TOKEN, { autoSubscribe: true });
       } catch(e) {
-        alert('Could not connect to meeting. ' + e.message);
-        window.location.href = 'student-live-meeting.html';
+        showConfirm('Could not connect to meeting. ' + e.message, () => { window.location.href = 'student-live-meeting.html'; });
+        document.getElementById('confirmCancel').onclick = () => { window.location.href = 'student-live-meeting.html'; };
         return;
       }
 
@@ -415,13 +448,13 @@
         }
         if(msg.type === 'kick' && msg.target === room.localParticipant.identity) {
           if(room) room.disconnect();
-          alert('You have been removed from the meeting by the faculty.');
-          window.location.href = 'student-live-meeting.html';
+          showConfirm('You have been removed from the meeting by the faculty.', () => { window.location.href = 'student-live-meeting.html'; });
+          document.getElementById('confirmCancel').onclick = () => { window.location.href = 'student-live-meeting.html'; };
         }
         if(msg.type === 'meeting_ended') {
           if(room) room.disconnect();
-          alert('The faculty has ended the meeting.');
-          window.location.href = 'student-live-meeting.html';
+          showConfirm('The faculty has ended the meeting.', () => { window.location.href = 'student-live-meeting.html'; });
+          document.getElementById('confirmCancel').onclick = () => { window.location.href = 'student-live-meeting.html'; };
         }
         if(msg.type === 'launch_game') {
           const name = msg.gameType ? msg.gameType.charAt(0).toUpperCase()+msg.gameType.slice(1) : 'Game';
@@ -745,10 +778,28 @@
     }
 
     function leaveMeeting() {
-      if(confirm('Leave the meeting?')) {
-        if(room) room.disconnect();
-        window.location.href = 'student-live-meeting.html';
-      }
+      showConfirm('Leave the meeting?', (ok) => {
+        if(ok) {
+          if(room) room.disconnect();
+          window.location.href = 'student-live-meeting.html';
+        }
+      });
+    }
+
+    function showConfirm(message, callback) {
+      const modal = document.getElementById('confirmModal');
+      const msgEl = document.getElementById('confirmMsg');
+      const okBtn = document.getElementById('confirmOk');
+      const cancelBtn = document.getElementById('confirmCancel');
+      msgEl.textContent = message;
+      modal.style.display = 'flex';
+      const cleanup = () => {
+        modal.style.display = 'none';
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+      };
+      okBtn.onclick = () => { cleanup(); if(callback) callback(true); };
+      cancelBtn.onclick = () => { cleanup(); if(callback) callback(false); };
     }
 
     //  Start 

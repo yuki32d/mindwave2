@@ -146,10 +146,25 @@
     /* ── TOAST ── */
     .toast-wrap{position:fixed;top:66px;right:1rem;display:flex;flex-direction:column;gap:.5rem;z-index:9999}
     .toast{display:flex;align-items:center;gap:.65rem;padding:.7rem 1rem;border-radius:11px;background:#1a1d2e;border:1px solid rgba(255,255,255,.1);font-size:.82rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tslide .25s ease both;min-width:240px}
-    .toast svg{width:15px;height:15px;flex-shrink:0}
-    .toast.info{border-color:rgba(208,128,0,.3);color:#fbbf24}
-    .toast.success{border-color:rgba(34,197,94,.3);color:#22c55e}
-    
+    .toast svg{width:16px;height:16px;flex-shrink:0}
+    .toast.info{border-left-color:#6366f1;background:rgba(99,102,241,.1)}
+    .toast.success{border-left-color:#22c55e;background:rgba(34,197,94,.1)}
+    .toast.error{border-left-color:#ef4444;background:rgba(239,68,68,.1)}
+
+    /* Custom Confirm Modal */
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; animation: fadeIn .2s ease; }
+    .confirm-card { background: #1a1d2e; border: 1px solid rgba(255,255,255,.08); border-radius: 20px; padding: 1.75rem; width: calc(100% - 2rem); max-width: 380px; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 20px 40px rgba(0,0,0,.4); transform: scale(.95); animation: scaleUp .2s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleUp { to { transform: scale(1); } }
+    .confirm-title { font-size: 1.1rem; font-weight: 700; color: #f0f2ff; display: flex; align-items: center; gap: .75rem; }
+    .confirm-title i { color: #6366f1; width: 22px; height: 22px; }
+    .confirm-msg { font-size: .92rem; color: #9ea4b6; line-height: 1.6; }
+    .confirm-btns { display: flex; gap: .75rem; justify-content: flex-end; margin-top: .5rem; }
+    .c-btn { padding: .65rem 1.25rem; border-radius: 10px; font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .2s; border: none; }
+    .c-btn-cancel { background: rgba(255,255,255,.05); color: #9ea4b6; border: 1px solid rgba(255,255,255,.1); }
+    .c-btn-cancel:hover { background: rgba(255,255,255,.1); color: #f0f2ff; }
+    .c-btn-ok { background: linear-gradient(135deg,#6366f1,#8b5cf6); color: #fff; box-shadow: 0 4px 12px rgba(99,102,241,.3); }
+    .c-btn-ok:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(99,102,241,.4); }
     /* ── SUMMARY MODAL ── */
     #summaryModal{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);z-index:10000;display:none;align-items:center;justify-content:center;padding:1.5rem}
     .sum-card{background:#111320;border:1px solid rgba(255,255,255,.1);border-radius:24px;width:100%;max-width:540px;overflow:hidden;box-shadow:0 32px 64px rgba(0,0,0,.6);animation:m-in .3s ease-out}
@@ -168,7 +183,6 @@
     
     #liveAiInsight{background:rgba(208,128,0,.1);border:1px solid rgba(208,128,0,.25);border-radius:12px;padding:.85rem;margin-top:.2rem;font-size:.78rem;line-height:1.5;color:#fbbf24}
     #liveAiInsight i{width:14px;height:14px;vertical-align:middle;margin-right:.4rem}
-    .toast.error{border-color:rgba(255,92,92,.3);color:#ff5c5c}
     @keyframes tslide{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
 
     /* ── WAITING OVERLAY ── */
@@ -316,6 +330,18 @@
 
 <!-- Toast container -->
 <div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Custom Confirm Modal -->
+<div class="confirm-overlay" id="confirmModal">
+  <div class="confirm-card">
+    <div class="confirm-title"><i data-lucide="help-circle"></i>Confirm Action</div>
+    <div class="confirm-msg" id="confirmMsg">Are you sure you want to proceed?</div>
+    <div class="confirm-btns">
+      <button class="c-btn c-btn-cancel" id="confirmCancel">Cancel</button>
+      <button class="c-btn c-btn-ok" id="confirmOk">Confirm</button>
+    </div>
+  </div>
+</div>
 
 <!-- Summary Modal -->
 <div id="summaryModal">
@@ -871,10 +897,12 @@
   }
 
   function kickPart(identity) {
-    if (!confirm('Remove this participant?')) return;
-    if (!room) return;
-    room.localParticipant.publishData(new TextEncoder().encode(JSON.stringify({ type: 'kick', target: identity })), { reliable: true });
-    showToast('Remove signal sent', 'info');
+    showConfirm('Remove this participant?', (ok) => {
+      if (!ok) return;
+      if (!room) return;
+      room.localParticipant.publishData(new TextEncoder().encode(JSON.stringify({ type: 'kick', target: identity })), { reliable: true });
+      showToast('Remove signal sent', 'info');
+    });
   }
 
   function togglePanel() {
@@ -884,24 +912,26 @@
   }
 
   async function endMeeting() {
-    if (!confirm('Are you sure you want to end this session for everyone?')) return;
-    
-    meetingLog.end = Date.now();
-    const payload = new TextEncoder().encode(JSON.stringify({ type: 'meeting_ended' }));
-    if(room) room.localParticipant.publishData(payload, { reliable: true });
+    showConfirm('Are you sure you want to end this session for everyone?', async (ok) => {
+      if (!ok) return;
+      
+      meetingLog.end = Date.now();
+      const payload = new TextEncoder().encode(JSON.stringify({ type: 'meeting_ended' }));
+      if(room) room.localParticipant.publishData(payload, { reliable: true });
 
-    // Populate Modal
-    const durationMins = Math.floor((meetingLog.end - meetingLog.start) / 60000);
-    const avgEng = meetingLog.engagementSamples.length ? Math.round(meetingLog.engagementSamples.reduce((a,b)=>a+b,0) / meetingLog.engagementSamples.length) : 0;
-    
-    document.getElementById('sumDur').textContent = durationMins + 'm';
-    document.getElementById('sumParts').textContent = meetingLog.participants.size + 1; // +1 for faculty
-    document.getElementById('sumChat').textContent = meetingLog.chats.length;
-    document.getElementById('sumEng').textContent = avgEng + '%';
-    
-    document.getElementById('summaryModal').style.display = 'flex';
-    
-    if(room) room.disconnect();
+      // Populate Modal
+      const durationMins = Math.floor((meetingLog.end - meetingLog.start) / 60000);
+      const avgEng = meetingLog.engagementSamples.length ? Math.round(meetingLog.engagementSamples.reduce((a,b)=>a+b,0) / meetingLog.engagementSamples.length) : 0;
+      
+      document.getElementById('sumDur').textContent = durationMins + 'm';
+      document.getElementById('sumParts').textContent = meetingLog.participants.size + 1; // +1 for faculty
+      document.getElementById('sumChat').textContent = meetingLog.chats.length;
+      document.getElementById('sumEng').textContent = avgEng + '%';
+      
+      document.getElementById('summaryModal').style.display = 'flex';
+      
+      if(room) room.disconnect();
+    });
   }
 
   function downloadSummary() {
@@ -952,6 +982,23 @@
     const url = `faculty-create-${selectedGame}.html${gameId ? '?id=' + gameId : ''}`;
     room.localParticipant.publishData(new TextEncoder().encode(JSON.stringify({ type: 'launch_game', gameType: selectedGame, gameId, url })), { reliable: true });
     showToast('Game launched for class! 🎮', 'success');
+  }
+
+  // ── CONFIRM MODAL LOGIC ──
+  function showConfirm(message, callback) {
+    const modal = document.getElementById('confirmModal');
+    const msgEl = document.getElementById('confirmMsg');
+    const okBtn = document.getElementById('confirmOk');
+    const cancelBtn = document.getElementById('confirmCancel');
+    msgEl.textContent = message;
+    modal.style.display = 'flex';
+    const cleanup = () => {
+      modal.style.display = 'none';
+      okBtn.onclick = null;
+      cancelBtn.onclick = null;
+    };
+    okBtn.onclick = () => { cleanup(); callback(true); };
+    cancelBtn.onclick = () => { cleanup(); callback(false); };
   }
 
   // ── COPY CODE ──
