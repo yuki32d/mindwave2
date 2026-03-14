@@ -405,147 +405,341 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ============================================
-// PEER REVIEW FUNCTIONALITY
+// PEER REVIEW WIZARD & SPLIT GRADING
 // ============================================
 
-// Open peer review modal
-document.getElementById('peerReviewBtn')?.addEventListener('click', openPeerReviewModal);
-document.getElementById('closePeerReviewModalBtn')?.addEventListener('click', closePeerReviewModal);
-document.getElementById('cancelPeerReviewBtn')?.addEventListener('click', closePeerReviewModal);
-document.getElementById('savePeerReviewBtn')?.addEventListener('click', savePeerReviewSettings);
+let wizardState = {
+    step: 1,
+    selectedProjects: [],
+    reviewerType: null, // 'faculty' or 'student'
+    selectedReviewer: null, // {id, name, email}
+    weightage: 50
+};
 
-// Enable/disable peer review settings
-document.getElementById('enablePeerReview')?.addEventListener('change', function () {
-    const settingsDiv = document.getElementById('peerReviewSettings');
-    if (this.checked) {
-        settingsDiv.style.display = 'grid';
-    } else {
-        settingsDiv.style.display = 'none';
-    }
-});
-
-// Update grade weight display
-document.getElementById('gradeWeight')?.addEventListener('input', function () {
-    const value = this.value;
-    document.getElementById('gradeWeightValue').textContent = value + '%';
-
-    // Update formula display
-    const facultyWeight = 100 - value;
-    const formula = document.querySelector('#peerReviewSettings .form-group:nth-child(4) p');
-    if (formula) {
-        formula.textContent = `Final Grade = Faculty Grade (${facultyWeight}%) + Peer Review Average (${value}%)`;
-    }
-});
-
-async function openPeerReviewModal() {
-    // Load existing settings if any
-    try {
-        const response = await fetch('/api/peer-review/settings', {
-            credentials: 'include'
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            if (data.settings) {
-                // Populate form with existing settings
-                document.getElementById('enablePeerReview').checked = data.settings.enabled;
-                document.getElementById('reviewsPerStudent').value = data.settings.reviewsPerStudent || 3;
-                document.getElementById('anonymousReviews').checked = data.settings.isAnonymous !== false;
-                document.getElementById('gradeWeight').value = data.settings.gradeWeight || 20;
-
-                if (data.settings.deadline) {
-                    const deadline = new Date(data.settings.deadline);
-                    document.getElementById('reviewDeadline').value = deadline.toISOString().slice(0, 16);
-                }
-
-                // Show/hide settings based on enabled state
-                if (data.settings.enabled) {
-                    document.getElementById('peerReviewSettings').style.display = 'grid';
-                }
-
-                // Update weight display
-                document.getElementById('gradeWeightValue').textContent = (data.settings.gradeWeight || 20) + '%';
-            }
-        }
-    } catch (error) {
-        console.error('Error loading peer review settings:', error);
-    }
-
+// Open peer review wizard
+document.getElementById('peerReviewBtn')?.addEventListener('click', () => {
+    resetWizard();
     document.getElementById('peerReviewModal').style.display = 'flex';
-}
+    renderWizardStep();
+});
 
-function closePeerReviewModal() {
+document.getElementById('closePeerReviewModalBtn')?.addEventListener('click', () => {
     document.getElementById('peerReviewModal').style.display = 'none';
+});
+
+// Wizard Navigation
+document.getElementById('wizardPrev')?.addEventListener('click', () => {
+    if (wizardState.step > 1) {
+        wizardState.step--;
+        renderWizardStep();
+    }
+});
+
+document.getElementById('wizardNext')?.addEventListener('click', () => {
+    if (validateWizardStep()) {
+        if (wizardState.step < 4) {
+            wizardState.step++;
+            renderWizardStep();
+        } else {
+            finalizePeerReviewSetup();
+        }
+    }
+});
+
+function resetWizard() {
+    wizardState = {
+        step: 1,
+        selectedProjects: [],
+        reviewerType: null,
+        selectedReviewer: null,
+        weightage: 50
+    };
+    document.getElementById('markSplitRange').value = 50;
+    document.getElementById('reviewerSearch').value = '';
+    document.getElementById('reviewerResultsList').style.display = 'none';
+    document.getElementById('selectedReviewerDisplay').style.display = 'none';
 }
 
-async function savePeerReviewSettings() {
-    const enabled = document.getElementById('enablePeerReview').checked;
+function renderWizardStep() {
+    // Update step dots
+    document.querySelectorAll('.step-dot').forEach(dot => {
+        const step = parseInt(dot.getAttribute('data-step'));
+        dot.className = `step-dot ${step === wizardState.step ? 'active' : ''}`;
+    });
 
-    if (!enabled) {
-        // Just disable peer review
-        try {
-            const response = await fetch('/api/peer-review/settings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({ enabled: false })
-            });
+    // Update visibility
+    document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
+    document.getElementById(`step${wizardState.step}`).classList.add('active');
 
-            if (response.ok) {
-                alert('✅ Peer review disabled successfully!');
-                closePeerReviewModal();
-            } else {
-                alert('❌ Failed to save settings');
-            }
-        } catch (error) {
-            console.error('Error saving settings:', error);
-            alert('❌ Network error');
+    // Update buttons
+    document.getElementById('wizardPrev').style.display = wizardState.step > 1 ? 'block' : 'none';
+    document.getElementById('wizardNext').textContent = wizardState.step === 4 ? 'Send Invites' : 'Continue';
+
+    // Step-specific rendering
+    if (wizardState.step === 1) renderProjectSelection();
+    if (wizardState.step === 2) setupReviewerTypeCards();
+    if (wizardState.step === 3) setupReviewerSearch();
+    if (wizardState.step === 4) updateWeightageDisplay();
+}
+
+function renderProjectSelection() {
+    const list = document.getElementById('projectSelectionList');
+    list.innerHTML = allProjects.map(p => `
+        <div class="project-selection-item" onclick="toggleProjectSelection('${p._id}')">
+            <input type="checkbox" ${wizardState.selectedProjects.includes(p._id) ? 'checked' : ''} onchange="event.stopPropagation(); toggleProjectSelection('${p._id}')">
+            <div style="flex: 1;">
+                <div style="font-weight: 700; font-size: 13px;">${escapeHtml(p.projectName)}</div>
+                <div style="font-size: 11px; color: var(--muted);">${escapeHtml(p.studentName)}</div>
+            </div>
+            <span class="status-badge status-${p.status}" style="font-size: 9px; padding: 2px 6px;">${p.status}</span>
+        </div>
+    `).join('');
+}
+
+function toggleProjectSelection(id) {
+    const index = wizardState.selectedProjects.indexOf(id);
+    if (index === -1) wizardState.selectedProjects.push(id);
+    else wizardState.selectedProjects.splice(index, 1);
+    renderProjectSelection();
+}
+
+function setupReviewerTypeCards() {
+    document.querySelectorAll('.reviewer-type-card').forEach(card => {
+        const type = card.getAttribute('data-type');
+        card.className = `reviewer-type-card ${wizardState.reviewerType === type ? 'selected' : ''}`;
+        card.onclick = () => {
+            wizardState.reviewerType = type;
+            setupReviewerTypeCards();
+        };
+    });
+}
+
+function setupReviewerSearch() {
+    const title = document.getElementById('step3Label');
+    title.textContent = wizardState.reviewerType === 'faculty' ? 'Step 3: Select Faculty Member' : 'Step 3: Select Student Group';
+    
+    const searchInput = document.getElementById('reviewerSearch');
+    searchInput.oninput = (e) => {
+        const query = e.target.value.toLowerCase();
+        if (query.length < 2) {
+            document.getElementById('reviewerResultsList').style.display = 'none';
+            return;
         }
-        return;
-    }
-
-    // Validate required fields
-    const deadline = document.getElementById('reviewDeadline').value;
-    if (!deadline) {
-        alert('⚠️ Please set a review deadline');
-        return;
-    }
-
-    const settings = {
-        enabled: true,
-        reviewsPerStudent: parseInt(document.getElementById('reviewsPerStudent').value),
-        deadline: new Date(deadline).toISOString(),
-        isAnonymous: document.getElementById('anonymousReviews').checked,
-        gradeWeight: parseInt(document.getElementById('gradeWeight').value)
+        
+        // Mock faculty/student list search
+        const mockList = wizardState.reviewerType === 'faculty' 
+            ? [{id: 'f1', name: 'Dr. Jane Smith', email: 'jane@univ.edu'}, {id: 'f2', name: 'Prof. Mark Wilson', email: 'mark@univ.edu'}]
+            : [{id: 's1', name: 'Student Group A', email: 'group-a@univ.edu'}, {id: 's2', name: 'Student Group B', email: 'group-b@univ.edu'}];
+            
+        const results = mockList.filter(item => item.name.toLowerCase().includes(query) || item.email.toLowerCase().includes(query));
+        
+        const listContainer = document.getElementById('reviewerResultsList');
+        listContainer.innerHTML = results.map(r => `
+            <div class="reviewer-result-item" onclick="selectReviewer('${r.id}', '${escapeHtml(r.name)}', '${escapeHtml(r.email)}')">
+                <div class="mini-avatar">${r.name.split(' ').map(n => n[0]).join('')}</div>
+                <div>
+                    <div style="font-weight: 700; font-size: 13px;">${escapeHtml(r.name)}</div>
+                    <div style="font-size: 11px; color: var(--muted);">${escapeHtml(r.email)}</div>
+                </div>
+            </div>
+        `).join('') || '<div style="padding: 10px; font-size: 12px; color: var(--muted);">No results found</div>';
+        listContainer.style.display = 'block';
     };
 
+    document.getElementById('clearReviewer').onclick = () => {
+        wizardState.selectedReviewer = null;
+        document.getElementById('selectedReviewerDisplay').style.display = 'none';
+        document.getElementById('reviewerSearch').style.display = 'block';
+        document.getElementById('reviewerSearch').value = '';
+    };
+}
+
+function selectReviewer(id, name, email) {
+    wizardState.selectedReviewer = {id, name, email};
+    document.getElementById('reviewerResultsList').style.display = 'none';
+    document.getElementById('reviewerSearch').style.display = 'none';
+    
+    document.getElementById('selectedReviewerDisplay').style.display = 'flex';
+    document.getElementById('reviewerAvatar').textContent = name.split(' ').map(n => n[0]).join('');
+    document.getElementById('reviewerName').textContent = name;
+    document.getElementById('reviewerEmail').textContent = email;
+}
+
+function updateWeightageDisplay() {
+    const val = parseInt(document.getElementById('markSplitRange').value);
+    wizardState.weightage = val;
+    document.getElementById('primaryWeightDisplay').textContent = `${100 - val}%`;
+    document.getElementById('secondaryWeightDisplay').textContent = `${val}%`;
+}
+
+document.getElementById('markSplitRange')?.addEventListener('input', updateWeightageDisplay);
+
+function validateWizardStep() {
+    if (wizardState.step === 1 && wizardState.selectedProjects.length === 0) {
+        alert('Please select at least one project.');
+        return false;
+    }
+    if (wizardState.step === 2 && !wizardState.reviewerType) {
+        alert('Please select a reviewer type.');
+        return false;
+    }
+    if (wizardState.step === 3 && !wizardState.selectedReviewer) {
+        alert('Please select a reviewer.');
+        return false;
+    }
+    return true;
+}
+
+async function finalizePeerReviewSetup() {
+    // In a real app, this would hit /api/peer-review/setup
+    console.log('Finalizing Setup:', wizardState);
+    alert(`🎉 Success! Peer review requests sent for ${wizardState.selectedProjects.length} projects.\nReviewer: ${wizardState.selectedReviewer.name}\nWeightage: Peer (${wizardState.weightage}%) / Faculty (${100-wizardState.weightage}%)`);
+    document.getElementById('peerReviewModal').style.display = 'none';
+    
+    // Simulate updating project state locally for the split grading UI
+    wizardState.selectedProjects.forEach(id => {
+        const p = allProjects.find(p => p._id === id);
+        if(p) p.hasPeerReview = true;
+    });
+}
+
+// ============================================
+// CORE REVIEW MODAL (Updated for Split Marks)
+// ============================================
+
+async function openReviewModal(projectId) {
     try {
-        const response = await fetch('/api/peer-review/settings', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+        const response = await fetch(`/api/projects/${projectId}`, { credentials: 'include' });
+        const data = await response.json();
+        if (data.ok) {
+            currentProject = data.project;
+            // Check if this project has a peer review assigned (simulating for UI)
+            const p = allProjects.find(p => p._id === projectId);
+            if (p) currentProject.hasPeerReview = p.hasPeerReview;
+            showReviewModal();
+        } else alert('Failed to load project');
+    } catch (e) { console.error(e); alert('Network error'); }
+}
+
+function showReviewModal() {
+    const project = currentProject;
+    const isSplit = project.hasPeerReview;
+    const peerWeight = 80; // Hardcoded example of active weightage
+    const facultyWeight = 100 - peerWeight;
+
+    document.getElementById('modalProjectName').textContent = project.projectName;
+    document.getElementById('modalContent').innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <div style="background: var(--bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="user"></i>Student Information
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between;"><span style="color: var(--muted);">Name:</span> <span style="font-weight: 700;">${escapeHtml(project.studentName)}</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span style="color: var(--muted);">Email:</span> <span style="font-weight: 700;">${escapeHtml(project.studentEmail)}</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span style="color: var(--muted);">Submitted:</span> <span style="font-weight: 700;">${formatDate(project.submittedAt)}</span></div>
+                </div>
+            </div>
+            <div style="background: var(--bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                 <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="info"></i>Project Context
+                </div>
+                <p style="color: var(--text); font-size: 13px; line-height: 1.6;">${escapeHtml(project.description)}</p>
+                <div style="display: flex; gap: 15px; margin-top: 15px;">
+                    <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" class="link-btn"><i data-lucide="github"></i>Repository</a>
+                    ${project.liveDemoUrl ? `<a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" class="link-btn"><i data-lucide="external-link"></i>Demo</a>` : ''}
+                </div>
+            </div>
+        </div>
+
+        <form id="gradeForm" style="border-top: 1px solid var(--border); padding-top: 24px;">
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- Faculty Block -->
+                <div style="background: var(--bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="font-weight: 800; font-size: 14px; color: var(--text);">Faculty Evaluation (Your Section)</div>
+                        <span class="status-badge" style="background: var(--surface); color: var(--accent); border: 1px solid var(--accent);">Weightage: ${isSplit ? facultyWeight : 100}%</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label>Marks (Max ${isSplit ? facultyWeight : 100})</label>
+                            <input type="number" id="gradeInput" min="0" max="${isSplit ? facultyWeight : 100}" required value="${project.grade || ''}" placeholder="${isSplit ? facultyWeight : 100}">
+                        </div>
+                        <div class="form-group">
+                            <label>Internal Comments</label>
+                            <textarea id="feedbackInput" required placeholder="Faculty feedback...">${project.feedback || ''}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                ${isSplit ? `
+                <!-- Peer Block (Visual Only for Faculty context) -->
+                <div style="background: var(--surface); padding: 24px; border-radius: 16px; border: 1px dashed var(--border); opacity: 0.8;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="font-weight: 800; font-size: 14px; color: var(--muted);"><i data-lucide="lock" style="width: 14px; display: inline; vertical-align: middle; margin-right: 6px;"></i>Peer Evaluation Section</div>
+                        <span class="status-badge" style="background: var(--bg); color: var(--muted);">Weightage: ${peerWeight}%</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 20px;">
+                         <div class="form-group"><label>Marks</label><input type="text" disabled placeholder="Pending Peer Review"></div>
+                         <div class="form-group"><label>Peer Feedback</label><textarea disabled placeholder="This section will be filled by the assigned reviewer..."></textarea></div>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+                <button type="button" class="btn btn-ghost" onclick="closeReviewModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i data-lucide="check"></i>${isSplit ? 'Save My Section' : 'Submit Final Grade'}</button>
+            </div>
+        </form>
+    `;
+    
+    if(window.lucide) window.lucide.createIcons();
+    document.getElementById('gradeForm').onsubmit = (e) => { e.preventDefault(); submitGrade(); };
+    document.getElementById('reviewModal').style.display = 'flex';
+}
+
+async function submitGrade() {
+    const grade = parseInt(document.getElementById('gradeInput').value);
+    const feedback = document.getElementById('feedbackInput').value.trim();
+    const isSplit = currentProject.hasPeerReview;
+    const maxGrade = isSplit ? 20 : 100; // Simulated weight check
+
+    if (grade < 0 || grade > maxGrade) { alert(`Grade must be between 0 and ${maxGrade}`); return; }
+    if (!feedback) { alert('Please provide feedback'); return; }
+
+    try {
+        const response = await fetch(`/api/projects/${currentProject._id}/grade`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify(settings)
+            body: JSON.stringify({ grade, feedback, isSplit })
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-            alert('✅ Peer review settings saved! Students will be auto-assigned reviews.');
-            closePeerReviewModal();
-
-            // Show success message with details
-            if (data.assignmentsCreated) {
-                alert(`🎉 ${data.assignmentsCreated} peer review assignments created!`);
-            }
-        } else {
-            alert('❌ ' + (data.message || 'Failed to save settings'));
-        }
-    } catch (error) {
-        console.error('Error saving settings:', error);
-        alert('❌ Network error. Please try again.');
-    }
+        if ((await response.json()).ok) {
+            alert('✅ Section submitted successfully!');
+            closeReviewModal();
+            loadAllProjects();
+        } else alert('❌ Submission failed');
+    } catch (e) { alert('❌ Network error'); }
 }
+
+function closeReviewModal() {
+    document.getElementById('reviewModal').style.display = 'none';
+    currentProject = null;
+}
+
+// Cleanup escape handlers
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeReviewModal();
+        document.getElementById('peerReviewModal').style.display = 'none';
+    }
+});
+
+// Helper functions (same as before)
+function escapeHtml(t) { if(!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+function formatDate(s) { return new Date(s).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}); }
+function formatDateShort(s) { return new Date(s).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric'}); }
+function getGradeColor(g) { return g >= 90 ? '#34c759' : (g >= 75 ? '#d08000' : '#ff3b30'); }
+function formatStatusTag(s) { return s.charAt(0).toUpperCase() + s.slice(1); }

@@ -164,88 +164,131 @@
         </section>
     </div>
 
-    <!-- Peer Review Settings Modal -->
+    <!-- Peer Review Wizard Modal -->
     <div id="peerReviewModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content" style="max-width: 650px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h2 style="margin: 0; font-size: 20px;">Peer Review Settings</h2>
+                <h2 style="margin: 0; font-size: 20px;" id="wizardTitle">Peer Review Setup</h2>
                 <button id="closePeerReviewModalBtn" class="close-btn"><i data-lucide="x"></i></button>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 20px;">
-                <!-- Enable Peer Review -->
-                <div class="form-group" style="background: var(--bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
-                    <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; text-transform: none; font-size: 13px; color: var(--text);">
-                        <input type="checkbox" id="enablePeerReview" style="width: 18px; height: 18px; cursor: pointer;">
-                        <span>Enable Peer Review for this assignment</span>
-                    </label>
-                    <p style="color: var(--muted); font-size: 12px; margin-top: 8px; margin-left: 30px;">
-                        Students will review each other's projects and provide structured feedback.
-                    </p>
+            <!-- Wizard Progress (Step Indicator) -->
+            <div style="display: flex; gap: 8px; margin-bottom: 30px;">
+                <div class="step-dot active" data-step="1"></div>
+                <div class="step-dot" data-step="2"></div>
+                <div class="step-dot" data-step="3"></div>
+                <div class="step-dot" data-step="4"></div>
+            </div>
+
+            <!-- STEP 1: SELECT PROJECTS -->
+            <div id="step1" class="wizard-step active">
+                <div class="form-group">
+                    <label>Step 1: Select Projects for Review</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="projectSearch" placeholder="Search projects or students..." style="flex: 1;">
+                        <button class="btn btn-ghost" id="selectAllProjects">Select All</button>
+                    </div>
+                    <div id="projectSelectionList" style="max-height: 250px; overflow-y: auto; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px; display: grid; gap: 8px;">
+                        <!-- Projects loaded via JS -->
+                    </div>
                 </div>
+            </div>
 
-                <div id="peerReviewSettings" style="display: none; flex-direction: column; gap: 20px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div class="form-group">
-                            <label>Reviews per Student</label>
-                            <select id="reviewsPerStudent">
-                                <option value="2">2 reviews</option>
-                                <option value="3" selected>3 reviews</option>
-                                <option value="4">4 reviews</option>
-                                <option value="5">5 reviews</option>
-                            </select>
+            <!-- STEP 2: SELECT REVIEWER TYPE -->
+            <div id="step2" class="wizard-step">
+                <div class="form-group">
+                    <label>Step 2: Who will perform the review?</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 15px;">
+                        <div class="reviewer-type-card" data-type="faculty">
+                            <i data-lucide="users" style="width: 32px; height: 32px; color: var(--accent);"></i>
+                            <div style="font-weight: 800; font-size: 15px;">Faculty Member</div>
+                            <div style="font-size: 11px; color: var(--muted); text-align: center;">Another faculty will provide expert review</div>
                         </div>
-                        <div class="form-group">
-                            <label>Review Deadline</label>
-                            <input type="datetime-local" id="reviewDeadline" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Peer Review Weight</label>
-                        <div style="display: flex; align-items: center; gap: 16px; background: var(--bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
-                            <input type="range" id="gradeWeight" min="0" max="50" value="20" style="flex: 1; cursor: pointer; accent-color: var(--accent);">
-                            <span id="gradeWeightValue" style="font-weight: 800; color: var(--accent); min-width: 45px; font-family: var(--mono);">20%</span>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; text-transform: none; font-size: 13px; color: var(--text);">
-                            <input type="checkbox" id="anonymousReviews" checked style="width: 16px; height: 16px;">
-                            <span>Anonymous Reviews</span>
-                        </label>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Review Criteria (Rubric)</label>
-                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: grid; gap: 10px;">
-                            <div style="display: flex; align-items: center; gap: 10px; font-size: 12px;">
-                                <i data-lucide="check" style="width: 14px; color: var(--accent);"></i>
-                                <span>Code Quality (1-5 stars)</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px; font-size: 12px;">
-                                <i data-lucide="check" style="width: 14px; color: var(--accent);"></i>
-                                <span>Functionality (1-5 stars)</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px; font-size: 12px;">
-                                <i data-lucide="check" style="width: 14px; color: var(--accent);"></i>
-                                <span>Documentation (1-5 stars)</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px; font-size: 12px;">
-                                <i data-lucide="message-square" style="width: 14px; color: var(--accent);"></i>
-                                <span>Written Feedback (Required)</span>
-                            </div>
+                        <div class="reviewer-type-card" data-type="student">
+                            <i data-lucide="graduation-cap" style="width: 32px; height: 32px; color: var(--accent);"></i>
+                            <div style="font-weight: 800; font-size: 15px;">Student (Peer)</div>
+                            <div style="font-size: 11px; color: var(--muted); text-align: center;">Students will review each other</div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 10px; padding-top: 20px; border-top: 1px solid var(--border);">
-                    <button id="cancelPeerReviewBtn" class="btn btn-ghost">Cancel</button>
-                    <button id="savePeerReviewBtn" class="btn btn-primary">Save Settings</button>
+            <!-- STEP 3: SEARCH REVIEWER -->
+            <div id="step3" class="wizard-step">
+                <div class="form-group">
+                    <label id="step3Label">Step 3: Select Reviewer</label>
+                    <div id="reviewerSearchContainer" style="margin-top: 15px;">
+                        <div style="position: relative;">
+                            <input type="text" id="reviewerSearch" placeholder="Enter name or email..." style="width: 100%; padding-left: 40px;">
+                            <i data-lucide="search" style="position: absolute; left: 14px; top: 11px; width: 16px; color: var(--muted);"></i>
+                        </div>
+                        <div id="reviewerResultsList" style="max-height: 200px; overflow-y: auto; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; margin-top: 12px; padding: 5px; display: none;">
+                            <!-- Results loaded via JS -->
+                        </div>
+                        <div id="selectedReviewerDisplay" style="display: none; background: var(--bg); padding: 12px; border: 1px solid var(--accent); border-radius: 12px; margin-top: 12px; align-items: center; gap: 12px;">
+                            <div id="reviewerAvatar" class="mini-avatar">JD</div>
+                            <div style="flex: 1;">
+                                <div id="reviewerName" style="font-weight: 700; font-size: 13px;">John Doe</div>
+                                <div id="reviewerEmail" style="font-size: 11px; color: var(--muted);">john@university.edu</div>
+                            </div>
+                            <button class="btn btn-ghost" id="clearReviewer" style="padding: 5px;"><i data-lucide="x" style="width: 16px;"></i></button>
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+            <!-- STEP 4: MARKS WEIGHTAGE -->
+            <div id="step4" class="wizard-step">
+                <div class="form-group">
+                    <label>Step 4: Configure Mark Distribution</label>
+                    <div style="background: var(--bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border); margin-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                            <div style="text-align: left;">
+                                <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Primary (You)</div>
+                                <div id="primaryWeightDisplay" style="font-size: 28px; font-weight: 800; font-family: var(--mono); color: var(--text);">50%</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Secondary Reviewer</div>
+                                <div id="secondaryWeightDisplay" style="font-size: 28px; font-weight: 800; font-family: var(--mono); color: var(--accent);">50%</div>
+                            </div>
+                        </div>
+                        
+                        <input type="range" id="markSplitRange" min="0" max="100" value="50" style="width: 100%; height: 6px; background: var(--border); border-radius: 3px; cursor: pointer; accent-color: var(--accent); margin-bottom: 20px;">
+                        
+                        <div style="background: rgba(208, 128, 0, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(208, 128, 0, 0.1); font-size: 11px; line-height: 1.5;">
+                            <i data-lucide="alert-circle" style="width: 14px; display: inline; vertical-align: middle; margin-right: 4px; color: var(--accent);"></i>
+                            Each reviewer will only be able to award marks up to their assigned weightage.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--border);">
+                <button id="wizardPrev" class="btn btn-ghost" style="display: none;">Back</button>
+                <button id="wizardNext" class="btn btn-primary">Continue</button>
             </div>
         </div>
     </div>
+
+    <style>
+        .step-dot { width: 12px; height: 12px; border-radius: 6px; background: var(--border); transition: all .3s; }
+        .step-dot.active { background: var(--accent); width: 32px; }
+        .wizard-step { display: none; }
+        .wizard-step.active { display: block; animation: slideIn .3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .reviewer-type-card { background: var(--bg); border: 2px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; transition: all .2s; }
+        .reviewer-type-card:hover { border-color: var(--accent); background: rgba(208, 128, 0, 0.02); }
+        .reviewer-type-card.selected { border-color: var(--accent); background: rgba(208, 128, 0, 0.05); }
+
+        .project-selection-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; cursor: pointer; transition: background .15s; }
+        .project-selection-item:hover { background: rgba(255, 255, 255, 0.05); }
+        .project-selection-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+
+        .reviewer-result-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; cursor: pointer; }
+        .reviewer-result-item:hover { background: var(--surface); }
+        .mini-avatar { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+    </style>
 
     <!-- Review Modal -->
     <div id="reviewModal" class="modal">
