@@ -1,118 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <script src="admin-theme-init.js"></script>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINDWAVE – Create Syntax Fill-in</title>
-    <link rel="stylesheet" href="3d-depth-design.css">
-    <style>
-        .builder-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .text-editor {
-            background: #1e1e1e;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 16px;
-            font-family: 'Fira Code', monospace;
-            color: #d4d4d4;
-            min-height: 200px;
-            width: 100%;
-            resize: vertical;
-            line-height: 1.6;
-        }
-
-        .preview-box {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 24px;
-            border-radius: 12px;
-            margin-top: 24px;
-            font-family: monospace;
-            line-height: 2;
-        }
-
-        .blank-preview {
-            display: inline-block;
-            background: rgba(15, 98, 254, 0.2);
-            border: 1px dashed var(--blue);
-            color: var(--blue);
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin: 0 4px;
-        }
-    </style>
+    <title>MindWave – Create Syntax Fill-in</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="game-builder.css">
+    <link rel="stylesheet" href="publish-modal.css">
 </head>
+<body>
 
-<body data-theme="dark">
-    <div class="page-shell">
-        <header class="hero">
-            <a class="ghost-link" href="ai-game-builder.html">← Back to AI</a>
-            <p class="eyebrow">Game Builder</p>
-            <h1>Syntax Fill-in</h1>
-            <p class="lede">Write code or text and wrap keywords in [brackets] to create blanks.</p>
-        </header>
+    <!-- TOPBAR -->
+    <header class="gb-topbar">
+        <a class="gb-logo" href="admin.html">
+            <div class="gb-logo-mark"><i data-lucide="brain-circuit"></i></div>
+            <span class="gb-logo-name">MindWave</span>
+        </a>
+        <div class="gb-breadcrumb">Game Builder / <span>Syntax Fill-in</span></div>
+        <div class="gb-topbar-right">
+            <button class="gb-theme-btn" id="themeToggle" title="Toggle theme">
+                <span class="icon-sun"><i data-lucide="sun"></i></span>
+                <span class="icon-moon"><i data-lucide="moon"></i></span>
+            </button>
+            <a href="ai-game-builder.html" class="gb-back-btn">
+                <i data-lucide="arrow-left"></i> Back to AI Builder
+            </a>
+        </div>
+    </header>
 
-        <div class="builder-container">
-            <form id="fillinForm">
-                <section class="panel-card" style="margin-bottom: 32px;">
-                    <div class="grid two">
-                        <div>
+    <!-- MAIN -->
+    <div class="gb-main">
+
+        <div class="gb-page-head">
+            <div class="gb-page-icon"><i data-lucide="keyboard"></i></div>
+            <div>
+                <div class="gb-page-title">Syntax Fill-in</div>
+                <div class="gb-page-sub">Write code or text and wrap keywords in [brackets] to create blanks for students to fill in.</div>
+            </div>
+        </div>
+
+        <form id="fillinForm">
+
+            <!-- Meta -->
+            <div class="gb-card">
+                <div class="gb-card-head"><i data-lucide="info"></i> Challenge Details</div>
+                <div class="gb-card-body">
+                    <div class="gb-form-row">
+                        <div class="gb-form-group">
                             <label for="gameTitle">Title</label>
-                            <input type="text" id="gameTitle" name="title" placeholder="e.g. Async/Await Syntax"
-                                required>
+                            <input type="text" id="gameTitle" name="title" placeholder="e.g. Async/Await Syntax" required>
                         </div>
-                        <div>
+                        <div class="gb-form-group">
                             <label for="gameDuration">Time Limit (Minutes)</label>
-                            <input type="number" id="gameDuration" name="duration" placeholder="5" value="5">
+                            <input type="number" id="gameDuration" name="duration" value="5" min="1">
                         </div>
                     </div>
-                </section>
+                </div>
+            </div>
 
-                <section class="panel-card">
-                    <label>Content Editor</label>
-                    <p style="font-size: 13px; color: #9ea4b6; margin-bottom: 12px;">Wrap words in [brackets] to turn
-                        them into blanks. Example: <code>const data = [await] fetch(url);</code></p>
-                    <textarea class="text-editor" id="contentEditor" name="content" placeholder="async function getData() {
+            <!-- Content editor -->
+            <div class="gb-card">
+                <div class="gb-card-head"><i data-lucide="file-code-2"></i> Content Editor</div>
+                <div class="gb-card-body">
+                    <p class="gb-helper">Wrap keywords in <code>[brackets]</code> to turn them into blanks.
+                        Example: <code>const data = [await] fetch(url);</code></p>
+                    <div class="gb-form-group">
+                        <textarea class="gb-code-editor" id="contentEditor" name="content"
+                            placeholder="async function getData() {
   const response = [await] fetch('https://api.com');
   const data = await response.[json]();
   return data;
 }"></textarea>
-
-                    <div class="preview-box" id="previewArea">
-                        <!-- Preview renders here -->
                     </div>
-                </section>
 
-                <div class="form-actions" style="margin-top: 32px;">
-                    <button type="button" class="secondary-btn" id="cancelBtn">Cancel</button>
-                    <button type="submit" class="submit-btn">Publish Challenge</button>
+                    <div class="gb-preview-box" id="previewArea">
+                        <!-- JS renders preview here -->
+                    </div>
                 </div>
-            </form>
-        </div>
-    </div>
+            </div>
 
+            <div class="gb-footer">
+                <span class="gb-footer-meta">Syntax Fill-in Builder</span>
+                <div class="gb-footer-actions">
+                    <button type="button" class="gb-btn gb-btn-ghost" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="gb-btn gb-btn-primary">
+                        <i data-lucide="upload-cloud"></i> Publish Challenge
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
 
     <!-- Publish Modal -->
     <div id="publishModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📢 Publish Game</h2>
+                <h2>Publish Game</h2>
                 <button class="close-btn" id="modalCloseBtn">&times;</button>
             </div>
             <div class="modal-body">
                 <p>Select which classes should have access to this game:</p>
                 <label for="modalTargetClasses">Target Classes *</label>
-                <select id="modalTargetClasses" multiple size="5">
-                    <!-- Populated dynamically -->
-                </select>
-                <p style="font-size: 12px; color: #9ea4b6; margin-top: 8px;">Hold Ctrl/Cmd to select multiple classes
-                </p>
-
-                <label style="display: flex; align-items: center; gap: 8px; margin-top: 16px;">
+                <select id="modalTargetClasses" multiple size="5"></select>
+                <p style="font-size:12px;color:var(--muted);margin-top:8px;">Hold Ctrl/Cmd to select multiple</p>
+                <label style="display:flex;align-items:center;gap:8px;margin-top:16px;">
                     <input type="checkbox" id="modalIsPublic">
                     <span>Make available to all departments</span>
                 </label>
@@ -124,10 +120,16 @@
         </div>
     </div>
 
-    <!-- Publish Modal Scripts -->
-    <link rel="stylesheet" href="publish-modal.css">
+    <script>
+        lucide.createIcons();
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const next = (document.documentElement.getAttribute('data-theme') || 'light') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            document.body.setAttribute('data-theme', next);
+            localStorage.setItem('mw-theme', next);
+        });
+    </script>
     <script src="publish-modal.js"></script>
     <script src="faculty-create-fillin.js"></script>
 </body>
-
 </html>

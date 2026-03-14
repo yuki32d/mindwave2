@@ -1,131 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <script src="admin-theme-init.js"></script>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINDWAVE – Create Tech Sorter</title>
-    <link rel="stylesheet" href="3d-depth-design.css">
-    <style>
-        .builder-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .category-input {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .category-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .category-tag {
-            background: rgba(15, 98, 254, 0.2);
-            color: #4da0ff;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .remove-cat {
-            cursor: pointer;
-            opacity: 0.7;
-        }
-
-        .item-input-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr auto;
-            gap: 12px;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-    </style>
+    <title>MindWave – Create Tech Sorter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="game-builder.css">
+    <link rel="stylesheet" href="publish-modal.css">
 </head>
+<body>
 
-<body data-theme="dark">
-    <div class="page-shell">
-        <header class="hero">
-            <a class="ghost-link" href="ai-game-builder.html">← Back to AI</a>
-            <p class="eyebrow">Game Builder</p>
-            <h1>Tech Stack Sorter</h1>
-            <p class="lede">Create categories and items. Students must drag each item into the correct category.</p>
-        </header>
-
-        <div class="builder-container">
-            <form id="sorterForm">
-                <section class="panel-card" style="margin-bottom: 32px;">
-                    <div class="grid two">
-                        <div>
-                            <label for="gameTitle">Title</label>
-                            <input type="text" id="gameTitle" name="title" placeholder="e.g. Frontend vs Backend"
-                                required>
-                        </div>
-                        <div>
-                            <label for="gameDuration">Time Limit (Minutes)</label>
-                            <input type="number" id="gameDuration" name="duration" placeholder="5" value="5">
-                        </div>
-                    </div>
-                </section>
-
-                <section class="panel-card" style="margin-bottom: 32px;">
-                    <h3>1. Define Categories</h3>
-                    <div class="category-input">
-                        <input type="text" id="newCatInput" placeholder="Category Name (e.g. Database)">
-                        <button type="button" class="secondary-btn" id="addCategoryBtn">Add</button>
-                    </div>
-                    <div class="category-list" id="categoryList">
-                        <!-- Categories go here -->
-                    </div>
-                </section>
-
-                <section class="panel-card">
-                    <h3>2. Add Items to Sort</h3>
-                    <div id="itemsContainer">
-                        <!-- Items go here -->
-                    </div>
-                    <button type="button" class="ghost-btn" id="addItemBtn" style="width: 100%; margin-top: 12px;">+ Add
-                        Item</button>
-                </section>
-
-                <div class="form-actions" style="margin-top: 32px;">
-                    <button type="button" class="secondary-btn" id="cancelBtn">Cancel</button>
-                    <button type="submit" class="submit-btn">Publish Sorter</button>
-                </div>
-            </form>
+    <!-- TOPBAR -->
+    <header class="gb-topbar">
+        <a class="gb-logo" href="admin.html">
+            <div class="gb-logo-mark"><i data-lucide="brain-circuit"></i></div>
+            <span class="gb-logo-name">MindWave</span>
+        </a>
+        <div class="gb-breadcrumb">Game Builder / <span>Tech Sorter</span></div>
+        <div class="gb-topbar-right">
+            <button class="gb-theme-btn" id="themeToggle" title="Toggle theme">
+                <span class="icon-sun"><i data-lucide="sun"></i></span>
+                <span class="icon-moon"><i data-lucide="moon"></i></span>
+            </button>
+            <a href="ai-game-builder.html" class="gb-back-btn">
+                <i data-lucide="arrow-left"></i> Back to AI Builder
+            </a>
         </div>
-    </div>
+    </header>
 
+    <!-- MAIN -->
+    <div class="gb-main">
+
+        <div class="gb-page-head">
+            <div class="gb-page-icon"><i data-lucide="layers-3"></i></div>
+            <div>
+                <div class="gb-page-title">Tech Stack Sorter</div>
+                <div class="gb-page-sub">Create categories and items — students must drag each item into the correct category.</div>
+            </div>
+        </div>
+
+        <form id="sorterForm">
+
+            <!-- Meta -->
+            <div class="gb-card">
+                <div class="gb-card-head"><i data-lucide="info"></i> Game Details</div>
+                <div class="gb-card-body">
+                    <div class="gb-form-row">
+                        <div class="gb-form-group">
+                            <label for="gameTitle">Title</label>
+                            <input type="text" id="gameTitle" name="title" placeholder="e.g. Frontend vs Backend" required>
+                        </div>
+                        <div class="gb-form-group">
+                            <label for="gameDuration">Time Limit (Minutes)</label>
+                            <input type="number" id="gameDuration" name="duration" value="5" min="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="gb-card">
+                <div class="gb-card-head"><i data-lucide="tag"></i> 1. Define Categories</div>
+                <div class="gb-card-body">
+                    <div style="display:flex;gap:10px;margin-bottom:12px;">
+                        <input type="text" id="newCatInput" placeholder="Category name (e.g. Database)"
+                            style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);outline:none;">
+                        <button type="button" class="gb-btn gb-btn-ghost" id="addCategoryBtn">
+                            <i data-lucide="plus"></i> Add
+                        </button>
+                    </div>
+                    <div class="gb-tag-list" id="categoryList"></div>
+                </div>
+            </div>
+
+            <!-- Items -->
+            <div class="gb-card">
+                <div class="gb-card-head"><i data-lucide="list"></i> 2. Add Items to Sort</div>
+                <div class="gb-card-body">
+                    <div id="itemsContainer"></div>
+                    <button type="button" class="gb-btn-dashed" id="addItemBtn" style="margin-top:8px;">
+                        <i data-lucide="plus"></i> Add Item
+                    </button>
+                </div>
+            </div>
+
+            <div class="gb-footer">
+                <span class="gb-footer-meta">Tech Sorter Builder</span>
+                <div class="gb-footer-actions">
+                    <button type="button" class="gb-btn gb-btn-ghost" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="gb-btn gb-btn-primary">
+                        <i data-lucide="upload-cloud"></i> Publish Sorter
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
 
     <!-- Publish Modal -->
     <div id="publishModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📢 Publish Game</h2>
+                <h2>Publish Game</h2>
                 <button class="close-btn" id="modalCloseBtn">&times;</button>
             </div>
             <div class="modal-body">
                 <p>Select which classes should have access to this game:</p>
                 <label for="modalTargetClasses">Target Classes *</label>
-                <select id="modalTargetClasses" multiple size="5">
-                    <!-- Populated dynamically -->
-                </select>
-                <p style="font-size: 12px; color: #9ea4b6; margin-top: 8px;">Hold Ctrl/Cmd to select
-                    multiple classes</p>
-
-                <label style="display: flex; align-items: center; gap: 8px; margin-top: 16px;">
+                <select id="modalTargetClasses" multiple size="5"></select>
+                <p style="font-size:12px;color:var(--muted);margin-top:8px;">Hold Ctrl/Cmd to select multiple</p>
+                <label style="display:flex;align-items:center;gap:8px;margin-top:16px;">
                     <input type="checkbox" id="modalIsPublic">
                     <span>Make available to all departments</span>
                 </label>
@@ -137,10 +125,16 @@
         </div>
     </div>
 
-    <!-- Publish Modal Scripts -->
-    <link rel="stylesheet" href="publish-modal.css">
+    <script>
+        lucide.createIcons();
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const next = (document.documentElement.getAttribute('data-theme') || 'light') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            document.body.setAttribute('data-theme', next);
+            localStorage.setItem('mw-theme', next);
+        });
+    </script>
     <script src="publish-modal.js"></script>
     <script src="faculty-create-sorter.js"></script>
 </body>
-
 </html>
