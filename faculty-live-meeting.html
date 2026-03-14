@@ -195,7 +195,7 @@
         <span id="codeDisplay">------</span>
         <i data-lucide="copy"></i>
       </div>
-      <button class="top-icon-btn" onclick="togglePanel()" title="Toggle panel"><i data-lucide="layout-panel-right"></i></button>
+      <button class="top-icon-btn" onclick="togglePanel()" title="Toggle panel"><i data-lucide="panel-right"></i></button>
     </div>
   </div>
 
@@ -268,7 +268,7 @@
       <button class="cb" id="btnScreen" onclick="toggleScreen()"><i data-lucide="monitor" id="screenIco"></i><span>Share</span></button>
       <button class="cb cb-warn" id="btnMuteAll" onclick="muteAll()"><i data-lucide="mic-off"></i><span>Mute All</span></button>
       <div class="sep"></div>
-      <button class="cb" id="btnPanel" onclick="togglePanel()"><i data-lucide="layout-panel-right"></i><span>Panel</span></button>
+      <button class="cb" id="btnPanel" onclick="togglePanel()"><i data-lucide="panel-right"></i><span>Panel</span></button>
       <div class="sep"></div>
       <button class="cb cb-end" onclick="endMeeting()"><i data-lucide="phone-off"></i>End</button>
     </div>
@@ -287,7 +287,7 @@
 
   let room = null, localAudio = null, localVideo = null, localScreen = null;
   let micOn = true, camOn = true, screenOn = false, panelOpen = true;
-  let startTs = null, timerInt = null;
+  let startTs = null, timerInt = null, isConnected = false;
   let meetingCode = '', meetingTitle = 'Live Meeting';
   let handsRaised = {}; // identity -> name
   let selectedGame = null;
@@ -326,33 +326,58 @@
   async function startMeeting() {
     const btn = document.getElementById('startBtn');
     btn.disabled = true;
+    const oldHTML = btn.innerHTML;
     btn.innerHTML = '<div class="sp"></div> Creating room...';
     try {
+      console.log('--- STARTING MEETING ---');
       const res = await fetch(API + '/api/meeting/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + jwt },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + jwt
+        },
         body: JSON.stringify({ title: 'MindWave Class' })
       });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: 'HTTP Error ' + res.status }));
+        throw new Error(errorData.message || 'Server error');
+      }
+
       const data = await res.json();
+      console.log('Room created successfully:', data);
+
       if (!data.ok) throw new Error(data.message || 'Failed to create meeting');
+      
       meetingCode = data.code || '------';
       meetingTitle = data.title || 'Live Meeting';
       document.getElementById('codeDisplay').textContent = meetingCode;
       document.getElementById('meetingTitle').textContent = meetingTitle;
+      
+      // UI Transition
       document.getElementById('startOverlay').style.display = 'none';
-      document.getElementById('roomUI').style.display = 'flex';
+      const roomUI = document.getElementById('roomUI');
+      roomUI.style.display = 'flex';
+      roomUI.style.flexDirection = 'column';
+
+      console.log('Connecting to LiveKit...');
       await connectRoom(data.token, data.wsUrl || 'wss://mindwave-rcbmrzha.livekit.cloud', data.roomName);
+      
     } catch (e) {
+      console.error('Start Meeting Error:', e);
       btn.disabled = false;
-      btn.innerHTML = '<i data-lucide="play"></i> Start Meeting';
+      btn.innerHTML = oldHTML;
       lucide.createIcons();
-      showToast('Could not start meeting: ' + e.message, 'error');
+      showToast('Error: ' + e.message, 'error');
+      alert('Could not start meeting: ' + e.message);
     }
   }
 
   // ── LIVEKIT CONNECT ──
   async function connectRoom(token, wsUrl, roomName) {
-    if (typeof LivekitClient === 'undefined') { showToast('LiveKit SDK not loaded', 'error'); return; }
+    if (typeof LivekitClient === 'undefined') { 
+      throw new Error('LiveKit SDK (LivekitClient) not found. Check script imports.');
+    }
 
     room = new LivekitClient.Room({ adaptiveStream: true, dynacast: true });
 
@@ -371,15 +396,40 @@
         if (msg.type === 'hand') handleHand(p, msg.raised);
       } catch {}
     });
-    room.on(LivekitClient.RoomEvent.Disconnected, () => { clearInterval(timerInt); window.location.href = 'admin.html'; });
+    
+    room.on(LivekitClient.RoomEvent.Disconnected, (reason) => { 
+      console.warn('Room Disconnected:', reason);
+      isConnected = false;
+      clearInterval(timerInt); 
+      if (reason === 'DUPLICATE_IDENTITY' || reason === 'ROOM_CLOSED') {
+        alert('Meeting disconnected: ' + reason);
+        window.location.href = 'admin.html';
+      } else {
+        // Only redirect if it wasn't an intentional stop or if it was already connected
+        showToast('Disconnected from meeting', 'error');
+        setTimeout(() => { window.location.href = 'admin.html'; }, 2000);
+      }
+    });
 
-    await room.connect(wsUrl, token, { autoSubscribe: true });
+    try {
+      await room.connect(wsUrl, token, { autoSubscribe: true });
+      isConnected = true;
+      console.log('Connected to room:', roomName);
+    } catch (e) {
+      console.error('LiveKit Connection Error:', e);
+      throw new Error('Failed to connect to video server. ' + e.message);
+    }
 
     // Publish tracks
-    localAudio = await LivekitClient.createLocalAudioTrack({ echoCancellation: true, noiseSuppression: true });
-    await room.localParticipant.publishTrack(localAudio);
-    localVideo = await LivekitClient.createLocalVideoTrack();
-    await room.localParticipant.publishTrack(localVideo);
+    try {
+      localAudio = await LivekitClient.createLocalAudioTrack({ echoCancellation: true, noiseSuppression: true });
+      await room.localParticipant.publishTrack(localAudio);
+      localVideo = await LivekitClient.createLocalVideoTrack();
+      await room.localParticipant.publishTrack(localVideo);
+    } catch (e) {
+      console.warn('Media Publish Error (probably no mic/cam):', e);
+      showToast('Camera/Mic access denied', 'error');
+    }
 
     renderLocalTile();
     renderAllParticipants();
