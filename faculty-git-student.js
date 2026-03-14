@@ -603,16 +603,39 @@ function validateWizardStep() {
 }
 
 async function finalizePeerReviewSetup() {
-    // In a real app, this would hit /api/peer-review/setup
-    console.log('Finalizing Setup:', wizardState);
-    alert(`🎉 Success! Peer review requests sent for ${wizardState.selectedProjects.length} projects.\nReviewer: ${wizardState.selectedReviewer.name}\nWeightage: Peer (${wizardState.weightage}%) / Faculty (${100-wizardState.weightage}%)`);
-    document.getElementById('peerReviewModal').style.display = 'none';
-    
-    // Simulate updating project state locally for the split grading UI
-    wizardState.selectedProjects.forEach(id => {
-        const p = allProjects.find(p => p._id === id);
-        if(p) p.hasPeerReview = true;
-    });
+    try {
+        const payload = {
+            projectIds: wizardState.selectedProjects,
+            reviewerIds: [wizardState.selectedReviewer.id], // Backend expects array for scaling
+            weightage: wizardState.weightage
+        };
+
+        const response = await fetch('/api/peer-review/invite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert(`🎉 Success! Peer review requests sent.\nReviewer: ${wizardState.selectedReviewer.name}\nWeightage: Peer (${wizardState.weightage}%) / Faculty (${100-wizardState.weightage}%)`);
+            document.getElementById('peerReviewModal').style.display = 'none';
+            
+            // Mark projects locally so UI updates
+            wizardState.selectedProjects.forEach(id => {
+                const p = allProjects.find(p => p._id === id);
+                if(p) p.hasPeerReview = true;
+            });
+            loadAllProjects(); // Refresh list to show new status
+        } else {
+            alert('❌ Failed to send invites: ' + (data.error || 'Unknown error'));
+        }
+    } catch (e) {
+        console.error('Invite Error:', e);
+        alert('❌ Network error while sending invites.');
+    }
 }
 
 // ============================================

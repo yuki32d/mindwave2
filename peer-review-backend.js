@@ -301,50 +301,121 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
     });
 
     // Get assigned reviews for a student
-    app.get('/api/peer-review/my-reviews', authMiddleware, async (req, res) => {
+    app.get('/api/peer-review/pending', authMiddleware, async (req, res) => {
         try {
+            const currentUser = await User.findById(req.user.sub);
+            if (!currentUser) return res.status(404).json({ error: 'User not found' });
+
             const reviews = await PeerReview.find({
-                reviewerId: req.user._id,
-                organizationId: req.user.organizationId
+                reviewerId: currentUser._id,
+                organizationId: currentUser.organizationId,
+                status: 'pending'
             })
                 .populate('submissionId')
                 .populate('revieweeId', 'name email')
                 .sort({ createdAt: -1 });
 
-            res.json({ reviews });
+            // Enrich with project names if possible
+            const enriched = reviews.map(r => ({
+                id: r._id,
+                reviewerId: r.reviewerId,
+                revieweeId: r.revieweeId,
+                revieweeName: r.revieweeId ? r.revieweeId.name : 'Unknown Student',
+                projectName: r.submissionId ? (r.submissionId.projectName || 'Project Submission') : 'Project Submission',
+                dueDate: r.createdAt, // Or a specific deadline if available
+                status: r.status
+            }));
+
+            res.json({ reviews: enriched });
         } catch (error) {
             console.error('Error fetching my reviews:', error);
             res.status(500).json({ error: 'Failed to fetch reviews' });
         }
     });
 
-    // Submit a peer review
-    app.post('/api/peer-review/submit', authMiddleware, async (req, res) => {
+    // Create manual peer review invites
+    app.post('/api/peer-review/invite', authMiddleware, async (req, res) => {
         try {
-            const { reviewId, ratings, feedback } = req.body;
-
-            const review = await PeerReview.findById(reviewId);
-
-            if (!review) {
-                return res.status(404).json({ error: 'Review not found' });
+            const { projectIds, reviewerIds, weightage } = req.body;
+            const currentUser = await User.findById(req.user.sub);
+            
+            if (!currentUser || (currentUser.orgRole !== 'faculty' && currentUser.role !== 'admin')) {
+                return res.status(403).json({ error: 'Only faculty can send invites' });
             }
 
-            if (review.reviewerId.toString() !== req.user._id.toString()) {
-                return res.status(403).json({ error: 'Not authorized' });
+            if (!projectIds || !reviewerIds || !projectIds.length || !reviewerIds.length) {
+                return res.status(400).json({ error: 'Missing selection' });
             }
 
-            review.ratings = ratings;
-            review.feedback = feedback;
-            review.status = 'submitted';
-            review.submittedAt = new Date();
-            review.updatedAt = new Date();
+            const assignments = [];
+            
+            // Loop through each project selected
+            for (const projectId of projectIds) {
+                const submission = await ProjectSubmission.findById(projectId);
+                if (!submission) continue;
 
-            await review.save();
+                // Loop through each reviewer selected
+                for (const reviewerId of reviewerIds) {
+                    // Check if reviewer is not the same as the student who submitted
+                    if (submission.studentId.toString() === reviewerId.toString()) continue;
 
-            res.json({ success: true, review });
+                    assignments.push({
+                        assignmentId: 'manual-invite',
+                        organizationId: currentUser.organizationId,
+                        reviewerId: reviewerId,
+                        revieweeId: submission.studentId,
+                        submissionId: submission._id,
+                        status: 'pending',
+                        createdAt: new Date()
+                    });
+                }
+            }
+
+            if (assignments.length > 0) {
+                await PeerReview.insertMany(assignments);
+            }
+
+            // Save weightage settings for this organization/context
+            let settings = await PeerReviewSettings.findOne({
+                organizationId: currentUser.organizationId,
+                assignmentId: 'git-projects'
+            });
+
+            if (!settings) {
+                settings = new PeerReviewSettings({
+                    assignmentId: 'git-projects',
+                    organizationId: currentUser.organizationId,
+                    createdBy: currentUser._id
+                });
+            }
+            settings.enabled = true;
+            settings.gradeWeight = weightage || 20;
+            await settings.save();
+
+            res.json({ success: true, count: assignments.length });
         } catch (error) {
-            console.error('Error submitting peer review:', error);
-            res.status(500).json({ error: 'Failed to submit review' });
+            console.error('Error creating invites:', error);
+            res.status(500).json({ error: 'Failed to send invites' });
+        }
+    });
+
+    // Get completed reviews for a student
+    app.get('/api/peer-review/completed', authMiddleware, async (req, res) => {
+        try {
+            const currentUser = await User.findById(req.user.sub);
+            const reviews = await PeerReview.find({
+                reviewerId: currentUser._id,
+                organizationId: currentUser.organizationId,
+                status: 'submitted'
+            })
+                .populate('submissionId')
+                .populate('revieweeId', 'name email')
+                .sort({ submittedAt: -1 });
+
+            res.json({ reviews });
+        } catch (error) {
+            console.error('Error fetching completed reviews:', error);
+            res.status(500).json({ error: 'Failed to fetch reviews' });
         }
     });
 

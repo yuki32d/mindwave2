@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peer Review | MindWave Student</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="student-theme.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="auth-guard.js"></script>
+    <script>
+        (function () {
+            const t = localStorage.getItem('mw_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <style>
+        .review-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .review-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .review-card:hover {
+            border-color: var(--accent-2);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .review-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .review-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--accent-lo, rgba(99, 102, 241, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-2);
+        }
+
+        .review-details h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .review-details p {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .review-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--orange);
+        }
+
+        .status-completed {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--green);
+        }
+
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 20px;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mw-app" id="mwApp">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="mw-sidebar">
+            <div class="mw-logo">
+                <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
+                <span class="mw-logo-text">MindWave</span>
+                <span class="mw-logo-badge">Student</span>
+            </div>
+
+            <div class="mw-sidebar-nav">
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Main</div>
+                    <a href="homepage.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+                    </a>
+                    <a href="student-courses.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
+                    </a>
+                    <a href="student-timetable.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
+                    </a>
+                    <a href="student-performance.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
+                    </a>
+                    <a href="student-leaderboard.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="trophy"></i></span> Leaderboard
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Engage</div>
+                    <a href="student-game.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="gamepad-2"></i></span> Play Games
+                    </a>
+                    <a href="student-community.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Community
+                    </a>
+                    <a href="student-achievements.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="award"></i></span> Achievements
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <div class="mw-nav-label">Tools</div>
+                    <a href="student-code-practice.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="terminal"></i></span> Code Practice
+                    </a>
+                    <a href="student-ai-tutor.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="bot"></i></span> AI Tutor
+                    </a>
+                    <a href="student-github.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="github"></i></span> GitHub Projects
+                    </a>
+                    <a href="student-peer-review.html" class="mw-nav-item active">
+                        <span class="mw-nav-icon"><i data-lucide="users"></i></span> Peer Review
+                    </a>
+                    <a href="student-live-meeting.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="video"></i></span> Web Conf
+                    </a>
+                </nav>
+
+                <div class="mw-divider"></div>
+
+                <nav class="mw-nav-section">
+                    <button id="signOutBtn" class="mw-nav-item" style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                        <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
+                    </button>
+                </nav>
+            </div>
+
+            <div class="mw-sidebar-footer">
+                <div id="profileToggle" class="mw-user-card" style="position:relative;">
+                    <div class="mw-avatar" id="avatarInitials">--</div>
+                    <div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-role">Student</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <div class="mw-main">
+            <!-- TOPBAR -->
+            <header class="mw-topbar">
+                <div class="mw-breadcrumb">Tools / <span>Peer Review</span></div>
+                <div class="mw-topbar-actions">
+                    <button class="mw-theme-toggle" id="themeToggle">
+                        <span class="mw-toggle-moon"><i data-lucide="moon"></i></span>
+                        <span class="mw-toggle-sun"><i data-lucide="sun"></i></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <div class="mw-content">
+                <div class="greeting-row">
+                    <div>
+                        <div class="greeting-name">Peer Review Dashboard</div>
+                        <div class="greeting-date">Assess your peers and grow together.</div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="mw-panel" style="margin-bottom: 24px;">
+                    <div class="mw-panel-body" style="padding: 8px;">
+                        <div style="display: flex; gap: 8px;">
+                            <button class="mw-btn mw-btn-primary" id="tabPending">Pending Invites</button>
+                            <button class="mw-btn mw-btn-ghost" id="tabCompleted">Completed History</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="reviewFeed" class="review-grid">
+                    <div class="empty-state">
+                        <div class="empty-icon">📂</div>
+                        <h3>Loading reviews…</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme logic
+        const root = document.documentElement;
+        const themeBtn = document.getElementById('themeToggle');
+        if (themeBtn) {
+            themeBtn.onclick = () => {
+                const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                root.setAttribute('data-theme', next);
+                localStorage.setItem('mw_theme', next);
+            };
+        }
+
+        let currentTab = 'pending';
+
+        // Tab Switching
+        document.getElementById('tabPending').onclick = () => switchTab('pending');
+        document.getElementById('tabCompleted').onclick = () => switchTab('completed');
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tabPending').className = tab === 'pending' ? 'mw-btn mw-btn-primary' : 'mw-btn mw-btn-ghost';
+            document.getElementById('tabCompleted').className = tab === 'completed' ? 'mw-btn mw-btn-primary' : 'mw-btn mw-btn-ghost';
+            loadReviews();
+        }
+
+        // UI Logic
+        async function loadReviews() {
+             const feed = document.getElementById('reviewFeed');
+             feed.innerHTML = '<div class="empty-state"><h3>Loading...</h3></div>';
+             
+             try {
+                const endpoint = currentTab === 'pending' ? '/api/peer-review/pending' : '/api/peer-review/completed';
+                const res = await fetch(endpoint, { credentials: 'include' });
+                const data = await res.json();
+                
+                if (data.reviews && data.reviews.length > 0) {
+                    feed.innerHTML = data.reviews.map(r => `
+                        <div class="review-card">
+                            <div class="review-info">
+                                <div class="review-icon"><i data-lucide="file-text"></i></div>
+                                <div class="review-details">
+                                    <h3>${r.projectName}</h3>
+                                    <p>By ${r.revieweeName || r.revieweeId?.name || 'Unknown Student'} • ${new Date(r.dueDate || r.createdAt).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <span class="review-status status-${currentTab}">${currentTab}</span>
+                                ${currentTab === 'pending' ? `<button class="mw-btn mw-btn-primary" onclick="startReview('${r.id}')">Start Assessment</button>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                    if (window.lucide) window.lucide.createIcons();
+                } else {
+                    feed.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📂</div>
+                            <h3>No ${currentTab} reviews</h3>
+                            <p>${currentTab === 'pending' ? "You're all caught up!" : "You haven't completed any reviews yet."}</p>
+                        </div>
+                    `;
+                }
+             } catch (e) {
+                console.error(e);
+                feed.innerHTML = '<div class="empty-state"><h3>Failed to load reviews</h3></div>';
+             }
+        }
+
+        function startReview(id) {
+            alert('Opening review for ID: ' + id);
+            // Future step: Redirect to a dedicated review page
+        }
+
+        window.onload = () => {
+            if (window.lucide) window.lucide.createIcons();
+            loadReviews();
+        };
+    </script>
+</body>
+</html>
