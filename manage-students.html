@@ -8,7 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindWave – Student Registry</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="auth-guard.js"></script>
     <link rel="stylesheet" href="3d-depth-design.css">
@@ -40,7 +41,13 @@
             --shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -50,7 +57,11 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        .shell { display: flex; flex-direction: column; min-height: 100vh; }
+        .shell {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
         .topbar {
             height: var(--topbar-h);
@@ -67,7 +78,9 @@
             -webkit-backdrop-filter: blur(12px);
         }
 
-        [data-theme="dark"] .topbar { background: rgba(22, 27, 39, 0.8); }
+        [data-theme="dark"] .topbar {
+            background: rgba(22, 27, 39, 0.8);
+        }
 
         .back-btn {
             display: flex;
@@ -97,7 +110,13 @@
             width: 100%;
         }
 
-        .page-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .page-header {
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
         .page-eyebrow {
             font-size: 11px;
             font-weight: 800;
@@ -106,13 +125,19 @@
             color: var(--accent);
             margin-bottom: 8px;
         }
+
         .page-title {
             font-size: 28px;
             font-weight: 800;
             letter-spacing: -0.02em;
             color: var(--text);
         }
-        .page-subtitle { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
 
         /* ── CONTROLS ── */
         .controls-card {
@@ -128,7 +153,9 @@
             flex-wrap: wrap;
         }
 
-        [data-theme="dark"] .controls-card { background: rgba(255, 255, 255, 0.02); }
+        [data-theme="dark"] .controls-card {
+            background: rgba(255, 255, 255, 0.02);
+        }
 
         .search-box {
             position: relative;
@@ -189,7 +216,10 @@
             transition: all 0.2s;
         }
 
-        .action-btn:hover { background: var(--bg); border-color: var(--muted); }
+        .action-btn:hover {
+            background: var(--bg);
+            border-color: var(--muted);
+        }
 
         .danger-btn {
             background: rgba(220, 38, 38, 0.05);
@@ -197,10 +227,17 @@
             border-color: rgba(220, 38, 38, 0.1);
         }
 
-        .danger-btn:hover { background: rgba(220, 38, 38, 0.1); border-color: var(--red); }
+        .danger-btn:hover {
+            background: rgba(220, 38, 38, 0.1);
+            border-color: var(--red);
+        }
 
         /* ── STUDENT LIST ── */
-        .students-list { display: flex; flex-direction: column; gap: 12px; }
+        .students-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
         .student-card {
             background: var(--surface);
@@ -220,12 +257,35 @@
             backdrop-filter: blur(10px);
         }
 
-        .student-card:hover { transform: translateY(-2px); border-color: var(--accent-bdr); }
+        .student-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-bdr);
+        }
 
-        .student-name { font-weight: 700; color: var(--text); font-size: 14px; }
-        .student-email { color: var(--muted); font-size: 13px; }
-        .student-meta { font-size: 12px; color: var(--muted); }
-        .student-tag { background: var(--accent-lo); color: var(--accent); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .student-name {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .student-email {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .student-meta {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .student-tag {
+            background: var(--accent-lo);
+            color: var(--accent);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
 
         /* ── BULK ROW ── */
         .bulk-actions-row {
@@ -243,7 +303,12 @@
             animation: slideDown 0.3s ease-out;
         }
 
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
 
         /* ── PAGINATION ── */
         .pagination-container {
@@ -253,6 +318,7 @@
             gap: 16px;
             margin-top: 32px;
         }
+
         .pagination-btn {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -264,20 +330,37 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .pagination-btn:not(:disabled):hover { background: var(--bg); }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn:not(:disabled):hover {
+            background: var(--bg);
+        }
 
         /* ── LOADING & TABLES ── */
-        .loading-container { text-align: center; padding: 60px; }
+        .loading-container {
+            text-align: center;
+            padding: 60px;
+        }
+
         .spinner {
-            width: 40px; height: 40px;
+            width: 40px;
+            height: 40px;
             border: 3px solid var(--border);
             border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         .table-header {
             padding: 8px 24px;
@@ -293,17 +376,35 @@
         }
 
         @media (max-width: 1024px) {
-            .student-card, .table-header { grid-template-columns: 40px 2fr 2fr 1fr 100px; }
-            .col-hide-md { display: none; }
+
+            .student-card,
+            .table-header {
+                grid-template-columns: 40px 2fr 2fr 1fr 100px;
+            }
+
+            .col-hide-md {
+                display: none;
+            }
         }
 
         @media (max-width: 768px) {
-            .student-card { grid-template-columns: 40px 1fr 100px; }
-            .col-hide-sm { display: none; }
-            .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .student-card {
+                grid-template-columns: 40px 1fr 100px;
+            }
+
+            .col-hide-sm {
+                display: none;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="shell">
         <header class="topbar">
@@ -340,7 +441,8 @@
                 <div class="controls-card">
                     <div class="search-box">
                         <i class="fas fa-search search-icon"></i>
-                        <input type="text" id="searchInput" class="premium-input" placeholder="Search by name or email...">
+                        <input type="text" id="searchInput" class="premium-input"
+                            placeholder="Search by name or email...">
                     </div>
 
                     <select id="dateFilter" class="filter-select">
@@ -367,7 +469,8 @@
                 </div>
 
                 <div id="emptyState" class="empty-state" style="display: none; text-align: center; padding: 60px;">
-                    <i class="fas fa-users-slash" style="font-size: 40px; color: var(--muted); margin-bottom: 16px;"></i>
+                    <i class="fas fa-users-slash"
+                        style="font-size: 40px; color: var(--muted); margin-bottom: 16px;"></i>
                     <h3>No Students Found</h3>
                     <p style="color: var(--muted);">Try adjusting your search or filters.</p>
                 </div>
@@ -405,24 +508,15 @@
         </main>
     </div>
 
-    <!-- Confirm Modal -->
-    <div id="confirmModal" class="modal-overlay">
-        <div class="confirm-modal" style="background: var(--surface); padding: 32px; border-radius: 24px; width: 400px; text-align: center; border: 1px solid var(--border);">
-            <div id="confirmTitle" style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">Confirm Action</div>
-            <div id="confirmMsg" style="color: var(--muted); margin-bottom: 32px;">Are you sure?</div>
-            <div style="display: flex; gap: 12px;">
-                <button class="modal-btn confirm-cancel" id="confirmCancel" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; background: var(--bg); color: var(--muted);">Cancel</button>
-                <button class="modal-btn confirm-ok" id="confirmOk" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; background: var(--accent); color: white;">Confirm</button>
-            </div>
-        </div>
-    </div>
 
-    <div id="toastContainer" style="position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px;"></div>
+    <div id="toastContainer"
+        style="position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px;">
+    </div>
 
     <script src="manage-students.js"></script>
     <script>
         // ── OVERRIDE ALERT/CONFIRM ──
-        window.alert = function(msg) {
+        window.alert = function (msg) {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -433,7 +527,7 @@
         };
 
         let confirmResolve;
-        window.confirm = function(msg) {
+        window.confirm = function (msg) {
             document.getElementById('confirmMsg').textContent = msg;
             document.getElementById('confirmModal').classList.add('active');
             return new Promise(res => confirmResolve = res);
