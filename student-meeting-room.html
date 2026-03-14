@@ -50,11 +50,19 @@
     .video-area{flex:1;overflow:hidden;padding:.75rem;display:flex;flex-direction:column;gap:.75rem}
     #videoGrid{flex:1;display:grid;gap:.75rem;overflow:hidden}
     
-    /* Layout helpers */
-    .video-area.layout-1 #videoGrid{grid-template-columns:1fr}
-    .video-area.layout-2 #videoGrid{grid-template-columns:1fr 1fr}
-    .video-area.layout-3,.video-area.layout-4{grid-template-columns:repeat(2,1fr)}
-    .video-area.layout-5,.video-area.layout-6{grid-template-columns:repeat(3,1fr)}
+    .video-area.layout-5,.video-area.layout-6 #videoGrid{grid-template-columns:repeat(3,1fr)}
+
+    /* ── PRESENTATION MODE ── */
+    .present-mode #videoArea { flex: 0 0 240px; }
+    .present-mode #videoGrid { grid-template-columns: 1fr !important; grid-template-rows: none !important; overflow-y: auto; display: flex; flex-direction: column; }
+    .present-mode .vtile { height: 160px; flex-shrink: 0; }
+    
+    #presentationArea { flex: 1; min-width: 0; background: #000; border-radius: 14px; position: relative; overflow: hidden; display: none; border: 1px solid rgba(255,255,255,.05); }
+    #presentationArea video { width: 100%; height: 100%; object-fit: contain; }
+    .present-mode #presentationArea { display: block; }
+    
+    .pres-label { position: absolute; top: .8rem; left: 1rem; background: rgba(0,0,0,.6); backdrop-filter: blur(8px); padding: .35rem .75rem; border-radius: 8px; font-size: .72rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: .5rem; border: 1px solid rgba(255,255,255,.1); z-index: 10; }
+    .pres-label i { color: #d08000; width: 14px; height: 14px; }
 
     /* Tile */
     .vtile{background:#141625;border-radius:14px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;border:2px solid transparent;transition:border-color .2s}
@@ -150,6 +158,12 @@
     </div>
 
     <div class="meeting-body" id="meetingBody">
+      <!-- Presentation Area -->
+      <div id="presentationArea">
+        <video id="presVideo" autoplay playsinline></video>
+        <div class="pres-label"><i data-lucide="monitor"></i> <span id="presName">Presentation</span></div>
+      </div>
+
       <div class="video-area layout-1" id="videoArea">
         <div id="videoGrid"></div>
       </div>
@@ -263,8 +277,14 @@
 
       room.on(LivekitClient.RoomEvent.ParticipantConnected, onParticipantConnected);
       room.on(LivekitClient.RoomEvent.ParticipantDisconnected, onParticipantDisconnected);
-      room.on(LivekitClient.RoomEvent.TrackSubscribed, onTrackSubscribed);
-      room.on(LivekitClient.RoomEvent.TrackUnsubscribed, onTrackUnsubscribed);
+      room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, pub, p) => {
+        if (track.source === 'screen_share') togglePresentation(track, p, true);
+        else attachTrackToTile(null, track, p); // Null tile check in function
+      });
+      room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track, pub, p) => {
+        if (track.source === 'screen_share') togglePresentation(null, null, false);
+        else updateTileMedia(p);
+      });
       room.on(LivekitClient.RoomEvent.TrackMuted, (pub, p) => updateTileMedia(p));
       room.on(LivekitClient.RoomEvent.TrackUnmuted, (pub, p) => updateTileMedia(p));
       room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, onSpeakersChanged);
@@ -351,11 +371,19 @@
     }
 
     function onTrackSubscribed(track, pub, rp) {
+      if (track.source === 'screen_share') {
+        togglePresentation(track, rp, true);
+        return;
+      }
       const tile = document.getElementById('tile-'+rp.identity);
       if(!tile) renderTile(rp); else attachTrackToTile(tile, track, rp);
     }
 
     function onTrackUnsubscribed(track, pub, rp) {
+      if (track.source === 'screen_share') {
+        togglePresentation(null, null, false);
+        return;
+      }
       updateTileMedia(rp);
     }
 
@@ -521,6 +549,24 @@
       area.className = 'video-area layout-'+Math.min(count,6);
     }
 
+    function togglePresentation(track, p, active) {
+      const body = document.getElementById('meetingBody');
+      const video = document.getElementById('presVideo');
+      const label = document.getElementById('presName');
+      
+      if (active && track) {
+        track.attach(video);
+        label.textContent = (p ? (p.name || p.identity) : 'Someone') + ' is presenting';
+        body.classList.add('present-mode');
+        if (panelOpen) togglePanel(); // Auto-close panel
+      } else {
+        video.srcObject = null;
+        body.classList.remove('present-mode');
+      }
+      updateGridLayout();
+      lucide.createIcons();
+    }
+
     //  Participants panel 
     function renderParticipants() {
       const view = document.getElementById('participantsView');
@@ -627,20 +673,28 @@
     }
 
     async function toggleScreen() {
-      if(!screenOn) {
-        try {
+      if(!room) return;
+      try {
+        if(!screenOn) {
           localScreen = await LivekitClient.createLocalScreenTracks({ audio:true });
-          for(const t of localScreen) await room.localParticipant.publishTrack(t);
+          await room.localParticipant.publishTrack(localScreen[0]);
           screenOn = true;
-          document.getElementById('btnScreen').classList.add('active');
-        } catch(e) { screenOn=false; }
-      } else {
-        if(localScreen) for(const t of localScreen){ await room.localParticipant.unpublishTrack(t); t.stop(); }
-        localScreen=null; screenOn=false;
-        document.getElementById('btnScreen').classList.remove('active');
-      }
-      document.getElementById('screenIco').setAttribute('data-lucide', screenOn?'monitor-stop':'monitor');
-      lucide.createIcons();
+          togglePresentation(localScreen[0], room.localParticipant, true);
+        } else {
+          if(localScreen) {
+            for(const t of localScreen) {
+              await room.localParticipant.unpublishTrack(t);
+              t.stop();
+            }
+          }
+          localScreen=null;
+          screenOn=false;
+          togglePresentation(null, null, false);
+        }
+        document.getElementById('screenIco').setAttribute('data-lucide', screenOn?'monitor-off':'monitor');
+        document.getElementById('btnScreen').classList.toggle('active', screenOn);
+        lucide.createIcons();
+      } catch(e) { console.error(e); }
     }
 
     async function raiseHand() {
