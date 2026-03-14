@@ -152,6 +152,38 @@ function renderProjects(projects) {
                 </div>
             ` : ''}
 
+            ${project.peerFeedback && project.peerFeedback.length > 0 ? `
+                <div style="margin-top: 16px;">
+                    ${project.peerFeedback.map(pf => `
+                        <div class="gh-peer-feedback">
+                            <div class="gh-peer-feedback-label">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                                Peer Feedback from ${escapeHtml(pf.reviewerName)}
+                            </div>
+                            <div class="gh-feedback-text">
+                                ${pf.feedback ? `
+                                    <div style="margin-bottom: 8px;">
+                                        <strong>Strengths:</strong> ${escapeHtml(pf.feedback.strengths)}<br>
+                                        <strong>Improvements:</strong> ${escapeHtml(pf.feedback.improvements)}
+                                    </div>
+                                ` : ''}
+                                <div style="display:flex; gap: 10px; font-size: 11px; opacity: 0.8;">
+                                    <span>Code: ${pf.ratings?.codeQuality || 'N/A'}/5</span>
+                                    <span>Logic: ${pf.ratings?.functionality || 'N/A'}/5</span>
+                                    <span>Docs: ${pf.ratings?.documentation || 'N/A'}/5</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+
             <div class="gh-timestamp">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

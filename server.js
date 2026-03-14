@@ -24,7 +24,7 @@ import paymentRoutes from './payment-routes.js';
 // Student Performance Analytics
 import studentPerformanceRoutes from './student-performance-routes.js';
 // Peer Review System
-import { setupPeerReviewRoutes } from './peer-review-backend.js';
+import { setupPeerReviewRoutes, PeerReview } from './peer-review-backend.js';
 // Live Activity System
 import activitiesRouter from './routes/activities.js';
 import liveSessionsRouter from './routes/live-sessions.js';
@@ -5733,9 +5733,30 @@ app.get("/api/projects/my", authMiddleware, async (req, res) => {
 
     const projects = await ProjectSubmission.find({ studentId: userId })
       .sort({ submittedAt: -1 })
-      .populate('reviewedBy', 'name email');
+      .populate('reviewedBy', 'name email')
+      .lean(); // Use lean for performance since we'll manually add data
 
-    res.json({ ok: true, projects });
+    // Fetch peer reviews for these projects
+    const enrichedProjects = await Promise.all(projects.map(async (project) => {
+      const peerReviews = await PeerReview.find({ 
+        submissionId: project._id,
+        status: 'submitted'
+      })
+      .populate('reviewerId', 'name displayName')
+      .lean();
+
+      return {
+        ...project,
+        peerFeedback: peerReviews.map(pr => ({
+          reviewerName: pr.reviewerId?.displayName || pr.reviewerId?.name || 'Peer',
+          ratings: pr.ratings,
+          feedback: pr.feedback,
+          submittedAt: pr.submittedAt
+        }))
+      };
+    }));
+
+    res.json({ ok: true, projects: enrichedProjects });
   } catch (error) {
     console.error("Get my projects error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
