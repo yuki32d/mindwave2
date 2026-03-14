@@ -386,6 +386,7 @@
   // Build game grid
   (function buildGameGrid() {
     const grid = document.getElementById('gameGrid');
+    if (!grid) return;
     GAMES.forEach(g => {
       const d = document.createElement('div');
       d.className = 'gc';
@@ -402,6 +403,37 @@
     });
     lucide.createIcons();
   })();
+
+  // ── CORE UTILS ──
+  function renderAllParticipants() {
+    const view = document.getElementById('tv-people');
+    if (!view || !room) return;
+    view.innerHTML = '';
+    const all = [room.localParticipant, ...Array.from(room.remoteParticipants.values())];
+    all.forEach(p => {
+      const name = p.name || p.identity;
+      const isMe = p === room.localParticipant;
+      const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const hue = [...(p.identity||'x')].reduce((a,c) => a+c.charCodeAt(0), 0) % 360;
+      const div = document.createElement('div');
+      div.className = 'pi';
+      div.innerHTML = `
+        <div class="pi-av" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue+40},55%,35%))">${initials}</div>
+        <div style="flex:1"><div class="pi-name">${name}${isMe ? ' (You)' : ''}</div><div class="pi-role">${isMe ? 'Faculty (Host)' : 'Student'}</div></div>
+        ${!isMe ? `<div class="pi-actions">
+          <button class="pi-btn" title="Mute" onclick="mutePart('${p.identity}')"><i data-lucide="mic-off"></i></button>
+          <button class="pi-btn danger" title="Remove" onclick="kickPart('${p.identity}')"><i data-lucide="user-x"></i></button>
+        </div>` : ''}
+      `;
+      view.appendChild(div);
+    });
+    lucide.createIcons();
+  }
+
+  function renderAllRemotes() {
+    if (!room) return;
+    room.remoteParticipants.forEach(p => addTile(p));
+  }
 
   // ── START MEETING ──
   async function startMeeting() {
@@ -541,11 +573,6 @@
     
     updateEngagement();
     setInterval(updateEngagement, 5000);
-  }
-
-  function renderAllRemotes() {
-    if (!room) return;
-    room.remoteParticipants.forEach(p => addTile(p));
   }
 
   // ── TIMER ──
