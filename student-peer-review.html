@@ -307,11 +307,25 @@
         // UI Logic
         async function loadReviews() {
             const feed = document.getElementById('reviewFeed');
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                feed.innerHTML = '<div class="empty-state"><h3>Not logged in</h3><p>Please log in to see your reviews.</p></div>';
+                return;
+            }
+
             feed.innerHTML = '<div class="empty-state"><h3>Loading...</h3></div>';
 
             try {
                 const endpoint = currentTab === 'pending' ? '/api/peer-review/pending' : '/api/peer-review/completed';
-                const res = await fetch(endpoint, { credentials: 'include' });
+                const res = await fetch(endpoint, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!res.ok) {
+                    throw new Error('Failed to fetch reviews: ' + res.status);
+                }
+
                 const data = await res.json();
 
                 if (data.reviews && data.reviews.length > 0) {

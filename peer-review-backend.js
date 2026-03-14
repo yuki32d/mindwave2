@@ -311,7 +311,6 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
 
             const reviews = await PeerReview.find({
                 reviewerId: currentUser._id,
-                organizationId: currentUser.organizationId,
                 status: 'pending'
             })
                 .populate('submissionId')
@@ -431,7 +430,6 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
             const currentUser = await User.findById(req.user.sub);
             const reviews = await PeerReview.find({
                 reviewerId: currentUser._id,
-                organizationId: currentUser.organizationId,
                 status: 'submitted'
             })
                 .populate('submissionId')
