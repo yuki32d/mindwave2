@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <script src="student-theme-init.js"></script>
@@ -369,8 +369,57 @@
         const msg = JSON.parse(new TextDecoder().decode(data));
         if(msg.type === 'chat') addChatMessage(rp ? rp.name||rp.identity : 'Unknown', msg.text, false);
         if(msg.type === 'hand') addChatMessage('', (rp ? rp.name||rp.identity : 'Someone') + ' raised their hand.', false, true);
+
+        // Faculty signals
+        if(msg.type === 'mute_all') {
+          micOn = false;
+          if(localAudio) localAudio.mute();
+          document.getElementById('micIco').setAttribute('data-lucide','mic-off');
+          document.getElementById('btnMic').classList.add('muted');
+          lucide.createIcons();
+          addChatMessage('', 'Faculty muted all participants.', false, true);
+        }
+        if(msg.type === 'mute' && msg.target === room.localParticipant.identity) {
+          micOn = false;
+          if(localAudio) localAudio.mute();
+          document.getElementById('micIco').setAttribute('data-lucide','mic-off');
+          document.getElementById('btnMic').classList.add('muted');
+          lucide.createIcons();
+          addChatMessage('', 'Faculty muted your microphone.', false, true);
+        }
+        if(msg.type === 'kick' && msg.target === room.localParticipant.identity) {
+          if(room) room.disconnect();
+          alert('You have been removed from the meeting by the faculty.');
+          window.location.href = 'student-live-meeting.html';
+        }
+        if(msg.type === 'meeting_ended') {
+          if(room) room.disconnect();
+          alert('The faculty has ended the meeting.');
+          window.location.href = 'student-live-meeting.html';
+        }
+        if(msg.type === 'launch_game') {
+          const name = msg.gameType ? msg.gameType.charAt(0).toUpperCase()+msg.gameType.slice(1) : 'Game';
+          addChatMessage('', `Faculty launched a ${name} game! Click to join →`, false, true);
+          // Show a small banner
+          showGameBanner(msg);
+        }
+        if(msg.type === 'called_on' && msg.target === room.localParticipant.identity) {
+          addChatMessage('', 'Faculty called on you! You may speak.', false, true);
+        }
       } catch {}
     }
+
+    function showGameBanner(msg) {
+      const existing = document.getElementById('gameBanner');
+      if(existing) existing.remove();
+      const b = document.createElement('div');
+      b.id = 'gameBanner';
+      b.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#1a1d2e;border:1px solid rgba(208,128,0,.4);border-radius:14px;padding:.85rem 1.25rem;display:flex;align-items:center;gap:.85rem;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:360px;width:90%';
+      b.innerHTML = `<div style="width:36px;height:36px;border-radius:9px;background:rgba(208,128,0,.15);display:flex;align-items:center;justify-content:center;color:#d08000;flex-shrink:0">🎮</div><div style="flex:1"><div style="font-size:.83rem;font-weight:700;color:#f0f2ff">New Game Launched!</div><div style="font-size:.75rem;color:#9ea4b6;margin-top:.1rem">Faculty started a ${msg.gameType || 'game'}</div></div><button onclick="document.getElementById('gameBanner').remove()" style="color:#9ea4b6;background:none;border:none;font-size:1.2rem;cursor:pointer;flex-shrink:0">×</button>`;
+      document.body.appendChild(b);
+      setTimeout(() => { if(b.parentNode) b.remove(); }, 8000);
+    }
+
 
     //  Video tiles 
     function renderLocalTile() {
