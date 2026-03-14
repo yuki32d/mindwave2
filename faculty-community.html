@@ -466,34 +466,6 @@
             .nav-btn { padding: 8px 10px; font-size: 12px; }
         }
 
-        .topbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .icon-btn {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 16px;
-        }
-
-        .icon-btn:hover {
-            color: var(--accent);
-            border-color: var(--accent-bdr);
-            background: var(--accent-lo);
-            transform: translateY(-2px);
-        }
-
         /* ── TOAST NOTIFICATIONS ── */
         .toast-container {
             position: fixed;
@@ -708,11 +680,7 @@
                 <button class="nav-btn" data-section="feedback">💬 Live Feedback</button>
                 <button class="nav-btn" data-section="quiz">🏆 Live Quiz</button>
             </nav>
-            <div class="topbar-actions">
-                <button class="icon-btn" id="themeToggle" title="Toggle Theme">
-                    <i class="fas fa-moon"></i>
-                </button>
-            </div>
+            <div style="width: 70px;"></div> <!-- Spacer for balance -->
         </header>
 
         <main class="main">
