@@ -547,6 +547,109 @@
             from { transform: translateX(0) scale(1); opacity: 1; }
             to { transform: translateX(20px); opacity: 0; }
         }
+
+        /* ── CONFIRM MODAL ── */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 11000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .confirm-modal {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(22, 27, 39, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        [data-theme="light"] .confirm-modal {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .confirm-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: var(--accent-lo);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 24px;
+            border: 1px solid var(--accent-bdr);
+        }
+
+        .confirm-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .confirm-msg {
+            font-size: 15px;
+            color: var(--muted);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .modal-cancel {
+            background: var(--bg);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .modal-cancel:hover {
+            color: var(--text);
+            border-color: var(--muted);
+        }
+
+        .modal-confirm {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .modal-confirm:hover {
+            box-shadow: 0 0 20px rgba(208, 128, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-overlay.active .confirm-modal { transform: scale(1); }
     </style>
 </head>
 
@@ -711,6 +814,19 @@
         </main>
     </div>
 
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="confirm-modal">
+            <div class="confirm-icon"><i class="fas fa-question"></i></div>
+            <div class="confirm-title" id="confirmTitle">Confirm Action</div>
+            <div class="confirm-msg" id="confirmMsg">Are you sure you want to proceed?</div>
+            <div class="confirm-actions">
+                <button class="modal-btn modal-cancel" id="confirmCancel">Cancel</button>
+                <button class="modal-btn modal-confirm" id="confirmOk">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toastContainer" class="toast-container"></div>
 
     <script src="role-page.js"></script>
@@ -790,6 +906,28 @@
             toast.style.animation = 'toastSlideOut 0.3s forwards cubic-bezier(0.19, 1, 0.22, 1)';
             setTimeout(() => toast.remove(), 300);
         }
+
+        // ── PROFESSIONAL CONFIRM SYSTEM ──
+        let confirmResolve;
+        window.confirm = function(message, title = 'Confirm Action') {
+            document.getElementById('confirmMsg').textContent = message;
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmModal').classList.add('active');
+            
+            return new Promise((resolve) => {
+                confirmResolve = resolve;
+            });
+        };
+
+        document.getElementById('confirmOk').onclick = () => {
+            document.getElementById('confirmModal').classList.remove('active');
+            if (confirmResolve) confirmResolve(true);
+        };
+
+        document.getElementById('confirmCancel').onclick = () => {
+            document.getElementById('confirmModal').classList.remove('active');
+            if (confirmResolve) confirmResolve(false);
+        };
 
         // Tab switching logic
         document.querySelectorAll('.nav-btn').forEach(btn => {

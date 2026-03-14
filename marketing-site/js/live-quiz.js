@@ -250,8 +250,8 @@ function updateSidebarPreview(index) {
     }
 }
 
-function deleteQuestion(index) {
-    if (!confirm('Delete this question?')) return;
+async function deleteQuestion(index) {
+    if (!await confirm('Delete this question?')) return;
 
     questions.splice(index, 1);
 
@@ -674,7 +674,7 @@ async function showFinalLeaderboard() {
 async function endQuiz() {
     if (!currentQuiz) return;
 
-    if (!confirm('Are you sure you want to end this quiz?')) return;
+    if (!await confirm('Are you sure you want to end this quiz?')) return;
 
     try {
         const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
