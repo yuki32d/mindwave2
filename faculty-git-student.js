@@ -620,7 +620,7 @@ async function finalizePeerReviewSetup() {
         const data = await response.json();
 
         if (data.success) {
-            alert(`🎉 Success! Peer review requests sent.\nReviewer: ${wizardState.selectedReviewer.name}\nWeightage: Peer (${wizardState.weightage}%) / Faculty (${100-wizardState.weightage}%)`);
+            alert(`🎉 Success! ${data.count || 0} peer review requests sent.\nReviewer: ${wizardState.selectedReviewer.name}\nWeightage: Peer (${wizardState.weightage}%) / Faculty (${100-wizardState.weightage}%)`);
             document.getElementById('peerReviewModal').style.display = 'none';
             
             // Mark projects locally so UI updates

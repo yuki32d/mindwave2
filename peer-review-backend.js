@@ -309,6 +309,8 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
             const currentUser = await User.findById(req.user.sub);
             if (!currentUser) return res.status(404).json({ error: 'User not found' });
 
+            console.log('🔍 Fetching pending reviews for User:', currentUser._id, ' (Email:', currentUser.email, ')');
+
             const reviews = await PeerReview.find({
                 reviewerId: currentUser._id,
                 status: 'pending'
@@ -316,6 +318,8 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
                 .populate('submissionId')
                 .populate('revieweeId', 'name email')
                 .sort({ createdAt: -1 });
+
+            console.log(`📋 Found ${reviews.length} pending reviews for user ${currentUser._id}`);
 
             // Enrich with project names if possible
             const enriched = reviews.map(r => ({
@@ -341,15 +345,14 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
             const { projectIds, reviewerIds, weightage } = req.body;
             console.log('📨 Peer Review Invite Request:', { 
                 projectCount: projectIds?.length, 
-                reviewerCount: reviewerIds?.length, 
+                reviewerIds: reviewerIds, 
                 weightage 
             });
 
             const currentUser = await User.findById(req.user.sub);
             
-            if (!currentUser || (currentUser.orgRole !== 'faculty' && currentUser.role !== 'admin')) {
-                console.warn('🚫 Unauthorized invite attempt from:', req.user.email);
-                return res.status(403).json({ error: 'Only faculty can send invites' });
+            if (!currentUser) {
+                return res.status(404).json({ error: 'User not found' });
             }
 
             if (!projectIds || !reviewerIds || !projectIds.length || !reviewerIds.length) {
@@ -374,12 +377,13 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
                         continue;
                     }
 
+                    console.log(`➕ Adding assignment: Reviewer ${reviewerId} -> Reviewee ${submission.studentId} for Project ${submission._id}`);
                     assignments.push({
                         assignmentId: 'manual-invite',
                         organizationId: currentUser.organizationId,
-                        reviewerId: reviewerId,
-                        revieweeId: submission.studentId,
-                        submissionId: submission._id,
+                        reviewerId: new mongoose.Types.ObjectId(reviewerId),
+                        revieweeId: submission.studentId, // This is already an ObjectId from DB
+                        submissionId: submission._id,      // This is already an ObjectId from DB
                         status: 'pending',
                         createdAt: new Date()
                     });
