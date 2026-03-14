@@ -48,9 +48,10 @@
 
     /* Video grid */
     .video-area{flex:1;overflow:hidden;padding:.75rem;display:flex;flex-direction:column;gap:.75rem}
-    #videoGrid{flex:1;display:grid;gap:.75rem;overflow:hidden}
-    
-    .video-area.layout-5,.video-area.layout-6 #videoGrid{grid-template-columns:repeat(3,1fr)}
+    .video-area.layout-1 #videoGrid{grid-template-columns:1fr}
+    .video-area.layout-2 #videoGrid{grid-template-columns:1fr 1fr}
+    .video-area.layout-3 #videoGrid,.video-area.layout-4 #videoGrid{grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr}
+    .video-area.layout-5 #videoGrid,.video-area.layout-6 #videoGrid{grid-template-columns:repeat(3,1fr)}
 
     /* ── PRESENTATION MODE ── */
     .present-mode #videoArea { flex: 0 0 240px; }
@@ -496,10 +497,11 @@
     function makeTile(identity, label) {
       const cleaned = (label||'?').split(' (')[0];
       const initials = cleaned.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const hue = [...(identity || 'x')].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
       const tile = document.createElement('div');
       tile.className = 'vtile';
       tile.innerHTML = `
-        <div class="vtile-avatar">${initials}</div>
+        <div class="vtile-avatar" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue+40},55%,35%)); display:flex;">${initials}</div>
         <video autoplay playsinline style="display:none"></video>
         <div class="vtile-label"><span>${label}</span></div>
       `;

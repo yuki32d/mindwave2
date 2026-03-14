@@ -37,11 +37,13 @@
     .meeting-shell{display:flex;flex-direction:column;height:calc(100vh - 54px)}
     .meeting-body{display:flex;flex:1;overflow:hidden}
 
-    /* ── VIDEO AREA ── */
+    #videoGrid{flex:1;display:grid;gap:.75rem;overflow:hidden;grid-template-columns:1fr}
+    .layout-2 #videoGrid{grid-template-columns:1fr 1fr}
+    .layout-3 #videoGrid,.layout-4 #videoGrid{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
     .layout-5 #videoGrid,.layout-6 #videoGrid{grid-template-columns:repeat(3,1fr)}
     
     /* ── PRESENTATION MODE ── */
-    .present-mode #videoArea { flex: 0 0 240px; }
+    .present-mode #videoArea { flex: 0 0 260px; }
     .present-mode #videoGrid { grid-template-columns: 1fr !important; grid-template-rows: none !important; overflow-y: auto; display: flex; flex-direction: column; }
     .present-mode .vtile { height: 160px; flex-shrink: 0; }
     
@@ -525,17 +527,25 @@
     }
 
     renderLocalTile();
-      renderAllRemotes();
-      startTimer();
-      
-      // AI Sampling Interval
-      setInterval(() => {
+    renderAllRemotes();
+    startTimer();
+    
+    // AI Sampling Interval
+    setInterval(() => {
+      if (!meetingLog.end) {
         const eng = parseInt(document.getElementById('engVal').textContent) || 0;
         meetingLog.engagementSamples.push(eng);
         updateAiInsight(eng);
-      }, 30000); // Every 30s
+      }
+    }, 30000); // Every 30s
+    
     updateEngagement();
     setInterval(updateEngagement, 5000);
+  }
+
+  function renderAllRemotes() {
+    if (!room) return;
+    room.remoteParticipants.forEach(p => addTile(p));
   }
 
   // ── TIMER ──
@@ -557,8 +567,8 @@
     div.className = 'vtile';
     div.id = 'tile-' + identity;
     div.innerHTML = `
-      <div class="vtile-avatar" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue+40},55%,35%))">${initials}</div>
-      <video autoplay playsinline></video>
+      <div class="vtile-avatar" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue+40},55%,35%)); display:flex;">${initials}</div>
+      <video autoplay playsinline style="display:none"></video>
       ${isHost ? '<div class="vtile-host">HOST</div>' : ''}
       <div class="vtile-label"><span>${label}</span></div>
     `;
@@ -783,8 +793,10 @@
     if (localVideo) { if (camOn) await localVideo.unmute(); else await localVideo.mute(); }
     const tile = document.getElementById('tile-local');
     if (tile) {
-      tile.querySelector('video').style.display = camOn ? 'block' : 'none';
-      tile.querySelector('.vtile-avatar').style.display = camOn ? 'none' : 'flex';
+      const v = tile.querySelector('video');
+      const av = tile.querySelector('.vtile-avatar');
+      v.style.display = camOn ? 'block' : 'none';
+      av.style.display = camOn ? 'none' : 'flex';
     }
     document.getElementById('camIco').setAttribute('data-lucide', camOn ? 'video' : 'video-off');
     document.getElementById('btnCam').classList.toggle('muted', !camOn);
