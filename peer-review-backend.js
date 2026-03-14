@@ -184,15 +184,13 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
         try {
             const { q, role } = req.query;
             
-            // Get full user to have organizationId (not in token)
             const currentUser = await User.findById(req.user.sub);
-            if (!currentUser || !currentUser.organizationId) {
-                return res.json({ users: [] });
+            const query = {};
+            
+            // Only filter by organization if the current user belongs to one
+            if (currentUser && currentUser.organizationId) {
+                query.organizationId = currentUser.organizationId;
             }
-
-            const query = {
-                organizationId: currentUser.organizationId
-            };
 
             if (q && q.trim().length >= 1) {
                 query.$or = [
@@ -203,13 +201,19 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
 
             // role filter: 'faculty' maps to faculty/admin (excluding owner), 'student' to student
             if (role === 'faculty') {
-                query.orgRole = { $in: ['faculty', 'admin'] };
+                query.orgRole = { $ne: 'owner' };
+                // Match if they have faculty/admin in orgRole OR if their base role is admin
+                query.$or = query.$or || [];
+                query.$or.push(
+                    { orgRole: { $in: ['faculty', 'admin'] } },
+                    { role: 'admin' }
+                );
             } else if (role === 'student') {
                 query.orgRole = 'student';
             }
 
             const users = await User.find(query)
-                .select('name email orgRole profilePhoto')
+                .select('name email orgRole role profilePhoto')
                 .limit(10)
                 .lean();
 
@@ -217,7 +221,7 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
                 id: u._id,
                 name: u.name,
                 email: u.email,
-                role: u.orgRole,
+                role: u.orgRole || u.role,
                 avatar: u.profilePhoto
             })) });
 
