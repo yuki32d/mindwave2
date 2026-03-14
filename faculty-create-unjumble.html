@@ -91,9 +91,7 @@ function binarySearch(arr, target) {
                 <span class="gb-footer-meta">Code Unjumble Builder</span>
                 <div class="gb-footer-actions">
                     <button type="button" class="gb-btn gb-btn-ghost" id="cancelBtn">Cancel</button>
-                    <button type="submit" class="gb-btn gb-btn-primary">
-                        <i data-lucide="upload-cloud"></i> Publish Challenge
-                    </button>
+                    
                 </div>
             </div>
 
@@ -104,8 +102,8 @@ function binarySearch(arr, target) {
     <div id="publishModal" class="modal" style="display:none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Publish Game</h2>
-                <button class="close-btn" id="modalCloseBtn">&times;</button>
+                <h2><i data-lucide="send"></i> Publish Game</h2>
+                <button class="close-btn" id="modalCloseBtn" title="Close"><i data-lucide="x"></i></button>
             </div>
             <div class="modal-body">
                 <p>Select which classes should have access to this game:</p>
@@ -118,8 +116,8 @@ function binarySearch(arr, target) {
                 </label>
             </div>
             <div class="modal-footer">
-                <button class="btn-secondary" id="modalCancelBtn">Cancel</button>
-                <button class="btn-primary" id="modalConfirmBtn">Publish Game</button>
+                <button class="btn-secondary" id="modalCancelBtn"><i data-lucide="x-circle"></i> Cancel</button>
+                <button class="btn-primary" id="modalConfirmBtn"><i data-lucide="upload-cloud"></i> Publish Game</button>
             </div>
         </div>
     </div>

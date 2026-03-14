@@ -840,10 +840,12 @@
             background: var(--accent-lo);
             border: 1px solid var(--accent-bdr);
             display: flex; align-items: center; justify-content: center;
-            font-size: 22px;
+            color: var(--accent);
             position: relative; z-index: 1;
             transition: transform .2s;
         }
+
+        .template-icon svg { width: 22px; height: 22px; }
 
         .game-type-card:hover .template-icon { transform: scale(1.08); }
 
@@ -1141,41 +1143,42 @@
 
                 <div class="game-types-grid">
                     <a href="faculty-create-quiz.html" class="game-type-card">
-                        <div class="template-icon">❓</div>
+                        <div class="template-icon"><i data-lucide="help-circle"></i></div>
                         <h3>Quiz</h3>
                         <p>Multiple choice with instant feedback</p>
                     </a>
                     <a href="faculty-create-sql.html" class="game-type-card">
-                        <div class="template-icon">🕸️</div>
+                        <div class="template-icon"><i data-lucide="database"></i></div>
                         <h3>SQL Builder</h3>
                         <p>Build and validate SQL queries</p>
                     </a>
                     <a href="faculty-create-unjumble.html" class="game-type-card">
-                        <div class="template-icon">🧩</div>
+                        <div class="template-icon"><i data-lucide="shuffle"></i></div>
                         <h3>Code Unjumble</h3>
                         <p>Reorder code lines to fix logic</p>
                     </a>
                     <a href="faculty-create-fillin.html" class="game-type-card">
-                        <div class="template-icon">⌨️</div>
+                        <div class="template-icon"><i data-lucide="keyboard"></i></div>
                         <h3>Syntax Fill-in</h3>
                         <p>Fill in missing code syntax</p>
                     </a>
                     <a href="faculty-create-debug.html" class="game-type-card">
-                        <div class="template-icon">🐛</div>
+                        <div class="template-icon"><i data-lucide="bug"></i></div>
                         <h3>Bug Hunt</h3>
                         <p>Find and fix bugs in code</p>
                     </a>
                     <a href="faculty-create-sorter.html" class="game-type-card">
-                        <div class="template-icon">🗂️</div>
+                        <div class="template-icon"><i data-lucide="layers-3"></i></div>
                         <h3>Tech Sorter</h3>
                         <p>Categorize technologies correctly</p>
                     </a>
                     <a href="faculty-create-scenario.html" class="game-type-card">
-                        <div class="template-icon">🎭</div>
+                        <div class="template-icon"><i data-lucide="drama"></i></div>
                         <h3>Scenario</h3>
                         <p>Interactive branching storylines</p>
                     </a>
                 </div>
+
 
             </div>
         </div>
