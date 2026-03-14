@@ -689,26 +689,46 @@
         let ratings = { codeQuality: 0, functionality: 0, documentation: 0 };
 
         async function startReview(id) {
+            console.log('🚀 Starting review for ID:', id);
             currentReviewId = id;
             const token = localStorage.getItem('token');
             const modal = document.getElementById('assessmentModal');
             
+            if (!modal) {
+                console.error('❌ assessmentModal element not found!');
+                return;
+            }
+
             try {
                 const res = await fetch(`/api/peer-review/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
-                if (!res.ok) throw new Error('Failed to fetch review details');
+                if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
                 const data = await res.json();
+                console.log('📦 Review data received:', data);
+                
                 const r = data.review;
+                if (!r) throw new Error('No review data found in response');
 
-                // Fill modal
-                document.getElementById('modalProjectName').textContent = r.submissionId.projectName;
-                document.getElementById('modalReviewee').textContent = `By ${r.revieweeId.name} • Assigned ${new Date(r.createdAt).toLocaleDateString()}`;
-                document.getElementById('modalDescription').textContent = r.submissionId.description;
-                document.getElementById('modalGithub').href = r.submissionId.githubRepoUrl;
-                document.getElementById('modalDemo').href = r.submissionId.liveDemoUrl || '#';
-                document.getElementById('modalDemo').style.display = r.submissionId.liveDemoUrl ? 'flex' : 'none';
+                // Fill modal with safety checks
+                const projName = r.submissionId?.projectName || 'Project Submission';
+                const revieweeName = r.revieweeId?.name || 'Unknown Student';
+                const desc = r.submissionId?.description || 'No description provided.';
+                
+                document.getElementById('modalProjectName').textContent = projName;
+                document.getElementById('modalReviewee').textContent = `By ${revieweeName} • Assigned ${new Date(r.createdAt).toLocaleDateString()}`;
+                document.getElementById('modalDescription').textContent = desc;
+                
+                const githubBtn = document.getElementById('modalGithub');
+                const demoBtn = document.getElementById('modalDemo');
+                
+                if (githubBtn) githubBtn.href = r.submissionId?.githubRepoUrl || '#';
+                
+                if (demoBtn) {
+                    demoBtn.href = r.submissionId?.liveDemoUrl || '#';
+                    demoBtn.style.display = r.submissionId?.liveDemoUrl ? 'flex' : 'none';
+                }
 
                 // Reset ratings and form
                 ratings = { codeQuality: 0, functionality: 0, documentation: 0 };
@@ -717,10 +737,11 @@
                 document.getElementById('modalImprovements').value = '';
 
                 modal.classList.add('active');
+                console.log('✨ Modal opened successfully');
                 if (window.lucide) window.lucide.createIcons();
             } catch (e) {
-                console.error(e);
-                alert('Failed to load review details');
+                console.error('💥 Error in startReview:', e);
+                alert('Failed to load review details. Check console for details.');
             }
         }
 
@@ -729,25 +750,27 @@
             currentReviewId = null;
         }
 
-        // Handle star interactions
-        document.querySelectorAll('.rating-stars').forEach(group => {
-            const category = group.getAttribute('data-category');
-            const stars = group.querySelectorAll('.star-box');
-            
-            stars.forEach(star => {
-                star.onclick = () => {
-                    const val = parseInt(star.getAttribute('data-value'));
-                    ratings[category] = val;
-                    
-                    // Update UI
-                    stars.forEach(s => {
-                        const sVal = parseInt(s.getAttribute('data-value'));
-                        if (sVal <= val) s.classList.add('active');
-                        else s.classList.remove('active');
-                    });
-                };
+        // Initialize star interactions
+        function initStarRatings() {
+            document.querySelectorAll('.rating-stars').forEach(group => {
+                const category = group.getAttribute('data-category');
+                const stars = group.querySelectorAll('.star-box');
+                
+                stars.forEach(star => {
+                    star.onclick = () => {
+                        const val = parseInt(star.getAttribute('data-value'));
+                        ratings[category] = val;
+                        
+                        // Update UI
+                        stars.forEach(s => {
+                            const sVal = parseInt(s.getAttribute('data-value'));
+                            if (sVal <= val) s.classList.add('active');
+                            else s.classList.remove('active');
+                        });
+                    };
+                });
             });
-        });
+        }
 
         async function submitAssessment() {
             if (!currentReviewId) return;
@@ -799,6 +822,7 @@
         window.onload = () => {
             if (window.lucide) window.lucide.createIcons();
             loadReviews();
+            initStarRatings();
 
             // Profile dropdown logic
             const profileToggle = document.getElementById('profileToggle');
