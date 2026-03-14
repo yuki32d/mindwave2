@@ -195,9 +195,9 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
                 ];
             }
 
-            // role filter: 'faculty' maps to orgRole faculty/admin/owner, 'student' to student
+            // role filter: 'faculty' maps to faculty/admin (excluding owner), 'student' to student
             if (role === 'faculty') {
-                query.orgRole = { $in: ['faculty', 'admin', 'owner'] };
+                query.orgRole = { $in: ['faculty', 'admin'] };
             } else if (role === 'student') {
                 query.orgRole = 'student';
             }
