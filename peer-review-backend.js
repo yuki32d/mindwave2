@@ -184,8 +184,14 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
         try {
             const { q, role } = req.query;
             
+            // Get full user to have organizationId (not in token)
+            const currentUser = await User.findById(req.user.sub);
+            if (!currentUser || !currentUser.organizationId) {
+                return res.json({ users: [] });
+            }
+
             const query = {
-                organizationId: req.user.organizationId
+                organizationId: currentUser.organizationId
             };
 
             if (q && q.trim().length >= 1) {
