@@ -43,19 +43,20 @@
     .layout-5 #videoGrid,.layout-6 #videoGrid{grid-template-columns:repeat(3,1fr)}
     
     /* ── PRESENTATION MODE ── */
-    .present-mode #videoArea { flex: 0 0 260px; }
+    #presentationArea { flex: 1; min-width: 0; background: #000; border-radius: 14px; position: relative; overflow: hidden; display: none; border: 1px solid rgba(255,255,255,.05); margin: .75rem .37rem .75rem .75rem; }
+    #presentationArea video { width: 100%; height: 100%; object-fit: contain; }
+    .video-area { flex: 1; display: flex; flex-direction: column; padding: .75rem; gap: .75rem; overflow: hidden; min-width: 0; }
+    
+    .present-mode #presentationArea { display: block; }
+    .present-mode #videoArea { flex: 0 0 280px; padding-left: 0; }
     .present-mode #videoGrid { grid-template-columns: 1fr !important; grid-template-rows: none !important; overflow-y: auto; display: flex; flex-direction: column; }
     .present-mode .vtile { height: 160px; flex-shrink: 0; }
-    
-    #presentationArea { flex: 1; min-width: 0; background: #000; border-radius: 14px; position: relative; overflow: hidden; display: none; border: 1px solid rgba(255,255,255,.05); }
-    #presentationArea video { width: 100%; height: 100%; object-fit: contain; }
-    .present-mode #presentationArea { display: block; }
     
     .pres-label { position: absolute; top: .8rem; left: 1rem; background: rgba(0,0,0,.6); backdrop-filter: blur(8px); padding: .35rem .75rem; border-radius: 8px; font-size: .72rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: .5rem; border: 1px solid rgba(255,255,255,.1); }
     .pres-label i { color: #d08000; width: 14px; height: 14px; }
 
     /* ── TILE ── */
-    .vtile{background:#141625;border-radius:14px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;border:2px solid transparent;transition:border-color .25s}
+    .vtile{background:#141625;border-radius:14px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;border:2px solid transparent;transition:all .25s; aspect-ratio:16/9; min-height:140px; width:100%; }
     .vtile.speaking{border-color:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.15)}
     .vtile video{width:100%;height:100%;object-fit:cover;display:none}
     .vtile-avatar{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:#fff}
@@ -705,7 +706,7 @@
       track.attach(video);
       label.textContent = (p ? (p.name || p.identity) : 'Someone') + ' is presenting';
       body.classList.add('present-mode');
-      if (panelOpen) togglePanel(); // Auto-close panel
+      if (panelOpen) togglePanel(); 
     } else {
       video.srcObject = null;
       body.classList.remove('present-mode');
