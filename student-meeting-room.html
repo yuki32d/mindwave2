@@ -279,14 +279,8 @@
 
       room.on(LivekitClient.RoomEvent.ParticipantConnected, onParticipantConnected);
       room.on(LivekitClient.RoomEvent.ParticipantDisconnected, onParticipantDisconnected);
-      room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, pub, p) => {
-        if (track.source === 'screen_share') togglePresentation(track, p, true);
-        else attachTrackToTile(null, track, p); // Null tile check in function
-      });
-      room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track, pub, p) => {
-        if (track.source === 'screen_share') togglePresentation(null, null, false);
-        else updateTileMedia(p);
-      });
+      room.on(LivekitClient.RoomEvent.TrackSubscribed, onTrackSubscribed);
+      room.on(LivekitClient.RoomEvent.TrackUnsubscribed, onTrackUnsubscribed);
       room.on(LivekitClient.RoomEvent.TrackMuted, (pub, p) => updateTileMedia(p));
       room.on(LivekitClient.RoomEvent.TrackUnmuted, (pub, p) => updateTileMedia(p));
       room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, onSpeakersChanged);
@@ -484,7 +478,10 @@
       const grid = document.getElementById('videoGrid');
       const tileId = 'tile-'+rp.identity;
       if(document.getElementById(tileId)) return;
-      const tile = makeTile(rp.identity, rp.name||rp.identity);
+      
+      const meta = tryParseMeta(rp.metadata);
+      const isHost = meta && meta.role === 'faculty';
+      const tile = makeTile(rp.identity, rp.name||rp.identity, isHost);
       tile.id = tileId;
       grid.appendChild(tile);
       attachTrackToTile(tile, null, rp);
@@ -495,7 +492,7 @@
       room.remoteParticipants.forEach(rp => renderTile(rp));
     }
 
-    function makeTile(identity, label) {
+    function makeTile(identity, label, isHost) {
       const cleaned = (label||'?').split(' (')[0];
       const initials = cleaned.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
       const hue = [...(identity || 'x')].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
@@ -504,6 +501,7 @@
       tile.innerHTML = `
         <div class="vtile-avatar" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue+40},55%,35%)); display:flex;">${initials}</div>
         <video autoplay playsinline style="display:none"></video>
+        ${isHost ? '<div class="vtile-host">HOST</div>' : ''}
         <div class="vtile-label"><span>${label}</span></div>
       `;
       return tile;
@@ -518,7 +516,9 @@
       // Video
       rp.videoTrackPublications.forEach(pub => {
         if(pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) {
-          pub.track.attach(vid); hasVid = true;
+          if (pub.track.source === 'camera') {
+            pub.track.attach(vid); hasVid = true;
+          }
         }
       });
 
@@ -540,7 +540,9 @@
       const av = tile.querySelector('.vtile-avatar');
       let hasVideo = false;
       rp.videoTrackPublications.forEach(pub => { 
-        if(pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) hasVideo = true; 
+        if(pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) {
+          if (pub.track.source === 'camera') hasVideo = true;
+        }
       });
       vid.style.display = hasVideo ? 'block' : 'none';
       av.style.display  = hasVideo ? 'none'  : 'flex';

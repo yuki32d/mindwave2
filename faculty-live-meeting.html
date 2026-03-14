@@ -595,10 +595,10 @@
     div.className = 'vtile';
     div.id = 'tile-' + identity;
     div.innerHTML = `
-      <div class="vtile-avatar" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue+40},55%,35%)); display:flex;">${initials}</div>
-      <video autoplay playsinline style="display:none"></video>
-      ${isHost ? '<div class="vtile-host">HOST</div>' : ''}
-      <div class="vtile-label"><span>${label}</span></div>
+    <div class="vtile-avatar" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue+40},55%,35%)); display:flex;">${initials}</div>
+    <video autoplay playsinline style="display:none"></video>
+    ${isHost ? '<div class="vtile-host">HOST</div>' : ''}
+    <div class="vtile-label"><span>${label}</span></div>
     `;
     return div;
   }
@@ -650,7 +650,9 @@
     // Video
     p.videoTrackPublications.forEach(pub => {
       if (pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) {
-        pub.track.attach(vid); hasVid = true;
+        if (pub.track.source === 'camera') {
+          pub.track.attach(vid); hasVid = true;
+        }
       }
     });
 
