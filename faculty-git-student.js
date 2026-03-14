@@ -88,10 +88,10 @@ function renderProjects(projects) {
 
     if (projects.length === 0) {
         container.innerHTML = `
-            <div style="text-align: center; padding: 48px; color: var(--text-muted);">
-                <div style="font-size: 48px; margin-bottom: 16px;">📦</div>
-                <h3>No Projects Found</h3>
-                <p>No projects match the current filters.</p>
+            <div style="text-align: center; padding: 60px; color: var(--muted); border: 1px dashed var(--border); border-radius: 20px;">
+                <div style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;">📦</div>
+                <h3 style="margin-bottom: 8px;">No Projects Found</h3>
+                <p style="font-size: 13px;">No student submissions match your current filters.</p>
             </div>
         `;
         return;
@@ -99,50 +99,51 @@ function renderProjects(projects) {
 
     container.innerHTML = projects.map(project => `
         <div class="project-card">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
-                <div style="flex: 1;">
-                    <h3 style="margin: 0 0 8px; font-size: 20px;">${escapeHtml(project.projectName)}</h3>
-                    <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">
-                        👤 ${escapeHtml(project.studentName)} • ${escapeHtml(project.studentEmail)}
-                    </div>
-                    <span class="status-badge status-${project.status}">${formatStatus(project.status)}</span>
+            <div class="p-info">
+                <h3>${escapeHtml(project.projectName)}</h3>
+                <div class="p-meta">
+                    <span><i data-lucide="user"></i>${escapeHtml(project.studentName)}</span>
+                    <span><i data-lucide="mail"></i>${escapeHtml(project.studentEmail)}</span>
+                    <span class="status-badge status-${project.status}">${formatStatusTag(project.status)}</span>
                     ${project.grade !== null && project.grade !== undefined ? `
-                        <span style="margin-left: 8px; font-weight: 600; color: ${getGradeColor(project.grade)};">
+                        <span style="font-weight: 800; color: ${getGradeColor(project.grade)}; font-family: var(--mono); background: var(--bg); padding: 2px 8px; border-radius: 5px;">
                             ${project.grade}/100
                         </span>
                     ` : ''}
                 </div>
-            </div>
-
-            <p style="color: var(--text-muted); margin-bottom: 16px;">${escapeHtml(project.description)}</p>
-
-            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
-                <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" class="link-btn">
-                    🐙 GitHub Repo
-                </a>
-                ${project.liveDemoUrl ? `
-                    <a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" class="link-btn">
-                        🚀 Live Demo
+                <p style="color: var(--muted); font-size: 13px; margin: 12px 0;">${escapeHtml(project.description)}</p>
+                <div style="display: flex; gap: 15px;">
+                    <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" class="link-btn">
+                        <i data-lucide="github"></i>GitHub Repository
                     </a>
-                ` : ''}
-                <button class="review-btn open-review-btn" data-project-id="${project._id}">
-                    ${project.status === 'graded' ? '✏️ Edit Review' : '📝 Review & Grade'}
+                    ${project.liveDemoUrl ? `
+                        <a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" class="link-btn">
+                            <i data-lucide="external-link"></i>Live Demo
+                        </a>
+                    ` : ''}
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
+                <button class="btn ${project.status === 'graded' ? 'btn-ghost' : 'btn-primary'} open-review-btn" data-project-id="${project._id}">
+                    <i data-lucide="${project.status === 'graded' ? 'edit-2' : 'clipboard-check'}"></i>
+                    ${project.status === 'graded' ? 'Edit Review' : 'Review & Grade'}
                 </button>
+                <div style="font-size: 10px; color: var(--muted); font-family: var(--mono);">
+                    Submitted ${formatDateShort(project.submittedAt)}
+                </div>
             </div>
 
             ${project.feedback ? `
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 12px; border-left: 3px solid #0f62fe; margin-top: 16px;">
-                    <div style="font-weight: 600; margin-bottom: 8px; color: #0f62fe;">Your Feedback</div>
-                    <p style="margin: 0; color: var(--text-muted);">${escapeHtml(project.feedback)}</p>
+                <div style="grid-column: 1 / -1; background: var(--bg); padding: 14px; border-radius: 10px; border-left: 3px solid var(--accent); margin-top: 5px;">
+                    <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); margin-bottom: 5px;">Faculty Feedback</div>
+                    <p style="margin: 0; color: var(--text); font-size: 12px;">${escapeHtml(project.feedback)}</p>
                 </div>
             ` : ''}
-
-            <div style="margin-top: 16px; font-size: 12px; color: var(--text-muted);">
-                Submitted ${formatDate(project.submittedAt)}
-                ${project.reviewedAt ? ` • Reviewed ${formatDate(project.reviewedAt)}` : ''}
-            </div>
         </div>
     `).join('');
+
+    // Initialize Lucide icons
+    if (window.lucide) window.lucide.createIcons();
 
     // Add event listeners to dynamically created buttons
     document.querySelectorAll('.open-review-btn').forEach(btn => {
@@ -180,50 +181,59 @@ function showReviewModal() {
 
     document.getElementById('modalProjectName').textContent = project.projectName;
     document.getElementById('modalContent').innerHTML = `
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
-            <h3 style="margin-top: 0;">Student Information</h3>
-            <p><strong>Name:</strong> ${escapeHtml(project.studentName)}</p>
-            <p><strong>Email:</strong> ${escapeHtml(project.studentEmail)}</p>
-            <p><strong>Submitted:</strong> ${formatDate(project.submittedAt)}</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <div style="background: var(--bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="user"></i>Student Information
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between;"><span style="color: var(--muted);">Name:</span> <span style="font-weight: 700;">${escapeHtml(project.studentName)}</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span style="color: var(--muted);">Email:</span> <span style="font-weight: 700;">${escapeHtml(project.studentEmail)}</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span style="color: var(--muted);">Submitted:</span> <span style="font-weight: 700;">${formatDate(project.submittedAt)}</span></div>
+                </div>
+            </div>
+            <div style="background: var(--bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                 <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="info"></i>Project Context
+                </div>
+                <p style="color: var(--text); font-size: 13px; line-height: 1.6;">${escapeHtml(project.description)}</p>
+                <div style="display: flex; gap: 15px; margin-top: 15px;">
+                    <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" class="link-btn">
+                        <i data-lucide="github"></i>Repository
+                    </a>
+                    ${project.liveDemoUrl ? `
+                        <a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" class="link-btn">
+                            <i data-lucide="external-link"></i>Demo
+                        </a>
+                    ` : ''}
+                </div>
+            </div>
         </div>
 
-        <div style="margin-bottom: 24px;">
-            <h3>Project Description</h3>
-            <p style="color: var(--text-muted);">${escapeHtml(project.description)}</p>
-        </div>
+        <form id="gradeForm" style="border-top: 1px solid var(--border); padding-top: 24px;">
+            <div style="display: grid; grid-template-columns: 180px 1fr; gap: 24px;">
+                <div class="form-group">
+                    <label for="gradeInput">Grade (0-100)</label>
+                    <input type="number" id="gradeInput" min="0" max="100" required 
+                           value="${project.grade !== null && project.grade !== undefined ? project.grade : ''}"
+                           placeholder="85">
+                    <p style="font-size: 10px; color: var(--muted); margin-top: 6px;">Evaluation score based on rubric.</p>
+                </div>
 
-        <div style="display: flex; gap: 12px; margin-bottom: 24px;">
-            <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" class="link-btn">
-                🐙 View GitHub Repository
-            </a>
-            ${project.liveDemoUrl ? `
-                <a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" class="link-btn">
-                    🚀 Open Live Demo
-                </a>
-            ` : ''}
-        </div>
-
-        <form id="gradeForm" style="background: rgba(255, 255, 255, 0.05); padding: 24px; border-radius: 12px;">
-            <h3 style="margin-top: 0;">Grade & Feedback</h3>
-            
-            <div class="form-group">
-                <label for="gradeInput">Grade (0-100) *</label>
-                <input type="number" id="gradeInput" min="0" max="100" required 
-                       value="${project.grade !== null && project.grade !== undefined ? project.grade : ''}"
-                       placeholder="Enter grade">
+                <div class="form-group">
+                    <label for="feedbackInput">Detailed Feedback</label>
+                    <textarea id="feedbackInput" required placeholder="Provide actionable feedback for the student..." style="min-height: 120px;">${project.feedback || ''}</textarea>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="feedbackInput">Feedback *</label>
-                <textarea id="feedbackInput" required placeholder="Provide detailed feedback to the student...">${project.feedback || ''}</textarea>
-            </div>
-
-            <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button type="submit" class="review-btn">💾 Submit Review</button>
-                <button type="button" class="link-btn" id="cancelReviewBtn">Cancel</button>
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+                <button type="button" class="btn btn-ghost" id="cancelReviewBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i data-lucide="check"></i>Submit Final Grade</button>
             </div>
         </form>
     `;
+    
+    if(window.lucide) window.lucide.createIcons();
 
     // Handle form submission
     document.getElementById('gradeForm').addEventListener('submit', async (e) => {
@@ -291,16 +301,22 @@ function viewDemo(url, projectName) {
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 1400px; width: 95%;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 style="margin: 0;">${escapeHtml(projectName)} - Live Demo</h2>
-                <button class="close-demo-btn" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
+                <h2 style="margin: 0; font-size: 20px;">${escapeHtml(projectName)} — Live Interactive Preview</h2>
+                <button class="close-demo-btn close-btn" style="color: var(--text);"><i data-lucide="x"></i></button>
             </div>
-            <iframe src="${escapeHtml(url)}" class="demo-preview" style="height: 600px;" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-            <div style="margin-top: 16px;">
-                <a href="${escapeHtml(url)}" target="_blank" class="link-btn">🔗 Open in New Tab</a>
+            <iframe src="${escapeHtml(url)}" class="demo-preview" style="height: 65vh; background: #fff;" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+                <a href="${escapeHtml(url)}" target="_blank" class="btn btn-ghost"><i data-lucide="external-link"></i>Full Tab</a>
+                <button class="btn btn-primary close-demo-btn">Dismiss Preview</button>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
+
+    if(window.lucide) window.lucide.createIcons();
+
+    // Add event listener to close buttons
+    modal.querySelectorAll('.close-demo-btn').forEach(b => b.addEventListener('click', () => modal.remove()));
 
     // Add event listener to close button
     modal.querySelector('.close-demo-btn').addEventListener('click', () => modal.remove());
@@ -315,9 +331,18 @@ function viewDemo(url, projectName) {
 // Helper functions
 function formatStatus(status) {
     const statusMap = {
-        'pending': '⏳ Pending Review',
+        'pending': '⏳ Pending',
         'reviewed': '👀 Reviewed',
         'graded': '✅ Graded'
+    };
+    return statusMap[status] || status;
+}
+
+function formatStatusTag(status) {
+    const statusMap = {
+        'pending': 'Pending',
+        'reviewed': 'Reviewed',
+        'graded': 'Graded'
     };
     return statusMap[status] || status;
 }
@@ -330,6 +355,15 @@ function formatDate(dateString) {
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
+    });
+}
+
+function formatDateShort(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
     });
 }
 
