@@ -451,6 +451,102 @@
             .topbar { padding: 0 16px; }
             .nav-btn { padding: 8px 10px; font-size: 12px; }
         }
+
+        /* ── TOAST NOTIFICATIONS ── */
+        .toast-container {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .toast {
+            min-width: 340px;
+            max-width: 450px;
+            background: rgba(22, 27, 39, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px 20px;
+            color: var(--text);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            animation: toastSlideIn 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            pointer-events: all;
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-theme="light"] .toast {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .toast.success { border-left: 4px solid var(--green); }
+        .toast.error { border-left: 4px solid var(--red); }
+        .toast.info { border-left: 4px solid var(--blue); }
+        .toast.warning { border-left: 4px solid var(--accent); }
+
+        .toast-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+        }
+
+        .toast.success .toast-icon { color: var(--green); background: rgba(22, 163, 74, 0.1); }
+        .toast.error .toast-icon { color: var(--red); background: rgba(220, 38, 38, 0.1); }
+        .toast.info .toast-icon { color: var(--blue); background: rgba(37, 99, 235, 0.1); }
+        .toast.warning .toast-icon { color: var(--accent); background: var(--accent-lo); }
+
+        .toast-content { flex: 1; }
+        .toast-title { font-weight: 800; font-size: 14px; margin-bottom: 2px; }
+        .toast-msg { font-size: 13px; color: var(--muted); line-height: 1.4; }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .toast-close:hover { color: var(--text); }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent);
+            width: 100%;
+            transform-origin: left;
+            opacity: 0.6;
+        }
+
+        @keyframes toastSlideIn {
+            from { transform: translateX(50px) translateY(20px); opacity: 0; }
+            to { transform: translateX(0) translateY(0); opacity: 1; }
+        }
+
+        @keyframes toastSlideOut {
+            from { transform: translateX(0) scale(1); opacity: 1; }
+            to { transform: translateX(20px); opacity: 0; }
+        }
     </style>
 </head>
 
@@ -615,8 +711,86 @@
         </main>
     </div>
 
+    <div id="toastContainer" class="toast-container"></div>
+
     <script src="role-page.js"></script>
     <script>
+        // ── PROFESSIONAL TOAST SYSTEM ──
+        window.alert = function(message) {
+            showToast(message);
+        };
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast`;
+            
+            let icon = 'info-circle';
+            let title = 'Notification';
+            
+            // Auto-detect type based on symbols or keywords
+            const msg = message.toString();
+            if (msg.includes('✅') || msg.toLowerCase().includes('success')) { 
+                type = 'success'; icon = 'check-circle'; title = 'Success'; message = msg.replace('✅', '').trim(); 
+            } else if (msg.includes('❌') || msg.toLowerCase().includes('fail') || msg.toLowerCase().includes('error')) { 
+                type = 'error'; icon = 'exclamation-circle'; title = 'System Error'; message = msg.replace('❌', '').trim(); 
+            } else if (msg.includes('⚠️') || msg.toLowerCase().includes('warning')) {
+                type = 'warning'; icon = 'exclamation-triangle'; title = 'Warning'; message = msg.replace('⚠️', '').trim();
+            }
+            
+            toast.classList.add(type);
+
+            toast.innerHTML = `
+                <div class="toast-icon"><i class="fas fa-${icon}"></i></div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-msg">${message}</div>
+                </div>
+                <button class="toast-close"><i class="fas fa-times"></i></button>
+                <div class="toast-progress"></div>
+            `;
+
+            container.appendChild(toast);
+
+            // Progress bar animation
+            const progress = toast.querySelector('.toast-progress');
+            progress.animate([
+                { transform: 'scaleX(1)' },
+                { transform: 'scaleX(0)' }
+            ], { duration: 5000, easing: 'linear' });
+
+            const timer = setTimeout(() => hideToast(toast), 5000);
+
+            toast.querySelector('.toast-close').onclick = () => {
+                clearTimeout(timer);
+                hideToast(toast);
+            };
+
+            // Audio feedback (subtle click)
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                if (context.state === 'running') {
+                    const osc = context.createOscillator();
+                    const gain = context.createGain();
+                    osc.connect(gain);
+                    gain.connect(context.destination);
+                    gain.gain.setValueAtTime(0, context.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.02, context.currentTime + 0.01);
+                    gain.gain.linearRampToValueAtTime(0, context.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(800, context.currentTime);
+                    osc.start();
+                    osc.stop(context.currentTime + 0.1);
+                }
+            } catch(e) {}
+        }
+
+        function hideToast(toast) {
+            toast.style.animation = 'toastSlideOut 0.3s forwards cubic-bezier(0.19, 1, 0.22, 1)';
+            setTimeout(() => toast.remove(), 300);
+        }
+
         // Tab switching logic
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
