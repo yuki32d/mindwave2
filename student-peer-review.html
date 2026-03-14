@@ -253,7 +253,33 @@
         </div>
     </div>
 
+    <!-- ── LOGOUT MODAL ── -->
+    <div id="logoutModal" class="mw-logout-overlay">
+        <div class="mw-logout-modal">
+            <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
+            <h3 class="mw-logout-title">Sign out?</h3>
+            <p class="mw-logout-sub">You'll need to log back in to access your dashboard.</p>
+            <div class="mw-logout-actions">
+                <button class="mw-logout-cancel"
+                    onclick="document.getElementById('logoutModal').classList.remove('active')">Cancel</button>
+                <button class="mw-logout-confirm" onclick="doLogout()">
+                    <i data-lucide="log-out"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Auth Logic
+        function doLogout() {
+            ['token', 'mindwave_token', 'email', 'firstName', 'lastName', 'role', 'userId'].forEach(k => localStorage.removeItem(k));
+            sessionStorage.clear();
+            window.location.replace('marketing-site/student-login.html');
+        }
+        function performLogout() {
+            document.getElementById('logoutModal').classList.add('active');
+        }
+
         // Theme logic
         const root = document.documentElement;
         const themeBtn = document.getElementById('themeToggle');
@@ -328,8 +354,13 @@
         window.onload = () => {
             if (window.lucide) window.lucide.createIcons();
             loadReviews();
+
+            // Logout listener
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', performLogout);
         };
     </script>
+    <script src="sidebar.js"></script>
 </body>
 
 </html>
