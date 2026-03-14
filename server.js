@@ -1733,7 +1733,8 @@ app.post("/api/signup", authLimiter, async (req, res) => {
       displayName: capitalizedName,
       email: email.toLowerCase(),
       password: hashed,
-      role: safeRole
+      role: safeRole,
+      lastActive: new Date()
     });
 
     const token = signToken(user);
@@ -1790,6 +1791,10 @@ app.post("/api/login", authLimiter, async (req, res) => {
         message: "Your account has been deactivated. Please contact administration for assistance."
       });
     }
+
+    // Update activity on login
+    user.lastActive = new Date();
+    await user.save();
 
     const token = signToken(user);
     res
