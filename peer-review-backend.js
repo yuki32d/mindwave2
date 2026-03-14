@@ -183,15 +183,17 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
     app.get('/api/users/search', authMiddleware, async (req, res) => {
         try {
             const { q, role } = req.query;
-            if (!q || q.length < 2) return res.json({ users: [] });
-
+            
             const query = {
-                organizationId: req.user.organizationId,
-                $or: [
-                    { name: { $regex: q, $options: 'i' } },
-                    { email: { $regex: q, $options: 'i' } }
-                ]
+                organizationId: req.user.organizationId
             };
+
+            if (q && q.trim().length >= 1) {
+                query.$or = [
+                    { name: { $regex: q.trim(), $options: 'i' } },
+                    { email: { $regex: q.trim(), $options: 'i' } }
+                ];
+            }
 
             // role filter: 'faculty' maps to orgRole faculty/admin/owner, 'student' to student
             if (role === 'faculty') {

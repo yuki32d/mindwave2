@@ -516,24 +516,27 @@ function setupReviewerTypeCards() {
 
 function setupReviewerSearch() {
     const title = document.getElementById('step3Label');
-    title.textContent = wizardState.reviewerType === 'faculty' ? 'Step 3: Select Faculty Member' : 'Step 3: Select Student Group';
+    const role = wizardState.reviewerType; // 'faculty' or 'student'
+    title.textContent = role === 'faculty' ? 'Step 3: Select Faculty Member' : 'Step 3: Select Student Group';
     
     const searchInput = document.getElementById('reviewerSearch');
+    const listContainer = document.getElementById('reviewerResultsList');
+
+    // Initial load: show first 10
+    fetchReviewers('', role);
+    
     searchInput.oninput = async (e) => {
-        const query = e.target.value.toLowerCase();
-        if (query.length < 2) {
-            document.getElementById('reviewerResultsList').style.display = 'none';
-            return;
-        }
-        
+        const query = e.target.value;
+        fetchReviewers(query, role);
+    };
+
+    async function fetchReviewers(query, role) {
         try {
-            const role = wizardState.reviewerType; // 'faculty' or 'student'
             const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}&role=${role}`, {
                 credentials: 'include'
             });
             const data = await response.json();
             
-            const listContainer = document.getElementById('reviewerResultsList');
             if (data.users && data.users.length > 0) {
                 listContainer.innerHTML = data.users.map(u => `
                     <div class="reviewer-result-item" onclick="selectReviewer('${u.id}', '${escapeHtml(u.name)}', '${escapeHtml(u.email)}')">
@@ -552,13 +555,14 @@ function setupReviewerSearch() {
         } catch (error) {
             console.error('Search error:', error);
         }
-    };
+    }
 
     document.getElementById('clearReviewer').onclick = () => {
         wizardState.selectedReviewer = null;
         document.getElementById('selectedReviewerDisplay').style.display = 'none';
         document.getElementById('reviewerSearch').style.display = 'block';
         document.getElementById('reviewerSearch').value = '';
+        fetchReviewers('', role); // Reload default list
     };
 }
 
