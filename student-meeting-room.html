@@ -68,12 +68,12 @@
     /* Tile */
     .vtile{background:#141625;border-radius:14px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;border:2px solid transparent;transition:all .2s; aspect-ratio:16/9; min-height:140px; width:100%; }
     .vtile.speaking{border-color:#22c55e}
-    .vtile video{width:100%;height:100%;object-fit:cover;display:none}
-    .vtile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:#fff}
-    .vtile-label{position:absolute;bottom:.6rem;left:.7rem;display:flex;align-items:center;gap:.4rem;font-size:.78rem;font-weight:600;color:#fff;background:rgba(0,0,0,.55);padding:.25rem .6rem;border-radius:6px;backdrop-filter:blur(4px)}
+    .vtile video{width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0;z-index:1}
+    .vtile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:#fff;position:absolute;z-index:1}
+    .vtile-label{position:absolute;bottom:.6rem;left:.7rem;display:flex;align-items:center;gap:.4rem;font-size:.78rem;font-weight:600;color:#fff;background:rgba(0,0,0,.55);padding:.25rem .6rem;border-radius:6px;backdrop-filter:blur(4px);z-index:10}
     .vtile-label svg{width:12px;height:12px}
-    .vtile-host{position:absolute;top:.6rem;left:.7rem;font-size:.66rem;font-weight:700;padding:.18rem .5rem;border-radius:5px;background:rgba(208,128,0,.75);color:#fef3c7;z-index:5;line-height:1}
-    .vtile-muted{position:absolute;top:.6rem;right:.6rem;width:28px;height:28px;background:rgba(255,92,92,.85);border-radius:50%;display:flex;align-items:center;justify-content:center}
+    .vtile-host{position:absolute;top:.6rem;left:.7rem;font-size:.66rem;font-weight:700;padding:.18rem .5rem;border-radius:5px;background:rgba(208,128,0,.75);color:#fef3c7;z-index:10;line-height:1}
+    .vtile-muted{position:absolute;top:.6rem;right:.6rem;width:28px;height:28px;background:rgba(255,92,92,.85);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10}
     .vtile-muted svg{width:13px;height:13px;color:#fff}
 
     /* Chat + participants panel */
@@ -371,18 +371,15 @@
         togglePresentation(track, rp, true);
         return;
       }
-      const tile = document.getElementById('tile-'+rp.identity);
-      if(!tile) renderTile(rp); else attachTrackToTile(tile, track, rp);
+      syncAllTiles();
     }
 
     function onTrackUnsubscribed(track, pub, rp) {
       if (track.source === 'screen_share') {
         togglePresentation(null, null, false);
-        // Safety: Ensure tiles are restored if they were lost/hidden
-        setTimeout(() => { renderAllRemotes(); }, 100);
         return;
       }
-      updateTileMedia(rp);
+      syncAllTiles();
     }
 
     function onSpeakersChanged(speakers) {
@@ -464,13 +461,23 @@
     function renderLocalTile() {
       const grid = document.getElementById('videoGrid');
       const id = 'tile-local';
-      if(document.getElementById(id)) return;
-      const tile = makeTile('local', MY_NAME + ' (You)');
-      tile.id = id;
-      grid.appendChild(tile);
-      if(localVideo) {
-        const v = tile.querySelector('video');
-        if(v) { localVideo.attach(v); v.style.display='block'; tile.querySelector('.vtile-avatar').style.display='none'; }
+      let tile = document.getElementById(id);
+      if(!tile) {
+        tile = makeTile('local', MY_NAME + ' (You)');
+        tile.id = id;
+        grid.appendChild(tile);
+      }
+      const vid = tile.querySelector('video');
+      const av = tile.querySelector('.vtile-avatar');
+      if(localVideo && camOn) {
+        if (vid.srcObject !== localVideo.mediaStream) {
+          localVideo.attach(vid);
+        }
+        vid.style.display='block';
+        if(av) av.style.display='none';
+      } else {
+        vid.style.display='none';
+        if(av) av.style.display='flex';
       }
       updateGridLayout();
     }
@@ -490,6 +497,16 @@
       updateGridLayout();
     }
 
+    function syncAllTiles() {
+      renderLocalTile();
+      room.remoteParticipants.forEach(rp => {
+        const tid = 'tile-'+rp.identity;
+        if(!document.getElementById(tid)) renderTile(rp);
+        else updateTileMedia(rp);
+      });
+      updateGridLayout();
+    }
+
     function renderAllRemotes() {
       room.remoteParticipants.forEach(rp => renderTile(rp));
     }
@@ -502,7 +519,7 @@
       tile.className = 'vtile';
       tile.innerHTML = `
         <div class="vtile-avatar" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue+40},55%,35%)); display:flex; align-items:center; justify-content:center;">${initials}</div>
-        <video autoplay playsinline style="display:none"></video>
+        <video autoplay playsinline muted style="display:none"></video>
         ${isHost ? '<div class="vtile-host">HOST</div>' : ''}
         <div class="vtile-label"><span>${label}</span></div>
       `;
@@ -519,7 +536,10 @@
       rp.videoTrackPublications.forEach(pub => {
         if(pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) {
           if (pub.track.source === 'camera') {
-            pub.track.attach(vid); hasVid = true;
+            if (vid.srcObject !== pub.track.mediaStream) {
+              pub.track.attach(vid);
+            }
+            hasVid = true;
           }
         }
       });
@@ -543,7 +563,12 @@
       let hasVideo = false;
       rp.videoTrackPublications.forEach(pub => { 
         if(pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) {
-          if (pub.track.source === 'camera') hasVideo = true;
+          if (pub.track.source === 'camera') {
+            if (vid.srcObject !== pub.track.mediaStream) {
+              pub.track.attach(vid);
+            }
+            hasVideo = true;
+          }
         }
       });
       vid.style.display = hasVideo ? 'block' : 'none';
@@ -571,6 +596,7 @@
         body.classList.remove('present-mode');
       }
       updateGridLayout();
+      syncAllTiles();
     }
 
     //  Participants panel 
