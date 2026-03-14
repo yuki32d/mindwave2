@@ -170,12 +170,19 @@
                     <a href="student-live-meeting.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="video"></i></span> Web Conf
                     </a>
+                    <a href="student-reports.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
+                    </a>
+                    <a href="student-settings.html" class="mw-nav-item">
+                        <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
+                    </a>
                 </nav>
 
                 <div class="mw-divider"></div>
 
                 <nav class="mw-nav-section">
-                    <button id="signOutBtn" class="mw-nav-item" style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
+                    <button id="signOutBtn" class="mw-nav-item"
+                        style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:var(--red,#ff5c5c);">
                         <span class="mw-nav-icon"><i data-lucide="log-out"></i></span> Logout
                     </button>
                 </nav>
@@ -261,14 +268,14 @@
 
         // UI Logic
         async function loadReviews() {
-             const feed = document.getElementById('reviewFeed');
-             feed.innerHTML = '<div class="empty-state"><h3>Loading...</h3></div>';
-             
-             try {
+            const feed = document.getElementById('reviewFeed');
+            feed.innerHTML = '<div class="empty-state"><h3>Loading...</h3></div>';
+
+            try {
                 const endpoint = currentTab === 'pending' ? '/api/peer-review/pending' : '/api/peer-review/completed';
                 const res = await fetch(endpoint, { credentials: 'include' });
                 const data = await res.json();
-                
+
                 if (data.reviews && data.reviews.length > 0) {
                     feed.innerHTML = data.reviews.map(r => `
                         <div class="review-card">
@@ -295,10 +302,10 @@
                         </div>
                     `;
                 }
-             } catch (e) {
+            } catch (e) {
                 console.error(e);
                 feed.innerHTML = '<div class="empty-state"><h3>Failed to load reviews</h3></div>';
-             }
+            }
         }
 
         function startReview(id) {
@@ -312,4 +319,5 @@
         };
     </script>
 </body>
+
 </html>
