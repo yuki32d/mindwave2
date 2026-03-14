@@ -384,7 +384,9 @@
     room.on(LivekitClient.RoomEvent.ParticipantConnected, p => { renderAllParticipants(); addTile(p); showToast(p.name + ' joined', 'info'); });
     room.on(LivekitClient.RoomEvent.ParticipantDisconnected, p => { removeTile(p); renderAllParticipants(); });
     room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, pub, p) => { attachTrack(p); });
-    room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track, pub, p) => { updateTile(p); });
+    room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track, pub, p) => { attachTrack(p); });
+    room.on(LivekitClient.RoomEvent.TrackMuted, (pub, p) => { attachTrack(p); });
+    room.on(LivekitClient.RoomEvent.TrackUnmuted, (pub, p) => { attachTrack(p); });
     room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, speakers => {
       document.querySelectorAll('.vtile').forEach(t => t.classList.remove('speaking'));
       speakers.forEach(s => { const t = document.getElementById('tile-' + s.identity); if (t) t.classList.add('speaking'); });
@@ -450,7 +452,8 @@
 
   // ── TILES ──
   function makeTile(identity, label, isHost) {
-    const initials = (label || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const cleaned = (label || '?').split(' (')[0];
+    const initials = cleaned.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const hue = [...(identity || 'x')].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
     const div = document.createElement('div');
     div.className = 'vtile';
@@ -510,7 +513,7 @@
 
     // Video
     p.videoTrackPublications.forEach(pub => {
-      if (pub.isSubscribed && pub.track && pub.kind === 'video') {
+      if (pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) {
         pub.track.attach(vid); hasVid = true;
       }
     });

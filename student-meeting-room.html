@@ -265,6 +265,8 @@
       room.on(LivekitClient.RoomEvent.ParticipantDisconnected, onParticipantDisconnected);
       room.on(LivekitClient.RoomEvent.TrackSubscribed, onTrackSubscribed);
       room.on(LivekitClient.RoomEvent.TrackUnsubscribed, onTrackUnsubscribed);
+      room.on(LivekitClient.RoomEvent.TrackMuted, (pub, p) => updateTileMedia(p));
+      room.on(LivekitClient.RoomEvent.TrackUnmuted, (pub, p) => updateTileMedia(p));
       room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, onSpeakersChanged);
       room.on(LivekitClient.RoomEvent.DataReceived, onDataReceived);
       room.on(LivekitClient.RoomEvent.Disconnected, () => { window.location.href = 'student-live-meeting.html'; });
@@ -453,7 +455,8 @@
     }
 
     function makeTile(identity, label) {
-      const initials = (label||'?').replace(' (You)','').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const cleaned = (label||'?').split(' (')[0];
+      const initials = cleaned.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
       const tile = document.createElement('div');
       tile.className = 'vtile';
       tile.innerHTML = `
@@ -469,12 +472,16 @@
       const vid = tile.querySelector('video');
       const av = tile.querySelector('.vtile-avatar');
       
+      let hasVid = false;
       // Video
       rp.videoTrackPublications.forEach(pub => {
-        if(pub.isSubscribed && pub.track && pub.kind === 'video') {
-          pub.track.attach(vid); vid.style.display='block'; av.style.display='none';
+        if(pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) {
+          pub.track.attach(vid); hasVid = true;
         }
       });
+
+      vid.style.display = hasVid ? 'block' : 'none';
+      av.style.display = hasVid ? 'none' : 'flex';
 
       // Audio
       rp.audioTrackPublications.forEach(pub => {
@@ -490,7 +497,9 @@
       const vid = tile.querySelector('video');
       const av = tile.querySelector('.vtile-avatar');
       let hasVideo = false;
-      rp.videoTrackPublications.forEach(pub => { if(pub.isSubscribed && pub.track) hasVideo = true; });
+      rp.videoTrackPublications.forEach(pub => { 
+        if(pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) hasVideo = true; 
+      });
       vid.style.display = hasVideo ? 'block' : 'none';
       av.style.display  = hasVideo ? 'none'  : 'flex';
     }
