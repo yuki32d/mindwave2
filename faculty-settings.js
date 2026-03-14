@@ -106,7 +106,7 @@ function setAccent(color, el) {
 }
 
 async function resetSeason() {
-    if (!confirm('Are you sure? This will wipe ALL student progress and cannot be undone.')) {
+    if (!await confirm('Are you sure? This will wipe ALL student progress and cannot be undone.')) {
         return;
     }
 
@@ -135,7 +135,7 @@ async function resetSeason() {
 }
 
 async function deleteAllGames() {
-    if (!confirm('⚠️ WARNING: This will permanently delete ALL games from the system!\n\nThis action cannot be undone. Are you absolutely sure?')) {
+    if (!await confirm('⚠️ WARNING: This will permanently delete ALL games from the system!\n\nThis action cannot be undone. Are you absolutely sure?')) {
         return;
     }
 
@@ -238,17 +238,13 @@ function renderBlockedPatterns(patterns) {
     if (countSpan) countSpan.textContent = `${patterns.length} pattern(s) blocked`;
 
     container.innerHTML = patterns.map(pattern => `
-        <div class="student-item" style="margin-bottom: 12px;">
-            <div class="student-info">
-                <strong>${pattern.pattern}</strong>
-                <span>${pattern.reason}</span>
-                <span style="display: block; margin-top: 4px; font-size: 12px;">
-                    🚫 ${pattern.affectedCount} account(s) blocked • 
-                    ${new Date(pattern.blockedAt).toLocaleDateString()}
-                </span>
+        <div class="alumni-item">
+            <div class="alumni-info">
+                <span class="alumni-pattern">${pattern.pattern}</span>
+                <span class="alumni-reason">${pattern.reason} • ${pattern.affectedCount} blocked</span>
             </div>
-            <button class="delete-student-btn" onclick="unblockPattern('${pattern._id}')">
-                Unblock
+            <button class="delete-btn" onclick="unblockPattern('${pattern._id}')" title="Unblock">
+                <i class="fas fa-trash-alt"></i>
             </button>
         </div>
     `).join('');
@@ -267,7 +263,7 @@ async function blockPattern() {
         return;
     }
 
-    if (!confirm(`Block all accounts matching "${pattern}"?\n\nThis will immediately disable login for all matching students.`)) {
+    if (!await confirm(`Block all accounts matching "${pattern}"?\n\nThis will immediately disable login for all matching students.`)) {
         return;
     }
 
@@ -300,7 +296,7 @@ async function blockPattern() {
 
 // Unblock an email pattern
 async function unblockPattern(id) {
-    if (!confirm('Unblock this pattern?\n\nThis will reactivate all matching student accounts.')) {
+    if (!await confirm('Unblock this pattern?\n\nThis will reactivate all matching student accounts.')) {
         return;
     }
 

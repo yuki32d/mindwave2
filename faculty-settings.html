@@ -2,86 +2,242 @@
 <html lang="en">
 
 <head>
+    <script src="admin-theme-init.js"></script>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINDWAVE – Faculty Settings</title>
+    <title>MindWave – Faculty Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="auth-guard.js"></script>
     <link rel="stylesheet" href="3d-depth-design.css">
-
-    <script src="theme-init.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .settings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin-top: 32px;
+        /* ── TOKENS ── */
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e5e9f2;
+            --accent: #d08000;
+            --accent-lo: rgba(208, 128, 0, 0.10);
+            --accent-bdr: rgba(208, 128, 0, 0.25);
+            --text: #111827;
+            --muted: #6b7280;
+            --green: #16a34a;
+            --red: #dc2626;
+            --blue: #2563eb;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.07), 0 4px 16px rgba(0, 0, 0, 0.05);
+            --radius: 14px;
+            --mono: 'JetBrains Mono', monospace;
+            --topbar-h: 58px;
         }
 
-        .settings-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 24px;
+        [data-theme="dark"] {
+            --bg: #0d1117;
+            --surface: #161b27;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #e2e8f0;
+            --muted: #6b7694;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg: #f4f6fa;
+            --surface: #ffffff;
+            --border: rgba(0, 0, 0, 0.08);
+            --text: #111827;
+            --muted: #6b7280;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── SHELL ── */
+        .shell {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            min-height: 100vh;
         }
 
-        .settings-card h2 {
-            font-size: 18px;
-            margin: 0;
+        .topbar {
+            height: var(--topbar-h);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        [data-theme="dark"] .topbar { background: rgba(22, 27, 39, 0.8); }
+
+        .back-btn {
             display: flex;
             align-items: center;
             gap: 8px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: 1px solid transparent;
         }
 
+        .back-btn:hover {
+            color: var(--accent);
+            background: var(--accent-lo);
+            border-color: var(--accent-bdr);
+        }
+
+        .main {
+            flex: 1;
+            padding: 40px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-container {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header { margin-bottom: 48px; }
+        .page-eyebrow {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        .page-subtitle {
+            font-size: 16px;
+            color: var(--muted);
+            max-width: 600px;
+        }
+
+        /* ── GRID SYSTEM ── */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 24px;
+        }
+
+        /* ── SETTINGS CARD ── */
+        .settings-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        [data-theme="dark"] .settings-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--accent-lo);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            border: 1px solid var(--accent-bdr);
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* ── CONTROL GROUPS ── */
         .control-group {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            gap: 16px;
             padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--border);
         }
 
-        .control-group:last-child {
-            border-bottom: none;
-        }
+        .control-group:last-of-type { border-bottom: none; }
 
+        .control-label { flex: 1; }
         .control-label strong {
             display: block;
             font-size: 14px;
             margin-bottom: 4px;
+            color: var(--text);
         }
-
         .control-label span {
             font-size: 12px;
-            color: #9ea4b6;
+            color: var(--muted);
+            line-height: 1.4;
         }
 
-        /* Toggle Switch */
+        /* ── INTERACTIVE ELEMENTS ── */
         .switch {
             position: relative;
             display: inline-block;
-            width: 48px;
+            width: 44px;
             height: 24px;
+            flex-shrink: 0;
         }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .switch input { opacity: 0; width: 0; height: 0; }
 
         .slider {
             position: absolute;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.1);
-            transition: .4s;
-            border-radius: 34px;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--border);
+            transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 24px;
         }
 
         .slider:before {
@@ -91,300 +247,585 @@
             width: 18px;
             left: 3px;
             bottom: 3px;
-            background-color: white;
-            transition: .4s;
+            background: #fff;
+            transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        input:checked+.slider {
-            background-color: #0f62fe;
-        }
+        input:checked + .slider { background: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
-        input:checked+.slider:before {
-            transform: translateX(24px);
-        }
-
-        /* Color Swatches */
         .color-options {
             display: flex;
-            gap: 12px;
-        }
-
-        .color-swatch {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: transform 0.2s;
-        }
-
-        .color-swatch:hover {
-            transform: scale(1.1);
-        }
-
-        .color-swatch.active {
-            border-color: white;
-        }
-
-        .danger-btn {
-            background: rgba(255, 59, 48, 0.1);
-            color: #ff3b30;
-            border: 1px solid rgba(255, 59, 48, 0.2);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            width: 100%;
+            gap: 10px;
             margin-top: 8px;
         }
 
-        .danger-btn:hover {
-            background: rgba(255, 59, 48, 0.2);
-        }
-
-        .student-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            margin-bottom: 8px;
-        }
-
-        .student-info strong {
-            display: block;
-            color: #f5f6fb;
-            margin-bottom: 4px;
-        }
-
-        .student-info span {
-            color: #9ea4b6;
-            font-size: 13px;
-        }
-
-        .delete-student-btn {
-            padding: 8px 16px;
-            background: rgba(220, 38, 38, 0.1);
-            border: 1px solid rgba(220, 38, 38, 0.3);
-            color: #ef4444;
-            border-radius: 8px;
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
             cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .color-swatch:hover { transform: scale(1.15); }
+        .color-swatch.active {
+            border-color: #fff;
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+
+        /* ── FORMS & BUTTONS ── */
+        .premium-input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text);
             font-size: 13px;
-            font-weight: 600;
             transition: all 0.2s;
         }
 
-        .delete-student-btn:hover {
-            background: rgba(220, 38, 38, 0.2);
-            border-color: rgba(220, 38, 38, 0.5);
+        .premium-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-lo);
         }
+
+        .primary-btn, .secondary-btn, .danger-btn {
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid transparent;
+            width: 100%;
+        }
+
+        .primary-btn {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .primary-btn:hover {
+            box-shadow: 0 0 20px var(--accent-lo);
+            transform: translateY(-2px);
+        }
+
+        .secondary-btn {
+            background: var(--surface);
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        .secondary-btn:hover {
+            border-color: var(--muted);
+            background: var(--bg);
+        }
+
+        .danger-btn {
+            background: rgba(220, 38, 38, 0.05);
+            color: var(--red);
+            border-color: rgba(220, 38, 38, 0.1);
+        }
+
+        .danger-btn:hover {
+            background: rgba(220, 38, 38, 0.1);
+            border-color: var(--red);
+            transform: translateY(-1px);
+        }
+
+        /* ── ALUMNI BATCH LIST ── */
+        .alumni-list {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .alumni-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alumni-info { display: flex; flex-direction: column; gap: 2px; }
+        .alumni-pattern { font-family: var(--mono); font-size: 12px; color: var(--text); font-weight: 600; }
+        .alumni-reason { font-size: 11px; color: var(--muted); }
+
+        .delete-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            background: transparent;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            color: var(--red);
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .settings-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 28px; }
+        }
+
+        /* ── TOAST NOTIFICATIONS ── */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 12000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            width: 320px;
+            background: rgba(22, 27, 39, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+            animation: toastSlideIn 0.4s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-theme="light"] .toast {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .toast-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .toast-content { flex: 1; }
+        .toast-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+        .toast-msg { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+        .toast-close {
+            background: none; border: none; color: var(--muted);
+            cursor: pointer; font-size: 14px; padding: 4px;
+            transition: color 0.2s;
+        }
+        .toast-close:hover { color: var(--text); }
+
+        .toast-progress {
+            position: absolute; bottom: 0; left: 0; height: 3px;
+            background: var(--accent); opacity: 0.3;
+            width: 100%; transform-origin: left;
+        }
+
+        .toast.success { border-left: 4px solid var(--green); }
+        .toast.error { border-left: 4px solid var(--red); }
+        .toast.warning { border-left: 4px solid var(--accent); }
+        .toast.info { border-left: 4px solid var(--blue); }
+
+        @keyframes toastSlideIn {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes toastSlideOut {
+            from { transform: translateX(0) scale(1); opacity: 1; }
+            to { transform: translateX(20px); opacity: 0; }
+        }
+
+        /* ── CONFIRM MODAL ── */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px); z-index: 11000;
+            display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+
+        .confirm-modal {
+            width: 100%; max-width: 400px; padding: 32px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 24px; text-align: center;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        [data-theme="dark"] .confirm-modal { background: rgba(22, 27, 39, 0.95); }
+
+        .confirm-icon {
+            width: 64px; height: 64px; border-radius: 20px;
+            background: var(--accent-lo); color: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin: 0 auto 24px; border: 1px solid var(--accent-bdr);
+        }
+
+        .confirm-title { font-size: 20px; font-weight: 800; margin-bottom: 12px; color: var(--text); }
+        .confirm-msg { font-size: 15px; color: var(--muted); margin-bottom: 32px; line-height: 1.5; }
+        .confirm-actions { display: flex; gap: 12px; }
+
+        .modal-btn {
+            flex: 1; padding: 14px; border-radius: 12px;
+            font-weight: 700; font-size: 14px; cursor: pointer;
+            transition: all 0.2s; border: none;
+        }
+
+        .modal-cancel { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+        .modal-cancel:hover { color: var(--text); border-color: var(--muted); }
+        .modal-confirm { background: var(--accent); color: #fff; }
+        .modal-confirm:hover { box-shadow: 0 0 20px var(--accent-lo); transform: translateY(-2px); }
+
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-overlay.active .confirm-modal { transform: scale(1); }
     </style>
+    <script>
+        // ── TOAST SYSTEM ──
+        window.alert = function(message) { showToast(message); };
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const iconMap = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+
+            if (message.toLowerCase().includes('success') || message.toLowerCase().includes('complete') || message.toLowerCase().includes('✅')) type = 'success';
+            if (message.toLowerCase().includes('fail') || message.toLowerCase().includes('error') || message.toLowerCase().includes('❌')) type = 'error';
+
+            toast.innerHTML = `
+                <div class="toast-icon"><i class="fas ${iconMap[type] || 'fa-info-circle'}"></i></div>
+                <div class="toast-content">
+                    <div class="toast-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                    <div class="toast-msg">${message}</div>
+                </div>
+                <button class="toast-close"><i class="fas fa-times"></i></button>
+                <div class="toast-progress"></div>
+            `;
+
+            container.appendChild(toast);
+
+            const progress = toast.querySelector('.toast-progress');
+            progress.style.transition = 'none';
+            progress.style.width = '100%';
+            
+            setTimeout(() => {
+                progress.style.transition = 'width 4s linear';
+                progress.style.width = '0%';
+            }, 10);
+
+            const timer = setTimeout(() => hideToast(toast), 4000);
+
+            toast.querySelector('.toast-close').onclick = () => {
+                clearTimeout(timer);
+                hideToast(toast);
+            };
+        }
+
+        function hideToast(toast) {
+            toast.style.animation = 'toastSlideOut 0.3s forwards cubic-bezier(0.19, 1, 0.22, 1)';
+            setTimeout(() => toast.remove(), 300);
+        }
+
+        // ── CONFIRM SYSTEM ──
+        let confirmResolve;
+        window.confirm = function(message, title = 'Confirm Action') {
+            document.getElementById('confirmMsg').textContent = message;
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmModal').classList.add('active');
+            return new Promise((resolve) => { confirmResolve = resolve; });
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('confirmOk').onclick = () => {
+                document.getElementById('confirmModal').classList.remove('active');
+                if (confirmResolve) confirmResolve(true);
+            };
+            document.getElementById('confirmCancel').onclick = () => {
+                document.getElementById('confirmModal').classList.remove('active');
+                if (confirmResolve) confirmResolve(false);
+            };
+        });
+    </script>
 </head>
 
-<body data-theme="dark" data-role="faculty" data-section="settings">
-    <div class="page-shell">
-        <header class="hero">
-            <p class="eyebrow" id="heroEyebrow">Faculty Space</p>
-            <h1 id="pageTitle">Mission Control</h1>
-            <p class="lede" id="pageSubtitle">Manage gamification, visuals, and platform security.</p>
-            <div class="hero-actions">
-                <a class="ghost-link" href="admin.html">← Back to Creator Hub</a>
+<body>
+    <div class="shell">
+        <header class="topbar">
+            <div class="topbar-left">
+                <a href="admin.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Hub
+                </a>
             </div>
+            <div style="width: 70px;"></div> <!-- Spacer -->
         </header>
 
-        <!-- Custom Container ID to avoid role-page.js overwrite -->
-        <div id="settingsContainer" class="settings-grid">
+        <main class="main">
+            <div class="content-container">
+                <header class="page-header">
+                    <p class="page-eyebrow">Faculty Space</p>
+                    <h1 class="page-title">Mission Control</h1>
+                    <p class="page-subtitle">Secure admin tools, manage integrations, and review permissions.</p>
+                </header>
 
-            <!-- 1. Gamification Control -->
-            <div class="settings-card">
-                <h2>🎮 Gamification Control</h2>
+                <div id="settingsContainer" class="settings-grid">
 
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Double XP Event</strong>
-                        <span>Boost all points earned by 2x.</span>
+                    <!-- 1. Gamification Control -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-gamepad"></i></div>
+                            <h2 class="card-title">Gamification Control</h2>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <strong>Double XP Event</strong>
+                                    <span>Boost all points earned by 2x.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="doubleXPToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <strong>Season Reset</strong>
+                                    <span>Clear all student leaderboards and start fresh.</span>
+                                </div>
+                            </div>
+                            <button class="danger-btn">
+                                <i class="fas fa-exclamation-triangle"></i> Reset All Progress
+                            </button>
+                        </div>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="doubleXPToggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
 
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Season Reset</strong>
-                        <span>Clear all student leaderboards.</span>
+                    <!-- 2. Visual Command Center -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-palette"></i></div>
+                            <h2 class="card-title">Visual Command</h2>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <strong>Theme Accent</strong>
+                                    <span>Global platform highlight color.</span>
+                                </div>
+                            </div>
+                            <div class="color-options">
+                                <div class="color-swatch" style="background: #0f62fe;"></div>
+                                <div class="color-swatch" style="background: #8a3ffc;"></div>
+                                <div class="color-swatch" style="background: #34c759;"></div>
+                                <div class="color-swatch" style="background: #ff9f0a;"></div>
+                                <div class="color-swatch" style="background: #ff3b30;"></div>
+                            </div>
+
+                            <div class="control-group" style="margin-top: 12px;">
+                                <div class="control-label">
+                                    <strong>Banner Message</strong>
+                                    <span>Global announcement for all students.</span>
+                                </div>
+                            </div>
+                            <input type="text" id="bannerInput" class="premium-input" placeholder="e.g. Exam week starts Monday!">
+                        </div>
                     </div>
+
+                    <!-- 3. Security & Access -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-shield-alt"></i></div>
+                            <h2 class="card-title">Security & Access</h2>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <strong>Maintenance Mode</strong>
+                                    <span>Lock students out of the platform.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="maintenanceToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <strong>Registration Gate</strong>
+                                    <span>Allow or prevent new student signups.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="regToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Faculty Management -->
+                    <div class="settings-card" id="facultyManagementSection" style="display: none;">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-user-shield"></i></div>
+                            <h2 class="card-title">Faculty Management</h2>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <strong>Admin Approvals</strong>
+                                    <span>Review and approve new admin signup requests.</span>
+                                </div>
+                            </div>
+                            <a href="admin-approvals.html">
+                                <button class="primary-btn">
+                                    <i class="fas fa-check-circle"></i> Open Admin Approvals
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 5. Student Management -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-users-cog"></i></div>
+                            <h2 class="card-title">Student Management</h2>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <strong>Central Registry</strong>
+                                    <span>View, search, and manage student accounts.</span>
+                                </div>
+                            </div>
+                            <a href="manage-students.html">
+                                <button class="secondary-btn">
+                                    <i class="fas fa-address-book"></i> Open Student Management
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 6. Game Management -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-vial"></i></div>
+                            <h2 class="card-title">Game Management</h2>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <strong>Content Control</strong>
+                                    <span>Manage individual games and activities.</span>
+                                </div>
+                            </div>
+                            <a href="manage-games.html" style="margin-bottom: 12px; display: block;">
+                                <button class="secondary-btn">
+                                    <i class="fas fa-list-ul"></i> Manage Games
+                                </button>
+                            </a>
+
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <strong>Bulk Action</strong>
+                                    <span>Remove all active games from the dashboard.</span>
+                                </div>
+                            </div>
+                            <button class="danger-btn" id="deleteAllGamesBtn">
+                                <i class="fas fa-trash-alt"></i> Delete All Games
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 7. Alumni Batch Management -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-user-graduate"></i></div>
+                            <h2 class="card-title">Alumni Management</h2>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <strong>Block Graduated Batches</strong>
+                                    <span>Disable login for entire batches by pattern.</span>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <input type="text" id="emailPattern" class="premium-input" placeholder="Pattern: .mca25@cmrit.ac.in">
+                                <input type="text" id="blockReason" class="premium-input" placeholder="Reason: Graduated Batch">
+                                <button id="blockPatternBtn" class="primary-btn" style="background: linear-gradient(120deg, var(--accent), #ff3b30);">
+                                    <i class="fas fa-ban"></i> Block Batch
+                                </button>
+                            </div>
+
+                            <div class="alumni-list" id="blockedPatternsList">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-                <button class="danger-btn">⚠️ Reset All Progress</button>
             </div>
+        </main>
+    </div>
 
-            <!-- 2. Visual Command Center -->
-            <div class="settings-card">
-                <h2>🎨 Visual Command</h2>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Theme Accent</strong>
-                        <span>Global platform highlight color.</span>
-                    </div>
-                </div>
-                <div class="color-options" style="margin-bottom: 16px;">
-                    <div class="color-swatch" style="background: #0f62fe;"></div>
-                    <div class="color-swatch" style="background: #8a3ffc;"></div>
-                    <div class="color-swatch" style="background: #34c759;"></div>
-                    <div class="color-swatch" style="background: #ff9f0a;"></div>
-                    <div class="color-swatch" style="background: #ff3b30;"></div>
-                </div>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Banner Message</strong>
-                        <span>Announcement for all students.</span>
-                    </div>
-                </div>
-                <input type="text" id="bannerInput" placeholder="e.g. Exam week starts Monday!"
-                    style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; color: white;">
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="confirm-modal">
+            <div class="confirm-icon"><i class="fas fa-question"></i></div>
+            <div class="confirm-title" id="confirmTitle">Confirm Action</div>
+            <div class="confirm-msg" id="confirmMsg">Are you sure you want to proceed?</div>
+            <div class="confirm-actions">
+                <button class="modal-btn modal-cancel" id="confirmCancel">Cancel</button>
+                <button class="modal-btn modal-confirm" id="confirmOk">Confirm</button>
             </div>
-
-            <!-- 3. Security & Access -->
-            <div class="settings-card">
-                <h2>🔒 Security & Access</h2>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Maintenance Mode</strong>
-                        <span>Lock students out of the platform.</span>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="maintenanceToggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Registration Gate</strong>
-                        <span>Allow new student signups.</span>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="regToggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- 4. Faculty Management (Super Admin Only) -->
-            <div class="settings-card" id="facultyManagementSection" style="display: none;">
-                <h2>🔐 Faculty Management</h2>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Admin Approvals</strong>
-                        <span>Review and approve new admin signup requests.</span>
-                    </div>
-                </div>
-
-                <a href="admin-approvals.html" style="text-decoration: none;">
-                    <button class="primary-btn"
-                        style="width: 100%; margin-top: 8px; background: linear-gradient(120deg, #0f62fe, #8a3ffc); color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600;">
-                        ✅ Open Admin Approvals
-                    </button>
-                </a>
-            </div>
-
-            <!-- 5. Student Management -->
-            <div class="settings-card">
-                <h2>👥 Student Management</h2>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Manage Students</strong>
-                        <span>View, search, and remove student accounts from the system.</span>
-                    </div>
-                </div>
-
-                <a href="manage-students.html" style="display: block; text-decoration: none; margin-top: 8px;">
-                    <button class="primary-btn"
-                        style="background: linear-gradient(120deg, #0f62fe, #8a3ffc); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; font-size: 14px;">
-                        📋 Open Student Management
-                    </button>
-                </a>
-            </div>
-
-            <!-- 6. Game Management -->
-            <div class="settings-card">
-                <h2>🎮 Game Management</h2>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Manage Games</strong>
-                        <span>View, search, and delete individual games from the system.</span>
-                    </div>
-                </div>
-
-                <a href="manage-games.html" style="display: block; text-decoration: none; margin-bottom: 16px;">
-                    <button class="primary-btn"
-                        style="background: linear-gradient(120deg, #0f62fe, #8a3ffc); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; font-size: 14px;">
-                        📋 Manage Games
-                    </button>
-                </a>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Delete All Games</strong>
-                        <span>Remove all games from student dashboard.</span>
-                    </div>
-                </div>
-                <button class="danger-btn" id="deleteAllGamesBtn">🗑️ Delete All Games</button>
-            </div>
-
-            <!-- 7. Alumni Batch Management -->
-            <div class="settings-card">
-                <h2>🎓 Alumni Batch Management</h2>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Block Graduated Batches</strong>
-                        <span>Disable login for entire batches by email pattern.</span>
-                    </div>
-                </div>
-
-                <!-- Add New Block Form -->
-                <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
-                    <label style="display: block; font-size: 13px; color: #9ea4b6; margin-bottom: 6px;">Email
-                        Pattern</label>
-                    <input type="text" id="emailPattern" placeholder=".mca25@cmrit.ac.in"
-                        style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; margin-bottom: 12px;">
-
-                    <label style="display: block; font-size: 13px; color: #9ea4b6; margin-bottom: 6px;">Reason</label>
-                    <input type="text" id="blockReason" placeholder="Graduated - Class of 2025"
-                        style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; margin-bottom: 12px;">
-
-                    <button id="blockPatternBtn"
-                        style="width: 100%; background: linear-gradient(120deg, #ff9f0a, #ff3b30); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
-                        🚫 Block Batch
-                    </button>
-                </div>
-
-                <!-- Blocked Patterns List -->
-                <div class="control-group">
-                    <div class="control-label">
-                        <strong>Currently Blocked Patterns</strong>
-                        <span id="blockedCount">Loading...</span>
-                    </div>
-                </div>
-
-                <div id="blockedPatternsList" style="max-height: 300px; overflow-y: auto;">
-                    <!-- Populated dynamically -->
-                </div>
-            </div>
-
         </div>
     </div>
+
+    <div id="toastContainer" class="toast-container"></div>
 
     <!-- We still include role-page.js for the header, but it won't find #panelGrid -->
     <script src="role-page.js"></script>
