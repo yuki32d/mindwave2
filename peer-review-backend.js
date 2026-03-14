@@ -10,8 +10,8 @@ import mongoose from 'mongoose';
 
 // Peer Review Settings Schema
 const peerReviewSettingsSchema = new mongoose.Schema({
-    assignmentId: { type: String, required: true, unique: true }, // Using 'git-projects' as default
-    organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
+    assignmentId: { type: String, required: true }, // Using 'git-projects' as default
+    organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' }, // Optional for flexibility
 
     enabled: { type: Boolean, default: false },
     reviewsPerStudent: { type: Number, default: 3, min: 1, max: 5 },
@@ -33,10 +33,13 @@ const peerReviewSettingsSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 
+// Settings should be unique per assignment within an organization
+peerReviewSettingsSchema.index({ assignmentId: 1, organizationId: 1 }, { unique: true });
+
 // Peer Review Schema
 const peerReviewSchema = new mongoose.Schema({
     assignmentId: { type: String, required: true },
-    organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
+    organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
 
     reviewerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     revieweeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -337,14 +340,21 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
     app.post('/api/peer-review/invite', authMiddleware, async (req, res) => {
         try {
             const { projectIds, reviewerIds, weightage } = req.body;
+            console.log('📨 Peer Review Invite Request:', { 
+                projectCount: projectIds?.length, 
+                reviewerCount: reviewerIds?.length, 
+                weightage 
+            });
+
             const currentUser = await User.findById(req.user.sub);
             
             if (!currentUser || (currentUser.orgRole !== 'faculty' && currentUser.role !== 'admin')) {
+                console.warn('🚫 Unauthorized invite attempt from:', req.user.email);
                 return res.status(403).json({ error: 'Only faculty can send invites' });
             }
 
             if (!projectIds || !reviewerIds || !projectIds.length || !reviewerIds.length) {
-                return res.status(400).json({ error: 'Missing selection' });
+                return res.status(400).json({ error: 'Please select both projects and reviewers' });
             }
 
             const assignments = [];
@@ -352,12 +362,18 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
             // Loop through each project selected
             for (const projectId of projectIds) {
                 const submission = await ProjectSubmission.findById(projectId);
-                if (!submission) continue;
+                if (!submission) {
+                    console.error(`❌ Project not found: ${projectId}`);
+                    continue;
+                }
 
                 // Loop through each reviewer selected
                 for (const reviewerId of reviewerIds) {
                     // Check if reviewer is not the same as the student who submitted
-                    if (submission.studentId.toString() === reviewerId.toString()) continue;
+                    if (submission.studentId.toString() === reviewerId.toString()) {
+                        console.log(`⏩ Skipping self-review for student: ${reviewerId}`);
+                        continue;
+                    }
 
                     assignments.push({
                         assignmentId: 'manual-invite',
@@ -371,31 +387,41 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
                 }
             }
 
+            console.log(`📝 Creating ${assignments.length} assignments...`);
+
             if (assignments.length > 0) {
                 await PeerReview.insertMany(assignments);
             }
 
-            // Save weightage settings for this organization/context
-            let settings = await PeerReviewSettings.findOne({
-                organizationId: currentUser.organizationId,
-                assignmentId: 'git-projects'
-            });
-
-            if (!settings) {
-                settings = new PeerReviewSettings({
-                    assignmentId: 'git-projects',
+            // Update weightage settings for this context
+            // We use findOneAndUpdate to handle potential race conditions or existing records
+            await PeerReviewSettings.findOneAndUpdate(
+                {
                     organizationId: currentUser.organizationId,
-                    createdBy: currentUser._id
-                });
-            }
-            settings.enabled = true;
-            settings.gradeWeight = weightage || 20;
-            await settings.save();
+                    assignmentId: 'git-projects'
+                },
+                {
+                    $set: {
+                        enabled: true,
+                        gradeWeight: weightage || 20,
+                        updatedAt: new Date(),
+                        createdBy: currentUser._id
+                    },
+                    $setOnInsert: {
+                        createdAt: new Date()
+                    }
+                },
+                { upsert: true, new: true }
+            );
 
+            console.log('✅ Peer review invites sent successfully!');
             res.json({ success: true, count: assignments.length });
         } catch (error) {
-            console.error('Error creating invites:', error);
-            res.status(500).json({ error: 'Failed to send invites' });
+            console.error('💥 ERROR creating invites:', error);
+            res.status(500).json({ 
+                error: 'Failed to send invites',
+                details: error.message 
+            });
         }
     });
 
