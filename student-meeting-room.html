@@ -47,16 +47,15 @@
     .top-tag svg{width:12px;height:12px}
 
     /* Video grid */
-    .video-area{flex:1;overflow:hidden;padding:.75rem;display:flex;flex-direction:column;gap:.75rem}
-    .video-area.layout-1 #videoGrid{grid-template-columns:1fr}
-    .video-area.layout-2 #videoGrid{grid-template-columns:1fr 1fr}
-    .video-area.layout-3 #videoGrid,.video-area.layout-4 #videoGrid{grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr}
-    .video-area.layout-5 #videoGrid,.video-area.layout-6 #videoGrid{grid-template-columns:repeat(3,1fr)}
-
+    .video-area { flex: 1; display: flex; flex-direction: column; padding: .75rem; gap: .75rem; overflow: hidden; min-width: 0; }
+    #videoGrid { flex: 1; display: grid; gap: .75rem; overflow: hidden; grid-template-columns: 1fr; }
+    .video-area.layout-2 #videoGrid { grid-template-columns: 1fr 1fr; }
+    .video-area.layout-3 #videoGrid, .video-area.layout-4 #videoGrid { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+    .video-area.layout-5 #videoGrid, .video-area.layout-6 #videoGrid { grid-template-columns: repeat(3, 1fr); }
+    
     /* Presentation Mode */
     #presentationArea { flex: 1; min-width: 0; background: #000; border-radius: 14px; position: relative; overflow: hidden; display: none; border: 1px solid rgba(255,255,255,.05); margin: .75rem .37rem .75rem .75rem; }
     #presentationArea video { width: 100%; height: 100%; object-fit: contain; }
-    .video-area { flex: 1; display: flex; flex-direction: column; padding: .75rem; gap: .75rem; overflow: hidden; min-width: 0; }
 
     .present-mode #presentationArea { display: block; }
     .present-mode #videoArea { flex: 0 0 280px; padding-left: 0; }
@@ -378,6 +377,8 @@
     function onTrackUnsubscribed(track, pub, rp) {
       if (track.source === 'screen_share') {
         togglePresentation(null, null, false);
+        // Safety: Ensure tiles are restored if they were lost/hidden
+        setTimeout(() => { renderAllRemotes(); }, 100);
         return;
       }
       updateTileMedia(rp);
