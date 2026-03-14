@@ -428,6 +428,87 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
         }
     });
 
+    // Get full details for a specific review (for the evaluator)
+    app.get('/api/peer-review/:id', authMiddleware, async (req, res) => {
+        try {
+            const review = await PeerReview.findById(req.params.id)
+                .populate('submissionId')
+                .populate('revieweeId', 'name email profilePhoto');
+
+            if (!review) {
+                return res.status(404).json({ error: 'Review not found' });
+            }
+
+            // Ensure the requester is the assigned reviewer
+            if (review.reviewerId.toString() !== req.user.sub) {
+                return res.status(403).json({ error: 'Unauthorized to view this review' });
+            }
+
+            res.json({ review });
+        } catch (error) {
+            console.error('Error fetching review details:', error);
+            res.status(500).json({ error: 'Failed to fetch review details' });
+        }
+    });
+
+    // Submit a peer review assessment
+    app.post('/api/peer-review/submit', authMiddleware, async (req, res) => {
+        try {
+            const { reviewId, ratings, feedback } = req.body;
+
+            if (!reviewId || !ratings || !feedback) {
+                return res.status(400).json({ error: 'Missing required review data' });
+            }
+
+            const review = await PeerReview.findById(reviewId);
+
+            if (!review) {
+                return res.status(404).json({ error: 'Review not found' });
+            }
+
+            // Ensure the requester is the assigned reviewer
+            if (review.reviewerId.toString() !== req.user.sub) {
+                return res.status(403).json({ error: 'Unauthorized to submit this review' });
+            }
+
+            if (review.status === 'submitted') {
+                return res.status(400).json({ error: 'Review already submitted' });
+            }
+
+            // Calculate overall score (average of the 3 ratings)
+            const overall = Math.round((ratings.codeQuality + ratings.functionality + ratings.documentation) / 3);
+
+            review.ratings = {
+                codeQuality: ratings.codeQuality,
+                functionality: ratings.functionality,
+                documentation: ratings.documentation,
+                overall: overall
+            };
+
+            review.feedback = {
+                strengths: feedback.strengths,
+                improvements: feedback.improvements,
+                generalComments: feedback.generalComments
+            };
+
+            review.status = 'submitted';
+            review.submittedAt = new Date();
+            review.updatedAt = new Date();
+
+            await review.save();
+
+            console.log(`✅ Peer Review ${reviewId} submitted by ${req.user.email}`);
+            res.json({ success: true, message: 'Review submitted successfully!' });
+
+        } catch (error) {
+            console.error('💥 Error submitting review:', error);
+            res.status(500).json({ 
+                error: 'Failed to submit review',
+                details: error.message 
+            });
+        }
+    });
+
     // Get completed reviews for a student
     app.get('/api/peer-review/completed', authMiddleware, async (req, res) => {
         try {

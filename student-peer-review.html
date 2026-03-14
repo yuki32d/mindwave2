@@ -195,6 +195,156 @@
         }
 
         .mw-logout-confirm svg { width: 16px; height: 16px; }
+        /* Assessment Modal */
+        .mw-assessment-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .mw-assessment-overlay.active { display: flex; }
+
+        .mw-assessment-modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .mw-assessment-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 10;
+        }
+
+        .mw-assessment-close {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .mw-assessment-close:hover {
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .mw-assessment-body {
+            padding: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        @media (max-width: 850px) {
+            .mw-assessment-body { grid-template-columns: 1fr; }
+        }
+
+        .project-context-section h4 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-2, var(--accent));
+            margin-bottom: 16px;
+        }
+
+        .project-details-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .rating-group {
+            margin-bottom: 24px;
+        }
+
+        .rating-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 8px;
+        }
+
+        .star-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--muted);
+        }
+
+        .star-box i { width: 20px; height: 20px; }
+
+        .star-box.active {
+            border-color: var(--accent-2);
+            color: var(--accent-2);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .assessment-textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 13px;
+            margin-bottom: 16px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .assessment-textarea:focus {
+            outline: none;
+            border-color: var(--accent-2);
+        }
+
+        .mw-assessment-footer {
+            padding: 24px 32px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            background: var(--surface);
+        }
     </style>
 </head>
 
@@ -360,6 +510,88 @@
                 </button>
             </div>
         </div>
+
+    <!-- Assessment Modal -->
+    <div id="assessmentModal" class="mw-assessment-overlay">
+        <div class="mw-assessment-modal">
+            <div class="mw-assessment-header">
+                <div>
+                    <h2 id="modalProjectName" style="margin: 0; font-size: 20px;">Review Assessment</h2>
+                    <p id="modalReviewee" style="margin: 4px 0 0; font-size: 13px; color: var(--muted);">By Student</p>
+                </div>
+                <button class="mw-assessment-close" onclick="closeAssessmentModal()"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="mw-assessment-body">
+                <!-- Left: Project Details -->
+                <div class="project-context-section">
+                    <h4><i data-lucide="info" style="width: 14px; display: inline; vertical-align: middle; margin-right: 6px;"></i> Project Details</h4>
+                    <div class="project-details-card">
+                        <p id="modalDescription" style="font-size: 14px; line-height: 1.6; margin-top: 0;">Loading description...</p>
+                        <div style="display: flex; gap: 12px; margin-top: 24px;">
+                            <a id="modalGithub" href="#" target="_blank" class="mw-btn mw-btn-ghost" style="flex: 1; border: 1px solid var(--border); height: auto; padding: 10px;">
+                                <i data-lucide="github"></i> Repository
+                            </a>
+                            <a id="modalDemo" href="#" target="_blank" class="mw-btn mw-btn-ghost" style="flex: 1; border: 1px solid var(--border); height: auto; padding: 10px;">
+                                <i data-lucide="external-link"></i> Live Demo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Rubric -->
+                <div class="rubric-section">
+                    <h4><i data-lucide="clipboard-check" style="width: 14px; display: inline; vertical-align: middle; margin-right: 6px;"></i> Evaluation Rubric</h4>
+                    
+                    <div class="rating-group">
+                        <span class="rating-label">Code Quality</span>
+                        <div class="rating-stars" data-category="codeQuality">
+                            <div class="star-box" data-value="1"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="2"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="3"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="4"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="5"><i data-lucide="star"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="rating-group">
+                        <span class="rating-label">Functionality</span>
+                        <div class="rating-stars" data-category="functionality">
+                            <div class="star-box" data-value="1"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="2"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="3"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="4"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="5"><i data-lucide="star"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="rating-group">
+                        <span class="rating-label">Documentation</span>
+                        <div class="rating-stars" data-category="documentation">
+                            <div class="star-box" data-value="1"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="2"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="3"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="4"><i data-lucide="star"></i></div>
+                            <div class="star-box" data-value="5"><i data-lucide="star"></i></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 32px;">
+                        <span class="rating-label">Qualitative Feedback</span>
+                        <textarea id="modalStrengths" class="assessment-textarea" placeholder="What are the main strengths?"></textarea>
+                        <textarea id="modalImprovements" class="assessment-textarea" placeholder="Areas for improvement?"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mw-assessment-footer">
+                <button class="mw-btn mw-btn-ghost" onclick="closeAssessmentModal()">Cancel</button>
+                <button class="mw-btn mw-btn-primary" onclick="submitAssessment()">
+                    <i data-lucide="send"></i> Submit Review
+                </button>
+            </div>
+        </div>
+    </div>
     </div>
 
     <script>
@@ -453,9 +685,115 @@
             }
         }
 
-        function startReview(id) {
-            alert('Opening review for ID: ' + id);
-            // Future step: Redirect to a dedicated review page
+        let currentReviewId = null;
+        let ratings = { codeQuality: 0, functionality: 0, documentation: 0 };
+
+        async function startReview(id) {
+            currentReviewId = id;
+            const token = localStorage.getItem('token');
+            const modal = document.getElementById('assessmentModal');
+            
+            try {
+                const res = await fetch(`/api/peer-review/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!res.ok) throw new Error('Failed to fetch review details');
+                const data = await res.json();
+                const r = data.review;
+
+                // Fill modal
+                document.getElementById('modalProjectName').textContent = r.submissionId.projectName;
+                document.getElementById('modalReviewee').textContent = `By ${r.revieweeId.name} • Assigned ${new Date(r.createdAt).toLocaleDateString()}`;
+                document.getElementById('modalDescription').textContent = r.submissionId.description;
+                document.getElementById('modalGithub').href = r.submissionId.githubRepoUrl;
+                document.getElementById('modalDemo').href = r.submissionId.liveDemoUrl || '#';
+                document.getElementById('modalDemo').style.display = r.submissionId.liveDemoUrl ? 'flex' : 'none';
+
+                // Reset ratings and form
+                ratings = { codeQuality: 0, functionality: 0, documentation: 0 };
+                document.querySelectorAll('.star-box').forEach(s => s.classList.remove('active'));
+                document.getElementById('modalStrengths').value = '';
+                document.getElementById('modalImprovements').value = '';
+
+                modal.classList.add('active');
+                if (window.lucide) window.lucide.createIcons();
+            } catch (e) {
+                console.error(e);
+                alert('Failed to load review details');
+            }
+        }
+
+        function closeAssessmentModal() {
+            document.getElementById('assessmentModal').classList.remove('active');
+            currentReviewId = null;
+        }
+
+        // Handle star interactions
+        document.querySelectorAll('.rating-stars').forEach(group => {
+            const category = group.getAttribute('data-category');
+            const stars = group.querySelectorAll('.star-box');
+            
+            stars.forEach(star => {
+                star.onclick = () => {
+                    const val = parseInt(star.getAttribute('data-value'));
+                    ratings[category] = val;
+                    
+                    // Update UI
+                    stars.forEach(s => {
+                        const sVal = parseInt(s.getAttribute('data-value'));
+                        if (sVal <= val) s.classList.add('active');
+                        else s.classList.remove('active');
+                    });
+                };
+            });
+        });
+
+        async function submitAssessment() {
+            if (!currentReviewId) return;
+            
+            // Validate
+            if (!ratings.codeQuality || !ratings.functionality || !ratings.documentation) {
+                alert('Please provide stars for all categories.');
+                return;
+            }
+
+            const strengths = document.getElementById('modalStrengths').value.trim();
+            const improvements = document.getElementById('modalImprovements').value.trim();
+
+            if (!strengths || !improvements) {
+                alert('Please provide written feedback for strengths and improvements.');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/peer-review/submit', {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        reviewId: currentReviewId,
+                        ratings,
+                        feedback: {
+                            strengths,
+                            improvements,
+                            generalComments: 'Manual review'
+                        }
+                    })
+                });
+
+                if (!res.ok) throw new Error('Submission failed');
+                
+                alert('✅ Review submitted successfully!');
+                closeAssessmentModal();
+                loadReviews(); // Refresh list
+            } catch (e) {
+                console.error(e);
+                alert('Failed to submit review');
+            }
         }
 
         window.onload = () => {
