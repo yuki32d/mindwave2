@@ -173,10 +173,19 @@ function renderProjects(projects) {
                                         <strong>Improvements:</strong> ${escapeHtml(pf.feedback.improvements)}
                                     </div>
                                 ` : ''}
-                                <div style="display:flex; gap: 10px; font-size: 11px; opacity: 0.8;">
-                                    <span>Code: ${pf.ratings?.codeQuality || 'N/A'}/5</span>
-                                    <span>Logic: ${pf.ratings?.functionality || 'N/A'}/5</span>
-                                    <span>Docs: ${pf.ratings?.documentation || 'N/A'}/5</span>
+                                <div class="gh-rating-chips">
+                                    <div class="gh-rating-chip">
+                                        <span class="gh-rating-label-tiny">Code</span>
+                                        <span class="gh-rating-value">${pf.ratings?.codeQuality || 'N/A'}/5</span>
+                                    </div>
+                                    <div class="gh-rating-chip">
+                                        <span class="gh-rating-label-tiny">Logic</span>
+                                        <span class="gh-rating-value">${pf.ratings?.functionality || 'N/A'}/5</span>
+                                    </div>
+                                    <div class="gh-rating-chip">
+                                        <span class="gh-rating-label-tiny">Docs</span>
+                                        <span class="gh-rating-value">${pf.ratings?.documentation || 'N/A'}/5</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
