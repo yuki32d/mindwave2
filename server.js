@@ -1257,7 +1257,7 @@ app.use('/api/live-sessions', liveSessionsRouter);
 // Student Performance Analytics Routes
 app.use('/api/student', authMiddleware, studentPerformanceRoutes);
 // Peer Review System Routes
-setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission);
+setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, User);
 
 // ============================================
 // MARKETING CHATBOT — GROQ PROXY

@@ -519,31 +519,39 @@ function setupReviewerSearch() {
     title.textContent = wizardState.reviewerType === 'faculty' ? 'Step 3: Select Faculty Member' : 'Step 3: Select Student Group';
     
     const searchInput = document.getElementById('reviewerSearch');
-    searchInput.oninput = (e) => {
+    searchInput.oninput = async (e) => {
         const query = e.target.value.toLowerCase();
         if (query.length < 2) {
             document.getElementById('reviewerResultsList').style.display = 'none';
             return;
         }
         
-        // Mock faculty/student list search
-        const mockList = wizardState.reviewerType === 'faculty' 
-            ? [{id: 'f1', name: 'Dr. Jane Smith', email: 'jane@univ.edu'}, {id: 'f2', name: 'Prof. Mark Wilson', email: 'mark@univ.edu'}]
-            : [{id: 's1', name: 'Student Group A', email: 'group-a@univ.edu'}, {id: 's2', name: 'Student Group B', email: 'group-b@univ.edu'}];
+        try {
+            const role = wizardState.reviewerType; // 'faculty' or 'student'
+            const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}&role=${role}`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
             
-        const results = mockList.filter(item => item.name.toLowerCase().includes(query) || item.email.toLowerCase().includes(query));
-        
-        const listContainer = document.getElementById('reviewerResultsList');
-        listContainer.innerHTML = results.map(r => `
-            <div class="reviewer-result-item" onclick="selectReviewer('${r.id}', '${escapeHtml(r.name)}', '${escapeHtml(r.email)}')">
-                <div class="mini-avatar">${r.name.split(' ').map(n => n[0]).join('')}</div>
-                <div>
-                    <div style="font-weight: 700; font-size: 13px;">${escapeHtml(r.name)}</div>
-                    <div style="font-size: 11px; color: var(--muted);">${escapeHtml(r.email)}</div>
-                </div>
-            </div>
-        `).join('') || '<div style="padding: 10px; font-size: 12px; color: var(--muted);">No results found</div>';
-        listContainer.style.display = 'block';
+            const listContainer = document.getElementById('reviewerResultsList');
+            if (data.users && data.users.length > 0) {
+                listContainer.innerHTML = data.users.map(u => `
+                    <div class="reviewer-result-item" onclick="selectReviewer('${u.id}', '${escapeHtml(u.name)}', '${escapeHtml(u.email)}')">
+                        <div class="mini-avatar">${u.name.split(' ').map(n => n[0]).join('')}</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 13px;">${escapeHtml(u.name)}</div>
+                            <div style="font-size: 11px; color: var(--muted);">${escapeHtml(u.email)}</div>
+                        </div>
+                    </div>
+                `).join('');
+                listContainer.style.display = 'block';
+            } else {
+                listContainer.innerHTML = '<div style="padding: 10px; font-size: 12px; color: var(--muted);">No results found</div>';
+                listContainer.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+        }
     };
 
     document.getElementById('clearReviewer').onclick = () => {

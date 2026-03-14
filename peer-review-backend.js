@@ -177,7 +177,48 @@ export async function calculateFinalGrade(submissionId, facultyGrade) {
 // API ROUTES
 // ============================================
 
-export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission) {
+export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, User) {
+
+    // Search users for peer review (Faculty or Students)
+    app.get('/api/users/search', authMiddleware, async (req, res) => {
+        try {
+            const { q, role } = req.query;
+            if (!q || q.length < 2) return res.json({ users: [] });
+
+            const query = {
+                organizationId: req.user.organizationId,
+                $or: [
+                    { name: { $regex: q, $options: 'i' } },
+                    { email: { $regex: q, $options: 'i' } }
+                ]
+            };
+
+            // role filter: 'faculty' maps to orgRole faculty/admin/owner, 'student' to student
+            if (role === 'faculty') {
+                query.orgRole = { $in: ['faculty', 'admin', 'owner'] };
+            } else if (role === 'student') {
+                query.orgRole = 'student';
+            }
+
+            const users = await User.find(query)
+                .select('name email orgRole profilePhoto')
+                .limit(10)
+                .lean();
+
+            res.json({ users: users.map(u => ({
+                id: u._id,
+                name: u.name,
+                email: u.email,
+                role: u.orgRole,
+                avatar: u.profilePhoto
+            })) });
+
+        } catch (error) {
+            console.error('Error searching users:', error);
+            res.status(500).json({ error: 'Search failed' });
+        }
+    });
+
 
     // Get peer review settings
     app.get('/api/peer-review/settings', authMiddleware, async (req, res) => {
