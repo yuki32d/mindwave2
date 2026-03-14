@@ -19,6 +19,7 @@ function saveData(key, data) {
 // Router logic
 const urlParams = new URLSearchParams(window.location.search);
 const gameId = urlParams.get('id') || urlParams.get('play');
+const autoStart = urlParams.get('auto') === '1';
 
 document.addEventListener('DOMContentLoaded', () => {
     if (gameId) {
@@ -353,7 +354,11 @@ async function initGamePlayer(gameId) {
             return;
         }
         window.allGames = window.allGames || games;
-        showGamePreview(game);
+        if (autoStart) {
+            launchGame(game);
+        } else {
+            showGamePreview(game);
+        }
     } catch (error) {
         console.error('Failed to init game:', error);
         container.innerHTML = '<div class="error-message">Failed to load game. Please try again.</div>';

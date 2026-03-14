@@ -192,7 +192,7 @@
         <span>Hand</span>
       </button>
       <button class="ctrl-btn" id="btnPanel" onclick="togglePanel()" title="Toggle panel" aria-label="Toggle panel">
-        <i data-lucide="layout-panel-right" id="panelIco"></i>
+        <i data-lucide="panel-right" id="panelIco"></i>
         <span>Panel</span>
       </button>
       <button class="ctrl-btn ctrl-end" id="btnLeave" onclick="leaveMeeting()" aria-label="Leave meeting">
@@ -401,7 +401,8 @@
         }
         if(msg.type === 'launch_game') {
           const name = msg.gameType ? msg.gameType.charAt(0).toUpperCase()+msg.gameType.slice(1) : 'Game';
-          addChatMessage('', `Faculty launched a ${name} game! Click to join →`, false, true);
+          const gameUrl = `student-game.html?id=${msg.gameId || ''}&auto=1`;
+          addChatMessage('', `Faculty launched a ${name} game! <a href="${gameUrl}" target="_blank" style="color:#d08000;text-decoration:underline;font-weight:700;">Click to join →</a>`, false, true);
           // Show a small banner
           showGameBanner(msg);
         }
@@ -416,7 +417,16 @@
       if(existing) existing.remove();
       const b = document.createElement('div');
       b.id = 'gameBanner';
-      b.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#1a1d2e;border:1px solid rgba(208,128,0,.4);border-radius:14px;padding:.85rem 1.25rem;display:flex;align-items:center;gap:.85rem;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:360px;width:90%';
+      
+      const gameUrl = `student-game.html?id=${msg.gameId || ''}&auto=1`;
+      b.onclick = (e) => {
+        if(e.target.tagName !== 'BUTTON') window.open(gameUrl, '_blank');
+      };
+      
+      b.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#1a1d2e;border:1px solid rgba(208,128,0,.4);border-radius:14px;padding:.85rem 1.25rem;display:flex;align-items:center;gap:.85rem;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:360px;width:90%;cursor:pointer;transition:transform .2s;';
+      b.onmouseover = () => b.style.transform = 'translateX(-50%) scale(1.02)';
+      b.onmouseout = () => b.style.transform = 'translateX(-50%) scale(1)';
+      
       b.innerHTML = `<div style="width:36px;height:36px;border-radius:9px;background:rgba(208,128,0,.15);display:flex;align-items:center;justify-content:center;color:#d08000;flex-shrink:0">🎮</div><div style="flex:1"><div style="font-size:.83rem;font-weight:700;color:#f0f2ff">New Game Launched!</div><div style="font-size:.75rem;color:#9ea4b6;margin-top:.1rem">Faculty started a ${msg.gameType || 'game'}</div></div><button onclick="document.getElementById('gameBanner').remove()" style="color:#9ea4b6;background:none;border:none;font-size:1.2rem;cursor:pointer;flex-shrink:0">×</button>`;
       document.body.appendChild(b);
       setTimeout(() => { if(b.parentNode) b.remove(); }, 8000);
