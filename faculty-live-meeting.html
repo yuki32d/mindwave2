@@ -484,6 +484,12 @@
     const tile = makeTile(p.identity, p.name || p.identity, false);
     document.getElementById('videoGrid').appendChild(tile);
     attachTrack(p);
+    
+    // Fallback for audio: sometimes it's already subscribed but not attached
+    p.audioTrackPublications.forEach(pub => {
+      if (pub.isSubscribed && pub.track) pub.track.attach();
+    });
+
     updateLayout();
   }
 
@@ -501,11 +507,21 @@
     const vid = tile.querySelector('video');
     const av  = tile.querySelector('.vtile-avatar');
     let hasVid = false;
+
+    // Video
     p.videoTrackPublications.forEach(pub => {
       if (pub.isSubscribed && pub.track && pub.kind === 'video') {
         pub.track.attach(vid); hasVid = true;
       }
     });
+
+    // Audio
+    p.audioTrackPublications.forEach(pub => {
+      if (pub.isSubscribed && pub.track && pub.kind === 'audio') {
+        pub.track.attach(); 
+      }
+    });
+
     vid.style.display = hasVid ? 'block' : 'none';
     av.style.display  = hasVid ? 'none'  : 'flex';
   }

@@ -468,9 +468,18 @@
       if(!tile) return;
       const vid = tile.querySelector('video');
       const av = tile.querySelector('.vtile-avatar');
+      
+      // Video
       rp.videoTrackPublications.forEach(pub => {
         if(pub.isSubscribed && pub.track && pub.kind === 'video') {
           pub.track.attach(vid); vid.style.display='block'; av.style.display='none';
+        }
+      });
+
+      // Audio
+      rp.audioTrackPublications.forEach(pub => {
+        if(pub.isSubscribed && pub.track && pub.kind === 'audio') {
+          pub.track.attach();
         }
       });
     }
