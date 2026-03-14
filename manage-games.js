@@ -49,22 +49,37 @@ function renderGameList(games) {
         return;
     }
 
-    gameList.innerHTML = games.map(game => `
-        <div class="game-card">
-            <div class="game-info">
-                <h3>${escapeHtml(game.title)}</h3>
-                <div class="game-meta">
-                    <span>🎮 ${formatGameType(game.type)}</span>
-                    <span>🎯 ${game.totalPoints || 0} points</span>
-                    <span>⏱️ ${game.duration || 10} min</span>
-                    ${game.published ? '<span style="color: #34c759;">✓ Published</span>' : '<span style="color: #9ea4b6;">○ Draft</span>'}
+    gameList.innerHTML = games.map(game => {
+        const type = formatGameType(game.type);
+        const points = game.totalPoints || 0;
+        const duration = game.duration || 10;
+        const statusIcon = game.published ? '<i class="fas fa-check-circle" style="color: var(--green);"></i> Published' : '<i class="fas fa-edit" style="color: var(--muted);"></i> Draft';
+
+        return `
+            <div class="game-card">
+                <div class="game-info">
+                    <h3>${escapeHtml(game.title)}</h3>
+                    <div class="game-meta">
+                        <div class="meta-pill">
+                            <i class="fas fa-gamepad"></i> ${type}
+                        </div>
+                        <div class="meta-pill">
+                            <i class="fas fa-bullseye"></i> ${points} Pts
+                        </div>
+                        <div class="meta-pill">
+                            <i class="fas fa-hourglass-half"></i> ${duration} Min
+                        </div>
+                        <div class="meta-pill">
+                            ${statusIcon}
+                        </div>
+                    </div>
                 </div>
+                <button class="danger-btn delete-game-btn" data-game-id="${game._id || game.id}" data-game-title="${escapeHtml(game.title)}">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </button>
             </div>
-            <button class="danger-btn delete-game-btn" data-game-id="${game._id || game.id}" data-game-title="${escapeHtml(game.title)}">
-                🗑️ Delete
-            </button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 
     // Add event listeners to delete buttons
     document.querySelectorAll('.delete-game-btn').forEach(btn => {
@@ -77,7 +92,7 @@ function renderGameList(games) {
 }
 
 async function deleteGame(gameId, gameTitle) {
-    if (!confirm(`Delete "${gameTitle}"?\n\nThis action cannot be undone.`)) {
+    if (!await confirm(`Permanently remove "${gameTitle}" from the vault?`, "Confirm Deletion")) {
         return;
     }
 
@@ -101,12 +116,11 @@ async function deleteGame(gameId, gameTitle) {
 }
 
 async function deleteAllGames() {
-    if (!confirm('⚠️ WARNING: This will permanently delete ALL games from the system!\n\nThis action cannot be undone. Are you absolutely sure?')) {
+    if (!await confirm('WARNING: This will permanently delete ALL content from the vault! This action cannot be undone. Are you absolutely sure?', 'Final Warning')) {
         return;
     }
 
-    // Double confirmation for safety
-    if (!confirm('⚠️ FINAL CONFIRMATION\n\nYou are about to delete ALL games. This will affect all students.\n\nType YES in your mind and click OK to proceed.')) {
+    if (!await confirm('Are you 100% sure? This will affect all student progress across the platform.', 'Double Confirmation')) {
         return;
     }
 

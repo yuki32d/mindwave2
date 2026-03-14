@@ -2,153 +2,297 @@
 <html lang="en">
 
 <head>
+    <script src="admin-theme-init.js"></script>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINDWAVE – Manage Games</title>
-    <link rel="stylesheet" href="3d-depth-design.css">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave – Game Vault</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="auth-guard.js"></script>
-    <script>
-        // Check admin/faculty authentication on page load
-        if (!checkAuth()) {
-            // Will redirect if not authenticated
-        }
-    </script>
+    <link rel="stylesheet" href="3d-depth-design.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .game-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e5e9f2;
+            --accent: #d08000;
+            --accent-lo: rgba(208, 128, 0, 0.10);
+            --accent-bdr: rgba(208, 128, 0, 0.25);
+            --text: #111827;
+            --muted: #6b7280;
+            --green: #16a34a;
+            --red: #dc2626;
+            --blue: #2563eb;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.07), 0 4px 16px rgba(0, 0, 0, 0.05);
+            --radius: 14px;
+            --topbar-h: 58px;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0d1117;
+            --surface: #161b27;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #e2e8f0;
+            --muted: #6b7694;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+        .topbar {
+            height: var(--topbar-h);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        [data-theme="dark"] .topbar { background: rgba(22, 27, 39, 0.8); }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+
+        .back-btn:hover {
+            color: var(--accent);
+            background: var(--accent-lo);
+            border-color: var(--accent-bdr);
+        }
+
+        .main {
+            flex: 1;
+            padding: 40px 24px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .page-eyebrow {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+        .page-subtitle { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+        /* ── SEARCH ── */
+        .search-container { margin-bottom: 24px; }
+        .search-box { position: relative; }
+        .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+        .premium-input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 14px 16px 14px 44px;
             border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
+            color: var(--text);
+            font-size: 14px;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+        }
+        .premium-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-lo); }
+
+        /* ── GAME CARDS ── */
+        .game-list { display: flex; flex-direction: column; gap: 16px; }
+
+        .game-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
         }
 
-        .game-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
+        [data-theme="dark"] .game-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(10px); }
 
-        .game-info {
-            flex: 1;
-        }
+        .game-card:hover { transform: translateY(-3px); border-color: var(--accent-bdr); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
 
-        .game-info h3 {
-            margin: 0 0 8px 0;
-            font-size: 18px;
-            color: #f5f7ff;
-        }
-
-        .game-meta {
-            display: flex;
-            gap: 16px;
-            font-size: 13px;
-            color: #9ea4b6;
-        }
+        .game-info h3 { margin: 0 0 4px 0; font-size: 18px; font-weight: 800; color: var(--text); }
+        .game-meta { display: flex; gap: 16px; font-size: 12px; color: var(--muted); font-weight: 600; }
+        .meta-pill { background: var(--bg); padding: 4px 10px; border-radius: 8px; display: flex; align-items: center; gap: 6px; }
 
         .danger-btn {
-            background: rgba(255, 59, 48, 0.1);
-            color: #ff3b30;
-            border: 1px solid rgba(255, 59, 48, 0.2);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .danger-btn:hover {
-            background: rgba(255, 59, 48, 0.2);
-            border-color: rgba(255, 59, 48, 0.4);
-        }
-
-        .search-container {
-            max-width: 600px;
-            margin: 24px auto;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 14px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(220, 38, 38, 0.05);
+            color: var(--red);
+            border: 1px solid rgba(220, 38, 38, 0.1);
+            padding: 10px 18px;
             border-radius: 12px;
-            color: white;
-            font-size: 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
             transition: all 0.2s;
+            display: flex; align-items: center; gap: 8px;
         }
 
-        .search-input:focus {
-            outline: none;
-            border-color: #0f62fe;
-            background: rgba(255, 255, 255, 0.08);
+        .danger-btn:hover { background: rgba(220, 38, 38, 0.1); border-color: var(--red); }
+
+        .delete-all-btn {
+            width: 100%;
+            margin-top: 32px;
+            padding: 16px;
+            background: var(--red);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
         }
 
-        .search-input::placeholder {
-            color: #9ea4b6;
-        }
+        .delete-all-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3); }
 
-        .game-list-container {
-            max-width: 900px;
-            margin: 0 auto;
+        /* ── LOADING ── */
+        .loading-state { text-align: center; padding: 60px; color: var(--muted); }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
-
-        .empty-state {
-            text-align: center;
-            color: #9ea4b6;
-            padding: 60px 20px;
-            font-size: 16px;
-        }
-
-        .loading-state {
-            text-align: center;
-            color: #9ea4b6;
-            padding: 60px 20px;
-            font-size: 16px;
-        }
-
-        .delete-all-container {
-            max-width: 600px;
-            margin: 32px auto;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 
-<body data-theme="dark" data-role="faculty" data-section="manage-games">
-    <div class="page-shell">
-        <header class="hero">
-            <p class="eyebrow">Faculty Space</p>
-            <a class="ghost-link" href="faculty-settings.html">← Back to Settings</a>
-            <h1 id="pageTitle">Game Management</h1>
-            <p class="lede" id="pageSubtitle">View, search, and delete games from the system.</p>
+
+<body>
+    <div class="shell">
+        <header class="topbar">
+            <div class="topbar-left">
+                <a href="faculty-settings.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Settings
+                </a>
+            </div>
+            <div style="width: 40px;"></div> <!-- Spacer -->
         </header>
 
-        <!-- Search Bar -->
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search games by title or type...">
-        </div>
+        <main class="main">
+            <div class="content-container">
+                <header class="page-header">
+                    <div>
+                        <p class="page-eyebrow">Content Management</p>
+                        <h1 class="page-title">Game Vault</h1>
+                        <p class="page-subtitle">Curate and manage all published learning experiences.</p>
+                    </div>
+                </header>
 
-        <!-- Game List Container -->
-        <div class="game-list-container">
-            <div id="gameList">
-                <div class="loading-state">Loading games...</div>
+                <!-- Search -->
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" class="premium-input" placeholder="Search games by title or type...">
+                    </div>
+                </div>
+
+                <!-- Game List -->
+                <div class="game-list" id="gameList">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Accessing the vault...</p>
+                    </div>
+                </div>
+
+                <!-- Delete All -->
+                <div class="delete-all-container">
+                    <button class="delete-all-btn" id="deleteAllGamesBtn">
+                        <i class="fas fa-trash-bulk"></i> Delete All Content
+                    </button>
+                </div>
             </div>
-        </div>
+        </main>
+    </div>
 
-        <!-- Delete All Button -->
-        <div class="delete-all-container">
-            <button class="danger-btn" id="deleteAllGamesBtn" style="width: 100%;">
-                🗑️ Delete All Games
-            </button>
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000;">
+        <div class="confirm-modal" style="background: var(--surface); padding: 32px; border-radius: 24px; width: 400px; text-align: center; border: 1px solid var(--border);">
+            <div id="confirmTitle" style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">Confirm Action</div>
+            <div id="confirmMsg" style="color: var(--muted); margin-bottom: 32px;">Are you sure?</div>
+            <div style="display: flex; gap: 12px;">
+                <button class="modal-btn confirm-cancel" id="confirmCancel" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; background: var(--bg); color: var(--muted);">Cancel</button>
+                <button class="modal-btn confirm-ok" id="confirmOk" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; background: var(--accent); color: white;">Confirm</button>
+            </div>
         </div>
     </div>
 
-    <!-- We include role-page.js for the header -->
+    <div id="toastContainer" style="position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px;"></div>
+
     <script src="role-page.js"></script>
-    <script src="manage-games.js"></script></body>
+    <script src="manage-games.js"></script>
+    <script>
+        // ── OVERRIDE ALERT/CONFIRM ──
+        window.alert = function(msg) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.cssText = 'background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 12px; box-shadow: var(--shadow); display: flex; gap: 12px; align-items: center; animation: slideIn 0.3s forwards;';
+            toast.innerHTML = `<i class="fas fa-info-circle" style="color: var(--accent);"></i> <span>${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        };
+
+        let confirmResolve;
+        window.confirm = function(msg) {
+            document.getElementById('confirmMsg').textContent = msg;
+            document.getElementById('confirmModal').style.display = 'flex';
+            return new Promise(res => confirmResolve = res);
+        };
+
+        document.getElementById('confirmOk').onclick = () => {
+            document.getElementById('confirmModal').style.display = 'none';
+            confirmResolve(true);
+        };
+        document.getElementById('confirmCancel').onclick = () => {
+            document.getElementById('confirmModal').style.display = 'none';
+            confirmResolve(false);
+        };
+    </script>
+</body>
+
 
 </html>

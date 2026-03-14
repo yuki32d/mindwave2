@@ -47,20 +47,24 @@ async function loadPendingSignups() {
 
         // Render pending signups
         pendingList.innerHTML = data.pendingSignups.map(signup => {
-            const requestedDate = new Date(signup.requestedAt).toLocaleString();
+            const requestedDate = new Date(signup.requestedAt).toLocaleDateString(undefined, {
+                year: 'numeric', month: 'short', day: 'numeric'
+            });
 
             return `
                 <div class="pending-item" data-id="${signup._id}" data-email="${signup.email}">
                     <div class="pending-info">
                         <div class="pending-email">${signup.email}</div>
-                        <div class="pending-date">Requested: ${requestedDate}</div>
+                        <div class="pending-date">
+                            <i class="fas fa-calendar-alt"></i> Requested ${requestedDate}
+                        </div>
                     </div>
                     <div class="pending-actions">
-                        <button class="approve-btn" data-action="approve">
-                            ✓ Approve
+                        <button class="action-btn approve-btn">
+                            <i class="fas fa-check"></i> Approve
                         </button>
-                        <button class="reject-btn" data-action="reject">
-                            ✕ Reject
+                        <button class="action-btn reject-btn">
+                            <i class="fas fa-times"></i> Reject
                         </button>
                     </div>
                 </div>
@@ -97,7 +101,7 @@ async function loadPendingSignups() {
 }
 
 async function approveSignup(id, email) {
-    if (!confirm(`Approve admin signup for ${email}?`)) {
+    if (!await confirm(`Authorize admin credentials for ${email}?`, "Confirm Approval")) {
         return;
     }
 
@@ -139,7 +143,7 @@ async function approveSignup(id, email) {
 }
 
 async function rejectSignup(id, email) {
-    if (!confirm(`Reject admin signup for ${email}? This action cannot be undone.`)) {
+    if (!await confirm(`Permanently reject admin request from ${email}? This action cannot be undone.`, "Confirm Rejection")) {
         return;
     }
 

@@ -179,40 +179,42 @@ function renderStudents() {
     selectAllCheckbox.checked = false;
 }
 
-// Create Student Row
+// Create Student Card
 function createStudentRow(student) {
-    const tr = document.createElement('tr');
+    const div = document.createElement('div');
+    div.className = 'student-card';
+    div.dataset.studentId = student._id;
 
     const isSelected = selectedStudents.has(student._id);
+    const joinedDate = formatDate(student.createdAt);
+    const lastActive = student.lastActive ? formatRelativeTime(student.lastActive) : 'Never';
 
-    tr.innerHTML = `
-        <td class="checkbox-col">
+    div.innerHTML = `
+        <div style="padding-left: 2px;">
             <input type="checkbox" class="student-checkbox" data-student-id="${student._id}" ${isSelected ? 'checked' : ''}>
-        </td>
-        <td>
-            <div class="student-name">${escapeHtml(student.displayName || student.name)}</div>
-        </td>
-        <td>
-            <div class="student-email">${escapeHtml(student.email)}</div>
-        </td>
-        <td>${formatDate(student.createdAt)}</td>
-        <td>${student.gamesPlayed || 0}</td>
-        <td>${student.lastActive ? formatRelativeTime(student.lastActive) : 'Never'}</td>
-        <td class="actions-col">
-            <button class="delete-student-btn" data-student-id="${student._id}" data-student-name="${escapeHtml(student.displayName || student.name)}">
-                🗑️ Delete
+        </div>
+        <div class="student-name">${escapeHtml(student.displayName || student.name)}</div>
+        <div class="student-email">${escapeHtml(student.email)}</div>
+        <div class="col-hide-md student-meta">${joinedDate}</div>
+        <div class="col-hide-sm student-meta">${student.gamesPlayed || 0}</div>
+        <div class="col-hide-sm student-meta">${lastActive}</div>
+        <div style="text-align: right;">
+            <button class="action-btn danger-btn delete-student-btn" 
+                    data-student-id="${student._id}" 
+                    data-student-name="${escapeHtml(student.displayName || student.name)}">
+                <i class="fas fa-trash-alt"></i>
             </button>
-        </td>
+        </div>
     `;
 
     // Add event listeners
-    const checkbox = tr.querySelector('.student-checkbox');
+    const checkbox = div.querySelector('.student-checkbox');
     checkbox.addEventListener('change', handleStudentCheckbox);
 
-    const deleteBtn = tr.querySelector('.delete-student-btn');
+    const deleteBtn = div.querySelector('.delete-student-btn');
     deleteBtn.addEventListener('click', handleDeleteStudent);
 
-    return tr;
+    return div;
 }
 
 // Handle Search
@@ -301,14 +303,11 @@ async function deleteStudents(studentIds, studentNames) {
     const count = studentIds.length;
     const namesList = studentNames.slice(0, 3).join(', ') + (count > 3 ? ` and ${count - 3} more` : '');
 
-    const confirmed = confirm(
+    const confirmed = await confirm(
         `Are you sure you want to delete ${count} student${count !== 1 ? 's' : ''}?\n\n` +
         `${namesList}\n\n` +
-        `This will:\n` +
-        `- Remove their account${count !== 1 ? 's' : ''}\n` +
-        `- Delete all their game submissions\n` +
-        `- Allow them to re-register\n\n` +
-        `This action cannot be undone.`
+        `This will permanently remove their records.`,
+        "Confirm Deletion"
     );
 
     if (!confirmed) return;
