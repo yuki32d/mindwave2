@@ -7011,7 +7011,6 @@ app.post("/api/github/submit-assignment", authMiddleware, async (req, res) => {
   }
 });
 
-// Zoom Integration
 app.get("/auth/zoom", (req, res) => {
   if (!ZOOM_CLIENT_ID || !ZOOM_CLIENT_SECRET) {
     return res.status(500).send("Zoom Credentials not configured.");
@@ -11698,7 +11697,7 @@ app.post('/api/meeting/create', async (req, res) => {
     at.addGrant({ roomJoin: true, room: roomName, roomAdmin: true, canPublish: true, canSubscribe: true, canPublishData: true });
 
     const token = await at.toJwt();
-    res.json({ ok: true, code, token, wsUrl: LIVEKIT_WS_URL, roomName, displayName: name });
+    res.json({ ok: true, code, token, wsUrl: LIVEKIT_WS_URL, roomName, displayName: name, title: title || 'MindWave Class' });
   } catch (err) {
     console.error('Meeting create error:', err);
     res.status(500).json({ ok: false, message: 'Server error' });

@@ -631,7 +631,7 @@
       await new Promise(r => setTimeout(r, 300));
       room.disconnect();
     }
-    try { await fetch(API + '/api/meeting/end', { method: 'POST', headers: { Authorization: 'Bearer ' + jwt } }); } catch {}
+    try { await fetch(API + '/api/meeting/end/' + meetingCode, { method: 'POST', headers: { Authorization: 'Bearer ' + jwt } }); } catch {}
     window.location.href = 'admin.html';
   }
 
