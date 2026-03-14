@@ -339,6 +339,42 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
         }
     });
 
+    // Get completed reviews for a student
+    app.get('/api/peer-review/completed', authMiddleware, async (req, res) => {
+        try {
+            console.log('🔍 Fetching COMPLETED reviews for User:', req.user.sub);
+            const currentUser = await User.findById(req.user.sub);
+            if (!currentUser) return res.status(404).json({ error: 'User not found' });
+
+            const reviews = await PeerReview.find({
+                reviewerId: currentUser._id,
+                status: 'submitted'
+            })
+                .populate('submissionId')
+                .populate('revieweeId', 'name email')
+                .sort({ submittedAt: -1 });
+
+            // Use the same mapping as /pending for frontend consistency
+            const enriched = reviews.map(r => ({
+                id: r._id,
+                reviewerId: r.reviewerId,
+                revieweeId: r.revieweeId,
+                revieweeName: r.revieweeId ? r.revieweeId.name : 'Unknown Student',
+                projectName: r.submissionId ? (r.submissionId.projectName || 'Project Submission') : 'Project Submission',
+                dueDate: r.submittedAt || r.createdAt,
+                status: r.status,
+                ratings: r.ratings,
+                feedback: r.feedback
+            }));
+
+            console.log(`📋 Found ${enriched.length} completed reviews`);
+            res.json({ reviews: enriched });
+        } catch (error) {
+            console.error('💥 Error fetching completed reviews:', error);
+            res.status(500).json({ error: 'Failed to fetch reviews', details: error.message });
+        }
+    });
+
     // Create manual peer review invites
     app.post('/api/peer-review/invite', authMiddleware, async (req, res) => {
         try {
@@ -509,39 +545,6 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
         }
     });
 
-    // Get completed reviews for a student
-    app.get('/api/peer-review/completed', authMiddleware, async (req, res) => {
-        try {
-            const currentUser = await User.findById(req.user.sub);
-            if (!currentUser) return res.status(404).json({ error: 'User not found' });
-
-            const reviews = await PeerReview.find({
-                reviewerId: currentUser._id,
-                status: 'submitted'
-            })
-                .populate('submissionId')
-                .populate('revieweeId', 'name email')
-                .sort({ submittedAt: -1 });
-
-            // Use the same mapping as /pending for frontend consistency
-            const enriched = reviews.map(r => ({
-                id: r._id,
-                reviewerId: r.reviewerId,
-                revieweeId: r.revieweeId,
-                revieweeName: r.revieweeId ? r.revieweeId.name : 'Unknown Student',
-                projectName: r.submissionId ? (r.submissionId.projectName || 'Project Submission') : 'Project Submission',
-                dueDate: r.submittedAt || r.createdAt,
-                status: r.status,
-                ratings: r.ratings,
-                feedback: r.feedback
-            }));
-
-            res.json({ reviews: enriched });
-        } catch (error) {
-            console.error('Error fetching completed reviews:', error);
-            res.status(500).json({ error: 'Failed to fetch reviews' });
-        }
-    });
 
     // Get peer feedback received for a submission
     app.get('/api/peer-review/feedback/:submissionId', authMiddleware, async (req, res) => {
