@@ -102,6 +102,99 @@
             margin-bottom: 16px;
             opacity: 0.5;
         }
+
+        /* ── LOGOUT MODAL STYLES ── */
+        .mw-logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mw-logout-overlay.active {
+            display: flex;
+            animation: mwFadeIn .18s ease;
+        }
+
+        @keyframes mwFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .mw-logout-modal {
+            background: var(--surface, #1e1e2e);
+            border: 1px solid var(--border, rgba(255, 255, 255, .1));
+            border-radius: 20px;
+            padding: 2.4rem 2rem 2rem;
+            width: 340px;
+            max-width: 90vw;
+            text-align: center;
+        }
+
+        .mw-logout-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255, 92, 92, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            color: #ff5c5c;
+        }
+
+        .mw-logout-icon svg { width: 28px; height: 28px; }
+
+        .mw-logout-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 .5rem;
+            color: var(--text, #fff);
+        }
+
+        .mw-logout-sub {
+            font-size: .875rem;
+            color: var(--text-muted, #aaa);
+            margin: 0 0 2rem;
+            line-height: 1.5;
+        }
+
+        .mw-logout-actions { display: flex; gap: .75rem; }
+
+        .mw-logout-cancel, .mw-logout-confirm {
+            flex: 1;
+            padding: .75rem 1rem;
+            border-radius: 12px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity .15s, transform .15s;
+        }
+
+        .mw-logout-cancel:hover { opacity: .8; }
+        .mw-logout-confirm:hover { opacity: .85; transform: translateY(-1px); }
+
+        .mw-logout-cancel {
+            background: var(--surface-alt, rgba(255, 255, 255, .08));
+            color: var(--text-muted, #aaa);
+        }
+
+        .mw-logout-confirm {
+            background: #ff5c5c;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem;
+        }
+
+        .mw-logout-confirm svg { width: 16px; height: 16px; }
     </style>
 </head>
 
@@ -368,6 +461,22 @@
         window.onload = () => {
             if (window.lucide) window.lucide.createIcons();
             loadReviews();
+
+            // Profile dropdown logic
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // Using 'show' class as defined in student-theme.css
+                    profileDropdown.classList.toggle('show');
+                });
+                document.addEventListener('click', (event) => {
+                    if (!profileToggle.contains(event.target) && !profileDropdown.contains(event.target)) {
+                        profileDropdown.classList.remove('show');
+                    }
+                });
+            }
 
             // Logout listener
             const signOutBtn = document.getElementById('signOutBtn');
