@@ -198,17 +198,25 @@
         /* Assessment Modal */
         .mw-assessment-overlay {
             position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85) !important;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 2000;
+            z-index: 10000;
             padding: 20px;
         }
 
-        .mw-assessment-overlay.active { display: flex; }
+        .mw-assessment-overlay.active { 
+            display: flex !important; 
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
 
         .mw-assessment-modal {
             background: var(--surface);
@@ -510,6 +518,7 @@
                 </button>
             </div>
         </div>
+    </div>
 
     <!-- Assessment Modal -->
     <div id="assessmentModal" class="mw-assessment-overlay">
@@ -591,7 +600,6 @@
                 </button>
             </div>
         </div>
-    </div>
     </div>
 
     <script>
@@ -736,8 +744,12 @@
                 document.getElementById('modalStrengths').value = '';
                 document.getElementById('modalImprovements').value = '';
 
+                modal.style.display = 'flex';
                 modal.classList.add('active');
+                
                 console.log('✨ Modal opened successfully');
+                console.log('📏 Modal rect:', modal.getBoundingClientRect());
+                
                 if (window.lucide) window.lucide.createIcons();
             } catch (e) {
                 console.error('💥 Error in startReview:', e);
