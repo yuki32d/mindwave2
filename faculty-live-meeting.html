@@ -146,6 +146,25 @@
     .toast svg{width:15px;height:15px;flex-shrink:0}
     .toast.info{border-color:rgba(208,128,0,.3);color:#fbbf24}
     .toast.success{border-color:rgba(34,197,94,.3);color:#22c55e}
+    
+    /* ── SUMMARY MODAL ── */
+    #summaryModal{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);z-index:10000;display:none;align-items:center;justify-content:center;padding:1.5rem}
+    .sum-card{background:#111320;border:1px solid rgba(255,255,255,.1);border-radius:24px;width:100%;max-width:540px;overflow:hidden;box-shadow:0 32px 64px rgba(0,0,0,.6);animation:m-in .3s ease-out}
+    @keyframes m-in{from{opacity:0;transform:scale(.95) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .sum-header{padding:2rem;text-align:center;background:linear-gradient(180deg,rgba(208,128,0,.15),transparent);border-bottom:1px solid rgba(255,255,255,.05)}
+    .sum-header i{width:48px;height:48px;color:#d08000;margin-bottom:1rem}
+    .sum-body{padding:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+    .sum-stat{background:rgba(255,255,255,.03);padding:1.25rem;border-radius:16px;border:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:.4rem}
+    .sum-stat-val{font-size:1.5rem;font-weight:800;color:#f0f2ff}
+    .sum-stat-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:#9ea4b6;font-weight:700}
+    .sum-actions{padding:1.5rem 2rem;display:flex;gap:1rem;background:rgba(255,255,255,.02)}
+    .sum-btn{flex:1;padding:.85rem;border-radius:12px;cursor:pointer;font-weight:700;font-size:.9rem;display:flex;align-items:center;justify-content:center;gap:.6rem;border:none;transition:all .15s}
+    .sum-btn-p{background:linear-gradient(135deg,#d08000,#f59e0b);color:#fff}
+    .sum-btn-s{background:rgba(255,255,255,.08);color:#f0f2ff;border:1px solid rgba(255,255,255,.1)}
+    .sum-btn:hover{opacity:.9;transform:translateY(-1px)}
+    
+    #liveAiInsight{background:rgba(208,128,0,.1);border:1px solid rgba(208,128,0,.25);border-radius:12px;padding:.85rem;margin-top:.2rem;font-size:.78rem;line-height:1.5;color:#fbbf24}
+    #liveAiInsight i{width:14px;height:14px;vertical-align:middle;margin-right:.4rem}
     .toast.error{border-color:rgba(255,92,92,.3);color:#ff5c5c}
     @keyframes tslide{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
 
@@ -259,6 +278,9 @@
               <div class="insight-label"><i data-lucide="users"></i> Participants</div>
               <div class="gauge-val" id="partCount">1</div>
             </div>
+            <div id="liveAiInsight">
+              <i data-lucide="sparkles"></i> <span>Initializing AI Meeting Analysis...</span>
+            </div>
           </div>
 
           <!-- Launch Game -->
@@ -292,6 +314,39 @@
 <!-- Toast container -->
 <div class="toast-wrap" id="toastWrap"></div>
 
+<!-- Summary Modal -->
+<div id="summaryModal">
+  <div class="sum-card">
+    <div class="sum-header">
+      <i data-lucide="check-circle-2"></i>
+      <h2>Meeting Summary</h2>
+      <p id="sumTitle" style="color:#9ea4b6;font-size:.85rem;margin-top:.4rem">Class Session Records</p>
+    </div>
+    <div class="sum-body">
+      <div class="sum-stat">
+        <span class="sum-stat-val" id="sumDur">0m</span>
+        <span class="sum-stat-lbl">Duration</span>
+      </div>
+      <div class="sum-stat">
+        <span class="sum-stat-val" id="sumParts">0</span>
+        <span class="sum-stat-lbl">Participants</span>
+      </div>
+      <div class="sum-stat">
+        <span class="sum-stat-val" id="sumChat">0</span>
+        <span class="sum-stat-lbl">Messages</span>
+      </div>
+      <div class="sum-stat">
+        <span class="sum-stat-val" id="sumEng">0%</span>
+        <span class="sum-stat-lbl">Avg. Engagement</span>
+      </div>
+    </div>
+    <div class="sum-actions">
+      <button class="sum-btn sum-btn-p" onclick="downloadSummary()"><i data-lucide="download"></i> Download Report</button>
+      <button class="sum-btn sum-btn-s" onclick="location.href='admin.html'"><i data-lucide="home"></i> Exit</button>
+    </div>
+  </div>
+</div>
+
 <script>
   lucide.createIcons();
 
@@ -305,6 +360,16 @@
   let meetingCode = '', meetingTitle = 'Live Meeting';
   let handsRaised = {}; // identity -> name
   let selectedGame = null;
+
+  const meetingLog = {
+    title: 'MindWave Live Class',
+    start: Date.now(),
+    end: null,
+    participants: new Set(),
+    chats: [],
+    engagementSamples: [],
+    events: []
+  };
 
   const GAMES = [
     { id:'quiz',     label:'Quiz',        icon:'help-circle' },
@@ -395,7 +460,12 @@
 
     room = new LivekitClient.Room({ adaptiveStream: true, dynacast: true });
 
-    room.on(LivekitClient.RoomEvent.ParticipantConnected, p => { renderAllParticipants(); addTile(p); showToast(p.name + ' joined', 'info'); });
+    room.on(LivekitClient.RoomEvent.ParticipantConnected, p => { 
+      renderAllParticipants(); 
+      addTile(p); 
+      showToast(p.name + ' joined', 'info'); 
+      meetingLog.participants.add(p.name || p.identity);
+    });
     room.on(LivekitClient.RoomEvent.ParticipantDisconnected, p => { removeTile(p); renderAllParticipants(); });
     room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, pub, p) => {
       if (track.source === 'screen_share') togglePresentation(track, p, true);
@@ -411,12 +481,13 @@
       document.querySelectorAll('.vtile').forEach(t => t.classList.remove('speaking'));
       speakers.forEach(s => { const t = document.getElementById('tile-' + s.identity); if (t) t.classList.add('speaking'); });
     });
-    room.on(LivekitClient.RoomEvent.DataReceived, (data, p) => {
-      try {
-        const msg = JSON.parse(new TextDecoder().decode(data));
-        if (msg.type === 'chat') addChat(p ? p.name || p.identity : 'Unknown', msg.text, false);
-        if (msg.type === 'hand') handleHand(p, msg.raised);
-      } catch {}
+    room.on(LivekitClient.RoomEvent.DataReceived, (data, rp) => {
+      const msg = JSON.parse(new TextDecoder().decode(data));
+      if (msg.type === 'chat') {
+        addChat(rp ? rp.name || rp.identity : 'Student', msg.text, false);
+        meetingLog.chats.push({ from: rp ? rp.name||rp.identity : 'Student', text: msg.text, time: Date.now() });
+      }
+      if (msg.type === 'hand') handleHand(rp, msg.raised);
     });
     
     room.on(LivekitClient.RoomEvent.Disconnected, (reason) => { 
@@ -454,8 +525,15 @@
     }
 
     renderLocalTile();
-    renderAllParticipants();
-    startTimer();
+      renderAllRemotes();
+      startTimer();
+      
+      // AI Sampling Interval
+      setInterval(() => {
+        const eng = parseInt(document.getElementById('engVal').textContent) || 0;
+        meetingLog.engagementSamples.push(eng);
+        updateAiInsight(eng);
+      }, 30000); // Every 30s
     updateEngagement();
     setInterval(updateEngagement, 5000);
   }
@@ -555,6 +633,30 @@
     const cnt = document.querySelectorAll('.vtile').length;
     document.getElementById('videoArea').className = 'video-area layout-' + Math.min(cnt, 6);
     document.getElementById('partCount').textContent = cnt;
+    
+    // Log engagement
+    const eng = parseInt(document.getElementById('engVal').textContent);
+    meetingLog.engagementSamples.push(eng);
+    updateAiInsight(eng);
+  }
+
+  function updateAiInsight(eng) {
+    const box = document.querySelector('#liveAiInsight span');
+    if (!box) return;
+    
+    const chats = meetingLog.chats.length;
+    let insight = "Monitoring student engagement...";
+    
+    if (eng > 80) insight = "Engagement is Excellent! Most students have cameras on and are focused.";
+    else if (eng > 50) insight = "Participation is steady. Keep interactive elements flowing.";
+    else if (eng < 30 && meetingLog.participants.size > 1) insight = "Engagement is slightly low. Try launching a Poll or Game to re-focus the class.";
+    
+    if (chats > 5) insight += " | Chat is very active, high collaboration detected.";
+    
+    const latestEvent = meetingLog.events[meetingLog.events.length - 1];
+    if (latestEvent) insight = `AI Insight: ${latestEvent.type === 'launch_game' ? 'Transitioning to gamified learning.' : 'Class activity in progress.'} | ` + insight;
+
+    box.textContent = insight;
   }
 
   function togglePresentation(track, p, active) {
@@ -615,6 +717,7 @@
     if (!room || !text.trim()) return;
     await room.localParticipant.publishData(new TextEncoder().encode(JSON.stringify({ type: 'chat', text: text.trim() })), { reliable: true });
     addChat('You (Faculty)', text.trim(), true);
+    meetingLog.chats.push({ from: 'Faculty (You)', text: text.trim(), time: Date.now() });
   }
 
   document.getElementById('chatSend').onclick = () => {
@@ -739,14 +842,54 @@
   }
 
   async function endMeeting() {
-    if (!confirm('End the meeting for everyone?')) return;
-    if (room) {
-      room.localParticipant.publishData(new TextEncoder().encode(JSON.stringify({ type: 'meeting_ended' })), { reliable: true });
-      await new Promise(r => setTimeout(r, 300));
-      room.disconnect();
-    }
-    try { await fetch(API + '/api/meeting/end/' + meetingCode, { method: 'POST', headers: { Authorization: 'Bearer ' + jwt } }); } catch {}
-    window.location.href = 'admin.html';
+    if (!confirm('Are you sure you want to end this session for everyone?')) return;
+    
+    meetingLog.end = Date.now();
+    const payload = new TextEncoder().encode(JSON.stringify({ type: 'meeting_ended' }));
+    if(room) room.localParticipant.publishData(payload, { reliable: true });
+
+    // Populate Modal
+    const durationMins = Math.floor((meetingLog.end - meetingLog.start) / 60000);
+    const avgEng = meetingLog.engagementSamples.length ? Math.round(meetingLog.engagementSamples.reduce((a,b)=>a+b,0) / meetingLog.engagementSamples.length) : 0;
+    
+    document.getElementById('sumDur').textContent = durationMins + 'm';
+    document.getElementById('sumParts').textContent = meetingLog.participants.size + 1; // +1 for faculty
+    document.getElementById('sumChat').textContent = meetingLog.chats.length;
+    document.getElementById('sumEng').textContent = avgEng + '%';
+    
+    document.getElementById('summaryModal').style.display = 'flex';
+    
+    if(room) room.disconnect();
+  }
+
+  function downloadSummary() {
+    const avgEng = meetingLog.engagementSamples.length ? Math.round(meetingLog.engagementSamples.reduce((a,b)=>a+b,0) / meetingLog.engagementSamples.length) : 0;
+    let text = `MINDWAVE MEETING SUMMARY\n`;
+    text += `=========================\n`;
+    text += `Title: ${meetingLog.title}\n`;
+    text += `Duration: ${Math.floor((meetingLog.end - meetingLog.start) / 60000)} minutes\n`;
+    text += `Participants: ${Array.from(meetingLog.participants).join(', ') || 'Only you'}\n`;
+    text += `Average Engagement: ${avgEng}%\n`;
+    text += `Total Messages: ${meetingLog.chats.length}\n\n`;
+    
+    text += `CHAT TRANSCRIPT\n----------------\n`;
+    meetingLog.chats.forEach(c => {
+      const t = new Date(c.time).toLocaleTimeString();
+      text += `[${t}] ${c.from}: ${c.text}\n`;
+    });
+    
+    text += `\nSESSION EVENTS\n----------------\n`;
+    meetingLog.events.forEach(e => {
+      const t = new Date(e.time).toLocaleTimeString();
+      text += `[${t}] Activity: ${e.type} (${e.game || ''})\n`;
+    });
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Meeting_Summary_${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
   }
 
   // ── TABS ──
