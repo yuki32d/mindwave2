@@ -12,6 +12,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
         rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="auth-guard.js"></script>
     <style>
         :root {
@@ -261,24 +262,79 @@
             color: var(--red);
         }
 
-        .service-row { border-bottom: 1px solid var(--border); padding-bottom: 24px; }
-        .service-row:last-child { border-bottom: none; }
-        .uptime-bars { width: 100%; display: flex; align-items: flex-end; }
+        .service-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow); }
+        .service-row:last-child { margin-bottom: 0; }
+        .uptime-bars { width: 100%; display: flex; align-items: stretch; gap: 2px; height: 34px; margin: 12px 0; }
         .bar { 
             flex: 1; 
             background: #10b981; 
-            border-radius: 1px; 
-            transition: transform 0.2s; 
+            border-radius: 2px; 
+            transition: transform 0.2s, opacity 0.2s; 
             cursor: pointer;
             min-width: 2px;
+            height: 100%;
         }
-        .bar:hover { transform: scaleY(1.3); }
+        .bar:hover { transform: scaleY(1.2); opacity: 0.8; }
         .bar.down { background: #ef4444; }
         .bar.degraded { background: #f59e0b; }
         .bar.today { position: relative; }
         .bar.today::after { 
-            content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+            content: ''; position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
             width: 4px; height: 4px; border-radius: 50%; background: var(--accent);
+        }
+
+        /* Tooltip */
+        #uptimeTooltip {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .metrics-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: var(--shadow);
+        }
+        .metrics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .metrics-tabs {
+            display: flex;
+            gap: 8px;
+            background: var(--bg);
+            padding: 4px;
+            border-radius: 8px;
+        }
+        .tab-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
     </style>
 </head>
@@ -315,87 +371,104 @@
                 </div>
 
                 <!-- Global Status Banner -->
-                <div id="globalStatusBanner" style="background: #10b981; color: white; padding: 20px; border-radius: 8px; margin-bottom: 40px; font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 15px;">
-                    <i data-lucide="check-circle" style="width: 24px; height: 24px;"></i>
+                <div id="globalStatusBanner" style="background: #10b981; color: white; padding: 22px; border-radius: 12px; margin-bottom: 40px; font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);">
+                    <i data-lucide="check-circle" style="width: 26px; height: 26px;"></i>
                     All Systems Operational
                 </div>
 
                 <!-- Services List -->
-                <div class="uptime-container" style="display: flex; flex-direction: column; gap: 32px;">
+                <div class="uptime-container" style="display: flex; flex-direction: column; gap: 4px;">
                     <!-- API Service -->
                     <div class="service-row" data-service="api">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <h3 style="font-size: 16px; font-weight: 600;">Core API Gateway</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="plus-square" style="width: 14px; color: var(--muted); cursor: pointer;"></i> Core API Gateway
+                            </h3>
                             <span class="service-status" style="color: #10b981; font-weight: 600; font-size: 14px;">Operational</span>
                         </div>
-                        <div class="uptime-bars" style="display: flex; gap: 2px; height: 34px;">
+                        <div class="uptime-bars">
                             <!-- Bars generated by JS -->
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px; color: var(--muted); font-weight: 500;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); font-weight: 500;">
                             <span>90 days ago</span>
-                            <span style="height: 1px; flex: 1; background: var(--border); margin: 0 15px;"></span>
-                            <span class="uptime-percent">100.0% uptime</span>
-                            <span style="height: 1px; flex: 1; background: var(--border); margin: 0 15px;"></span>
+                            <span class="uptime-percent">100.0 % uptime</span>
                             <span>Today</span>
                         </div>
                     </div>
 
                     <!-- Database Service -->
                     <div class="service-row" data-service="db">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <h3 style="font-size: 16px; font-weight: 600;">Main Database Cluster</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="plus-square" style="width: 14px; color: var(--muted); cursor: pointer;"></i> Main Database Cluster
+                            </h3>
                             <span class="service-status" style="color: #10b981; font-weight: 600; font-size: 14px;">Operational</span>
                         </div>
-                        <div class="uptime-bars" style="display: flex; gap: 2px; height: 34px;">
+                        <div class="uptime-bars">
                             <!-- Bars generated by JS -->
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px; color: var(--muted); font-weight: 500;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); font-weight: 500;">
                             <span>90 days ago</span>
-                            <span style="height: 1px; flex: 1; background: var(--border); margin: 0 15px;"></span>
-                            <span class="uptime-percent">99.98% uptime</span>
-                            <span style="height: 1px; flex: 1; background: var(--border); margin: 0 15px;"></span>
+                            <span class="uptime-percent">99.98 % uptime</span>
                             <span>Today</span>
                         </div>
                     </div>
 
                     <!-- AI Service -->
                     <div class="service-row" data-service="ai">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <h3 style="font-size: 16px; font-weight: 600;">AI Game Engine (v2)</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="plus-square" style="width: 14px; color: var(--muted); cursor: pointer;"></i> AI Game Engine (v2)
+                            </h3>
                             <span class="service-status" style="color: #10b981; font-weight: 600; font-size: 14px;">Operational</span>
                         </div>
-                        <div class="uptime-bars" style="display: flex; gap: 2px; height: 34px;">
+                        <div class="uptime-bars">
                             <!-- Bars generated by JS -->
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px; color: var(--muted); font-weight: 500;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); font-weight: 500;">
                             <span>90 days ago</span>
-                            <span style="height: 1px; flex: 1; background: var(--border); margin: 0 15px;"></span>
-                            <span class="uptime-percent">100.0% uptime</span>
-                            <span style="height: 1px; flex: 1; background: var(--border); margin: 0 15px;"></span>
+                            <span class="uptime-percent">100.0 % uptime</span>
                             <span>Today</span>
                         </div>
                     </div>
 
                     <!-- CDN Service -->
                     <div class="service-row" data-service="cdn">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <h3 style="font-size: 16px; font-weight: 600;">Asset Delivery (CDN)</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="plus-square" style="width: 14px; color: var(--muted); cursor: pointer;"></i> Asset Delivery (CDN)
+                            </h3>
                             <span class="service-status" style="color: #10b981; font-weight: 600; font-size: 14px;">Operational</span>
                         </div>
-                        <div class="uptime-bars" style="display: flex; gap: 2px; height: 34px;">
+                        <div class="uptime-bars">
                             <!-- Bars generated by JS -->
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px; color: var(--muted); font-weight: 500;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); font-weight: 500;">
                             <span>90 days ago</span>
-                            <span style="height: 1px; flex: 1; background: var(--border); margin: 0 15px;"></span>
-                            <span class="uptime-percent">100.0% uptime</span>
-                            <span style="height: 1px; flex: 1; background: var(--border); margin: 0 15px;"></span>
+                            <span class="uptime-percent">100.0 % uptime</span>
                             <span>Today</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- System Logs (Kept for detail) -->
+                <!-- System Metrics Chart Section -->
+                <div class="metrics-section">
+                    <div class="metrics-header">
+                        <h2 style="font-size: 20px; font-weight: 700;">System Metrics</h2>
+                        <div class="metrics-tabs">
+                            <button class="tab-btn active" data-range="day">Day</button>
+                            <button class="tab-btn" data-range="week">Week</button>
+                            <button class="tab-btn" data-range="month">Month</button>
+                        </div>
+                    </div>
+                    <div style="background: var(--surface); padding: 20px; border-radius: 12px; height: 300px; position: relative;">
+                        <div style="position: absolute; top: 15px; left: 25px; font-size: 15px; font-weight: 600; color: var(--muted);">Site Uptime</div>
+                        <div style="position: absolute; top: 15px; right: 25px; font-size: 20px; font-weight: 700; color: var(--muted);">100%</div>
+                        <canvas id="uptimeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- System Logs -->
                 <div class="health-card" style="margin-top: 60px; border: none; background: transparent; padding: 0;">
                     <div class="health-header" style="border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px;">
                         <span class="health-title" style="font-size: 18px;">Uptime History & Logs</span>
@@ -409,7 +482,8 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <div id="uptimeTooltip"></div>
+
     <script src="admin-logout-handler.js"></script>
     <script src="admin-status.js"></script>
     <script>
