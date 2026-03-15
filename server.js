@@ -730,7 +730,9 @@ const gameSubmissionSchema = new mongoose.Schema(
     submittedAt: { type: Date, default: Date.now },
     startedAt: { type: Date }, // When student started the game
     completedAt: { type: Date }, // When student completed/submitted the game
-    durationSeconds: { type: Number } // Time taken in seconds
+    durationSeconds: { type: Number }, // Time taken in seconds
+    cheatingAttempts: { type: Number, default: 0 },
+    cheatLogs: { type: Array, default: [] }
   },
   { timestamps: true }
 );
@@ -3922,7 +3924,17 @@ app.get("/api/games/debug", async (req, res) => {
 // Game Submission Endpoint - Save student game results
 app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, res) => {
   try {
-    const { gameId, score, isCorrect, studentAnswers, startedAt, completedAt, durationSeconds } = req.body;
+    const { 
+      gameId, 
+      score, 
+      isCorrect, 
+      studentAnswers, 
+      startedAt, 
+      completedAt, 
+      durationSeconds,
+      cheatingAttempts,
+      cheatLogs 
+    } = req.body;
 
     if (!gameId) {
       return res.status(400).json({ ok: false, message: "Game ID is required" });
@@ -3943,7 +3955,9 @@ app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, re
       studentAnswers: studentAnswers || [],
       startedAt: startedAt ? new Date(startedAt) : new Date(),
       completedAt: completedAt ? new Date(completedAt) : new Date(),
-      durationSeconds: durationSeconds || 0
+      durationSeconds: durationSeconds || 0,
+      cheatingAttempts: cheatingAttempts || 0,
+      cheatLogs: cheatLogs || []
     });
 
     res.status(201).json({ ok: true, submission });
@@ -5084,7 +5098,17 @@ app.get("/api/games/:gameId/leaderboard", authMiddleware, async (req, res) => {
 
 app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, res) => {
   try {
-    const { gameId, score, isCorrect, studentAnswers, startedAt, completedAt, durationSeconds } = req.body;
+    const { 
+      gameId, 
+      score, 
+      isCorrect, 
+      studentAnswers, 
+      startedAt, 
+      completedAt, 
+      durationSeconds,
+      cheatingAttempts,
+      cheatLogs 
+    } = req.body;
     const studentId = req.user.sub;
 
     if (!gameId) {
@@ -5101,7 +5125,9 @@ app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, re
       submittedAt: new Date(),
       startedAt: startedAt ? new Date(startedAt) : null,
       completedAt: completedAt ? new Date(completedAt) : new Date(),
-      durationSeconds: durationSeconds || null
+      durationSeconds: durationSeconds || null,
+      cheatingAttempts: cheatingAttempts || 0,
+      cheatLogs: cheatLogs || []
     });
 
     res.status(201).json({ ok: true, submission });

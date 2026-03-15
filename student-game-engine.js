@@ -159,7 +159,11 @@ function renderGameList(games) {
     container.querySelectorAll('.gc-card').forEach(card => {
         card.addEventListener('click', () => {
             const game = (window.allGames || []).find(g => (g._id || g.id) === card.dataset.id);
-            if (game) showGamePreview(game);
+            if (game) {
+                // Instead of showing preview here, we can still show it or launch directly.
+                // The user wants a "professional platform" when they click Play Now.
+                showGamePreview(game);
+            }
             else window.location.href = `?id=${card.dataset.id}`;
         });
     });
@@ -233,14 +237,25 @@ function showGamePreview(game) {
         renderGameList(window.allGames || []);
     });
     document.getElementById('startGameBtn').addEventListener('click', () => {
-        launchGame(game);
+        // PROFESSIONAL PLATFORM: Launch in a new tab
+        const gId = game._id || game.id;
+        const playUrl = `student-game-play.html?id=${gId}&auto=1`;
+        window.open(playUrl, '_blank', 'noopener,noreferrer');
+        
+        // Return to lobby in this tab
+        renderGameList(window.allGames || []);
     });
 }
 
 function launchGame(game) {
     const container = document.getElementById('appContainer');
-    if (document.getElementById('gcFilterBar')) document.getElementById('gcFilterBar').style.display = 'none';
-    if (document.getElementById('breadcrumbSub')) document.getElementById('breadcrumbSub').textContent = game.title;
+    
+    // Safety checks for Pro Mode
+    if (!window.isProMode) {
+        if (document.getElementById('gcFilterBar')) document.getElementById('gcFilterBar').style.display = 'none';
+        if (document.getElementById('breadcrumbSub')) document.getElementById('breadcrumbSub').textContent = game.title;
+    }
+    
     container.innerHTML = '';
     try {
         switch (game.type) {
@@ -1218,7 +1233,7 @@ async function saveResult(game, score, totalPoints, startTime, studentAnswers = 
             return false;
         }
 
-        // Submit to backend API with time tracking
+        // Submit to backend API with time tracking and anti-cheat logs
         const response = await fetch(`${window.location.origin}/api/game-submissions`, {
             method: 'POST',
             headers: {
@@ -1232,7 +1247,9 @@ async function saveResult(game, score, totalPoints, startTime, studentAnswers = 
                 studentAnswers: studentAnswers,
                 startedAt: new Date(startTime).toISOString(),
                 completedAt: new Date().toISOString(),
-                durationSeconds: timeTaken
+                durationSeconds: timeTaken,
+                cheatingAttempts: window.cheatingAttempts || 0,
+                cheatLogs: window.cheatLogs || []
             })
         });
 
@@ -1323,6 +1340,15 @@ function startTimer(durationMinutes, containerSelector, onFinish) {
             onFinish();
         }
     }, 1000);
+}
+
+// Fullscreen helper
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+    }
 }
 
 // === SCENARIO GAME ENGINE ===

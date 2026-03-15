@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave Pro Mode | Interactive Session</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-brain-circuit'><path d='M12 4.5a2.5 2.5 0 0 0-4.96-.44l-.32 1.6d4a4.44 4.44 0 0 1-4.42 3.54 3 3 0 0 0 0 6 4.44 4.44 0 0 1 4.42 3.54l.32 1.6d4a2.5 2.5 0 0 0 4.96-.44' /><path d='M12 19.5a2.5 2.5 0 0 0 4.96.44l.32-1.6d4a4.44 4.44 0 0 1 4.42-3.54 3 3 0 0 0 0-6 4.44 4.44 0 0 1-4.42-3.54l-.32-1.6d4a2.5 2.5 0 0 0-4.96.44' /><circle cx='12' cy='12' r='3' /></svg>">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --accent: #a855f7;
+            --bg: #030712;
+            --surface: rgba(17, 24, 39, 0.7);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f9fafb;
+            --text-muted: #9ca3af;
+            --red: #ef4444;
+            --glass: rgba(255, 255, 255, 0.02);
+            --glass-strong: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .pro-layout {
+            width: 100%;
+            max-width: 900px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pro-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding: 0 10px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .brand-text {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to right, #fff, #9ca3af);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .session-badge {
+            background: var(--glass-strong);
+            padding: 6px 14px;
+            border-radius: 99px;
+            border: 1px solid var(--border);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pro-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pro-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
+            opacity: 0.5;
+        }
+
+        #appContainer {
+            width: 100%;
+        }
+
+        /* Anti-Cheat UI Enhancements */
+        #cheat-warning {
+            backdrop-filter: blur(12px) !important;
+            border: 1px solid rgba(255, 59, 48, 0.3) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 640px) {
+            .pro-card {
+                padding: 24px;
+            }
+            .pro-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+        }
+
+        /* Loading State */
+        .loading-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 0;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--glass-strong);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes mwFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="pro-layout">
+        <header class="pro-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i data-lucide="brain-circuit" style="color: white; width: 24px; height: 24px;"></i>
+                </div>
+                <span class="brand-text">MindWave Pro</span>
+            </div>
+            <div class="session-badge">
+                <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i>
+                Secure Session Active
+            </div>
+        </header>
+
+        <main class="pro-card">
+            <div id="appContainer">
+                <div class="loading-wrap">
+                    <div class="spinner"></div>
+                    <p style="color: var(--text-muted); font-weight: 500;">Initializing secure environment...</p>
+                </div>
+            </div>
+        </main>
+
+        <footer style="margin-top: 24px; text-align: center;">
+            <p style="font-size: 0.75rem; color: var(--text-muted); opacity: 0.6;">
+                &copy; 2026 MindWave Interactive. All activity is proctored for exam integrity.
+            </p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Check for standalone mode (standalone game play doesn't need certain elements)
+        window.isProMode = true;
+        
+        // Lucide initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+
+        // Set player initials from localStorage if available
+        const firstName = localStorage.getItem('firstName') || '';
+        const lastName = localStorage.getItem('lastName') || '';
+        const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Student';
+    </script>
+    <script src="anti-cheat.js"></script>
+    <script src="student-game-engine.js"></script>
+</body>
+</html>

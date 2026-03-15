@@ -130,59 +130,116 @@
     `;
     document.head.appendChild(style);
 
+    // Cheat metrics
+    window.cheatingAttempts = 0;
+    window.cheatLogs = [];
+
     // Show warning message
     let warningTimeout;
-    function showCheatWarning(message) {
+    function showCheatWarning(message, isCritical = false) {
         // Remove existing warning if any
         const existingWarning = document.getElementById('cheat-warning');
         if (existingWarning) {
+            if (isCritical) return; // Don't replace a critical warning
             existingWarning.remove();
         }
 
         // Create warning element
         const warning = document.createElement('div');
         warning.id = 'cheat-warning';
-        warning.style.cssText = `
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 59, 48, 0.95);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            z-index: 99999;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            animation: slideDown 0.3s ease;
-        `;
-        warning.textContent = '⚠️ ' + message;
-
-        // Add animation
-        const keyframes = document.createElement('style');
-        keyframes.textContent = `
-            @keyframes slideDown {
-                from {
-                    opacity: 0;
-                    transform: translateX(-50%) translateY(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(-50%) translateY(0);
-                }
-            }
-        `;
-        document.head.appendChild(keyframes);
+        
+        if (isCritical) {
+            warning.style.cssText = `
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.9);
+                backdrop-filter: blur(20px);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 999999;
+                padding: 40px;
+                text-align: center;
+                animation: mwFadeIn 0.3s ease;
+            `;
+            warning.innerHTML = `
+                <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; border-radius: 24px; padding: 48px; max-width: 500px; box-shadow: 0 0 50px rgba(239,68,68,0.2);">
+                    <div style="font-size: 64px; margin-bottom: 24px;">🚫</div>
+                    <h2 style="color: #fff; font-size: 28px; font-weight: 800; margin-bottom: 16px;">Cheating Detected!</h2>
+                    <p style="color: #9ca3af; font-size: 18px; line-height: 1.6; margin-bottom: 32px;">
+                        You have navigated away from the exam tab. This action has been <strong>logged</strong> and sent to your teacher.
+                    </p>
+                    <p style="color: #ef4444; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em;">
+                        Return to the exam immediately to avoid disqualification.
+                    </p>
+                    <button id="resumeExamBtn" style="margin-top: 32px; background: #fff; color: #000; border: none; padding: 16px 32px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: transform 0.2s;">
+                        Resume Exam
+                    </button>
+                </div>
+            `;
+        } else {
+            warning.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(255, 59, 48, 0.95);
+                backdrop-filter: blur(10px);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 600;
+                z-index: 99999;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                animation: slideDown 0.3s ease;
+            `;
+            warning.textContent = '⚠️ ' + message;
+        }
 
         document.body.appendChild(warning);
 
-        // Auto-remove after 3 seconds
-        clearTimeout(warningTimeout);
-        warningTimeout = setTimeout(() => {
-            warning.style.animation = 'slideDown 0.3s ease reverse';
-            setTimeout(() => warning.remove(), 300);
-        }, 3000);
+        if (isCritical) {
+            const btn = document.getElementById('resumeExamBtn');
+            btn.onclick = () => {
+                warning.remove();
+                if (window.isProMode && typeof toggleFullScreen === 'function') {
+                    toggleFullScreen();
+                }
+            };
+        } else {
+            // Auto-remove standard warnings after 3 seconds
+            clearTimeout(warningTimeout);
+            warningTimeout = setTimeout(() => {
+                warning.style.animation = 'slideDown 0.3s ease reverse';
+                setTimeout(() => warning.remove(), 300);
+            }, 3000);
+        }
+    }
+
+    // Visibility Detection
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            handleCheatAttempt('Tab switched / window minimized');
+        }
+    });
+
+    window.addEventListener('blur', () => {
+        handleCheatAttempt('Focus lost');
+    });
+
+    function handleCheatAttempt(reason) {
+        window.cheatingAttempts++;
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            reason: reason,
+            attemptNumber: window.cheatingAttempts
+        };
+        window.cheatLogs.push(logEntry);
+        
+        console.warn('⚠️ Anti-Cheat Warning:', reason, logEntry);
+        showCheatWarning('Please close other tabs or applications to continue.', true);
     }
 
     // Detect if DevTools is open (optional - more aggressive)
