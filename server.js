@@ -7034,6 +7034,7 @@ app.get("/auth/google", (req, res) => {
     "https://www.googleapis.com/auth/classroom.courses.readonly",
     "https://www.googleapis.com/auth/classroom.coursework.me",
     "https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly",
+    "https://www.googleapis.com/auth/drive.readonly",
     "https://www.googleapis.com/auth/drive.file"
   ];
   const url = oauth2Client.generateAuthUrl({
@@ -12053,7 +12054,11 @@ app.post('/api/admin/sync-classroom', async (req, res) => {
               }
 
             } catch (err) {
-              console.log(`[RAG Sync] Error processing ${fileTitle}:`, err.message);
+              if (err.code === 403 || err.message.includes('permission') || err.message.includes('Forbidden')) {
+                  console.error(`[RAG Sync] PERMISSION ERROR on ${fileTitle}: You likely need to disconnect and reconnect your Google account to grant new Drive permissions.`);
+              } else {
+                  console.log(`[RAG Sync] Error processing ${fileTitle}:`, err.message);
+              }
             }
           }
         }
