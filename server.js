@@ -9061,9 +9061,13 @@ app.get('/api/google-classroom/courses', authMiddleware, async (req, res) => {
   }
 
   try {
+    console.log('[Google API Debug] req.user:', req.user);
+    const userId = req.user.id || req.user.sub;
+    if (!userId) throw new Error('User ID missing from token');
+
     const User = mongoose.model('User');
     const models = { User };
-    const courses = await googleClassroomService.getCourses(req.user.sub, models);
+    const courses = await googleClassroomService.getCourses(userId, models);
     res.json({ ok: true, courses, count: courses.length });
   } catch (error) {
     console.error('[Google API Error] Get courses:', error);
@@ -9076,9 +9080,12 @@ app.get('/api/google-classroom/courses', authMiddleware, async (req, res) => {
 // Get materials for a course (real-time)
 app.get('/api/google-classroom/courses/:courseId/materials', authMiddleware, async (req, res) => {
   try {
+    const userId = req.user.id || req.user.sub;
+    if (!userId) throw new Error('User ID missing from token');
+    
     const User = mongoose.model('User');
     const models = { User };
-    const materials = await googleClassroomService.getCourseMaterials(req.user.sub, req.params.courseId, models);
+    const materials = await googleClassroomService.getCourseMaterials(userId, req.params.courseId, models);
     res.json({ ok: true, materials, count: materials.length });
   } catch (error) {
     console.error('[Google API Error] Get materials:', error);
@@ -9091,9 +9098,10 @@ app.get('/api/google-classroom/courses/:courseId/materials', authMiddleware, asy
 // Get assignments for a course (real-time)
 app.get('/api/google-classroom/courses/:courseId/assignments', authMiddleware, async (req, res) => {
   try {
-    const User = mongoose.model('User');
+    const userId = req.user.id || req.user.sub;
+    if (!userId) throw new Error('User ID missing from token');
     const models = { User };
-    const assignments = await googleClassroomService.getCourseAssignments(req.user.sub, req.params.courseId, models);
+    const assignments = await googleClassroomService.getCourseAssignments(userId, req.params.courseId, models);
     res.json({ ok: true, assignments, count: assignments.length });
   } catch (error) {
     console.error('[Google API Error] Get assignments:', error);
@@ -9106,9 +9114,10 @@ app.get('/api/google-classroom/courses/:courseId/assignments', authMiddleware, a
 // Get announcements for a course (real-time)
 app.get('/api/google-classroom/courses/:courseId/announcements', authMiddleware, async (req, res) => {
   try {
-    const User = mongoose.model('User');
+    const userId = req.user.id || req.user.sub;
+    if (!userId) throw new Error('User ID missing from token');
     const models = { User };
-    const announcements = await googleClassroomService.getCourseAnnouncements(req.user.sub, req.params.courseId, models);
+    const announcements = await googleClassroomService.getCourseAnnouncements(userId, req.params.courseId, models);
     res.json({ ok: true, announcements, count: announcements.length });
   } catch (error) {
     console.error('[Google API Error] Get announcements:', error);
@@ -9121,9 +9130,10 @@ app.get('/api/google-classroom/courses/:courseId/announcements', authMiddleware,
 // Upload material to Google Classroom
 app.post('/api/google-classroom/courses/:courseId/materials', authMiddleware, requireFaculty, async (req, res) => {
   try {
-    const User = mongoose.model('User');
+    const userId = req.user.id || req.user.sub;
+    if (!userId) throw new Error('User ID missing from token');
     const models = { User };
-    const material = await googleClassroomService.uploadMaterial(req.user.sub, req.params.courseId, req.body, models);
+    const material = await googleClassroomService.uploadMaterial(userId, req.params.courseId, req.body, models);
     res.json({ ok: true, material });
   } catch (error) {
     console.error('[Google API Error] Upload material:', error);
@@ -9136,9 +9146,10 @@ app.post('/api/google-classroom/courses/:courseId/materials', authMiddleware, re
 // Create assignment in Google Classroom
 app.post('/api/google-classroom/courses/:courseId/assignments', authMiddleware, requireFaculty, async (req, res) => {
   try {
-    const User = mongoose.model('User');
+    const userId = req.user.id || req.user.sub;
+    if (!userId) throw new Error('User ID missing from token');
     const models = { User };
-    const assignment = await googleClassroomService.createAssignment(req.user.sub, req.params.courseId, req.body, models);
+    const assignment = await googleClassroomService.createAssignment(userId, req.params.courseId, req.body, models);
     res.json({ ok: true, assignment });
   } catch (error) {
     console.error('[Google API Error] Create assignment:', error);
@@ -9155,9 +9166,10 @@ app.post('/api/google-drive/upload', authMiddleware, async (req, res) => {
   }
 
   try {
-    const User = mongoose.model('User');
+    const userId = req.user.id || req.user.sub;
+    if (!userId) throw new Error('User ID missing from token');
     const models = { User };
-    const file = await googleClassroomService.uploadToGoogleDrive(req.user.sub, req.body, models);
+    const file = await googleClassroomService.uploadToGoogleDrive(userId, req.body, models);
     res.json({ ok: true, file });
   } catch (error) {
     console.error('[Google API Error] Drive upload:', error);
@@ -9174,10 +9186,11 @@ app.get('/api/google-classroom/courses/:courseId/assignments/:assignmentId/submi
   }
 
   try {
-    const User = mongoose.model('User');
+    const userId = req.user.id || req.user.sub;
+    if (!userId) throw new Error('User ID missing from token');
     const models = { User };
     const submissions = await googleClassroomService.getAssignmentSubmissions(
-      req.user.sub,
+      userId,
       req.params.courseId,
       req.params.assignmentId,
       models
