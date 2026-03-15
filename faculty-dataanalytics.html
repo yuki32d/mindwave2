@@ -13,6 +13,7 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <style>
         /* ── Exact admin.html design tokens ── */
         :root {
@@ -1204,6 +1205,33 @@
             });
             buildStudentChart(chartLabels, chartValues);
         };
+
+        // ── Real-time via Socket.IO ──
+        (function setupRealtime() {
+            try {
+                const socket = io();
+                socket.on('connect', () => {
+                    console.log('📡 Real-time analytics connected');
+                    // Flash live indicator
+                    const dot = document.querySelector('.live-dot');
+                    if (dot) dot.style.boxShadow = '0 0 12px var(--green)';
+                });
+
+                socket.on('game-submitted', (data) => {
+                    console.log('🎮 New game submission received, refreshing dashboard...', data);
+                    // Update dashboard immediately
+                    if (typeof updateDashboard === 'function') {
+                        updateDashboard();
+                    }
+                });
+
+                socket.on('disconnect', () => {
+                    console.warn('📡 Real-time analytics disconnected');
+                });
+            } catch (e) {
+                console.error('Socket.IO initialization error:', e);
+            }
+        })();
     </script>
 
     <script src="admin-logout-handler.js"></script>

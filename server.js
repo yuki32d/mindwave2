@@ -3975,6 +3975,16 @@ app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, re
       }
     } catch (e) { console.error("Stats update error:", e); }
 
+    // Broadcast real-time update to analytics dashboard
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('game-submitted', { 
+        gameId, 
+        studentId: req.user.sub,
+        score: submission.score
+      });
+    }
+
     res.status(201).json({ ok: true, submission });
   } catch (error) {
     console.error("Game submission error:", error);
