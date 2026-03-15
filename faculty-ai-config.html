@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="admin-theme-init.js"></script>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tutor Settings | MindWave Faculty</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="auth-guard.js"></script>
+    <style>
+        /* ── TOKENS ── */
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e5e9f2;
+            --accent: #d08000;
+            --accent-lo: rgba(208, 128, 0, 0.10);
+            --accent-bdr: rgba(208, 128, 0, 0.25);
+            --text: #111827;
+            --muted: #6b7280;
+            --green: #16a34a;
+            --red: #dc2626;
+            --blue: #2563eb;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.07), 0 4px 16px rgba(0, 0, 0, 0.05);
+            --radius: 14px;
+            --mono: 'JetBrains Mono', monospace;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0d1117;
+            --surface: #161b27;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #e2e8f0;
+            --muted: #6b7694;
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { min-height: 100%; }
+        body { font-family: 'Inter', sans-serif; font-size: 14px; background: var(--bg); color: var(--text); padding: 40px 20px; position: relative; }
+        a { text-decoration: none; color: inherit; }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+        input, textarea, select { font-family: inherit; }
+
+        /* ── STANDALONE LAYOUT ── */
+        .profile-container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Background ornament */
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top right, var(--accent-lo) 0%, transparent 60%); pointer-events: none; z-index: -1; }
+
+        /* ── PROFILE PAGE CONTENT ── */
+        .profile-hero-card { display: flex; flex-direction: column; gap: 16px; padding: 40px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+        .profile-hero-card::before { content: ''; position: absolute; top: -50%; right: -10%; width: 400px; height: 200%; background: radial-gradient(circle, var(--accent-lo) 0%, transparent 70%); opacity: 0.6; pointer-events: none; }
+
+        .hero-info h1 { font-size: 36px; font-weight: 800; letter-spacing: -.035em; margin-bottom: 8px; background: linear-gradient(to right, var(--text), var(--muted)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-info p { color: var(--muted); font-size: 16px; margin-bottom: 0px; font-weight: 500; line-height: 1.5; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: var(--accent-lo); border: 1px solid var(--accent-bdr); color: var(--accent); border-radius: 100px; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; backdrop-filter: blur(4px); width: fit-content; }
+        .hero-badge svg { width: 12px; height: 12px; }
+
+        /* Global Cards & Stats */
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px; }
+        .card-head { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .card-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .card-title svg { width: 15px; height: 15px; color: var(--accent); }
+        
+        .form-body { padding: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; letter-spacing: 0.05em; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; color: var(--text); font-size: 14px; transition: 0.2s; font-weight: 500; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-lo); }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 700; transition: 0.2s; cursor: pointer;}
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: #b87000; transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-lo); }
+        .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; box-shadow: none; transform: none; }
+        
+        /* Loading Spinner */
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff; width: 16px; height: 16px; -webkit-animation: spin 1s linear infinite; animation: spin 1s linear infinite; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Notification Toast */
+        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--surface); color: var(--text); padding: 16px 24px; border-radius: 12px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid var(--border); transform: translateY(100px); opacity: 0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; display: flex; align-items: center; gap: 12px;}
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success i { color: var(--green); }
+        .toast.error i { color: var(--red); }
+
+    </style>
+</head>
+
+<body>
+    <div class="profile-container">
+        <!-- Minimal Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="window.location.href='faculty-dashboard.html'">
+                <div style="width: 40px; height: 40px; border-radius: 12px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--accent-lo);">
+                    <i data-lucide="arrow-left" style="width: 22px;"></i>
+                </div>
+                <div>
+                    <h2 style="font-weight: 850; font-size: 20px; letter-spacing: -.03em; line-height: 1;">Back to Dashboard</h2>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="theme-toggle" id="themeToggle" title="Toggle Theme" style="width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--muted);">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+            </div>
+        </div>
+                
+        <!-- Hero Card -->
+        <div class="profile-hero-card">
+            <div class="hero-badge"><i data-lucide="bot"></i> Sage AI Settings</div>
+            <div class="hero-info">
+                <h1>Classroom Auto-Sync (RAG)</h1>
+                <p>Teach Sage the exact curriculum and materials you use in your class. <br>MindWave will securely sync your Google Classroom materials directly into Sage's brain.</p>
+            </div>
+        </div>
+
+        <!-- Sync Card -->
+        <div class="card">
+            <div class="card-head"><div class="card-title"><i data-lucide="refresh-cw"></i> Manual Synchronization</div></div>
+            <div class="form-body">
+                <p style="color: var(--muted); margin-bottom: 24px; line-height: 1.6;"> MindWave automatically checks your active Google Classrooms for new PDFs, Docs, and Assignments every hour in the background. However, if you just posted an assignment and need Sage to learn it immediately, you can trigger a manual sync below.</p>
+                
+                <div class="form-group" style="max-width: 400px;">
+                    <label>Select Google Classroom Course</label>
+                    <select id="courseSelect">
+                        <option value="">Loading your courses...</option>
+                    </select>
+                </div>
+
+                <div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
+                    <button class="btn btn-primary" id="syncBtn">
+                        <i data-lucide="download"></i> <span id="syncText">Sync Course Materials to Sage</span>
+                        <div class="spinner" id="syncSpinner"></div>
+                    </button>
+                    <span id="syncStatus" style="font-size: 12px; font-weight: 600; color: var(--muted);"></span>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <i data-lucide="check-circle" id="toastIcon"></i>
+        <span id="toastMsg">Action completed</span>
+    </div>
+
+    <script src="faculty-ai-config.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

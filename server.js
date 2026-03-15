@@ -19,6 +19,8 @@ import cron from "node-cron";
 import compression from "compression";
 import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
+import pdfParse from 'pdf-parse'; // RAG
+import fetch from 'node-fetch'; // RAG
 import { WebSocketServer } from 'ws';
 import paymentRoutes from './payment-routes.js';
 // Student Performance Analytics
@@ -515,6 +517,29 @@ const adminNotificationSchema = new mongoose.Schema(
 // ============================================
 // SUBSCRIPTION SYSTEM SCHEMAS
 // ============================================
+
+// Knowledge Schema (For AI Tutor RAG)
+const knowledgeSchema = new mongoose.Schema(
+  {
+    courseId: { type: String, required: true, index: true },
+    teacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    sourceTitle: { type: String, required: true },
+    sourceType: { type: String, required: true }, // 'MATERIAL', 'ASSIGNMENT', etc.
+    sourceId: { type: String, required: true, index: true },
+    chunkIndex: { type: Number, required: true },
+    textChunk: { type: String, required: true },
+    keywords: { type: String } // For better text search
+  },
+  { timestamps: true }
+);
+
+// Search indexes for RAG retrieval
+knowledgeSchema.index({ textChunk: 'text', keywords: 'text' });
+// Ensure we don't duplicate chunks on cron syncs
+knowledgeSchema.index({ sourceId: 1, chunkIndex: 1 }, { unique: true });
+
+const Knowledge = mongoose.model("Knowledge", knowledgeSchema);
+
 
 // Organization Schema (Multi-tenant)
 const organizationSchema = new mongoose.Schema(
@@ -11749,6 +11774,243 @@ When you detect frustration or confusion (keywords: "give up", "don't get", "con
 - Never repeat what you already explained unless the student asks you to
 `;
 
+// ============================================
+// ============================================
+// AI TUTOR: GOOGLE CLASSROOM RAG SYNC
+// ============================================
+
+// Auto-Sync Teacher Google Classrooms Every Hour
+cron.schedule("0 * * * *", async () => {
+  console.log("[RAG Tracker] Running Auto-Sync for Google Classrooms...");
+  try {
+    const User = mongoose.model('User');
+    const Knowledge = mongoose.model('Knowledge');
+    
+    // Find all users who are teachers/admins with activated Google Integration
+    const teachers = await User.find({ 
+      googleAccessToken: { $exists: true, $ne: null },
+      role: { $in: ['admin', 'faculty'] } // Also handle 'faculty' if used in orgRole
+    });
+
+    for (const user of teachers) {
+        try {
+            const oauth2Client = new google.auth.OAuth2(
+              GOOGLE_CLIENT_ID,
+              GOOGLE_CLIENT_SECRET,
+              GOOGLE_REDIRECT_URI
+            );
+            oauth2Client.setCredentials({
+              access_token: user.googleAccessToken,
+              refresh_token: user.googleRefreshToken
+            });
+            const classroom = google.classroom({ version: 'v1', auth: oauth2Client });
+            const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+            // Fetch active courses
+            const response = await classroom.courses.list({ courseStates: ['ACTIVE'], pageSize: 15 });
+            const courses = response.data.courses || [];
+
+            for (const course of courses) {
+                const materialsRes = await classroom.courses.courseWorkMaterials.list({
+                    courseId: course.id,
+                    pageSize: 20 // Just check recent ones on auto-sync
+                });
+                const materials = materialsRes.data.courseWorkMaterial || [];
+
+                for (const item of materials) {
+                  const title = item.title || 'Untitled Material';
+                  const description = item.description || '';
+                  const sourceId = item.id;
+
+                  // 1. Process description
+                  if (description) {
+                    await chunkAndSaveText(Knowledge, description, course.id, user._id, title, "MATERIAL_DESC", `${sourceId}-desc`);
+                  }
+
+                  // 2. Process attached files
+                  if (item.materials && item.materials.length > 0) {
+                    for (const attachment of item.materials) {
+                      if (attachment.driveFile && attachment.driveFile.driveFile) {
+                        const driveFileId = attachment.driveFile.driveFile.id;
+                        const fileTitle = attachment.driveFile.driveFile.title;
+
+                        // Only process if we haven't chunked this sourceId recently
+                        // (BulkWrite upsert handles duplicates, but we want to save API calls)
+                        const existing = await Knowledge.findOne({ sourceId: driveFileId });
+                        if (existing) continue; 
+                        
+                        try {
+                          let fileResponse;
+                          try {
+                              fileResponse = await drive.files.export({ fileId: driveFileId, mimeType: 'text/plain' });
+                          } catch (exportErr) {
+                              fileResponse = await drive.files.get({ fileId: driveFileId, alt: 'media' }, { responseType: 'arraybuffer' });
+                          }
+
+                          let rawText = "";
+                          if (typeof fileResponse.data === 'string') {
+                              rawText = fileResponse.data;
+                          } else if (fileResponse.data instanceof Buffer || fileResponse.data instanceof ArrayBuffer) {
+                              try {
+                                  let pdfData = await pdfParse(Buffer.from(fileResponse.data));
+                                  rawText = pdfData.text;
+                              } catch(e) {}
+                          }
+
+                          if (rawText && rawText.trim().length > 0) {
+                            await chunkAndSaveText(Knowledge, rawText, course.id, user._id, fileTitle, "DRIVE_FILE", driveFileId);
+                          }
+                        } catch (err) {}
+                      }
+                    }
+                  }
+                }
+            }
+        } catch (teacherErr) {
+            console.log(`[RAG Tracker] Skip teacher sync for ${user.email} - API Auth Expired or Invalid.`);
+        }
+    }
+  } catch (error) {
+    console.error("[RAG Tracker] Auto-Sync Failed:", error);
+  }
+});
+
+
+app.post('/api/admin/sync-classroom', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { courseId } = req.body;
+
+    if (!courseId) {
+      return res.status(400).json({ success: false, message: "courseId is required" });
+    }
+
+    const User = mongoose.model('User');
+    const Knowledge = mongoose.model('Knowledge');
+    
+    // Connect to Google API
+    const user = await User.findById(userId);
+    if (!user || !user.googleAccessToken) {
+      return res.status(401).json({ success: false, message: "Google Classroom not connected" });
+    }
+
+    const oauth2Client = new google.auth.OAuth2(
+      GOOGLE_CLIENT_ID,
+      GOOGLE_CLIENT_SECRET,
+      GOOGLE_REDIRECT_URI
+    );
+    oauth2Client.setCredentials({
+      access_token: user.googleAccessToken,
+      refresh_token: user.googleRefreshToken
+    });
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+    const materials = await googleClassroomService.getCourseMaterials(userId, courseId, { User });
+    let chunksProcessed = 0;
+
+    for (const item of materials) {
+      const title = item.title || 'Untitled Material';
+      const description = item.description || '';
+      const sourceId = item.id;
+
+      if (description) {
+        await chunkAndSaveText(Knowledge, description, courseId, userId, title, "MATERIAL_DESC", `${sourceId}-desc`);
+        chunksProcessed++;
+      }
+
+      if (item.materials && item.materials.length > 0) {
+        for (const attachment of item.materials) {
+          if (attachment.driveFile && attachment.driveFile.driveFile) {
+            const driveFileId = attachment.driveFile.driveFile.id;
+            const fileTitle = attachment.driveFile.driveFile.title;
+            
+            try {
+              let fileResponse;
+              try {
+                  fileResponse = await drive.files.export({
+                      fileId: driveFileId,
+                      mimeType: 'text/plain'
+                  });
+              } catch (exportErr) {
+                  fileResponse = await drive.files.get({
+                      fileId: driveFileId,
+                      alt: 'media'
+                  }, { responseType: 'arraybuffer' });
+              }
+
+              let rawText = "";
+              if (typeof fileResponse.data === 'string') {
+                  rawText = fileResponse.data;
+              } else if (fileResponse.data instanceof Buffer || fileResponse.data instanceof ArrayBuffer) {
+                  try {
+                      const pdfData = await pdfParse(Buffer.from(fileResponse.data));
+                      rawText = pdfData.text;
+                  } catch (pdfErr) {
+                      console.log(`[RAG] Skipped non-text file: ${fileTitle}`);
+                      continue; 
+                  }
+              }
+
+              if (rawText && rawText.trim().length > 0) {
+                await chunkAndSaveText(Knowledge, rawText, courseId, userId, fileTitle, "DRIVE_FILE", driveFileId);
+                chunksProcessed++;
+              }
+
+            } catch (err) {
+              console.log(`[RAG] Error on ${fileTitle}:`, err.message);
+            }
+          }
+        }
+      }
+    }
+
+    res.json({ success: true, message: `Successfully synced course. Extracted ${chunksProcessed} knowledge chunks.` });
+
+  } catch (error) {
+    console.error("Error syncing classroom:", error);
+    res.status(500).json({ success: false, message: "Server error during sync" });
+  }
+});
+
+// Helper for Google Classroom Sync
+async function chunkAndSaveText(KnowledgeModel, fullText, courseId, teacherId, sourceTitle, sourceType, sourceId) {
+    const words = fullText.split(/\s+/);
+    const chunkSize = 400; 
+    const overlap = 50; 
+
+    let chunks = [];
+    for (let i = 0; i < words.length; i += (chunkSize - overlap)) {
+        const chunk = words.slice(i, i + chunkSize).join(" ");
+        if (chunk.trim().length > 20) { 
+            chunks.push(chunk);
+        }
+    }
+
+    const operations = chunks.map((chunkText, index) => {
+        return {
+            updateOne: {
+                filter: { sourceId: sourceId, chunkIndex: index },
+                update: {
+                    $set: {
+                        courseId,
+                        teacherId,
+                        sourceTitle,
+                        sourceType,
+                        textChunk: chunkText,
+                        keywords: chunkText.substring(0, 100).toLowerCase().replace(/[^a-z0-9 ]/g, '')
+                    }
+                },
+                upsert: true
+            }
+        };
+    });
+
+    if (operations.length > 0) {
+        await KnowledgeModel.bulkWrite(operations);
+    }
+}
+
+
 app.post('/api/ai-tutor/chat', async (req, res) => {
   try {
     const { message, subject, mode, mood, history = [] } = req.body;
@@ -11767,7 +12029,36 @@ app.post('/api/ai-tutor/chat', async (req, res) => {
     const subjectCtx = subject ? `\n[SUBJECT CONTEXT: ${subject} — keep your response focused on this subject]` : '';
     const moodCtx = mood === 'encouraging' ? '\n[STUDENT MOOD: frustrated/confused — start with genuine encouragement before explaining]' : '';
 
-    const systemContent = SAGE_SYSTEM_PROMPT + modeInstruction + subjectCtx + moodCtx;
+    // ==========================================
+    // RAG: RETRIEVE CLASSROOM KNOWLEDGE
+    // ==========================================
+    let ragContext = "";
+    try {
+        const Knowledge = mongoose.model('Knowledge');
+        
+        // Very basic search: find chunks that contain words from the student's message
+        // In a production app, this would use Vector Embeddings. For now, regex search.
+        const searchWords = message.split(/\s+/).filter(w => w.length > 4).join('|');
+        if (searchWords.length > 0) {
+            const relevantChunks = await Knowledge.find({
+                textChunk: { $regex: new RegExp(searchWords, 'i') }
+            }).limit(3); // Grab top 3 matching chunks
+
+            if (relevantChunks && relevantChunks.length > 0) {
+                ragContext = "\n\n=== RELEVANT COURSE MATERIAL ===\n";
+                relevantChunks.forEach((c, idx) => {
+                    ragContext += `[Source ${idx+1}: ${c.sourceTitle}] ${c.textChunk}\n`;
+                });
+                ragContext += "================================\n";
+                ragContext += "CRITICAL INSTRUCTION: You MUST use the course material above to answer the student's question if it is relevant. Do not contradict the course material.\n";
+            }
+        }
+    } catch (ragErr) {
+        console.error("RAG Retrieval Error:", ragErr);
+        // Continue without RAG if it fails
+    }
+
+    const systemContent = SAGE_SYSTEM_PROMPT + modeInstruction + subjectCtx + moodCtx + ragContext;
 
     // Build messages array with conversation history for multi-turn context
     const messages = [

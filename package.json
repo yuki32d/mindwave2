@@ -29,6 +29,7 @@
     "mongoose": "^6.12.0",
     "multer": "^2.0.2",
     "node-cron": "^3.0.3",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.13",
     "openai": "^6.9.1",
     "pdf-parse": "^2.4.5",
