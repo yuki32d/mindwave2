@@ -9061,99 +9061,120 @@ app.get('/api/google-classroom/courses', authMiddleware, async (req, res) => {
   }
 
   try {
+    const User = mongoose.model('User');
     const models = { User };
     const courses = await googleClassroomService.getCourses(req.user.sub, models);
     res.json({ ok: true, courses, count: courses.length });
   } catch (error) {
-    console.error('Get courses error:', error);
-    res.status(500).json({ ok: false, message: error.message });
+    console.error('[Google API Error] Get courses:', error);
+    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    }
+    res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
 });
 // Get materials for a course (real-time)
 app.get('/api/google-classroom/courses/:courseId/materials', authMiddleware, async (req, res) => {
   try {
+    const User = mongoose.model('User');
     const models = { User };
     const materials = await googleClassroomService.getCourseMaterials(req.user.sub, req.params.courseId, models);
     res.json({ ok: true, materials, count: materials.length });
   } catch (error) {
-    console.error('Get materials error:', error);
-    res.status(500).json({ ok: false, message: error.message });
+    console.error('[Google API Error] Get materials:', error);
+    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    }
+    res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
 });
 // Get assignments for a course (real-time)
 app.get('/api/google-classroom/courses/:courseId/assignments', authMiddleware, async (req, res) => {
   try {
+    const User = mongoose.model('User');
     const models = { User };
     const assignments = await googleClassroomService.getCourseAssignments(req.user.sub, req.params.courseId, models);
     res.json({ ok: true, assignments, count: assignments.length });
   } catch (error) {
-    console.error('Get assignments error:', error);
-    res.status(500).json({ ok: false, message: error.message });
+    console.error('[Google API Error] Get assignments:', error);
+    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    }
+    res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
 });
 // Get announcements for a course (real-time)
 app.get('/api/google-classroom/courses/:courseId/announcements', authMiddleware, async (req, res) => {
   try {
+    const User = mongoose.model('User');
     const models = { User };
     const announcements = await googleClassroomService.getCourseAnnouncements(req.user.sub, req.params.courseId, models);
     res.json({ ok: true, announcements, count: announcements.length });
   } catch (error) {
-    console.error('Get announcements error:', error);
-    res.status(500).json({ ok: false, message: error.message });
+    console.error('[Google API Error] Get announcements:', error);
+    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    }
+    res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
 });
 // Upload material to Google Classroom
 app.post('/api/google-classroom/courses/:courseId/materials', authMiddleware, requireFaculty, async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ ok: false, message: 'Admin access required' });
-  }
-
   try {
+    const User = mongoose.model('User');
     const models = { User };
     const material = await googleClassroomService.uploadMaterial(req.user.sub, req.params.courseId, req.body, models);
     res.json({ ok: true, material });
   } catch (error) {
-    console.error('Upload material error:', error);
-    res.status(500).json({ ok: false, message: error.message });
+    console.error('[Google API Error] Upload material:', error);
+    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    }
+    res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
 });
 // Create assignment in Google Classroom
 app.post('/api/google-classroom/courses/:courseId/assignments', authMiddleware, requireFaculty, async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ ok: false, message: 'Admin access required' });
-  }
-
   try {
+    const User = mongoose.model('User');
     const models = { User };
     const assignment = await googleClassroomService.createAssignment(req.user.sub, req.params.courseId, req.body, models);
     res.json({ ok: true, assignment });
   } catch (error) {
-    console.error('Create assignment error:', error);
-    res.status(500).json({ ok: false, message: error.message });
+    console.error('[Google API Error] Create assignment:', error);
+    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    }
+    res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
 });
 // Upload file to Google Drive (for materials)
 app.post('/api/google-drive/upload', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ ok: false, message: 'Admin access required' });
+  if (req.user.role !== 'admin' && req.user.role !== 'faculty') {
+    return res.status(403).json({ ok: false, message: 'Admin or Faculty access required' });
   }
 
   try {
+    const User = mongoose.model('User');
     const models = { User };
     const file = await googleClassroomService.uploadToGoogleDrive(req.user.sub, req.body, models);
     res.json({ ok: true, file });
   } catch (error) {
-    console.error('Upload to Drive error:', error);
-    res.status(500).json({ ok: false, message: error.message });
+    console.error('[Google API Error] Drive upload:', error);
+    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    }
+    res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
 });
 // Get assignment submissions (for teachers)
 app.get('/api/google-classroom/courses/:courseId/assignments/:assignmentId/submissions', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ ok: false, message: 'Admin access required' });
+  if (req.user.role !== 'admin' && req.user.role !== 'faculty') {
+    return res.status(403).json({ ok: false, message: 'Admin or Faculty access required' });
   }
 
   try {
+    const User = mongoose.model('User');
     const models = { User };
     const submissions = await googleClassroomService.getAssignmentSubmissions(
       req.user.sub,
@@ -9163,8 +9184,11 @@ app.get('/api/google-classroom/courses/:courseId/assignments/:assignmentId/submi
     );
     res.json({ ok: true, submissions, count: submissions.length });
   } catch (error) {
-    console.error('Get submissions error:', error);
-    res.status(500).json({ ok: false, message: error.message });
+    console.error('[Google API Error] Get submissions:', error);
+    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    }
+    res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
 });
 // Get my submission (for students)
