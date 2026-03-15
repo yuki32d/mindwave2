@@ -19,7 +19,9 @@ import cron from "node-cron";
 import compression from "compression";
 import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
-import pdfParse from 'pdf-parse'; // RAG
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse'); // RAG
 import fetch from 'node-fetch'; // RAG
 import { WebSocketServer } from 'ws';
 import paymentRoutes from './payment-routes.js';
