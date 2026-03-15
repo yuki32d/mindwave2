@@ -67,7 +67,7 @@
 
         .shell {
             display: grid;
-            grid-template-columns: var(--sidebar-w) 1fr;
+            grid-template-columns: 1fr;
             height: 100vh;
         }
 
@@ -186,7 +186,7 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 24px;
             margin-top: 20px;
         }
@@ -341,101 +341,14 @@
 
 <body>
     <div class="shell">
-        <!-- ── SIDEBAR ── -->
-        <aside class="sidebar">
-            <div class="side-logo">
-                <div class="side-logo-mark"><i data-lucide="shield-check"></i></div>
-                <span class="side-logo-name">MindWave</span>
-                <span class="side-logo-tag">Admin</span>
-            </div>
-
-            <div class="side-scroll">
-                <div class="nav-section">
-                    <div class="nav-label">Control Center</div>
-                    <a href="admin.html" class="nav-item active"><i data-lucide="gauge"></i> Overview</a>
-                    <a href="admin-students.html" class="nav-item"><i data-lucide="users"></i> Students</a>
-                    <a href="faculty-dataanalytics.html" class="nav-item"><i data-lucide="bar-chart-2"></i>
-                        Analytics</a>
-                </div>
-                <div class="side-divider"></div>
-                <div class="nav-section">
-                    <div class="nav-label">Content</div>
-                    <a href="faculty-classroom.html" class="nav-item"><i data-lucide="book-open"></i> Courses</a>
-                    <a href="interactive-tools-selector.html" class="nav-item"><i data-lucide="gamepad-2"></i> Game
-                        Tools</a>
-                    <a href="ai-game-builder.html" class="nav-item"><i data-lucide="bot"></i> AI
-                        Builder</a>
-                    <a href="#" class="nav-item"
-                        onclick="document.getElementById('announcementSection').scrollIntoView({behavior:'smooth'});return false;"><i
-                            data-lucide="megaphone"></i> Announcements</a>
-                    <a href="#" class="nav-item"
-                        onclick="document.getElementById('updateSection').scrollIntoView({behavior:'smooth'});return false;"><i
-                            data-lucide="file-pen-line"></i> Post Update</a>
-                </div>
-                <div class="side-divider"></div>
-                <div class="nav-section">
-                    <div class="nav-label">Platform</div>
-                    <a href="faculty-live-meeting.html" class="nav-item"><i data-lucide="video"></i> Live Meeting <span
-                            class="nav-badge badge-green">Live</span></a>
-                    <a href="faculty-git-student.html" class="nav-item"><i data-lucide="git-branch"></i> GitHub</a>
-                    <a href="faculty-community.html" class="nav-item"><i data-lucide="message-square"></i> Community</a>
-                </div>
-                <div class="side-divider"></div>
-                <div class="nav-section">
-                    <div class="nav-label">System</div>
-                    <a href="faculty-settings.html" class="nav-item"><i data-lucide="settings-2"></i> Settings</a>
-                    <button class="nav-item" id="systemStatusBtn"><i data-lucide="activity"></i> System Status</button>
-                    <button class="nav-item" id="signOutControl" style="color:#f87171;"><i data-lucide="log-out"></i>
-                        Logout</button>
-                </div>
-            </div>
-
-            <div class="side-foot">
-                <div class="user-card">
-                    <div class="user-av" id="adminAvatarInitials">AD</div>
-                    <div>
-                        <div class="user-name" id="adminDisplayName">Faculty Admin</div>
-                        <div class="user-role">Administrator</div>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- ── TOPBAR ── -->
-        <header class="topbar">
-            <script src="admin-theme-init.js"></script>
-            <div class="breadcrumb">Admin / <span>Overview</span></div>
-            <div class="search-bar">
-                <i data-lucide="search"></i>
-                <input type="text" placeholder="Search students, games, courses…">
-            </div>
-            <div class="topbar-right">
-                <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-                    <span class="icon-sun"><i data-lucide="sun"></i></span>
-                    <span class="icon-moon"><i data-lucide="moon"></i></span>
-                </button>
-                <button class="t-btn" id="adminNotificationBtn" title="Notifications"><i
-                        data-lucide="bell"></i></button>
-                <div class="profile-wrap">
-                    <div class="profile-toggle" id="profileToggle">
-                        <div class="profile-av">AD</div>
-                        <small>Account</small>
-                    </div>
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <a href="faculty-profile.html">Profile</a>
-                        <a href="faculty-settings.html">Settings</a>
-                        <a href="#" class="danger"
-                            onclick="event.preventDefault(); typeof performLogout==='function' && performLogout();">Sign
-                            out</a>
-                    </div>
-                </div>
-            </div>
-        </header>
 
         <!-- Main -->
         <div class="main">
             <header class="topbar">
                 <div class="topbar-left">
+                    <a href="admin.html" class="t-btn" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); display: flex; align-items: center; justify-content: center; margin-right: 15px; transition: 0.2s;" title="Back to Overview">
+                        <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+                    </a>
                     <div class="status-dot"></div>
                     <span class="topbar-title">Command Center</span>
                     <span class="topbar-sub">Operational</span>
