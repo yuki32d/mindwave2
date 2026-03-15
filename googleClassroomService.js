@@ -7,10 +7,21 @@ import { google } from 'googleapis';
  * Initialize Google Classroom API with user's OAuth tokens
  */
 export async function getClassroomAPI(user) {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+
+    console.log('[Google API Debug] OAuth Config Check:', {
+        hasClientId: !!clientId,
+        hasClientSecret: !!clientSecret,
+        hasRedirectUri: !!redirectUri,
+        email: user.email
+    });
+
     const oauth2Client = new google.auth.OAuth2(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_REDIRECT_URI
+        clientId,
+        clientSecret,
+        redirectUri
     );
 
     oauth2Client.setCredentials({

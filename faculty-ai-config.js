@@ -40,13 +40,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             
             if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                console.error('[Course Load Detail]', { status: res.status, data: errData });
+                
                 if (res.status === 401) {
                     courseSelect.innerHTML = '<option value="">Google Classroom Not Connected</option>';
                     syncBtn.disabled = true;
                     showToast('Please connect Google Classroom in settings first', 'error');
                     return;
                 }
-                throw new Error('Failed to load courses');
+                throw new Error(errData.message || 'Failed to load courses');
             }
 
             const data = await res.json();
@@ -69,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Error loading courses:', error);
             courseSelect.innerHTML = '<option value="">Error Loading Courses</option>';
             syncBtn.disabled = true;
-            showToast('Failed to connect to Google Classroom', 'error');
+            showToast(error.message || 'Failed to connect to Google Classroom', 'error');
         }
     }
 
