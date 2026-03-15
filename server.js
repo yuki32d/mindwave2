@@ -11878,9 +11878,13 @@ cron.schedule("0 * * * *", async () => {
 });
 
 
-app.post('/api/admin/sync-classroom', authenticateToken, async (req, res) => {
+app.post('/api/admin/sync-classroom', async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userPayload = verifyAnyToken(req);
+    if (!userPayload || (userPayload.role !== 'admin' && userPayload.role !== 'faculty')) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    const userId = userPayload.id || userPayload.sub;
     const { courseId } = req.body;
 
     if (!courseId) {
