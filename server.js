@@ -11959,10 +11959,9 @@ app.post('/api/admin/sync-classroom', async (req, res) => {
     const User = mongoose.model('User');
     const Knowledge = mongoose.model('Knowledge');
     
-    // Connect to Google API
     const user = await User.findById(userId);
     if (!user || !user.googleAccessToken) {
-      return res.status(401).json({ success: false, message: "Google Classroom not connected" });
+      return res.status(401).json({ success: false, message: "Google Classroom connection expired. Please reconnect." });
     }
 
     const oauth2Client = new google.auth.OAuth2(
@@ -11976,17 +11975,31 @@ app.post('/api/admin/sync-classroom', async (req, res) => {
     });
     const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
-    const materials = await googleClassroomService.getCourseMaterials(userId, courseId, { User });
-    let chunksProcessed = 0;
+    console.log(`[RAG Sync] Starting sync for course: ${courseId}`);
 
-    for (const item of materials) {
-      const title = item.title || 'Untitled Material';
+    // Fetch both Materials and Assignments
+    const [materials, assignments] = await Promise.all([
+      googleClassroomService.getCourseMaterials(userId, courseId, { User }),
+      googleClassroomService.getCourseAssignments(userId, courseId, { User })
+    ]);
+
+    console.log(`[RAG Sync] Found ${materials.length} materials and ${assignments.length} assignments`);
+
+    const allItems = [
+      ...materials.map(m => ({ ...m, ragType: 'MATERIAL_DESC' })),
+      ...assignments.map(a => ({ ...a, ragType: 'ASSIGNMENT_DESC' }))
+    ];
+
+    let totalChunks = 0;
+
+    for (const item of allItems) {
+      const title = item.title || 'Untitled';
       const description = item.description || '';
       const sourceId = item.id;
 
       if (description) {
-        await chunkAndSaveText(Knowledge, description, courseId, userId, title, "MATERIAL_DESC", `${sourceId}-desc`);
-        chunksProcessed++;
+        const count = await chunkAndSaveText(Knowledge, description, courseId, userId, title, item.ragType, `${sourceId}-desc`);
+        totalChunks += count;
       }
 
       if (item.materials && item.materials.length > 0) {
@@ -11996,6 +12009,15 @@ app.post('/api/admin/sync-classroom', async (req, res) => {
             const fileTitle = attachment.driveFile.driveFile.title;
             
             try {
+              console.log(`[RAG Sync] Processing file: ${fileTitle} (${driveFileId})`);
+              
+              // Skip if already processed (optional but good for performance)
+              const existing = await Knowledge.findOne({ sourceId: driveFileId });
+              if (existing) {
+                console.log(`[RAG Sync] Skipping already processed file: ${fileTitle}`);
+                continue;
+              }
+
               let fileResponse;
               try {
                   fileResponse = await drive.files.export({
@@ -12012,34 +12034,38 @@ app.post('/api/admin/sync-classroom', async (req, res) => {
               let rawText = "";
               if (typeof fileResponse.data === 'string') {
                   rawText = fileResponse.data;
-              } else if (fileResponse.data instanceof Buffer || fileResponse.data instanceof ArrayBuffer) {
+              } else if (fileResponse.data instanceof Buffer || fileResponse.data instanceof ArrayBuffer || Buffer.isBuffer(fileResponse.data)) {
                   try {
                       const pdfData = await pdfParse(Buffer.from(fileResponse.data));
                       rawText = pdfData.text;
                   } catch (pdfErr) {
-                      console.log(`[RAG] Skipped non-text file: ${fileTitle}`);
+                      console.log(`[RAG Sync] Failed to parse PDF ${fileTitle}:`, pdfErr.message);
                       continue; 
                   }
               }
 
               if (rawText && rawText.trim().length > 0) {
-                await chunkAndSaveText(Knowledge, rawText, courseId, userId, fileTitle, "DRIVE_FILE", driveFileId);
-                chunksProcessed++;
+                const count = await chunkAndSaveText(Knowledge, rawText, courseId, userId, fileTitle, "DRIVE_FILE", driveFileId);
+                totalChunks += count;
+                console.log(`[RAG Sync] Saved ${count} chunks from ${fileTitle}`);
+              } else {
+                console.log(`[RAG Sync] No content extracted from ${fileTitle}`);
               }
 
             } catch (err) {
-              console.log(`[RAG] Error on ${fileTitle}:`, err.message);
+              console.log(`[RAG Sync] Error processing ${fileTitle}:`, err.message);
             }
           }
         }
       }
     }
 
-    res.json({ success: true, message: `Successfully synced course. Extracted ${chunksProcessed} knowledge chunks.` });
+    console.log(`[RAG Sync] Finished. Total chunks extracted: ${totalChunks}`);
+    res.json({ success: true, message: `Successfully synced course. Extracted ${totalChunks} knowledge chunks.` });
 
   } catch (error) {
-    console.error("Error syncing classroom:", error);
-    res.status(500).json({ success: false, message: "Server error during sync" });
+    console.error("[RAG Sync] Fatal Error:", error);
+    res.status(500).json({ success: false, message: error.message || "Server error during sync" });
   }
 });
 
@@ -12079,6 +12105,7 @@ async function chunkAndSaveText(KnowledgeModel, fullText, courseId, teacherId, s
     if (operations.length > 0) {
         await KnowledgeModel.bulkWrite(operations);
     }
+    return operations.length;
 }
 
 
