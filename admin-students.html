@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
 <head>
@@ -2234,6 +2234,7 @@
                 transform: scale(.7);
             }
         }
+
         .online-pulse {
             width: 8px;
             height: 8px;
@@ -2247,9 +2248,20 @@
         }
 
         @keyframes pulse-green {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
         }
     </style>
 </head>
@@ -2300,6 +2312,7 @@
                 <div class="nav-section">
                     <div class="nav-label">System</div>
                     <a href="faculty-settings.html" class="nav-item"><i data-lucide="settings-2"></i> Settings</a>
+                    <a href="faculty-ai-config.html" class="nav-item"><i data-lucide="bot"></i> AI Settings</a>
                     <button class="nav-item" id="systemStatusBtn"><i data-lucide="activity"></i> System Status</button>
                     <button class="nav-item" id="signOutControl" style="color:#f87171;"><i data-lucide="log-out"></i>
                         Logout</button>
@@ -2453,10 +2466,10 @@
             if (!dateStr) return 'Never';
             const diff = Date.now() - new Date(dateStr);
             const m = Math.floor(diff / 60000);
-            
+
             // If active within last 40 seconds (heartbeat is 10s), mark as Online
             if (diff < 40000) return '<span class="online-pulse"></span> Online';
-            
+
             if (m < 1) return 'Just now';
             if (m < 60) return `${m}m ago`;
             const h = Math.floor(m / 60);
@@ -2515,11 +2528,11 @@
             document.getElementById('sTotal').textContent = allStudents.length;
             document.getElementById('sActive').textContent = allStudents.filter(s => !s.isBlocked).length;
             document.getElementById('sBlocked').textContent = allStudents.filter(s => s.isBlocked).length;
-            
+
             // Calculate truly online (active in last 40s)
             const onlineCount = allStudents.filter(s => s.lastActive && (Date.now() - new Date(s.lastActive) < 40000)).length;
             document.getElementById('sOnline').textContent = onlineCount;
-            
+
             document.getElementById('totalCount').textContent = ` · ${allStudents.length} students`;
         }
 
