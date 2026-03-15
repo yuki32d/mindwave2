@@ -88,6 +88,10 @@
                             link.removeAttribute('onclick');
                         }
                     }
+                    if (text.includes('system status')) {
+                        link.setAttribute('href', 'admin-status.html');
+                        link.removeAttribute('onclick');
+                    }
                 });
             }
         }

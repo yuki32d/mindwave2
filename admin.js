@@ -384,45 +384,6 @@ if (adminProfileToggle && adminProfileDropdown) {
 
 if (gamesNavBtn) gamesNavBtn.addEventListener('click', () => document.getElementById('gamesPanel')?.scrollIntoView({ behavior: 'smooth' }));
 
-// --- System Status Modal ---
-async function showSystemStatus() {
-    const modal = document.getElementById('statusModal');
-    if (!modal) return;
-    modal.style.display = 'flex';
-
-    // Fetch real-time data
-    try {
-        // Get active users count from API
-        const activeUsersData = await fetchAPI('/api/admin/active-users');
-        if (activeUsersData && activeUsersData.ok) {
-            document.getElementById('statusTotalUsers').textContent = activeUsersData.totalOnline;
-        }
-
-        // Get active games count
-        const gamesData = await fetchAPI('/api/games/published');
-        if (gamesData && gamesData.ok) {
-            document.getElementById('statusActiveGames').textContent = gamesData.games.length;
-        }
-
-        // Get announcements count
-        const announcementsData = await fetchAPI('/api/announcements');
-        if (announcementsData && announcementsData.ok) {
-            document.getElementById('statusAnnouncements').textContent = announcementsData.announcements.length;
-        }
-
-        // Update timestamp
-        document.getElementById('statusLastUpdated').textContent = new Date().toLocaleTimeString();
-    } catch (error) {
-        console.error('Failed to load system status:', error);
-    }
-
-    // Close on click outside
-    modal.onclick = function (e) {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    }
-}
 
 // --- Event Listeners for Quick Actions ---
 const analyticsBtn = document.getElementById('analyticsBtn');
@@ -546,7 +507,9 @@ if (updateBtn) {
 
 const systemStatusBtn = document.getElementById('systemStatusBtn');
 if (systemStatusBtn) {
-    systemStatusBtn.addEventListener('click', showSystemStatus);
+    systemStatusBtn.addEventListener('click', () => {
+        window.location.href = 'admin-status.html';
+    });
 }
 
 const newGameBtn = document.getElementById('newGameBtn');
