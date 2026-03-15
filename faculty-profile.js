@@ -25,25 +25,10 @@ function initDashboard() {
     const themeBtn = document.getElementById('themeToggle');
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
-            const current = document.body.getAttribute('data-theme') || 'light';
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
             const next = current === 'light' ? 'dark' : 'light';
-            document.body.setAttribute('data-theme', next);
+            document.documentElement.setAttribute('data-theme', next);
             localStorage.setItem('admin-theme', next);
-        });
-    }
-
-    // Profile Dropdown
-    const profileToggle = document.getElementById('profileToggle');
-    const profileDropdown = document.getElementById('profileDropdown');
-    
-    if (profileToggle && profileDropdown) {
-        profileToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            profileDropdown.classList.toggle('active');
-        });
-
-        document.addEventListener('click', () => {
-            profileDropdown.classList.remove('active');
         });
     }
 
@@ -99,38 +84,25 @@ function updateProfileUI(data) {
     const email = data.email || 'faculty@example.com';
     const role = data.role || 'faculty';
 
-    // Header/Hero
+    // Name & Email sync
     const nameEl = document.getElementById('profileName');
     const emailEl = document.getElementById('profileEmail');
     if (nameEl) nameEl.textContent = name;
     if (emailEl) emailEl.textContent = email;
 
-    // Initials Sync
+    // Initials Sync (Profile Hero Avatar)
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    const initialsElements = [
-        'avatarInitials', 
-        'sidebarAvatarInitials', 
-        'settingsAvatarPreview',
-        'topbarProfileAv'
-    ];
-    initialsElements.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = initials;
-    });
+    const avatarInit = document.getElementById('avatarInitials');
+    if (avatarInit) avatarInit.textContent = initials;
+    
+    const settingsInit = document.getElementById('settingsAvatarPreview');
+    if (settingsInit) settingsInit.textContent = initials;
 
-    // Handle elements without IDs but with classes
-    const topAv = document.querySelector('.profile-av-small');
-    if (topAv) topAv.textContent = initials;
-
-    // Sidebar Name
-    const sideName = document.getElementById('sidebarDisplayName');
-    if (sideName) sideName.textContent = name;
-
-    // Badge Correction - Ensure it doesn't show "Student" for Faculty pages
+    // Badge Correction
     const badge = document.getElementById('roleBadge');
     if (badge) {
         let displayRole = role.toLowerCase();
-        if (displayRole === 'student') displayRole = 'faculty'; // Safety for faculty pages
+        if (displayRole === 'student') displayRole = 'faculty';
         
         const icon = displayRole === 'admin' ? '👨‍💼' : '👨‍🏫';
         const label = displayRole.charAt(0).toUpperCase() + displayRole.slice(1);
