@@ -381,30 +381,7 @@ if (adminProfileToggle && adminProfileDropdown) {
     });
 }
 
-async function performLogout() {
-    // Show custom sign-out modal instead of browser confirm()
-    const modal = document.getElementById('signoutModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        setTimeout(() => modal.style.opacity = '1', 10);
-        return;
-    }
-    // Fallback if modal doesn't exist
-    _doLogout();
-}
 
-async function _doLogout() {
-    try {
-        await fetch(`${API_BASE}/api/logout`, { method: 'POST', credentials: 'include' });
-    } catch (error) { console.error('Logout failed', error); }
-    finally {
-        localStorage.clear();
-        window.location.href = 'marketing-site/admin-login.html';
-    }
-}
-window._doLogout = _doLogout;
-
-if (signOutControl) signOutControl.addEventListener('click', performLogout);
 if (gamesNavBtn) gamesNavBtn.addEventListener('click', () => document.getElementById('gamesPanel')?.scrollIntoView({ behavior: 'smooth' }));
 
 // --- System Status Modal ---
