@@ -8,407 +8,209 @@
     <title>MINDWAVE – Faculty Profile</title>
     <link rel="stylesheet" href="3d-depth-design.css">
     <script src="theme-init.js"></script>
-    <style>
+    <style>        :root {
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --bg: #09090b;
+            --surface: #18181b;
+            --surface-hover: #27272a;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #fafafa;
+            --muted: #a1a1aa;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            line-height: 1.5;
+        }
+
         .profile-container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
+            padding: 0 20px 80px;
         }
 
         /* Hero Section */
         .profile-hero {
-            background: linear-gradient(135deg, rgba(15, 98, 254, 0.2) 0%, rgba(138, 43, 226, 0.2) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 24px;
-            padding: 48px;
-            margin-bottom: 32px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            margin-bottom: 40px;
             display: flex;
             align-items: center;
-            gap: 32px;
-            backdrop-filter: blur(10px);
+            gap: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+        }
+
+        .profile-hero::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at center, var(--accent-glow) 0%, transparent 60%);
+            opacity: 0.1; pointer-events: none;
         }
 
         .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
+            width: 140px;
+            height: 140px;
+            border-radius: 40px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
-            font-weight: 700;
-            border: 4px solid rgba(255, 255, 255, 0.2);
+            font-size: 52px;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 0 40px var(--accent-glow);
+            border: 4px solid rgba(255, 255, 255, 0.1);
             flex-shrink: 0;
             position: relative;
-            overflow: hidden;
+            transform: rotate(-3deg);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .profile-avatar:hover { transform: rotate(0deg) scale(1.05); }
 
         .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-info {
-            flex: 1;
+            width: 100%; height: 100%; object-fit: cover; border-radius: 36px;
         }
 
         .profile-info h1 {
-            margin: 0 0 8px;
-            font-size: 36px;
+            margin: 0 0 4px; font-size: 42px; font-weight: 850; letter-spacing: -0.03em;
+            background: linear-gradient(to bottom, #fff, #a1a1aa);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         }
 
         .profile-info p {
-            margin: 0;
-            color: #9ea4b6;
-            font-size: 16px;
+            margin: 0; color: var(--muted); font-size: 17px; font-weight: 500;
         }
 
         .role-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #0f62fe 0%, #8a3ffc 100%);
-            color: white;
-            border-radius: 999px;
-            font-weight: 700;
-            margin-top: 12px;
-            font-size: 14px;
+            display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px;
+            background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa; border-radius: 100px; font-weight: 700; margin-top: 16px; font-size: 13px;
+            text-transform: uppercase; letter-spacing: 0.05em;
         }
 
         .edit-profile-btn {
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
+            padding: 12px 20px; background: var(--surface); border: 1px solid var(--border);
+            color: var(--text); border-radius: 12px; cursor: pointer; transition: 0.2s;
+            font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+            margin-left: auto;
         }
+        .edit-profile-btn:hover { background: var(--surface-hover); border-color: var(--muted); transform: translateY(-2px); }
 
-        .edit-profile-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        /* Tabs */
+        /* Tabs Navigation */
         .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 32px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 0;
+            display: flex; gap: 12px; margin-bottom: 40px; padding: 6px;
+            background: rgba(255,255,255,0.03); border-radius: 14px; width: fit-content;
         }
 
         .tab-btn {
-            padding: 12px 24px;
-            background: transparent;
-            border: none;
-            color: #9ea4b6;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 16px;
-            font-weight: 500;
-            border-bottom: 2px solid transparent;
+            padding: 10px 24px; border-radius: 10px; background: transparent; border: none;
+            color: var(--muted); cursor: pointer; transition: 0.3s; font-size: 14px; font-weight: 600;
         }
-
-        .tab-btn:hover {
-            color: white;
-        }
-
-        .tab-btn.active {
-            color: white;
-            border-bottom-color: #0f62fe;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
+        .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+        .tab-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 15px var(--accent-glow); }
 
         /* Stats Grid */
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px;
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            transition: all 0.3s;
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+            padding: 28px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;
         }
+        .stat-card:hover { border-color: var(--accent); transform: translateY(-8px); box-shadow: var(--shadow); }
+        .stat-card::after { 
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0; transition: 0.3s;
+        }
+        .stat-card:hover::after { opacity: 1; }
 
-        .stat-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-4px);
-        }
+        .stat-icon { font-size: 32px; margin-bottom: 16px; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.3)); }
+        .stat-value { font-size: 40px; font-weight: 850; letter-spacing: -0.02em; margin-bottom: 4px; }
+        .stat-label { color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
 
-        .stat-icon {
-            font-size: 32px;
-            margin-bottom: 12px;
-            display: block;
+        /* Content Sections */
+        .settings-section {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+            padding: 32px; margin-bottom: 24px; box-shadow: var(--shadow);
         }
+        .settings-section h3 { margin: 0 0 24px; font-size: 20px; font-weight: 750; color: #fff; }
 
-        .stat-value {
-            font-size: 36px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #4da0ff 0%, #a78bfa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
+        .form-group { margin-bottom: 28px; }
+        .form-group label { display: block; margin-bottom: 10px; color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 14px 18px; background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+            border-radius: 12px; color: white; font-size: 15px; transition: 0.2s; box-sizing: border-box;
         }
-
-        .stat-label {
-            color: #9ea4b6;
-            font-size: 14px;
-        }
-
-        /* Classes List */
-        .classes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
-        }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); outline: none; background: rgba(59, 130, 246, 0.05); }
 
         .class-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            transition: all 0.3s;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px;
+            transition: 0.3s; cursor: pointer;
         }
-
-        .class-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-4px);
-        }
-
-        .class-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 16px;
-        }
-
-        .class-name {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .class-code {
-            color: #9ea4b6;
-            font-size: 12px;
-        }
-
-        .class-stats {
-            display: flex;
-            gap: 16px;
-            margin-top: 12px;
-        }
-
-        .class-stat {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: #9ea4b6;
-        }
-
-        /* Activity List */
-        .activity-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
+        .class-card:hover { border-color: var(--muted); transform: scale(1.02); }
 
         .activity-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 20px;
-            align-items: center;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px;
+            display: flex; align-items: center; gap: 20px; margin-bottom: 12px;
         }
 
-        .activity-icon {
-            font-size: 24px;
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: rgba(15, 98, 254, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .toggle-switch { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .switch { 
+            position: relative; width: 52px; height: 28px; background: #3f3f46; border-radius: 100px;
+            cursor: pointer; transition: 0.3s;
         }
+        .switch.active { background: var(--accent); }
+        .switch::after { 
+            content: ''; position: absolute; top: 4px; left: 4px; width: 20px; height: 20px;
+            background: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .switch.active::after { transform: translateX(24px); }
 
-        .activity-info h4 {
-            margin: 0 0 4px;
-            font-size: 16px;
+        .save-btn { 
+            padding: 16px 40px; background: var(--accent); border: none; color: white;
+            border-radius: 14px; cursor: pointer; font-size: 16px; font-weight: 700;
+            transition: 0.3s; box-shadow: 0 4px 20px var(--accent-glow);
         }
-
-        .activity-info p {
-            margin: 0;
-            font-size: 12px;
-            color: #9ea4b6;
-        }
-
-        .activity-time {
-            font-size: 12px;
-            color: #9ea4b6;
-        }
-
-        /* Settings */
-        .settings-section {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-
-        .settings-section h3 {
-            margin: 0 0 24px;
-            font-size: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #9ea4b6;
-            font-size: 14px;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: white;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #0f62fe;
-        }
-
-        .toggle-switch {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .switch {
-            position: relative;
-            width: 48px;
-            height: 24px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 999px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .switch.active {
-            background: #0f62fe;
-        }
-
-        .switch::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            transition: transform 0.2s;
-        }
-
-        .switch.active::after {
-            transform: translateX(24px);
-        }
-
-        .save-btn {
-            padding: 12px 32px;
-            background: #0f62fe;
-            border: none;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        .save-btn:hover {
-            background: #0353e9;
-        }
+        .save-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--accent-glow); }
 
         .danger-btn {
-            padding: 12px 32px;
-            background: rgba(255, 59, 48, 0.1);
-            border: 1px solid rgba(255, 59, 48, 0.3);
-            color: #ff3b30;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.2s;
+            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;
         }
-
-        .danger-btn:hover {
-            background: rgba(255, 59, 48, 0.2);
-        }
+        .danger-btn:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; }
 
         @media (max-width: 768px) {
-            .profile-hero {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .activity-item {
-                grid-template-columns: auto 1fr;
-            }
-
-            .activity-time {
-                grid-column: 2;
-            }
+            .profile-hero { flex-direction: column; text-align: center; }
+            .edit-profile-btn { margin: 0 auto; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
         }
+
     </style>
 </head>
 
 <body data-theme="dark">
     <div class="page-shell">
-        <header class="hero">
-            <a class="ghost-link" href="admin.html">← Back to Creator Hub</a>
-            <p class="eyebrow">Your Profile</p>
-            <h1>Faculty Profile</h1>
-            <p class="lede">Manage your professional information and teaching statistics</p>
+        <header style="padding: 40px 0; max-width: 1100px; margin: 0 auto; width: 100%;">
+            <a href="admin.html" style="display: inline-flex; align-items: center; gap: 8px; color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted)'">
+                <i data-lucide="arrow-left" style="width: 16px;"></i> Back to Creator Hub
+            </a>
+            <div style="margin-top: 24px;">
+                <p style="color: var(--accent); font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px;">Professional Identity</p>
+                <h1 style="font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -0.04em;">Faculty Profile</h1>
+                <p style="color: var(--muted); font-size: 18px; max-width: 600px; margin-top: 12px;">Manage your professional information, department details, and teaching performance metrics.</p>
+            </div>
         </header>
 
         <div class="profile-container">
@@ -418,11 +220,13 @@
                     <span id="avatarInitials">FA</span>
                 </div>
                 <div class="profile-info">
-                    <h1 id="profileName">Faculty Name</h1>
+                    <h1 id="profileName">Faculty Member</h1>
                     <p id="profileEmail">faculty@example.com</p>
-                    <span class="role-badge" id="roleBadge">👨‍🏫 Faculty</span>
+                    <div class="role-badge" id="roleBadge">👨‍🏫 Faculty Member</div>
                 </div>
-                <button class="edit-profile-btn" data-tab="settings">⚙️ Edit Profile</button>
+                <button class="edit-profile-btn" data-tab="settings">
+                    <i data-lucide="settings" style="width: 18px;"></i> Edit Profile
+                </button>
             </div>
 
             <!-- Tabs -->
@@ -437,32 +241,32 @@
             <div class="tab-content active" id="overview">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <span class="stat-icon">📚</span>
+                        <div class="stat-icon">📚</div>
                         <div class="stat-value" id="totalClasses">0</div>
                         <div class="stat-label">Active Classes</div>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-icon">👥</span>
+                        <div class="stat-icon">👥</div>
                         <div class="stat-value" id="totalStudents">0</div>
                         <div class="stat-label">Total Students</div>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-icon">🎮</span>
+                        <div class="stat-icon">🎮</div>
                         <div class="stat-value" id="gamesCreated">0</div>
                         <div class="stat-label">Games Created</div>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-icon">📊</span>
+                        <div class="stat-icon">📊</div>
                         <div class="stat-value" id="avgEngagement">0%</div>
                         <div class="stat-label">Avg Engagement</div>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-icon">⏱️</span>
+                        <div class="stat-icon">⏱️</div>
                         <div class="stat-value" id="totalTeachingTime">0h</div>
                         <div class="stat-label">Teaching Hours</div>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-icon">🏆</span>
+                        <div class="stat-icon">🏆</div>
                         <div class="stat-value" id="completionRate">0%</div>
                         <div class="stat-label">Completion Rate</div>
                     </div>
@@ -494,75 +298,86 @@
 
             <!-- Settings Tab -->
             <div class="tab-content" id="settings">
-                <div class="settings-section">
-                    <h3>Profile Photo</h3>
-                    <div class="form-group">
-                        <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;">
-                        <button class="edit-profile-btn" id="uploadPhotoBtn">📷 Change Photo</button>
-                        <p style="margin-top: 8px; font-size: 12px; color: #9ea4b6;">Max size: 5MB. Supported formats:
-                            JPG, PNG, GIF</p>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <h3>Professional Information</h3>
-                    <div class="form-group">
-                        <label>Display Name</label>
-                        <input type="text" id="displayName" placeholder="Enter your name">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="emailInput" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Department</label>
-                        <input type="text" id="departmentInput" placeholder="e.g., Computer Science">
-                    </div>
-                    <div class="form-group">
-                        <label>Bio</label>
-                        <textarea id="bioInput"
-                            placeholder="Tell students about yourself, your teaching philosophy, expertise, etc."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Office Hours</label>
-                        <input type="text" id="officeHours" placeholder="e.g., Mon-Fri 2:00 PM - 4:00 PM">
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <h3>Notifications</h3>
-                    <div class="form-group">
-                        <div class="toggle-switch">
-                            <div class="switch active" id="emailNotifToggle"></div>
-                            <label style="margin: 0;">Email notifications for new student submissions</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="settings-section">
+                        <h3><i data-lucide="user" style="width: 18px; color: var(--accent);"></i> Professional Profile</h3>
+                        <div class="form-group">
+                            <label>Profile Photo</label>
+                            <div style="display: flex; align-items: center; gap: 20px; background: rgba(0,0,0,0.1); padding: 15px; border-radius: 12px; border: 1px dashed var(--border);">
+                                <div id="settingsAvatarPreview" style="width: 60px; height: 60px; border-radius: 15px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px;">FA</div>
+                                <div>
+                                    <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;">
+                                    <button class="edit-profile-btn" id="uploadPhotoBtn" style="margin: 0;">Update Photo</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Display Name</label>
+                            <input type="text" id="displayName" placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
+                            <label>Department</label>
+                            <input type="text" id="departmentInput" placeholder="e.g., Computer Science">
+                        </div>
+                        <div class="form-group">
+                            <label>Bio</label>
+                            <textarea id="bioInput" rows="4" placeholder="Tell students about yourself..."></textarea>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <div class="toggle-switch">
-                            <div class="switch active" id="classNotifToggle"></div>
-                            <label style="margin: 0;">Notify when students join classes</label>
+
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <div class="settings-section">
+                            <h3><i data-lucide="mail" style="width: 18px; color: var(--accent);"></i> Contact & Hours</h3>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="emailInput" readonly style="opacity: 0.6; cursor: not-allowed;">
+                            </div>
+                            <div class="form-group">
+                                <label>Office Hours</label>
+                                <input type="text" id="officeHours" placeholder="e.g., Mon-Fri 2:00 PM - 4:00 PM">
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3><i data-lucide="bell" style="width: 18px; color: var(--accent);"></i> Preferences</h3>
+                            <div class="form-group">
+                                <div class="toggle-switch">
+                                    <label style="margin: 0;">Email Notifications</label>
+                                    <div class="switch active" id="emailNotifToggle"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="toggle-switch">
+                                    <label style="margin: 0;">New Student Alerts</label>
+                                    <div class="switch active" id="classNotifToggle"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="settings-section">
-                    <h3>Change Password</h3>
-                    <div class="form-group">
-                        <label>Current Password</label>
-                        <input type="password" id="currentPassword" placeholder="Enter current password">
+                    <h3><i data-lucide="lock" style="width: 18px; color: #ef4444;"></i> Security</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label>Current Password</label>
+                            <input type="password" id="currentPassword" placeholder="••••••••">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label>New Password</label>
+                            <input type="password" id="newPassword" placeholder="••••••••">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label>Confirm Password</label>
+                            <input type="password" id="confirmPassword" placeholder="••••••••">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>New Password</label>
-                        <input type="password" id="newPassword" placeholder="Enter new password">
-                    </div>
-                    <div class="form-group">
-                        <label>Confirm New Password</label>
-                        <input type="password" id="confirmPassword" placeholder="Confirm new password">
-                    </div>
-                    <button class="danger-btn" id="changePasswordBtn">🔒 Change Password</button>
+                    <button class="danger-btn" id="changePasswordBtn">Change Password</button>
                 </div>
 
-                <button class="save-btn" id="saveSettingsBtn">Save Changes</button>
+                <div style="display: flex; justify-content: flex-end; margin-top: 40px;">
+                    <button class="save-btn" id="saveSettingsBtn">Save All Changes</button>
+                </div>
             </div>
         </div>
     </div>

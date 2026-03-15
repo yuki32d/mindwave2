@@ -1,5 +1,4 @@
-// Faculty Profile JavaScript
-const API_BASE = 'https://mindwave2.onrender.com/api';
+const API_BASE = window.location.origin + '/api';
 
 // Tab switching
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -75,6 +74,9 @@ function updateProfileUI(data) {
     // Update avatar initials
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     document.getElementById('avatarInitials').textContent = initials;
+    if (document.getElementById('settingsAvatarPreview')) {
+        document.getElementById('settingsAvatarPreview').textContent = initials;
+    }
 
     // Update role badge
     const role = data.role || 'Faculty';
@@ -140,24 +142,30 @@ function displayClasses(classes) {
 
     container.innerHTML = classes.map(cls => `
         <div class="class-card">
-            <div class="class-header">
-                <div>
-                    <div class="class-name">${cls.name || 'Untitled Class'}</div>
-                    <div class="class-code">${cls.code || 'N/A'}</div>
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                <div style="width: 48px; height: 48px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--accent);">
+                    <i data-lucide="book-open" style="width: 24px;"></i>
+                </div>
+                <div style="text-align: right;">
+                    <div class="class-code" style="font-weight: 700; color: var(--muted);">${cls.code || 'CODE'}</div>
+                    <div style="font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 800;">Class Active</div>
                 </div>
             </div>
+            <div class="class-name" style="font-size: 20px; font-weight: 800; margin-bottom: 8px;">${cls.name || 'Untitled Class'}</div>
+            <div style="height: 1px; background: var(--border); margin: 16px 0;"></div>
             <div class="class-stats">
                 <div class="class-stat">
-                    <span>👥</span>
-                    <span>${cls.studentCount || 0} students</span>
+                    <i data-lucide="users" style="width: 14px;"></i>
+                    <span>${cls.studentCount || 0} Students</span>
                 </div>
                 <div class="class-stat">
-                    <span>🎮</span>
-                    <span>${cls.gameCount || 0} games</span>
+                    <i data-lucide="gamepad-2" style="width: 14px;"></i>
+                    <span>${cls.gameCount || 0} Games</span>
                 </div>
             </div>
         </div>
     `).join('');
+    if (window.lucide) lucide.createIcons();
 }
 
 // Load recent activity
@@ -195,12 +203,16 @@ function displayActivity(activities) {
 
     container.innerHTML = activities.map(activity => `
         <div class="activity-item">
-            <div class="activity-icon">${activity.icon || '📝'}</div>
-            <div class="activity-info">
-                <h4>${activity.title || 'Activity'}</h4>
-                <p>${activity.description || ''}</p>
+            <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                ${activity.icon || '📝'}
             </div>
-            <div class="activity-time">${formatTime(activity.timestamp)}</div>
+            <div class="activity-info">
+                <h4 style="font-weight: 700; margin-bottom: 2px;">${activity.title || 'Activity'}</h4>
+                <p style="color: var(--muted); font-size: 13px;">${activity.description || ''}</p>
+            </div>
+            <div class="activity-time" style="font-weight: 600; font-size: 11px; text-transform: uppercase; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px;">
+                ${formatTime(activity.timestamp)}
+            </div>
         </div>
     `).join('');
 }
@@ -354,4 +366,5 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFacultyProfile();
     loadClasses();
     loadActivity();
+    if (window.lucide) lucide.createIcons();
 });

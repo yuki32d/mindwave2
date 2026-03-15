@@ -2636,6 +2636,154 @@ app.get("/api/faculty/classes", authMiddleware, async (req, res) => {
   }
 });
 
+// ============================================
+// FACULTY PROFILE & ACTIVITY ENDPOINTS
+// ============================================
+
+// Get faculty profile and statistics
+app.get("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub);
+    if (!user) return res.status(404).json({ ok: false, message: "User not found" });
+
+    // Fetch statistics
+    const gamesCreated = await Game.countDocuments({ createdBy: user._id });
+    
+    // Calculate student and class counts based on department (same logic as /api/faculty/classes)
+    const emailPrefix = user.email.split('@')[0];
+    let facultyDepartment = user.department || emailPrefix.toUpperCase();
+    if (emailPrefix.includes('.')) {
+      const parts = emailPrefix.split('.');
+      facultyDepartment = parts[parts.length - 1].replace(/[0-9]/g, '').toUpperCase();
+    }
+
+    const students = await User.find({
+      department: { $regex: new RegExp(`^${facultyDepartment}$`, 'i') },
+      role: 'student',
+      isActive: true
+    });
+
+    const classSet = new Set();
+    students.forEach(s => {
+      if (s.department && s.batch && s.section) {
+        classSet.add(`${s.department}-${s.batch}-${s.section}`);
+      }
+    });
+
+    res.json({
+      ok: true,
+      name: user.name,
+      displayName: user.displayName || user.name,
+      email: user.email,
+      department: user.department || facultyDepartment,
+      bio: user.bio || "",
+      officeHours: user.officeHours || "",
+      role: user.orgRole || user.role,
+      totalClasses: classSet.size,
+      totalStudents: students.length,
+      gamesCreated: gamesCreated,
+      avgEngagement: 85, // Placeholder metric
+      totalTeachingTime: 124, // Placeholder metric
+      completionRate: 92 // Placeholder metric
+    });
+  } catch (error) {
+    console.error("Get faculty profile error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Update faculty profile
+app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const { displayName, department, bio, officeHours } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.sub,
+      { $set: { displayName, department, bio, officeHours } },
+      { new: true }
+    );
+
+    if (!updatedUser) return res.status(404).json({ ok: false, message: "User not found" });
+
+    // Log the activity
+    await UserActivity.create({
+      userId: updatedUser._id,
+      activityType: 'profile_update',
+      description: 'Updated professional profile information',
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.json({ ok: true, message: "Profile updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error("Update faculty profile error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Get faculty recent activity
+app.get("/api/faculty/activity", authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const activities = await UserActivity.find({ userId: req.user.sub })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    const formattedActivities = activities.map(act => ({
+      id: act._id,
+      title: act.activityType.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+      description: act.description,
+      icon: getActivityIcon(act.activityType),
+      timestamp: act.createdAt
+    }));
+
+    res.json(formattedActivities);
+  } catch (error) {
+    console.error("Get faculty activity error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Helper for activity icons
+function getActivityIcon(type) {
+  const icons = {
+    'login': '🔑',
+    'game_create': '🎮',
+    'profile_update': '👤',
+    'password_change': '🔒',
+    'class_create': '📚',
+    'student_invite': '👥'
+  };
+  return icons[type] || '📝';
+}
+
+// Change faculty password
+app.post("/api/faculty/change-password", authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user.sub);
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ ok: false, message: "Incorrect current password" });
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    // Log the activity
+    await UserActivity.create({
+      userId: user._id,
+      activityType: 'password_change',
+      description: 'Changed account password',
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.json({ ok: true, message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Change faculty password error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 // ===================================
 // ALUMNI BATCH DEACTIVATION API
 // ===================================
