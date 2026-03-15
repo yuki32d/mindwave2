@@ -1209,12 +1209,22 @@
         // ── Real-time via Socket.IO ──
         (function setupRealtime() {
             try {
-                const socket = io();
+                // Explicitly use polling first then upgrade to websocket
+                const socket = io({
+                    transports: ['polling', 'websocket'],
+                    reconnectionAttempts: 5,
+                    reconnectionDelay: 2000
+                });
+
                 socket.on('connect', () => {
-                    console.log('📡 Real-time analytics connected');
+                    console.log('📡 Real-time analytics connected (via ' + socket.io.engine.transport.name + ')');
                     // Flash live indicator
                     const dot = document.querySelector('.live-dot');
                     if (dot) dot.style.boxShadow = '0 0 12px var(--green)';
+                });
+
+                socket.on('connect_error', (error) => {
+                    console.warn('📡 Real-time connection error, falling back...', error);
                 });
 
                 socket.on('game-submitted', (data) => {
@@ -1225,8 +1235,8 @@
                     }
                 });
 
-                socket.on('disconnect', () => {
-                    console.warn('📡 Real-time analytics disconnected');
+                socket.on('disconnect', (reason) => {
+                    console.warn('📡 Real-time analytics disconnected:', reason);
                 });
             } catch (e) {
                 console.error('Socket.IO initialization error:', e);

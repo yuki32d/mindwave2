@@ -8571,7 +8571,11 @@ function listenWithFallback(preferred) {
         cors: {
           origin: "*",
           methods: ["GET", "POST"]
-        }
+        },
+        transports: ['polling', 'websocket'],
+        allowEIO3: true,
+        pingTimeout: 60000,
+        pingInterval: 25000
       });
 
       // Make io globally accessible for real-time event broadcasting
