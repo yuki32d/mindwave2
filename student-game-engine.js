@@ -536,8 +536,8 @@ function playQuiz(game, container) {
                     `).join('')}
                 </div>
                 <div style="margin-top: 32px; display: flex; gap: 16px;">
-                    <button id="quitBtn" class="secondary-btn" style="background: rgba(255, 59, 48, 0.1); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.2); padding: 12px 24px; border-radius: 8px; cursor: pointer;">Quit</button>
-                    <button id="submitBtn" class="submit-btn" style="flex: 1; opacity: ${selectedOptionIndex === null ? '0.5' : '1'}; cursor: ${selectedOptionIndex === null ? 'not-allowed' : 'pointer'};" ${selectedOptionIndex === null ? 'disabled' : ''}>Submit Answer</button>
+                    <button id="quitBtn" class="secondary-btn" style="border-color: rgba(239, 68, 68, 0.2); color: #ef4444;">Quit</button>
+                    <button id="submitBtn" class="submit-btn" style="flex: 1;" ${selectedOptionIndex === null ? 'disabled' : ''}>Submit Answer</button>
                 </div>
                 <div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>
             </div>
@@ -611,7 +611,7 @@ function playUnjumble(game, container) {
         container.innerHTML = `
             <div class="player-header"><span>Reorder the Code</span><span class="timer">⏱️</span></div>
             <div class="question-display">
-                <p style="margin-bottom: 24px; color: #9ea4b6;">
+                <p style="margin-bottom: 32px; color: var(--text-muted); font-size: 0.95rem;">
                     <strong>🎯 Drag and drop</strong> the code blocks to arrange them in the correct order.
                 </p>
                 <div id="code-lines" style="display: flex; flex-direction: column; gap: 12px;">
@@ -645,7 +645,7 @@ function playUnjumble(game, container) {
                         </div>
                     `).join('')}
                 </div>
-                <button id="unjumbleSubmitBtn" class="submit-btn" style="margin-top: 32px; width: 100%;">Submit Solution</button>
+                <button id="unjumbleSubmitBtn" class="submit-btn" style="margin-top: 40px; width: 100%;">Submit Solution</button>
             </div>
         `;
 
@@ -784,7 +784,7 @@ function playSorter(game, container) {
         container.innerHTML = `
             <div class="player-header"><span>Sort the Item</span><span class="timer">⏱️</span></div>
             <div class="question-display" style="text-align: center;">
-                <h2 style="font-size: 32px; margin-bottom: 32px;">${currentItem.name || currentItem}</h2>
+                <h2 style="margin-bottom: 40px;">${currentItem.name || currentItem}</h2>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
                     ${(game.categories || []).map(cat => `
                         <button class="option-btn category-btn" data-category="${cat}" style="text-align: center; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
@@ -1509,13 +1509,17 @@ function renderScoreboard(data, score, totalPoints) {
     const totalParticipants = data.totalParticipants || 0;
 
     scoreCard.innerHTML = `
-        <div class="score-display">
-            <span class="score-label">Your Score:</span>
-            <span class="score-value">${score}/${totalPoints} (${percentage}%)</span>
-        </div>
-        <div class="rank-display">
-            <span class="rank-label">Your Rank:</span>
-            <span class="rank-value">#${rank} out of ${totalParticipants}</span>
+        <div style="background: var(--glass-strong); border: 1px solid var(--border); border-radius: 20px; padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div style="text-align: left;">
+                <span style="display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Your Score</span>
+                <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary-light);">${score} / ${totalPoints}</span>
+                <span style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Accuracy: ${percentage}%</span>
+            </div>
+            <div style="text-align: right; border-left: 1px solid var(--border); padding-left: 24px;">
+                <span style="display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Class Rank</span>
+                <span style="font-size: 1.5rem; font-weight: 800; color: #fff;">#${rank}</span>
+                <span style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">of ${totalParticipants} students</span>
+            </div>
         </div>
     `;
 
@@ -1528,18 +1532,20 @@ function renderScoreboard(data, score, totalPoints) {
             const icon = isCorrect ? '✅' : '❌';
 
             return `
-                <div class="answer-item ${itemClass}">
-                    <div class="question-text">Q${index + 1}: ${q.questionText}</div>
-                    <div class="student-answer ${isCorrect ? 'correct' : 'incorrect'}">
-                        <span class="answer-icon">${icon}</span>
-                        <span>Your answer: ${q.studentAnswer}</span>
-                    </div>
-                    ${!isCorrect ? `
-                        <div class="correct-answer">
-                            <span class="answer-icon">✅</span>
-                            <span>Correct answer: ${q.correctAnswer}</span>
+                <div class="answer-item" style="background: var(--glass); border: 1px solid ${isCorrect ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}; border-radius: 16px; padding: 20px; margin-bottom: 12px; transition: transform 0.2s;">
+                    <div style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; margin-bottom: 8px; text-transform: uppercase;">Question ${index + 1}</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; line-height: 1.4;">${q.questionText}</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display:flex; align-items:center; gap:10px; font-weight:600; color: ${isCorrect ? '#4ade80' : '#f87171'}">
+                            <span style="font-size: 1.2rem;">${icon}</span>
+                            <span>Your Answer: ${q.studentAnswer}</span>
                         </div>
-                    ` : ''}
+                        ${!isCorrect ? `
+                            <div style="display:flex; align-items:center; gap:10px; font-weight:600; color: #4ade80; opacity: 0.8; padding-left: 28px;">
+                                <span>Correct: ${q.correctAnswer}</span>
+                            </div>
+                        ` : ''}
+                    </div>
                 </div>
             `;
         }).join('');
@@ -1574,12 +1580,19 @@ function renderScoreboard(data, score, totalPoints) {
 
     playAgainBtn.onclick = () => {
         modal.style.display = 'none';
-        window.location.reload();
+        const gId = new URLSearchParams(window.location.search).get('id');
+        const game = (window.allGames || []).find(g => (g._id || g.id) === gId);
+        if (game) launchGame(game);
+        else window.location.reload();
     };
 
     backToGamesBtn.onclick = () => {
         modal.style.display = 'none';
-        window.location.href = 'student-game.html';
+        if (window.isProMode) {
+            window.close();
+        } else {
+            window.location.href = 'student-game.html';
+        }
     };
 
     // Fire confetti for good scores

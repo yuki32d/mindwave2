@@ -170,6 +170,169 @@
             animation: spin 1s linear infinite;
         }
 
+        /* --- Premium Game Component Styles --- */
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .timer {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            padding: 4px 12px;
+            border-radius: 99px;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            font-family: monospace;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .question-display h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            line-height: 1.4;
+            margin-bottom: 32px;
+            letter-spacing: -0.02em;
+            color: #fff;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 24px;
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .option-btn:hover {
+            background: var(--glass-strong);
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .option-btn.selected {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: var(--primary);
+            color: var(--primary-light);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .option-btn::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.2s;
+        }
+
+        .option-btn.selected::before {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            transform: scale(1.5);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.35);
+            filter: brightness(1.1);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+        }
+
+        .secondary-btn {
+            background: var(--glass-strong);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 16px 24px;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .secondary-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--glass-strong);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 40px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 99px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Results / Modal overides inside Pro Mode */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: mwFadeIn 0.3s ease;
+        }
+
+        .scoreboard-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 48px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -214,6 +377,37 @@
                 </div>
             </div>
         </main>
+
+        <!-- -- Scoreboard Modal -- -->
+        <div id="scoreboardModal" class="modal" style="display:none;">
+            <div class="scoreboard-content">
+                <div style="margin-bottom: 32px;">
+                    <div style="width: 64px; height: 64px; background: rgba(251, 191, 36, 0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                        <i data-lucide="trophy" style="color:#fbbf24;width:32px;height:32px;"></i>
+                    </div>
+                    <h2 style="font-size: 2rem; font-weight: 800; color: #fff;">Game Complete!</h2>
+                </div>
+
+                <div id="studentScoreCard" style="margin-bottom: 32px;"></div>
+
+                <div id="answerReviewSection" style="display:none; text-align: left; margin-bottom: 32px;">
+                    <h3 style="font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="clipboard-list" style="width:18px;height:18px;"></i>
+                        Answer Review
+                    </h3>
+                    <div id="answerReviewList" style="display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto; padding-right: 10px;"></div>
+                </div>
+
+                <div style="display: flex; gap: 16px;">
+                    <button id="playAgainBtn" class="secondary-btn" style="flex: 1; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i data-lucide="rotate-ccw" style="width:18px;height:18px;"></i> Play Again
+                    </button>
+                    <button id="backToGamesBtn" class="submit-btn" style="flex: 1; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i data-lucide="gamepad-2" style="width:18px;height:18px;"></i> Exit Pro Mode
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <footer style="margin-top: 24px; text-align: center;">
             <p style="font-size: 0.75rem; color: var(--text-muted); opacity: 0.6;">
