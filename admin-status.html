@@ -8,7 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Status | MindWave Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="auth-guard.js"></script>
     <style>
@@ -24,7 +26,7 @@
             --green: #16a34a;
             --red: #dc2626;
             --blue: #2563eb;
-            --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.07), 0 4px 16px rgba(0, 0, 0, 0.05);
             --radius: 14px;
             --mono: 'JetBrains Mono', monospace;
             --sidebar-w: 240px;
@@ -44,93 +46,391 @@
             --border: rgba(255, 255, 255, 0.08);
             --text: #e2e8f0;
             --muted: #6b7694;
-            --shadow: 0 1px 4px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        .shell { display: grid; grid-template-columns: var(--sidebar-w) 1fr; height: 100vh; }
-        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .shell {
+            display: grid;
+            grid-template-columns: var(--sidebar-w) 1fr;
+            height: 100vh;
+        }
+
         /* ── Sidebar ── */
-        .sidebar { background: var(--s-bg); border-right: 1px solid var(--s-border); display: flex; flex-direction: column; }
-        .side-logo { height: var(--topbar-h); display: flex; align-items: center; gap: 10px; padding: 0 20px; border-bottom: 1px solid var(--s-border); }
-        .side-logo-mark { width: 30px; height: 30px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; }
-        .side-logo-name { font-weight: 800; font-size: 15px; color: #fff; }
-        .side-nav { flex: 1; padding: 20px 10px; overflow-y: auto; }
-        .nav-label { font-size: 10px; font-weight: 800; color: var(--s-muted); text-transform: uppercase; letter-spacing: .1em; padding: 0 12px; margin-bottom: 10px; margin-top: 20px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; color: var(--s-text); transition: 0.2s; margin-bottom: 2px; text-decoration: none; font-size: 13px; }
-        .nav-item:hover { background: var(--s-hover); color: #fff; }
-        .nav-item.active { background: var(--s-active-bg); color: var(--s-active-txt); font-weight: 600; }
+        .sidebar {
+            background: var(--s-bg);
+            border-right: 1px solid var(--s-border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-logo {
+            height: var(--topbar-h);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--s-border);
+        }
+
+        .side-logo-mark {
+            width: 30px;
+            height: 30px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .side-logo-name {
+            font-weight: 800;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .side-nav {
+            flex: 1;
+            padding: 20px 10px;
+            overflow-y: auto;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--s-muted);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            padding: 0 12px;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: var(--s-text);
+            transition: 0.2s;
+            margin-bottom: 2px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .nav-item:hover {
+            background: var(--s-hover);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: var(--s-active-bg);
+            color: var(--s-active-txt);
+            font-weight: 600;
+        }
 
         /* ── Main content ── */
-        .main { display: flex; flex-direction: column; overflow: hidden; }
-        .topbar { height: var(--topbar-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 30px; justify-content: space-between; flex-shrink: 0; }
-        .topbar-left { display: flex; align-items: center; gap: 10px; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); }
-        .content { flex: 1; overflow-y: auto; padding: 40px; }
+        .main {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-        .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 20px; }
-        .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow); position: relative; overflow: hidden; }
-        .stat-card h4 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-        .stat-value { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
-        .stat-trend { font-size: 11px; margin-top: 8px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
-        
-        .health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
-        .health-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
-        .health-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .health-title { font-weight: 700; font-size: 16px; }
-        
-        .resource-row { margin-bottom: 16px; }
-        .resource-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; font-weight: 600; }
-        .progress-bg { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
-        .progress-bar { height: 100%; height: 100%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 4px; }
+        .topbar {
+            height: var(--topbar-h);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
 
-        .terminal { background: #0a0c10; border-radius: 12px; padding: 20px; font-family: var(--mono); color: #8b949e; font-size: 12px; line-height: 1.6; height: 300px; overflow-y: auto; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
-        .terminal-line { margin-bottom: 4px; }
-        .terminal-time { color: var(--accent); margin-right: 10px; }
-        .terminal-cmd { color: #58a6ff; }
-        .terminal-ok { color: var(--green); }
-        .terminal-err { color: var(--red); }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px var(--green);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card h4 {
+            font-size: 12px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-trend {
+            font-size: 11px;
+            margin-top: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .health-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .health-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .health-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .health-title {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .resource-row {
+            margin-bottom: 16px;
+        }
+
+        .resource-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .progress-bg {
+            height: 8px;
+            background: var(--bg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            height: 100%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 4px;
+        }
+
+        .terminal {
+            background: #0a0c10;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: var(--mono);
+            color: #8b949e;
+            font-size: 12px;
+            line-height: 1.6;
+            height: 300px;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-line {
+            margin-bottom: 4px;
+        }
+
+        .terminal-time {
+            color: var(--accent);
+            margin-right: 10px;
+        }
+
+        .terminal-cmd {
+            color: #58a6ff;
+        }
+
+        .terminal-ok {
+            color: var(--green);
+        }
+
+        .terminal-err {
+            color: var(--red);
+        }
 
         /* Animations */
-        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
-        .pulse-active::after { content: ''; position: absolute; width: 100%; height: 100%; background: inherit; border-radius: inherit; animation: pulse-ring 1.5s infinite; }
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .pulse-active::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: inherit;
+            animation: pulse-ring 1.5s infinite;
+        }
     </style>
 </head>
 
 <body>
     <div class="shell">
-        <!-- Sidebar -->
+        <!-- ── SIDEBAR ── -->
         <aside class="sidebar">
             <div class="side-logo">
-                <div class="side-logo-mark"><i data-lucide="shield"></i></div>
+                <div class="side-logo-mark"><i data-lucide="shield-check"></i></div>
                 <span class="side-logo-name">MindWave</span>
+                <span class="side-logo-tag">Admin</span>
             </div>
-            <nav class="side-nav">
-                <div class="nav-label">Core</div>
-                <a href="admin.html" class="nav-item">
-                    <i data-lucide="layout-dashboard"></i> Overview
-                </a>
-                <a href="admin-students.html" class="nav-item">
-                    <i data-lucide="users"></i> Students
-                </a>
-                <a href="faculty-classroom.html" class="nav-item">
-                    <i data-lucide="book-open"></i> Courses
-                </a>
-                
-                <div class="nav-label">System</div>
-                <a href="faculty-settings.html" class="nav-item">
-                    <i data-lucide="settings"></i> Settings
-                </a>
-                <a href="admin-status.html" class="nav-item active">
-                    <i data-lucide="activity"></i> System Status
-                </a>
-                <a href="#" id="signOutControl" class="nav-item" style="color: #f87171; margin-top: auto;">
-                    <i data-lucide="log-out"></i> Logout
-                </a>
-            </nav>
+
+            <div class="side-scroll">
+                <div class="nav-section">
+                    <div class="nav-label">Control Center</div>
+                    <a href="admin.html" class="nav-item active"><i data-lucide="gauge"></i> Overview</a>
+                    <a href="admin-students.html" class="nav-item"><i data-lucide="users"></i> Students</a>
+                    <a href="faculty-dataanalytics.html" class="nav-item"><i data-lucide="bar-chart-2"></i>
+                        Analytics</a>
+                </div>
+                <div class="side-divider"></div>
+                <div class="nav-section">
+                    <div class="nav-label">Content</div>
+                    <a href="faculty-classroom.html" class="nav-item"><i data-lucide="book-open"></i> Courses</a>
+                    <a href="interactive-tools-selector.html" class="nav-item"><i data-lucide="gamepad-2"></i> Game
+                        Tools</a>
+                    <a href="ai-game-builder.html" class="nav-item"><i data-lucide="bot"></i> AI
+                        Builder</a>
+                    <a href="#" class="nav-item"
+                        onclick="document.getElementById('announcementSection').scrollIntoView({behavior:'smooth'});return false;"><i
+                            data-lucide="megaphone"></i> Announcements</a>
+                    <a href="#" class="nav-item"
+                        onclick="document.getElementById('updateSection').scrollIntoView({behavior:'smooth'});return false;"><i
+                            data-lucide="file-pen-line"></i> Post Update</a>
+                </div>
+                <div class="side-divider"></div>
+                <div class="nav-section">
+                    <div class="nav-label">Platform</div>
+                    <a href="faculty-live-meeting.html" class="nav-item"><i data-lucide="video"></i> Live Meeting <span
+                            class="nav-badge badge-green">Live</span></a>
+                    <a href="faculty-git-student.html" class="nav-item"><i data-lucide="git-branch"></i> GitHub</a>
+                    <a href="faculty-community.html" class="nav-item"><i data-lucide="message-square"></i> Community</a>
+                </div>
+                <div class="side-divider"></div>
+                <div class="nav-section">
+                    <div class="nav-label">System</div>
+                    <a href="faculty-settings.html" class="nav-item"><i data-lucide="settings-2"></i> Settings</a>
+                    <button class="nav-item" id="systemStatusBtn"><i data-lucide="activity"></i> System Status</button>
+                    <button class="nav-item" id="signOutControl" style="color:#f87171;"><i data-lucide="log-out"></i>
+                        Logout</button>
+                </div>
+            </div>
+
+            <div class="side-foot">
+                <div class="user-card">
+                    <div class="user-av" id="adminAvatarInitials">AD</div>
+                    <div>
+                        <div class="user-name" id="adminDisplayName">Faculty Admin</div>
+                        <div class="user-role">Administrator</div>
+                    </div>
+                </div>
+            </div>
         </aside>
+
+        <!-- ── TOPBAR ── -->
+        <header class="topbar">
+            <script src="admin-theme-init.js"></script>
+            <div class="breadcrumb">Admin / <span>Overview</span></div>
+            <div class="search-bar">
+                <i data-lucide="search"></i>
+                <input type="text" placeholder="Search students, games, courses…">
+            </div>
+            <div class="topbar-right">
+                <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                    <span class="icon-sun"><i data-lucide="sun"></i></span>
+                    <span class="icon-moon"><i data-lucide="moon"></i></span>
+                </button>
+                <button class="t-btn" id="adminNotificationBtn" title="Notifications"><i
+                        data-lucide="bell"></i></button>
+                <div class="profile-wrap">
+                    <div class="profile-toggle" id="profileToggle">
+                        <div class="profile-av">AD</div>
+                        <small>Account</small>
+                    </div>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="faculty-profile.html">Profile</a>
+                        <a href="faculty-settings.html">Settings</a>
+                        <a href="#" class="danger"
+                            onclick="event.preventDefault(); typeof performLogout==='function' && performLogout();">Sign
+                            out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
 
         <!-- Main -->
         <div class="main">
@@ -141,7 +441,8 @@
                     <span class="topbar-sub">Operational</span>
                 </div>
                 <div class="topbar-right">
-                    <button id="refreshBtn" class="t-btn" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    <button id="refreshBtn" class="t-btn"
+                        style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 600; display: flex; align-items: center; gap: 8px;">
                         <i data-lucide="refresh-cw" style="width: 14px;"></i> Refresh
                     </button>
                 </div>
@@ -149,7 +450,8 @@
 
             <main class="content">
                 <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">Platform Health</h2>
-                <p style="color: var(--muted); margin-bottom: 32px;">Real-time performance metrics and infrastructure status.</p>
+                <p style="color: var(--muted); margin-bottom: 32px;">Real-time performance metrics and infrastructure
+                    status.</p>
 
                 <div class="dashboard-grid">
                     <div class="stat-card">
@@ -187,21 +489,28 @@
                                 <span>CPU Usage</span>
                                 <span id="labelCpu">0%</span>
                             </div>
-                            <div class="progress-bg"><div id="barCpu" class="progress-bar" style="width: 0%; background: var(--blue);"></div></div>
+                            <div class="progress-bg">
+                                <div id="barCpu" class="progress-bar" style="width: 0%; background: var(--blue);"></div>
+                            </div>
                         </div>
                         <div class="resource-row">
                             <div class="resource-label">
                                 <span>Memory Usage</span>
                                 <span id="labelMem">0%</span>
                             </div>
-                            <div class="progress-bg"><div id="barMem" class="progress-bar" style="width: 0%; background: var(--accent);"></div></div>
+                            <div class="progress-bg">
+                                <div id="barMem" class="progress-bar" style="width: 0%; background: var(--accent);">
+                                </div>
+                            </div>
                         </div>
                         <div class="resource-row">
                             <div class="resource-label">
                                 <span>Storage (SSD)</span>
                                 <span>42%</span>
                             </div>
-                            <div class="progress-bg"><div class="progress-bar" style="width: 42%; background: var(--green);"></div></div>
+                            <div class="progress-bg">
+                                <div class="progress-bar" style="width: 42%; background: var(--green);"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -211,9 +520,15 @@
                             <i data-lucide="terminal" style="width: 16px; color: var(--muted);"></i>
                         </div>
                         <div class="terminal" id="terminal">
-                            <div class="terminal-line"><span class="terminal-time">[10:35:01]</span> <span class="terminal-cmd">INIT_SYSTRAY</span> ... <span class="terminal-ok">DONE</span></div>
-                            <div class="terminal-line"><span class="terminal-time">[10:35:05]</span> <span class="terminal-cmd">AUTH_ENGINE</span> ... <span class="terminal-ok">OPERATIONAL</span></div>
-                            <div class="terminal-line"><span class="terminal-time">[10:35:10]</span> <span class="terminal-cmd">WEBSOCKET_CLUSTER</span> ... <span class="terminal-ok">LISTENING</span></div>
+                            <div class="terminal-line"><span class="terminal-time">[10:35:01]</span> <span
+                                    class="terminal-cmd">INIT_SYSTRAY</span> ... <span class="terminal-ok">DONE</span>
+                            </div>
+                            <div class="terminal-line"><span class="terminal-time">[10:35:05]</span> <span
+                                    class="terminal-cmd">AUTH_ENGINE</span> ... <span
+                                    class="terminal-ok">OPERATIONAL</span></div>
+                            <div class="terminal-line"><span class="terminal-time">[10:35:10]</span> <span
+                                    class="terminal-cmd">WEBSOCKET_CLUSTER</span> ... <span
+                                    class="terminal-ok">LISTENING</span></div>
                         </div>
                     </div>
                 </div>
