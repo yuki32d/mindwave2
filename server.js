@@ -9056,8 +9056,8 @@ app.get('/api/auth/google/status', authMiddleware, async (req, res) => {
 
 // Get all courses for current user
 app.get('/api/google-classroom/courses', authMiddleware, async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ ok: false, message: 'Admin access required' });
+  if (req.user.role !== 'admin' && req.user.role !== 'faculty') {
+    return res.status(403).json({ ok: false, message: 'Admin or Faculty access required' });
   }
 
   try {

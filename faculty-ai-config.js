@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadCourses() {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('/api/admin/classroom/courses', {
+            const res = await fetch('/api/google-classroom/courses', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     option.textContent = course.name;
                     courseSelect.appendChild(option);
                 });
+                syncBtn.disabled = false;
             } else {
                 courseSelect.innerHTML = '<option value="">No Active Courses Found</option>';
                 syncBtn.disabled = true;
