@@ -9061,20 +9061,25 @@ app.get('/api/google-classroom/courses', authMiddleware, async (req, res) => {
   }
 
   try {
-    console.log('[Google API Debug] req.user:', req.user);
     const userId = req.user.id || req.user.sub;
-    if (!userId) throw new Error('User ID missing from token');
-
-    const User = mongoose.model('User');
-    const models = { User };
-    const courses = await googleClassroomService.getCourses(userId, models);
+    console.log(`[Google API Route] Request to /courses from userId: ${userId}`);
+    
+    // Use global User model directly
+    const courses = await googleClassroomService.getCourses(userId, { User });
     res.json({ ok: true, courses, count: courses.length });
   } catch (error) {
-    console.error('[Google API Error] Get courses:', error);
-    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
+    console.error('[Google API Route Error] /courses:', error);
+    
+    if (error.message.includes('User not connected to Google') || 
+        error.message.includes('Google Classroom not connected')) {
         return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
     }
-    res.status(500).json({ ok: false, message: error.message, stack: error.stack });
+    
+    res.status(500).json({ 
+        ok: false, 
+        message: error.message || 'Internal Server Error fetching courses',
+        stack: error.stack 
+    });
   }
 });
 // Get materials for a course (real-time)

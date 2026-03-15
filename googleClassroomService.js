@@ -39,7 +39,17 @@ export async function getCourses(userId, models) {
     const { User } = models;
 
     try {
+        console.log(`[Google API Service] getCourses - userId:`, userId, typeof userId);
+        
+        // Validate ObjectId
+        if (!userId || userId.length !== 24) {
+            console.error(`[Google API Service] Invalid userId format:`, userId);
+            throw new Error(`Invalid User ID format for fetch: ${userId}`);
+        }
+
         const user = await User.findById(userId);
+        console.log(`[Google API Service] User find result:`, user ? `Found (${user.email})` : 'Not Found');
+
         if (!user || !user.googleAccessToken) {
             throw new Error('User not connected to Google');
         }

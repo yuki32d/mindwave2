@@ -49,7 +49,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     showToast('Please connect Google Classroom in settings first', 'error');
                     return;
                 }
-                throw new Error(errData.message || 'Failed to load courses');
+                const msg = errData.message || `Server error (${res.status})`;
+                throw new Error(msg);
             }
 
             const data = await res.json();
