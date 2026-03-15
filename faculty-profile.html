@@ -35,8 +35,10 @@
             --s-text: #cbd5e1;
             --s-muted: #4a5e7a;
             --s-hover: rgba(255, 255, 255, 0.06);
-            --s-active-bg: rgba(245, 166, 35, 0.18);
+            --s-active-bg: rgba(208, 128, 0, 0.15);
             --s-active-txt: #f5a623;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
         }
 
         [data-theme="dark"] {
@@ -113,16 +115,19 @@
         .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
         /* ── PROFILE PAGE CONTENT ── */
-        .profile-hero-card { display: flex; align-items: center; gap: 24px; padding: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 24px; position: relative; overflow: hidden; }
-        .profile-hero-card::after { content: ''; position: absolute; top: 0; right: 0; width: 300px; height: 100%; background: linear-gradient(90deg, transparent, var(--accent-lo)); opacity: 0.5; pointer-events: none; }
+        .profile-hero-card { display: flex; align-items: center; gap: 28px; padding: 40px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+        .profile-hero-card::before { content: ''; position: absolute; top: -50%; right: -10%; width: 400px; height: 200%; background: radial-gradient(circle, var(--accent-lo) 0%, transparent 70%); opacity: 0.6; pointer-events: none; }
         
-        .hero-avatar { width: 100px; height: 100px; border-radius: 24px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 800; flex-shrink: 0; position: relative; border: 4px solid var(--surface); box-shadow: 0 0 20px var(--accent-lo); transition: 0.3s; }
-        .hero-avatar:hover { transform: scale(1.05); }
-        .hero-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; }
+        .hero-avatar { width: 110px; height: 110px; border-radius: 28px; background: linear-gradient(135deg, var(--accent), #ff9f00); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 800; flex-shrink: 0; position: relative; border: 4px solid var(--surface); box-shadow: 0 8px 30px rgba(208, 128, 0, 0.3); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .hero-avatar::after { content: ''; position: absolute; inset: -8px; border-radius: 34px; border: 2px solid var(--accent-bdr); opacity: 0; transition: 0.3s; }
+        .hero-avatar:hover { transform: translateY(-5px) scale(1.02); }
+        .hero-avatar:hover::after { opacity: 1; transform: scale(1.05); }
+        .hero-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 24px; }
 
-        .hero-info h1 { font-size: 32px; font-weight: 800; letter-spacing: -.03em; margin-bottom: 4px; }
-        .hero-info p { color: var(--muted); font-size: 15px; margin-bottom: 12px; }
-        .hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: var(--accent-lo); border: 1px solid var(--accent-bdr); color: var(--accent); border-radius: 100px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+        .hero-info h1 { font-size: 36px; font-weight: 800; letter-spacing: -.035em; margin-bottom: 4px; background: linear-gradient(to right, var(--text), var(--muted)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-info p { color: var(--muted); font-size: 15px; margin-bottom: 16px; font-weight: 500; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: var(--accent-lo); border: 1px solid var(--accent-bdr); color: var(--accent); border-radius: 100px; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; backdrop-filter: blur(4px); }
+        .hero-badge svg { width: 12px; height: 12px; }
 
         .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 1px; }
         .tab-btn { padding: 10px 20px; font-size: 13px; font-weight: 700; color: var(--muted); border-bottom: 2px solid transparent; transition: 0.2s; position: relative; bottom: -1px; }
@@ -139,11 +144,14 @@
         .card-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
         .card-title svg { width: 15px; height: 15px; color: var(--accent); }
         
-        .stats-strip { display: grid; grid-template-columns: repeat(3, 1fr); }
-        .stat-box { padding: 20px; border-right: 1px solid var(--border); }
+        .stats-strip { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface); }
+        .stat-box { padding: 24px; border-right: 1px solid var(--border); transition: 0.2s; position: relative; overflow: hidden; }
         .stat-box:last-child { border-right: none; }
-        .stat-key { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
-        .stat-val { font-family: var(--mono); font-size: 24px; font-weight: 800; }
+        .stat-box:hover { background: var(--bg); }
+        .stat-box::after { content: ''; position: absolute; bottom: 0; left: 24px; right: 24px; height: 2px; background: var(--accent); transform: scaleX(0); transition: 0.3s; transform-origin: left; }
+        .stat-box:hover::after { transform: scaleX(1); }
+        .stat-key { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; letter-spacing: .05em; }
+        .stat-val { font-family: var(--mono); font-size: 28px; font-weight: 800; color: var(--text); }
 
         /* Lists */
         .list { display: flex; flex-direction: column; gap: 10px; padding: 18px; }
@@ -261,11 +269,11 @@
                     <div class="hero-avatar" id="profileAvatar">
                         <span id="avatarInitials">FA</span>
                     </div>
-                    <div class="hero-info">
-                        <h1 id="profileName">Faculty Member</h1>
-                        <p id="profileEmail">faculty@example.com</p>
-                        <div class="hero-badge" id="roleBadge">👨‍🏫 Faculty Member</div>
-                    </div>
+                        <div class="hero-info">
+                            <h1 id="profileName">Jeeban</h1>
+                            <p id="profileEmail">jeeban.mca@cmrit.ac.in</p>
+                            <div class="hero-badge" id="roleBadge">👨‍🏫 Faculty Member</div>
+                        </div>
                 </div>
 
                 <!-- Tabs -->

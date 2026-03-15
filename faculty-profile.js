@@ -97,6 +97,7 @@ async function loadFacultyProfile() {
 function updateProfileUI(data) {
     const name = data.name || data.displayName || 'Faculty Member';
     const email = data.email || 'faculty@example.com';
+    const role = data.role || 'faculty';
 
     // Header/Hero
     const nameEl = document.getElementById('profileName');
@@ -106,13 +107,18 @@ function updateProfileUI(data) {
 
     // Initials Sync
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    const initialsMap = ['avatarInitials', 'sidebarAvatarInitials', 'settingsAvatarPreview'];
-    initialsMap.forEach(id => {
+    const initialsElements = [
+        'avatarInitials', 
+        'sidebarAvatarInitials', 
+        'settingsAvatarPreview',
+        'topbarProfileAv'
+    ];
+    initialsElements.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.textContent = initials;
     });
 
-    // Small avatar in topbar
+    // Handle elements without IDs but with classes
     const topAv = document.querySelector('.profile-av-small');
     if (topAv) topAv.textContent = initials;
 
@@ -120,12 +126,15 @@ function updateProfileUI(data) {
     const sideName = document.getElementById('sidebarDisplayName');
     if (sideName) sideName.textContent = name;
 
-    // Badge
-    const role = data.role || 'Faculty';
+    // Badge Correction - Ensure it doesn't show "Student" for Faculty pages
     const badge = document.getElementById('roleBadge');
     if (badge) {
-        const icon = role === 'admin' ? '👨‍💼' : '👨‍🏫';
-        badge.innerHTML = `${icon} ${role.charAt(0).toUpperCase() + role.slice(1)} Member`;
+        let displayRole = role.toLowerCase();
+        if (displayRole === 'student') displayRole = 'faculty'; // Safety for faculty pages
+        
+        const icon = displayRole === 'admin' ? '👨‍💼' : '👨‍🏫';
+        const label = displayRole.charAt(0).toUpperCase() + displayRole.slice(1);
+        badge.innerHTML = `${icon} ${label} Member`;
     }
 
     // Stats
