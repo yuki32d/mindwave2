@@ -593,8 +593,9 @@ function playQuiz(game, container) {
     async function finish() {
         // Calculate total possible points
         const totalPoints = questions.reduce((sum, q) => sum + Number(q.points || 10), 0);
-        await saveResult(game, score, totalPoints, startTime, studentAnswers);
-        showResult(container, score, totalPoints, startTime, game._id || game.id);
+        const tp = Number(game.totalPoints || totalPoints); // Use totalPoints if game.totalPoints is not set
+        await saveResult(game, score, tp, startTime, studentAnswers);
+        showResult(container, score, tp, startTime, game._id || game.id);
     }
 
     startTimer(game.duration || 10, '#appContainer', finish);
@@ -748,8 +749,9 @@ function playUnjumble(game, container) {
 
         const accuracy = correct / (game.lines ? game.lines.length : 1);
         const score = Math.round(accuracy * Number(game.totalPoints || 100));
-        await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
-        showResult(container, score, game.totalPoints, startTime, game._id || game.id);
+        const tp = Number(game.totalPoints || 100);
+        await saveResult(game, score, tp, startTime, studentAnswers);
+        showResult(container, score, tp, startTime, game._id || game.id);
     }
 
     startTimer(game.duration || 10, '#appContainer', checkUnjumble);
@@ -822,8 +824,9 @@ function playSorter(game, container) {
     }
 
     async function finish() {
-        await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
-        showResult(container, score, game.totalPoints, startTime, game._id || game.id);
+        const tp = Number(game.totalPoints || 100);
+        await saveResult(game, score, tp, startTime, studentAnswers);
+        showResult(container, score, tp, startTime, game._id || game.id);
     }
 
     startTimer(game.duration || 10, '#appContainer', finish);
@@ -1032,8 +1035,8 @@ function playSQL(game, container) {
             isCorrect: isCorrect
         }];
 
-        await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
-        showResult(container, score, game.totalPoints, startTime, game._id || game.id);
+        await saveResult(game, score, tp, startTime, studentAnswers);
+        showResult(container, score, tp, startTime, game._id || game.id);
     }
 
     startTimer(game.duration || 10, '#appContainer', checkSQL);
@@ -1205,10 +1208,11 @@ function playDebug(game, container) {
             isCorrect: bugsFixed === totalBugs
         }];
 
-        await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
+        const tp = Number(game.totalPoints || 100);
+        await saveResult(game, score, tp, startTime, studentAnswers);
 
         // Use the standard showResult function to display leaderboard
-        showResult(container, score, game.totalPoints, startTime, game._id || game.id);
+        showResult(container, score, tp, startTime, game._id || game.id);
     }
 
     startTimer(game.duration || 15, '#appContainer', checkDebug);

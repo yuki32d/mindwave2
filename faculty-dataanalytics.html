@@ -1009,7 +1009,7 @@
             const ctx = document.getElementById('studentChart').getContext('2d');
             if (studentChart) studentChart.destroy();
             studentChart = new Chart(ctx, {
-                type: 'bar', indexAxis: 'y',
+                type: 'bar',
                 data: {
                     labels,
                     datasets: [{
@@ -1018,6 +1018,7 @@
                     }]
                 },
                 options: {
+                    indexAxis: 'y',
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.parsed.x}%` } } },
                     scales: {

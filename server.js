@@ -4830,6 +4830,15 @@ app.get("/api/analytics/games", authMiddleware, async (req, res) => {
       },
       { $unwind: '$student' },
       {
+        $match: {
+          $or: [
+            { 'student.role': { $ne: 'admin' } },
+            { 'student.email': req.user.email }
+          ],
+          'student.email': { $ne: SUPER_ADMIN_EMAIL }
+        }
+      },
+      {
         $group: {
           _id: '$gameId',
           title: { $first: '$game.title' },
@@ -4890,7 +4899,10 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
     const studentsData = await User.aggregate([
       {
         $match: {
-          role: 'student',
+          $or: [
+            { role: 'student' },
+            { email: req.user.email }
+          ],
           email: { $ne: SUPER_ADMIN_EMAIL }
         }
       },
