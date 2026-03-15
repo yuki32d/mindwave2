@@ -1502,11 +1502,15 @@ function renderScoreboard(data, score, totalPoints) {
     const answerReviewList = document.getElementById('answerReviewList');
     const leaderboardBody = document.getElementById('leaderboardBody');
 
+    if (!modal) return;
+
     // Render score card
     const percentage = Math.round((score / totalPoints) * 100);
     const currentStudent = data.currentStudent || {};
     const rank = currentStudent.rank || 'N/A';
     const totalParticipants = data.totalParticipants || 0;
+
+    if (!scoreCard) return;
 
     scoreCard.innerHTML = `
         <div style="background: var(--glass-strong); border: 1px solid var(--border); border-radius: 20px; padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
@@ -1554,21 +1558,23 @@ function renderScoreboard(data, score, totalPoints) {
     }
 
     // Render leaderboard
-    if (data.leaderboard && data.leaderboard.length > 0) {
-        leaderboardBody.innerHTML = data.leaderboard.map(entry => {
-            const rowClass = entry.isCurrentStudent ? 'current-student' : (entry.rank <= 3 ? 'top-3' : '');
-            return `
-                <tr class="${rowClass}">
-                    <td>${entry.rank}</td>
-                    <td>${entry.isCurrentStudent ? 'You' : entry.studentName}</td>
-                    <td>${entry.score}%</td>
-                    <td>${entry.gamesPlayed || 1}</td>
-                    <td>${entry.accuracy || entry.score}%</td>
-                </tr>
-            `;
-        }).join('');
-    } else {
-        leaderboardBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ea4b6;">No leaderboard data available</td></tr>';
+    if (leaderboardBody) {
+        if (data.leaderboard && data.leaderboard.length > 0) {
+            leaderboardBody.innerHTML = data.leaderboard.map(entry => {
+                const rowClass = entry.isCurrentStudent ? 'current-student' : (entry.rank <= 3 ? 'top-3' : '');
+                return `
+                    <tr class="${rowClass}">
+                        <td>${entry.rank}</td>
+                        <td>${entry.isCurrentStudent ? 'You' : entry.studentName}</td>
+                        <td>${entry.score}%</td>
+                        <td>${entry.gamesPlayed || 1}</td>
+                        <td>${entry.accuracy || entry.score}%</td>
+                    </tr>
+                `;
+            }).join('');
+        } else {
+            leaderboardBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ea4b6;">No leaderboard data available</td></tr>';
+        }
     }
 
     // Show modal
