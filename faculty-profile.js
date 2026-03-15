@@ -1,62 +1,93 @@
 const API_BASE = window.location.origin + '/api';
 
-// Tab switching
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const targetTab = btn.dataset.tab;
+// ── TABS LOGIC ──
+function initTabs() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
 
-        // Update active tab button
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.tab;
+            
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
 
-        // Update active tab content
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
+            btn.classList.add('active');
+            const targetEl = document.getElementById(target);
+            if (targetEl) targetEl.classList.add('active');
         });
-        document.getElementById(targetTab).classList.add('active');
     });
-});
+}
 
-// Edit profile button
-document.querySelector('.edit-profile-btn[data-tab="settings"]').addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('.tab-btn[data-tab="settings"]').classList.add('active');
+// ── DASHBOARD INTERACTIONS ──
+function initDashboard() {
+    // Theme Toggle
+    const themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const current = document.body.getAttribute('data-theme') || 'light';
+            const next = current === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', next);
+            localStorage.setItem('admin-theme', next);
+        });
+    }
 
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
+    // Profile Dropdown
+    const profileToggle = document.getElementById('profileToggle');
+    const profileDropdown = document.getElementById('profileDropdown');
+    
+    if (profileToggle && profileDropdown) {
+        profileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', () => {
+            profileDropdown.classList.remove('active');
+        });
+    }
+
+    // Toggle Switches (Email Notifs, etc)
+    document.querySelectorAll('.switch').forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            toggle.classList.toggle('active');
+        });
     });
-    document.getElementById('settings').classList.add('active');
-});
 
-// Toggle switches
-document.querySelectorAll('.switch').forEach(toggle => {
-    toggle.addEventListener('click', () => {
-        toggle.classList.toggle('active');
+    // Logout
+    const logoutBtns = ['logoutBtn', 'signOutControl'];
+    logoutBtns.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (window.performLogout) {
+                    performLogout();
+                } else {
+                    localStorage.clear();
+                    window.location.href = 'admin-login.html';
+                }
+            });
+        }
     });
-});
+}
 
-// Load faculty profile data
+// ── DATA LOADING ──
 async function loadFacultyProfile() {
     try {
         const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = 'admin-login.html';
-            return;
-        }
+        if (!token) { window.location.href = 'admin-login.html'; return; }
 
         const response = await fetch(`${API_BASE}/faculty/profile`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!response.ok) throw new Error('Failed to load profile');
-
         const data = await response.json();
         updateProfileUI(data);
     } catch (error) {
         console.error('Error loading profile:', error);
-        // Use fallback data from localStorage
+        // Fallback for demo/dev
         const email = localStorage.getItem('userEmail') || 'faculty@example.com';
         const name = localStorage.getItem('userName') || 'Faculty Member';
         updateProfileUI({ email, name });
@@ -64,61 +95,79 @@ async function loadFacultyProfile() {
 }
 
 function updateProfileUI(data) {
-    // Update profile header
     const name = data.name || data.displayName || 'Faculty Member';
     const email = data.email || 'faculty@example.com';
 
-    document.getElementById('profileName').textContent = name;
-    document.getElementById('profileEmail').textContent = email;
+    // Header/Hero
+    const nameEl = document.getElementById('profileName');
+    const emailEl = document.getElementById('profileEmail');
+    if (nameEl) nameEl.textContent = name;
+    if (emailEl) emailEl.textContent = email;
 
-    // Update avatar initials
+    // Initials Sync
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    document.getElementById('avatarInitials').textContent = initials;
-    if (document.getElementById('settingsAvatarPreview')) {
-        document.getElementById('settingsAvatarPreview').textContent = initials;
-    }
+    const initialsMap = ['avatarInitials', 'sidebarAvatarInitials', 'settingsAvatarPreview'];
+    initialsMap.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = initials;
+    });
 
-    // Update role badge
+    // Small avatar in topbar
+    const topAv = document.querySelector('.profile-av-small');
+    if (topAv) topAv.textContent = initials;
+
+    // Sidebar Name
+    const sideName = document.getElementById('sidebarDisplayName');
+    if (sideName) sideName.textContent = name;
+
+    // Badge
     const role = data.role || 'Faculty';
-    const roleEmoji = role === 'admin' ? '👨‍💼' : '👨‍🏫';
-    document.getElementById('roleBadge').innerHTML = `${roleEmoji} ${role.charAt(0).toUpperCase() + role.slice(1)}`;
-
-    // Update stats
-    document.getElementById('totalClasses').textContent = data.totalClasses || 0;
-    document.getElementById('totalStudents').textContent = data.totalStudents || 0;
-    document.getElementById('gamesCreated').textContent = data.gamesCreated || 0;
-    document.getElementById('avgEngagement').textContent = `${data.avgEngagement || 0}%`;
-    document.getElementById('totalTeachingTime').textContent = `${data.totalTeachingTime || 0}h`;
-    document.getElementById('completionRate').textContent = `${data.completionRate || 0}%`;
-
-    // Update department and bio
-    if (data.department) {
-        document.getElementById('department').textContent = data.department;
-    }
-    if (data.bio) {
-        document.getElementById('bioInfo').textContent = data.bio;
+    const badge = document.getElementById('roleBadge');
+    if (badge) {
+        const icon = role === 'admin' ? '👨‍💼' : '👨‍🏫';
+        badge.innerHTML = `${icon} ${role.charAt(0).toUpperCase() + role.slice(1)} Member`;
     }
 
-    // Update settings form
-    document.getElementById('displayName').value = name;
-    document.getElementById('emailInput').value = email;
-    document.getElementById('departmentInput').value = data.department || '';
-    document.getElementById('bioInput').value = data.bio || '';
-    document.getElementById('officeHours').value = data.officeHours || '';
+    // Stats
+    const stats = {
+        'totalClasses': data.totalClasses || 0,
+        'totalStudents': data.totalStudents || 0,
+        'gamesCreated': data.gamesCreated || 0,
+        'avgEngagement': `${data.avgEngagement || 0}%`,
+        'completionRate': `${data.completionRate || 0}%`
+    };
+    Object.entries(stats).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+    });
+
+    // Bio & Dept
+    const deptEl = document.getElementById('department');
+    const bioEl = document.getElementById('bioInfo');
+    if (deptEl) deptEl.textContent = data.department || 'Not set';
+    if (bioEl) bioEl.textContent = data.bio || 'No bio available. Add one in settings!';
+
+    // Form Fields
+    const fields = {
+        'displayName': name,
+        'emailInput': email,
+        'departmentInput': data.department || '',
+        'bioInput': data.bio || '',
+        'officeHours': data.officeHours || ''
+    };
+    Object.entries(fields).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+    });
 }
 
-// Load classes
 async function loadClasses() {
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`${API_BASE}/faculty/classes`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-
         if (!response.ok) throw new Error('Failed to load classes');
-
         const classes = await response.json();
         displayClasses(classes);
     } catch (error) {
@@ -129,38 +178,36 @@ async function loadClasses() {
 
 function displayClasses(classes) {
     const container = document.getElementById('classesGrid');
+    if (!container) return;
 
     if (classes.length === 0) {
         container.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 48px; color: #9ea4b6;">
-                <p style="font-size: 48px; margin-bottom: 16px;">📚</p>
-                <p>No classes yet. Create your first class to get started!</p>
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted);">
+                <i data-lucide="book-x" style="width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.5;"></i>
+                <p>No registered classes found.</p>
             </div>
         `;
+        if (window.lucide) lucide.createIcons();
         return;
     }
 
     container.innerHTML = classes.map(cls => `
         <div class="class-card">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
-                <div style="width: 48px; height: 48px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--accent);">
-                    <i data-lucide="book-open" style="width: 24px;"></i>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--accent-lo); color: var(--accent); display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="book-open" style="width: 18px;"></i>
                 </div>
-                <div style="text-align: right;">
-                    <div class="class-code" style="font-weight: 700; color: var(--muted);">${cls.code || 'CODE'}</div>
-                    <div style="font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 800;">Class Active</div>
+                <div>
+                    <div style="font-weight: 700; font-size: 15px;">${cls.name || 'Untitled'}</div>
+                    <div style="font-size: 11px; color: var(--muted); font-family: var(--mono);">${cls.code || 'N/A'}</div>
                 </div>
             </div>
-            <div class="class-name" style="font-size: 20px; font-weight: 800; margin-bottom: 8px;">${cls.name || 'Untitled Class'}</div>
-            <div style="height: 1px; background: var(--border); margin: 16px 0;"></div>
-            <div class="class-stats">
-                <div class="class-stat">
-                    <i data-lucide="users" style="width: 14px;"></i>
-                    <span>${cls.studentCount || 0} Students</span>
+            <div style="display: flex; gap: 16px;">
+                <div style="font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                    <i data-lucide="users" style="width: 12px;"></i> ${cls.studentCount || 0}
                 </div>
-                <div class="class-stat">
-                    <i data-lucide="gamepad-2" style="width: 14px;"></i>
-                    <span>${cls.gameCount || 0} Games</span>
+                <div style="font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                    <i data-lucide="gamepad-2" style="width: 12px;"></i> ${cls.gameCount || 0}
                 </div>
             </div>
         </div>
@@ -168,18 +215,13 @@ function displayClasses(classes) {
     if (window.lucide) lucide.createIcons();
 }
 
-// Load recent activity
 async function loadActivity() {
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`${API_BASE}/faculty/activity`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-
         if (!response.ok) throw new Error('Failed to load activity');
-
         const activities = await response.json();
         displayActivity(activities);
     } catch (error) {
@@ -190,181 +232,102 @@ async function loadActivity() {
 
 function displayActivity(activities) {
     const container = document.getElementById('activityList');
+    if (!container) return;
 
     if (activities.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 48px; color: #9ea4b6;">
-                <p style="font-size: 48px; margin-bottom: 16px;">📊</p>
-                <p>No recent activity to display.</p>
-            </div>
-        `;
+        container.innerHTML = `<p style="padding: 20px; text-align: center; color: var(--muted);">No recent logs.</p>`;
         return;
     }
 
-    container.innerHTML = activities.map(activity => `
+    container.innerHTML = activities.map(item => `
         <div class="activity-item">
-            <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
-                ${activity.icon || '📝'}
-            </div>
+            <div class="activity-icon">${item.icon || '📝'}</div>
             <div class="activity-info">
-                <h4 style="font-weight: 700; margin-bottom: 2px;">${activity.title || 'Activity'}</h4>
-                <p style="color: var(--muted); font-size: 13px;">${activity.description || ''}</p>
+                <h4>${item.title || 'System Action'}</h4>
+                <p>${item.description || ''}</p>
             </div>
-            <div class="activity-time" style="font-weight: 600; font-size: 11px; text-transform: uppercase; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px;">
-                ${formatTime(activity.timestamp)}
-            </div>
+            <div class="activity-time">${formatTime(item.timestamp)}</div>
         </div>
     `).join('');
 }
 
-function formatTime(timestamp) {
-    if (!timestamp) return 'Just now';
-
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now - date;
-
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-
+function formatTime(ts) {
+    if (!ts) return 'Recent';
+    const date = new Date(ts);
+    const diff = (new Date() - date) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff/60)}m`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h`;
     return date.toLocaleDateString();
 }
 
-// Photo upload
-document.getElementById('uploadPhotoBtn').addEventListener('click', () => {
-    document.getElementById('profilePhotoInput').click();
-});
+// ── SAVE LOGIC ──
+async function initSaveLogic() {
+    const saveBtn = document.getElementById('saveSettingsBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async () => {
+            const data = {
+                displayName: document.getElementById('displayName').value,
+                department: document.getElementById('departmentInput').value,
+                bio: document.getElementById('bioInput').value,
+                officeHours: document.getElementById('officeHours').value
+            };
 
-document.getElementById('profilePhotoInput').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/faculty/profile`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
-        return;
-    }
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
-        return;
-    }
-
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const avatarDiv = document.getElementById('profileAvatar');
-        avatarDiv.innerHTML = `<img src="${e.target.result}" alt="Profile Photo">`;
-    };
-    reader.readAsDataURL(file);
-
-    // TODO: Upload to server
-    console.log('Photo selected:', file.name);
-});
-
-// Save settings
-document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
-    const displayName = document.getElementById('displayName').value;
-    const department = document.getElementById('departmentInput').value;
-    const bio = document.getElementById('bioInput').value;
-    const officeHours = document.getElementById('officeHours').value;
-
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE}/faculty/profile`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                displayName,
-                department,
-                bio,
-                officeHours
-            })
+                if (!response.ok) throw new Error('Failed to update');
+                
+                localStorage.setItem('userName', data.displayName);
+                updateProfileUI(data);
+                alert('✅ Profile updated successfully!');
+            } catch (err) {
+                console.error(err);
+                alert('❌ Update failed');
+            }
         });
-
-        if (!response.ok) throw new Error('Failed to save settings');
-
-        // Update localStorage
-        localStorage.setItem('userName', displayName);
-
-        // Update UI
-        document.getElementById('profileName').textContent = displayName;
-        document.getElementById('department').textContent = department || 'Not set';
-        document.getElementById('bioInfo').textContent = bio || 'No bio available. Add one in settings!';
-
-        alert('✅ Profile updated successfully!');
-    } catch (error) {
-        console.error('Error saving settings:', error);
-        alert('❌ Failed to save settings. Please try again.');
-    }
-});
-
-// Change password
-document.getElementById('changePasswordBtn').addEventListener('click', async () => {
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-        alert('Please fill in all password fields');
-        return;
     }
 
-    if (newPassword !== confirmPassword) {
-        alert('New passwords do not match');
-        return;
-    }
+    const passBtn = document.getElementById('changePasswordBtn');
+    if (passBtn) {
+        passBtn.addEventListener('click', async () => {
+            const oldPass = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confPass = document.getElementById('confirmPassword').value;
 
-    if (newPassword.length < 6) {
-        alert('New password must be at least 6 characters');
-        return;
-    }
+            if (newPass !== confPass) return alert('Passwords mismatch');
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/faculty/change-password`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currentPassword: oldPass, newPassword: newPass })
+                });
 
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE}/faculty/change-password`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                currentPassword,
-                newPassword
-            })
+                if (!response.ok) throw new Error('Password change failed');
+                
+                ['currentPassword', 'newPassword', 'confirmPassword'].forEach(id => document.getElementById(id).value = '');
+                alert('✅ Password changed!');
+            } catch (err) {
+                console.error(err);
+                alert('❌ Error updating password');
+            }
         });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Failed to change password');
-        }
-
-        // Clear password fields
-        document.getElementById('currentPassword').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmPassword').value = '';
-
-        alert('✅ Password changed successfully!');
-    } catch (error) {
-        console.error('Error changing password:', error);
-        alert(`❌ ${error.message}`);
     }
-});
+}
 
-// Initialize on page load
+// ── INITIALIZE ──
 document.addEventListener('DOMContentLoaded', () => {
-    loadFacultyProfile();
-    loadClasses();
-    loadActivity();
     if (window.lucide) lucide.createIcons();
+    initTabs();
+    initDashboard();
+    initSaveLogic();
+    loadFacultyProfile();
+        loadActivity();
 });
