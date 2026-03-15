@@ -558,7 +558,7 @@ function playQuiz(game, container) {
                 if (selectedOptionIndex === null) return;
 
                 // Track student answer for review
-                const isCorrect = selectedOptionIndex === q.correctIndex;
+                const isCorrect = Number(selectedOptionIndex) === Number(q.correctIndex);
                 studentAnswers.push({
                     questionText: q.text,
                     studentAnswer: q.options[selectedOptionIndex],
@@ -569,7 +569,7 @@ function playQuiz(game, container) {
 
                 // Check if answer is correct and add points
                 if (isCorrect) {
-                    score += (q.points || 10);
+                    score += Number(q.points || 10);
                 }
 
                 // Move to next question
@@ -592,7 +592,7 @@ function playQuiz(game, container) {
 
     async function finish() {
         // Calculate total possible points
-        const totalPoints = questions.reduce((sum, q) => sum + (q.points || 10), 0);
+        const totalPoints = questions.reduce((sum, q) => sum + Number(q.points || 10), 0);
         await saveResult(game, score, totalPoints, startTime, studentAnswers);
         showResult(container, score, totalPoints, startTime, game._id || game.id);
     }
@@ -747,7 +747,7 @@ function playUnjumble(game, container) {
         });
 
         const accuracy = correct / (game.lines ? game.lines.length : 1);
-        const score = Math.round(accuracy * game.totalPoints);
+        const score = Math.round(accuracy * Number(game.totalPoints || 100));
         await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
         showResult(container, score, game.totalPoints, startTime, game._id || game.id);
     }
@@ -807,7 +807,7 @@ function playSorter(game, container) {
 
     function sortItem(cat) {
         const isCorrect = cat === currentItem.category;
-        if (isCorrect) score += 10;
+        if (isCorrect) score += Number(game.pointsPerItem || 10);
 
         // Track student answer
         studentAnswers.push({
@@ -946,9 +946,9 @@ function playFillIn(game, container) {
             });
         });
 
-        const score = Math.round((correct / (correctAnswers.length || 1)) * game.totalPoints);
-        await saveResult(game, score, game.totalPoints, startTime, studentAnswers);
-        showResult(container, score, game.totalPoints, startTime, game._id || game.id);
+        const score = Math.round((correct / (correctAnswers.length || 1)) * Number(game.totalPoints || 100));
+        await saveResult(game, score, Number(game.totalPoints || 100), startTime, studentAnswers);
+        showResult(container, score, Number(game.totalPoints || 100), startTime, game._id || game.id);
     }
 
     startTimer(game.duration || 10, '#appContainer', checkFillIn);
@@ -1022,7 +1022,8 @@ function playSQL(game, container) {
         const correctQuery = (game.blocks || []).join(' ');
         const userQuery = builtQuery.join(' ');
         const isCorrect = correctQuery === userQuery;
-        const score = isCorrect ? game.totalPoints : Math.round((builtQuery.filter((b, i) => b === game.blocks[i]).length / game.blocks.length) * game.totalPoints);
+        const tp = Number(game.totalPoints || 100);
+        const score = isCorrect ? tp : Math.round((builtQuery.filter((b, i) => b === (game.blocks || [])[i]).length / (game.blocks || [1]).length) * tp);
 
         const studentAnswers = [{
             questionText: 'Build the SQL Query',
@@ -1405,12 +1406,12 @@ function playScenario(game, container) {
         studentAnswers.push({
             questionText: scene.text,
             studentAnswer: choice.text,
-            points: choice.points,
-            isCorrect: choice.points > 0
+            points: Number(choice.points || 0),
+            isCorrect: Number(choice.points || 0) > 0
         });
 
         // Update score
-        totalScore += choice.points;
+        totalScore += Number(choice.points || 0);
 
         // Move to next scene or end
         if (choice.nextSceneId === 'END') {
@@ -1423,7 +1424,7 @@ function playScenario(game, container) {
     }
 
     async function finishScenario() {
-        const totalPossiblePoints = game.totalPoints || 100;
+        const totalPossiblePoints = Number(game.totalPoints || 100);
         await saveResult(game, totalScore, totalPossiblePoints, startTime, studentAnswers);
         showResult(container, totalScore, totalPossiblePoints, startTime, game._id || game.id);
     }
@@ -1505,7 +1506,9 @@ function renderScoreboard(data, score, totalPoints) {
     if (!modal) return;
 
     // Render score card
-    const percentage = Math.round((score / totalPoints) * 100);
+    const s = Number(score) || 0;
+    const tp = Number(totalPoints) || 100;
+    const percentage = Math.round((s / tp) * 100);
     const currentStudent = data.currentStudent || {};
     const rank = currentStudent.rank || 'N/A';
     const totalParticipants = data.totalParticipants || 0;
@@ -1516,7 +1519,7 @@ function renderScoreboard(data, score, totalPoints) {
         <div style="background: var(--glass-strong); border: 1px solid var(--border); border-radius: 20px; padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
             <div style="text-align: left;">
                 <span style="display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Your Score</span>
-                <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary-light);">${score} / ${totalPoints}</span>
+                <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary-light);">${s} / ${tp}</span>
                 <span style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Accuracy: ${percentage}%</span>
             </div>
             <div style="text-align: right; border-left: 1px solid var(--border); padding-left: 24px;">

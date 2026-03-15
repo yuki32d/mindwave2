@@ -3953,12 +3953,27 @@ app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, re
       score: score || 0,
       isCorrect: isCorrect || false,
       studentAnswers: studentAnswers || [],
+      submittedAt: new Date(),
       startedAt: startedAt ? new Date(startedAt) : new Date(),
       completedAt: completedAt ? new Date(completedAt) : new Date(),
       durationSeconds: durationSeconds || 0,
       cheatingAttempts: cheatingAttempts || 0,
       cheatLogs: cheatLogs || []
     });
+
+    // Handle activity stats update (optional but good for consistency)
+    try {
+      const correct = studentAnswers.filter(a => a.isCorrect).length;
+      const calculatedScore = Math.round((correct / (studentAnswers.length || 1)) * Number(game.totalPoints || 100));
+      if (game) {
+        game.stats = game.stats || { totalSessions: 0, totalParticipants: 0, averageScore: 0 };
+        game.stats.totalSessions += 1;
+        const allSubs = await GameSubmission.find({ gameId });
+        const totalScore = allSubs.reduce((acc, s) => acc + (s.score || 0), 0);
+        game.stats.averageScore = Math.round(totalScore / allSubs.length);
+        await game.save();
+      }
+    } catch (e) { console.error("Stats update error:", e); }
 
     res.status(201).json({ ok: true, submission });
   } catch (error) {
@@ -4688,7 +4703,10 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
       { $unwind: '$student' },
       {
         $match: {
-          'student.role': { $ne: 'admin' },
+          $or: [
+            { 'student.role': { $ne: 'admin' } },
+            { 'student.email': req.user.email }
+          ],
           'student.email': { $ne: SUPER_ADMIN_EMAIL }
         }
       },
@@ -4734,6 +4752,24 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
 
     // Get consistent students (3+ games)
     const consistentStudentsData = await GameSubmission.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'studentId',
+          foreignField: '_id',
+          as: 'student'
+        }
+      },
+      { $unwind: '$student' },
+      {
+        $match: {
+          $or: [
+            { 'student.role': { $ne: 'admin' } },
+            { 'student.email': req.user.email }
+          ],
+          'student.email': { $ne: SUPER_ADMIN_EMAIL }
+        }
+      },
       {
         $group: {
           _id: '$studentId',
@@ -4874,7 +4910,8 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
             }
           },
           lastActive: { $max: '$submissions.submittedAt' },
-          totalTime: { $sum: '$submissions.durationSeconds' }
+          totalTime: { $sum: '$submissions.durationSeconds' },
+          averageScore: { $avg: '$submissions.score' }
         }
       },
       {
@@ -4885,7 +4922,8 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
           gamesPlayed: 1,
           gamesCompleted: 1,
           lastActive: 1,
-          totalTime: 1
+          totalTime: 1,
+          avgScore: { $round: [{ $ifNull: ['$averageScore', 0] }, 0] }
         }
       },
       { $sort: { lastActive: -1, name: 1 } }
@@ -4895,9 +4933,7 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
       const completionRate = student.gamesPlayed > 0
         ? Math.round((student.gamesCompleted / student.gamesPlayed) * 100)
         : 0;
-      const avgScore = student.gamesPlayed > 0
-        ? Math.round((student.gamesCompleted / student.gamesPlayed) * 100)
-        : 0;
+      const avgScore = student.avgScore || 0;
 
       return {
         _id: student._id,
@@ -5088,51 +5124,6 @@ app.get("/api/games/:gameId/leaderboard", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Leaderboard error:", error);
-    res.status(500).json({ ok: false, message: "Server error" });
-  }
-});
-
-// ============================================
-// Game Submission Endpoint
-// ============================================
-
-app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, res) => {
-  try {
-    const { 
-      gameId, 
-      score, 
-      isCorrect, 
-      studentAnswers, 
-      startedAt, 
-      completedAt, 
-      durationSeconds,
-      cheatingAttempts,
-      cheatLogs 
-    } = req.body;
-    const studentId = req.user.sub;
-
-    if (!gameId) {
-      return res.status(400).json({ ok: false, message: "Game ID is required" });
-    }
-
-    // Create game submission with time tracking
-    const submission = await GameSubmission.create({
-      gameId,
-      studentId,
-      score: score || 0,
-      isCorrect: isCorrect || false,
-      studentAnswers: studentAnswers || [],
-      submittedAt: new Date(),
-      startedAt: startedAt ? new Date(startedAt) : null,
-      completedAt: completedAt ? new Date(completedAt) : new Date(),
-      durationSeconds: durationSeconds || null,
-      cheatingAttempts: cheatingAttempts || 0,
-      cheatLogs: cheatLogs || []
-    });
-
-    res.status(201).json({ ok: true, submission });
-  } catch (error) {
-    console.error("Game submission error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });
