@@ -63,6 +63,9 @@ export async function getCourses(userId, models) {
         return response.data.courses || [];
     } catch (error) {
         console.error('Error fetching courses:', error);
+        if (error.code === 401 || error.message.includes('Invalid Credentials')) {
+            error.message = 'Google Classroom connection expired. Please reconnect.';
+        }
         throw error;
     }
 }
@@ -88,6 +91,9 @@ export async function getCourseMaterials(userId, courseId, models) {
         return response.data.courseWorkMaterial || [];
     } catch (error) {
         console.error('Error fetching materials:', error);
+        if (error.code === 401 || error.message.includes('Invalid Credentials')) {
+            error.message = 'Google Classroom connection expired. Please reconnect.';
+        }
         throw error;
     }
 }
@@ -113,6 +119,9 @@ export async function getCourseAssignments(userId, courseId, models) {
         return response.data.courseWork || [];
     } catch (error) {
         console.error('Error fetching assignments:', error);
+        if (error.code === 401 || error.message.includes('Invalid Credentials')) {
+            error.message = 'Google Classroom connection expired. Please reconnect.';
+        }
         throw error;
     }
 }
@@ -138,6 +147,9 @@ export async function getCourseAnnouncements(userId, courseId, models) {
         return response.data.announcements || [];
     } catch (error) {
         console.error('Error fetching announcements:', error);
+        if (error.code === 401 || error.message.includes('Invalid Credentials')) {
+            error.message = 'Google Classroom connection expired. Please reconnect.';
+        }
         throw error;
     }
 }
@@ -171,6 +183,9 @@ export async function uploadMaterial(userId, courseId, materialData, models) {
         return response.data;
     } catch (error) {
         console.error('Error uploading material:', error);
+        if (error.code === 401 || error.message.includes('Invalid Credentials')) {
+            error.message = 'Google Classroom connection expired. Please reconnect.';
+        }
         throw error;
     }
 }
@@ -208,6 +223,9 @@ export async function createAssignment(userId, courseId, assignmentData, models)
         return response.data;
     } catch (error) {
         console.error('Error creating assignment:', error);
+        if (error.code === 401 || error.message.includes('Invalid Credentials')) {
+            error.message = 'Google Classroom connection expired. Please reconnect.';
+        }
         throw error;
     }
 }
@@ -271,6 +289,9 @@ export async function uploadToGoogleDrive(userId, fileData, models) {
         };
     } catch (error) {
         console.error('Error uploading to Google Drive:', error);
+        if (error.code === 401 || error.message.includes('Invalid Credentials')) {
+            error.message = 'Google Classroom connection expired. Please reconnect.';
+        }
         throw error;
     }
 }
@@ -297,6 +318,9 @@ export async function getAssignmentSubmissions(userId, courseId, assignmentId, m
         return response.data.studentSubmissions || [];
     } catch (error) {
         console.error('Error fetching submissions:', error);
+        if (error.code === 401 || error.message.includes('Invalid Credentials')) {
+            error.message = 'Google Classroom connection expired. Please reconnect.';
+        }
         throw error;
     }
 }
@@ -325,6 +349,9 @@ export async function getMySubmission(userId, courseId, assignmentId, models) {
         return submissions.length > 0 ? submissions[0] : null;
     } catch (error) {
         console.error('Error fetching my submission:', error);
+        if (error.code === 401 || error.message.includes('Invalid Credentials')) {
+            error.message = 'Google Classroom connection expired. Please reconnect.';
+        }
         throw error;
     }
 }

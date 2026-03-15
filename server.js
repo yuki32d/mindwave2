@@ -9071,8 +9071,10 @@ app.get('/api/google-classroom/courses', authMiddleware, async (req, res) => {
     console.error('[Google API Route Error] /courses:', error);
     
     if (error.message.includes('User not connected to Google') || 
-        error.message.includes('Google Classroom not connected')) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+        error.message.includes('Google Classroom not connected') ||
+        error.message.includes('Invalid Credentials') ||
+        error.code === 401) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     
     res.status(500).json({ 
@@ -9094,8 +9096,11 @@ app.get('/api/google-classroom/courses/:courseId/materials', authMiddleware, asy
     res.json({ ok: true, materials, count: materials.length });
   } catch (error) {
     console.error('[Google API Error] Get materials:', error);
-    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    if (error.message.includes('User not connected to Google') || 
+        error.message.includes('Google Classroom not connected') ||
+        error.message.includes('connection expired') ||
+        error.code === 401) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -9110,8 +9115,11 @@ app.get('/api/google-classroom/courses/:courseId/assignments', authMiddleware, a
     res.json({ ok: true, assignments, count: assignments.length });
   } catch (error) {
     console.error('[Google API Error] Get assignments:', error);
-    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    if (error.message.includes('User not connected to Google') || 
+        error.message.includes('Google Classroom not connected') ||
+        error.message.includes('connection expired') ||
+        error.code === 401) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -9126,8 +9134,11 @@ app.get('/api/google-classroom/courses/:courseId/announcements', authMiddleware,
     res.json({ ok: true, announcements, count: announcements.length });
   } catch (error) {
     console.error('[Google API Error] Get announcements:', error);
-    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    if (error.message.includes('User not connected to Google') || 
+        error.message.includes('Google Classroom not connected') ||
+        error.message.includes('connection expired') ||
+        error.code === 401) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -9142,8 +9153,11 @@ app.post('/api/google-classroom/courses/:courseId/materials', authMiddleware, re
     res.json({ ok: true, material });
   } catch (error) {
     console.error('[Google API Error] Upload material:', error);
-    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    if (error.message.includes('User not connected to Google') || 
+        error.message.includes('Google Classroom not connected') ||
+        error.message.includes('connection expired') ||
+        error.code === 401) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -9158,8 +9172,11 @@ app.post('/api/google-classroom/courses/:courseId/assignments', authMiddleware, 
     res.json({ ok: true, assignment });
   } catch (error) {
     console.error('[Google API Error] Create assignment:', error);
-    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    if (error.message.includes('User not connected to Google') || 
+        error.message.includes('Google Classroom not connected') ||
+        error.message.includes('connection expired') ||
+        error.code === 401) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -9178,8 +9195,11 @@ app.post('/api/google-drive/upload', authMiddleware, async (req, res) => {
     res.json({ ok: true, file });
   } catch (error) {
     console.error('[Google API Error] Drive upload:', error);
-    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    if (error.message.includes('User not connected to Google') || 
+        error.message.includes('Google Classroom not connected') ||
+        error.message.includes('connection expired') ||
+        error.code === 401) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -9203,8 +9223,11 @@ app.get('/api/google-classroom/courses/:courseId/assignments/:assignmentId/submi
     res.json({ ok: true, submissions, count: submissions.length });
   } catch (error) {
     console.error('[Google API Error] Get submissions:', error);
-    if (error.message.includes('User not connected to Google') || error.message.includes('Google Classroom not connected')) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom not connected' });
+    if (error.message.includes('User not connected to Google') || 
+        error.message.includes('Google Classroom not connected') ||
+        error.message.includes('connection expired') ||
+        error.code === 401) {
+        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
