@@ -7,6 +7,8 @@
     const TOKEN = localStorage.getItem('token');
     let uptimeChart = null;
     
+    let rawHistory = [];
+
     // 1. Uptime Bar Generation from Backend Data
     async function generateUptimeBars() {
         const containers = document.querySelectorAll('.service-row');
@@ -17,7 +19,7 @@
             const data = await response.json();
             if (!data.success) throw new Error('Failed to fetch history');
             
-            const history = data.history;
+            rawHistory = data.history;
 
             containers.forEach(row => {
                 const serviceId = row.dataset.service;
@@ -27,14 +29,9 @@
                 barContainer.innerHTML = '';
                 
                 // Filter history for this service
-                const serviceHistory = history.filter(h => {
-                    // Mapping frontend service keys to backend identifiers if needed
-                    const map = { 'api': 'api', 'db': 'db', 'ai': 'ai', 'cdn': 'cdn' };
-                    return h.service === map[serviceId];
-                });
+                const serviceHistory = rawHistory.filter(h => h.service === serviceId);
 
                 // Get last 90 measurements (one per day for the bar chart)
-                // We'll group by date to ensure we have one bar per day
                 const dailyStatus = {};
                 serviceHistory.forEach(h => {
                     const date = new Date(h.timestamp).toDateString();
@@ -42,8 +39,6 @@
                         dailyStatus[date] = h.status;
                     }
                 });
-
-                const dates = Object.keys(dailyStatus).sort((a, b) => new Date(a) - new Date(b)).slice(-90);
 
                 for (let i = 0; i < 90; i++) {
                     const bar = document.createElement('div');
@@ -74,10 +69,75 @@
                     barContainer.appendChild(bar);
                 }
             });
+
+            // Update chart after history is loaded
+            if (uptimeChart) updateChartData('day');
         } catch (error) {
             console.error('Error rendering status bars:', error);
             logToTerminal('STATUS_ENGINE', 'FETCH_HISTORY_FAILED', 'error');
         }
+    }
+
+    // Uptime Calculation Helper
+    function getUptimeForRange(range) {
+        if (!rawHistory.length) return { labels: [], points: [] };
+
+        const labels = [];
+        const points = [];
+        const now = new Date();
+
+        if (range === 'day') {
+            // Last 24 hours, grouped by hour
+            for (let i = 0; i < 24; i++) {
+                const hourDate = new Date(now);
+                hourDate.setHours(now.getHours() - (23 - i), 0, 0, 0);
+                labels.push(`${hourDate.getHours()}:00`);
+
+                const hourChecks = rawHistory.filter(h => {
+                    const hDate = new Date(h.timestamp);
+                    return hDate.toDateString() === hourDate.toDateString() && hDate.getHours() === hourDate.getHours();
+                });
+
+                if (hourChecks.length > 0) {
+                    const operational = hourChecks.filter(h => h.status === 'operational').length;
+                    points.push(99.0 + (operational / hourChecks.length));
+                } else {
+                    points.push(100);
+                }
+            }
+        } else {
+            // Week (7 days) or Month (30 days)
+            const days = range === 'week' ? 7 : 30;
+            for (let i = 0; i < days; i++) {
+                const dayDate = new Date(now);
+                dayDate.setDate(now.getDate() - (days - 1 - i));
+                labels.push(dayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+
+                const dayChecks = rawHistory.filter(h => new Date(h.timestamp).toDateString() === dayDate.toDateString());
+
+                if (dayChecks.length > 0) {
+                    const operational = dayChecks.filter(h => h.status === 'operational').length;
+                    points.push(99.0 + (operational / dayChecks.length));
+                } else {
+                    points.push(100);
+                }
+            }
+        }
+
+        return { labels, points };
+    }
+
+    function updateChartData(range) {
+        const { labels, points } = getUptimeForRange(range);
+        uptimeChart.data.labels = labels;
+        uptimeChart.data.datasets[0].data = points;
+        uptimeChart.update();
+
+        // Update the big percentage label
+        const avg = points.length > 0 ? points.reduce((a, b) => a + b, 0) / points.length : 100;
+        const percentEl = document.querySelector('.metrics-section h2 + div + div div:last-child');
+        const bigPercent = document.querySelector('.metrics-section div > div:last-child');
+        if (bigPercent) bigPercent.textContent = `${avg.toFixed(2)}%`;
     }
 
     // 2. Chart.js Initialization
@@ -85,16 +145,13 @@
         const ctx = document.getElementById('uptimeChart')?.getContext('2d');
         if (!ctx) return;
 
-        const labels = Array.from({length: 24}, (_, i) => `${i}:00`);
-        const data = Array.from({length: 24}, () => 100);
-
         uptimeChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: labels,
+                labels: [],
                 datasets: [{
                     label: 'Uptime',
-                    data: data,
+                    data: [],
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.05)',
                     borderWidth: 2,
@@ -118,12 +175,14 @@
                     y: {
                         min: 99,
                         max: 100,
-                        ticks: { stepSize: 0.5, font: { size: 10 } },
-                        grid: { color: 'rgba(0,0,0,0.03)' }
+                        ticks: { stepSize: 0.2, font: { size: 10 } },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
                     }
                 }
             }
         });
+        
+        if (rawHistory.length) updateChartData('day');
     }
 
     // 3. Tab Switching Logic
@@ -134,15 +193,8 @@
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 
-                // Simulate data change
                 const range = tab.dataset.range;
-                let count = range === 'day' ? 24 : (range === 'week' ? 7 : 30);
-                let labels = range === 'day' ? Array.from({length: 24}, (_, i) => `${i}:00`) : Array.from({length: count}, (_, i) => `Day ${i+1}`);
-                
-                uptimeChart.data.labels = labels;
-                uptimeChart.data.datasets[0].data = Array.from({length: count}, () => 99.9 + (Math.random() * 0.1));
-                uptimeChart.update();
-                
+                updateChartData(range);
                 logToTerminal('METRICS', `RANGE_SWITCHED: ${range.toUpperCase()}`, 'ok');
             });
         });
