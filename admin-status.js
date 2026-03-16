@@ -7,53 +7,77 @@
     const TOKEN = localStorage.getItem('token');
     let uptimeChart = null;
     
-    // 1. Uptime Bar Generation with Tooltips
-    function generateUptimeBars() {
-        const containers = document.querySelectorAll('.uptime-bars');
+    // 1. Uptime Bar Generation from Backend Data
+    async function generateUptimeBars() {
+        const containers = document.querySelectorAll('.service-row');
         const tooltip = document.getElementById('uptimeTooltip');
         
-        containers.forEach(container => {
-            container.innerHTML = '';
-            for (let i = 0; i < 90; i++) {
-                const bar = document.createElement('div');
-                bar.className = 'bar';
-                
-                // Simulate occasional issues
-                const rand = Math.random();
-                let statusText = 'Operational';
-                if (rand > 0.99) {
-                    bar.classList.add('down');
-                    statusText = 'Partial Outage';
-                } else if (rand > 0.97) {
-                    bar.classList.add('degraded');
-                    statusText = 'Degraded Performance';
-                }
-                
-                const date = new Date();
-                date.setDate(date.getDate() - (89 - i));
-                const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-                
-                // Today marker
-                if (i === 89) {
-                    bar.classList.add('today');
-                }
+        try {
+            const response = await fetch('/api/system/status-history');
+            const data = await response.json();
+            if (!data.success) throw new Error('Failed to fetch history');
+            
+            const history = data.history;
 
-                // Tooltip listeners
-                bar.addEventListener('mouseenter', (e) => {
-                    tooltip.innerHTML = `<strong>${dateStr}</strong><br>${statusText}`;
-                    tooltip.style.display = 'block';
-                });
-                bar.addEventListener('mousemove', (e) => {
-                    tooltip.style.left = (e.clientX + 10) + 'px';
-                    tooltip.style.top = (e.clientY - 40) + 'px';
-                });
-                bar.addEventListener('mouseleave', () => {
-                    tooltip.style.display = 'none';
-                });
+            containers.forEach(row => {
+                const serviceId = row.dataset.service;
+                const barContainer = row.querySelector('.uptime-bars');
+                if (!barContainer) return;
+
+                barContainer.innerHTML = '';
                 
-                container.appendChild(bar);
-            }
-        });
+                // Filter history for this service
+                const serviceHistory = history.filter(h => {
+                    // Mapping frontend service keys to backend identifiers if needed
+                    const map = { 'api': 'api', 'db': 'db', 'ai': 'ai', 'cdn': 'cdn' };
+                    return h.service === map[serviceId];
+                });
+
+                // Get last 90 measurements (one per day for the bar chart)
+                // We'll group by date to ensure we have one bar per day
+                const dailyStatus = {};
+                serviceHistory.forEach(h => {
+                    const date = new Date(h.timestamp).toDateString();
+                    if (!dailyStatus[date] || h.status !== 'operational') {
+                        dailyStatus[date] = h.status;
+                    }
+                });
+
+                const dates = Object.keys(dailyStatus).sort((a, b) => new Date(a) - new Date(b)).slice(-90);
+
+                for (let i = 0; i < 90; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'bar';
+                    
+                    const dateObj = new Date();
+                    dateObj.setDate(dateObj.getDate() - (89 - i));
+                    const dateKey = dateObj.toDateString();
+                    const status = dailyStatus[dateKey] || 'operational';
+                    
+                    if (status === 'down') bar.classList.add('down');
+                    else if (status === 'degraded') bar.classList.add('degraded');
+                    
+                    const dateStr = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                    
+                    if (i === 89) bar.classList.add('today');
+
+                    bar.addEventListener('mouseenter', (e) => {
+                        tooltip.innerHTML = `<strong>${dateStr}</strong><br>${status.charAt(0).toUpperCase() + status.slice(1)}`;
+                        tooltip.style.display = 'block';
+                    });
+                    bar.addEventListener('mousemove', (e) => {
+                        tooltip.style.left = (e.clientX + 10) + 'px';
+                        tooltip.style.top = (e.clientY - 40) + 'px';
+                    });
+                    bar.addEventListener('mouseleave', () => tooltip.style.display = 'none');
+                    
+                    barContainer.appendChild(bar);
+                }
+            });
+        } catch (error) {
+            console.error('Error rendering status bars:', error);
+            logToTerminal('STATUS_ENGINE', 'FETCH_HISTORY_FAILED', 'error');
+        }
     }
 
     // 2. Chart.js Initialization
@@ -175,17 +199,18 @@
     }
 
     // Initialize
-    function init() {
-        generateUptimeBars();
+    async function init() {
+        await generateUptimeBars();
         initChart();
         initTabs();
         
         setInterval(updateLiveStatus, 1000);
         setInterval(checkSystemHealth, 20000);
+        setInterval(generateUptimeBars, 600000); // Refresh bars every 10 mins
         
-        document.getElementById('refreshBtn')?.addEventListener('click', () => {
+        document.getElementById('refreshBtn')?.addEventListener('click', async () => {
             logToTerminal('MANUAL_SYNC', 'REFRESHING_DASHBOARD', 'ok');
-            generateUptimeBars();
+            await generateUptimeBars();
             checkSystemHealth();
         });
 
