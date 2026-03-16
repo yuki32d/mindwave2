@@ -852,14 +852,24 @@ function playFillIn(game, container) {
     function render() {
         let blankIndex = 0;
         let content = game.content || '';
+        
+        if (!content && game.description) {
+            content = game.description;
+        }
+        
+        if (!content) {
+            container.innerHTML = '<div class="error-message">No content found for this challenge.</div>';
+            return;
+        }
 
         // Replace ___ with [blank] placeholders for consistent parsing
         content = content.replace(/___/g, '[blank]');
 
-        const parts = content.split(/(\\[.*?\\])/g);
+        // Fix: Corrected regex to match [blank] or [word] without requiring backslashes
+        const parts = content.split(/(\[.*?\])/g);
 
         const renderedContent = parts.map(part => {
-            if (part.startsWith('[') && part.endsWith(']')) {
+            if (part && part.startsWith('[') && part.endsWith(']')) {
                 const idx = blankIndex++;
                 const filled = filledBlanks[idx];
                 return `<span class="blank-slot" data-idx="${idx}" style="display: inline-block; min-width: 80px; padding: 4px 8px; border: 2px dashed #0f62fe; background: rgba(15, 98, 254, 0.1); border-radius: 4px; color: #0f62fe; text-align: center; cursor: pointer; margin: 0 4px; font-weight: 600;">${filled || '___'}</span>`;
