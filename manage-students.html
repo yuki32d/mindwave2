@@ -632,16 +632,24 @@
                     <button id="nextBtn" class="pagination-btn" disabled>
                         Next <i class="fas fa-chevron-right"></i>
                     </button>
-                </div>
-            </div>
-        </main>
-    </div>
-
-
-    <div id="toastContainer"
+                 <div id="toastContainer"
         style="position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px;">
     </div>
 
+    <!-- Confirm Modal Structure -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="confirm-modal">
+            <div class="confirm-icon"><i class="fas fa-question"></i></div>
+            <div class="confirm-title" id="confirmTitle">Confirm Action</div>
+            <div class="confirm-msg" id="confirmMsg">Are you sure you want to proceed?</div>
+            <div class="confirm-actions">
+                <button class="modal-btn modal-cancel" id="confirmCancel">Cancel</button>
+                <button class="modal-btn modal-confirm" id="confirmOk">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Logic Scripts -->
     <script src="manage-students.js"></script>
     <script>
         // ── OVERRIDE ALERT/CONFIRM ──
@@ -680,28 +688,28 @@
             });
         };
 
-        document.getElementById('confirmOk').onclick = () => {
-            const modal = document.getElementById('confirmModal');
-            if (modal) modal.classList.remove('active');
-            if (confirmResolve) confirmResolve(true);
-        };
+        const okBtn = document.getElementById('confirmOk');
+        if (okBtn) {
+            okBtn.onclick = () => {
+                const modal = document.getElementById('confirmModal');
+                if (modal) modal.classList.remove('active');
+                if (confirmResolve) confirmResolve(true);
+            };
+        }
         
-        document.getElementById('confirmCancel').onclick = () => {
-            const modal = document.getElementById('confirmModal');
-            if (modal) modal.classList.remove('active');
-            if (confirmResolve) confirmResolve(false);
-        };
+        const cancelBtn = document.getElementById('confirmCancel');
+        if (cancelBtn) {
+            cancelBtn.onclick = () => {
+                const modal = document.getElementById('confirmModal');
+                if (modal) modal.classList.remove('active');
+                if (confirmResolve) confirmResolve(false);
+            };
+        }
     </script>
+</body>
 
-    <!-- Confirm Modal Structure -->
-    <div id="confirmModal" class="modal-overlay">
-        <div class="confirm-modal">
-            <div class="confirm-icon"><i class="fas fa-question"></i></div>
-            <div class="confirm-title" id="confirmTitle">Confirm Action</div>
-            <div class="confirm-msg" id="confirmMsg">Are you sure you want to proceed?</div>
-            <div class="confirm-actions">
-                <button class="modal-btn modal-cancel" id="confirmCancel">Cancel</button>
-                <button class="modal-btn modal-confirm" id="confirmOk">Confirm</button>
+</html>
+ton>
             </div>
         </div>
     </div>
