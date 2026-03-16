@@ -7,6 +7,15 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-brain-circuit'><path d='M12 4.5a2.5 2.5 0 0 0-4.96-.44l-.32 1.6d4a4.44 4.44 0 0 1-4.42 3.54 3 3 0 0 0 0 6 4.44 4.44 0 0 1 4.42 3.54l.32 1.6d4a2.5 2.5 0 0 0 4.96-.44' /><path d='M12 19.5a2.5 2.5 0 0 0 4.96.44l.32-1.6d4a4.44 4.44 0 0 1 4.42-3.54 3 3 0 0 0 0-6 4.44 4.44 0 0 1-4.42-3.54l-.32-1.6d4a2.5 2.5 0 0 0-4.96.44' /><circle cx='12' cy='12' r='3' /></svg>">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CodeMirror -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    
     <style>
         :root {
             --primary: #6366f1;
@@ -21,6 +30,21 @@
             --red: #ef4444;
             --glass: rgba(255, 255, 255, 0.02);
             --glass-strong: rgba(255, 255, 255, 0.05);
+        }
+
+        .CodeMirror {
+            height: auto;
+            min-height: 150px;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.2) !important;
+            margin-bottom: 8px;
+        }
+
+        .cm-s-dracula.CodeMirror {
+            background-color: transparent !important;
         }
 
         * {
