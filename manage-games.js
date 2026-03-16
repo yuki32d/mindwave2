@@ -98,10 +98,21 @@ async function deleteGame(gameId, gameTitle) {
 
     try {
         const res = await fetch(`/api/games/${gameId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
 
-        const data = await res.json();
+        // Safe JSON parsing
+        const text = await res.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('Non-JSON response:', text);
+            throw new Error(`Server returned an invalid response (${res.status} ${res.statusText})`);
+        }
 
         if (data.ok) {
             alert(`✅ Successfully deleted "${gameTitle}"`);
@@ -126,10 +137,21 @@ async function deleteAllGames() {
 
     try {
         const res = await fetch('/api/games', {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
 
-        const data = await res.json();
+        // Safe JSON parsing
+        const text = await res.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('Non-JSON response:', text);
+            throw new Error(`Server returned an invalid response (${res.status} ${res.statusText})`);
+        }
 
         if (data.ok) {
             alert(`✅ Successfully deleted all ${data.deletedCount || 0} games.`);

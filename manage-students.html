@@ -402,6 +402,135 @@
                 gap: 16px;
             }
         }
+
+        /* ── CONFIRM MODAL ── */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 11000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .confirm-modal {
+            width: 100%;
+            max-width: 400px;
+            padding: 32px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        [data-theme="dark"] .confirm-modal {
+            background: rgba(22, 27, 39, 0.95);
+        }
+
+        .confirm-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: var(--accent-lo);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 24px;
+            border: 1px solid var(--accent-bdr);
+        }
+
+        .confirm-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .confirm-msg {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 32px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .modal-cancel {
+            background: var(--bg);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .modal-cancel:hover {
+            color: var(--text);
+            border-color: var(--muted);
+        }
+
+        .modal-confirm {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .modal-confirm:hover {
+            box-shadow: 0 0 20px var(--accent-lo);
+            transform: translateY(-2px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-overlay.active .confirm-modal {
+            transform: scale(1);
+        }
+
+        /* ── TOAST NOTIFICATIONS ── */
+        .toast {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            animation: slideIn 0.3s forwards;
+            min-width: 250px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 
@@ -518,30 +647,64 @@
         // ── OVERRIDE ALERT/CONFIRM ──
         window.alert = function (msg) {
             const container = document.getElementById('toastContainer');
+            if (!container) return;
             const toast = document.createElement('div');
             toast.className = 'toast';
-            toast.style.cssText = 'background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 12px; box-shadow: var(--shadow); display: flex; gap: 12px; align-items: center; animation: slideIn 0.3s forwards;';
             toast.innerHTML = `<i class="fas fa-info-circle" style="color: var(--accent);"></i> <span>${msg}</span>`;
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                toast.style.transition = 'all 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         };
 
         let confirmResolve;
-        window.confirm = function (msg) {
-            document.getElementById('confirmMsg').textContent = msg;
-            document.getElementById('confirmModal').classList.add('active');
-            return new Promise(res => confirmResolve = res);
+        window.confirm = function (msg, title = 'Confirm Action') {
+            const modal = document.getElementById('confirmModal');
+            const msgEl = document.getElementById('confirmMsg');
+            const titleEl = document.getElementById('confirmTitle');
+            
+            if (!modal || !msgEl || !titleEl) {
+                // Fallback to native if UI missing
+                return Promise.resolve(window.confirm(msg));
+            }
+
+            msgEl.textContent = msg;
+            titleEl.textContent = title;
+            modal.classList.add('active');
+            
+            return new Promise(res => {
+                confirmResolve = res;
+            });
         };
 
         document.getElementById('confirmOk').onclick = () => {
-            document.getElementById('confirmModal').classList.remove('active');
-            confirmResolve(true);
+            const modal = document.getElementById('confirmModal');
+            if (modal) modal.classList.remove('active');
+            if (confirmResolve) confirmResolve(true);
         };
+        
         document.getElementById('confirmCancel').onclick = () => {
-            document.getElementById('confirmModal').classList.remove('active');
-            confirmResolve(false);
+            const modal = document.getElementById('confirmModal');
+            if (modal) modal.classList.remove('active');
+            if (confirmResolve) confirmResolve(false);
         };
     </script>
+
+    <!-- Confirm Modal Structure -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="confirm-modal">
+            <div class="confirm-icon"><i class="fas fa-question"></i></div>
+            <div class="confirm-title" id="confirmTitle">Confirm Action</div>
+            <div class="confirm-msg" id="confirmMsg">Are you sure you want to proceed?</div>
+            <div class="confirm-actions">
+                <button class="modal-btn modal-cancel" id="confirmCancel">Cancel</button>
+                <button class="modal-btn modal-confirm" id="confirmOk">Confirm</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

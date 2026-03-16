@@ -3882,6 +3882,19 @@ app.get("/api/games/my", authMiddleware, async (req, res) => {
   }
 });
 
+app.delete("/api/games", authMiddleware, requireFaculty, async (req, res) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ ok: false, message: "Only admins can perform bulk deletion" });
+  }
+  try {
+    const result = await Game.deleteMany({ createdBy: req.user.sub });
+    res.json({ ok: true, deletedCount: result.deletedCount });
+  } catch (error) {
+    console.error("Bulk delete games error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 app.delete("/api/games/:id", authMiddleware, requireFaculty, async (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ ok: false, message: "Only admins can delete games" });
