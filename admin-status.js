@@ -91,7 +91,13 @@
             for (let i = 0; i < 24; i++) {
                 const hourDate = new Date(now);
                 hourDate.setHours(now.getHours() - (23 - i), 0, 0, 0);
-                labels.push(`${hourDate.getHours()}:00`);
+                
+                // Show date if it's the first label or if hour is 0 (midnight)
+                if (i === 0 || hourDate.getHours() === 0) {
+                    labels.push(hourDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ` ${hourDate.getHours()}:00`);
+                } else {
+                    labels.push(`${hourDate.getHours()}:00`);
+                }
 
                 const hourChecks = rawHistory.filter(h => {
                     const hDate = new Date(h.timestamp);
@@ -111,7 +117,7 @@
             for (let i = 0; i < days; i++) {
                 const dayDate = new Date(now);
                 dayDate.setDate(now.getDate() - (days - 1 - i));
-                labels.push(dayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+                labels.push(dayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' }));
 
                 const dayChecks = rawHistory.filter(h => new Date(h.timestamp).toDateString() === dayDate.toDateString());
 
@@ -204,7 +210,10 @@
     function updateLiveStatus() {
         const clock = document.getElementById('lastUpdatedClock');
         if (clock) {
-            clock.textContent = new Date().toLocaleTimeString();
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            clock.textContent = `${dateStr}, ${timeStr}`;
         }
 
         // Pulse the "today" bar
