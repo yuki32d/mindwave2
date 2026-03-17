@@ -568,12 +568,17 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
         }
     });
 
-    // Faculty: Get all peer reviews for monitoring
+    // Faculty/Admin: Get all peer reviews for monitoring
     app.get('/api/peer-review/all', authMiddleware, async (req, res) => {
         try {
-            const reviews = await PeerReview.find({
-                organizationId: req.user.organizationId
-            })
+            // JWT doesn't include organizationId — look up the user from DB
+            const currentUser = await User.findById(req.user.sub).select('organizationId').lean();
+            const orgId = currentUser && currentUser.organizationId;
+
+            // Build query: filter by org if available, else return all (super-admin mode)
+            const query = orgId ? { organizationId: orgId } : {};
+
+            const reviews = await PeerReview.find(query)
                 .populate('reviewerId', 'name email')
                 .populate('revieweeId', 'name email')
                 .populate('submissionId')
