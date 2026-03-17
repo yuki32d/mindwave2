@@ -740,7 +740,8 @@
                     <a href="faculty-settings.html" class="nav-item"><i data-lucide="settings-2"></i> Settings</a>
                     <a href="faculty-ai-config.html" class="nav-item"><i data-lucide="bot"></i> AI Settings</a>
                     <button class="nav-item" id="systemStatusBtn"><i data-lucide="activity"></i> System Status</button>
-                    <button class="nav-item" style="color:#f87171;" onclick="showLogoutModal()"><i data-lucide="log-out"></i>
+                    <button class="nav-item" style="color:#f87171;" onclick="showLogoutModal()"><i
+                            data-lucide="log-out"></i>
                         Logout</button>
                 </div>
             </div>
@@ -797,16 +798,22 @@
     </div>
 
     <!-- Logout Confirmation Modal -->
-    <div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:20000;align-items:center;justify-content:center;">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.2rem 2rem 2rem;width:340px;max-width:90vw;text-align:center;">
-            <div style="width:54px;height:54px;border-radius:50%;background:rgba(220,38,38,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;color:#f87171;">
+    <div id="logoutModal"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:20000;align-items:center;justify-content:center;">
+        <div
+            style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.2rem 2rem 2rem;width:340px;max-width:90vw;text-align:center;">
+            <div
+                style="width:54px;height:54px;border-radius:50%;background:rgba(220,38,38,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;color:#f87171;">
                 <i data-lucide="log-out" style="width:26px;height:26px;"></i>
             </div>
             <h3 style="font-size:1.2rem;font-weight:700;margin:0 0 .5rem;color:var(--text);">Sign out?</h3>
-            <p style="font-size:.875rem;color:var(--muted);margin:0 0 2rem;line-height:1.5;">You'll need to log back in to access the admin console.</p>
+            <p style="font-size:.875rem;color:var(--muted);margin:0 0 2rem;line-height:1.5;">You'll need to log back in
+                to access the admin console.</p>
             <div style="display:flex;gap:.75rem;">
-                <button onclick="hideLogoutModal()" style="flex:1;padding:.75rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:var(--border);color:var(--muted);">Cancel</button>
-                <button onclick="doLogout()" style="flex:1;padding:.75rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:#f87171;color:#fff;display:flex;align-items:center;justify-content:center;gap:.4rem;">
+                <button onclick="hideLogoutModal()"
+                    style="flex:1;padding:.75rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:var(--border);color:var(--muted);">Cancel</button>
+                <button onclick="doLogout()"
+                    style="flex:1;padding:.75rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:#f87171;color:#fff;display:flex;align-items:center;justify-content:center;gap:.4rem;">
                     <i data-lucide="log-out" style="width:16px;height:16px;"></i> Sign Out
                 </button>
             </div>
@@ -1115,7 +1122,7 @@
         function doLogout() {
             ['token', 'mindwave_token', 'email', 'firstName', 'lastName', 'role', 'userId'].forEach(k => localStorage.removeItem(k));
             sessionStorage.clear();
-            window.location.replace('login.html');
+            window.location.replace('marketing-site/admin-login.html');
         }
 
         window.onload = () => {
