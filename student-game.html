@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -1313,12 +1313,11 @@
             window.location.replace('marketing-site/student-login.html');
         }
     </script>
-    <script src="chatbot.js">
-        function doLogout() {
-            ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
-                .forEach(k => localStorage.removeItem(k));
-            window.location.replace('marketing-site/student-login.html');
-        }
+    function doLogout() {
+    ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
+    .forEach(k => localStorage.removeItem(k));
+    window.location.replace('marketing-site/student-login.html');
+    }
     </script>
     <script src="loading-spinner.js">
         function doLogout() {
