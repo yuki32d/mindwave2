@@ -65,24 +65,32 @@
         /* ── SHELL ── */
         .shell { display: grid; grid-template-columns: var(--sidebar-w) 1fr; grid-template-rows: var(--topbar-h) 1fr; height: 100vh; }
 
-        /* ── SIDEBAR ── */
+        /* ── SIDEBAR (exact copy from admin.html) ── */
         .sidebar { grid-row: 1 / 3; background: var(--s-bg); border-right: 1px solid var(--s-border); display: flex; flex-direction: column; }
         .side-logo { height: var(--topbar-h); display: flex; align-items: center; gap: 10px; padding: 0 20px; border-bottom: 1px solid var(--s-border); flex-shrink: 0; }
-        .side-logo-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; }
-        .side-logo-name { font-weight: 800; font-size: 15px; color: #fff; }
+        .side-logo-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .side-logo-mark svg { width: 16px; height: 16px; }
+        .side-logo-name { font-weight: 800; font-size: 15px; letter-spacing: -.02em; color: #fff; }
+        .side-logo-tag { margin-left: auto; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 3px 7px; border-radius: 4px; background: var(--s-active-bg); color: var(--s-active-txt); border: 1px solid rgba(245,166,35,.3); }
         .side-scroll { flex: 1; overflow-y: auto; padding: 14px 10px; scrollbar-width: none; }
         .side-scroll::-webkit-scrollbar { display: none; }
-        .nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--s-muted); padding: 8px 10px 5px; letter-spacing: .06em; }
-        .nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 9px; font-size: 13px; color: var(--s-text); transition: all .15s; text-decoration: none; }
-        .nav-item:hover { background: var(--s-hover); color: #fff; }
-        .nav-item.active { background: var(--s-active-bg); color: var(--s-active-txt); font-weight: 700; }
+        .nav-section { margin-bottom: 6px; }
+        .nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--s-muted); padding: 8px 10px 5px; }
+        .nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 9px; font-size: 13px; font-weight: 500; color: var(--s-text); transition: all .15s; position: relative; border: none; background: none; width: 100%; text-align: left; text-decoration: none; }
         .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .nav-item:hover { background: var(--s-hover); color: #fff; }
+        .nav-item.active { background: var(--s-active-bg); color: var(--s-active-txt); font-weight: 700; border: 1px solid rgba(245,166,35,.3); }
+        .nav-item.active::before { content: ''; position: absolute; left: 0; top: 25%; bottom: 25%; width: 3px; background: var(--accent); border-radius: 0 3px 3px 0; }
+        .nav-badge { margin-left: auto; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 20px; }
+        .badge-red { background: rgba(220,38,38,.2); color: #f87171; }
+        .badge-green { background: rgba(22,163,74,.2); color: #4ade80; }
         .side-divider { height: 1px; background: var(--s-border); margin: 8px 10px; }
-        .side-foot { border-top: 1px solid var(--s-border); padding: 12px; }
-        .user-card { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; }
+        .side-foot { border-top: 1px solid var(--s-border); padding: 12px; flex-shrink: 0; }
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; cursor: pointer; transition: background .14s; }
+        .user-card:hover { background: var(--s-hover); }
         .user-av { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
-        .user-name { font-size: 13px; font-weight: 700; color: var(--s-text); }
-        .user-role-tag { font-size: 11px; color: var(--s-muted); }
+        .user-name { font-size: 12px; font-weight: 700; color: #fff; }
+        .user-role { font-size: 11px; color: var(--s-muted); }
 
         /* ── TOPBAR ── */
         .topbar { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 22px; gap: 12px; }
@@ -158,32 +166,53 @@
 <body>
     <div class="shell">
 
-        <!-- ── SIDEBAR (Admin) ── -->
+        <!-- ── SIDEBAR (exact copy from admin.html) ── -->
         <aside class="sidebar">
             <div class="side-logo">
                 <div class="side-logo-mark"><i data-lucide="shield-check"></i></div>
                 <span class="side-logo-name">MindWave</span>
+                <span class="side-logo-tag">Admin</span>
             </div>
+
             <div class="side-scroll">
-                <div class="nav-label">Control Center</div>
-                <a href="admin.html" class="nav-item"><i data-lucide="gauge"></i> Overview</a>
-                <a href="admin-students.html" class="nav-item"><i data-lucide="users"></i> Students</a>
-                <a href="faculty-dataanalytics.html" class="nav-item"><i data-lucide="bar-chart-2"></i> Analytics</a>
-
+                <div class="nav-section">
+                    <div class="nav-label">Control Center</div>
+                    <a href="admin.html" class="nav-item"><i data-lucide="gauge"></i> Overview</a>
+                    <a href="admin-students.html" class="nav-item"><i data-lucide="users"></i> Students</a>
+                    <a href="faculty-dataanalytics.html" class="nav-item"><i data-lucide="bar-chart-2"></i> Analytics</a>
+                </div>
                 <div class="side-divider"></div>
-
-                <div class="nav-label">Platform</div>
-                <a href="faculty-live-meeting.html" class="nav-item"><i data-lucide="video"></i> Live Meeting</a>
-                <a href="faculty-git-student.html" class="nav-item"><i data-lucide="git-branch"></i> GitHub</a>
-                <a href="admin-peer-review.html" class="nav-item active"><i data-lucide="users-2"></i> Peer Review</a>
-                <a href="faculty-community.html" class="nav-item"><i data-lucide="message-square"></i> Community</a>
+                <div class="nav-section">
+                    <div class="nav-label">Content</div>
+                    <a href="faculty-classroom.html" class="nav-item"><i data-lucide="book-open"></i> Courses</a>
+                    <a href="interactive-tools-selector.html" class="nav-item"><i data-lucide="gamepad-2"></i> Game Tools</a>
+                    <a href="ai-game-builder.html" class="nav-item"><i data-lucide="bot"></i> AI Builder</a>
+                    <a href="admin.html#announcementSection" class="nav-item"><i data-lucide="megaphone"></i> Announcements</a>
+                    <a href="admin.html#updateSection" class="nav-item"><i data-lucide="file-pen-line"></i> Post Update</a>
+                </div>
+                <div class="side-divider"></div>
+                <div class="nav-section">
+                    <div class="nav-label">Platform</div>
+                    <a href="faculty-live-meeting.html" class="nav-item"><i data-lucide="video"></i> Live Meeting <span class="nav-badge badge-green">Live</span></a>
+                    <a href="faculty-git-student.html" class="nav-item"><i data-lucide="git-branch"></i> GitHub</a>
+                    <a href="admin-peer-review.html" class="nav-item active"><i data-lucide="users-2"></i> Peer Review</a>
+                    <a href="faculty-community.html" class="nav-item"><i data-lucide="message-square"></i> Community</a>
+                </div>
+                <div class="side-divider"></div>
+                <div class="nav-section">
+                    <div class="nav-label">System</div>
+                    <a href="faculty-settings.html" class="nav-item"><i data-lucide="settings-2"></i> Settings</a>
+                    <a href="faculty-ai-config.html" class="nav-item"><i data-lucide="bot"></i> AI Settings</a>
+                    <button class="nav-item" style="color:#f87171;" onclick="doLogout()"><i data-lucide="log-out"></i> Logout</button>
+                </div>
             </div>
+
             <div class="side-foot">
                 <div class="user-card">
                     <div class="user-av" id="adminAv">AD</div>
                     <div>
-                        <div class="user-name" id="adminName">Admin</div>
-                        <div class="user-role-tag">Administrator</div>
+                        <div class="user-name" id="adminName">Faculty Admin</div>
+                        <div class="user-role">Administrator</div>
                     </div>
                 </div>
             </div>
@@ -507,10 +536,28 @@
         }
 
         // ── INIT ──
+        function doLogout() {
+            ['token','mindwave_token','email','firstName','lastName','role','userId'].forEach(k => localStorage.removeItem(k));
+            sessionStorage.clear();
+            window.location.replace('login.html');
+        }
+
         window.onload = () => {
             if (window.lucide) window.lucide.createIcons();
             loadReviews();
             initStarRatings();
+
+            // Populate user info from token
+            try {
+                const t = localStorage.getItem('token');
+                if (t) {
+                    const p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+                    const av = document.getElementById('adminAv');
+                    const nm = document.getElementById('adminName');
+                    if (av && p.name) av.textContent = p.name.slice(0,2).toUpperCase();
+                    if (nm && p.name) nm.textContent = p.name;
+                }
+            } catch(e) {}
         };
     </script>
 </body>
