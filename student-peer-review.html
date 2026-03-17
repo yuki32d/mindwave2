@@ -758,7 +758,9 @@
         }
 
         function closeAssessmentModal() {
-            document.getElementById('assessmentModal').classList.remove('active');
+            const modal = document.getElementById('assessmentModal');
+            modal.classList.remove('active');
+            modal.style.display = '';
             currentReviewId = null;
         }
 
