@@ -155,7 +155,7 @@ body{display:flex;min-height:100vh;}
   </div>
 
   <div class="form-title">Sign in to MindWave</div>
-  <div class="form-sub">Use your campus email to continue</div>
+  <div class="form-sub">Use your CMRIT faculty or HOD email</div>
 
   <div class="steps">
     <div class="step-dot active" id="dot1"></div>
@@ -168,7 +168,7 @@ body{display:flex;min-height:100vh;}
         <label for="username">Email</label>
         <div class="input-wrap">
           <i class="fas fa-envelope ico"></i>
-          <input type="email" id="username" placeholder="admin.name@cmrit.ac.in" autocomplete="email" required>
+          <input type="email" id="username" placeholder="jeeban.j@cmrit.ac.in" autocomplete="email" required>
         </div>
       </div>
       <div class="opts-row">
@@ -255,10 +255,17 @@ const step1=document.getElementById('step1'),step2=document.getElementById('step
 const emailInput=document.getElementById('username'),emailDisplay=document.getElementById('emailDisplay');
 const dot1=document.getElementById('dot1'),dot2=document.getElementById('dot2');
 
+const FACULTY_REGEX=/^[a-z]+\.[a-z]@cmrit\.ac\.in$/i;
+const HOD_REGEX=/^hod\.[a-z]+@cmrit\.ac\.in$/i;
+function isValidAdminEmail(e){return FACULTY_REGEX.test(e)||HOD_REGEX.test(e);}
+
 document.getElementById('nextBtn').addEventListener('click',()=>{
   const v=emailInput.value.trim(),e1=document.getElementById('e1'),e1t=document.getElementById('e1t');
   e1.classList.remove('show');
-  if(!v||!v.includes('@')){e1t.textContent='Authorized email required.';e1.classList.add('show');return;}
+  if(!v||!isValidAdminEmail(v)){
+    e1t.textContent='Use your college email: name.initial@cmrit.ac.in or hod.dept@cmrit.ac.in';
+    e1.classList.add('show');return;
+  }
   emailDisplay.textContent=v;
   step1.style.display='none';step2.style.display='block';socials.style.display='none';
   dot1.classList.remove('active');dot2.classList.add('active');

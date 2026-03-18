@@ -783,7 +783,12 @@ const pendingAdminSignupSchema = new mongoose.Schema(
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     approvedAt: { type: Date },
     rejectedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    rejectedAt: { type: Date }
+    rejectedAt: { type: Date },
+    // Email verification OTP
+    emailOtp: { type: String },          // 6-digit OTP (stored as string)
+    emailOtpExpiry: { type: Date },       // 15-minute expiry
+    emailVerified: { type: Boolean, default: false },
+    isHod: { type: Boolean, default: false } // auto-detected from HOD email pattern
   },
   { timestamps: true }
 );
@@ -1355,17 +1360,25 @@ app.use('/api', paymentRoutes);
 app.use('/api/', apiLimiter);
 
 const STUDENT_EMAIL_REGEX = /\.mca25@cmrit\.ac\.in$/i;
-const ADMIN_EMAIL_REGEX = /\.mca@cmrit\.ac\.in$/i;
+// Faculty: firstname.initial@cmrit.ac.in (e.g. jeeban.j@cmrit.ac.in) — no .mca suffix
+const FACULTY_EMAIL_REGEX = /^[a-z]+\.[a-z]@cmrit\.ac\.in$/i;
+// HOD (super admin): hod.dept@cmrit.ac.in (e.g. hod.mca@cmrit.ac.in)
+const HOD_EMAIL_REGEX = /^hod\.[a-z]+@cmrit\.ac\.in$/i;
+
+function isSuperAdmin(email) {
+  return HOD_EMAIL_REGEX.test(email);
+}
 
 function validateEmail(email, role) {
   if (!email) return false;
   if (role === "admin") {
-    return ADMIN_EMAIL_REGEX.test(email);
+    // Accept faculty (name.initial@cmrit.ac.in) OR HOD (hod.dept@cmrit.ac.in)
+    return FACULTY_EMAIL_REGEX.test(email) || HOD_EMAIL_REGEX.test(email);
   }
   if (role === "student") {
     return STUDENT_EMAIL_REGEX.test(email);
   }
-  return STUDENT_EMAIL_REGEX.test(email) || ADMIN_EMAIL_REGEX.test(email);
+  return STUDENT_EMAIL_REGEX.test(email) || FACULTY_EMAIL_REGEX.test(email) || HOD_EMAIL_REGEX.test(email);
 }
 
 function validatePassword(password) {
@@ -1684,6 +1697,154 @@ async function createAdminNotification(message, meta = {}) {
   }
 }
 
+// ── Admin Email Verification Helper ─────────────────────────────────────────
+async function sendAdminVerificationEmail(email, otp, isHod) {
+  if (!BREVO_API_KEY) {
+    console.warn(`[WARN] BREVO_API_KEY not set. OTP for ${email}: ${otp}`);
+    return;
+  }
+  const role = isHod ? 'HOD' : 'Faculty';
+  const htmlContent = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F4F4F7;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F4F4F7;padding:40px 0;">
+    <tr><td align="center">
+      <table width="540" cellpadding="0" cellspacing="0" style="max-width:540px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <tr><td style="background:#4F46E5;padding:28px 36px;text-align:center;">
+          <span style="display:inline-block;width:36px;height:36px;background:#fff;border-radius:10px;text-align:center;line-height:36px;font-size:18px;">🧠</span>
+          <span style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.5px;vertical-align:middle;margin-left:8px;">MindWave</span>
+          <p style="color:rgba(255,255,255,0.75);font-size:11px;margin:6px 0 0;letter-spacing:0.5px;text-transform:uppercase;">Admin Portal · ${role} Signup</p>
+        </td></tr>
+        <tr><td style="padding:36px 36px 28px;">
+          <h1 style="font-size:22px;font-weight:800;color:#111827;margin:0 0 10px;">Verify your email</h1>
+          <p style="font-size:14px;color:#6B7280;margin:0 0 28px;line-height:1.6;">Use the code below to complete your MindWave <strong>${role}</strong> account registration. This code expires in <strong>15 minutes</strong>.</p>
+          <div style="background:#EEF2FF;border-radius:12px;padding:24px;text-align:center;margin-bottom:28px;">
+            <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#6366F1;margin:0 0 12px;">Your Verification Code</p>
+            <p style="font-size:42px;font-weight:800;letter-spacing:0.2em;color:#3730A3;margin:0;font-family:monospace;">${otp}</p>
+          </div>
+          <p style="font-size:12px;color:#9CA3AF;margin:0;line-height:1.6;">🔒 If you didn't request this, please ignore this email. Your account will not be created.</p>
+        </td></tr>
+        <tr><td style="background:#F9FAFB;padding:18px 36px;border-top:1px solid #E5E7EB;text-align:center;">
+          <p style="font-size:11px;color:#9CA3AF;margin:0;">© 2025 MindWave · CMR Institute of Technology<br>This is an automated message — do not reply.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  try {
+    const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sender: { name: BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
+        to: [{ email }],
+        subject: `MindWave – Your ${role} verification code: ${otp}`,
+        htmlContent
+      })
+    });
+    const brevoData = await brevoRes.json();
+    if (!brevoRes.ok) {
+      console.error('[MAIL] Brevo error:', JSON.stringify(brevoData));
+    } else {
+      console.log(`[MAIL] OTP sent to ${email} (id: ${brevoData.messageId})`);
+    }
+  } catch (err) {
+    console.error('[MAIL] sendAdminVerificationEmail error:', err);
+  }
+}
+
+// ── POST /api/admin/verify-email ─────────────────────────────────────────────
+// Verifies the OTP from the admin signup flow.
+// HOD emails are auto-approved and a User account is created immediately.
+// Faculty emails are marked emailVerified and kept pending for HOD approval.
+app.post("/api/admin/verify-email", authLimiter, async (req, res) => {
+  const { email, otp } = req.body || {};
+  if (!email || !otp) {
+    return res.status(400).json({ ok: false, message: "Email and OTP are required" });
+  }
+
+  try {
+    const lowerEmail = email.toLowerCase();
+    const pending = await PendingAdminSignup.findOne({ email: lowerEmail });
+
+    if (!pending) {
+      return res.status(404).json({ ok: false, message: "No pending signup found for this email. Please sign up first." });
+    }
+    if (pending.emailVerified) {
+      return res.status(409).json({ ok: false, message: "Email already verified. Your request is awaiting HOD approval." });
+    }
+    if (!pending.emailOtp || pending.emailOtp !== String(otp).trim()) {
+      return res.status(400).json({ ok: false, message: "Invalid verification code. Please check and try again." });
+    }
+    if (!pending.emailOtpExpiry || new Date() > pending.emailOtpExpiry) {
+      return res.status(400).json({ ok: false, message: "Verification code has expired. Please sign up again to get a new code." });
+    }
+
+    // Mark OTP used
+    pending.emailVerified = true;
+    pending.emailOtp = undefined;
+    pending.emailOtpExpiry = undefined;
+
+    if (pending.isHod) {
+      // HOD: Auto-approve — create User account immediately
+      const emailPrefix = lowerEmail.split('@')[0];
+      const firstName = emailPrefix.split('.')[0];
+      const displayName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+
+      const existingUser = await User.findOne({ email: lowerEmail });
+      if (existingUser) {
+        return res.status(409).json({ ok: false, message: "HOD account already exists. Please sign in." });
+      }
+
+      await User.create({
+        name: displayName,
+        displayName,
+        email: lowerEmail,
+        password: pending.password, // already hashed
+        role: 'admin',
+        lastActive: new Date()
+      });
+
+      pending.status = 'approved';
+      pending.approvedAt = new Date();
+      await pending.save();
+
+      return res.json({
+        ok: true,
+        message: "Email verified! Your HOD account has been created. You can now sign in.",
+        approved: true
+      });
+    }
+
+    // Faculty: Keep pending for HOD approval, but now email-verified
+    await pending.save();
+
+    // Notify HOD (super admin) of the new verified faculty request
+    const superAdmin = await User.findOne({ email: SUPER_ADMIN_EMAIL });
+    if (superAdmin) {
+      await AdminNotification.create({
+        userId: superAdmin._id,
+        type: 'admin_signup_request',
+        message: `New verified faculty signup request from ${lowerEmail}`,
+        metadata: { pendingSignupId: pending._id, email: lowerEmail }
+      });
+    }
+
+    return res.json({
+      ok: true,
+      message: "Email verified! Your signup request has been sent to the HOD for approval. You'll be notified once approved.",
+      approved: false
+    });
+
+  } catch (error) {
+    console.error("verify-email error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 app.post("/api/signup", authLimiter, async (req, res) => {
   const { name, email, password, role } = req.body || {};
 
@@ -1707,52 +1868,64 @@ app.post("/api/signup", authLimiter, async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
-    // ADMIN SIGNUP: Create pending request for approval
+    // ADMIN SIGNUP: Send email verification OTP first, then create pending request
     if (safeRole === 'admin') {
-      // Check if already has a pending request
-      const existingPending = await PendingAdminSignup.findOne({
-        email: email.toLowerCase(),
-        status: 'pending'
-      });
+      const lowerEmail = email.toLowerCase();
+      const hodSignup = isSuperAdmin(lowerEmail);
 
+      // Check if already has a pending/verified request
+      const existingPending = await PendingAdminSignup.findOne({ email: lowerEmail });
       if (existingPending) {
+        if (!existingPending.emailVerified) {
+          // Resend OTP — update it
+          const otp = String(Math.floor(100000 + Math.random() * 900000));
+          existingPending.emailOtp = otp;
+          existingPending.emailOtpExpiry = new Date(Date.now() + 15 * 60 * 1000);
+          await existingPending.save();
+          await sendAdminVerificationEmail(lowerEmail, otp, hodSignup);
+          return res.status(202).json({
+            ok: true,
+            message: "A new verification code has been sent to your email.",
+            pending: true,
+            awaitingVerification: true
+          });
+        }
         return res.status(409).json({
           ok: false,
-          message: "Admin signup request already pending approval"
+          message: existingPending.status === 'pending'
+            ? "Your signup request is already submitted and awaiting HOD approval."
+            : "This email is already registered or rejected. Contact your HOD."
         });
       }
 
       // Check if user already exists
-      const existingUser = await User.findOne({ email: email.toLowerCase() });
+      const existingUser = await User.findOne({ email: lowerEmail });
       if (existingUser) {
         return res.status(409).json({ ok: false, message: "Email already registered" });
       }
 
-      // Create pending admin signup request
+      // Generate 6-digit OTP
+      const otp = String(Math.floor(100000 + Math.random() * 900000));
+
+      // Create pending admin signup request (unverified)
       const pendingSignup = await PendingAdminSignup.create({
-        email: email.toLowerCase(),
+        email: lowerEmail,
         password: hashed,
-        status: 'pending'
+        status: 'pending',
+        emailOtp: otp,
+        emailOtpExpiry: new Date(Date.now() + 15 * 60 * 1000),
+        emailVerified: false,
+        isHod: hodSignup
       });
 
-      // Create notification for super admin
-      const superAdmin = await User.findOne({ email: SUPER_ADMIN_EMAIL });
-      if (superAdmin) {
-        await AdminNotification.create({
-          userId: superAdmin._id,
-          type: 'admin_signup_request',
-          message: `New admin signup request from ${email}`,
-          metadata: {
-            pendingSignupId: pendingSignup._id,
-            email: email
-          }
-        });
-      }
+      // Send verification email
+      await sendAdminVerificationEmail(lowerEmail, otp, hodSignup);
 
       return res.status(202).json({
         ok: true,
-        message: "Admin signup request submitted for approval. You'll be notified once approved.",
-        pending: true
+        message: "A 6-digit verification code has been sent to your email. Please verify to continue.",
+        pending: true,
+        awaitingVerification: true
       });
     }
 
