@@ -52,8 +52,16 @@ body{display:flex;min-height:100vh;}
 .msg{border-radius:8px;padding:10px 13px;font-size:.82rem;margin-bottom:14px;display:none;align-items:center;gap:8px;}
 .err-msg{background:#FEF2F2;border:1px solid #FECACA;color:var(--danger);animation:shake .35s ease;}
 .suc-msg{background:#F0FDF4;border:1px solid #BBF7D0;color:#059669;}
+.info-msg{background:#EEF2FF;border:1px solid #C7D2FE;color:#4338CA;}
 .msg.show{display:flex;}
 @keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-5px);}40%,80%{transform:translateX(5px);}}
+/* OTP panel */
+#otpPanel{display:none;}
+.otp-wrap{display:flex;gap:8px;margin-bottom:18px;}
+.otp-wrap input{flex:1;padding:14px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:1.3rem;font-weight:700;font-family:monospace;text-align:center;color:var(--text);letter-spacing:.1em;transition:border-color .2s,box-shadow .2s;}
+.otp-wrap input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.1);}
+.resend-link{background:none;border:none;color:var(--p);font-size:.82rem;font-weight:600;cursor:pointer;padding:0;}
+.resend-link:disabled{color:var(--muted);cursor:not-allowed;}
 .submit-btn{width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-size:.93rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(79,70,229,.28);transition:all .3s;margin-bottom:18px;}
 .submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.36);}
 .spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
@@ -92,14 +100,14 @@ body{display:flex;min-height:100vh;}
         <label for="fname">First name</label>
         <div class="input-wrap">
           <i class="fas fa-user ico"></i>
-          <input type="text" id="fname" placeholder="Raj" required>
+          <input type="text" id="fname" placeholder="" required>
         </div>
       </div>
       <div class="field">
         <label for="lname">Last name</label>
         <div class="input-wrap">
           <i class="fas fa-user ico"></i>
-          <input type="text" id="lname" placeholder="Kumar" required>
+          <input type="text" id="lname" placeholder="" required>
         </div>
       </div>
     </div>
@@ -108,7 +116,7 @@ body{display:flex;min-height:100vh;}
       <label for="email">College email</label>
       <div class="input-wrap">
         <i class="fas fa-envelope ico"></i>
-        <input type="email" id="email" placeholder="name.mca25@cmrit.ac.in" autocomplete="email" required>
+        <input type="email" id="email" placeholder="" autocomplete="email" required>
       </div>
     </div>
 
@@ -142,6 +150,30 @@ body{display:flex;min-height:100vh;}
     <div class="bottom">Already have an account? <a href="student-login.html">Sign in</a></div>
   </form>
 
+  <!-- OTP Verification Panel -->
+  <div id="otpPanel">
+    <div class="form-title" style="margin-bottom:6px;">Check your inbox</div>
+    <div class="form-sub">We sent a 6-digit code to <strong id="otpEmailDisplay"></strong>. Enter it below to activate your account.</div>
+
+    <div class="otp-wrap">
+      <input type="text" id="otpInput" maxlength="6" placeholder="······" autocomplete="one-time-code" inputmode="numeric">
+    </div>
+
+    <div class="err-msg msg" id="otpErr"><i class="fas fa-circle-exclamation"></i><span id="otpErrTxt"></span></div>
+    <div class="suc-msg msg" id="otpSuc"><i class="fas fa-circle-check"></i><span id="otpSucTxt"></span></div>
+    <div class="info-msg msg" id="otpInfo"><i class="fas fa-circle-info"></i><span id="otpInfoTxt"></span></div>
+
+    <button type="button" class="submit-btn" id="verifyBtn">
+      <span class="btn-lbl"><i class="fas fa-shield-check"></i> Verify &amp; Create Account</span>
+      <div class="spin"></div>
+    </button>
+
+    <div class="bottom" style="margin-bottom:10px;">
+      Didn't receive it? <button class="resend-link" id="resendBtn">Resend code</button>
+    </div>
+    <div class="bottom"><a href="student-signup.html"><i class="fas fa-chevron-left" style="font-size:.7rem;"></i> Start over</a></div>
+  </div>
+
   <div class="bottom-bar">
     <a href="privacy.html">Privacy</a> &nbsp;·&nbsp; <a href="terms.html">Terms</a> &nbsp;·&nbsp; &copy; 2025 MindWave Inc.
   </div>
@@ -170,6 +202,10 @@ document.getElementById('password').addEventListener('input',function(){
   lbl.textContent=v.length?labels[Math.min(s-1,3)]||'Weak':'';lbl.style.color=colors[Math.min(s-1,3)]||'';
 });
 
+// Student email regex: name.dept+year@cmrit.ac.in
+const STUDENT_EMAIL_REGEX=/^[a-z]+\.[a-z]{2,6}\d{2}@cmrit\.ac\.in$/i;
+let pendingEmail='';
+
 document.getElementById('signup-form').addEventListener('submit',async function(e){
   e.preventDefault();
   const fname=document.getElementById('fname').value.trim(),lname=document.getElementById('lname').value.trim();
@@ -180,7 +216,10 @@ document.getElementById('signup-form').addEventListener('submit',async function(
   err.classList.remove('show');suc.classList.remove('show');
 
   if(!fname||!lname){errTxt.textContent='Please enter your full name.';err.classList.add('show');return;}
-  if(!email.includes('@')){errTxt.textContent='Please enter a valid college email.';err.classList.add('show');return;}
+  if(!STUDENT_EMAIL_REGEX.test(email)){
+    errTxt.textContent='Please use your college email (e.g. name.mca25@cmrit.ac.in).';
+    err.classList.add('show');return;
+  }
   if(password.length<6){errTxt.textContent='Password must be at least 6 characters.';err.classList.add('show');return;}
   if(!terms){errTxt.textContent='Please accept the Terms of Service to continue.';err.classList.add('show');return;}
 
@@ -188,10 +227,76 @@ document.getElementById('signup-form').addEventListener('submit',async function(
   try{
     const res=await fetch('/api/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:`${fname} ${lname}`,email,password,role:'student'})});
     const data=await res.json();
-    if(data.ok){suc.classList.add('show');setTimeout(()=>window.location.href='student-login.html',2000);}
-    else{errTxt.textContent=data.message||'Signup failed. Please try again.';err.classList.add('show');err.style.animation='none';requestAnimationFrame(()=>err.style.animation='');}
+    if(data.ok && data.awaitingVerification){
+      pendingEmail=email;
+      showOtpPanel(email);
+    } else if(data.ok){
+      suc.classList.add('show');
+      setTimeout(()=>window.location.href='student-login.html',2000);
+    } else{
+      errTxt.textContent=data.message||'Signup failed. Please try again.';
+      err.classList.add('show');err.style.animation='none';requestAnimationFrame(()=>err.style.animation='');
+    }
   }catch(ex){errTxt.textContent='Connection error — please try again.';err.classList.add('show');}
   finally{btn.classList.remove('loading');}
+});
+
+function showOtpPanel(email){
+  document.getElementById('signup-form').style.display='none';
+  document.getElementById('otpPanel').style.display='block';
+  document.getElementById('otpEmailDisplay').textContent=email;
+  document.getElementById('otpInput').focus();
+}
+
+document.getElementById('verifyBtn').addEventListener('click',async()=>{
+  const otp=document.getElementById('otpInput').value.trim();
+  const errEl=document.getElementById('otpErr'),errTxt=document.getElementById('otpErrTxt');
+  const sucEl=document.getElementById('otpSuc'),sucTxt=document.getElementById('otpSucTxt');
+  const btn=document.getElementById('verifyBtn');
+  [errEl,sucEl,document.getElementById('otpInfo')].forEach(el=>el.classList.remove('show'));
+  if(!otp||otp.length!==6){errTxt.textContent='Please enter the 6-digit code from your email.';errEl.classList.add('show');return;}
+  btn.classList.add('loading');
+  try{
+    const res=await fetch('/api/student/verify-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pendingEmail,otp})});
+    const data=await res.json();
+    if(data.ok){
+      // Store auth and redirect
+      if(data.token){localStorage.setItem('token',data.token);localStorage.setItem('auth_token',data.token);}
+      if(data.user){
+        localStorage.setItem('role',data.user.role);
+        localStorage.setItem('email',data.user.email);
+        localStorage.setItem('name',data.user.name||'');
+      }
+      sucTxt.textContent='✓ Account created! Taking you to your dashboard…';
+      sucEl.classList.add('show');
+      setTimeout(()=>window.location.href='../homepage.html',2000);
+    } else {
+      errTxt.textContent=data.message||'Verification failed.';
+      errEl.classList.add('show');
+    }
+  }catch(ex){errTxt.textContent='Connection error — please try again.';errEl.classList.add('show');}
+  finally{btn.classList.remove('loading');}
+});
+
+document.getElementById('otpInput').addEventListener('keydown',function(e){
+  if(e.key==='Enter')document.getElementById('verifyBtn').click();
+  if(!/[0-9]/.test(e.key)&&!['Backspace','Tab','ArrowLeft','ArrowRight','Delete'].includes(e.key))e.preventDefault();
+});
+
+document.getElementById('resendBtn').addEventListener('click',async()=>{
+  const btn=document.getElementById('resendBtn');
+  btn.disabled=true;btn.textContent='Sending…';
+  const infoEl=document.getElementById('otpInfo'),infoTxt=document.getElementById('otpInfoTxt');
+  const errEl=document.getElementById('otpErr'),errTxt=document.getElementById('otpErrTxt');
+  [infoEl,errEl].forEach(el=>el.classList.remove('show'));
+  try{
+    const pw=document.getElementById('password')?.value||'';
+    const res=await fetch('/api/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pendingEmail,password:pw||'_resend_',role:'student'})});
+    const data=await res.json();
+    infoTxt.textContent=data.message||'A new code has been sent.';
+    infoEl.classList.add('show');
+  }catch(ex){errTxt.textContent='Failed to resend. Please try again.';errEl.classList.add('show');}
+  finally{setTimeout(()=>{btn.disabled=false;btn.textContent='Resend code';},30000);}
 });
 </script>
 </body>

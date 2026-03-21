@@ -89,7 +89,7 @@ body{display:flex;min-height:100vh;}
         <label for="username">Email</label>
         <div class="input-wrap">
           <i class="fas fa-envelope ico"></i>
-          <input type="email" id="username" placeholder="name.mca25@cmrit.ac.in" autocomplete="email" required>
+          <input type="email" id="username" placeholder="" autocomplete="email" required>
         </div>
       </div>
       <div class="opts-row">
@@ -158,10 +158,15 @@ const step1=document.getElementById('step1'),step2=document.getElementById('step
 const emailInput=document.getElementById('username'),emailDisplay=document.getElementById('emailDisplay');
 const dot1=document.getElementById('dot1'),dot2=document.getElementById('dot2');
 
+const STUDENT_EMAIL_REGEX=/^[a-z]+\.[a-z]{2,6}\d{2}@cmrit\.ac\.in$/i;
+
 document.getElementById('nextBtn').addEventListener('click',()=>{
   const v=emailInput.value.trim(),e1=document.getElementById('e1'),e1t=document.getElementById('e1t');
   e1.classList.remove('show');
-  if(!v||!v.includes('@')){e1t.textContent='Please enter a valid email address.';e1.classList.add('show');return;}
+  if(!v||!STUDENT_EMAIL_REGEX.test(v)){
+    e1t.textContent='Please use your college email (e.g. name.mca25@cmrit.ac.in).';
+    e1.classList.add('show');return;
+  }
   emailDisplay.textContent=v;
   step1.style.display='none';step2.style.display='block';socials.style.display='none';
   dot1.classList.remove('active');dot2.classList.add('active');

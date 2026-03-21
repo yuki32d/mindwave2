@@ -769,6 +769,20 @@ const GameSubmission = mongoose.model("GameSubmission", gameSubmissionSchema);
 const TimeAttackSession = mongoose.model("TimeAttackSession", timeAttackSessionSchema);
 const TimeAttackLeaderboard = mongoose.model("TimeAttackLeaderboard", timeAttackLeaderboardSchema);
 
+// Pending Student Signup Schema (holds OTP-unverified students; auto-expires after 1h)
+const pendingStudentSignupSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    password: { type: String, required: true }, // bcrypt hashed
+    emailOtp: { type: String },
+    emailOtpExpiry: { type: Date },
+    createdAt: { type: Date, default: Date.now, expires: 3600 } // TTL: auto-delete after 1h
+  },
+  { timestamps: false }
+);
+const PendingStudentSignup = mongoose.model("PendingStudentSignup", pendingStudentSignupSchema);
+
 // Pending Admin Signup Schema (for approval workflow)
 const pendingAdminSignupSchema = new mongoose.Schema(
   {
@@ -1359,7 +1373,8 @@ app.use('/api', paymentRoutes);
 // Apply rate limiting to all API routes
 app.use('/api/', apiLimiter);
 
-const STUDENT_EMAIL_REGEX = /\.mca25@cmrit\.ac\.in$/i;
+// Student: name.dept+year@cmrit.ac.in — e.g. jeeban.mca25@cmrit.ac.in, alex.mba26@cmrit.ac.in
+const STUDENT_EMAIL_REGEX = /^[a-z]+\.[a-z]{2,6}\d{2}@cmrit\.ac\.in$/i;
 // Faculty: firstname.initial@cmrit.ac.in (e.g. jeeban.j@cmrit.ac.in) — no .mca suffix
 const FACULTY_EMAIL_REGEX = /^[a-z]+\.[a-z]@cmrit\.ac\.in$/i;
 // HOD (super admin): hod.dept@cmrit.ac.in (e.g. hod.mca@cmrit.ac.in)
@@ -1845,6 +1860,127 @@ app.post("/api/admin/verify-email", authLimiter, async (req, res) => {
   }
 });
 
+// ── Student Email Verification Helper ────────────────────────────────────────
+async function sendStudentVerificationEmail(email, otp) {
+  if (!BREVO_API_KEY) {
+    console.warn(`[WARN] BREVO_API_KEY not set. Student OTP for ${email}: ${otp}`);
+    return;
+  }
+  const htmlContent = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F4F4F7;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F4F4F7;padding:40px 0;">
+    <tr><td align="center">
+      <table width="540" cellpadding="0" cellspacing="0" style="max-width:540px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <tr><td style="background:linear-gradient(135deg,#4F46E5,#7C3AED);padding:28px 36px;text-align:center;">
+          <span style="display:inline-block;width:36px;height:36px;background:#fff;border-radius:10px;text-align:center;line-height:36px;font-size:18px;">🧠</span>
+          <span style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.5px;vertical-align:middle;margin-left:8px;">MindWave</span>
+          <p style="color:rgba(255,255,255,0.75);font-size:11px;margin:6px 0 0;letter-spacing:0.5px;text-transform:uppercase;">Student Portal · Email Verification</p>
+        </td></tr>
+        <tr><td style="padding:36px 36px 28px;">
+          <h1 style="font-size:22px;font-weight:800;color:#111827;margin:0 0 10px;">Verify your email</h1>
+          <p style="font-size:14px;color:#6B7280;margin:0 0 28px;line-height:1.6;">Enter the code below to complete your MindWave student account registration. This code expires in <strong>15 minutes</strong>.</p>
+          <div style="background:#EEF2FF;border-radius:12px;padding:24px;text-align:center;margin-bottom:28px;">
+            <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#6366F1;margin:0 0 12px;">Your Verification Code</p>
+            <p style="font-size:42px;font-weight:800;letter-spacing:0.2em;color:#3730A3;margin:0;font-family:monospace;">${otp}</p>
+          </div>
+          <p style="font-size:12px;color:#9CA3AF;margin:0;line-height:1.6;">🔒 If you didn't request this, please ignore this email.</p>
+        </td></tr>
+        <tr><td style="background:#F9FAFB;padding:18px 36px;border-top:1px solid #E5E7EB;text-align:center;">
+          <p style="font-size:11px;color:#9CA3AF;margin:0;">© 2025 MindWave · CMR Institute of Technology<br>This is an automated message — do not reply.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  try {
+    const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sender: { name: BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
+        to: [{ email }],
+        subject: `MindWave – Your verification code: ${otp}`,
+        htmlContent
+      })
+    });
+    const brevoData = await brevoRes.json();
+    if (!brevoRes.ok) {
+      console.error('[MAIL] Brevo student OTP error:', JSON.stringify(brevoData));
+    } else {
+      console.log(`[MAIL] Student OTP sent to ${email} (id: ${brevoData.messageId})`);
+    }
+  } catch (err) {
+    console.error('[MAIL] sendStudentVerificationEmail error:', err);
+  }
+}
+
+// ── POST /api/student/verify-email ───────────────────────────────────────────
+// Validates the OTP and creates the actual student User account.
+app.post("/api/student/verify-email", authLimiter, async (req, res) => {
+  const { email, otp } = req.body || {};
+  if (!email || !otp) {
+    return res.status(400).json({ ok: false, message: "Email and OTP are required" });
+  }
+
+  try {
+    const lowerEmail = email.toLowerCase();
+    const pending = await PendingStudentSignup.findOne({ email: lowerEmail });
+
+    if (!pending) {
+      return res.status(404).json({ ok: false, message: "No pending signup found. Please sign up again." });
+    }
+    if (!pending.emailOtp || pending.emailOtp !== String(otp).trim()) {
+      return res.status(400).json({ ok: false, message: "Invalid verification code. Please check and try again." });
+    }
+    if (!pending.emailOtpExpiry || new Date() > pending.emailOtpExpiry) {
+      return res.status(400).json({ ok: false, message: "Verification code has expired. Please sign up again to get a new code." });
+    }
+
+    // Check no duplicate was created in the meantime
+    const existingUser = await User.findOne({ email: lowerEmail });
+    if (existingUser) {
+      await PendingStudentSignup.deleteOne({ email: lowerEmail });
+      return res.status(409).json({ ok: false, message: "Account already exists. Please sign in." });
+    }
+
+    // Create the verified student account
+    const user = await User.create({
+      name: pending.name,
+      displayName: pending.name,
+      email: lowerEmail,
+      password: pending.password, // already hashed
+      role: 'student',
+      lastActive: new Date()
+    });
+
+    // Cleanup the pending record
+    await PendingStudentSignup.deleteOne({ email: lowerEmail });
+
+    const token = signToken(user);
+    res
+      .cookie("mindwave_token", token, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      })
+      .json({
+        ok: true,
+        message: "Email verified! Your account is ready.",
+        token,
+        user: { name: user.name, email: user.email, role: user.role }
+      });
+
+  } catch (error) {
+    console.error("student/verify-email error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 app.post("/api/signup", authLimiter, async (req, res) => {
   const { name, email, password, role } = req.body || {};
 
@@ -1929,29 +2065,50 @@ app.post("/api/signup", authLimiter, async (req, res) => {
       });
     }
 
-    // STUDENT SIGNUP: Create user immediately
-    const user = await User.create({
+    // STUDENT SIGNUP: Send OTP first — create user only after verification
+    const lowerEmail = email.toLowerCase();
+
+    // Check if already registered
+    const existingUser = await User.findOne({ email: lowerEmail });
+    if (existingUser) {
+      return res.status(409).json({ ok: false, message: "Email already registered. Please sign in." });
+    }
+
+    // Check for existing unverified pending signup — resend OTP
+    const existingPending = await PendingStudentSignup.findOne({ email: lowerEmail });
+    if (existingPending) {
+      const otp = String(Math.floor(100000 + Math.random() * 900000));
+      existingPending.password = hashed; // Update password in case they changed it
+      existingPending.name = capitalizedName;
+      existingPending.emailOtp = otp;
+      existingPending.emailOtpExpiry = new Date(Date.now() + 15 * 60 * 1000);
+      await existingPending.save();
+      await sendStudentVerificationEmail(lowerEmail, otp);
+      return res.status(202).json({
+        ok: true,
+        message: "A new verification code has been sent to your email.",
+        awaitingVerification: true
+      });
+    }
+
+    // Generate OTP and create pending signup
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    await PendingStudentSignup.create({
+      email: lowerEmail,
       name: capitalizedName,
-      displayName: capitalizedName,
-      email: email.toLowerCase(),
       password: hashed,
-      role: safeRole,
-      lastActive: new Date()
+      emailOtp: otp,
+      emailOtpExpiry: new Date(Date.now() + 15 * 60 * 1000)
     });
 
-    const token = signToken(user);
-    res
-      .cookie("mindwave_token", token, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false,
-        maxAge: 7 * 24 * 60 * 60 * 1000
-      })
-      .status(201)
-      .json({
-        ok: true,
-        user: { name: user.name, email: user.email, role: user.role }
-      });
+    await sendStudentVerificationEmail(lowerEmail, otp);
+
+    return res.status(202).json({
+      ok: true,
+      message: "A 6-digit verification code has been sent to your college email. Please verify to complete signup.",
+      awaitingVerification: true
+    });
+
   } catch (error) {
     if (error.code === 11000) {
       return res.status(409).json({ ok: false, message: "Email already registered" });
