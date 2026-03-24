@@ -54,24 +54,33 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
         body {
             background-color: var(--bg);
             background-image: 
                 radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
             color: var(--text);
-            min-height: 100vh;
+            height: 100vh;
+            width: 100vw;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
-            padding: 20px;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .pro-layout {
             width: 100%;
-            max-width: 900px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
             animation: fadeIn 0.6s ease-out;
+            padding: 16px 24px;
+            box-sizing: border-box;
         }
 
         @keyframes fadeIn {
@@ -139,6 +148,58 @@
             box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
             position: relative;
             overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #appContainer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        /* Fullscreen entry prompt overlay */
+        #fs-prompt {
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 7, 18, 0.97);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999999;
+            gap: 24px;
+            text-align: center;
+            padding: 40px;
+        }
+        #fs-prompt h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+        }
+        #fs-prompt p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 440px;
+            line-height: 1.6;
+        }
+        #fs-enter-btn {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+            border: none;
+            padding: 18px 48px;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(99,102,241,0.35);
+            transition: all 0.2s;
+        }
+        #fs-enter-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
         }
 
         .pro-card::before {
@@ -165,12 +226,14 @@
 
         /* Mobile Adjustments */
         @media (max-width: 640px) {
+            .pro-layout { padding: 8px 12px; }
             .pro-card {
-                padding: 24px;
+                padding: 18px;
+                border-radius: 16px;
             }
             .pro-header {
                 flex-direction: column;
-                gap: 16px;
+                gap: 10px;
                 align-items: flex-start;
             }
         }
@@ -395,6 +458,18 @@
     </style>
 </head>
 <body>
+
+    <!-- Fullscreen entry prompt (shown before game loads) -->
+    <div id="fs-prompt">
+        <div style="width:72px;height:72px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(99,102,241,0.4);">
+            <i data-lucide="maximize" style="color:white;width:36px;height:36px;"></i>
+        </div>
+        <h2>🔒 Secure Game Session</h2>
+        <p>This game runs in <strong>fullscreen mode</strong>. Your session is proctored for exam integrity. You must complete the game to exit.</p>
+        <button id="fs-enter-btn" onclick="startFullscreenSession()">▶ Enter Game</button>
+        <p style="font-size:0.75rem;color:var(--text-muted);opacity:0.6;margin-top:8px;">By clicking above you acknowledge that this session is recorded.</p>
+    </div>
+
     <div class="pro-layout">
         <header class="pro-header">
             <div class="brand">
@@ -491,8 +566,53 @@
         const firstName = localStorage.getItem('firstName') || '';
         const lastName = localStorage.getItem('lastName') || '';
         const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Student';
+
+        // --- Fullscreen Session Entry ---
+        function startFullscreenSession() {
+            const prompt = document.getElementById('fs-prompt');
+            const el = document.documentElement;
+
+            const requestFS = el.requestFullscreen
+                ? el.requestFullscreen()
+                : el.webkitRequestFullscreen
+                    ? el.webkitRequestFullscreen()
+                    : el.mozRequestFullScreen
+                        ? el.mozRequestFullScreen()
+                        : el.msRequestFullscreen
+                            ? el.msRequestFullscreen()
+                            : Promise.resolve();
+
+            (requestFS || Promise.resolve())
+                .then(() => { if (prompt) prompt.style.display = 'none'; })
+                .catch(() => { if (prompt) prompt.style.display = 'none'; });
+        }
+
+        // Expose so anti-cheat.js can call it when re-entering fullscreen
+        window.startFullscreenSession = startFullscreenSession;
+
+        // When the game completes, release the fullscreen + unload locks
+        // This runs AFTER anti-cheat.js has defined window.releaseGameLock
+        document.addEventListener('DOMContentLoaded', () => {
+            const exitBtn = document.getElementById('backToGamesBtn');
+            if (exitBtn) {
+                exitBtn.addEventListener('click', () => {
+                    if (typeof window.releaseGameLock === 'function') window.releaseGameLock();
+                });
+            }
+        });
     </script>
     <script src="anti-cheat.js"></script>
     <script src="student-game-engine.js"></script>
+    <!-- Wire exit button AFTER anti-cheat.js so releaseGameLock is defined -->
+    <script>
+        (function() {
+            const exitBtn = document.getElementById('backToGamesBtn');
+            if (exitBtn) {
+                exitBtn.addEventListener('click', function() {
+                    if (typeof window.releaseGameLock === 'function') window.releaseGameLock();
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

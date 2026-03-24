@@ -4,6 +4,58 @@
 (function () {
     'use strict';
 
+    /* ============================================================
+       FULLSCREEN LOCKDOWN
+       - Request fullscreen as soon as possible
+       - If user exits fullscreen (e.g. via ESC), forcibly re-enter
+       - Game is flagged & user is warned
+    ============================================================ */
+
+    function enterFullscreen() {
+        const el = document.documentElement;
+        if (el.requestFullscreen) return el.requestFullscreen();
+        if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+        if (el.mozRequestFullScreen) return el.mozRequestFullScreen();
+        if (el.msRequestFullscreen) return el.msRequestFullscreen();
+    }
+
+    function isFullscreen() {
+        return !!(document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement);
+    }
+
+    // Try entering fullscreen immediately and again on first user interaction
+    // (browsers require a user gesture for the very first fullscreen request)
+    function tryEnterFullscreen() {
+        if (!isFullscreen()) {
+            enterFullscreen().catch(() => {});
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', tryEnterFullscreen);
+    // Fallback: if DOMContentLoaded already fired
+    if (document.readyState !== 'loading') tryEnterFullscreen();
+
+    // Re-enter fullscreen on any click/key if not already fullscreen
+    document.addEventListener('click', tryEnterFullscreen, { once: false });
+    document.addEventListener('keydown', tryEnterFullscreen, { once: false });
+
+    // If user somehow exits fullscreen, immediately re-enter and log it
+    function onFullscreenChange() {
+        if (!isFullscreen()) {
+            handleCheatAttempt('Exited fullscreen / pressed ESC');
+            setTimeout(() => {
+                enterFullscreen().catch(() => {});
+            }, 300);
+        }
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    document.addEventListener('mozfullscreenchange', onFullscreenChange);
+    document.addEventListener('MSFullscreenChange', onFullscreenChange);
+
     // Disable right-click context menu
     document.addEventListener('contextmenu', function (e) {
         e.preventDefault();
@@ -34,6 +86,107 @@
 
     // Disable keyboard shortcuts
     document.addEventListener('keydown', function (e) {
+
+        // --- EXIT / NAVIGATION KEYS ---
+
+        // ESC — blocked (fullscreen exit is handled by fullscreenchange event)
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            // Re-enter fullscreen is handled by the fullscreenchange listener.
+            // Show a soft reminder so the student knows;
+            // the critical warning only fires if fullscreen actually exits.
+            showCheatWarning('Press ESC is disabled during the game');
+            return false;
+        }
+
+        // Alt+F4 (Windows close window)
+        if (e.altKey && e.key === 'F4') {
+            e.preventDefault();
+            showCheatWarning('Closing the window is disabled during the game');
+            return false;
+        }
+
+        // Meta/Win key (Windows Start menu / macOS Spotlight)
+        if (e.key === 'Meta') {
+            e.preventDefault();
+            showCheatWarning('System keys are disabled during the game');
+            return false;
+        }
+
+        // Alt+Tab (Windows task switcher)
+        if (e.altKey && e.key === 'Tab') {
+            e.preventDefault();
+            showCheatWarning('Switching windows is disabled during the game');
+            return false;
+        }
+
+        // Ctrl+Alt+Delete (caught only in some browsers/environments)
+        if (e.ctrlKey && e.altKey && e.key === 'Delete') {
+            e.preventDefault();
+            return false;
+        }
+
+        // Ctrl+W (Close tab)
+        if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
+            e.preventDefault();
+            showCheatWarning('Closing the tab is disabled during the game');
+            return false;
+        }
+
+        // Ctrl+T (New tab)
+        if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+            e.preventDefault();
+            showCheatWarning('Opening new tabs is disabled during the game');
+            return false;
+        }
+
+        // Ctrl+N (New window)
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+            e.preventDefault();
+            showCheatWarning('Opening new windows is disabled during the game');
+            return false;
+        }
+
+        // Ctrl+R / F5 (Reload)
+        if (((e.ctrlKey || e.metaKey) && e.key === 'r') || e.key === 'F5') {
+            e.preventDefault();
+            showCheatWarning('Reloading is disabled during the game');
+            return false;
+        }
+
+        // F11 (Toggle fullscreen — we manage it ourselves)
+        if (e.key === 'F11') {
+            e.preventDefault();
+            return false;
+        }
+
+        // Cmd+Q (macOS quit app)
+        if (e.metaKey && e.key === 'q') {
+            e.preventDefault();
+            showCheatWarning('Quitting is disabled during the game');
+            return false;
+        }
+
+        // Cmd+H (macOS hide window)
+        if (e.metaKey && e.key === 'h') {
+            e.preventDefault();
+            return false;
+        }
+
+        // Cmd+M (macOS minimise)
+        if (e.metaKey && e.key === 'm') {
+            e.preventDefault();
+            return false;
+        }
+
+        // Alt+F (Open File menu on Windows)
+        if (e.altKey && e.key === 'F') {
+            e.preventDefault();
+            return false;
+        }
+
+        // --- ANTI-CHEAT KEYS ---
+
         // Ctrl/Cmd + A (Select All)
         if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
             e.preventDefault();
@@ -103,7 +256,7 @@
             showCheatWarning('Inspect element is disabled during games');
             return false;
         }
-    });
+    }, true); // Use capture phase to intercept before browser default handling
 
     // Disable text selection on game content
     const style = document.createElement('style');
@@ -279,5 +432,29 @@
         return false;
     });
 
-    console.log('🔒 Anti-cheat protection enabled');
+    // Block beforeunload / page navigation
+    let gameCompleted = false;
+    function beforeUnloadHandler(e) {
+        if (gameCompleted) return; // allow exit after game is done
+        e.preventDefault();
+        e.returnValue = 'The game is still in progress. Are you sure you want to leave?';
+        return e.returnValue;
+    }
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+
+    /**
+     * Call this when the game is completed so that fullscreen enforcement
+     * and the unload block are lifted, allowing the student to exit cleanly.
+     */
+    window.releaseGameLock = function () {
+        gameCompleted = true;
+        // Exit fullscreen gracefully
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+        else if (document.msExitFullscreen) document.msExitFullscreen();
+        console.log('🔓 Game lock released — student completed the game');
+    };
+
+    console.log('🔒 Anti-cheat protection enabled | Fullscreen lockdown active');
 })();
