@@ -5,10 +5,21 @@
     'use strict';
 
     /* ============================================================
+       STARTUP GRACE PERIOD
+       Ignore blur / visibilitychange for the first 4 seconds.
+       This prevents false 'Cheating Detected' popups when the browser
+       opens the game in a new tab and focus briefly returns to the
+       parent tab or OS.
+    ============================================================ */
+    let startupComplete = false;
+    setTimeout(() => { startupComplete = true; }, 4000);
+
+    /* ============================================================
        FULLSCREEN LOCKDOWN
-       - Request fullscreen as soon as possible
-       - If user exits fullscreen (e.g. via ESC), forcibly re-enter
-       - Game is flagged & user is warned
+       NOTE: Browsers require a real user gesture (click/keypress) to
+       enter fullscreen. A window.open() tab load is NOT a user gesture.
+       Fullscreen is therefore triggered only from actual user clicks.
+       The fullscreenchange listener re-enforces it if the student exits.
     ============================================================ */
 
     function enterFullscreen() {
@@ -17,6 +28,7 @@
         if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
         if (el.mozRequestFullScreen) return el.mozRequestFullScreen();
         if (el.msRequestFullscreen) return el.msRequestFullscreen();
+        return Promise.resolve();
     }
 
     function isFullscreen() {
@@ -26,19 +38,14 @@
             document.msFullscreenElement);
     }
 
-    // Try entering fullscreen immediately and again on first user interaction
-    // (browsers require a user gesture for the very first fullscreen request)
+    // Only re-enter fullscreen on user interaction AFTER startup
     function tryEnterFullscreen() {
-        if (!isFullscreen()) {
+        if (startupComplete && !isFullscreen()) {
             enterFullscreen().catch(() => {});
         }
     }
 
-    document.addEventListener('DOMContentLoaded', tryEnterFullscreen);
-    // Fallback: if DOMContentLoaded already fired
-    if (document.readyState !== 'loading') tryEnterFullscreen();
-
-    // Re-enter fullscreen on any click/key if not already fullscreen
+    // Re-enter fullscreen on any click/key (after grace period)
     document.addEventListener('click', tryEnterFullscreen, { once: false });
     document.addEventListener('keydown', tryEnterFullscreen, { once: false });
 
@@ -400,14 +407,16 @@
         }
     }
 
-    // Visibility Detection
+    // Visibility Detection — guarded by startup grace period
     document.addEventListener('visibilitychange', () => {
+        if (!startupComplete) return; // ignore during startup
         if (document.visibilityState === 'hidden') {
             handleCheatAttempt('Tab switched / window minimized');
         }
     });
 
     window.addEventListener('blur', () => {
+        if (!startupComplete) return; // ignore during startup
         handleCheatAttempt('Focus lost');
     });
 
