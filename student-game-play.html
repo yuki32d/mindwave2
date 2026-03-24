@@ -160,47 +160,6 @@
             overflow-y: auto;
         }
 
-        /* Fullscreen entry prompt overlay */
-        #fs-prompt {
-            position: fixed;
-            inset: 0;
-            background: rgba(3, 7, 18, 0.97);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999999;
-            gap: 24px;
-            text-align: center;
-            padding: 40px;
-        }
-        #fs-prompt h2 {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #fff;
-        }
-        #fs-prompt p {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-            max-width: 440px;
-            line-height: 1.6;
-        }
-        #fs-enter-btn {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: #fff;
-            border: none;
-            padding: 18px 48px;
-            border-radius: 16px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 8px 24px rgba(99,102,241,0.35);
-            transition: all 0.2s;
-        }
-        #fs-enter-btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
 
         .pro-card::before {
             content: '';
@@ -459,17 +418,6 @@
 </head>
 <body>
 
-    <!-- Fullscreen entry prompt (shown before game loads) -->
-    <div id="fs-prompt">
-        <div style="width:72px;height:72px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(99,102,241,0.4);">
-            <i data-lucide="maximize" style="color:white;width:36px;height:36px;"></i>
-        </div>
-        <h2>🔒 Secure Game Session</h2>
-        <p>This game runs in <strong>fullscreen mode</strong>. Your session is proctored for exam integrity. You must complete the game to exit.</p>
-        <button id="fs-enter-btn" onclick="startFullscreenSession()">▶ Enter Game</button>
-        <p style="font-size:0.75rem;color:var(--text-muted);opacity:0.6;margin-top:8px;">By clicking above you acknowledge that this session is recorded.</p>
-    </div>
-
     <div class="pro-layout">
         <header class="pro-header">
             <div class="brand">
@@ -557,21 +505,17 @@
         // Check for standalone mode (standalone game play doesn't need certain elements)
         window.isProMode = true;
         
-        // Lucide initialization
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.lucide) lucide.createIcons();
-        });
+
+
 
         // Set player initials from localStorage if available
         const firstName = localStorage.getItem('firstName') || '';
         const lastName = localStorage.getItem('lastName') || '';
         const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Student';
 
-        // --- Fullscreen Session Entry ---
+        // --- Fullscreen Session Entry (auto-triggered on load) ---
         function startFullscreenSession() {
-            const prompt = document.getElementById('fs-prompt');
             const el = document.documentElement;
-
             const requestFS = el.requestFullscreen
                 ? el.requestFullscreen()
                 : el.webkitRequestFullscreen
@@ -581,11 +525,14 @@
                         : el.msRequestFullscreen
                             ? el.msRequestFullscreen()
                             : Promise.resolve();
-
-            (requestFS || Promise.resolve())
-                .then(() => { if (prompt) prompt.style.display = 'none'; })
-                .catch(() => { if (prompt) prompt.style.display = 'none'; });
+            return (requestFS || Promise.resolve()).catch(() => {});
         }
+
+        // Auto-enter fullscreen as soon as DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            startFullscreenSession();
+        });
 
         // Expose so anti-cheat.js can call it when re-entering fullscreen
         window.startFullscreenSession = startFullscreenSession;

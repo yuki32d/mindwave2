@@ -1309,15 +1309,14 @@ function showResult(container, score, totalPoints, startTime, gameId) {
     container.innerHTML = `
         <div class="question-display" style="text-align: center;">
             <h2 style="font-size: 32px; margin-bottom: 24px;">Loading scoreboard...</h2>
-            <p style="color: #9ea4b6;">Please wait</p>
+            <p style="color: #9ea4b6;">Calculating your rank…</p>
         </div>
     `;
 
-    // Show scoreboard with leaderboard and answer review
+    // Wait 1 second before fetching leaderboard so the backend can index the submission
     if (gameId) {
-        showScoreboard(gameId, score, totalPoints);
+        setTimeout(() => showScoreboard(gameId, score, totalPoints), 1000);
     } else {
-        // Fallback if no gameId
         showSimpleResult(score, totalPoints);
     }
 
@@ -1524,10 +1523,23 @@ function renderScoreboard(data, score, totalPoints) {
     const tp = Number(totalPoints) || 100;
     const percentage = Math.round((s / tp) * 100);
     const currentStudent = data.currentStudent || {};
-    const rank = currentStudent.rank || 'N/A';
-    const totalParticipants = data.totalParticipants || 0;
 
     if (!scoreCard) return;
+
+    // ── Client-side rank fallback ──
+    // If the API doesn't return a rank or totalParticipants, derive them from the leaderboard array.
+    let rank = (currentStudent && currentStudent.rank) ? currentStudent.rank : null;
+    let totalParticipants = data.totalParticipants || 0;
+
+    if (!rank || rank === 'N/A') {
+        // Try to find the current student in the leaderboard array
+        const myEntry = (data.leaderboard || []).find(e => e.isCurrentStudent);
+        if (myEntry) rank = myEntry.rank || (data.leaderboard.indexOf(myEntry) + 1);
+    }
+    if (!rank) rank = 'N/A';
+    if (!totalParticipants && data.leaderboard && data.leaderboard.length > 0) {
+        totalParticipants = data.leaderboard.length;
+    }
 
     scoreCard.innerHTML = `
         <div style="background: var(--glass-strong); border: 1px solid var(--border); border-radius: 20px; padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">

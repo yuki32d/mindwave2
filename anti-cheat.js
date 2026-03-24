@@ -42,13 +42,42 @@
     document.addEventListener('click', tryEnterFullscreen, { once: false });
     document.addEventListener('keydown', tryEnterFullscreen, { once: false });
 
+    // Blocking overlay shown while fullscreen is temporarily exited (e.g. ESC press)
+    // so the student cannot interact with the OS desktop during the re-entry window.
+    let fsOverlay = null;
+    function showFsOverlay() {
+        if (fsOverlay) return;
+        fsOverlay = document.createElement('div');
+        fsOverlay.style.cssText = `
+            position: fixed; inset: 0; background: #000;
+            z-index: 99999999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 16px;
+        `;
+        fsOverlay.innerHTML = `
+            <div style="width:48px;height:48px;border:4px solid rgba(99,102,241,0.3);border-top:4px solid #6366f1;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+            <p style="color:#9ca3af;font-family:sans-serif;font-size:0.95rem;">Re-entering secure session…</p>
+        `;
+        document.body.appendChild(fsOverlay);
+    }
+    function hideFsOverlay() {
+        if (fsOverlay) { fsOverlay.remove(); fsOverlay = null; }
+    }
+
     // If user somehow exits fullscreen, immediately re-enter and log it
     function onFullscreenChange() {
         if (!isFullscreen()) {
             handleCheatAttempt('Exited fullscreen / pressed ESC');
-            setTimeout(() => {
-                enterFullscreen().catch(() => {});
-            }, 300);
+            showFsOverlay();
+            // Re-enter immediately — no delay
+            enterFullscreen()
+                .catch(() => {})
+                .finally(() => {
+                    // Hide overlay once fullscreen is re-established (or after 1.5s max)
+                    setTimeout(hideFsOverlay, 1500);
+                });
+        } else {
+            // Fullscreen restored
+            hideFsOverlay();
         }
     }
     document.addEventListener('fullscreenchange', onFullscreenChange);
