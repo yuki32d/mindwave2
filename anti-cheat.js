@@ -70,20 +70,28 @@
         if (fsOverlay) { fsOverlay.remove(); fsOverlay = null; }
     }
 
-    // If user somehow exits fullscreen, immediately re-enter and log it
+    // If user exits fullscreen (e.g. presses ESC), silently re-enter immediately.
+    // We log the event but do NOT show a scary popup — just a brief black overlay
+    // while fullscreen is re-established (takes < 1 second).
     function onFullscreenChange() {
         if (!isFullscreen()) {
-            handleCheatAttempt('Exited fullscreen / pressed ESC');
+            // Silent log only — no popup shown to student
+            window.cheatingAttempts = (window.cheatingAttempts || 0) + 1;
+            window.cheatLogs = window.cheatLogs || [];
+            window.cheatLogs.push({
+                timestamp: new Date().toISOString(),
+                reason: 'Exited fullscreen / pressed ESC',
+                attemptNumber: window.cheatingAttempts
+            });
+
             showFsOverlay();
-            // Re-enter immediately — no delay
+            // Re-enter fullscreen immediately — no delay
             enterFullscreen()
                 .catch(() => {})
                 .finally(() => {
-                    // Hide overlay once fullscreen is re-established (or after 1.5s max)
-                    setTimeout(hideFsOverlay, 1500);
+                    setTimeout(hideFsOverlay, 800); // hide after max 0.8s
                 });
         } else {
-            // Fullscreen restored
             hideFsOverlay();
         }
     }

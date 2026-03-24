@@ -1526,20 +1526,41 @@ function renderScoreboard(data, score, totalPoints) {
 
     if (!scoreCard) return;
 
-    // ── Client-side rank fallback ──
-    // If the API doesn't return a rank or totalParticipants, derive them from the leaderboard array.
+    // ── Client-side rank + leaderboard fallback ──
+    // If the API returns nothing (no currentStudent, empty leaderboard),
+    // build synthetic data from the student's own session so the scoreboard
+    // always shows something meaningful.
     let rank = (currentStudent && currentStudent.rank) ? currentStudent.rank : null;
     let totalParticipants = data.totalParticipants || 0;
+    let leaderboard = data.leaderboard || [];
 
     if (!rank || rank === 'N/A') {
-        // Try to find the current student in the leaderboard array
-        const myEntry = (data.leaderboard || []).find(e => e.isCurrentStudent);
-        if (myEntry) rank = myEntry.rank || (data.leaderboard.indexOf(myEntry) + 1);
+        const myEntry = leaderboard.find(e => e.isCurrentStudent);
+        if (myEntry) rank = myEntry.rank || (leaderboard.indexOf(myEntry) + 1);
     }
+
+    // If leaderboard is empty, build a synthetic row for the current student
+    if (leaderboard.length === 0) {
+        const firstName = localStorage.getItem('firstName') || '';
+        const lastName = localStorage.getItem('lastName') || '';
+        const studentName = [firstName, lastName].filter(Boolean).join(' ') || 'You';
+        leaderboard = [{
+            rank: 1,
+            studentName: studentName,
+            score: percentage,
+            gamesPlayed: 1,
+            accuracy: percentage,
+            isCurrentStudent: true
+        }];
+        if (!rank || rank === 'N/A') rank = 1;
+        if (!totalParticipants) totalParticipants = 1;
+    }
+
     if (!rank) rank = 'N/A';
-    if (!totalParticipants && data.leaderboard && data.leaderboard.length > 0) {
-        totalParticipants = data.leaderboard.length;
-    }
+    if (!totalParticipants && leaderboard.length > 0) totalParticipants = leaderboard.length;
+
+    // Patch data so the leaderboard renderer below uses the fallback
+    data = Object.assign({}, data, { leaderboard });
 
     scoreCard.innerHTML = `
         <div style="background: var(--glass-strong); border: 1px solid var(--border); border-radius: 20px; padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
