@@ -1209,38 +1209,43 @@
 
         // ── Real-time via Socket.IO ──
         (function setupRealtime() {
+            // Guard: socket.io.js may fail to load if server is cold-starting
+            if (typeof io === 'undefined') {
+                console.warn('📡 Socket.IO not available, skipping real-time updates (HTTP polling still active)');
+                return;
+            }
             try {
-                // Explicitly use polling first then upgrade to websocket
+                // Force polling-only — Render's reverse proxy returns 502 on
+                // WebSocket upgrade attempts, so we skip the upgrade entirely.
                 const socket = io({
-                    transports: ['polling', 'websocket'],
-                    reconnectionAttempts: 5,
-                    reconnectionDelay: 2000
+                    transports: ['polling'],
+                    reconnectionAttempts: 3,
+                    reconnectionDelay: 5000,
+                    timeout: 10000
                 });
 
                 socket.on('connect', () => {
-                    console.log('📡 Real-time analytics connected (via ' + socket.io.engine.transport.name + ')');
-                    // Flash live indicator
+                    console.log('📡 Real-time analytics connected (via polling)');
                     const dot = document.querySelector('.live-dot');
                     if (dot) dot.style.boxShadow = '0 0 12px var(--green)';
                 });
 
                 socket.on('connect_error', (error) => {
-                    console.warn('📡 Real-time connection error, falling back...', error);
+                    // Silent — HTTP polling fallback (30s interval) is still active
                 });
 
                 socket.on('game-submitted', (data) => {
                     console.log('🎮 New game submission received, refreshing dashboard...', data);
-                    // Update dashboard immediately
                     if (typeof updateDashboard === 'function') {
                         updateDashboard();
                     }
                 });
 
                 socket.on('disconnect', (reason) => {
-                    console.warn('📡 Real-time analytics disconnected:', reason);
+                    // Silent — reconnection is automatic
                 });
             } catch (e) {
-                console.error('Socket.IO initialization error:', e);
+                // Silent — HTTP polling fallback is still active
             }
         })();
     </script>
