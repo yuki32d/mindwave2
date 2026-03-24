@@ -49,8 +49,8 @@
     document.addEventListener('click', tryEnterFullscreen, { once: false });
     document.addEventListener('keydown', tryEnterFullscreen, { once: false });
 
-    // Blocking overlay shown while fullscreen is temporarily exited (e.g. ESC press)
-    // so the student cannot interact with the OS desktop during the re-entry window.
+    // Blocking overlay shown while fullscreen is temporarily exited (ESC press).
+    // Also clickable as a fallback in case auto re-entry is blocked by the browser.
     let fsOverlay = null;
     function showFsOverlay() {
         if (fsOverlay) return;
@@ -59,20 +59,28 @@
             position: fixed; inset: 0; background: #000;
             z-index: 99999999; display: flex; flex-direction: column;
             align-items: center; justify-content: center; gap: 16px;
+            cursor: pointer;
         `;
         fsOverlay.innerHTML = `
             <div style="width:48px;height:48px;border:4px solid rgba(99,102,241,0.3);border-top:4px solid #6366f1;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-            <p style="color:#9ca3af;font-family:sans-serif;font-size:0.95rem;">Re-entering secure session…</p>
+            <p style="color:#9ca3af;font-family:sans-serif;font-size:0.95rem;margin:0;">Re-entering secure session…</p>
+            <p style="color:#4b5563;font-family:sans-serif;font-size:0.78rem;margin:0;">Click anywhere if fullscreen doesn't resume</p>
         `;
+        // Clicking the overlay forces re-entry (guaranteed user gesture)
+        fsOverlay.addEventListener('click', () => {
+            enterFullscreen()
+                .then(() => setTimeout(hideFsOverlay, 300))
+                .catch(() => {});
+        });
         document.body.appendChild(fsOverlay);
     }
     function hideFsOverlay() {
         if (fsOverlay) { fsOverlay.remove(); fsOverlay = null; }
     }
 
-    // If user exits fullscreen (e.g. presses ESC), silently re-enter immediately.
-    // We log the event but do NOT show a scary popup — just a brief black overlay
-    // while fullscreen is re-established (takes < 1 second).
+    // If user exits fullscreen (ESC), silently re-enter with a 100ms delay.
+    // The delay is critical: Chrome briefly loses document focus on ESC exit,
+    // causing requestFullscreen() to fail if called instantly.
     function onFullscreenChange() {
         if (!isFullscreen()) {
             // Silent log only — no popup shown to student
@@ -85,12 +93,19 @@
             });
 
             showFsOverlay();
-            // Re-enter fullscreen immediately — no delay
-            enterFullscreen()
-                .catch(() => {})
-                .finally(() => {
-                    setTimeout(hideFsOverlay, 800); // hide after max 0.8s
-                });
+            // 100ms delay gives the browser time to return focus to the document
+            setTimeout(() => {
+                if (!isFullscreen()) {
+                    enterFullscreen()
+                        .then(() => setTimeout(hideFsOverlay, 300))
+                        .catch(() => {
+                            // Auto re-entry blocked by browser — overlay stays visible
+                            // and is clickable so student can re-enter manually
+                        });
+                } else {
+                    hideFsOverlay(); // already fullscreen again
+                }
+            }, 100);
         } else {
             hideFsOverlay();
         }
