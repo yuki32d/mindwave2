@@ -1446,25 +1446,62 @@ function playScenario(game, container) {
 }
 
 function fireConfetti() {
-    for (let i = 0; i < 50; i++) {
-        const c = document.createElement('div');
-        c.style.position = 'fixed';
-        c.style.left = Math.random() * 100 + 'vw';
-        c.style.top = '-10px';
-        c.style.width = '10px';
-        c.style.height = '10px';
-        c.style.backgroundColor = ['#ff3b30', '#ff9f0a', '#34c759', '#0f62fe'][Math.floor(Math.random() * 4)];
-        c.style.zIndex = '9999';
-        c.style.transition = 'top 2s ease-in, transform 2s ease-in';
-        document.body.appendChild(c);
+    const colors = [
+        '#6366f1', '#a855f7', '#ec4899', '#f59e0b',
+        '#10b981', '#3b82f6', '#f43f5e', '#fbbf24',
+        '#34d399', '#60a5fa', '#e879f9', '#fb923c'
+    ];
+    const shapes = ['circle', 'square', 'rect', 'triangle'];
 
-        setTimeout(() => {
-            c.style.top = '110vh';
-            c.style.transform = `rotate(${Math.random() * 360}deg)`;
-        }, 10);
+    function spawnBurst(count, offsetMs) {
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => {
+                const c = document.createElement('div');
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                const size = 6 + Math.random() * 10;
+                const startX = 20 + Math.random() * 60; // spread across 20-80vw
+                const drift = (Math.random() - 0.5) * 14; // horizontal drift vw
+                const spinDeg = (Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 720);
+                const fallDuration = 1.8 + Math.random() * 1.2;
 
-        setTimeout(() => c.remove(), 2000);
+                c.style.cssText = `
+                    position: fixed;
+                    left: ${startX}vw;
+                    top: -20px;
+                    width: ${shape === 'rect' ? size * 2 : size}px;
+                    height: ${shape === 'rect' ? size * 0.5 : size}px;
+                    background: ${color};
+                    z-index: 999999;
+                    pointer-events: none;
+                    opacity: 1;
+                    border-radius: ${shape === 'circle' ? '50%' : shape === 'square' ? '2px' : shape === 'rect' ? '2px' : '0'};
+                    clip-path: ${shape === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : 'none'};
+                    transform-origin: center;
+                    will-change: transform, top, opacity;
+                    transition: top ${fallDuration}s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                                transform ${fallDuration}s linear,
+                                left ${fallDuration}s ease-in-out,
+                                opacity 0.4s ease ${fallDuration - 0.4}s;
+                `;
+                document.body.appendChild(c);
+
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        c.style.top = '110vh';
+                        c.style.left = `calc(${startX}vw + ${drift}vw)`;
+                        c.style.transform = `rotate(${spinDeg}deg)`;
+                        c.style.opacity = '0';
+                    });
+                });
+
+                setTimeout(() => c.remove(), (fallDuration + 0.5) * 1000);
+            }, offsetMs + Math.random() * 400);
+        }
     }
+
+    spawnBurst(80, 0);        // first wave
+    spawnBurst(60, 600);      // second wave offset for layered effect
 }
 
 // === SCOREBOARD FUNCTIONS ===
