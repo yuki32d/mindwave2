@@ -1,4 +1,4 @@
-// Faculty Git Student Review Page
+﻿// Faculty Git Student Review Page
 
 let allProjects = [];
 let currentProject = null;
@@ -114,7 +114,7 @@ function renderProjects(projects) {
                 <p style="color: var(--muted); font-size: 13px; margin: 12px 0;">${escapeHtml(project.description)}</p>
                 <div style="display: flex; gap: 15px;">
                     <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" class="link-btn">
-                        <i data-lucide="github"></i>GitHub Repository
+                        <i data-lucide="git-branch"></i>GitHub Repository
                     </a>
                     ${project.liveDemoUrl ? `
                         <a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" class="link-btn">
@@ -199,7 +199,7 @@ function showReviewModal() {
                 <p style="color: var(--text); font-size: 13px; line-height: 1.6;">${escapeHtml(project.description)}</p>
                 <div style="display: flex; gap: 15px; margin-top: 15px;">
                     <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" class="link-btn">
-                        <i data-lucide="github"></i>Repository
+                        <i data-lucide="git-branch"></i>Repository
                     </a>
                     ${project.liveDemoUrl ? `
                         <a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" class="link-btn">
@@ -681,7 +681,7 @@ function showReviewModal() {
                 </div>
                 <p style="color: var(--text); font-size: 13px; line-height: 1.6;">${escapeHtml(project.description)}</p>
                 <div style="display: flex; gap: 15px; margin-top: 15px;">
-                    <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" class="link-btn"><i data-lucide="github"></i>Repository</a>
+                    <a href="${escapeHtml(project.githubRepoUrl)}" target="_blank" class="link-btn"><i data-lucide="git-branch"></i>Repository</a>
                     ${project.liveDemoUrl ? `<a href="${escapeHtml(project.liveDemoUrl)}" target="_blank" class="link-btn"><i data-lucide="external-link"></i>Demo</a>` : ''}
                 </div>
             </div>
