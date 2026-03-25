@@ -1303,7 +1303,7 @@ app.use(express.static(__dirname, {
 app.use('/api/activities', activitiesRouter);
 app.use('/api/live-sessions', liveSessionsRouter);
 // ── PUBLIC: Student Email Verification (must be BEFORE the auth middleware below) ──
-app.post("/api/student/verify-email", authLimiter, async (req, res) => {
+app.post("/api/student/verify-email", async (req, res) => {
   const { email, otp } = req.body || {};
   if (!email || !otp) {
     return res.status(400).json({ ok: false, message: "Email and OTP are required" });
