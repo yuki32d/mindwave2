@@ -1302,6 +1302,48 @@ app.use(express.static(__dirname, {
 // ============================================
 app.use('/api/activities', activitiesRouter);
 app.use('/api/live-sessions', liveSessionsRouter);
+// ── PUBLIC: Student Email Verification (must be BEFORE the auth middleware below) ──
+app.post("/api/student/verify-email", authLimiter, async (req, res) => {
+  const { email, otp } = req.body || {};
+  if (!email || !otp) {
+    return res.status(400).json({ ok: false, message: "Email and OTP are required" });
+  }
+  try {
+    const lowerEmail = email.toLowerCase();
+    const pending = await PendingStudentSignup.findOne({ email: lowerEmail });
+    if (!pending) {
+      return res.status(404).json({ ok: false, message: "No pending signup found. Please sign up again." });
+    }
+    if (!pending.emailOtp || pending.emailOtp !== String(otp).trim()) {
+      return res.status(400).json({ ok: false, message: "Invalid verification code. Please check and try again." });
+    }
+    if (!pending.emailOtpExpiry || new Date() > pending.emailOtpExpiry) {
+      return res.status(400).json({ ok: false, message: "Verification code has expired. Please sign up again to get a new code." });
+    }
+    const existingUser = await User.findOne({ email: lowerEmail });
+    if (existingUser) {
+      await PendingStudentSignup.deleteOne({ email: lowerEmail });
+      return res.status(409).json({ ok: false, message: "Account already exists. Please sign in." });
+    }
+    const user = await User.create({
+      name: pending.name,
+      displayName: pending.name,
+      email: lowerEmail,
+      password: pending.password,
+      role: 'student',
+      lastActive: new Date()
+    });
+    await PendingStudentSignup.deleteOne({ email: lowerEmail });
+    const token = signToken(user);
+    res
+      .cookie("mindwave_token", token, { httpOnly: true, sameSite: "lax", secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 })
+      .json({ ok: true, message: "Email verified! Your account is ready.", token, user: { name: user.name, email: user.email, role: user.role } });
+  } catch (error) {
+    console.error("student/verify-email error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 // Student Performance Analytics Routes
 app.use('/api/student', authMiddleware, studentPerformanceRoutes);
 // Peer Review System Routes
