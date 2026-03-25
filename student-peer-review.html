@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -103,7 +103,7 @@
             opacity: 0.5;
         }
 
-        /* ── LOGOUT MODAL STYLES ── */
+        /* -- LOGOUT MODAL STYLES -- */
         .mw-logout-overlay {
             display: none;
             position: fixed;
@@ -359,7 +359,7 @@
 <body>
     <div class="mw-app" id="mwApp">
 
-        <!-- ── SIDEBAR ── -->
+        <!-- -- SIDEBAR -- -->
         <aside class="mw-sidebar">
             <div class="mw-logo">
                 <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
@@ -376,9 +376,7 @@
                     <a href="student-courses.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
                     </a>
-                    <a href="student-timetable.html" class="mw-nav-item">
-                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
-                    </a>
+                    
                     <a href="student-performance.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
                     </a>
@@ -424,9 +422,7 @@
                     <a href="student-live-meeting.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="video"></i></span> Web Conf
                     </a>
-                    <a href="student-reports.html" class="mw-nav-item">
-                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
-                    </a>
+                    
                     <a href="student-settings.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
                     </a>
@@ -462,7 +458,7 @@
                 </div>
             </div>
         </aside>
-        <!-- ── MAIN ── -->
+        <!-- -- MAIN -- -->
         <div class="mw-main">
             <!-- TOPBAR -->
             <header class="mw-topbar">
@@ -496,15 +492,15 @@
 
                 <div id="reviewFeed" class="review-grid">
                     <div class="empty-state">
-                        <div class="empty-icon">📂</div>
-                        <h3>Loading reviews…</h3>
+                        <div class="empty-icon">??</div>
+                        <h3>Loading reviews�</h3>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ── LOGOUT MODAL ── -->
+    <!-- -- LOGOUT MODAL -- -->
     <div id="logoutModal" class="mw-logout-overlay">
         <div class="mw-logout-modal">
             <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
@@ -668,7 +664,7 @@
                                 <div class="review-icon"><i data-lucide="file-text"></i></div>
                                 <div class="review-details">
                                     <h3>${r.projectName}</h3>
-                                    <p>By ${r.revieweeName || r.revieweeId?.name || 'Unknown Student'} • ${new Date(r.dueDate || r.createdAt).toLocaleDateString()}</p>
+                                    <p>By ${r.revieweeName || r.revieweeId?.name || 'Unknown Student'} � ${new Date(r.dueDate || r.createdAt).toLocaleDateString()}</p>
                                 </div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 16px;">
@@ -681,7 +677,7 @@
                 } else {
                     feed.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-icon">📂</div>
+                            <div class="empty-icon">??</div>
                             <h3>No ${currentTab} reviews</h3>
                             <p>${currentTab === 'pending' ? "You're all caught up!" : "You haven't completed any reviews yet."}</p>
                         </div>
@@ -697,13 +693,13 @@
         let ratings = { codeQuality: 0, functionality: 0, documentation: 0 };
 
         async function startReview(id) {
-            console.log('🚀 Starting review for ID:', id);
+            console.log('?? Starting review for ID:', id);
             currentReviewId = id;
             const token = localStorage.getItem('token');
             const modal = document.getElementById('assessmentModal');
             
             if (!modal) {
-                console.error('❌ assessmentModal element not found!');
+                console.error('? assessmentModal element not found!');
                 return;
             }
 
@@ -714,7 +710,7 @@
                 
                 if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
                 const data = await res.json();
-                console.log('📦 Review data received:', data);
+                console.log('?? Review data received:', data);
                 
                 const r = data.review;
                 if (!r) throw new Error('No review data found in response');
@@ -725,7 +721,7 @@
                 const desc = r.submissionId?.description || 'No description provided.';
                 
                 document.getElementById('modalProjectName').textContent = projName;
-                document.getElementById('modalReviewee').textContent = `By ${revieweeName} • Assigned ${new Date(r.createdAt).toLocaleDateString()}`;
+                document.getElementById('modalReviewee').textContent = `By ${revieweeName} � Assigned ${new Date(r.createdAt).toLocaleDateString()}`;
                 document.getElementById('modalDescription').textContent = desc;
                 
                 const githubBtn = document.getElementById('modalGithub');
@@ -747,12 +743,12 @@
                 modal.style.display = 'flex';
                 modal.classList.add('active');
                 
-                console.log('✨ Modal opened successfully');
-                console.log('📏 Modal rect:', modal.getBoundingClientRect());
+                console.log('? Modal opened successfully');
+                console.log('?? Modal rect:', modal.getBoundingClientRect());
                 
                 if (window.lucide) window.lucide.createIcons();
             } catch (e) {
-                console.error('💥 Error in startReview:', e);
+                console.error('?? Error in startReview:', e);
                 alert('Failed to load review details. Check console for details.');
             }
         }
@@ -824,7 +820,7 @@
 
                 if (!res.ok) throw new Error('Submission failed');
                 
-                alert('✅ Review submitted successfully!');
+                alert('? Review submitted successfully!');
                 closeAssessmentModal();
                 loadReviews(); // Refresh list
             } catch (e) {

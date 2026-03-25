@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -161,7 +161,7 @@
     <script src="student-theme-init.js"></script>
     <script src="auth-guard.js" data-role="student"></script>
             <div class="topbar-brand">
-                <span>🌊</span>
+                <span>??</span>
                 <span>MindwaveIo</span>
             </div>
         </header>
@@ -169,13 +169,13 @@
         <main style="padding: 32px 48px;">
             <div class="main-header" style="margin-bottom: 32px;">
                 <div>
-                    <a href="homepage.html" class="ghost-btn" style="display: inline-block; margin-bottom: 16px;">← Back
+                    <a href="homepage.html" class="ghost-btn" style="display: inline-block; margin-bottom: 16px;">? Back
                         to Dashboard</a>
-                    <h1 style="margin: 0 0 8px;">🔔 Notifications</h1>
+                    <h1 style="margin: 0 0 8px;">?? Notifications</h1>
                     <p style="color: var(--text-gray); margin: 0;">Stay updated with announcements, new games, and
                         important updates</p>
                 </div>
-                <button class="mark-all-read" id="markAllReadBtn">✓ Mark All as Read</button>
+                <button class="mark-all-read" id="markAllReadBtn">? Mark All as Read</button>
             </div>
 
             <div class="notifications-container">
@@ -188,7 +188,7 @@
 
                 <div id="notificationsList">
                     <div class="empty-state">
-                        <div class="empty-state-icon">🔔</div>
+                        <div class="empty-state-icon">??</div>
                         <h3>No notifications yet</h3>
                         <p>You're all caught up! New notifications will appear here.</p>
                     </div>
@@ -230,7 +230,7 @@
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">🔔</div>
+                        <div class="empty-state-icon">??</div>
                         <h3>No ${currentFilter === 'all' ? '' : currentFilter} notifications</h3>
                         <p>You're all caught up!</p>
                     </div>
@@ -239,9 +239,9 @@
             }
 
             container.innerHTML = filtered.map(n => {
-                const icon = n.title.includes('Game') ? '🎮' :
-                    n.title.includes('Announcement') ? '📢' :
-                        n.title.includes('Update') ? '📝' : '🔔';
+                const icon = n.title.includes('Game') ? '??' :
+                    n.title.includes('Announcement') ? '??' :
+                        n.title.includes('Update') ? '??' : '??';
 
                 const time = new Date(n.createdAt);
                 const timeStr = time.toLocaleString('en-US', {

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -6,7 +6,7 @@
     <script src="auth-guard.js" data-role="student"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Projects — MindWave</title>
+    <title>GitHub Projects � MindWave</title>
     <meta name="description" content="Submit your mini projects and track faculty feedback in MindWave.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="student-theme.css">
@@ -14,7 +14,7 @@
     <script src="theme-init.js"></script>
     <script src="sidebar.js"></script>
     <style>
-        /* ── Stats KPI pills ── */
+        /* -- Stats KPI pills -- */
         .gh-stats-row {
             display: flex;
             gap: 12px;
@@ -75,7 +75,7 @@
             margin-top: 2px;
         }
 
-        /* ── Project cards ── */
+        /* -- Project cards -- */
         .gh-cards-grid {
             display: grid;
             gap: 16px;
@@ -399,7 +399,7 @@
             line-height: 1.6;
         }
 
-        /* ── Submit Modal ── */
+        /* -- Submit Modal -- */
         .gh-modal-overlay {
             display: none;
             position: fixed;
@@ -551,7 +551,7 @@
             margin-top: 24px;
         }
 
-        /* ── Delete Confirm Modal ── */
+        /* -- Delete Confirm Modal -- */
         .gh-confirm-modal {
             background: var(--surface);
             border: 1px solid var(--border-2);
@@ -599,7 +599,7 @@
             gap: 10px;
         }
 
-        /* ── Toast ── */
+        /* -- Toast -- */
         #gh-toast-container {
             position: fixed;
             bottom: 24px;
@@ -781,7 +781,7 @@
 <body>
     <div class="mw-app" id="mwApp">
 
-        <!-- ── SIDEBAR ── -->
+        <!-- -- SIDEBAR -- -->
         <aside class="mw-sidebar" id="mwSidebar">
             <div class="mw-logo">
                 <div class="mw-logo-icon"><i data-lucide="brain-circuit"></i></div>
@@ -800,9 +800,7 @@
                     <a href="student-courses.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="book-open"></i></span> My Courses
                     </a>
-                    <a href="student-timetable.html" class="mw-nav-item">
-                        <span class="mw-nav-icon"><i data-lucide="calendar-days"></i></span> Timetable
-                    </a>
+                    
                     <a href="student-performance.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="bar-chart-2"></i></span> Performance
                     </a>
@@ -851,9 +849,7 @@
                     <a href="student-live-meeting.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="video"></i></span> Web Conf
                     </a>
-                    <a href="student-reports.html" class="mw-nav-item">
-                        <span class="mw-nav-icon"><i data-lucide="file-text"></i></span> Reports
-                    </a>
+                    
                     <a href="student-settings.html" class="mw-nav-item">
                         <span class="mw-nav-icon"><i data-lucide="settings"></i></span> Settings
                     </a>
@@ -875,15 +871,15 @@
                 <div id="profileToggle" class="mw-user-card" style="position:relative;">
                     <div class="mw-avatar" id="avatarInitials">--</div>
                     <div>
-                        <div class="mw-user-name" id="sidebarUserName">Loading…</div>
+                        <div class="mw-user-name" id="sidebarUserName">Loading�</div>
                         <div class="mw-user-role">Student</div>
                     </div>
-                    <span class="mw-user-more">⋯</span>
+                    <span class="mw-user-more">?</span>
 
                     <div id="profileDropdown" class="mw-profile-dropdown">
                         <div class="mw-profile-dropdown-header">
                             <div class="name" id="dropdownUserName">Student</div>
-                            <div class="role">Student · MindWave</div>
+                            <div class="role">Student � MindWave</div>
                         </div>
                         <a href="student-profile.html"><i data-lucide="user"></i> My Profile</a>
                         <a href="student-settings.html"><i data-lucide="settings"></i> Settings</a>
@@ -893,7 +889,7 @@
             </div>
         </aside>
 
-        <!-- ── MAIN ── -->
+        <!-- -- MAIN -- -->
         <div class="mw-main">
 
             <!-- TOPBAR -->
@@ -907,7 +903,7 @@
 
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search projects…" id="projectSearch">
+                    <input type="text" placeholder="Search projects�" id="projectSearch">
                 </div>
 
                 <div class="mw-topbar-actions">
@@ -952,7 +948,7 @@
                             <i data-lucide="folder-git-2"></i>
                         </div>
                         <div class="gh-stat-body">
-                            <div class="gh-stat-value" id="statTotal">—</div>
+                            <div class="gh-stat-value" id="statTotal">�</div>
                             <div class="gh-stat-label">Total</div>
                         </div>
                     </div>
@@ -961,7 +957,7 @@
                             <i data-lucide="clock"></i>
                         </div>
                         <div class="gh-stat-body">
-                            <div class="gh-stat-value" id="statPending">—</div>
+                            <div class="gh-stat-value" id="statPending">�</div>
                             <div class="gh-stat-label">Pending</div>
                         </div>
                     </div>
@@ -971,7 +967,7 @@
                             <i data-lucide="eye"></i>
                         </div>
                         <div class="gh-stat-body">
-                            <div class="gh-stat-value" id="statReviewed">—</div>
+                            <div class="gh-stat-value" id="statReviewed">�</div>
                             <div class="gh-stat-label">Reviewed</div>
                         </div>
                     </div>
@@ -980,7 +976,7 @@
                             <i data-lucide="check-circle-2"></i>
                         </div>
                         <div class="gh-stat-body">
-                            <div class="gh-stat-value" id="statGraded">—</div>
+                            <div class="gh-stat-value" id="statGraded">�</div>
                             <div class="gh-stat-label">Graded</div>
                         </div>
                     </div>
@@ -1004,7 +1000,7 @@
         </div><!-- end mw-main -->
     </div><!-- end mw-app -->
 
-    <!-- ── SUBMIT MODAL ── -->
+    <!-- -- SUBMIT MODAL -- -->
     <div id="submitModal" class="gh-modal-overlay">
         <div class="gh-modal">
             <div class="gh-modal-header">
@@ -1051,7 +1047,7 @@
         </div>
     </div>
 
-    <!-- ── DELETE CONFIRM MODAL ── -->
+    <!-- -- DELETE CONFIRM MODAL -- -->
     <div id="deleteModal" class="gh-modal-overlay">
         <div class="gh-confirm-modal">
             <div class="gh-confirm-icon">
@@ -1068,7 +1064,7 @@
         </div>
     </div>
 
-    <!-- ── LOGOUT MODAL ── -->
+    <!-- -- LOGOUT MODAL -- -->
     <div id="logoutModal" class="mw-logout-overlay">
         <div class="mw-logout-modal">
             <div class="mw-logout-icon"><i data-lucide="log-out"></i></div>
@@ -1087,7 +1083,7 @@
     <!-- Toast container -->
     <div id="gh-toast-container"></div>
 
-    <!-- ── SCRIPTS ── -->
+    <!-- -- SCRIPTS -- -->
     <script>
         // Auth
         function doLogout() {
@@ -1140,7 +1136,7 @@
                 });
             }
 
-            // Settings btn → settings page
+            // Settings btn ? settings page
             const settingsBtn = document.getElementById('settingsBtn');
             if (settingsBtn) settingsBtn.addEventListener('click', () => window.location.href = 'student-settings.html');
 
