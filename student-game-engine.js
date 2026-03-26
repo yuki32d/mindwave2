@@ -81,6 +81,7 @@ function getTypeInfo(type) {
         'syntax-fill': { icon: 'pencil', label: 'Fill in Blank', color: '#22c55e', bg: 'rgba(34,197,94,.14)', accent: 'linear-gradient(90deg,#22c55e,#4ade80)' },
         'sql': { icon: 'database', label: 'SQL Builder', color: '#14b8a6', bg: 'rgba(20,184,166,.14)', accent: 'linear-gradient(90deg,#14b8a6,#2dd4bf)' },
         'sql-builder': { icon: 'database', label: 'SQL Builder', color: '#14b8a6', bg: 'rgba(20,184,166,.14)', accent: 'linear-gradient(90deg,#14b8a6,#2dd4bf)' },
+        'sql-scenario': { icon: 'file-code-2', label: 'SQL Scenario', color: '#8b5cf6', bg: 'rgba(139,92,246,.14)', accent: 'linear-gradient(90deg,#8b5cf6,#c084fc)' },
         'bug-hunt': { icon: 'bug', label: 'Debug the Code', color: '#ef4444', bg: 'rgba(239,68,68,.14)', accent: 'linear-gradient(90deg,#ef4444,#f87171)' },
         'scenario': { icon: 'book-open', label: 'Scenario', color: '#8b5cf6', bg: 'rgba(139,92,246,.14)', accent: 'linear-gradient(90deg,#8b5cf6,#c084fc)' },
         'poll': { icon: 'bar-chart-3', label: 'Poll', color: '#f97316', bg: 'rgba(249,115,22,.14)', accent: 'linear-gradient(90deg,#f97316,#fb923c)' },
@@ -94,6 +95,7 @@ function getGameMeta(game) {
     if (game.type === 'sorter' || game.type === 'tech-sorter') return (game.items ? game.items.length : 0) + ' Items';
     if (game.type === 'fillin' || game.type === 'syntax-fill') return (game.blanks ? game.blanks.length : 0) + ' Blanks';
     if (game.type === 'sql' || game.type === 'sql-builder') return (game.blocks ? game.blocks.length : 0) + ' Blocks';
+    if (game.type === 'sql-scenario') return 'AI Graded';
     if (game.type === 'bug-hunt') return (game.bugCount || 0) + ' Bugs';
     if (game.type === 'scenario') return (game.scenes ? game.scenes.length : 0) + ' Scenes';
     return 'Game';
@@ -187,6 +189,7 @@ function showGamePreview(game) {
         'syntax-fill': 'Click words from the bank to fill in the blanks in the code. Click a filled blank to remove it.',
         'sql': 'Drag SQL blocks into the correct order to build a valid query.',
         'sql-builder': 'Drag SQL blocks into the correct order to build a valid query.',
+        'sql-scenario': 'Read the scenario carefully and type your SQL query in the box below. The AI will evaluate your answer — variations in syntax are accepted as long as your query is functionally correct!',
         'bug-hunt': 'Read the buggy code carefully, then rewrite the corrected version in the editor below.',
         'scenario': 'Walk through the scenario and make choices. Each decision affects the outcome.',
         'poll': 'Share your opinion by selecting your answer(s). Results may be shown after submission.',
@@ -270,6 +273,7 @@ function launchGame(game) {
             case 'syntax-fill': playFillIn(game, container); break;
             case 'sql':
             case 'sql-builder': playSQL(game, container); break;
+            case 'sql-scenario': playScenarioSQL(game, container); break;
             case 'bug-hunt': playDebug(game, container); break;
             case 'scenario': playScenario(game, container); break;
             default:
@@ -1050,6 +1054,151 @@ function playSQL(game, container) {
     }
 
     startTimer(game.duration || 10, '#appContainer', checkSQL);
+    render();
+}
+
+// NEW: SQL Scenario - AI Graded Free-Form Query
+function playScenarioSQL(game, container) {
+    let startTime = Date.now();
+
+    function render() {
+        container.innerHTML = `
+            <div class="player-header"><span>🧠 SQL Scenario</span><span class="timer">⏱️</span></div>
+            <div class="question-display">
+                <div style="
+                    background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(99,102,241,0.08));
+                    border: 1px solid rgba(139,92,246,0.3);
+                    border-radius: 16px;
+                    padding: 24px;
+                    margin-bottom: 28px;
+                ">
+                    <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#a78bfa;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        Scenario Challenge
+                    </div>
+                    <p style="font-size:1.1rem;line-height:1.7;color:var(--text);margin:0;">${game.scenarioQuestion || game.description || 'Write the correct SQL query for this problem.'}</p>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;font-size:0.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;">Your SQL Query</label>
+                    <textarea id="studentSqlInput"
+                        placeholder="Type your SQL query here... e.g. SELECT * FROM students"
+                        style="
+                            width: 100%;
+                            min-height: 120px;
+                            background: rgba(0,0,0,0.25);
+                            border: 2px solid rgba(139,92,246,0.3);
+                            border-radius: 12px;
+                            padding: 16px;
+                            color: var(--text, #f5f7ff);
+                            font-family: 'JetBrains Mono', 'Courier New', monospace;
+                            font-size: 15px;
+                            line-height: 1.6;
+                            resize: vertical;
+                            outline: none;
+                            box-sizing: border-box;
+                            transition: border-color 0.2s;
+                        "
+                        onfocus="this.style.borderColor='rgba(139,92,246,0.7)'"
+                        onblur="this.style.borderColor='rgba(139,92,246,0.3)'"
+                    ></textarea>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.07);border-radius:10px;padding:12px 16px;margin-bottom:28px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    <span style="font-size:0.85rem;color:#a78bfa;">The AI will evaluate your answer. Variations in formatting and case are accepted.</span>
+                </div>
+
+                <button id="scenariSqlSubmitBtn" style="
+                    width: 100%;
+                    padding: 16px 24px;
+                    border: none;
+                    border-radius: 14px;
+                    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+                    color: #fff;
+                    font-size: 1rem;
+                    font-weight: 700;
+                    letter-spacing: .02em;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    transition: opacity .2s, transform .15s;
+                    box-shadow: 0 4px 20px rgba(139, 92, 246, .35);
+                ">⚡&nbsp; Submit & Grade with AI</button>
+            </div>
+        `;
+
+        startTimer(game.duration || 10, '#appContainer', () => submitScenarioSQL(true));
+
+        const submitBtn = document.getElementById('scenariSqlSubmitBtn');
+        if (submitBtn) submitBtn.addEventListener('click', () => submitScenarioSQL(false));
+    }
+
+    async function submitScenarioSQL(isTimeout) {
+        const textarea = document.getElementById('studentSqlInput');
+        const studentQuery = textarea ? textarea.value.trim() : '';
+
+        if (!studentQuery && !isTimeout) {
+            // Highlight the textarea
+            if (textarea) {
+                textarea.style.borderColor = '#ef4444';
+                textarea.placeholder = 'Please enter your SQL query before submitting!';
+            }
+            return;
+        }
+
+        // Show loading state
+        const submitBtn = document.getElementById('scenariSqlSubmitBtn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳&nbsp; AI is grading your answer...';
+        }
+
+        let isCorrect = false;
+        let score = 0;
+        const tp = Number(game.totalPoints || 50);
+
+        try {
+            if (studentQuery && game.possibleQueries && game.possibleQueries.length > 0) {
+                const token = localStorage.getItem('token');
+                const evalRes = await fetch('/api/sql-scenario/evaluate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        studentQuery,
+                        possibleQueries: game.possibleQueries,
+                        question: game.scenarioQuestion || game.description
+                    })
+                });
+
+                const evalData = await evalRes.json();
+                isCorrect = evalData.ok && evalData.isCorrect === true;
+            }
+        } catch (err) {
+            console.error('SQL Scenario evaluate error:', err);
+            // If eval fails, do a basic string comparison fallback
+            const normalise = q => q.replace(/\s+/g, ' ').trim().toLowerCase();
+            isCorrect = (game.possibleQueries || []).some(q => normalise(q) === normalise(studentQuery));
+        }
+
+        score = isCorrect ? tp : 0;
+
+        const studentAnswers = [{
+            questionText: game.scenarioQuestion || game.description || 'SQL Scenario',
+            studentAnswer: studentQuery || '(no answer)',
+            correctAnswer: (game.possibleQueries || [])[0] || 'N/A',
+            isCorrect
+        }];
+
+        await saveResult(game, score, tp, startTime, studentAnswers);
+        showResult(container, score, tp, startTime, game._id || game.id);
+    }
+
     render();
 }
 

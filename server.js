@@ -698,6 +698,8 @@ const gameSchema = new mongoose.Schema(
     blocks: { type: Array, default: [] }, // For SQL
     distractors: { type: Array, default: [] }, // For SQL
     correctQuery: { type: String }, // For SQL
+    scenarioQuestion: { type: String }, // For SQL Scenario
+    possibleQueries: { type: Array, default: [] }, // For SQL Scenario (AI-generated correct answers)
     lines: { type: Array, default: [] }, // For Unjumble
     scenes: { type: Array, default: [] }, // For Scenario
 
@@ -1388,6 +1390,139 @@ app.post('/api/chat', async (req, res) => {
     res.json({ ok: true, reply: data.choices[0].message.content });
   } catch (err) {
     console.error('Chat proxy error:', err);
+    res.status(500).json({ ok: false, message: 'Internal server error' });
+  }
+});
+
+
+
+// ============================================
+// SQL SCENARIO — GROQ AI ENDPOINTS
+// ============================================
+
+// 1. Teacher: Analyze a natural-language SQL question → return array of possible queries
+app.post('/api/sql-scenario/analyze', async (req, res) => {
+  const GROQ_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_KEY) {
+    return res.status(503).json({ ok: false, message: 'AI not configured (missing GROQ_API_KEY).' });
+  }
+
+  const { question } = req.body || {};
+  if (!question) return res.status(400).json({ ok: false, message: 'question is required' });
+
+  const systemPrompt = `You are a SQL expert. A teacher will give you a natural-language database question.
+Your task is to generate ALL functionally correct, commonly accepted SQL queries that answer that question.
+Respond ONLY with a valid JSON array of strings. Each string must be a standalone SQL query. No explanations, no markdown, no prose. Only the JSON array.
+Example output: ["SELECT * FROM students", "SELECT id, name FROM students WHERE 1=1"]`;
+
+  try {
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: question }
+        ],
+        temperature: 0.3,
+        max_tokens: 1024
+      })
+    });
+
+    if (!groqRes.ok) {
+      const err = await groqRes.text();
+      console.error('Groq SQL Analyze error:', err);
+      return res.status(500).json({ ok: false, message: 'AI analysis failed' });
+    }
+
+    const data = await groqRes.json();
+    const rawContent = data.choices[0].message.content.trim();
+
+    // Safely parse JSON array from content
+    let possibleQueries = [];
+    try {
+      // Extract JSON array even if model wraps it in ```json ... ```
+      const match = rawContent.match(/\[[\s\S]*\]/);
+      possibleQueries = JSON.parse(match ? match[0] : rawContent);
+    } catch (parseErr) {
+      console.error('Failed to parse AI response as JSON array:', rawContent);
+      return res.status(500).json({ ok: false, message: 'AI returned an invalid format. Please try again.' });
+    }
+
+    res.json({ ok: true, possibleQueries });
+  } catch (err) {
+    console.error('SQL Scenario analyze error:', err);
+    res.status(500).json({ ok: false, message: 'Internal server error' });
+  }
+});
+
+// 2. Student: Evaluate a student's submitted query against the stored possible answers
+app.post('/api/sql-scenario/evaluate', async (req, res) => {
+  const GROQ_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_KEY) {
+    return res.status(503).json({ ok: false, message: 'AI not configured (missing GROQ_API_KEY).' });
+  }
+
+  const { studentQuery, possibleQueries, question } = req.body || {};
+  if (!studentQuery || !possibleQueries || !Array.isArray(possibleQueries)) {
+    return res.status(400).json({ ok: false, message: 'studentQuery and possibleQueries are required' });
+  }
+
+  const systemPrompt = `You are a strict SQL grader. A student submitted a SQL query.
+You are given the original question and a list of known-correct SQL queries for it.
+Determine if the student's query is functionally equivalent to any of the correct queries.
+Ignore minor differences like extra whitespace or uppercase/lowercase keywords.
+Respond ONLY with a JSON object: {"isCorrect": true} or {"isCorrect": false}. Nothing else.`;
+
+  const userMessage = `Question: ${question || 'Write the correct SQL query'}
+Correct Queries: ${JSON.stringify(possibleQueries)}
+Student Query: ${studentQuery}`;
+
+  try {
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage }
+        ],
+        temperature: 0.1,
+        max_tokens: 64
+      })
+    });
+
+    if (!groqRes.ok) {
+      const err = await groqRes.text();
+      console.error('Groq SQL Evaluate error:', err);
+      return res.status(500).json({ ok: false, message: 'AI evaluation failed' });
+    }
+
+    const data = await groqRes.json();
+    const rawContent = data.choices[0].message.content.trim();
+
+    let isCorrect = false;
+    try {
+      const match = rawContent.match(/\{[\s\S]*\}/);
+      const parsed = JSON.parse(match ? match[0] : rawContent);
+      isCorrect = parsed.isCorrect === true;
+    } catch (parseErr) {
+      console.error('Failed to parse AI evaluation response:', rawContent);
+      // Fallback: check if the response contains "true"
+      isCorrect = rawContent.toLowerCase().includes('"iscorrect": true');
+    }
+
+    res.json({ ok: true, isCorrect });
+  } catch (err) {
+    console.error('SQL Scenario evaluate error:', err);
     res.status(500).json({ ok: false, message: 'Internal server error' });
   }
 });

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave — The Future of Human-Centric Learning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #7C3AED;
+            --accent: #0ea5e9;
+            --bg: #FAFAFA;
+            --surface: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4, .brand-logo { font-family: 'Outfit', sans-serif; }
+
+        /* Ambient Background */
+        .ambient-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+            overflow: hidden;
+            background: #FAFAFA;
+        }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.4;
+            animation: float 20s infinite alternate;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: rgba(79, 70, 229, 0.4); }
+        .blob-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: rgba(124, 58, 237, 0.3); animation-delay: -5s; }
+        .blob-3 { top: 40%; left: 60%; width: 40vw; height: 40vw; background: rgba(14, 165, 233, 0.2); animation-delay: -10s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 10%) scale(1.1); }
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px; left: 50%;
+            transform: translateX(-50%);
+            width: 90%; max-width: 1200px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .navbar.scrolled {
+            top: 0;
+            width: 100%;
+            max-width: 100%;
+            border-radius: 0;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+        }
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .brand-logo i {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        .nav-link:hover { color: var(--primary); }
+        .nav-link:hover::after { transform: scaleX(1); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(79, 70, 229, 0.35);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1.5px solid rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-outline:hover {
+            border-color: var(--text-main);
+            background: var(--text-main);
+            color: white;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 5% 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .hero-content {
+            flex: 1;
+            padding-right: 40px;
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+            border: 1px solid rgba(79, 70, 229, 0.2);
+            animation: fadeUp 0.8s ease both;
+        }
+        .hero h1 {
+            font-size: clamp(3rem, 5vw, 4.5rem);
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -0.03em;
+            animation: fadeUp 0.8s 0.2s ease both;
+        }
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: gradient-shift 5s ease infinite;
+        }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            max-width: 540px;
+            margin-bottom: 40px;
+            animation: fadeUp 0.8s 0.4s ease both;
+        }
+        .hero-buttons { 
+            display: flex; gap: 16px; 
+            animation: fadeUp 0.8s 0.6s ease both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero Image Panel */
+        .hero-visual {
+            flex: 1.1;
+            position: relative;
+            height: 600px;
+            perspective: 1000px;
+            animation: fadeUp 1s 0.5s ease both;
+        }
+        .hero-image-wrapper {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            height: 90%;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.15);
+            border: 4px solid #FFFFFF;
+        }
+        .hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transform: scale(1.05);
+            transition: transform 10s ease-out;
+        }
+        .hero-visual:hover .hero-image { transform: scale(1); }
+        
+        /* Floating Glass Cards on Hero */
+        .glass-card {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            border-radius: 20px;
+            padding: 16px 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            animation: float-y 6s ease-in-out infinite;
+        }
+        @keyframes float-y {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .gc-1 { top: 10%; left: -5%; animation-delay: 0s; }
+        .gc-2 { bottom: 15%; right: -10%; animation-delay: -3s; }
+        .gc-icon {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+        .gc-text strong { display: block; font-family: 'Outfit'; font-size: 1.1rem; color: var(--text-main); }
+        .gc-text span { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* Feature Section */
+        .features {
+            padding: 120px 5%;
+            background: #FFFFFF;
+            position: relative;
+            z-index: 10;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .features-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 80px;
+        }
+        .features-header h2 {
+            font-size: clamp(2.2rem, 4vw, 3rem);
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
+        }
+        .feature-text h3 {
+            font-size: 2.2rem;
+            margin-bottom: 24px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .feature-text p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+        .feature-list li i {
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.1);
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem;
+        }
+
+        .feature-image-wrapper {
+            position: relative;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.12);
+            border: 4px solid #FFFFFF;
+            transform: perspective(1000px) rotateY(-5deg);
+            transition: transform 0.5s ease;
+        }
+        .feature-image-wrapper:hover {
+            transform: perspective(1000px) rotateY(0deg);
+        }
+        .feature-image-wrapper img {
+            width: 100%;
+            display: block;
+        }
+
+        /* Story Section */
+        .story {
+            padding: 100px 5%;
+            background: #FAFAFA;
+            text-align: center;
+        }
+        .story-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .story p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+            font-style: italic;
+            margin-bottom: 40px;
+        }
+        .founder-sig {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+        .sig-avatar {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid white;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .sig-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .founder-sig strong { display: block; font-family: 'Outfit'; font-size: 1.2rem; }
+        .founder-sig span { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 120px 5%;
+            background: #FFFFFF;
+        }
+        .testimonials-header { text-align: center; margin-bottom: 60px; }
+        .testimonials-header h2 { font-family: 'Outfit'; font-size: 2.8rem; margin-bottom: 16px; letter-spacing: -0.02em; }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .test-card {
+            background: #FAFAFA;
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 24px;
+            padding: 40px;
+            position: relative;
+        }
+        .test-card::before {
+            content: '"';
+            position: absolute;
+            top: 20px; left: 30px;
+            font-size: 8rem;
+            color: rgba(79, 70, 229, 0.05);
+            font-family: 'Outfit';
+            line-height: 1;
+        }
+        .test-card p {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            margin-bottom: 32px;
+            position: relative;
+            z-index: 2;
+        }
+        .test-author { display: flex; align-items: center; gap: 16px; }
+        .test-avatar { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; }
+        .test-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        @media(max-width: 768px) {
+            .test-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Stats Strip */
+        .stats {
+            padding: 100px 5%;
+            background: var(--text-main);
+            color: white;
+            text-align: center;
+        }
+        .stats-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+        }
+        .stat-item h4 {
+            font-size: 3.8rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #a78bfa, #38bdf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Outfit';
+        }
+        .stat-item p {
+            font-size: 1.05rem;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        /* Footer */
+        footer {
+            background: #FFFFFF;
+            padding: 80px 5% 40px;
+        }
+        .footer-content {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 60px;
+        }
+        .footer-brand p {
+            max-width: 300px; color: var(--text-muted);
+            margin-top: 16px; line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        .footer-bottom {
+            max-width: 1200px; margin: 0 auto;
+            padding-top: 30px; border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between;
+            color: var(--text-muted); font-size: 0.95rem;
+        }
+        .social-icons i {
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+        .social-icons i:hover { color: var(--primary); }
+
+        @media(max-width: 992px) {
+            .hero { flex-direction: column; padding-top: 160px; text-align: center; }
+            .hero-content { padding-right: 0; margin-bottom: 60px; display: flex; flex-direction: column; align-items: center; }
+            .hero p { margin: 0 auto 40px; }
+            .hero-buttons { justify-content: center; }
+            .hero-visual { width: 100%; height: 500px; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .feature-image-wrapper { transform: none; order: 2; }
+            .feature-text { order: 1; text-align: center; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 60px; }
+            .glass-card { display: none; } /* Hide floating cards on small screens for clarity */
+        }
+        @media(max-width: 768px) {
+            .nav-links { display: none; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .footer-content { flex-direction: column; gap: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Gradient Background -->
+    <div class="ambient-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <a href="#" class="brand-logo">
+            <i class="fas fa-brain"></i> MindWave
+        </a>
+        <div class="nav-links">
+            <a href="#product" class="nav-link">Platform</a>
+            <a href="#solutions" class="nav-link">Solutions</a>
+            <a href="#pricing" class="nav-link">Pricing</a>
+            <a href="#resources" class="nav-link">Wall of Love</a>
+        </div>
+        <div style="display: flex; gap: 16px;">
+            <a href="#" class="btn-outline" style="padding: 10px 20px; font-size: 0.9rem; border: none;">Sign In</a>
+            <a href="#" class="btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">Start Free Trial</a>
+        </div>
+    </nav>
+
+    <!-- Main Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="pill">
+                <i class="fas fa-fire" style="color: #ea580c;"></i> Rated #1 by Educators
+            </div>
+            <h1>Empowering Students with <span class="gradient-text">Human-Centric</span> Learning.</h1>
+            <p>Step away from sterile, AI-generated environments. MindWave combines cutting-edge gamification with organic, collaborative spaces designed for how real students actually learn and thrive.</p>
+            <div class="hero-buttons">
+                <a href="#" class="btn-primary">Explore The Platform</a>
+                <a href="#" class="btn-outline"><i class="fas fa-play" style="margin-right: 8px;"></i> See How It Works</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-image-wrapper">
+                <img src="images/hero_students.png" alt="Students collaborating and smiling" class="hero-image">
+            </div>
+            
+            <div class="glass-card gc-1">
+                <div class="gc-icon" style="background: linear-gradient(135deg, #10B981, #059669);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="gc-text">
+                    <strong>94% Engagement</strong>
+                    <span>Real-time collaboration</span>
+                </div>
+            </div>
+
+            <div class="glass-card gc-2">
+                <div class="gc-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="gc-text">
+                    <strong>Online Now</strong>
+                    <span>342 students focused</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Story -->
+    <section class="story">
+        <div class="story-content">
+            <h2 style="font-family: 'Outfit'; font-size: 2.5rem; margin-bottom: 24px;">Built by educators, for actual humans.</h2>
+            <p>"We started MindWave after watching brilliant students completely tune out during traditional lectures. We didn't want to build another sterile testing tool or lifeless dashboard. We wanted to build a digital space that feels like the best, most energetic group study session you've ever had."</p>
+            <div class="founder-sig">
+                <div class="sig-avatar">
+                   <img src="images/teacher_avatar.png" alt="Sarah, Founder">
+                </div>
+                <div>
+                   <strong>Sarah Jenkins</strong>
+                   <span>Former High School Teacher & Product Lead</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Feature -->
+    <section class="features">
+        <div class="features-header">
+            <h2>Designed for the human mind,<br>powered by intelligent tools.</h2>
+            <p>We observed hours of physical classroom interactions to build a platform that feels natural, intuitive, and genuinely fun to use instead of feeling like an exam.</p>
+        </div>
+        
+        <div class="grid-2">
+            <div class="feature-image-wrapper">
+                <img src="images/excited_student.png" alt="Excited student looking at tablet in classroom">
+            </div>
+            <div class="feature-text">
+                <h3>Transform passive listeners into active participants.</h3>
+                <p>Education shouldn't feel isolated. MindWave brings the organic energy of group study sessions and the thrill of supportive competition right to the student's screen.</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> <span>Dynamic peer-to-peer activities</span></li>
+                    <li><i class="fas fa-check"></i> <span>Emotional intelligence mapping</span></li>
+                    <li><i class="fas fa-check"></i> <span>Organic reward structures</span></li>
+                </ul>
+                <a href="#" class="btn-outline" style="display: inline-block; margin-top: 36px;">Discover the Psychology</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials / Wall of Love -->
+    <section class="testimonials" id="resources">
+        <div class="testimonials-header">
+            <h2>The Wall of Love</h2>
+            <p style="font-size: 1.1rem; color: var(--text-muted);">Don't just take our word for it. Hear from the people learning and teaching every day.</p>
+        </div>
+        <div class="test-grid">
+            <div class="test-card">
+                <p>"Honestly, I used to dread online quizzes. They felt so sterile. But seeing the live leaderboard and getting immediate feedback makes it feel like an actual game. It's the first time I've ever looked forward to a knowledge check."</p>
+                <div class="test-author">
+                    <div class="test-avatar"><img src="images/student_avatar.png" alt="Student"></div>
+                    <div>
+                        <strong style="font-family: 'Outfit'; display: block;">Jason P.</strong>
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">Computer Science Major</span>
+                    </div>
+                </div>
+            </div>
+            <div class="test-card">
+                <p>"The tools are incredible, but what really sold me is the empathy in the design. It doesn't treat my students like data points; it treats them like people. The engagement we've seen since switching is unbelievable."</p>
+                <div class="test-author">
+                    <div class="test-avatar"><img src="images/teacher_avatar.png" alt="Teacher"></div>
+                    <div>
+                        <strong style="font-family: 'Outfit'; display: block;">Dr. Emily Chen</strong>
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">Associate Professor</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h4>2.4M+</h4>
+                <p>Students Engaged</p>
+            </div>
+            <div class="stat-item">
+                <h4>98%</h4>
+                <p>Satisfaction Rate</p>
+            </div>
+            <div class="stat-item">
+                <h4>500+</h4>
+                <p>Global Campuses</p>
+            </div>
+            <div class="stat-item">
+                <h4>30%</h4>
+                <p>Grade Improvement</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="#" class="brand-logo">
+                    <i class="fas fa-brain"></i> MindWave
+                </a>
+                <p>Building the future of empathetic, high-impact learning experiences for forward-looking institutions worldwide.</p>
+            </div>
+            <div style="display: flex; gap: 80px;">
+                <div>
+                    <h4 style="margin-bottom: 24px; font-weight: 700;">Platform</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px; color: var(--text-muted); font-weight: 500;">
+                        <li>Live Quizzes</li>
+                        <li>AI Tutor</li>
+                        <li>Analytics Dashboard</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 24px; font-weight: 700;">Company</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px; color: var(--text-muted); font-weight: 500;">
+                        <li>About Us</li>
+                        <li>Careers</li>
+                        <li>Contact Sales</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 MindWave Inc. All rights reserved.</p>
+            <div class="social-icons" style="display: flex; gap: 20px; font-size: 1.25rem;">
+                <i class="fab fa-twitter"></i>
+                <i class="fab fa-linkedin"></i>
+                <i class="fab fa-instagram"></i>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple navbar background effect on scroll
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                document.getElementById('navbar').classList.add('scrolled');
+            } else {
+                document.getElementById('navbar').classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>

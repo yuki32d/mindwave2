@@ -11,7 +11,103 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="game-builder.css">
     <link rel="stylesheet" href="publish-modal.css">
-    
+    <style>
+        /* Mode Toggle */
+        .mode-toggle-container {
+            display: flex;
+            gap: 0;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px;
+            width: fit-content;
+            margin-bottom: 24px;
+        }
+        .mode-toggle-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 9px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mode-toggle-btn.active {
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+        }
+        .mode-toggle-btn i { width: 16px; height: 16px; }
+        /* Analyze button */
+        .btn-analyze {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+        }
+        .btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4); }
+        .btn-analyze:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        /* Analysis result box */
+        .analysis-result {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 10px;
+        }
+        .analysis-result-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #8b5cf6;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .analysis-query-chip {
+            display: inline-block;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--text);
+            margin: 4px 4px 4px 0;
+            line-height: 1.4;
+        }
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 100px;
+            padding: 3px 10px;
+            margin-left: 8px;
+        }
+    </style>
 </head>
 <body>
 
@@ -40,13 +136,24 @@
             <div class="gb-page-icon"><i data-lucide="database"></i></div>
             <div>
                 <div class="gb-page-title">SQL Query Builder</div>
-                <div class="gb-page-sub">Define a data problem — students drag blocks to construct the correct SQL query.</div>
+                <div class="gb-page-sub">Define a data problem — students construct the correct SQL query.</div>
             </div>
+        </div>
+
+        <!-- Mode Toggle -->
+        <div class="mode-toggle-container">
+            <button class="mode-toggle-btn active" id="modeBuilderBtn">
+                <i data-lucide="blocks"></i> Classic Builder
+            </button>
+            <button class="mode-toggle-btn" id="modeScenarioBtn">
+                <i data-lucide="sparkles"></i> AI Scenario
+                <span class="ai-badge"><i data-lucide="zap"></i> NEW</span>
+            </button>
         </div>
 
         <form id="sqlForm">
 
-            <!-- Meta -->
+            <!-- Meta (shared) -->
             <div class="gb-card">
                 <div class="gb-card-head"><i data-lucide="info"></i> Challenge Details</div>
                 <div class="gb-card-body">
@@ -68,36 +175,64 @@
                 </div>
             </div>
 
-            <!-- SQL Query -->
-            <div class="gb-card">
-                <div class="gb-card-head"><i data-lucide="terminal"></i> Correct SQL Query</div>
-                <div class="gb-card-body">
-                    <p class="gb-helper">Type the exact query — it will be split into draggable blocks automatically.</p>
-                    <div class="gb-form-group">
-                        <textarea class="gb-code-editor" id="correctQuery" name="query" rows="4"
-                            placeholder="SELECT * FROM users WHERE last_login > NOW() - INTERVAL 7 DAY" required></textarea>
-                    </div>
-
-                    <div class="gb-form-group">
-                        <label>Generated Blocks (Preview)</label>
-                        <div class="gb-blocks-wrap" id="blocksPreview"></div>
-                    </div>
-
-                    <div class="gb-form-group">
-                        <label>Add Distractor Blocks <span style="font-weight:400;text-transform:none;font-size:11px;">(optional wrong pieces)</span></label>
-                        <div style="display:flex;gap:10px;">
-                            <input type="text" id="distractorInput" placeholder="e.g. DELETE, DROP..." style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);outline:none;">
-                            <button type="button" class="gb-btn gb-btn-ghost" id="addDistractorBtn">
-                                <i data-lucide="plus"></i> Add
-                            </button>
+            <!-- ── CLASSIC BUILDER MODE ── -->
+            <div id="builderSection">
+                <div class="gb-card">
+                    <div class="gb-card-head"><i data-lucide="terminal"></i> Correct SQL Query</div>
+                    <div class="gb-card-body">
+                        <p class="gb-helper">Type the exact query — it will be split into draggable blocks automatically.</p>
+                        <div class="gb-form-group">
+                            <textarea class="gb-code-editor" id="correctQuery" name="query" rows="4"
+                                placeholder="SELECT * FROM users WHERE last_login > NOW() - INTERVAL 7 DAY"></textarea>
                         </div>
-                        <div class="gb-blocks-wrap" id="distractorPreview" style="margin-top:10px;"></div>
+
+                        <div class="gb-form-group">
+                            <label>Generated Blocks (Preview)</label>
+                            <div class="gb-blocks-wrap" id="blocksPreview"></div>
+                        </div>
+
+                        <div class="gb-form-group">
+                            <label>Add Distractor Blocks <span style="font-weight:400;text-transform:none;font-size:11px;">(optional wrong pieces)</span></label>
+                            <div style="display:flex;gap:10px;">
+                                <input type="text" id="distractorInput" placeholder="e.g. DELETE, DROP..." style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);outline:none;">
+                                <button type="button" class="gb-btn gb-btn-ghost" id="addDistractorBtn">
+                                    <i data-lucide="plus"></i> Add
+                                </button>
+                            </div>
+                            <div class="gb-blocks-wrap" id="distractorPreview" style="margin-top:10px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── AI SCENARIO MODE ── -->
+            <div id="scenarioSection" style="display:none;">
+                <div class="gb-card">
+                    <div class="gb-card-head">
+                        <i data-lucide="sparkles"></i> AI Scenario Analysis
+                    </div>
+                    <div class="gb-card-body">
+                        <p class="gb-helper">Describe the SQL challenge in natural language. Click "Analyze" and the AI will find all possible correct SQL answers automatically. Students will type their own query and the AI will grade it.</p>
+                        <div class="gb-form-group">
+                            <label for="scenarioQuestion">Scenario Question / Challenge Description</label>
+                            <textarea class="gb-code-editor" id="scenarioQuestion" rows="4"
+                                placeholder="e.g. How do you display all the data from the student table?"></textarea>
+                        </div>
+                        <button type="button" class="btn-analyze" id="analyzeBtn">
+                            <i data-lucide="sparkles"></i> Analyze with AI
+                        </button>
+                        <div id="analysisResult" style="display:none;" class="analysis-result">
+                            <div class="analysis-result-title">
+                                <i data-lucide="check-circle-2"></i> Possible Correct Queries Found
+                            </div>
+                            <div id="analysisQueryList"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="gb-footer">
-                <span class="gb-footer-meta">SQL Challenge Builder</span>
+                <span class="gb-footer-meta" id="footerMeta">SQL Challenge Builder</span>
                 <div class="gb-footer-actions">
                     <button type="button" class="gb-btn gb-btn-ghost" id="cancelBtn">Cancel</button>
                     <button type="submit" class="gb-btn gb-btn-primary" id="publishBtn">
