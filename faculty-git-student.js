@@ -832,6 +832,7 @@ function formatStatusTag(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 // ============================================
 
 let allAssignments = [];
+let currentAssignmentId = null; // which assignment drill-down is active
 
 async function loadAssignments() {
     try {
@@ -839,37 +840,75 @@ async function loadAssignments() {
         const data = await res.json();
         if (data.ok) {
             allAssignments = data.assignments;
-            populateAssignmentFilter(data.assignments);
+            renderAssignmentsGrid(data.assignments);
         }
     } catch (e) {
         console.error('Load assignments error:', e);
     }
 }
 
-function populateAssignmentFilter(assignments) {
-    const filter = document.getElementById('assignmentFilter');
-    if (!filter) return;
-    // Keep the "All Assignments" option, rebuild the rest
-    filter.innerHTML = '<option value="all">All Assignments</option>';
-    assignments.forEach(a => {
-        const opt = document.createElement('option');
-        opt.value = a._id;
-        opt.textContent = a.title;
-        filter.appendChild(opt);
-    });
+function renderAssignmentsGrid(assignments) {
+    const grid = document.getElementById('assignmentsGrid');
+    if (!grid) return;
+
+    if (!assignments || assignments.length === 0) {
+        grid.innerHTML = `<div style="opacity:.4; grid-column:1/-1; text-align:center; padding:56px 0; color:var(--muted); font-size:14px;">
+            No assignments created yet. Click "Create Assignment" to get started.
+        </div>`;
+        return;
+    }
+
+    grid.innerHTML = assignments.map(a => {
+        const now = new Date();
+        const deadline = new Date(a.deadline);
+        const startDate = new Date(a.startDate);
+        const isActive = now >= startDate && now <= deadline;
+        const isPast = now > deadline;
+        const statusColor = isActive ? '#22d3a5' : (isPast ? '#f43f5e' : '#f59e0b');
+        const statusLabel = isActive ? 'Active' : (isPast ? 'Closed' : 'Upcoming');
+        const sectionPills = a.targetSections && a.targetSections.length > 0
+            ? a.targetSections.map(s => `<span class="section-pill">Section ${escapeHtml(s)}</span>`).join(' ')
+            : '<span style="font-size:10px; color:var(--muted); font-style:italic;">All sections</span>';
+
+        return `<div class="assignment-card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <div class="assignment-card-title">${escapeHtml(a.title)}</div>
+                <span style="font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; background:${statusColor}22; color:${statusColor}; border:1px solid ${statusColor}44; white-space:nowrap;">${statusLabel}</span>
+            </div>
+            ${a.description ? `<div class="assignment-card-desc">${escapeHtml(a.description)}</div>` : ''}
+            <div class="assignment-card-meta">
+                <span>📅 Start: ${formatDate(a.startDate)}</span>
+                <span>⏰ Due: ${formatDate(a.deadline)}</span>
+                <span>👤 By: ${escapeHtml(a.createdByName || 'Faculty')}</span>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:2px;">${sectionPills}</div>
+            <div class="assignment-card-actions">
+                <button class="btn btn-primary" style="flex:1; font-size:12.5px;" onclick="viewProjectsForAssignment('${a._id}', '${escapeHtml(a.title).replace(/'/g, "\\'")}')">
+                    <i data-lucide="eye"></i> View Projects
+                </button>
+                <button class="btn btn-ghost" style="font-size:12px; color:#f43f5e; border-color:#f43f5e33;" onclick="deleteAssignment('${a._id}')">
+                    <i data-lucide="trash-2"></i>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+
+    if (window.lucide) window.lucide.createIcons();
 }
 
-// Wire the assignment filter to reload projects
-document.getElementById('assignmentFilter')?.addEventListener('change', () => {
-    loadAllProjectsWithFilter();
-});
+// Navigate: Assignment grid -> Projects drill-down
+function viewProjectsForAssignment(assignmentId, title) {
+    currentAssignmentId = assignmentId;
+    document.getElementById('assignmentsView').style.display = 'none';
+    document.getElementById('projectsView').style.display = 'block';
+    document.getElementById('activeAssignmentTitle').textContent = `📋 ${title}`;
+    loadProjectsForAssignment(assignmentId);
+    if (window.lucide) window.lucide.createIcons();
+}
 
-async function loadAllProjectsWithFilter() {
-    const assignmentFilter = document.getElementById('assignmentFilter')?.value || 'all';
+async function loadProjectsForAssignment(assignmentId) {
     try {
-        const url = assignmentFilter === 'all'
-            ? '/api/projects/all'
-            : `/api/projects/all?assignmentFilter=${assignmentFilter}`;
+        const url = `/api/projects/all?assignmentFilter=${assignmentId}`;
         const response = await fetch(url, { credentials: 'include' });
         const data = await response.json();
         if (data.ok) {
@@ -883,10 +922,34 @@ async function loadAllProjectsWithFilter() {
     }
 }
 
+// Navigate: Back to assignments grid
+document.getElementById('backToAssignmentsBtn')?.addEventListener('click', () => {
+    currentAssignmentId = null;
+    document.getElementById('projectsView').style.display = 'none';
+    document.getElementById('assignmentsView').style.display = 'block';
+    if (window.lucide) window.lucide.createIcons();
+});
+
+// Delete an assignment
+async function deleteAssignment(assignmentId) {
+    if (!confirm('Delete this assignment? Student submissions will remain but will no longer be linked to it.')) return;
+    try {
+        const res = await fetch(`/api/assignments/${assignmentId}`, { method: 'DELETE', credentials: 'include' });
+        const data = await res.json();
+        if (data.ok) {
+            showNotif({ type: 'success', title: 'Deleted', subtitle: 'Assignment removed.' });
+            await loadAssignments();
+        } else {
+            showNotif({ type: 'error', title: 'Failed', subtitle: data.message });
+        }
+    } catch (e) {
+        showNotif({ type: 'error', title: 'Network Error', subtitle: 'Could not reach server.' });
+    }
+}
+
 // Open Create Assignment modal
 document.getElementById('createAssignmentBtn')?.addEventListener('click', () => {
     document.getElementById('createAssignmentForm').reset();
-    // Pre-fill start date to now
     const now = new Date();
     now.setSeconds(0, 0);
     const localNow = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -910,6 +973,8 @@ document.getElementById('createAssignmentForm')?.addEventListener('submit', asyn
     const description = document.getElementById('assignmentDescription').value.trim();
     const startDate = document.getElementById('assignmentStartDate').value;
     const deadline = document.getElementById('assignmentDeadline').value;
+    // Collect checked sections
+    const targetSections = [...document.querySelectorAll('input[name="targetSection"]:checked')].map(cb => cb.value);
 
     if (new Date(deadline) <= new Date(startDate)) {
         showNotif({ type: 'warning', title: 'Invalid Dates', subtitle: 'Deadline must be after the start date.' });
@@ -921,22 +986,23 @@ document.getElementById('createAssignmentForm')?.addEventListener('submit', asyn
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ title, description, startDate, deadline })
+            body: JSON.stringify({ title, description, startDate, deadline, targetSections })
         });
         const data = await res.json();
         if (data.ok) {
             document.getElementById('createAssignmentModal').style.display = 'none';
-            showNotif({ type: 'success', title: 'Assignment Created!', subtitle: `"${title}" is now visible to students.` });
+            const sectionText = targetSections.length > 0 ? `Sections: ${targetSections.join(', ')}` : 'All sections';
+            showNotif({ type: 'success', title: 'Assignment Created!', subtitle: `"${title}" — ${sectionText}` });
             await loadAssignments();
         } else {
-            showNotif({ type: 'error', title: 'Failed', errors: [data.message || 'Unknown error'] });
+            showNotif({ type: 'error', title: 'Failed', errors: [data.message || data.detail || 'Unknown error'] });
         }
     } catch (err) {
         showNotif({ type: 'error', title: 'Network Error', subtitle: 'Could not reach the server.' });
     }
 });
 
-// Render assignment badge on project cards (called inside renderProjects)
+// Render assignment badge on project cards
 function getAssignmentBadge(project) {
     if (!project.assignmentId) return '';
     const a = project.assignmentId;
@@ -946,5 +1012,10 @@ function getAssignmentBadge(project) {
 }
 
 // Load assignments immediately on page load
+loadAssignments();
+
+
+
+
 loadAssignments();
 

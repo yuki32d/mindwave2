@@ -841,7 +841,8 @@ const assignmentSchema = new mongoose.Schema({
   startDate: { type: Date, required: true },
   deadline: { type: Date, required: true },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  createdByName: { type: String }
+  createdByName: { type: String },
+  targetSections: { type: [String], default: [] } // Empty = all sections, else ["A","B"] etc.
 }, { timestamps: true });
 
 // Delete cached model if it exists (prevents OverwriteModelError on hot reloads)
@@ -6615,7 +6616,7 @@ app.post("/api/assignments", authMiddleware, async (req, res) => {
     if (!user || (user.role !== 'faculty' && user.role !== 'admin')) {
       return res.status(403).json({ ok: false, message: "Only faculty can create assignments" });
     }
-    const { title, description, startDate, deadline } = req.body;
+    const { title, description, startDate, deadline, targetSections } = req.body;
     if (!title || !startDate || !deadline) {
       return res.status(400).json({ ok: false, message: "Title, start date, and deadline are required" });
     }
@@ -6625,7 +6626,8 @@ app.post("/api/assignments", authMiddleware, async (req, res) => {
       startDate: new Date(startDate),
       deadline: new Date(deadline),
       createdBy: userId,
-      createdByName: user.displayName || user.name || user.email
+      createdByName: user.displayName || user.name || user.email,
+      targetSections: Array.isArray(targetSections) ? targetSections : []
     });
     await assignment.save();
     res.json({ ok: true, message: "Assignment created", assignment });
@@ -6635,7 +6637,7 @@ app.post("/api/assignments", authMiddleware, async (req, res) => {
   }
 });
 
-// Get all assignments (faculty sees all; students see only active ones)
+// Get all assignments (faculty sees all; students see only active ones for their section)
 app.get("/api/assignments", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.sub;
@@ -6643,10 +6645,16 @@ app.get("/api/assignments", authMiddleware, async (req, res) => {
     const now = new Date();
     let assignments;
     if (user && (user.role === 'faculty' || user.role === 'admin')) {
+      // Faculty see all assignments regardless of section
       assignments = await Assignment.find().sort({ createdAt: -1 });
     } else {
-      // Students see only active assignments (startDate <= now <= deadline)
-      assignments = await Assignment.find({ startDate: { $lte: now }, deadline: { $gte: now } }).sort({ deadline: 1 });
+      // Students only see active assignments for their section (or all-section assignments)
+      const studentSection = user ? user.section : null;
+      const timeQuery = { startDate: { $lte: now }, deadline: { $gte: now } };
+      const sectionQuery = studentSection
+        ? { $or: [{ targetSections: { $size: 0 } }, { targetSections: studentSection }] }
+        : { targetSections: { $size: 0 } };
+      assignments = await Assignment.find({ ...timeQuery, ...sectionQuery }).sort({ deadline: 1 });
     }
     res.json({ ok: true, assignments });
   } catch (error) {
@@ -6691,19 +6699,22 @@ app.post("/api/projects/submit", authMiddleware, async (req, res) => {
       return res.status(400).json({ ok: false, message: "Project name, description, and GitHub URL are required" });
     }
 
-    // If an assignmentId is provided, validate it is active
-    if (assignmentId) {
-      const assignment = await Assignment.findById(assignmentId);
-      const now = new Date();
-      if (!assignment) {
-        return res.status(400).json({ ok: false, message: "Assignment not found" });
-      }
-      if (now < assignment.startDate) {
-        return res.status(400).json({ ok: false, message: "This assignment has not started yet" });
-      }
-      if (now > assignment.deadline) {
-        return res.status(400).json({ ok: false, message: "The deadline for this assignment has passed" });
-      }
+    // Assignment is now mandatory
+    if (!assignmentId) {
+      return res.status(400).json({ ok: false, message: "You must select an assignment to submit your project" });
+    }
+
+    // Validate the assignment is active
+    const assignment = await Assignment.findById(assignmentId);
+    const now = new Date();
+    if (!assignment) {
+      return res.status(400).json({ ok: false, message: "Assignment not found" });
+    }
+    if (now < assignment.startDate) {
+      return res.status(400).json({ ok: false, message: "This assignment has not started yet" });
+    }
+    if (now > assignment.deadline) {
+      return res.status(400).json({ ok: false, message: "The deadline for this assignment has passed" });
     }
 
     const newProject = new ProjectSubmission({

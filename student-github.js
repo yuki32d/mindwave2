@@ -227,9 +227,27 @@ async function loadAssignments() {
     try {
         const res = await fetch('/api/assignments', { credentials: 'include' });
         const data = await res.json();
-        if (data.ok && data.assignments.length > 0) {
-            renderAssignmentCards(data.assignments);
-            populateAssignmentDropdown(data.assignments);
+        if (data.ok) {
+            const section = document.getElementById('activeAssignmentsSection');
+            if (section) section.style.display = 'block';
+            if (data.assignments.length > 0) {
+                renderAssignmentCards(data.assignments);
+                populateAssignmentDropdown(data.assignments);
+            } else {
+                // No active assignments — show placeholder and disable the submit button
+                const container = document.getElementById('activeAssignmentCards');
+                if (container) container.innerHTML = `
+                    <div style="background:var(--surface);border:1px dashed var(--border);border-radius:14px;padding:20px 18px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6;">
+                        Your teacher hasn't created any active assignments yet.<br>
+                        <span style="font-size:12px;">You'll be able to submit once an assignment is available.</span>
+                    </div>`;
+                const submitBtn = document.getElementById('submitNewProjectBtn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.title = 'No active assignments available';
+                    submitBtn.style.opacity = '0.45';
+                }
+            }
         }
     } catch (e) {
         console.error('Load assignments error:', e);
@@ -265,7 +283,7 @@ function renderAssignmentCards(assignments) {
 function populateAssignmentDropdown(assignments) {
     const select = document.getElementById('assignmentSelect');
     if (!select) return;
-    select.innerHTML = '<option value="">— Submit as a general project —</option>';
+    select.innerHTML = '<option value="" disabled selected>\u2014 Select an Assignment \u2014</option>';
     assignments.forEach(a => {
         const opt = document.createElement('option');
         opt.value = a._id;
@@ -298,6 +316,11 @@ async function handleSubmit(e) {
     const techTagsRaw = document.getElementById('techTags').value.trim();
     const techTags = techTagsRaw ? techTagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
     const assignmentId = document.getElementById('assignmentSelect')?.value || null;
+
+    if (!assignmentId) {
+        showToast('Please select an assignment to submit under.', 'error');
+        return;
+    }
 
     if (!githubRepoUrl.includes('github.com')) {
         showToast('Please enter a valid GitHub repository URL', 'error');

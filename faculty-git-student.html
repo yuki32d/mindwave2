@@ -104,6 +104,20 @@
 
         button.close-btn { background: none; border: none; color: var(--muted); font-size: 24px; cursor: pointer; transition: color .15s; }
         button.close-btn:hover { color: var(--text); }
+
+        .section-check { display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; cursor:pointer; padding:6px 12px; border:1.5px solid var(--border); border-radius:8px; transition:all .15s; user-select:none; }
+        .section-check input { accent-color: var(--accent); width:15px; height:15px; cursor:pointer; }
+        .section-check:has(input:checked) { border-color:var(--accent); background:rgba(var(--accent-rgb,99,102,241),.1); color:var(--accent); }
+
+        /* Assignment grid cards */
+        .assignment-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px 22px; display:flex; flex-direction:column; gap:10px; transition:box-shadow .18s; }
+        .assignment-card:hover { box-shadow:0 4px 24px rgba(0,0,0,.18); }
+        .assignment-card-title { font-size:15px; font-weight:800; letter-spacing:-.01em; }
+        .assignment-card-desc { font-size:12.5px; color:var(--muted); line-height:1.55; }
+        .assignment-card-meta { font-size:11px; color:var(--muted); display:flex; flex-direction:column; gap:4px; }
+        .assignment-card-meta span { display:flex; align-items:center; gap:5px; }
+        .assignment-card-actions { display:flex; gap:8px; margin-top:4px; }
+        .section-pill { font-size:10px; font-weight:700; background:rgba(99,102,241,.12); color:#818cf8; border:1px solid rgba(99,102,241,.25); border-radius:20px; padding:2px 10px; letter-spacing:.03em; }
     </style>
 </head>
 
@@ -138,36 +152,56 @@
             </div>
         </div>
 
-        <!-- Filter Bar -->
-        <div class="filter-bar">
-            <span class="filter-label">Filter:</span>
-            <select id="statusFilter">
-                <option value="all">All Submissions</option>
-                <option value="pending">Pending Review</option>
-                <option value="reviewed">Reviewed</option>
-                <option value="graded">Graded</option>
-            </select>
-            <select id="sortFilter">
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="grade-high">Highest Grade</option>
-                <option value="grade-low">Lowest Grade</option>
-            </select>
-            <select id="assignmentFilter" style="min-width: 160px;">
-                <option value="all">All Assignments</option>
-            </select>
-            <button id="createAssignmentBtn" class="btn btn-ghost">
-                <i data-lucide="plus-circle"></i>Create Assignment
-            </button>
-            <button id="peerReviewBtn" class="btn btn-primary" style="margin-left: auto;">
-                <i data-lucide="users"></i>Peer Review Settings
-            </button>
+        <!-- Default view: Assignments Grid -->
+        <div id="assignmentsView">
+            <!-- Toolbar row -->
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+                <div style="font-size:15px; font-weight:700; letter-spacing:-.01em;">📋 All Assignments</div>
+                <button id="createAssignmentBtn" class="btn btn-primary">
+                    <i data-lucide="plus-circle"></i> Create Assignment
+                </button>
+            </div>
+            <!-- Assignment cards injected here by JS -->
+            <div id="assignmentsGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px;">
+                <div style="opacity:.4; grid-column:1/-1; text-align:center; padding:40px 0; color:var(--muted); font-size:14px;">
+                    No assignments created yet. Click "Create Assignment" to get started.
+                </div>
+            </div>
         </div>
 
-        <!-- Projects Grid -->
-        <section id="projectsList" class="project-list">
-            <!-- Projects injected via JS -->
-        </section>
+        <!-- Drill-down view: Projects for a specific assignment -->
+        <div id="projectsView" style="display:none;">
+            <!-- Back button + title -->
+            <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px; flex-wrap:wrap;">
+                <button id="backToAssignmentsBtn" class="btn btn-ghost" style="padding:8px 14px;">
+                    <i data-lucide="arrow-left"></i> All Assignments
+                </button>
+                <div style="font-size:15px; font-weight:700;" id="activeAssignmentTitle">Projects</div>
+                <button id="peerReviewBtn" class="btn btn-ghost" style="margin-left:auto;">
+                    <i data-lucide="users"></i>Peer Review Settings
+                </button>
+            </div>
+            <!-- Filter Bar -->
+            <div class="filter-bar" style="margin-bottom:18px;">
+                <span class="filter-label">Filter:</span>
+                <select id="statusFilter">
+                    <option value="all">All Submissions</option>
+                    <option value="pending">Pending Review</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="graded">Graded</option>
+                </select>
+                <select id="sortFilter">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="grade-high">Highest Grade</option>
+                    <option value="grade-low">Lowest Grade</option>
+                </select>
+            </div>
+            <!-- Projects Grid -->
+            <section id="projectsList" class="project-list">
+                <!-- Projects injected via JS -->
+            </section>
+        </div>
     </div>
 
     <!-- Peer Review Wizard Modal -->
@@ -339,22 +373,21 @@
                         <input type="datetime-local" id="assignmentDeadline" required>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label>Target Sections <span style="font-weight:400; opacity:.6; text-transform:none;">(leave empty for all)</span></label>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
+                        <label class="section-check"><input type="checkbox" name="targetSection" value="A"> Section A</label>
+                        <label class="section-check"><input type="checkbox" name="targetSection" value="B"> Section B</label>
+                        <label class="section-check"><input type="checkbox" name="targetSection" value="C"> Section C</label>
+                        <label class="section-check"><input type="checkbox" name="targetSection" value="D"> Section D</label>
+                        <label class="section-check"><input type="checkbox" name="targetSection" value="E"> Section E</label>
+                    </div>
+                </div>
                 <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
                     <button type="button" class="btn btn-ghost" id="cancelAssignmentBtn">Cancel</button>
                     <button type="submit" class="btn btn-primary"><i data-lucide="check"></i>Create Assignment</button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Assignments List Panel -->
-    <div id="assignmentsPanel" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(8px); z-index:1000; align-items:center; justify-content:center; padding:20px;">
-        <div class="modal-content" style="max-width:680px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="margin:0; font-size:18px;">Manage Assignments</h2>
-                <button id="closeAssignmentsPanelBtn" class="close-btn"><i data-lucide="x"></i></button>
-            </div>
-            <div id="assignmentsList" style="display:grid; gap:10px; max-height:400px; overflow-y:auto;"></div>
         </div>
     </div>
 
