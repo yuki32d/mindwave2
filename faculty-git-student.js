@@ -1,4 +1,4 @@
-﻿// Faculty Git Student Review Page
+// Faculty Git Student Review Page
 
 let allProjects = [];
 let currentProject = null;
@@ -437,7 +437,7 @@ document.getElementById('wizardPrev')?.addEventListener('click', () => {
 
 document.getElementById('wizardNext')?.addEventListener('click', () => {
     if (validateWizardStep()) {
-        if (wizardState.step < 4) {
+        if (wizardState.step < 3) {
             wizardState.step++;
             renderWizardStep();
         } else {
@@ -451,10 +451,8 @@ function resetWizard() {
         step: 1,
         selectedProjects: [],
         reviewerType: null,
-        selectedReviewer: null,
-        weightage: 50
+        selectedReviewer: null
     };
-    document.getElementById('markSplitRange').value = 50;
     document.getElementById('reviewerSearch').value = '';
     document.getElementById('reviewerResultsList').style.display = 'none';
     document.getElementById('selectedReviewerDisplay').style.display = 'none';
@@ -471,15 +469,14 @@ function renderWizardStep() {
     document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
     document.getElementById(`step${wizardState.step}`).classList.add('active');
 
-    // Update buttons
+    // Update buttons — now 3 steps total
     document.getElementById('wizardPrev').style.display = wizardState.step > 1 ? 'block' : 'none';
-    document.getElementById('wizardNext').textContent = wizardState.step === 4 ? 'Send Invites' : 'Continue';
+    document.getElementById('wizardNext').textContent = wizardState.step === 3 ? 'Send Invites' : 'Continue';
 
     // Step-specific rendering
     if (wizardState.step === 1) renderProjectSelection();
     if (wizardState.step === 2) setupReviewerTypeCards();
     if (wizardState.step === 3) setupReviewerSearch();
-    if (wizardState.step === 4) updateWeightageDisplay();
 }
 
 function renderProjectSelection() {
@@ -606,8 +603,7 @@ async function finalizePeerReviewSetup() {
     try {
         const payload = {
             projectIds: wizardState.selectedProjects,
-            reviewerIds: [wizardState.selectedReviewer.id], // Backend expects array for scaling
-            weightage: wizardState.weightage
+            reviewerIds: [wizardState.selectedReviewer.id]
         };
 
         const response = await fetch('/api/peer-review/invite', {
@@ -620,17 +616,19 @@ async function finalizePeerReviewSetup() {
         const data = await response.json();
 
         if (data.success) {
-            alert(`🎉 Success! ${data.count || 0} peer review requests sent.\nReviewer: ${wizardState.selectedReviewer.name}\nWeightage: Peer (${wizardState.weightage}%) / Faculty (${100-wizardState.weightage}%)`);
+            let msg = `✅ ${data.count} peer review request(s) sent.\nReviewer: ${wizardState.selectedReviewer.name}`;
+            if (data.errors && data.errors.length > 0) {
+                msg += '\n\n⚠️ Skipped (already assigned):\n' + data.errors.map(e => `• ${e}`).join('\n');
+            }
+            alert(msg);
             document.getElementById('peerReviewModal').style.display = 'none';
-            
-            // Mark projects locally so UI updates
             wizardState.selectedProjects.forEach(id => {
                 const p = allProjects.find(p => p._id === id);
                 if(p) p.hasPeerReview = true;
             });
-            loadAllProjects(); // Refresh list to show new status
+            loadAllProjects();
         } else {
-            alert('❌ Failed to send invites: ' + (data.error || 'Unknown error'));
+            alert('❌ ' + (data.error || 'Failed to send invites'));
         }
     } catch (e) {
         console.error('Invite Error:', e);

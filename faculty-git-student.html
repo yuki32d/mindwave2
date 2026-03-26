@@ -177,7 +177,6 @@
                 <div class="step-dot active" data-step="1"></div>
                 <div class="step-dot" data-step="2"></div>
                 <div class="step-dot" data-step="3"></div>
-                <div class="step-dot" data-step="4"></div>
             </div>
 
             <!-- STEP 1: SELECT PROJECTS -->
@@ -237,31 +236,7 @@
                 </div>
             </div>
 
-            <!-- STEP 4: MARKS WEIGHTAGE -->
-            <div id="step4" class="wizard-step">
-                <div class="form-group">
-                    <label>Step 4: Configure Mark Distribution</label>
-                    <div style="background: var(--bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border); margin-top: 15px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                            <div style="text-align: left;">
-                                <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Primary (You)</div>
-                                <div id="primaryWeightDisplay" style="font-size: 28px; font-weight: 800; font-family: var(--mono); color: var(--text);">50%</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Secondary Reviewer</div>
-                                <div id="secondaryWeightDisplay" style="font-size: 28px; font-weight: 800; font-family: var(--mono); color: var(--accent);">50%</div>
-                            </div>
-                        </div>
-                        
-                        <input type="range" id="markSplitRange" min="0" max="100" value="50" style="width: 100%; height: 6px; background: var(--border); border-radius: 3px; cursor: pointer; accent-color: var(--accent); margin-bottom: 20px;">
-                        
-                        <div style="background: rgba(208, 128, 0, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(208, 128, 0, 0.1); font-size: 11px; line-height: 1.5;">
-                            <i data-lucide="alert-circle" style="width: 14px; display: inline; vertical-align: middle; margin-right: 4px; color: var(--accent);"></i>
-                            Each reviewer will only be able to award marks up to their assigned weightage.
-                        </div>
-                    </div>
-                </div>
-            </div>
+
 
             <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--border);">
                 <button id="wizardPrev" class="btn btn-ghost" style="display: none;">Back</button>

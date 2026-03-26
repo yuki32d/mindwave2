@@ -378,15 +378,13 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
     // Create manual peer review invites
     app.post('/api/peer-review/invite', authMiddleware, async (req, res) => {
         try {
-            const { projectIds, reviewerIds, weightage } = req.body;
-            console.log('📨 Peer Review Invite Request:', { 
-                projectCount: projectIds?.length, 
-                reviewerIds: reviewerIds, 
-                weightage 
+            const { projectIds, reviewerIds } = req.body;
+            console.log('📨 Peer Review Invite Request:', {
+                projectCount: projectIds?.length,
+                reviewerIds
             });
 
             const currentUser = await User.findById(req.user.sub);
-            
             if (!currentUser) {
                 return res.status(404).json({ error: 'User not found' });
             }
@@ -395,31 +393,76 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
                 return res.status(400).json({ error: 'Please select both projects and reviewers' });
             }
 
+            // Fetch reviewer user objects to check their roles
+            const reviewerUsers = await User.find({ _id: { $in: reviewerIds } }).select('_id name email role').lean();
+            const reviewerMap = Object.fromEntries(reviewerUsers.map(u => [u._id.toString(), u]));
+
             const assignments = [];
-            
-            // Loop through each project selected
+            const errors = [];
+
             for (const projectId of projectIds) {
                 const submission = await ProjectSubmission.findById(projectId);
                 if (!submission) {
                     console.error(`❌ Project not found: ${projectId}`);
+                    errors.push(`Project ID ${projectId} not found.`);
                     continue;
                 }
 
-                // Loop through each reviewer selected
+                // Get all existing reviews for this submission
+                const existingReviews = await PeerReview.find({ submissionId: submission._id }).lean();
+
                 for (const reviewerId of reviewerIds) {
-                    // Check if reviewer is not the same as the student who submitted
+                    // Skip self-review
                     if (submission.studentId.toString() === reviewerId.toString()) {
                         console.log(`⏩ Skipping self-review for student: ${reviewerId}`);
                         continue;
                     }
 
-                    console.log(`➕ Adding assignment: Reviewer ${reviewerId} -> Reviewee ${submission.studentId} for Project ${submission._id}`);
+                    const reviewer = reviewerMap[reviewerId];
+                    const reviewerName = reviewer ? reviewer.name : reviewerId;
+
+                    // Constraint 1: Duplicate check — same reviewer already assigned to this project
+                    const alreadyAssigned = existingReviews.some(r =>
+                        r.reviewerId.toString() === reviewerId.toString()
+                    );
+                    if (alreadyAssigned) {
+                        const msg = `"${submission.projectName || projectId}" is already assigned to ${reviewerName}.`;
+                        console.log(`⏩ ${msg}`);
+                        errors.push(msg);
+                        continue;
+                    }
+
+                    // Constraint 2: Single-faculty rule — if reviewer is faculty/admin, check no other faculty is assigned
+                    const reviewerIsFaculty = reviewer && (reviewer.role === 'admin' || reviewer.role === 'faculty');
+                    if (reviewerIsFaculty) {
+                        // Find any existing reviewer who is also faculty (but not this same reviewer)
+                        const existingReviewerIds = existingReviews
+                            .filter(r => r.reviewerId.toString() !== reviewerId.toString())
+                            .map(r => r.reviewerId);
+
+                        if (existingReviewerIds.length > 0) {
+                            const existingFacultyReviewers = await User.find({
+                                _id: { $in: existingReviewerIds },
+                                role: { $in: ['admin', 'faculty'] }
+                            }).select('name').lean();
+
+                            if (existingFacultyReviewers.length > 0) {
+                                const existingName = existingFacultyReviewers[0].name;
+                                const msg = `"${submission.projectName || projectId}" is already assigned to ${existingName}. A project can only be reviewed by one faculty member.`;
+                                console.log(`🚫 ${msg}`);
+                                errors.push(msg);
+                                continue;
+                            }
+                        }
+                    }
+
+                    console.log(`➕ Adding assignment: Reviewer ${reviewerId} -> Project ${submission._id}`);
                     assignments.push({
                         assignmentId: 'manual-invite',
                         organizationId: currentUser.organizationId,
                         reviewerId: new mongoose.Types.ObjectId(reviewerId),
-                        revieweeId: submission.studentId, // This is already an ObjectId from DB
-                        submissionId: submission._id,      // This is already an ObjectId from DB
+                        revieweeId: submission.studentId,
+                        submissionId: submission._id,
                         status: 'pending',
                         createdAt: new Date()
                     });
@@ -427,39 +470,17 @@ export function setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, Us
             }
 
             console.log(`📝 Creating ${assignments.length} assignments...`);
-
             if (assignments.length > 0) {
                 await PeerReview.insertMany(assignments);
             }
 
-            // Update weightage settings for this context
-            // We use findOneAndUpdate to handle potential race conditions or existing records
-            await PeerReviewSettings.findOneAndUpdate(
-                {
-                    organizationId: currentUser.organizationId,
-                    assignmentId: 'git-projects'
-                },
-                {
-                    $set: {
-                        enabled: true,
-                        gradeWeight: weightage || 20,
-                        updatedAt: new Date(),
-                        createdBy: currentUser._id
-                    },
-                    $setOnInsert: {
-                        createdAt: new Date()
-                    }
-                },
-                { upsert: true, new: true }
-            );
-
-            console.log('✅ Peer review invites sent successfully!');
-            res.json({ success: true, count: assignments.length });
+            console.log('✅ Peer review invites processed.');
+            res.json({ success: true, count: assignments.length, errors });
         } catch (error) {
             console.error('💥 ERROR creating invites:', error);
-            res.status(500).json({ 
+            res.status(500).json({
                 error: 'Failed to send invites',
-                details: error.message 
+                details: error.message
             });
         }
     });
