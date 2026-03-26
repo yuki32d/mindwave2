@@ -844,7 +844,10 @@ const assignmentSchema = new mongoose.Schema({
   createdByName: { type: String }
 }, { timestamps: true });
 
-const Assignment = mongoose.models.Assignment || mongoose.model("Assignment", assignmentSchema);
+// Delete cached model if it exists (prevents OverwriteModelError on hot reloads)
+if (mongoose.models.Assignment) delete mongoose.models.Assignment;
+const Assignment = mongoose.model("Assignment", assignmentSchema);
+
 
 
 // Meeting schema and model defined later in the LiveKit section
@@ -6627,8 +6630,8 @@ app.post("/api/assignments", authMiddleware, async (req, res) => {
     await assignment.save();
     res.json({ ok: true, message: "Assignment created", assignment });
   } catch (error) {
-    console.error("Create assignment error:", error);
-    res.status(500).json({ ok: false, message: "Server error" });
+    console.error("Create assignment error:", error.message, error.stack);
+    res.status(500).json({ ok: false, message: "Server error", detail: error.message });
   }
 });
 
@@ -6647,8 +6650,8 @@ app.get("/api/assignments", authMiddleware, async (req, res) => {
     }
     res.json({ ok: true, assignments });
   } catch (error) {
-    console.error("Get assignments error:", error);
-    res.status(500).json({ ok: false, message: "Server error" });
+    console.error("Get assignments error:", error.message, error.stack);
+    res.status(500).json({ ok: false, message: "Server error", detail: error.message });
   }
 });
 
