@@ -64,61 +64,21 @@ async function loadSettings() {
     });
 }
 
-// ── Locks all personal-info fields to read-only visual state (matching email field) ──
+// ── Grays out ALL profile fields using the standard disabled attribute ──
 function lockProfileFields() {
-    const textFields = ['displayName', 'bio', 'rollNumber', 'phone', 'batch'];
-    const selectFields = ['department', 'section'];
-
-    // Mark text/textarea fields as readonly (identical look to email)
-    textFields.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.setAttribute('readonly', '');
-        el.style.cursor = 'not-allowed';
-        el.style.userSelect = 'none';
-        // Add badge to label
-        const label = el.closest('.st-field')?.querySelector('label');
-        if (label && !label.querySelector('.st-readonly-tag')) {
-            const badge = document.createElement('span');
-            badge.className = 'st-readonly-tag';
-            badge.textContent = 'read-only';
-            label.appendChild(badge);
-        }
-    });
-
-    // Block selects with a transparent overlay so they look normal but aren't clickable
-    selectFields.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.style.pointerEvents = 'none';
-        el.style.userSelect = 'none';
-        // Also disable for keyboard navigation
-        el.setAttribute('tabindex', '-1');
-        const wrapper = el.closest('.st-field');
-        if (wrapper) {
-            wrapper.style.position = 'relative';
-            if (!wrapper.querySelector('.st-select-lock')) {
-                const overlay = document.createElement('div');
-                overlay.className = 'st-select-lock';
-                overlay.style.cssText = 'position:absolute;inset:0;background:transparent;cursor:not-allowed;z-index:10;';
-                wrapper.appendChild(overlay);
-            }
-            // Add badge to label too
-            const label = wrapper.querySelector('label');
-            if (label && !label.querySelector('.st-readonly-tag')) {
-                const badge = document.createElement('span');
-                badge.className = 'st-readonly-tag';
-                badge.textContent = 'read-only';
-                label.appendChild(badge);
-            }
-        }
-    });
+    // Disable every input, textarea, and select in the profile panel
+    const panel = document.getElementById('tab-profile');
+    if (panel) {
+        panel.querySelectorAll('input, textarea, select').forEach(el => {
+            el.disabled = true;
+        });
+    }
 
     // Hide photo action buttons
     const photoBtns = document.querySelector('.st-photo-btns');
     if (photoBtns) photoBtns.style.display = 'none';
 
-    // Hide save bar
+    // Hide Save Profile bar
     const saveBar = document.querySelector('#tab-profile .st-save-bar');
     if (saveBar) saveBar.style.display = 'none';
 
@@ -127,7 +87,7 @@ function lockProfileFields() {
         const notice = document.createElement('div');
         notice.id = 'profileLockNotice';
         notice.style.cssText = 'padding:12px 16px;background:rgba(208,128,0,.1);border:1px solid rgba(208,128,0,.25);border-radius:10px;color:#d08000;font-size:13px;margin-bottom:18px;display:flex;align-items:center;gap:10px;';
-        notice.innerHTML = `<i data-lucide="lock" style="width:16px;height:16px;flex-shrink:0;"></i><span><strong>Profile Locked</strong> — Your academic details are verified and cannot be changed. Contact your faculty or HOD to request modifications.</span>`;
+        notice.innerHTML = `<i data-lucide="lock" style="width:16px;height:16px;flex-shrink:0;"></i><span><strong>Profile Locked</strong> — Your academic details have been saved and cannot be changed. Contact your faculty or HOD to request modifications.</span>`;
         const sub = document.querySelector('#tab-profile .st-panel-sub');
         if (sub) sub.insertAdjacentElement('afterend', notice);
     }

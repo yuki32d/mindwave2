@@ -237,20 +237,23 @@
         }
 
         .st-field input:disabled,
-        .st-field input[readonly] {
-            opacity: .5;
+        .st-field input[readonly],
+        .st-field textarea:disabled,
+        .st-field textarea[readonly],
+        .st-field select:disabled {
+            opacity: .45;
             cursor: not-allowed;
         }
 
         .st-field textarea[readonly] {
-            opacity: .5;
+            opacity: .45;
             cursor: not-allowed;
             resize: none;
         }
 
         /* Select locked via pointer-events:none */
         .st-field select[tabindex="-1"] {
-            opacity: .5;
+            opacity: .45;
             cursor: not-allowed;
         }
 
