@@ -1539,13 +1539,23 @@ app.post('/api/coding-scenario/analyze', async (req, res) => {
   const GROQ_KEY = process.env.GROQ_API_KEY;
   if (!GROQ_KEY) return res.status(503).json({ ok: false, message: 'AI not configured.' });
 
-  const { question, testCases = [] } = req.body || {};
+  const { question, testCases = [], language = 'python' } = req.body || {};
   if (!question) return res.status(400).json({ ok: false, message: 'question is required' });
+
+  const langLabels = { python: 'Python 3', cpp: 'C++', java: 'Java', c: 'C', javascript: 'JavaScript' };
+  const langName = langLabels[language] || language;
+  const ioHint = language === 'python' ? 'Use standard input (input()) and print() for I/O.'
+    : language === 'javascript' ? 'Read from a variable named `input` and use console.log() for output.'
+    : language === 'cpp' ? 'Use cin for input and cout for output. Include necessary headers.'
+    : language === 'c' ? 'Use scanf for input and printf for output. Include stdio.h.'
+    : language === 'java' ? 'Use Scanner(System.in) for input and System.out.println for output. Class must be named Main.'
+    : '';
 
   const tcText = testCases.map((tc, i) => `Test ${i + 1}: Input: ${tc.input || '(none)'}, Expected Output: ${tc.expected}`).join('\n');
 
-  const systemPrompt = `You are a programming teacher. Given a coding problem statement and test cases, generate 2-3 correct, complete Python 3 solutions that solve the problem. Use standard input (input()) and print() for I/O. Return ONLY a valid JSON array of solution strings, no explanation. Example: ["solution1 code", "solution2 code"]`;
+  const systemPrompt = `You are a programming teacher. Given a coding problem statement and test cases, generate 2-3 correct, complete ${langName} solutions that solve the problem. ${ioHint} Return ONLY a valid JSON array of solution strings, no explanation. Example: ["solution1 code", "solution2 code"]`;
   const userMessage = `Problem: ${question}\n\nTest Cases:\n${tcText || 'No test cases provided'}`;
+
 
   try {
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -1633,6 +1643,53 @@ app.get('/api/games/coding-scenarios', async (req, res) => {
 });
 
 
+
+// ============================================
+// Cloud Code Runner (AI-simulated execution)
+// Supports: Python, JavaScript, C, C++, Java
+// ============================================
+app.post('/api/run-code-cloud', async (req, res) => {
+  const GROQ_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_KEY) return res.status(503).json({ ok: false, message: 'AI execution not configured.' });
+
+  const { code, language = 'cpp', input = '' } = req.body || {};
+  if (!code) return res.status(400).json({ ok: false, message: 'code is required' });
+
+  const langLabels = { c: 'C', cpp: 'C++', java: 'Java', python: 'Python 3', javascript: 'JavaScript' };
+  const langName = langLabels[language] || language;
+
+  const systemPrompt = `You are a strict code execution simulator. The user will give you ${langName} code and standard input. Your ONLY job is to simulate what a real ${langName} compiler/runtime would output to stdout. Respond with ONLY the exact stdout output — no explanation, no code, no markdown. If there is a compile error or runtime exception, respond with ONLY the error text as a real compiler would show it.`;
+  const userMessage = `${langName} Code:\n\`\`\`\n${code}\n\`\`\`\nStandard Input:\n${input || '(no input)'}`;
+
+  try {
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage }
+        ],
+        temperature: 0,
+        max_tokens: 512
+      })
+    });
+    if (!groqRes.ok) {
+      const err = await groqRes.text();
+      console.error('Groq run-code-cloud error:', err);
+      return res.status(500).json({ ok: false, message: 'AI execution failed' });
+    }
+    const data = await groqRes.json();
+    const output = data.choices[0].message.content.trim();
+    // Detect error vs normal output
+    const isError = /error:|exception:|cannot|undefined reference|segmentation fault/i.test(output) && output.length < 400;
+    res.json({ ok: true, output, error: isError ? output : null });
+  } catch (err) {
+    console.error('run-code-cloud error:', err);
+    res.status(500).json({ ok: false, message: 'Internal server error' });
+  }
+});
 
 const authLimiter = rateLimit({
   windowMs: 60 * 1000,

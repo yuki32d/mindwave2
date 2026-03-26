@@ -75,11 +75,14 @@ function resetAnalysis() {
 // ── AI Analysis ───────────────────────────────────────────────────
 async function analyzeWithAI() {
     const question = document.getElementById('gameDescription').value.trim();
+    const language = document.getElementById('gameLanguage').value;
     const statusEl = document.getElementById('aiStatus');
     const analyzeBtn = document.getElementById('analyzeBtn');
+    const langLabels = { python: 'Python 3', cpp: 'C++', java: 'Java', c: 'C', javascript: 'JavaScript' };
+    const langName = langLabels[language] || language;
 
     analyzeBtn.disabled = true;
-    statusEl.textContent = 'Analyzing… Please wait.';
+    statusEl.textContent = `Analyzing with AI (${langName})… Please wait.`;
     statusEl.className = 'cs-ai-status';
     resetAnalysis();
 
@@ -90,7 +93,7 @@ async function analyzeWithAI() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ question, testCases })
+            body: JSON.stringify({ question, testCases, language })
         });
         const data = await res.json();
 
@@ -103,8 +106,8 @@ async function analyzeWithAI() {
         // Show preview
         const preview = document.getElementById('solutionsPreview');
         preview.style.display = 'block';
-        document.getElementById('solutionsCount').textContent = `AI generated ${data.solutions.length} reference solution(s) — click to expand`;
-        document.getElementById('solutionsCode').textContent = data.solutions.join('\n\n# ── Solution 2 ──\n\n');
+        document.getElementById('solutionsCount').textContent = `AI generated ${data.solutions.length} reference solution(s) in ${langName} — click to expand`;
+        document.getElementById('solutionsCode').textContent = data.solutions.join('\n\n// ── Solution 2 ──\n\n');
 
         statusEl.textContent = `✅ Analysis complete — ${data.solutions.length} solution(s) stored. Ready to publish!`;
         statusEl.className = 'cs-ai-status analyzed';
@@ -113,6 +116,7 @@ async function analyzeWithAI() {
         document.getElementById('footerStatus').textContent = 'Challenge is ready to publish!';
     } catch (err) {
         console.error('AI analyze error:', err);
+
         statusEl.textContent = `❌ Analysis failed: ${err.message}`;
         statusEl.className = 'cs-ai-status error';
     }
