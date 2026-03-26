@@ -971,8 +971,13 @@ document.getElementById('createAssignmentForm')?.addEventListener('submit', asyn
     e.preventDefault();
     const title = document.getElementById('assignmentTitle').value.trim();
     const description = document.getElementById('assignmentDescription').value.trim();
-    const startDate = document.getElementById('assignmentStartDate').value;
-    const deadline = document.getElementById('assignmentDeadline').value;
+    
+    // Convert local datetime-local strings to proper ISO strings with timezone info
+    const startDateRaw = document.getElementById('assignmentStartDate').value;
+    const deadlineRaw = document.getElementById('assignmentDeadline').value;
+    const startDate = new Date(startDateRaw).toISOString();
+    const deadline = new Date(deadlineRaw).toISOString();
+    
     // Collect checked sections
     const targetSections = [...document.querySelectorAll('input[name="targetSection"]:checked')].map(cb => cb.value);
 
