@@ -242,6 +242,18 @@
             cursor: not-allowed;
         }
 
+        .st-field textarea[readonly] {
+            opacity: .5;
+            cursor: not-allowed;
+            resize: none;
+        }
+
+        /* Select locked via pointer-events:none */
+        .st-field select[tabindex="-1"] {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
         .st-field textarea {
             resize: vertical;
             min-height: 90px;

@@ -1,5 +1,6 @@
 const currentUserEmail = localStorage.getItem('email') || 'student@example.com';
 const currentUserName = localStorage.getItem('firstName') || 'Student';
+let profileLocked = false; // flag set when profile is already completed
 
 function getInitials(name) {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -45,48 +46,10 @@ async function loadSettings() {
             }
 
             // --- READ-ONLY LOCK LOGIC ---
-            // If the user has already saved their profile constraints (e.g. rollNumber and department)
+            // If the user has already set their academic info (roll + department), lock everything.
             if (user.rollNumber && user.department) {
-                const fieldsToLock = ['displayName', 'bio', 'rollNumber', 'phone', 'batch', 'department', 'section', 'photoInput'];
-                fieldsToLock.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.disabled = true;
-                        el.style.opacity = '0.6';
-                        el.style.cursor = 'not-allowed';
-                    }
-                });
-
-                // Hide Action Buttons
-                const saveBtn = document.getElementById('saveProfileBtn') || document.getElementById('saveBtn');
-                if (saveBtn) saveBtn.closest('.st-save-bar').style.display = 'none';
-                
-                const photoBtns = document.querySelector('.st-photo-btns');
-                if (photoBtns) photoBtns.style.display = 'none';
-
-                // Add Locked Notice
-                const profilePanel = document.getElementById('tab-profile');
-                if (profilePanel && !document.getElementById('profileLockNotice')) {
-                    const notice = document.createElement('div');
-                    notice.id = 'profileLockNotice';
-                    notice.style.padding = '12px 16px';
-                    notice.style.background = 'rgba(208, 128, 0, 0.1)';
-                    notice.style.border = '1px solid rgba(208, 128, 0, 0.2)';
-                    notice.style.borderRadius = '10px';
-                    notice.style.color = '#d08000';
-                    notice.style.fontSize = '13px';
-                    notice.style.marginBottom = '20px';
-                    notice.style.display = 'flex';
-                    notice.style.alignItems = 'center';
-                    notice.style.gap = '8px';
-                    notice.innerHTML = `<i data-lucide="lock" style="width: 16px; height: 16px;"></i> <span>Your profile is locked. Contact your faculty to request changes.</span>`;
-                    
-                    const titleNode = profilePanel.querySelector('.st-panel-sub');
-                    if (titleNode) {
-                        titleNode.insertAdjacentElement('afterend', notice);
-                    }
-                    if (window.lucide) window.lucide.createIcons();
-                }
+                profileLocked = true;
+                lockProfileFields();
             }
         }
     } catch (error) {
@@ -101,7 +64,79 @@ async function loadSettings() {
     });
 }
 
+// ── Locks all personal-info fields to read-only visual state (matching email field) ──
+function lockProfileFields() {
+    const textFields = ['displayName', 'bio', 'rollNumber', 'phone', 'batch'];
+    const selectFields = ['department', 'section'];
+
+    // Mark text/textarea fields as readonly (identical look to email)
+    textFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.setAttribute('readonly', '');
+        el.style.cursor = 'not-allowed';
+        el.style.userSelect = 'none';
+        // Add badge to label
+        const label = el.closest('.st-field')?.querySelector('label');
+        if (label && !label.querySelector('.st-readonly-tag')) {
+            const badge = document.createElement('span');
+            badge.className = 'st-readonly-tag';
+            badge.textContent = 'read-only';
+            label.appendChild(badge);
+        }
+    });
+
+    // Block selects with a transparent overlay so they look normal but aren't clickable
+    selectFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.pointerEvents = 'none';
+        el.style.userSelect = 'none';
+        // Also disable for keyboard navigation
+        el.setAttribute('tabindex', '-1');
+        const wrapper = el.closest('.st-field');
+        if (wrapper) {
+            wrapper.style.position = 'relative';
+            if (!wrapper.querySelector('.st-select-lock')) {
+                const overlay = document.createElement('div');
+                overlay.className = 'st-select-lock';
+                overlay.style.cssText = 'position:absolute;inset:0;background:transparent;cursor:not-allowed;z-index:10;';
+                wrapper.appendChild(overlay);
+            }
+            // Add badge to label too
+            const label = wrapper.querySelector('label');
+            if (label && !label.querySelector('.st-readonly-tag')) {
+                const badge = document.createElement('span');
+                badge.className = 'st-readonly-tag';
+                badge.textContent = 'read-only';
+                label.appendChild(badge);
+            }
+        }
+    });
+
+    // Hide photo action buttons
+    const photoBtns = document.querySelector('.st-photo-btns');
+    if (photoBtns) photoBtns.style.display = 'none';
+
+    // Hide save bar
+    const saveBar = document.querySelector('#tab-profile .st-save-bar');
+    if (saveBar) saveBar.style.display = 'none';
+
+    // Inject amber lock notice at top of profile section
+    if (!document.getElementById('profileLockNotice')) {
+        const notice = document.createElement('div');
+        notice.id = 'profileLockNotice';
+        notice.style.cssText = 'padding:12px 16px;background:rgba(208,128,0,.1);border:1px solid rgba(208,128,0,.25);border-radius:10px;color:#d08000;font-size:13px;margin-bottom:18px;display:flex;align-items:center;gap:10px;';
+        notice.innerHTML = `<i data-lucide="lock" style="width:16px;height:16px;flex-shrink:0;"></i><span><strong>Profile Locked</strong> — Your academic details are verified and cannot be changed. Contact your faculty or HOD to request modifications.</span>`;
+        const sub = document.querySelector('#tab-profile .st-panel-sub');
+        if (sub) sub.insertAdjacentElement('afterend', notice);
+    }
+    if (window.lucide) window.lucide.createIcons();
+}
+
 async function saveSettings() {
+    // Guard: do nothing if profile is already locked
+    if (profileLocked) return;
     const displayName = document.getElementById('displayName').value;
     const bio = document.getElementById('bio').value;
     const rollNumber = document.getElementById('rollNumber').value;
@@ -251,10 +286,16 @@ document.addEventListener('DOMContentLoaded', function () {
         cancelBtn.addEventListener('click', cancelSettings);
     }
 
-    // Save button
-    const saveBtn = document.getElementById('saveBtn') || document.querySelector('.save-btn');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', saveSettings);
+    // Save Profile button (profile tab)
+    const saveProfileBtn = document.getElementById('saveProfileBtn') || document.getElementById('saveBtn') || document.querySelector('.save-btn');
+    if (saveProfileBtn) {
+        saveProfileBtn.addEventListener('click', saveSettings);
+    }
+
+    // Save Password button (security tab)
+    const savePasswordBtn = document.getElementById('savePasswordBtn');
+    if (savePasswordBtn) {
+        savePasswordBtn.addEventListener('click', saveSettings);
     }
 
     // Photo upload handler
