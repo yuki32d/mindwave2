@@ -401,12 +401,57 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeReviewModal();
         closePeerReviewModal();
+        document.getElementById('notifModal').style.display = 'none';
     }
 });
 
-// ============================================
-// PEER REVIEW WIZARD & SPLIT GRADING
-// ============================================
+// ── Professional Notification Modal ──
+// opts: { type: 'success'|'error'|'warning', title, subtitle?, message?, errors: [] }
+function showNotif(opts) {
+    const modal     = document.getElementById('notifModal');
+    const iconWrap  = document.getElementById('notifIconWrap');
+    const iconEl    = document.getElementById('notifIcon');
+    const titleEl   = document.getElementById('notifTitle');
+    const subtitleEl= document.getElementById('notifSubtitle');
+    const bodyEl    = document.getElementById('notifBody');
+    const okBtn     = document.getElementById('notifOkBtn');
+
+    const cfg = {
+        success: { bg: 'rgba(22,163,74,.12)', color: '#16a34a', icon: 'check-circle', btnColor: '#16a34a' },
+        error:   { bg: 'rgba(255,59,48,.12)',  color: '#ff3b30', icon: 'x-circle',     btnColor: '#ff3b30' },
+        warning: { bg: 'rgba(208,128,0,.12)',  color: '#d08000', icon: 'alert-triangle',btnColor: '#d08000' }
+    }[opts.type || 'success'];
+
+    iconWrap.style.background = cfg.bg;
+    iconEl.setAttribute('data-lucide', cfg.icon);
+    iconEl.style.color = cfg.color;
+    okBtn.style.background = cfg.btnColor;
+
+    titleEl.textContent    = opts.title || '';
+    subtitleEl.textContent = opts.subtitle || '';
+
+    // Build body HTML
+    let html = '';
+    if (opts.message) {
+        html += `<div class="notif-success-note"><i data-lucide="check-circle"></i>${escapeHtml(opts.message)}</div>`;
+    }
+    if (opts.errors && opts.errors.length > 0) {
+        if (opts.errors.length > 0 && !opts.message) {
+            // pure error mode — no success note needed
+        }
+        html += opts.errors.map(e =>
+            `<div class="notif-error-item"><i data-lucide="alert-circle"></i><span>${escapeHtml(e)}</span></div>`
+        ).join('');
+    }
+    bodyEl.innerHTML = html;
+
+    modal.style.display = 'flex';
+    if (window.lucide) window.lucide.createIcons();
+
+    okBtn.onclick = () => { modal.style.display = 'none'; if (opts.onOk) opts.onOk(); };
+    modal.onclick = (e) => { if (e.target === modal) { modal.style.display = 'none'; if (opts.onOk) opts.onOk(); } };
+}
+
 
 let wizardState = {
     step: 1,
@@ -585,15 +630,15 @@ document.getElementById('markSplitRange')?.addEventListener('input', updateWeigh
 
 function validateWizardStep() {
     if (wizardState.step === 1 && wizardState.selectedProjects.length === 0) {
-        alert('Please select at least one project.');
+        showNotif({ type: 'warning', title: 'No Projects Selected', subtitle: 'Please select at least one project to continue.' });
         return false;
     }
     if (wizardState.step === 2 && !wizardState.reviewerType) {
-        alert('Please select a reviewer type.');
+        showNotif({ type: 'warning', title: 'Reviewer Type Required', subtitle: 'Please choose who will perform the review.' });
         return false;
     }
     if (wizardState.step === 3 && !wizardState.selectedReviewer) {
-        alert('Please select a reviewer.');
+        showNotif({ type: 'warning', title: 'No Reviewer Selected', subtitle: 'Please search for and select a reviewer.' });
         return false;
     }
     return true;
@@ -616,23 +661,27 @@ async function finalizePeerReviewSetup() {
         const data = await response.json();
 
         if (data.success) {
-            let msg = `✅ ${data.count} peer review request(s) sent.\nReviewer: ${wizardState.selectedReviewer.name}`;
-            if (data.errors && data.errors.length > 0) {
-                msg += '\n\n⚠️ Skipped (already assigned):\n' + data.errors.map(e => `• ${e}`).join('\n');
-            }
-            alert(msg);
             document.getElementById('peerReviewModal').style.display = 'none';
             wizardState.selectedProjects.forEach(id => {
                 const p = allProjects.find(p => p._id === id);
                 if(p) p.hasPeerReview = true;
             });
             loadAllProjects();
+
+            const hasErrors = data.errors && data.errors.length > 0;
+            showNotif({
+                type: data.count > 0 ? (hasErrors ? 'warning' : 'success') : 'error',
+                title: data.count > 0 ? 'Invites Sent!' : 'No Invites Sent',
+                subtitle: `Reviewer: ${wizardState.selectedReviewer.name}`,
+                message: data.count > 0 ? `${data.count} project(s) assigned successfully.` : null,
+                errors: data.errors || []
+            });
         } else {
-            alert('❌ ' + (data.error || 'Failed to send invites'));
+            showNotif({ type: 'error', title: 'Failed to Send Invites', errors: [data.error || 'Unknown error'] });
         }
     } catch (e) {
         console.error('Invite Error:', e);
-        alert('❌ Network error while sending invites.');
+        showNotif({ type: 'error', title: 'Network Error', subtitle: 'Could not reach the server. Please try again.' });
     }
 }
 

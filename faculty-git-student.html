@@ -278,7 +278,37 @@
         </div>
     </div>
 
+    <!-- ── Custom Notification Modal ── -->
+    <div id="notifModal" class="modal" style="z-index: 2000;">
+        <div class="modal-content" style="max-width: 480px; padding: 0; border-radius: 20px; overflow: hidden;">
+            <!-- Header strip -->
+            <div id="notifHeader" style="display: flex; align-items: center; gap: 14px; padding: 24px 28px 20px;">
+                <div id="notifIconWrap" style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i id="notifIcon" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                    <div id="notifTitle" style="font-size: 16px; font-weight: 800; color: var(--text);"></div>
+                    <div id="notifSubtitle" style="font-size: 12px; color: var(--muted); margin-top: 2px;"></div>
+                </div>
+            </div>
+            <!-- Body -->
+            <div id="notifBody" style="padding: 0 28px 8px; font-size: 13px; color: var(--text); line-height: 1.6; max-height: 320px; overflow-y: auto;"></div>
+            <!-- Footer -->
+            <div style="padding: 20px 28px 24px; display: flex; justify-content: flex-end;">
+                <button id="notifOkBtn" class="btn btn-primary" style="min-width: 100px;">OK</button>
+            </div>
+        </div>
+    </div>
+    <style>
+        #notifModal .modal-content { box-shadow: 0 32px 80px rgba(0,0,0,.5); }
+        .notif-error-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 8px; background: rgba(255,59,48,.06); border: 1px solid rgba(255,59,48,.12); margin-bottom: 6px; font-size: 12px; }
+        .notif-error-item i { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; color: #ff3b30; }
+        .notif-success-note { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: rgba(22,163,74,.08); border: 1px solid rgba(22,163,74,.2); margin-bottom: 16px; font-size: 13px; font-weight: 600; color: #16a34a; }
+        .notif-success-note i { width: 16px; height: 16px; flex-shrink: 0; }
+    </style>
+
     <script src="faculty-git-student.js"></script>
+
 </body>
 
 </html>
