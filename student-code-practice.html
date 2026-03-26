@@ -681,6 +681,34 @@
             margin-top: 2px;
         }
 
+        /* Exam mode / Anti-cheat banner */
+        .cp-exam-banner {
+            position: fixed;
+            top: 52px; left: 0; right: 0;
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            color: #fff;
+            padding: 6px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            z-index: 50;
+            letter-spacing: .3px;
+            display: none;
+        }
+        .cp-exam-banner.active { display: block; }
+        body.exam-mode .cp-layout { margin-top: 30px; }
+
+        /* Disabled AI tab in exam mode */
+        .cp-tab.tab-locked {
+            opacity: .35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .cp-tab.tab-locked::after {
+            content: ' 🔒';
+            font-size: 10px;
+        }
+
         /* Pyodide loader */
         .cp-loader {
             position: fixed;
@@ -1284,6 +1312,9 @@
     </header>
 
     <!-- MAIN LAYOUT -->
+    <!-- Exam mode banner -->
+    <div id="examBanner" class="cp-exam-banner">🔒 EXAM MODE &mdash; AI assistant is disabled. Anti-cheat is active. Do not switch tabs.</div>
+
     <div class="cp-layout">
 
         <!-- LEFT: Problem panel -->
@@ -1600,18 +1631,67 @@
         let userCode = {};
         let solved = JSON.parse(localStorage.getItem('cp_solved') || '{}');
         let stats = JSON.parse(localStorage.getItem('cp_stats') || '{"solved":0,"attempted":0,"runs":0,"correct":0}');
+        let DB_CHALLENGES = []; // Fetched from backend
+        let isExamMode = false; // True when a coding-scenario is active
 
         // ── INIT ──
         async function init() {
+            await fetchDBChallenges(); // Load teacher-created coding scenarios from DB
             renderChallengeList();
             updateStats();
             initMonaco();
         }
 
+        // ── FETCH TEACHER CODING SCENARIOS ──
+        async function fetchDBChallenges() {
+            try {
+                const res = await fetch('/api/games/coding-scenarios', {
+                    headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') }
+                });
+                const data = await res.json();
+                if (data.ok && data.games) {
+                    // Convert DB games into the challenge format
+                    DB_CHALLENGES = data.games.map((g, i) => ({
+                        id: 'db_' + g._id,
+                        _dbId: g._id,
+                        title: g.title,
+                        difficulty: g.difficulty || 'medium',
+                        category: g.brief || 'Custom Challenge',
+                        tags: ['coding-scenario'],
+                        description: g.description || '',
+                        examples: (g.testCases || []).slice(0, 1).map(tc => ({ input: tc.input || '(none)', output: tc.expected })),
+                        constraints: ['AI-graded: write code that correctly produces the expected output for every test case.'],
+                        testCases: g.testCases || [],
+                        codingSolutions: g.codingSolutions || [],
+                        starterCode: { python: '# Write your solution here\n', javascript: '// Write your solution here\n' },
+                        isScenario: true // Mark as scenario
+                    }));
+                }
+            } catch (e) { console.warn('Could not fetch coding scenarios:', e); }
+        }
+
         // ── CHALLENGE LIST ──
         function renderChallengeList() {
+            const allChallenges = [...DB_CHALLENGES, ...CHALLENGES];
             const el = document.getElementById('challengeList');
-            el.innerHTML = CHALLENGES.map(c => {
+            // Separator if there are DB challenges
+            let html = '';
+            if (DB_CHALLENGES.length > 0) {
+                html += `<div style="padding:8px 12px 4px;font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;">🎯 Assigned by Teacher</div>`;
+                html += DB_CHALLENGES.map((c, i) => {
+                    const state = solved[c.id] ? 'solved' : '';
+                    return `<div class="cp-challenge-item ${state} scenario-item" onclick="selectChallenge('${c.id}')">
+      <div class="cp-challenge-num" style="background:rgba(244,63,94,.15);color:#f43f5e;">${state === 'solved' ? '<i data-lucide="check" style="width:10px;height:10px;"></i>' : '!'}</div>
+      <div class="cp-challenge-info">
+        <div class="cp-challenge-name">${c.title}</div>
+        <div class="cp-challenge-cat">${c.category}</div>
+      </div>
+      <span class="cp-diff-badge diff-${c.difficulty}">${c.difficulty}</span>
+    </div>`;
+                }).join('');
+                html += `<div style="padding:8px 12px 4px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-top:6px;">Practice Challenges</div>`;
+            }
+            html += CHALLENGES.map(c => {
                 const state = solved[c.id] ? 'solved' : '';
                 return `<div class="cp-challenge-item ${state}" onclick="selectChallenge(${c.id})">
       <div class="cp-challenge-num">${state === 'solved' ? '<i data-lucide="check" style="width:10px;height:10px;color:var(--green)"></i>' : c.id}</div>
@@ -1622,23 +1702,41 @@
       <span class="cp-diff-badge diff-${c.difficulty}">${c.difficulty}</span>
     </div>`;
             }).join('');
+            el.innerHTML = html;
             lucide.createIcons();
         }
 
         function selectChallenge(id) {
-            currentChallenge = CHALLENGES.find(c => c.id === id);
+            // Find from DB challenges first, then local
+            const allChallenges = [...DB_CHALLENGES, ...CHALLENGES];
+            currentChallenge = allChallenges.find(c => String(c.id) === String(id));
             if (!currentChallenge) return;
 
+            // ── Exam Mode: activate for DB scenarios ──
+            const isScenario = currentChallenge.isScenario === true;
+            isExamMode = isScenario;
+            const banner = document.getElementById('examBanner');
+            const aiTab = document.querySelector('.cp-output-tabs .cp-tab:nth-child(4)');
+
+            if (isScenario) {
+                banner.classList.add('active');
+                document.body.classList.add('exam-mode');
+                if (aiTab) aiTab.classList.add('tab-locked');
+                switchRightTab('tests', document.querySelectorAll('.cp-output-tabs .cp-tab')[0]);
+            } else {
+                banner.classList.remove('active');
+                document.body.classList.remove('exam-mode');
+                if (aiTab) aiTab.classList.remove('tab-locked');
+            }
+
             // Highlight active
-            document.querySelectorAll('.cp-challenge-item').forEach((el, i) => {
-                el.classList.toggle('active', CHALLENGES[i].id === id);
-            });
+            document.querySelectorAll('.cp-challenge-item').forEach(el => el.classList.remove('active'));
 
             // Topbar
             document.getElementById('topbarTitle').textContent = currentChallenge.title;
-            const db = document.getElementById('topbarDiff');
-            db.className = `cp-diff-badge diff-${currentChallenge.difficulty}`;
-            db.textContent = currentChallenge.difficulty;
+            const diff = document.getElementById('topbarDiff');
+            diff.className = `cp-diff-badge diff-${currentChallenge.difficulty}`;
+            diff.textContent = currentChallenge.difficulty;
 
             // Render problem
             renderProblem();
@@ -1646,14 +1744,16 @@
 
             // Set editor code
             const lang = document.getElementById('langSelect').value;
-            if (!userCode[id]) userCode[id] = {};
-            if (!userCode[id][lang]) userCode[id][lang] = currentChallenge.starterCode[lang];
-            if (editor) editor.setValue(userCode[id][lang]);
+            const cId = String(currentChallenge.id);
+            if (!userCode[cId]) userCode[cId] = {};
+            if (!userCode[cId][lang]) userCode[cId][lang] = currentChallenge.starterCode[lang] || '# Write your solution here\n';
+            if (editor) editor.setValue(userCode[cId][lang]);
             setMonacoLang(lang);
 
             // Clear results
             resetOutput();
         }
+
 
         function renderProblem() {
             const c = currentChallenge;
@@ -1795,14 +1895,51 @@
 
             if (isSubmit) {
                 stats.attempted++;
-                if (results.every(r => r.pass)) {
+                const allPass = results.every(r => r.pass);
+
+                // For DB coding-scenarios, also do AI logic evaluation
+                if (currentChallenge.isScenario && allPass) {
+                    setRunStatus('running', 'Checking with AI…');
+                    try {
+                        const aiRes = await fetch('/api/coding-scenario/evaluate', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                            },
+                            body: JSON.stringify({
+                                studentCode: code,
+                                question: currentChallenge.description,
+                                testCases: currentChallenge.testCases,
+                                language: lang
+                            })
+                        });
+                        const aiData = await aiRes.json();
+                        if (aiData.ok) {
+                            const aiFeedback = aiData.feedback || (aiData.isCorrect ? 'Correct!' : 'Incorrect logic.');
+                            setRunStatus(aiData.isCorrect ? 'pass' : 'fail',
+                                aiData.isCorrect
+                                    ? `✅ AI Verified: ${aiFeedback}`
+                                    : `❌ AI Review: ${aiFeedback}`);
+                            if (aiData.isCorrect && !solved[String(currentChallenge.id)]) {
+                                stats.solved++;
+                                stats.correct++;
+                                solved[String(currentChallenge.id)] = true;
+                                localStorage.setItem('cp_solved', JSON.stringify(solved));
+                                renderChallengeList();
+                                if (typeof awardXP === 'function') awardXP(currentChallenge);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('AI evaluate error:', e);
+                    }
+                } else if (!currentChallenge.isScenario && allPass) {
                     stats.solved++;
                     stats.correct++;
                     if (!solved[currentChallenge.id]) {
                         solved[currentChallenge.id] = true;
                         localStorage.setItem('cp_solved', JSON.stringify(solved));
                         renderChallengeList();
-                        // Award XP on first solve
                         if (typeof awardXP === 'function') awardXP(currentChallenge);
                     }
                 }
@@ -2295,7 +2432,19 @@ _json.dumps({'steps': _trace_steps, 'lines': _user_code.split('\\n')})
         initXP();
         renderRef('python');
         init();
+
+        // Override AI tab click to block during exam mode
+        document.querySelectorAll('.cp-output-tabs .cp-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                if (isExamMode && tab.classList.contains('tab-locked')) {
+                    e.preventDefault(); e.stopPropagation();
+                    alert('🔒 AI Assistant is disabled during this exam challenge.');
+                }
+            }, true);
+        });
     </script>
+    <!-- Anti-cheat for exam mode -->
+    <script src="anti-cheat.js" defer></script>
     <script src="heartbeat.js"></script>
 </body>
 

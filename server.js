@@ -703,6 +703,8 @@ const gameSchema = new mongoose.Schema(
     scenarioQuestions: { type: Array, default: [] }, // For SQL Scenario multi-question: [{question, possibleQueries}]
     lines: { type: Array, default: [] }, // For Unjumble
     scenes: { type: Array, default: [] }, // For Scenario
+    testCases: { type: Array, default: [] }, // For Coding Scenario: [{input, expected}]
+    codingSolutions: { type: Array, default: [] }, // For Coding Scenario: reference solutions (strings)
 
     // Section-based access control
     targetClasses: { type: [String], default: [] }, // Array of class identifiers (e.g., ["MCA-2024-A", "MCA-2024-B"])
@@ -1527,6 +1529,109 @@ Student Query: ${studentQuery}`;
     res.status(500).json({ ok: false, message: 'Internal server error' });
   }
 });
+
+// ============================================
+// Coding Scenario Endpoints (LeetCode-style)
+// ============================================
+
+// 1. Faculty: Analyze a coding question & generate reference solutions
+app.post('/api/coding-scenario/analyze', async (req, res) => {
+  const GROQ_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_KEY) return res.status(503).json({ ok: false, message: 'AI not configured.' });
+
+  const { question, testCases = [] } = req.body || {};
+  if (!question) return res.status(400).json({ ok: false, message: 'question is required' });
+
+  const tcText = testCases.map((tc, i) => `Test ${i + 1}: Input: ${tc.input || '(none)'}, Expected Output: ${tc.expected}`).join('\n');
+
+  const systemPrompt = `You are a programming teacher. Given a coding problem statement and test cases, generate 2-3 correct, complete Python 3 solutions that solve the problem. Use standard input (input()) and print() for I/O. Return ONLY a valid JSON array of solution strings, no explanation. Example: ["solution1 code", "solution2 code"]`;
+  const userMessage = `Problem: ${question}\n\nTest Cases:\n${tcText || 'No test cases provided'}`;
+
+  try {
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }],
+        temperature: 0.2,
+        max_tokens: 1024
+      })
+    });
+    if (!groqRes.ok) { const err = await groqRes.text(); console.error('Groq analyze error:', err); return res.status(500).json({ ok: false, message: 'AI analysis failed' }); }
+    const data = await groqRes.json();
+    const raw = data.choices[0].message.content.trim();
+    let solutions = [];
+    try {
+      const match = raw.match(/\[[\s\S]*\]/);
+      solutions = JSON.parse(match ? match[0] : raw);
+    } catch (e) {
+      solutions = [raw]; // Fallback: use raw text as single solution
+    }
+    res.json({ ok: true, solutions });
+  } catch (err) {
+    console.error('Coding scenario analyze error:', err);
+    res.status(500).json({ ok: false, message: 'Internal server error' });
+  }
+});
+
+// 2. Student: Evaluate student code logic against the coding problem
+app.post('/api/coding-scenario/evaluate', async (req, res) => {
+  const GROQ_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_KEY) return res.status(503).json({ ok: false, message: 'AI not configured.' });
+
+  const { studentCode, question, testCases = [], language = 'python' } = req.body || {};
+  if (!studentCode || !question) return res.status(400).json({ ok: false, message: 'studentCode and question are required' });
+
+  const tcText = testCases.map((tc, i) => `Test ${i + 1}: Input: ${tc.input || '(none)'} → Expected: ${tc.expected}`).join('\n');
+
+  const systemPrompt = `You are a strict code reviewer. Given a coding problem and test cases, evaluate if the student's ${language} code correctly solves the problem logically. Check that the approach and logic are correct, not just for surface-level matching. Respond ONLY with a JSON object: {"isCorrect": true/false, "feedback": "brief one-sentence feedback"}. Nothing else.`;
+  const userMessage = `Problem: ${question}\nTest Cases:\n${tcText}\n\nStudent Code:\n${studentCode}`;
+
+  try {
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }],
+        temperature: 0.1,
+        max_tokens: 128
+      })
+    });
+    if (!groqRes.ok) { const err = await groqRes.text(); console.error('Groq evaluate error:', err); return res.status(500).json({ ok: false, message: 'AI evaluation failed' }); }
+    const data = await groqRes.json();
+    const raw = data.choices[0].message.content.trim();
+    let isCorrect = false, feedback = 'Could not parse AI response.';
+    try {
+      const match = raw.match(/\{[\s\S]*\}/);
+      const parsed = JSON.parse(match ? match[0] : raw);
+      isCorrect = parsed.isCorrect === true;
+      feedback = parsed.feedback || (isCorrect ? 'Correct!' : 'Incorrect logic.');
+    } catch (e) {
+      isCorrect = raw.toLowerCase().includes('"iscorrect": true');
+    }
+    res.json({ ok: true, isCorrect, feedback });
+  } catch (err) {
+    console.error('Coding scenario evaluate error:', err);
+    res.status(500).json({ ok: false, message: 'Internal server error' });
+  }
+});
+
+// 3. Get published coding-scenario games for student code practice
+app.get('/api/games/coding-scenarios', async (req, res) => {
+  try {
+    const games = await Game.find({ type: 'coding-scenario', published: true })
+      .select('title brief description difficulty testCases codingSolutions createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json({ ok: true, games });
+  } catch (err) {
+    console.error('Fetch coding scenarios error:', err);
+    res.status(500).json({ ok: false, message: 'Internal server error' });
+  }
+});
+
 
 
 const authLimiter = rateLimit({

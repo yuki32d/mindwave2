@@ -5,11 +5,62 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindWave – Scenario Builder</title>
+    <title>MindWave – Coding Challenge Builder</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="game-builder.css">
+    <style>
+        .cs-section { background: var(--surface-2, #1a1d2e); border: 1px solid var(--border, #2c2f45); border-radius: 14px; padding: 24px; margin-bottom: 20px; }
+        .cs-section-head { font-size: 13px; font-weight: 700; color: var(--muted, #9ea4b6); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .cs-section-head svg { width: 15px; height: 15px; }
+        .cs-label { font-size: 12px; font-weight: 600; color: var(--muted, #9ea4b6); margin-bottom: 6px; display: block; }
+        .cs-input, .cs-textarea, .cs-select {
+            width: 100%; padding: 10px 12px;
+            background: var(--bg, #0f1117); border: 1px solid var(--border, #2c2f45);
+            border-radius: 10px; color: var(--text, #e2e4f0); font-size: 13px; font-family: inherit;
+            box-sizing: border-box; transition: border-color .15s; outline: none;
+        }
+        .cs-input:focus, .cs-textarea:focus { border-color: var(--accent, #6366f1); }
+        .cs-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+        .cs-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .cs-form-group { display: flex; flex-direction: column; gap: 6px; }
+        
+        /* Test Cases */
+        .tc-list { display: flex; flex-direction: column; gap: 10px; }
+        .tc-item { background: var(--bg, #0f1117); border: 1px solid var(--border, #2c2f45); border-radius: 10px; padding: 14px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+        .tc-item .cs-form-group { margin: 0; }
+        .tc-num { font-size: 11px; font-weight: 700; color: var(--accent, #6366f1); margin-bottom: 6px; }
+        .tc-del-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(244,63,94,.3); background: rgba(244,63,94,.1); color: #f43f5e; cursor: pointer; font-size: 12px; transition: all .15s; display: flex; align-items: center; gap: 4px; }
+        .tc-del-btn:hover { background: rgba(244,63,94,.2); }
+        .tc-add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: 1px dashed var(--border, #2c2f45); background: transparent; color: var(--muted, #9ea4b6); cursor: pointer; font-size: 12px; font-weight: 600; transition: all .15s; margin-top: 8px; }
+        .tc-add-btn:hover { border-color: var(--accent, #6366f1); color: var(--accent, #6366f1); }
+        
+        /* AI Analyze */
+        .cs-analyze-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+        .cs-ai-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 10px; border: none; background: linear-gradient(135deg, #6366f1, #06b6d4); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .15s; }
+        .cs-ai-btn:hover { opacity: .9; transform: translateY(-1px); }
+        .cs-ai-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+        .cs-ai-status { font-size: 12px; color: var(--muted, #9ea4b6); }
+        .cs-ai-status.analyzed { color: #22d3a5; }
+        .cs-ai-status.error { color: #f43f5e; }
+        .cs-solutions-preview { margin-top: 12px; background: var(--bg, #0f1117); border: 1px solid var(--border, #2c2f45); border-radius: 10px; overflow: hidden; }
+        .cs-solutions-preview summary { padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--muted, #9ea4b6); cursor: pointer; }
+        .cs-solutions-preview pre { padding: 12px 14px; border-top: 1px solid var(--border, #2c2f45); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text, #e2e4f0); white-space: pre-wrap; word-break: break-all; margin: 0; }
+        
+        /* Footer */
+        .cs-footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: var(--surface-2, #1a1d2e); border-top: 1px solid var(--border, #2c2f45); position: sticky; bottom: 0; z-index: 10; }
+        .cs-footer-left { font-size: 12px; color: var(--muted, #9ea4b6); }
+        .cs-footer-right { display: flex; gap: 10px; }
+        .cs-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all .15s; }
+        .cs-btn-ghost { background: transparent; border: 1px solid var(--border, #2c2f45); color: var(--muted, #9ea4b6); }
+        .cs-btn-ghost:hover { border-color: var(--accent, #6366f1); color: var(--accent, #6366f1); }
+        .cs-btn-primary { background: linear-gradient(135deg, #6366f1, #06b6d4); color: #fff; }
+        .cs-btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+        .cs-btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+        
+        .gb-main-wide { max-width: 860px; padding: 32px 24px 120px; }
+    </style>
 </head>
 <body>
 
@@ -19,7 +70,7 @@
             <div class="gb-logo-mark"><i data-lucide="brain-circuit"></i></div>
             <span class="gb-logo-name">MindWave</span>
         </a>
-        <div class="gb-breadcrumb">Game Builder / <span>Scenario</span></div>
+        <div class="gb-breadcrumb">Game Builder / <span>Coding Challenge</span></div>
         <div class="gb-topbar-right">
             <button class="gb-theme-btn" id="themeToggle" title="Toggle theme">
                 <span class="icon-sun"><i data-lucide="sun"></i></span>
@@ -31,88 +82,96 @@
         </div>
     </header>
 
-    <!-- MAIN (wide for 2-col layout) -->
     <div class="gb-main-wide">
 
         <div class="gb-page-head">
-            <div class="gb-page-icon"><i data-lucide="drama"></i></div>
+            <div class="gb-page-icon"><i data-lucide="code-2"></i></div>
             <div>
-                <div class="gb-page-title">Scenario Builder</div>
-                <div class="gb-page-sub">Create interactive branching storylines where students make decisions and face consequences.</div>
+                <div class="gb-page-title">Coding Challenge Builder</div>
+                <div class="gb-page-sub">Create LeetCode-style coding problems with test cases. AI will generate reference solutions for automatic grading.</div>
             </div>
         </div>
 
-        <!-- Game Info -->
-        <div class="gb-card">
-            <div class="gb-card-head"><i data-lucide="info"></i> Game Information</div>
-            <div class="gb-card-body">
-                <div class="gb-form-row">
-                    <div class="gb-form-group">
-                        <label for="gameTitle">Game Title</label>
-                        <input id="gameTitle" type="text" required placeholder="e.g. Tech Interview Simulation">
-                    </div>
-                    <div class="gb-form-group">
-                        <label for="gameDifficulty">Difficulty</label>
-                        <select id="gameDifficulty">
-                            <option value="Easy">Easy</option>
-                            <option value="Normal" selected>Normal</option>
-                            <option value="Hard">Hard</option>
-                        </select>
-                    </div>
+        <!-- Game Information -->
+        <div class="cs-section">
+            <div class="cs-section-head"><i data-lucide="info"></i> Challenge Information</div>
+            <div class="cs-grid-2" style="margin-bottom:16px;">
+                <div class="cs-form-group">
+                    <label class="cs-label">Challenge Title *</label>
+                    <input id="gameTitle" class="cs-input" type="text" placeholder="e.g. Reverse a String" required>
                 </div>
-                <div class="gb-form-group">
-                    <label for="gameDescription">Description</label>
-                    <textarea id="gameDescription" rows="3" required
-                        placeholder="Describe the scenario and what students will learn..."></textarea>
+                <div class="cs-form-group">
+                    <label class="cs-label">Difficulty</label>
+                    <select id="gameDifficulty" class="cs-input cs-select">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
                 </div>
             </div>
-        </div>
-
-        <!-- Builder Grid -->
-        <div class="gb-builder-grid">
-            <!-- Scene List -->
-            <div class="gb-card">
-                <div class="gb-card-head"><i data-lucide="list"></i> Scenes</div>
-                <div class="gb-card-body">
-                    <div class="gb-scene-list" id="sceneList">
-                        <div class="gb-empty">
-                            <div class="gb-empty-icon"><i data-lucide="film"></i></div>
-                            <p>No scenes yet. Click "Add Scene" to start!</p>
-                        </div>
-                    </div>
-                    <button class="gb-btn-dashed" id="addSceneBtn" style="margin-top:14px;">
-                        <i data-lucide="plus"></i> Add Scene
-                    </button>
+            <div class="cs-grid-2">
+                <div class="cs-form-group">
+                    <label class="cs-label">Category / Topic</label>
+                    <input id="gameCategory" class="cs-input" type="text" placeholder="e.g. Strings, Arrays, Loops">
                 </div>
-            </div>
-
-            <!-- Scene Editor -->
-            <div class="gb-card">
-                <div class="gb-card-head"><i data-lucide="pencil"></i> Edit Scene</div>
-                <div class="gb-card-body">
-                    <div id="sceneEditor">
-                        <div class="gb-empty">
-                            <div class="gb-empty-icon"><i data-lucide="mouse-pointer-click"></i></div>
-                            <p>Select a scene to edit</p>
-                        </div>
-                    </div>
+                <div class="cs-form-group">
+                    <label class="cs-label">Language</label>
+                    <select id="gameLanguage" class="cs-input cs-select">
+                        <option value="python">Python 3</option>
+                        <option value="javascript">JavaScript</option>
+                    </select>
                 </div>
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="gb-footer" style="margin-top:18px;">
-            <span class="gb-footer-meta">Scenario Builder</span>
-            <div class="gb-footer-actions">
-                <button type="button" class="gb-btn gb-btn-ghost" id="previewBtn">
-                    <i data-lucide="eye"></i> Preview
+        <!-- Problem Statement -->
+        <div class="cs-section">
+            <div class="cs-section-head"><i data-lucide="file-text"></i> Problem Statement *</div>
+            <div class="cs-form-group">
+                <label class="cs-label">Write a clear problem description for students</label>
+                <textarea id="gameDescription" class="cs-textarea" rows="6" placeholder="Example:&#10;Given a string s, write a function to reverse the string and print it.&#10;&#10;Input: A single line containing the string.&#10;Output: The reversed string."></textarea>
+            </div>
+        </div>
+
+        <!-- Test Cases -->
+        <div class="cs-section">
+            <div class="cs-section-head"><i data-lucide="flask-conical"></i> Test Cases *</div>
+            <div class="tc-list" id="tcList"></div>
+            <button class="tc-add-btn" id="addTcBtn" onclick="addTestCase()">
+                <i data-lucide="plus" style="width:13px;height:13px;"></i> Add Test Case
+            </button>
+        </div>
+
+        <!-- AI Analysis -->
+        <div class="cs-section">
+            <div class="cs-section-head"><i data-lucide="sparkles"></i> AI Analysis</div>
+            <p style="font-size:13px;color:var(--muted,#9ea4b6);margin:0 0 12px;">Click "Analyze with AI" to generate reference Python solutions. Students will be evaluated against these solutions.</p>
+            <div class="cs-analyze-row">
+                <button class="cs-ai-btn" id="analyzeBtn" onclick="analyzeWithAI()" disabled>
+                    <i data-lucide="brain-circuit" style="width:15px;height:15px;"></i>
+                    Analyze with AI
                 </button>
-                <button type="submit" class="gb-btn gb-btn-primary" id="publishBtn">
-                    <i data-lucide="send"></i> Publish Game
-                </button>
+                <span class="cs-ai-status" id="aiStatus">Fill in the problem and test cases first.</span>
+            </div>
+            <div id="solutionsPreview" style="display:none;" class="cs-solutions-preview">
+                <details>
+                    <summary id="solutionsCount">AI generated 0 solutions</summary>
+                    <pre id="solutionsCode"></pre>
+                </details>
             </div>
         </div>
 
+    </div>
+
+    <!-- Sticky Footer -->
+    <div class="cs-footer">
+        <span class="cs-footer-left" id="footerStatus">Fill in all fields, add test cases, and analyze with AI before publishing.</span>
+        <div class="cs-footer-right">
+            <button class="cs-btn cs-btn-ghost" onclick="history.back()">Cancel</button>
+            <button class="cs-btn cs-btn-primary" id="publishBtn" onclick="publishChallenge()" disabled>
+                <i data-lucide="send" style="width:14px;height:14px;"></i> Publish Challenge
+            </button>
+        </div>
     </div>
 
     <script>

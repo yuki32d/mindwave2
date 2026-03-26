@@ -1,290 +1,159 @@
-// Scenario Builder JavaScript
+// Coding Challenge Builder – faculty-create-scenario.js
 const API_BASE = window.location.origin;
+let testCases = [];
+let tcCounter = 0;
+let analyzedSolutions = null;
 
-// State
-let scenes = [];
-let currentSceneId = null;
-let sceneIdCounter = 1;
-
-// Elements
-const gameTitle = document.getElementById('gameTitle');
-const gameDescription = document.getElementById('gameDescription');
-const gameDifficulty = document.getElementById('gameDifficulty');
-const sceneList = document.getElementById('sceneList');
-const sceneEditor = document.getElementById('sceneEditor');
-const addSceneBtn = document.getElementById('addSceneBtn');
-const previewBtn = document.getElementById('previewBtn');
-const publishBtn = document.getElementById('publishBtn');
-
-// Initialize
-function init() {
-    addSceneBtn.addEventListener('click', addScene);
-    previewBtn.addEventListener('click', previewScenario);
-    publishBtn.addEventListener('click', publishScenario);
-
-    // Create first scene automatically
-    addScene();
+// ── Test Case Management ──────────────────────────────────────────
+function addTestCase(input = '', expected = '') {
+    const id = ++tcCounter;
+    testCases.push({ id, input, expected });
+    renderTestCases();
+    updateAnalyzeButton();
 }
 
-// Add new scene
-function addScene() {
-    const newScene = {
-        id: sceneIdCounter++,
-        text: '',
-        choices: []
-    };
-    scenes.push(newScene);
-    renderSceneList();
-    selectScene(newScene.id);
+function updateTC(id, field, value) {
+    const tc = testCases.find(t => t.id === id);
+    if (tc) tc[field] = value;
+    updateAnalyzeButton();
 }
 
-// Render scene list
-function renderSceneList() {
-    if (scenes.length === 0) {
-        sceneList.innerHTML = `
-            <div class="empty-state">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
-                <p>No scenes yet. Click "Add Scene" to start!</p>
-            </div>
-        `;
+function deleteTC(id) {
+    testCases = testCases.filter(t => t.id !== id);
+    renderTestCases();
+    updateAnalyzeButton();
+    resetAnalysis();
+}
+
+function renderTestCases() {
+    const list = document.getElementById('tcList');
+    if (testCases.length === 0) {
+        list.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted,#9ea4b6);font-size:13px;">No test cases yet. Add at least one.</div>`;
         return;
     }
-
-    sceneList.innerHTML = scenes.map(scene => `
-        <div class="scene-card ${scene.id === currentSceneId ? 'active' : ''}" onclick="selectScene(${scene.id})">
-            <h4>Scene ${scene.id}</h4>
-            <p>${scene.text || 'No text yet...'}</p>
+    list.innerHTML = testCases.map((tc, i) => `
+        <div class="tc-item">
+            <div class="cs-form-group">
+                <div class="tc-num">TEST ${i + 1} — INPUT</div>
+                <input class="cs-input" style="font-family:'JetBrains Mono',monospace;font-size:12px;"
+                    placeholder="e.g. hello" value="${escapeHtml(tc.input)}"
+                    oninput="updateTC(${tc.id},'input',this.value)">
+            </div>
+            <div class="cs-form-group">
+                <div class="tc-num">EXPECTED OUTPUT</div>
+                <input class="cs-input" style="font-family:'JetBrains Mono',monospace;font-size:12px;"
+                    placeholder="e.g. olleh" value="${escapeHtml(tc.expected)}"
+                    oninput="updateTC(${tc.id},'expected',this.value)">
+            </div>
+            <button class="tc-del-btn" onclick="deleteTC(${tc.id})" title="Remove test case">
+                <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+            </button>
         </div>
     `).join('');
+    lucide.createIcons();
 }
 
-// Select scene
-window.selectScene = function (sceneId) {
-    currentSceneId = sceneId;
-    renderSceneList();
-    renderSceneEditor();
-};
-
-// Render scene editor
-function renderSceneEditor() {
-    const scene = scenes.find(s => s.id === currentSceneId);
-    if (!scene) {
-        sceneEditor.innerHTML = `
-            <div class="empty-state">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                </svg>
-                <p>Select a scene to edit</p>
-            </div>
-        `;
-        return;
+function updateAnalyzeButton() {
+    const title = document.getElementById('gameTitle').value.trim();
+    const desc = document.getElementById('gameDescription').value.trim();
+    const hasTC = testCases.length > 0 && testCases.some(t => t.expected.trim());
+    const canAnalyze = title && desc && hasTC;
+    document.getElementById('analyzeBtn').disabled = !canAnalyze;
+    if (!canAnalyze) {
+        document.getElementById('aiStatus').textContent = 'Fill in the problem title, description, and at least one test case first.';
+        document.getElementById('aiStatus').className = 'cs-ai-status';
     }
-
-    sceneEditor.innerHTML = `
-        <div class="scene-editor">
-            <div>
-                <label for="sceneText">Scene Text / Question</label>
-                <textarea id="sceneText" rows="4" placeholder="Describe the situation or ask a question...">${scene.text}</textarea>
-            </div>
-            
-            <div>
-                <label>Choices (students will pick one)</label>
-                <div id="choicesList"></div>
-                <button class="add-choice-btn" onclick="addChoice()">+ Add Choice</button>
-            </div>
-            
-            <div style="display: flex; gap: 12px;">
-                <button class="secondary-btn" onclick="deleteScene()" style="flex: 1; background: rgba(220, 38, 38, 0.2); color: #ef4444; border: 1px solid rgba(220, 38, 38, 0.3);">🗑️ Delete Scene</button>
-            </div>
-        </div>
-    `;
-
-    // Add event listener for scene text
-    document.getElementById('sceneText').addEventListener('input', (e) => {
-        scene.text = e.target.value;
-        renderSceneList();
-    });
-
-    renderChoices();
 }
 
-// Render choices
-function renderChoices() {
-    const scene = scenes.find(s => s.id === currentSceneId);
-    if (!scene) return;
-
-    const choicesList = document.getElementById('choicesList');
-    if (!choicesList) return;
-
-    if (scene.choices.length === 0) {
-        choicesList.innerHTML = '<p style="color: #9ea4b6; text-align: center; padding: 20px;">No choices yet. Add at least 2 choices!</p>';
-        return;
-    }
-
-    choicesList.innerHTML = scene.choices.map((choice, index) => `
-        <div class="choice-item">
-            <input type="text" placeholder="Choice text (e.g., Explain hooks)" value="${choice.text}" onchange="updateChoice(${index}, 'text', this.value)">
-            <input type="number" class="choice-points" placeholder="Points" value="${choice.points}" onchange="updateChoice(${index}, 'points', this.value)">
-            <select onchange="updateChoice(${index}, 'nextSceneId', this.value)">
-                <option value="">-- Next Scene --</option>
-                <option value="END" ${choice.nextSceneId === 'END' ? 'selected' : ''}>🏁 End Game</option>
-                ${scenes.filter(s => s.id !== currentSceneId).map(s => `
-                    <option value="${s.id}" ${choice.nextSceneId == s.id ? 'selected' : ''}>Scene ${s.id}</option>
-                `).join('')}
-            </select>
-            <button class="delete-choice-btn" onclick="deleteChoice(${index})">×</button>
-        </div>
-    `).join('');
+function resetAnalysis() {
+    analyzedSolutions = null;
+    document.getElementById('solutionsPreview').style.display = 'none';
+    document.getElementById('publishBtn').disabled = true;
+    document.getElementById('footerStatus').textContent = 'Analyze with AI before publishing.';
 }
 
-// Add choice
-window.addChoice = function () {
-    const scene = scenes.find(s => s.id === currentSceneId);
-    if (!scene) return;
+// ── AI Analysis ───────────────────────────────────────────────────
+async function analyzeWithAI() {
+    const question = document.getElementById('gameDescription').value.trim();
+    const statusEl = document.getElementById('aiStatus');
+    const analyzeBtn = document.getElementById('analyzeBtn');
 
-    if (scene.choices.length >= 4) {
-        alert('Maximum 4 choices per scene!');
-        return;
-    }
+    analyzeBtn.disabled = true;
+    statusEl.textContent = 'Analyzing… Please wait.';
+    statusEl.className = 'cs-ai-status';
+    resetAnalysis();
 
-    scene.choices.push({
-        text: '',
-        points: 0,
-        nextSceneId: ''
-    });
+    try {
+        const res = await fetch(`${API_BASE}/api/coding-scenario/analyze`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ question, testCases })
+        });
+        const data = await res.json();
 
-    renderChoices();
-};
-
-// Update choice
-window.updateChoice = function (index, field, value) {
-    const scene = scenes.find(s => s.id === currentSceneId);
-    if (!scene) return;
-
-    if (field === 'points') {
-        scene.choices[index][field] = parseInt(value) || 0;
-    } else {
-        scene.choices[index][field] = value;
-    }
-};
-
-// Delete choice
-window.deleteChoice = function (index) {
-    const scene = scenes.find(s => s.id === currentSceneId);
-    if (!scene) return;
-
-    scene.choices.splice(index, 1);
-    renderChoices();
-};
-
-// Delete scene
-window.deleteScene = function () {
-    if (!confirm('Delete this scene?')) return;
-
-    scenes = scenes.filter(s => s.id !== currentSceneId);
-    currentSceneId = scenes.length > 0 ? scenes[0].id : null;
-
-    renderSceneList();
-    renderSceneEditor();
-};
-
-// Validate scenario
-function validateScenario() {
-    if (!gameTitle.value.trim()) {
-        alert('Please enter a game title');
-        return false;
-    }
-
-    if (!gameDescription.value.trim()) {
-        alert('Please enter a game description');
-        return false;
-    }
-
-    if (scenes.length === 0) {
-        alert('Please add at least one scene');
-        return false;
-    }
-
-    for (const scene of scenes) {
-        if (!scene.text.trim()) {
-            alert(`Scene ${scene.id} has no text`);
-            return false;
+        if (!data.ok || !data.solutions || data.solutions.length === 0) {
+            throw new Error(data.message || 'No solutions returned');
         }
 
-        if (scene.choices.length < 2) {
-            alert(`Scene ${scene.id} needs at least 2 choices`);
-            return false;
-        }
+        analyzedSolutions = data.solutions;
 
-        for (const choice of scene.choices) {
-            if (!choice.text.trim()) {
-                alert(`Scene ${scene.id} has a choice with no text`);
-                return false;
-            }
+        // Show preview
+        const preview = document.getElementById('solutionsPreview');
+        preview.style.display = 'block';
+        document.getElementById('solutionsCount').textContent = `AI generated ${data.solutions.length} reference solution(s) — click to expand`;
+        document.getElementById('solutionsCode').textContent = data.solutions.join('\n\n# ── Solution 2 ──\n\n');
 
-            if (!choice.nextSceneId) {
-                alert(`Scene ${scene.id}: Choice "${choice.text}" has no next scene selected`);
-                return false;
-            }
-        }
+        statusEl.textContent = `✅ Analysis complete — ${data.solutions.length} solution(s) stored. Ready to publish!`;
+        statusEl.className = 'cs-ai-status analyzed';
+
+        document.getElementById('publishBtn').disabled = false;
+        document.getElementById('footerStatus').textContent = 'Challenge is ready to publish!';
+    } catch (err) {
+        console.error('AI analyze error:', err);
+        statusEl.textContent = `❌ Analysis failed: ${err.message}`;
+        statusEl.className = 'cs-ai-status error';
     }
 
-    return true;
+    analyzeBtn.disabled = false;
+    updateAnalyzeButton();
 }
 
-// Preview scenario
-function previewScenario() {
-    if (!validateScenario()) return;
+// ── Publish ───────────────────────────────────────────────────────
+async function publishChallenge() {
+    const title = document.getElementById('gameTitle').value.trim();
+    const description = document.getElementById('gameDescription').value.trim();
+    const difficulty = document.getElementById('gameDifficulty').value;
+    const category = document.getElementById('gameCategory').value.trim();
+    const language = document.getElementById('gameLanguage').value;
 
-    // Store in localStorage for preview
-    localStorage.setItem('scenario_preview', JSON.stringify({
-        title: gameTitle.value,
-        description: gameDescription.value,
-        difficulty: gameDifficulty.value,
-        scenes: scenes
-    }));
+    if (!title || !description) { alert('Please fill in the challenge title and description.'); return; }
+    if (testCases.length === 0) { alert('Please add at least one test case.'); return; }
+    if (!analyzedSolutions) { alert('Please click "Analyze with AI" before publishing.'); return; }
 
-    window.open('student-scenario-preview.html', '_blank');
-}
-
-// Publish scenario
-async function publishScenario() {
-    if (!validateScenario()) return;
-
-    // Store game data for modal (use global variable)
     window.gameDataToPublish = {
-        title: gameTitle.value.trim(),
-        type: 'scenario',
-        difficulty: gameDifficulty.value,
-        brief: gameDescription.value.trim(),
-        description: gameDescription.value.trim(),
-        scenes: scenes,
-        published: true,
-        totalPoints: scenes.reduce((sum, scene) => {
-            return sum + scene.choices.reduce((max, choice) => Math.max(max, choice.points), 0);
-        }, 0)
+        title,
+        type: 'coding-scenario',
+        difficulty,
+        brief: category ? `${category} · ${difficulty}` : difficulty,
+        description,
+        testCases: testCases.map(({ input, expected }) => ({ input, expected })),
+        codingSolutions: analyzedSolutions,
+        language,
+        totalPoints: testCases.length * 20,
+        published: true
     };
 
-    // Show publish modal instead of directly publishing
     showPublishModal();
 }
 
-// Function called by publish modal when confirmed (MUST be global)
+// Called by publish modal
 async function publishGameWithClasses(targetClasses, isPublic) {
-    if (!window.gameDataToPublish) {
-        alert('Error: No game data to publish');
-        return;
-    }
+    if (!window.gameDataToPublish) { alert('Error: No game data to publish'); return; }
 
-    const gameData = {
-        ...window.gameDataToPublish,
-        targetClasses,
-        isPublic
-    };
-
-    console.log('Publishing Scenario with classes:', gameData);
+    const gameData = { ...window.gameDataToPublish, targetClasses, isPublic };
 
     try {
         const res = await fetch(`${API_BASE}/api/games`, {
@@ -296,20 +165,29 @@ async function publishGameWithClasses(targetClasses, isPublic) {
             credentials: 'include',
             body: JSON.stringify(gameData)
         });
-
         const data = await res.json();
-
         if (data.ok) {
-            alert('✅ Scenario published successfully!');
+            alert('✅ Coding challenge published! Students will find it in Code Practice.');
             window.location.href = 'admin.html';
         } else {
             alert('Failed to publish: ' + data.message);
         }
-    } catch (error) {
-        console.error('Publish error:', error);
-        alert('Failed to publish scenario');
+    } catch (err) {
+        console.error('Publish error:', err);
+        alert('Failed to publish challenge');
     }
 }
 
-// Initialize on load
-init();
+// ── Helpers ───────────────────────────────────────────────────────
+function escapeHtml(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ── Watch for form changes ────────────────────────────────────────
+document.getElementById('gameTitle').addEventListener('input', () => { updateAnalyzeButton(); resetAnalysis(); });
+document.getElementById('gameDescription').addEventListener('input', () => { updateAnalyzeButton(); resetAnalysis(); });
+
+// ── Init ──────────────────────────────────────────────────────────
+addTestCase(); // Start with one empty test case
+renderTestCases();
+updateAnalyzeButton();
