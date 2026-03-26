@@ -107,6 +107,44 @@
             padding: 3px 10px;
             margin-left: 8px;
         }
+
+        /* Per-question cards in Scenario mode */
+        .scenario-q-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+        }
+        .scenario-q-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .scenario-q-num {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--muted);
+        }
+        .remove-q-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            transition: background .2s;
+        }
+        .remove-q-btn:hover { background: rgba(239,68,68,0.1); }
+        .scenario-q-input {
+            width: 100%;
+            margin-bottom: 14px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -209,24 +247,17 @@
             <div id="scenarioSection" style="display:none;">
                 <div class="gb-card">
                     <div class="gb-card-head">
-                        <i data-lucide="sparkles"></i> AI Scenario Analysis
+                        <i data-lucide="sparkles"></i> AI Scenario Questions
                     </div>
                     <div class="gb-card-body">
-                        <p class="gb-helper">Describe the SQL challenge in natural language. Click "Analyze" and the AI will find all possible correct SQL answers automatically. Students will type their own query and the AI will grade it.</p>
-                        <div class="gb-form-group">
-                            <label for="scenarioQuestion">Scenario Question / Challenge Description</label>
-                            <textarea class="gb-code-editor" id="scenarioQuestion" rows="4"
-                                placeholder="e.g. How do you display all the data from the student table?"></textarea>
-                        </div>
-                        <button type="button" class="btn-analyze" id="analyzeBtn">
-                            <i data-lucide="sparkles"></i> Analyze with AI
+                        <p class="gb-helper">Add one question per card. Each question is shown to students one at a time. Click <strong>"Analyze with AI"</strong> on each question before publishing.</p>
+
+                        <!-- Dynamic question cards rendered by JS -->
+                        <div id="scenarioQuestionList" style="display:flex;flex-direction:column;gap:20px;margin-bottom:20px;"></div>
+
+                        <button type="button" class="gb-btn gb-btn-ghost" id="addQuestionBtn" style="width:100%;justify-content:center;gap:8px;">
+                            <i data-lucide="plus-circle"></i> Add Another Question
                         </button>
-                        <div id="analysisResult" style="display:none;" class="analysis-result">
-                            <div class="analysis-result-title">
-                                <i data-lucide="check-circle-2"></i> Possible Correct Queries Found
-                            </div>
-                            <div id="analysisQueryList"></div>
-                        </div>
                     </div>
                 </div>
             </div>

@@ -1057,14 +1057,39 @@ function playSQL(game, container) {
     render();
 }
 
-// NEW: SQL Scenario - AI Graded Free-Form Query
+// SQL Scenario - AI Graded, One Question at a Time
 function playScenarioSQL(game, container) {
     let startTime = Date.now();
 
+    // Support both old format (single scenarioQuestion) and new format (scenarioQuestions array)
+    const questions = Array.isArray(game.scenarioQuestions) && game.scenarioQuestions.length > 0
+        ? game.scenarioQuestions
+        : [{ question: game.scenarioQuestion || game.description || 'Write the correct SQL query.', possibleQueries: game.possibleQueries || [] }];
+
+    let currentIdx = 0;
+    let totalScore = 0;
+    const tp = Number(game.totalPoints || questions.length * 20);
+    const pointsPerQ = Math.floor(tp / questions.length);
+    const studentAnswers = [];
+
     function render() {
+        if (currentIdx >= questions.length) {
+            return finish();
+        }
+        const q = questions[currentIdx];
+        const progress = (currentIdx / questions.length) * 100;
+
         container.innerHTML = `
-            <div class="player-header"><span>🧠 SQL Scenario</span><span class="timer">⏱️</span></div>
+            <div class="player-header">
+                <span>🧠 SQL Scenario — Q${currentIdx + 1} of ${questions.length}</span>
+                <span class="timer">⏱️</span>
+            </div>
             <div class="question-display">
+                <!-- Progress bar -->
+                <div class="progress-bar" style="margin-bottom:24px;">
+                    <div class="progress-fill" style="width:${progress}%"></div>
+                </div>
+
                 <div style="
                     background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(99,102,241,0.08));
                     border: 1px solid rgba(139,92,246,0.3);
@@ -1072,11 +1097,10 @@ function playScenarioSQL(game, container) {
                     padding: 24px;
                     margin-bottom: 28px;
                 ">
-                    <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#a78bfa;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                        Scenario Challenge
+                    <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#a78bfa;margin-bottom:10px;">
+                        ✦ Scenario Challenge ${currentIdx + 1}
                     </div>
-                    <p style="font-size:1.1rem;line-height:1.7;color:var(--text);margin:0;">${game.scenarioQuestion || game.description || 'Write the correct SQL query for this problem.'}</p>
+                    <p style="font-size:1.1rem;line-height:1.7;color:var(--text);margin:0;">${q.question}</p>
                 </div>
 
                 <div style="margin-bottom:16px;">
@@ -1085,7 +1109,7 @@ function playScenarioSQL(game, container) {
                         placeholder="Type your SQL query here... e.g. SELECT * FROM students"
                         style="
                             width: 100%;
-                            min-height: 120px;
+                            min-height: 110px;
                             background: rgba(0,0,0,0.25);
                             border: 2px solid rgba(139,92,246,0.3);
                             border-radius: 12px;
@@ -1118,89 +1142,119 @@ function playScenarioSQL(game, container) {
                     color: #fff;
                     font-size: 1rem;
                     font-weight: 700;
-                    letter-spacing: .02em;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     gap: 8px;
-                    transition: opacity .2s, transform .15s;
                     box-shadow: 0 4px 20px rgba(139, 92, 246, .35);
-                ">⚡&nbsp; Submit & Grade with AI</button>
+                    transition: opacity .2s;
+                ">⚡&nbsp; Submit Answer</button>
             </div>
         `;
 
-        startTimer(game.duration || 10, '#appContainer', () => submitScenarioSQL(true));
-
         const submitBtn = document.getElementById('scenariSqlSubmitBtn');
-        if (submitBtn) submitBtn.addEventListener('click', () => submitScenarioSQL(false));
+        if (submitBtn) submitBtn.addEventListener('click', () => submitAnswer(q));
     }
 
-    async function submitScenarioSQL(isTimeout) {
+    async function submitAnswer(q) {
         const textarea = document.getElementById('studentSqlInput');
         const studentQuery = textarea ? textarea.value.trim() : '';
 
-        if (!studentQuery && !isTimeout) {
-            // Highlight the textarea
+        if (!studentQuery) {
             if (textarea) {
                 textarea.style.borderColor = '#ef4444';
-                textarea.placeholder = 'Please enter your SQL query before submitting!';
+                textarea.placeholder = 'Please enter a query before submitting!';
             }
             return;
         }
 
-        // Show loading state
         const submitBtn = document.getElementById('scenariSqlSubmitBtn');
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳&nbsp; AI is grading your answer...';
+            submitBtn.innerHTML = '⏳&nbsp; AI is grading...';
         }
 
         let isCorrect = false;
-        let score = 0;
-        const tp = Number(game.totalPoints || 50);
-
         try {
-            if (studentQuery && game.possibleQueries && game.possibleQueries.length > 0) {
-                const token = localStorage.getItem('token');
+            if (q.possibleQueries && q.possibleQueries.length > 0) {
                 const evalRes = await fetch('/api/sql-scenario/evaluate', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
                     },
                     body: JSON.stringify({
                         studentQuery,
-                        possibleQueries: game.possibleQueries,
-                        question: game.scenarioQuestion || game.description
+                        possibleQueries: q.possibleQueries,
+                        question: q.question
                     })
                 });
-
                 const evalData = await evalRes.json();
                 isCorrect = evalData.ok && evalData.isCorrect === true;
             }
         } catch (err) {
-            console.error('SQL Scenario evaluate error:', err);
-            // If eval fails, do a basic string comparison fallback
-            const normalise = q => q.replace(/\s+/g, ' ').trim().toLowerCase();
-            isCorrect = (game.possibleQueries || []).some(q => normalise(q) === normalise(studentQuery));
+            console.error('Evaluate error:', err);
+            const norm = s => s.replace(/\s+/g, ' ').trim().toLowerCase();
+            isCorrect = (q.possibleQueries || []).some(pq => norm(pq) === norm(studentQuery));
         }
 
-        score = isCorrect ? tp : 0;
+        if (isCorrect) totalScore += pointsPerQ;
 
-        const studentAnswers = [{
-            questionText: game.scenarioQuestion || game.description || 'SQL Scenario',
-            studentAnswer: studentQuery || '(no answer)',
-            correctAnswer: (game.possibleQueries || [])[0] || 'N/A',
+        studentAnswers.push({
+            questionText: q.question,
+            studentAnswer: studentQuery,
+            correctAnswer: (q.possibleQueries || [])[0] || 'N/A',
             isCorrect
-        }];
+        });
 
-        await saveResult(game, score, tp, startTime, studentAnswers);
-        showResult(container, score, tp, startTime, game._id || game.id);
+        // Show quick feedback then advance
+        showFeedback(isCorrect, () => {
+            currentIdx++;
+            render();
+        });
     }
+
+    function showFeedback(isCorrect, next) {
+        const display = container.querySelector('.question-display');
+        if (!display) { next(); return; }
+
+        const feedback = document.createElement('div');
+        feedback.style.cssText = `
+            position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.65); z-index: 9999; animation: fadeIn .15s ease;
+        `;
+        feedback.innerHTML = `
+            <div style="
+                background: var(--surface, #1a1f2e);
+                border: 2px solid ${isCorrect ? '#22c55e' : '#ef4444'};
+                border-radius: 20px; padding: 40px 56px; text-align: center;
+                box-shadow: 0 20px 60px rgba(0,0,0,.5);
+            ">
+                <div style="font-size:3.5rem;margin-bottom:12px;">${isCorrect ? '✅' : '❌'}</div>
+                <div style="font-size:1.5rem;font-weight:800;color:${isCorrect ? '#22c55e' : '#ef4444'};margin-bottom:8px;">${isCorrect ? 'Correct!' : 'Incorrect'}</div>
+                <div style="color:var(--muted);font-size:0.95rem;">${isCorrect ? `+${pointsPerQ} XP earned` : 'Better luck next time!'}</div>
+            </div>
+        `;
+        document.body.appendChild(feedback);
+        setTimeout(() => { feedback.remove(); next(); }, 1400);
+    }
+
+    async function finish() {
+        if (window.timerInterval) clearInterval(window.timerInterval);
+        await saveResult(game, totalScore, tp, startTime, studentAnswers);
+        showResult(container, totalScore, tp, startTime, game._id || game.id);
+    }
+
+    startTimer(game.duration || 10, '#appContainer', async () => {
+        // Time's up — save whatever we have
+        await saveResult(game, totalScore, tp, startTime, studentAnswers);
+        showResult(container, totalScore, tp, startTime, game._id || game.id);
+    });
 
     render();
 }
+
 
 // NEW: Debug the Monolith - Code Editor Version
 function playDebug(game, container) {

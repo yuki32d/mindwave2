@@ -698,8 +698,9 @@ const gameSchema = new mongoose.Schema(
     blocks: { type: Array, default: [] }, // For SQL
     distractors: { type: Array, default: [] }, // For SQL
     correctQuery: { type: String }, // For SQL
-    scenarioQuestion: { type: String }, // For SQL Scenario
-    possibleQueries: { type: Array, default: [] }, // For SQL Scenario (AI-generated correct answers)
+    scenarioQuestion: { type: String }, // For SQL Scenario (single question, legacy)
+    possibleQueries: { type: Array, default: [] }, // For SQL Scenario (legacy)
+    scenarioQuestions: { type: Array, default: [] }, // For SQL Scenario multi-question: [{question, possibleQueries}]
     lines: { type: Array, default: [] }, // For Unjumble
     scenes: { type: Array, default: [] }, // For Scenario
 
