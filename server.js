@@ -844,7 +844,8 @@ const assignmentSchema = new mongoose.Schema({
   createdByName: { type: String }
 }, { timestamps: true });
 
-const Assignment = mongoose.model("Assignment", assignmentSchema);
+const Assignment = mongoose.models.Assignment || mongoose.model("Assignment", assignmentSchema);
+
 
 // Meeting schema and model defined later in the LiveKit section
 
