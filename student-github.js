@@ -3,9 +3,10 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     loadMyProjects();
+    loadAssignments();
 
     // Submit modal triggers
-    document.getElementById('submitNewProjectBtn')?.addEventListener('click', openSubmitModal);
+    document.getElementById('submitNewProjectBtn')?.addEventListener('click', () => openSubmitModal());
     document.getElementById('cancelSubmitBtn')?.addEventListener('click', closeSubmitModal);
     document.getElementById('cancelSubmitBtn2')?.addEventListener('click', closeSubmitModal);
 
@@ -92,6 +93,7 @@ function renderProjects(projects) {
                     <span class="gh-badge ${getBadgeClass(project.status)}">
                         ${getStatusIcon(project.status)} ${formatStatus(project.status)}
                     </span>
+                    ${project.assignmentId ? `<span style="font-size:10px;background:rgba(208,128,0,0.12);color:#d08000;border:1px solid rgba(208,128,0,0.3);padding:2px 8px;border-radius:6px;font-weight:700;margin-left:6px;">📋 ${escapeHtml(project.assignmentId.title)}</span>` : ''}
                 </div>
                 <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
                     ${project.grade !== null && project.grade !== undefined
@@ -220,9 +222,65 @@ function renderTags(tags) {
     return `<div class="gh-tags">${tagList.map(t => `<span class="gh-tag">${escapeHtml(t)}</span>`).join('')}</div>`;
 }
 
+// ── Load Assignments ────────────────────────────────────────────────────────
+async function loadAssignments() {
+    try {
+        const res = await fetch('/api/assignments', { credentials: 'include' });
+        const data = await res.json();
+        if (data.ok && data.assignments.length > 0) {
+            renderAssignmentCards(data.assignments);
+            populateAssignmentDropdown(data.assignments);
+        }
+    } catch (e) {
+        console.error('Load assignments error:', e);
+    }
+}
+
+function renderAssignmentCards(assignments) {
+    const section = document.getElementById('activeAssignmentsSection');
+    const container = document.getElementById('activeAssignmentCards');
+    if (!section || !container) return;
+    section.style.display = 'block';
+    container.innerHTML = assignments.map(a => {
+        const deadline = new Date(a.deadline);
+        const now = new Date();
+        const hoursLeft = Math.round((deadline - now) / 3600000);
+        const urgency = hoursLeft < 24 ? 'rgba(244,63,94,0.12)' : 'rgba(208,128,0,0.08)';
+        const urgencyBorder = hoursLeft < 24 ? 'rgba(244,63,94,0.3)' : 'rgba(208,128,0,0.25)';
+        const urgencyColor = hoursLeft < 24 ? '#f43f5e' : '#d08000';
+        return `
+        <div style="background:var(--surface);border:1px solid ${urgencyBorder};border-radius:14px;padding:16px 18px;background-image:linear-gradient(135deg,${urgency},transparent);">
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px;">${escapeHtml(a.title)}</div>
+            ${a.description ? `<div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5;">${escapeHtml(a.description)}</div>` : ''}
+            <div style="font-size:11px;color:${urgencyColor};font-weight:700;margin-bottom:10px;">
+                ⏰ Due ${deadline.toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+            </div>
+            <button class="mw-btn mw-btn-primary" style="font-size:12px;padding:7px 14px;" onclick="openSubmitModal('${a._id}')">
+                Submit for this Assignment
+            </button>
+        </div>`;
+    }).join('');
+}
+
+function populateAssignmentDropdown(assignments) {
+    const select = document.getElementById('assignmentSelect');
+    if (!select) return;
+    select.innerHTML = '<option value="">— Submit as a general project —</option>';
+    assignments.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a._id;
+        opt.textContent = a.title;
+        select.appendChild(opt);
+    });
+}
+
 // ── Submit Modal ──────────────────────────────────────────────────────────────
-function openSubmitModal() {
+function openSubmitModal(preselectedAssignmentId) {
     document.getElementById('submitModal').classList.add('open');
+    if (preselectedAssignmentId) {
+        const select = document.getElementById('assignmentSelect');
+        if (select) select.value = preselectedAssignmentId;
+    }
 }
 
 function closeSubmitModal() {
@@ -239,6 +297,7 @@ async function handleSubmit(e) {
     const liveDemoUrl = document.getElementById('liveDemoUrl').value.trim();
     const techTagsRaw = document.getElementById('techTags').value.trim();
     const techTags = techTagsRaw ? techTagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+    const assignmentId = document.getElementById('assignmentSelect')?.value || null;
 
     if (!githubRepoUrl.includes('github.com')) {
         showToast('Please enter a valid GitHub repository URL', 'error');
@@ -259,7 +318,7 @@ async function handleSubmit(e) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ projectName, description, githubRepoUrl, liveDemoUrl: liveDemoUrl || null, techTags })
+            body: JSON.stringify({ projectName, description, githubRepoUrl, liveDemoUrl: liveDemoUrl || null, techTags, assignmentId: assignmentId || null })
         });
 
         const data = await response.json();

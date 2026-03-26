@@ -153,6 +153,12 @@
                 <option value="grade-high">Highest Grade</option>
                 <option value="grade-low">Lowest Grade</option>
             </select>
+            <select id="assignmentFilter" style="min-width: 160px;">
+                <option value="all">All Assignments</option>
+            </select>
+            <button id="createAssignmentBtn" class="btn btn-ghost">
+                <i data-lucide="plus-circle"></i>Create Assignment
+            </button>
             <button id="peerReviewBtn" class="btn btn-primary" style="margin-left: auto;">
                 <i data-lucide="users"></i>Peer Review Settings
             </button>
@@ -306,6 +312,51 @@
         .notif-success-note { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: rgba(22,163,74,.08); border: 1px solid rgba(22,163,74,.2); margin-bottom: 16px; font-size: 13px; font-weight: 600; color: #16a34a; }
         .notif-success-note i { width: 16px; height: 16px; flex-shrink: 0; }
     </style>
+
+    <!-- Create Assignment Modal -->
+    <div id="createAssignmentModal" class="modal">
+        <div class="modal-content" style="max-width: 560px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="margin: 0; font-size: 20px;">Create Assignment</h2>
+                <button id="closeAssignmentModalBtn" class="close-btn"><i data-lucide="x"></i></button>
+            </div>
+            <form id="createAssignmentForm">
+                <div class="form-group">
+                    <label>Assignment Title *</label>
+                    <input type="text" id="assignmentTitle" placeholder="e.g. Mini Project — Phase 1" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="assignmentDescription" rows="3" placeholder="Describe what students should build and submit..."></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label>Start Date *</label>
+                        <input type="datetime-local" id="assignmentStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Deadline *</label>
+                        <input type="datetime-local" id="assignmentDeadline" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
+                    <button type="button" class="btn btn-ghost" id="cancelAssignmentBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i data-lucide="check"></i>Create Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assignments List Panel -->
+    <div id="assignmentsPanel" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(8px); z-index:1000; align-items:center; justify-content:center; padding:20px;">
+        <div class="modal-content" style="max-width:680px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0; font-size:18px;">Manage Assignments</h2>
+                <button id="closeAssignmentsPanelBtn" class="close-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div id="assignmentsList" style="display:grid; gap:10px; max-height:400px; overflow-y:auto;"></div>
+        </div>
+    </div>
 
     <script src="faculty-git-student.js"></script>
 

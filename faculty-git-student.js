@@ -100,7 +100,7 @@ function renderProjects(projects) {
     container.innerHTML = projects.map(project => `
         <div class="project-card">
             <div class="p-info">
-                <h3>${escapeHtml(project.projectName)}</h3>
+                <h3>${escapeHtml(project.projectName)}${project.assignmentId ? `<span style="font-size:10px;background:rgba(208,128,0,0.12);color:var(--accent);border:1px solid rgba(208,128,0,0.3);padding:2px 8px;border-radius:6px;font-weight:700;margin-left:8px;">📋 ${escapeHtml(project.assignmentId.title)}</span>` : ''}</h3>
                 <div class="p-meta">
                     <span><i data-lucide="user"></i>${escapeHtml(project.studentName)}</span>
                     <span><i data-lucide="mail"></i>${escapeHtml(project.studentEmail)}</span>
@@ -816,6 +816,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeReviewModal();
         document.getElementById('peerReviewModal').style.display = 'none';
+        document.getElementById('createAssignmentModal').style.display = 'none';
     }
 });
 
@@ -825,3 +826,125 @@ function formatDate(s) { return new Date(s).toLocaleDateString('en-US', { year:'
 function formatDateShort(s) { return new Date(s).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric'}); }
 function getGradeColor(g) { return g >= 90 ? '#34c759' : (g >= 75 ? '#d08000' : '#ff3b30'); }
 function formatStatusTag(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// ============================================
+// ASSIGNMENT MANAGEMENT
+// ============================================
+
+let allAssignments = [];
+
+async function loadAssignments() {
+    try {
+        const res = await fetch('/api/assignments', { credentials: 'include' });
+        const data = await res.json();
+        if (data.ok) {
+            allAssignments = data.assignments;
+            populateAssignmentFilter(data.assignments);
+        }
+    } catch (e) {
+        console.error('Load assignments error:', e);
+    }
+}
+
+function populateAssignmentFilter(assignments) {
+    const filter = document.getElementById('assignmentFilter');
+    if (!filter) return;
+    // Keep the "All Assignments" option, rebuild the rest
+    filter.innerHTML = '<option value="all">All Assignments</option>';
+    assignments.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a._id;
+        opt.textContent = a.title;
+        filter.appendChild(opt);
+    });
+}
+
+// Wire the assignment filter to reload projects
+document.getElementById('assignmentFilter')?.addEventListener('change', () => {
+    loadAllProjectsWithFilter();
+});
+
+async function loadAllProjectsWithFilter() {
+    const assignmentFilter = document.getElementById('assignmentFilter')?.value || 'all';
+    try {
+        const url = assignmentFilter === 'all'
+            ? '/api/projects/all'
+            : `/api/projects/all?assignmentFilter=${assignmentFilter}`;
+        const response = await fetch(url, { credentials: 'include' });
+        const data = await response.json();
+        if (data.ok) {
+            allProjects = data.projects;
+            updateStats();
+            applyFilters();
+        }
+    } catch (error) {
+        console.error('Load projects error:', error);
+        showError('Network error');
+    }
+}
+
+// Open Create Assignment modal
+document.getElementById('createAssignmentBtn')?.addEventListener('click', () => {
+    document.getElementById('createAssignmentForm').reset();
+    // Pre-fill start date to now
+    const now = new Date();
+    now.setSeconds(0, 0);
+    const localNow = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('assignmentStartDate').value = localNow;
+    document.getElementById('createAssignmentModal').style.display = 'flex';
+    if (window.lucide) window.lucide.createIcons();
+});
+
+document.getElementById('closeAssignmentModalBtn')?.addEventListener('click', () => {
+    document.getElementById('createAssignmentModal').style.display = 'none';
+});
+
+document.getElementById('cancelAssignmentBtn')?.addEventListener('click', () => {
+    document.getElementById('createAssignmentModal').style.display = 'none';
+});
+
+// Submit new assignment
+document.getElementById('createAssignmentForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('assignmentTitle').value.trim();
+    const description = document.getElementById('assignmentDescription').value.trim();
+    const startDate = document.getElementById('assignmentStartDate').value;
+    const deadline = document.getElementById('assignmentDeadline').value;
+
+    if (new Date(deadline) <= new Date(startDate)) {
+        showNotif({ type: 'warning', title: 'Invalid Dates', subtitle: 'Deadline must be after the start date.' });
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/assignments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ title, description, startDate, deadline })
+        });
+        const data = await res.json();
+        if (data.ok) {
+            document.getElementById('createAssignmentModal').style.display = 'none';
+            showNotif({ type: 'success', title: 'Assignment Created!', subtitle: `"${title}" is now visible to students.` });
+            await loadAssignments();
+        } else {
+            showNotif({ type: 'error', title: 'Failed', errors: [data.message || 'Unknown error'] });
+        }
+    } catch (err) {
+        showNotif({ type: 'error', title: 'Network Error', subtitle: 'Could not reach the server.' });
+    }
+});
+
+// Render assignment badge on project cards (called inside renderProjects)
+function getAssignmentBadge(project) {
+    if (!project.assignmentId) return '';
+    const a = project.assignmentId;
+    return `<span style="font-size:10px; background:rgba(208,128,0,0.12); color:var(--accent); border:1px solid rgba(208,128,0,0.3); padding:2px 8px; border-radius:6px; font-weight:700; letter-spacing:.03em; margin-left:6px;">
+        📋 ${escapeHtml(a.title)}
+    </span>`;
+}
+
+// Load assignments immediately on page load
+loadAssignments();
+

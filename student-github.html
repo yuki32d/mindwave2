@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -982,6 +982,12 @@
                     </div>
                 </div>
 
+                <!-- Active Assignments section -->
+                <div id="activeAssignmentsSection" style="margin-bottom:24px; display:none;">
+                    <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:12px;">📋 Active Assignments</div>
+                    <div id="activeAssignmentCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;"></div>
+                </div>
+
                 <!-- Projects list -->
                 <div id="projectsList" class="gh-cards-grid">
                     <!-- Loading skeleton -->
@@ -1013,6 +1019,13 @@
                 </button>
             </div>
             <form id="submitForm">
+                <div class="gh-form-group">
+                    <label>Assignment <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">(optional)</span></label>
+                    <select id="assignmentSelect" style="width:100%;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:13.5px;">
+                        <option value="">— Submit as a general project —</option>
+                    </select>
+                    <div class="gh-form-hint">Select an assignment if your teacher created one for this project.</div>
+                </div>
                 <div class="gh-form-group">
                     <label>Project Name *</label>
                     <input type="text" id="projectName" required placeholder="My Awesome Project">

@@ -823,6 +823,7 @@ const projectSubmissionSchema = new mongoose.Schema({
   description: { type: String, required: true },
   githubRepoUrl: { type: String, required: true },
   liveDemoUrl: { type: String }, // Optional
+  assignmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Assignment', default: null }, // Linked assignment (optional)
   submittedAt: { type: Date, default: Date.now },
   grade: { type: Number, min: 0, max: 100 }, // null if not graded yet
   feedback: { type: String },
@@ -831,8 +832,19 @@ const projectSubmissionSchema = new mongoose.Schema({
   reviewedAt: { type: Date }
 }, { timestamps: true });
 
-
 const ProjectSubmission = mongoose.model("ProjectSubmission", projectSubmissionSchema);
+
+// Schema for faculty-created GitHub project assignments
+const assignmentSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: { type: String, default: '' },
+  startDate: { type: Date, required: true },
+  deadline: { type: Date, required: true },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  createdByName: { type: String }
+}, { timestamps: true });
+
+const Assignment = mongoose.model("Assignment", assignmentSchema);
 
 // Meeting schema and model defined later in the LiveKit section
 
@@ -6588,6 +6600,74 @@ app.get("/api/admin/active-users", authMiddleware, async (req, res) => {
 
 
 // ============================================
+// ASSIGNMENT ENDPOINTS (Faculty creates assignments)
+// ============================================
+
+// Faculty creates an assignment
+app.post("/api/assignments", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+    if (!user || (user.role !== 'faculty' && user.role !== 'admin')) {
+      return res.status(403).json({ ok: false, message: "Only faculty can create assignments" });
+    }
+    const { title, description, startDate, deadline } = req.body;
+    if (!title || !startDate || !deadline) {
+      return res.status(400).json({ ok: false, message: "Title, start date, and deadline are required" });
+    }
+    const assignment = new Assignment({
+      title,
+      description: description || '',
+      startDate: new Date(startDate),
+      deadline: new Date(deadline),
+      createdBy: userId,
+      createdByName: user.displayName || user.name || user.email
+    });
+    await assignment.save();
+    res.json({ ok: true, message: "Assignment created", assignment });
+  } catch (error) {
+    console.error("Create assignment error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Get all assignments (faculty sees all; students see only active ones)
+app.get("/api/assignments", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+    const now = new Date();
+    let assignments;
+    if (user && (user.role === 'faculty' || user.role === 'admin')) {
+      assignments = await Assignment.find().sort({ createdAt: -1 });
+    } else {
+      // Students see only active assignments (startDate <= now <= deadline)
+      assignments = await Assignment.find({ startDate: { $lte: now }, deadline: { $gte: now } }).sort({ deadline: 1 });
+    }
+    res.json({ ok: true, assignments });
+  } catch (error) {
+    console.error("Get assignments error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Delete an assignment (faculty only)
+app.delete("/api/assignments/:id", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId);
+    if (!user || (user.role !== 'faculty' && user.role !== 'admin')) {
+      return res.status(403).json({ ok: false, message: "Only faculty can delete assignments" });
+    }
+    await Assignment.findByIdAndDelete(req.params.id);
+    res.json({ ok: true, message: "Assignment deleted" });
+  } catch (error) {
+    console.error("Delete assignment error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// ============================================
 // PROJECT SUBMISSION ENDPOINTS
 // ============================================
 
@@ -6601,10 +6681,25 @@ app.post("/api/projects/submit", authMiddleware, async (req, res) => {
       return res.status(403).json({ ok: false, message: "Only students can submit projects" });
     }
 
-    const { projectName, description, githubRepoUrl, liveDemoUrl } = req.body;
+    const { projectName, description, githubRepoUrl, liveDemoUrl, assignmentId } = req.body;
 
     if (!projectName || !description || !githubRepoUrl) {
       return res.status(400).json({ ok: false, message: "Project name, description, and GitHub URL are required" });
+    }
+
+    // If an assignmentId is provided, validate it is active
+    if (assignmentId) {
+      const assignment = await Assignment.findById(assignmentId);
+      const now = new Date();
+      if (!assignment) {
+        return res.status(400).json({ ok: false, message: "Assignment not found" });
+      }
+      if (now < assignment.startDate) {
+        return res.status(400).json({ ok: false, message: "This assignment has not started yet" });
+      }
+      if (now > assignment.deadline) {
+        return res.status(400).json({ ok: false, message: "The deadline for this assignment has passed" });
+      }
     }
 
     const newProject = new ProjectSubmission({
@@ -6614,7 +6709,8 @@ app.post("/api/projects/submit", authMiddleware, async (req, res) => {
       projectName,
       description,
       githubRepoUrl,
-      liveDemoUrl: liveDemoUrl || null
+      liveDemoUrl: liveDemoUrl || null,
+      assignmentId: assignmentId || null
     });
 
     await newProject.save();
@@ -6634,6 +6730,7 @@ app.get("/api/projects/my", authMiddleware, async (req, res) => {
     const projects = await ProjectSubmission.find({ studentId: userId })
       .sort({ submittedAt: -1 })
       .populate('reviewedBy', 'name email')
+      .populate('assignmentId', 'title deadline')
       .lean(); // Use lean for performance since we'll manually add data
 
     // Fetch peer reviews for these projects
@@ -6673,10 +6770,13 @@ app.get("/api/projects/all", authMiddleware, async (req, res) => {
       return res.status(403).json({ ok: false, message: "Access denied" });
     }
 
-    const projects = await ProjectSubmission.find()
+    const { assignmentFilter } = req.query;
+    const query = assignmentFilter && assignmentFilter !== 'all' ? { assignmentId: assignmentFilter } : {};
+    const projects = await ProjectSubmission.find(query)
       .sort({ submittedAt: -1 })
       .populate('studentId', 'name email')
-      .populate('reviewedBy', 'name email');
+      .populate('reviewedBy', 'name email')
+      .populate('assignmentId', 'title deadline');
 
     res.json({ ok: true, projects });
   } catch (error) {
