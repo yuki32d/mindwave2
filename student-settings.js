@@ -40,7 +40,53 @@ async function loadSettings() {
                 document.getElementById('photoImage').style.display = 'block';
                 document.getElementById('photoInitials').style.display = 'none';
             } else {
-                document.getElementById('photoInitials').textContent = getInitials(user.displayName || user.name || 'Student');
+                const initialsNode = document.getElementById('photoInitials') || document.getElementById('stAvatarInitials');
+                if (initialsNode) initialsNode.textContent = getInitials(user.displayName || user.name || 'Student');
+            }
+
+            // --- READ-ONLY LOCK LOGIC ---
+            // If the user has already saved their profile constraints (e.g. rollNumber and department)
+            if (user.rollNumber && user.department) {
+                const fieldsToLock = ['displayName', 'bio', 'rollNumber', 'phone', 'batch', 'department', 'section', 'photoInput'];
+                fieldsToLock.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.disabled = true;
+                        el.style.opacity = '0.6';
+                        el.style.cursor = 'not-allowed';
+                    }
+                });
+
+                // Hide Action Buttons
+                const saveBtn = document.getElementById('saveProfileBtn') || document.getElementById('saveBtn');
+                if (saveBtn) saveBtn.closest('.st-save-bar').style.display = 'none';
+                
+                const photoBtns = document.querySelector('.st-photo-btns');
+                if (photoBtns) photoBtns.style.display = 'none';
+
+                // Add Locked Notice
+                const profilePanel = document.getElementById('tab-profile');
+                if (profilePanel && !document.getElementById('profileLockNotice')) {
+                    const notice = document.createElement('div');
+                    notice.id = 'profileLockNotice';
+                    notice.style.padding = '12px 16px';
+                    notice.style.background = 'rgba(208, 128, 0, 0.1)';
+                    notice.style.border = '1px solid rgba(208, 128, 0, 0.2)';
+                    notice.style.borderRadius = '10px';
+                    notice.style.color = '#d08000';
+                    notice.style.fontSize = '13px';
+                    notice.style.marginBottom = '20px';
+                    notice.style.display = 'flex';
+                    notice.style.alignItems = 'center';
+                    notice.style.gap = '8px';
+                    notice.innerHTML = `<i data-lucide="lock" style="width: 16px; height: 16px;"></i> <span>Your profile is locked. Contact your faculty to request changes.</span>`;
+                    
+                    const titleNode = profilePanel.querySelector('.st-panel-sub');
+                    if (titleNode) {
+                        titleNode.insertAdjacentElement('afterend', notice);
+                    }
+                    if (window.lucide) window.lucide.createIcons();
+                }
             }
         }
     } catch (error) {
