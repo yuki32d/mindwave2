@@ -230,20 +230,22 @@ async function saveSettings() {
         // Update localStorage
         localStorage.setItem('firstName', displayName);
 
-        // Show success message
+        // Lock profile immediately on first successful save
+        profileLocked = true;
+        lockProfileFields();
+
+        // Show success toast
         const successMsg = document.getElementById('successMessage');
-        successMsg.style.display = 'block';
-        setTimeout(() => {
-            successMsg.style.display = 'none';
-        }, 3000);
+        if (successMsg) {
+            successMsg.style.display = 'block';
+            setTimeout(() => { successMsg.style.display = 'none'; }, 3000);
+        }
 
         // Clear password fields
         document.getElementById('currentPassword').value = '';
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmPassword').value = '';
 
-        // Reload settings to show saved data
-        await loadSettings();
 
     } catch (error) {
         console.error('Error saving settings:', error);
