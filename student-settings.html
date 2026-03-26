@@ -1489,7 +1489,39 @@
             </div>
         </div>
     </div>
+    <!-- ── Profile Confirmation Modal ── -->
+    <div id="profileConfirmModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;flex-direction:column;">
+        <div style="background:var(--surface,#1a1d2e);border:1px solid var(--border,rgba(255,255,255,.1));border-radius:22px;padding:0;max-width:460px;width:92%;box-shadow:0 32px 80px rgba(0,0,0,.6);overflow:hidden;">
+            <!-- Header -->
+            <div style="background:rgba(208,128,0,.08);border-bottom:1px solid rgba(208,128,0,.2);padding:24px 28px 20px;display:flex;align-items:center;gap:14px;">
+                <div style="width:46px;height:46px;border-radius:12px;background:rgba(208,128,0,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i data-lucide="shield-alert" style="width:22px;height:22px;color:#d08000;"></i>
+                </div>
+                <div>
+                    <div style="font-size:17px;font-weight:800;color:var(--text-primary,#f5f7ff);">Confirm Your Details</div>
+                    <div style="font-size:12px;color:var(--text-muted,#9ea4b6);margin-top:2px;">Please verify — this cannot be changed after saving</div>
+                </div>
+            </div>
+            <!-- Details grid -->
+            <div style="padding:20px 28px 8px;display:flex;flex-direction:column;gap:8px;" id="confirmDetailsList"></div>
+            <!-- Caution note -->
+            <div style="margin:12px 28px;padding:11px 14px;background:rgba(255,59,48,.06);border:1px solid rgba(255,59,48,.15);border-radius:10px;font-size:12px;color:#ff6b6b;display:flex;align-items:center;gap:8px;">
+                <i data-lucide="alert-triangle" style="width:14px;height:14px;flex-shrink:0;"></i>
+                Once you confirm, your profile will be <strong>&nbsp;permanently locked&nbsp;</strong>. Contact your faculty to request changes.
+            </div>
+            <!-- Footer buttons -->
+            <div style="padding:16px 28px 24px;display:flex;gap:12px;justify-content:flex-end;">
+                <button id="confirmGoBackBtn" style="padding:10px 20px;border-radius:10px;border:1px solid var(--border,rgba(255,255,255,.1));background:var(--surface-hover,rgba(255,255,255,.06));color:var(--text-primary,#f5f7ff);font-size:14px;font-weight:600;cursor:pointer;">
+                    Go Back
+                </button>
+                <button id="confirmLockBtn" style="padding:10px 22px;border-radius:10px;border:none;background:#d08000;color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;">
+                    <i data-lucide="lock" style="width:15px;height:15px;"></i> Yes, Lock My Profile
+                </button>
+            </div>
+        </div>
+    </div>
     <script src="heartbeat.js"></script>
+
 </body>
 
 </html>

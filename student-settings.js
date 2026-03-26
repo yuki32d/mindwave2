@@ -94,107 +94,86 @@ function lockProfileFields() {
     if (window.lucide) window.lucide.createIcons();
 }
 
-async function saveSettings() {
+// Holds the staged profile data between "Save" click and "Confirm" click
+let _pendingProfileData = null;
+
+function saveSettings() {
     // Guard: do nothing if profile is already locked
     if (profileLocked) return;
-    const displayName = document.getElementById('displayName').value;
-    const bio = document.getElementById('bio').value;
-    const rollNumber = document.getElementById('rollNumber').value;
-    const phone = document.getElementById('phone').value;
-    const batch = document.getElementById('batch').value;
-    const department = document.getElementById('department').value;
-    const section = document.getElementById('section').value;
+
+    const displayName = document.getElementById('displayName').value.trim();
+    const bio         = document.getElementById('bio').value.trim();
+    const rollNumber  = document.getElementById('rollNumber').value.trim();
+    const phone       = document.getElementById('phone').value.trim();
+    const batch       = document.getElementById('batch').value.trim();
+    const department  = document.getElementById('department').value;
+    const section     = document.getElementById('section').value;
+    const deptText    = document.getElementById('department').options[document.getElementById('department').selectedIndex]?.text || department;
 
     // Validate required fields
-    if (!displayName) {
-        alert('Display name is required!');
-        return;
-    }
-
+    if (!displayName) { alert('Display name is required!'); return; }
     if (!rollNumber || !batch || !department || !section) {
         alert('Please fill in all required fields: Roll Number, Batch, Department, and Section');
         return;
     }
 
-    // Check password change
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
+    // Store staged data
+    _pendingProfileData = { displayName, bio, rollNumber, phone, batch, department, section };
 
-    if (newPassword || confirmPassword) {
-        if (!currentPassword) {
-            alert('Please enter your current password to change it.');
-            return;
-        }
-        if (newPassword !== confirmPassword) {
-            alert('New passwords do not match!');
-            return;
-        }
-        if (newPassword.length < 8) {
-            alert('Password must be at least 8 characters long!');
-            return;
-        }
-        try {
-            const pwRes = await fetch(`${window.location.origin}/api/users/password`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ currentPassword, newPassword })
-            });
-            const pwData = await pwRes.json();
-            if (!pwData.ok) {
-                alert(pwData.message || 'Failed to update password.');
-                return;
-            }
-        } catch (e) {
-            alert('Password change failed. Please try again.');
-            return;
-        }
-
+    // Populate confirmation modal details
+    const rows = [
+        ['Name',        displayName],
+        ['Roll Number', rollNumber],
+        ['Phone',       phone || '—'],
+        ['Batch',       batch],
+        ['Department',  deptText],
+        ['Section',     section],
+    ];
+    const list = document.getElementById('confirmDetailsList');
+    if (list) {
+        list.innerHTML = rows.map(([label, val]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border,rgba(255,255,255,.08));">
+                <span style="font-size:12px;color:var(--text-muted,#9ea4b6);font-weight:500;">${label}</span>
+                <span style="font-size:13px;color:var(--text-primary,#f5f7ff);font-weight:700;">${val}</span>
+            </div>`).join('');
     }
+
+    // Show the modal
+    const modal = document.getElementById('profileConfirmModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        if (window.lucide) window.lucide.createIcons();
+    }
+}
+
+async function performSaveProfile() {
+    const d = _pendingProfileData;
+    if (!d) return;
+
+    // Close modal immediately on click
+    const modal = document.getElementById('profileConfirmModal');
+    if (modal) modal.style.display = 'none';
 
     try {
         const token = localStorage.getItem('token');
-        if (!token) {
-            alert('Please log in again');
-            window.location.replace('marketing-site/student-login.html');
-            return;
-        }
+        if (!token) { window.location.replace('marketing-site/student-login.html'); return; }
 
-        // Save profile to database using new endpoint
         const response = await fetch(`${window.location.origin}/api/users/profile`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                displayName,
-                bio,
-                rollNumber,
-                phone,
-                batch,
-                department,
-                section
-            })
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(d)
         });
 
         const data = await response.json();
+        if (!data.ok) throw new Error(data.message || 'Failed to save profile');
 
-        if (!data.ok) {
-            throw new Error(data.message || 'Failed to save profile');
-        }
+        localStorage.setItem('firstName', d.displayName);
 
-        // Update localStorage
-        localStorage.setItem('firstName', displayName);
-
-        // Lock profile immediately on first successful save
+        // Lock immediately
         profileLocked = true;
         lockProfileFields();
 
-        // Show success toast
+        // Success toast
         const successMsg = document.getElementById('successMessage');
         if (successMsg) {
             successMsg.style.display = 'block';
@@ -202,11 +181,12 @@ async function saveSettings() {
         }
 
         // Clear password fields
-        document.getElementById('currentPassword').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmPassword').value = '';
+        ['currentPassword', 'newPassword', 'confirmPassword'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
 
-
+        _pendingProfileData = null;
     } catch (error) {
         console.error('Error saving settings:', error);
         alert('Failed to save settings: ' + error.message);
@@ -259,6 +239,20 @@ document.addEventListener('DOMContentLoaded', function () {
     if (savePasswordBtn) {
         savePasswordBtn.addEventListener('click', saveSettings);
     }
+
+    // Profile Confirmation Modal buttons
+    document.getElementById('confirmGoBackBtn')?.addEventListener('click', () => {
+        document.getElementById('profileConfirmModal').style.display = 'none';
+        _pendingProfileData = null;
+    });
+    document.getElementById('confirmLockBtn')?.addEventListener('click', performSaveProfile);
+    // Click backdrop to go back
+    document.getElementById('profileConfirmModal')?.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('profileConfirmModal')) {
+            document.getElementById('profileConfirmModal').style.display = 'none';
+            _pendingProfileData = null;
+        }
+    });
 
     // Photo upload handler
     document.getElementById('photoInput').addEventListener('change', function (e) {
