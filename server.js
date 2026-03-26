@@ -5420,10 +5420,8 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
     const studentsData = await User.aggregate([
       {
         $match: {
-          $or: [
-            { role: 'student' },
-            { email: req.user.email }
-          ],
+          role: 'student',              // Only real students
+          orgRole: { $nin: ['owner', 'admin', 'faculty'] }, // Exclude HOD / faculty org roles
           email: { $ne: SUPER_ADMIN_EMAIL }
         }
       },
