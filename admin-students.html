@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
 <head>
@@ -2411,7 +2411,7 @@
                                 <th>Dept / Batch / Section</th>
                                 <th>Status</th>
                                 <th>Last Active</th>
-                                <th>Actions</th>
+                                <th id="actionsHeader">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="studentTableBody">
@@ -2450,6 +2450,18 @@
         lucide.createIcons();
 
         const TOKEN = localStorage.getItem('token');
+
+        // Decode JWT payload (no signature verification needed — just for display gating)
+        function decodeJwtEmail(token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+                return (payload.email || '').toLowerCase();
+            } catch { return ''; }
+        }
+        const currentEmail = decodeJwtEmail(TOKEN || '');
+        // HODs have emails like hod.mca@cmrit.ac.in — starts with 'hod.'
+        const isHOD = currentEmail.startsWith('hod.');
+
         let allStudents = [];
         let refreshInterval;
 
@@ -2535,6 +2547,9 @@
         function renderTable() {
             const rows = filtered();
             const tbody = document.getElementById('studentTableBody');
+            // Toggle ACTIONS column header visibility
+            const actHeader = document.getElementById('actionsHeader');
+            if (actHeader) actHeader.style.display = isHOD ? '' : 'none';
             if (!rows.length) {
                 tbody.innerHTML = `<tr class="state-row"><td colspan="6">No students match your filters.</td></tr>`;
                 return;
@@ -2563,9 +2578,7 @@
         <td style="color:var(--muted)">${timeAgo(s.lastActive)}</td>
         <td>
           <div class="actions">
-            <button class="act-btn" title="View Profile" onclick="window.open('student-profile.html?id=${s._id}','_blank')">
-              <i data-lucide="external-link" style="width:13px;height:13px"></i>
-            </button>
+            ${isHOD ? `
             <button class="act-btn ${blocked ? 'success' : 'warn'}" title="${blocked ? 'Unblock' : 'Block'}" onclick="toggleBlock('${s._id}','${(s.displayName || s.name).replace(/'/g, "\\'")}',${blocked})">
               <i data-lucide="${blocked ? 'unlock' : 'lock'}" style="width:13px;height:13px"></i>
             </button>
@@ -2575,6 +2588,7 @@
             <button class="act-btn danger" title="Remove Student" onclick="removeStudent('${s._id}','${(s.displayName || s.name).replace(/'/g, "\\'")}')">
               <i data-lucide="trash-2" style="width:13px;height:13px"></i>
             </button>
+            ` : '<span style="color:var(--muted);font-size:12px">—</span>'}
           </div>
         </td>
       </tr>`;
