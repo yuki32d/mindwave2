@@ -1520,6 +1520,7 @@
     let room = null, localAudio = null, localVideo = null, localScreen = null;
     let micOn = true, camOn = true, screenOn = false, panelOpen = true, allMuted = false;
     let startTs = null, timerInt = null, isConnected = false;
+    let meetingEndedIntentionally = false;
     let meetingCode = '', meetingTitle = 'Live Meeting';
     let handsRaised = {}; // identity -> name
     let selectedGame = null;
@@ -1689,11 +1690,12 @@
         console.warn('Room Disconnected:', reason);
         isConnected = false;
         clearInterval(timerInt);
+        // Skip auto-redirect if faculty intentionally ended the meeting (summary modal is showing)
+        if (meetingEndedIntentionally) return;
         if (reason === 'DUPLICATE_IDENTITY' || reason === 'ROOM_CLOSED') {
           alert('Meeting disconnected: ' + reason);
           window.location.href = 'admin.html';
         } else {
-          // Only redirect if it wasn't an intentional stop or if it was already connected
           showToast('Disconnected from meeting', 'error');
           setTimeout(() => { window.location.href = 'admin.html'; }, 2000);
         }
@@ -2073,12 +2075,14 @@
         const avgEng = meetingLog.engagementSamples.length ? Math.round(meetingLog.engagementSamples.reduce((a, b) => a + b, 0) / meetingLog.engagementSamples.length) : 0;
 
         document.getElementById('sumDur').textContent = durationMins + 'm';
-        document.getElementById('sumParts').textContent = meetingLog.participants.size + 1; // +1 for faculty
+        document.getElementById('sumParts').textContent = meetingLog.participants.size + 1;
         document.getElementById('sumChat').textContent = meetingLog.chats.length;
         document.getElementById('sumEng').textContent = avgEng + '%';
 
         document.getElementById('summaryModal').style.display = 'flex';
 
+        // Set flag BEFORE disconnect so the Disconnected handler doesn't redirect
+        meetingEndedIntentionally = true;
         if (room) room.disconnect();
       });
     }
