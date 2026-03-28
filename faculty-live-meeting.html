@@ -1030,7 +1030,7 @@
     t.innerHTML = `<i data-lucide="${icons[type]}"></i>${msg}`;
     document.getElementById('toastWrap').appendChild(t);
     lucide.createIcons();
-    setTimeout(() => t.remove(), 3500);
+    setTimeout(() => t.remove(), 10000);
   }
 
   lucide.createIcons();
