@@ -319,7 +319,7 @@
       <button class="cb" id="btnCam" onclick="toggleCam()"><i data-lucide="video" id="camIco"></i><span>Camera</span></button>
       <div class="sep"></div>
       <button class="cb" id="btnScreen" onclick="toggleScreen()"><i data-lucide="monitor" id="screenIco"></i><span>Share</span></button>
-      <button class="cb cb-warn" id="btnMuteAll" onclick="muteAll()"><i data-lucide="mic-off"></i><span>Mute All</span></button>
+      <button class="cb cb-warn" id="btnMuteAll" onclick="toggleMuteAll()"><i data-lucide="mic-off" id="muteAllIco"></i><span id="muteAllLabel">Mute All</span></button>
       <div class="sep"></div>
       <button class="cb" id="btnPanel" onclick="togglePanel()"><i data-lucide="panel-right"></i><span>Panel</span></button>
       <div class="sep"></div>
@@ -384,7 +384,7 @@
   if (!jwt) window.location.href = 'marketing-site/faculty-login.html';
 
   let room = null, localAudio = null, localVideo = null, localScreen = null;
-  let micOn = true, camOn = true, screenOn = false, panelOpen = true;
+  let micOn = true, camOn = true, screenOn = false, panelOpen = true, allMuted = false;
   let startTs = null, timerInt = null, isConnected = false;
   let meetingCode = '', meetingTitle = 'Live Meeting';
   let handsRaised = {}; // identity -> name
@@ -884,10 +884,25 @@
     } catch (e) { console.error(e); }
   }
 
-  function muteAll() {
+  function toggleMuteAll() {
     if (!room) return;
-    room.localParticipant.publishData(new TextEncoder().encode(JSON.stringify({ type: 'mute_all' })), { reliable: true });
-    showToast('Mute all signal sent', 'info');
+    allMuted = !allMuted;
+    if (allMuted) {
+      room.localParticipant.publishData(new TextEncoder().encode(JSON.stringify({ type: 'mute_all' })), { reliable: true });
+      showToast('Mute all signal sent', 'info');
+      document.getElementById('muteAllIco').setAttribute('data-lucide', 'mic-off');
+      document.getElementById('muteAllLabel').textContent = 'Unmute All';
+      document.getElementById('btnMuteAll').classList.remove('cb-warn');
+      document.getElementById('btnMuteAll').classList.add('muted');
+    } else {
+      room.localParticipant.publishData(new TextEncoder().encode(JSON.stringify({ type: 'unmute_all' })), { reliable: true });
+      showToast('Unmute all signal sent', 'success');
+      document.getElementById('muteAllIco').setAttribute('data-lucide', 'mic');
+      document.getElementById('muteAllLabel').textContent = 'Mute All';
+      document.getElementById('btnMuteAll').classList.remove('muted');
+      document.getElementById('btnMuteAll').classList.add('cb-warn');
+    }
+    lucide.createIcons();
   }
 
   function mutePart(identity) {

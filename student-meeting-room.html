@@ -438,6 +438,14 @@
           lucide.createIcons();
           addChatMessage('', 'Faculty muted all participants.', false, true);
         }
+        if(msg.type === 'unmute_all') {
+          micOn = true;
+          if(localAudio) localAudio.unmute();
+          document.getElementById('micIco').setAttribute('data-lucide','mic');
+          document.getElementById('btnMic').classList.remove('muted');
+          lucide.createIcons();
+          addChatMessage('', 'Faculty unmuted all participants.', false, true);
+        }
         if(msg.type === 'mute' && msg.target === room.localParticipant.identity) {
           micOn = false;
           if(localAudio) localAudio.mute();
