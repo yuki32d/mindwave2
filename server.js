@@ -5377,7 +5377,7 @@ app.get("/api/student/dashboard-sparklines", authMiddleware, async (req, res) =>
 app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
   try {
     // Determine if current user is HOD (sees all) or faculty (sees only their games)
-    const isHod = req.user.email === SUPER_ADMIN_EMAIL;
+    const isHod = isSuperAdmin(req.user.email); // HOD: any hod.*@cmrit.ac.in email
     const currentUserId = req.user.sub;
 
     // Build game filter: HOD sees all, faculty sees only their created games
@@ -5572,7 +5572,7 @@ app.get("/api/analytics/games", authMiddleware, async (req, res) => {
     ]);
 
     // Determine if the current user is HOD (sees all games) or faculty (sees only their own)
-    const isHod = req.user.email === SUPER_ADMIN_EMAIL;
+    const isHod = isSuperAdmin(req.user.email); // HOD: any hod.*@cmrit.ac.in email
     const currentUserId = req.user.sub;
 
     const filteredGames = isHod
