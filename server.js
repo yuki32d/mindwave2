@@ -5376,11 +5376,23 @@ app.get("/api/student/dashboard-sparklines", authMiddleware, async (req, res) =>
 // Analytics Overview
 app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
   try {
+    // Determine if current user is HOD (sees all) or faculty (sees only their games)
+    const isHod = req.user.email === SUPER_ADMIN_EMAIL;
+    const currentUserId = req.user.sub;
+
+    // Build game filter: HOD sees all, faculty sees only their created games
+    const gameFilter = isHod ? {} : { createdBy: mongoose.Types.ObjectId(currentUserId) };
+    const facultyGameIds = isHod ? null : (await Game.find(gameFilter).select('_id').lean()).map(g => g._id);
+
+    // Helper to add game filter to aggregation match
+    const gameMatchStage = facultyGameIds ? { gameId: { $in: facultyGameIds } } : {};
+
     // Get total students
     const totalStudents = await User.countDocuments({ role: 'student' });
 
-    // Get total game submissions (excluding admin and super admin)
+    // Get total game submissions (excluding admin and super admin, filtered by faculty games)
     const gamesPlayedData = await GameSubmission.aggregate([
+      { $match: gameMatchStage },
       {
         $lookup: {
           from: 'users',
@@ -5400,8 +5412,9 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
     ]);
     const gamesPlayed = (gamesPlayedData[0] && gamesPlayedData[0].total) || 0;
 
-    // Get active students (those who submitted games, excluding admin)
+    // Get active students (those who submitted games, filtered by faculty games)
     const activeStudentsData = await GameSubmission.aggregate([
+      { $match: gameMatchStage },
       {
         $lookup: {
           from: 'users',
@@ -5429,8 +5442,9 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
     const activeStudents = activeStudentsData.length;
     const totalEngagement = totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100) : 0;
 
-    // Get top performer
+    // Get top performer (filtered by faculty games)
     const topPerformerData = await GameSubmission.aggregate([
+      { $match: gameMatchStage },
       {
         $lookup: {
           from: 'users',
@@ -5440,7 +5454,6 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
         }
       },
       { $unwind: '$student' },
-      // Filter to exclude admin users and super admin email
       {
         $match: {
           'student.role': { $ne: 'admin' },
@@ -5451,7 +5464,7 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
         $group: {
           _id: '$studentId',
           name: { $first: { $ifNull: ['$student.displayName', '$student.name'] } },
-          totalScore: { $sum: 1 } // Count submissions as score
+          totalScore: { $sum: 1 }
         }
       },
       { $sort: { totalScore: -1 } },
@@ -5460,8 +5473,9 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
 
     const topPerformer = topPerformerData[0] || null;
 
-    // Get consistent students (3+ games)
+    // Get consistent students (3+ games, filtered by faculty games)
     const consistentStudentsData = await GameSubmission.aggregate([
+      { $match: gameMatchStage },
       {
         $lookup: {
           from: 'users',
@@ -5493,7 +5507,7 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
       ok: true,
       gamesPlayed,
       totalEngagement,
-      activeStudents: activeStudents.length,
+      activeStudents: activeStudentsData.length,
       totalStudents,
       topPerformer: topPerformer ? {
         name: topPerformer.name,
@@ -5543,7 +5557,9 @@ app.get("/api/analytics/games", authMiddleware, async (req, res) => {
           _id: '$gameId',
           title: { $first: '$game.title' },
           type: { $first: '$game.type' },
+          createdBy: { $first: '$game.createdBy' },
           completions: { $sum: 1 },
+          avgDuration: { $avg: '$durationSeconds' },
           students: {
             $push: {
               name: '$student.name',
@@ -5555,7 +5571,15 @@ app.get("/api/analytics/games", authMiddleware, async (req, res) => {
       { $sort: { completions: -1 } }
     ]);
 
-    const games = gamesData.map(game => {
+    // Determine if the current user is HOD (sees all games) or faculty (sees only their own)
+    const isHod = req.user.email === SUPER_ADMIN_EMAIL;
+    const currentUserId = req.user.sub;
+
+    const filteredGames = isHod
+      ? gamesData
+      : gamesData.filter(game => game.createdBy && game.createdBy.toString() === currentUserId);
+
+    const games = filteredGames.map(game => {
       const scores = game.students.map(s => s.score);
       const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
       const topScorer = game.students.sort((a, b) => b.score - a.score)[0];
@@ -5566,7 +5590,7 @@ app.get("/api/analytics/games", authMiddleware, async (req, res) => {
         type: game.type,
         completions: game.completions,
         avgScore,
-        avgTime: 0, // Not tracking time in GameSubmission currently
+        avgTime: game.avgDuration ? Math.round(game.avgDuration) : null,
         topScorer: topScorer ? {
           name: topScorer.name,
           score: topScorer.score
