@@ -1,729 +1,769 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindWave — The Future of Human-Centric Learning</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #4F46E5;
-            --secondary: #7C3AED;
-            --accent: #0ea5e9;
-            --bg: #FAFAFA;
-            --surface: #FFFFFF;
-            --text-main: #0F172A;
-            --text-muted: #64748B;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindWave — The Classroom Engagement Platform</title>
+  <meta name="description" content="MindWave is a tool-rich classroom platform built for faculty and students. Run live quizzes, polls, SQL games, AI tutoring, and more — all in one place." />
+  <link rel="icon" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
+    :root {
+      --teal: #06B6D4;
+      --teal-dark: #0891B2;
+      --teal-light: #CCFBF1;
+      --teal-bg: #E0F7FA;
+      --orange: #F97316;
+      --orange-light: #FFF7ED;
+      --navy: #0F172A;
+      --slate: #475569;
+      --slate-light: #94A3B8;
+      --white: #FFFFFF;
+      --card-bg: #F8FAFC;
+      --border: #E2E8F0;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 4px 24px rgba(6,182,212,0.10);
+      --shadow-lg: 0 8px 40px rgba(6,182,212,0.16);
+    }
 
-        h1, h2, h3, h4, .brand-logo { font-family: 'Outfit', sans-serif; }
+    html { scroll-behavior: smooth; }
 
-        /* Ambient Background */
-        .ambient-bg {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: -1;
-            overflow: hidden;
-            background: #FAFAFA;
-        }
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.4;
-            animation: float 20s infinite alternate;
-        }
-        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: rgba(79, 70, 229, 0.4); }
-        .blob-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: rgba(124, 58, 237, 0.3); animation-delay: -5s; }
-        .blob-3 { top: 40%; left: 60%; width: 40vw; height: 40vw; background: rgba(14, 165, 233, 0.2); animation-delay: -10s; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--white);
+      color: var(--navy);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
 
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(5%, 10%) scale(1.1); }
-        }
+    /* ─── BLOB SHAPES ─── */
+    .blob-tl {
+      position: absolute; top: -80px; left: -80px;
+      width: 420px; height: 420px;
+      background: var(--teal-light);
+      border-radius: 70% 30% 60% 40% / 50% 60% 40% 50%;
+      z-index: 0; opacity: 0.7;
+      animation: blobFloat 8s ease-in-out infinite;
+    }
+    .blob-br {
+      position: absolute; bottom: -100px; right: -80px;
+      width: 380px; height: 380px;
+      background: var(--teal-light);
+      border-radius: 40% 60% 30% 70% / 60% 40% 70% 30%;
+      z-index: 0; opacity: 0.6;
+      animation: blobFloat 10s ease-in-out infinite reverse;
+    }
+    .blob-hero-bot {
+      position: absolute; bottom: -60px; left: 0; right: 0;
+      height: 120px;
+      background: var(--teal-light);
+      border-radius: 60% 60% 0 0 / 80% 80% 0 0;
+      z-index: 0; opacity: 0.5;
+    }
+    @keyframes blobFloat {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%      { transform: translate(12px,-18px) scale(1.04); }
+    }
 
-        /* Navbar */
-        .navbar {
-            position: fixed;
-            top: 20px; left: 50%;
-            transform: translateX(-50%);
-            width: 90%; max-width: 1200px;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 20px;
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-        .navbar.scrolled {
-            top: 0;
-            width: 100%;
-            max-width: 100%;
-            border-radius: 0;
-            border-top: none;
-            border-left: none;
-            border-right: none;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
-        }
-        .brand-logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--text-main);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .brand-logo i {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-        .nav-link {
-            text-decoration: none;
-            color: var(--text-muted);
-            font-weight: 500;
-            transition: color 0.2s;
-            font-size: 0.95rem;
-            position: relative;
-        }
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.3s ease;
-        }
-        .nav-link:hover { color: var(--primary); }
-        .nav-link:hover::after { transform: scaleX(1); }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 12px 24px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
-            border: none;
-            cursor: pointer;
-            font-family: inherit;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(79, 70, 229, 0.35);
-        }
-        .btn-outline {
-            background: transparent;
-            color: var(--text-main);
-            padding: 12px 24px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            border: 1.5px solid rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        .btn-outline:hover {
-            border-color: var(--text-main);
-            background: var(--text-main);
-            color: white;
-        }
+    /* ─── NAVBAR ─── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.90);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 5%;
+      height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.25rem; font-weight: 800; color: var(--navy);
+      text-decoration: none;
+    }
+    .nav-logo img { width: 34px; height: 34px; border-radius: 8px; }
+    .nav-logo span { color: var(--teal); }
+    .nav-links {
+      display: flex; align-items: center; gap: 8px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none; color: var(--slate);
+      font-size: 0.92rem; font-weight: 500;
+      padding: 6px 14px; border-radius: 50px;
+      transition: all 0.2s;
+    }
+    .nav-links a:hover { color: var(--teal); background: var(--teal-light); }
+    .nav-links a.active {
+      background: var(--teal); color: white;
+    }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .btn-login {
+      text-decoration: none; color: var(--navy);
+      font-size: 0.9rem; font-weight: 600;
+      padding: 8px 20px; border-radius: 50px;
+      border: 1.5px solid var(--border);
+      transition: all 0.2s;
+    }
+    .btn-login:hover { border-color: var(--teal); color: var(--teal); }
+    .btn-cta {
+      text-decoration: none; color: white;
+      font-size: 0.9rem; font-weight: 700;
+      padding: 9px 22px; border-radius: 50px;
+      background: var(--teal);
+      transition: all 0.2s;
+      box-shadow: 0 2px 12px rgba(6,182,212,0.35);
+    }
+    .btn-cta:hover { background: var(--teal-dark); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(6,182,212,0.45); }
 
-        /* Hero */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            padding: 120px 5% 60px;
-            max-width: 1400px;
-            margin: 0 auto;
-            position: relative;
-        }
-        .hero-content {
-            flex: 1;
-            padding-right: 40px;
-        }
-        .pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(79, 70, 229, 0.1);
-            color: var(--primary);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin-bottom: 24px;
-            border: 1px solid rgba(79, 70, 229, 0.2);
-            animation: fadeUp 0.8s ease both;
-        }
-        .hero h1 {
-            font-size: clamp(3rem, 5vw, 4.5rem);
-            line-height: 1.1;
-            margin-bottom: 24px;
-            letter-spacing: -0.03em;
-            animation: fadeUp 0.8s 0.2s ease both;
-        }
-        .hero h1 .gradient-text {
-            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 200% 200%;
-            animation: gradient-shift 5s ease infinite;
-        }
-        @keyframes gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .hero p {
-            font-size: 1.15rem;
-            color: var(--text-muted);
-            line-height: 1.7;
-            max-width: 540px;
-            margin-bottom: 40px;
-            animation: fadeUp 0.8s 0.4s ease both;
-        }
-        .hero-buttons { 
-            display: flex; gap: 16px; 
-            animation: fadeUp 0.8s 0.6s ease both;
-        }
+    /* ─── HERO ─── */
+    .hero {
+      position: relative; overflow: hidden;
+      min-height: calc(100vh - 68px);
+      display: flex; align-items: center;
+      padding: 80px 5% 100px;
+      background: var(--white);
+    }
+    .hero-inner {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      gap: 60px; width: 100%; max-width: 1200px; margin: 0 auto;
+      position: relative; z-index: 1;
+    }
+    .hero-text { flex: 1; max-width: 520px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--orange-light); color: var(--orange);
+      font-size: 0.82rem; font-weight: 700;
+      padding: 6px 14px; border-radius: 50px;
+      margin-bottom: 22px; letter-spacing: 0.02em;
+      border: 1px solid rgba(249,115,22,0.2);
+    }
+    .hero-badge i { width: 14px; height: 14px; }
+    .hero-title {
+      font-size: clamp(2.4rem, 5vw, 3.5rem);
+      font-weight: 900; line-height: 1.1;
+      color: var(--navy); margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+    .hero-title .accent { color: var(--teal); }
+    .hero-title .accent-o { color: var(--orange); }
+    .hero-sub {
+      font-size: 1.05rem; color: var(--slate);
+      line-height: 1.75; margin-bottom: 36px;
+      max-width: 440px;
+    }
+    .hero-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--teal); color: white;
+      font-size: 0.97rem; font-weight: 700;
+      padding: 14px 30px; border-radius: 50px;
+      text-decoration: none; transition: all 0.25s;
+      box-shadow: 0 4px 20px rgba(6,182,212,0.4);
+    }
+    .btn-primary:hover { background: var(--teal-dark); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(6,182,212,0.5); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--orange); color: white;
+      font-size: 0.97rem; font-weight: 700;
+      padding: 14px 28px; border-radius: 50px;
+      text-decoration: none; transition: all 0.25s;
+      box-shadow: 0 4px 20px rgba(249,115,22,0.35);
+    }
+    .btn-secondary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(249,115,22,0.45); }
+    .hero-image { flex: 1; max-width: 560px; position: relative; }
+    .hero-image img {
+      width: 100%; border-radius: 24px;
+      filter: drop-shadow(0 20px 50px rgba(6,182,212,0.18));
+      animation: heroFloat 6s ease-in-out infinite;
+    }
+    @keyframes heroFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-14px); }
+    }
 
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    /* ─── SECTION BASE ─── */
+    section { padding: 100px 5%; }
+    .section-inner { max-width: 1200px; margin: 0 auto; }
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--teal);
+      background: var(--teal-light); padding: 5px 14px; border-radius: 50px;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 800;
+      color: var(--navy); margin-bottom: 14px; line-height: 1.2;
+    }
+    .section-sub {
+      font-size: 1rem; color: var(--slate);
+      max-width: 560px; line-height: 1.75;
+    }
+    .section-head { margin-bottom: 56px; }
+    .section-head.center { text-align: center; }
+    .section-head.center .section-sub { margin: 0 auto; }
 
-        /* Hero Image Panel */
-        .hero-visual {
-            flex: 1.1;
-            position: relative;
-            height: 600px;
-            perspective: 1000px;
-            animation: fadeUp 1s 0.5s ease both;
-        }
-        .hero-image-wrapper {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            height: 90%;
-            border-radius: 32px;
-            overflow: hidden;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.15);
-            border: 4px solid #FFFFFF;
-        }
-        .hero-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            transform: scale(1.05);
-            transition: transform 10s ease-out;
-        }
-        .hero-visual:hover .hero-image { transform: scale(1); }
-        
-        /* Floating Glass Cards on Hero */
-        .glass-card {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 1);
-            border-radius: 20px;
-            padding: 16px 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            animation: float-y 6s ease-in-out infinite;
-        }
-        @keyframes float-y {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-        .gc-1 { top: 10%; left: -5%; animation-delay: 0s; }
-        .gc-2 { bottom: 15%; right: -10%; animation-delay: -3s; }
-        .gc-icon {
-            width: 48px; height: 48px;
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem;
-            color: white;
-        }
-        .gc-text strong { display: block; font-family: 'Outfit'; font-size: 1.1rem; color: var(--text-main); }
-        .gc-text span { font-size: 0.85rem; color: var(--text-muted); }
+    /* ─── ROLES STRIP ─── */
+    .roles-strip { background: var(--card-bg); }
+    .roles-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+    .role-card {
+      background: white; border-radius: var(--radius);
+      padding: 36px 30px; border: 1.5px solid var(--border);
+      transition: all 0.3s; position: relative; overflow: hidden;
+    }
+    .role-card::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%;
+    }
+    .role-card.faculty::before { background: var(--teal); }
+    .role-card.student::before { background: var(--orange); }
+    .role-card.admin::before  { background: #8B5CF6; }
+    .role-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: transparent; }
+    .role-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+    }
+    .role-card.faculty .role-icon { background: var(--teal-light); color: var(--teal); }
+    .role-card.student .role-icon { background: var(--orange-light); color: var(--orange); }
+    .role-card.admin  .role-icon { background: #EDE9FE; color: #8B5CF6; }
+    .role-icon i { width: 26px; height: 26px; }
+    .role-title { font-size: 1.15rem; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+    .role-desc  { font-size: 0.92rem; color: var(--slate); line-height: 1.7; }
 
-        /* Feature Section */
-        .features {
-            padding: 120px 5%;
-            background: #FFFFFF;
-            position: relative;
-            z-index: 10;
-            border-top: 1px solid rgba(0,0,0,0.05);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        .features-header {
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto 80px;
-        }
-        .features-header h2 {
-            font-size: clamp(2.2rem, 4vw, 3rem);
-            margin-bottom: 20px;
-            letter-spacing: -0.02em;
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
-            max-width: 1200px;
-            margin: 0 auto;
-            align-items: center;
-        }
-        .feature-text h3 {
-            font-size: 2.2rem;
-            margin-bottom: 24px;
-            line-height: 1.2;
-            letter-spacing: -0.02em;
-        }
-        .feature-text p {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            line-height: 1.7;
-            margin-bottom: 32px;
-        }
-        .feature-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .feature-list li {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.05rem;
-            font-weight: 500;
-            color: var(--text-main);
-        }
-        .feature-list li i {
-            color: var(--primary);
-            background: rgba(79, 70, 229, 0.1);
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.85rem;
-        }
+    /* ─── FACULTY TOOLS ─── */
+    .tools-bg { background: white; }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .tool-chip {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card-bg); border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px; cursor: default;
+      transition: all 0.25s; position: relative; overflow: hidden;
+    }
+    .tool-chip::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(6,182,212,0.05), rgba(249,115,22,0.04));
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .tool-chip:hover { border-color: var(--teal); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(6,182,212,0.12); }
+    .tool-chip:hover::after { opacity: 1; }
+    .tool-chip-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--teal-light); color: var(--teal);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.25s;
+    }
+    .tool-chip:hover .tool-chip-icon { background: var(--teal); color: white; }
+    .tool-chip-icon i { width: 18px; height: 18px; }
+    .tool-chip-name { font-size: 0.88rem; font-weight: 600; color: var(--navy); line-height: 1.3; }
 
-        .feature-image-wrapper {
-            position: relative;
-            border-radius: 32px;
-            overflow: hidden;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.12);
-            border: 4px solid #FFFFFF;
-            transform: perspective(1000px) rotateY(-5deg);
-            transition: transform 0.5s ease;
-        }
-        .feature-image-wrapper:hover {
-            transform: perspective(1000px) rotateY(0deg);
-        }
-        .feature-image-wrapper img {
-            width: 100%;
-            display: block;
-        }
+    /* ─── LIVE SESSION ─── */
+    .live-section { background: var(--teal-light); }
+    .live-inner {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 70px; align-items: center;
+    }
+    .live-features { list-style: none; display: flex; flex-direction: column; gap: 20px; }
+    .live-feature {
+      display: flex; align-items: flex-start; gap: 16px;
+      background: white; border-radius: var(--radius-sm);
+      padding: 18px 20px; border: 1px solid rgba(6,182,212,0.15);
+      transition: all 0.25s;
+    }
+    .live-feature:hover { transform: translateX(6px); box-shadow: var(--shadow); }
+    .live-feat-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: var(--teal-light); color: var(--teal);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .live-feat-icon i { width: 20px; height: 20px; }
+    .live-feat-title { font-size: 0.97rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .live-feat-desc  { font-size: 0.85rem; color: var(--slate); line-height: 1.6; }
+    .live-mockup {
+      background: white; border-radius: 20px;
+      box-shadow: var(--shadow-lg); overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .mock-bar {
+      background: var(--navy); padding: 14px 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mock-bar-title { color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600; margin-left: 6px; }
+    .mock-body { padding: 20px; }
+    .mock-question {
+      background: var(--teal-light); border-radius: 10px;
+      padding: 14px 16px; font-size: 0.9rem; font-weight: 600;
+      color: var(--navy); margin-bottom: 14px;
+      border-left: 4px solid var(--teal);
+    }
+    .mock-options { display: flex; flex-direction: column; gap: 9px; }
+    .mock-opt {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 500;
+      border: 1.5px solid var(--border);
+    }
+    .mock-opt.selected { background: var(--teal); color: white; border-color: var(--teal); }
+    .mock-bar-fill {
+      height: 7px; border-radius: 50px; background: var(--border);
+      margin-top: 16px; overflow: hidden;
+    }
+    .mock-bar-fill-inner { height: 100%; background: var(--teal); border-radius: 50px; }
+    .mock-stat-row {
+      display: flex; justify-content: space-between;
+      margin-top: 14px; padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .mock-stat { text-align: center; }
+    .mock-stat-val { font-size: 1.1rem; font-weight: 800; color: var(--navy); }
+    .mock-stat-lbl { font-size: 0.75rem; color: var(--slate-light); font-weight: 500; }
 
-        /* Story Section */
-        .story {
-            padding: 100px 5%;
-            background: #FAFAFA;
-            text-align: center;
-        }
-        .story-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .story p {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            line-height: 1.8;
-            font-style: italic;
-            margin-bottom: 40px;
-        }
-        .founder-sig {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-        }
-        .sig-avatar {
-            width: 64px; height: 64px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid white;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        }
-        .sig-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .founder-sig strong { display: block; font-family: 'Outfit'; font-size: 1.2rem; }
-        .founder-sig span { color: var(--text-muted); font-size: 0.9rem; }
+    /* ─── STUDENT FEATURES ─── */
+    .student-section { background: white; }
+    .student-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 22px;
+    }
+    .student-card {
+      background: var(--card-bg); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 28px 24px;
+      transition: all 0.3s; cursor: default; position: relative; overflow: hidden;
+    }
+    .student-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: linear-gradient(90deg, var(--teal), var(--orange));
+      transform: scaleX(0); transform-origin: left; transition: transform 0.3s;
+    }
+    .student-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: transparent; }
+    .student-card:hover::before { transform: scaleX(1); }
+    .student-card-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px; transition: all 0.3s;
+    }
+    .student-card:nth-child(odd) .student-card-icon  { background: var(--teal-light); color: var(--teal); }
+    .student-card:nth-child(even) .student-card-icon { background: var(--orange-light); color: var(--orange); }
+    .student-card:hover .student-card-icon { transform: rotate(-6deg) scale(1.1); }
+    .student-card-icon i { width: 24px; height: 24px; }
+    .student-card-title { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+    .student-card-desc  { font-size: 0.87rem; color: var(--slate); line-height: 1.65; }
 
-        /* Testimonials */
-        .testimonials {
-            padding: 120px 5%;
-            background: #FFFFFF;
-        }
-        .testimonials-header { text-align: center; margin-bottom: 60px; }
-        .testimonials-header h2 { font-family: 'Outfit'; font-size: 2.8rem; margin-bottom: 16px; letter-spacing: -0.02em; }
-        .test-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 40px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        .test-card {
-            background: #FAFAFA;
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 24px;
-            padding: 40px;
-            position: relative;
-        }
-        .test-card::before {
-            content: '"';
-            position: absolute;
-            top: 20px; left: 30px;
-            font-size: 8rem;
-            color: rgba(79, 70, 229, 0.05);
-            font-family: 'Outfit';
-            line-height: 1;
-        }
-        .test-card p {
-            font-size: 1.15rem;
-            line-height: 1.7;
-            margin-bottom: 32px;
-            position: relative;
-            z-index: 2;
-        }
-        .test-author { display: flex; align-items: center; gap: 16px; }
-        .test-avatar { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; }
-        .test-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    /* ─── AI STRIP ─── */
+    .ai-strip {
+      background: linear-gradient(135deg, var(--navy) 0%, #164E63 100%);
+      padding: 80px 5%;
+    }
+    .ai-strip-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center;
+    }
+    .ai-strip .section-tag { background: rgba(6,182,212,0.2); color: #67E8F9; }
+    .ai-strip .section-title { color: white; }
+    .ai-strip .section-sub { color: #94A3B8; }
+    .ai-cards { display: flex; gap: 28px; margin-top: 50px; flex-wrap: wrap; justify-content: center; }
+    .ai-card {
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius); padding: 36px 28px;
+      flex: 1; min-width: 220px; max-width: 300px;
+      text-align: left; transition: all 0.3s;
+    }
+    .ai-card:hover { background: rgba(255,255,255,0.12); transform: translateY(-6px); border-color: rgba(6,182,212,0.4); }
+    .ai-card-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: rgba(6,182,212,0.2); color: #67E8F9;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+    }
+    .ai-card-icon i { width: 26px; height: 26px; }
+    .ai-card-title { font-size: 1.05rem; font-weight: 700; color: white; margin-bottom: 10px; }
+    .ai-card-desc  { font-size: 0.88rem; color: #94A3B8; line-height: 1.7; }
 
-        @media(max-width: 768px) {
-            .test-grid { grid-template-columns: 1fr; }
-        }
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--card-bg); border-top: 1px solid var(--border);
+      padding: 60px 5% 36px;
+    }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-top {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; gap: 60px;
+      padding-bottom: 40px; border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .footer-brand .nav-logo { margin-bottom: 14px; }
+    .footer-tagline { font-size: 0.88rem; color: var(--slate); max-width: 280px; line-height: 1.7; }
+    .footer-links { display: flex; gap: 60px; flex-wrap: wrap; }
+    .footer-col h4 { font-size: 0.85rem; font-weight: 700; color: var(--navy); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col a { text-decoration: none; color: var(--slate); font-size: 0.9rem; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--teal); }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 28px; flex-wrap: wrap; gap: 10px; }
+    .footer-copy { font-size: 0.85rem; color: var(--slate-light); }
+    .footer-badges { display: flex; gap: 10px; }
+    .footer-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 600; color: var(--slate);
+      background: white; border: 1px solid var(--border);
+      padding: 5px 12px; border-radius: 50px;
+    }
+    .footer-badge i { width: 13px; height: 13px; color: var(--teal); }
 
-        /* Stats Strip */
-        .stats {
-            padding: 100px 5%;
-            background: var(--text-main);
-            color: white;
-            text-align: center;
-        }
-        .stats-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 40px;
-        }
-        .stat-item h4 {
-            font-size: 3.8rem;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #a78bfa, #38bdf8);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-family: 'Outfit';
-        }
-        .stat-item p {
-            font-size: 1.05rem;
-            opacity: 0.8;
-            font-weight: 500;
-        }
-
-        /* Footer */
-        footer {
-            background: #FFFFFF;
-            padding: 80px 5% 40px;
-        }
-        .footer-content {
-            max-width: 1200px; margin: 0 auto;
-            display: flex; justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 60px;
-        }
-        .footer-brand p {
-            max-width: 300px; color: var(--text-muted);
-            margin-top: 16px; line-height: 1.6;
-            font-size: 0.95rem;
-        }
-        .footer-bottom {
-            max-width: 1200px; margin: 0 auto;
-            padding-top: 30px; border-top: 1px solid rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between;
-            color: var(--text-muted); font-size: 0.95rem;
-        }
-        .social-icons i {
-            transition: color 0.3s ease;
-            cursor: pointer;
-        }
-        .social-icons i:hover { color: var(--primary); }
-
-        @media(max-width: 992px) {
-            .hero { flex-direction: column; padding-top: 160px; text-align: center; }
-            .hero-content { padding-right: 0; margin-bottom: 60px; display: flex; flex-direction: column; align-items: center; }
-            .hero p { margin: 0 auto 40px; }
-            .hero-buttons { justify-content: center; }
-            .hero-visual { width: 100%; height: 500px; }
-            .grid-2 { grid-template-columns: 1fr; }
-            .feature-image-wrapper { transform: none; order: 2; }
-            .feature-text { order: 1; text-align: center; }
-            .stats-grid { grid-template-columns: 1fr 1fr; gap: 60px; }
-            .glass-card { display: none; } /* Hide floating cards on small screens for clarity */
-        }
-        @media(max-width: 768px) {
-            .nav-links { display: none; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .footer-content { flex-direction: column; gap: 50px; }
-        }
-    </style>
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .hero-inner { flex-direction: column; text-align: center; }
+      .hero-text { max-width: 100%; }
+      .hero-actions { justify-content: center; }
+      .hero-image { max-width: 480px; }
+      .roles-grid { grid-template-columns: 1fr; }
+      .live-inner { grid-template-columns: 1fr; }
+      .footer-top { flex-direction: column; }
+    }
+    @media (max-width: 640px) {
+      section { padding: 70px 5%; }
+      .nav-links { display: none; }
+      .tools-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
 </head>
 <body>
 
-    <!-- Ambient Gradient Background -->
-    <div class="ambient-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
+  <!-- NAVBAR -->
+  <nav role="navigation" aria-label="Main navigation">
+    <a href="#" class="nav-logo">
+      <img src="./favicon.png" alt="MindWave logo" onerror="this.style.display='none'" />
+      Mind<span>Wave</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features" class="active">Features</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#live">Live Sessions</a></li>
+      <li><a href="#ai">AI</a></li>
+      <li><a href="#students">For Students</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="demo-login.html" class="btn-login" id="nav-login">Log in</a>
+      <a href="demo-login.html" class="btn-cta" id="nav-cta">Get Started</a>
     </div>
+  </nav>
 
-    <!-- Navigation -->
-    <nav class="navbar" id="navbar">
-        <a href="#" class="brand-logo">
-            <i class="fas fa-brain"></i> MindWave
-        </a>
-        <div class="nav-links">
-            <a href="#product" class="nav-link">Platform</a>
-            <a href="#solutions" class="nav-link">Solutions</a>
-            <a href="#pricing" class="nav-link">Pricing</a>
-            <a href="#resources" class="nav-link">Wall of Love</a>
+  <!-- HERO -->
+  <section class="hero" id="home" aria-label="Hero section">
+    <div class="blob-tl"></div>
+    <div class="blob-br"></div>
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-badge">
+          <i data-lucide="zap"></i>
+          Built for real classrooms
         </div>
-        <div style="display: flex; gap: 16px;">
-            <a href="#" class="btn-outline" style="padding: 10px 20px; font-size: 0.9rem; border: none;">Sign In</a>
-            <a href="#" class="btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">Start Free Trial</a>
+        <h1 class="hero-title">
+          The Classroom<br />
+          <span class="accent">Engagement</span><br />
+          Platform
+        </h1>
+        <p class="hero-sub">
+          MindWave gives faculty 20+ interactive tools — quizzes, SQL games, live polls, AI activities — while giving students a richer way to learn, track progress, and collaborate.
+        </p>
+        <div class="hero-actions">
+          <a href="demo-login.html" class="btn-primary" id="hero-explore-cta">
+            <i data-lucide="arrow-right"></i>
+            Explore the Platform
+          </a>
         </div>
-    </nav>
+      </div>
+      <div class="hero-image">
+        <img src="./images/hero-illustration.png" alt="Students and faculty collaborating in a digital classroom" />
+      </div>
+    </div>
+  </section>
 
-    <!-- Main Hero -->
-    <section class="hero">
-        <div class="hero-content">
-            <div class="pill">
-                <i class="fas fa-fire" style="color: #ea580c;"></i> Rated #1 by Educators
-            </div>
-            <h1>Empowering Students with <span class="gradient-text">Human-Centric</span> Learning.</h1>
-            <p>Step away from sterile, AI-generated environments. MindWave combines cutting-edge gamification with organic, collaborative spaces designed for how real students actually learn and thrive.</p>
-            <div class="hero-buttons">
-                <a href="#" class="btn-primary">Explore The Platform</a>
-                <a href="#" class="btn-outline"><i class="fas fa-play" style="margin-right: 8px;"></i> See How It Works</a>
-            </div>
+  <!-- ROLES STRIP -->
+  <section class="roles-strip" id="features" aria-labelledby="roles-title">
+    <div class="section-inner">
+      <div class="section-head center">
+        <div class="section-tag"><i data-lucide="users"></i> Who It's For</div>
+        <h2 class="section-title" id="roles-title">One Platform. Three Roles.</h2>
+        <p class="section-sub">MindWave is purpose-built for every person in the classroom ecosystem — from the faculty who designs the session to the admin who oversees the department.</p>
+      </div>
+      <div class="roles-grid">
+        <div class="role-card faculty">
+          <div class="role-icon"><i data-lucide="presentation"></i></div>
+          <div class="role-title">Faculty</div>
+          <p class="role-desc">Create interactive activities, launch live sessions, track participation, run AI-powered games, and review analytics — all from a single dashboard.</p>
         </div>
-        <div class="hero-visual">
-            <div class="hero-image-wrapper">
-                <img src="images/hero_students.png" alt="Students collaborating and smiling" class="hero-image">
-            </div>
-            
-            <div class="glass-card gc-1">
-                <div class="gc-icon" style="background: linear-gradient(135deg, #10B981, #059669);">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="gc-text">
-                    <strong>94% Engagement</strong>
-                    <span>Real-time collaboration</span>
-                </div>
-            </div>
+        <div class="role-card student">
+          <div class="role-icon"><i data-lucide="book-open"></i></div>
+          <div class="role-title">Students</div>
+          <p class="role-desc">Join live quizzes, get AI tutoring, submit GitHub projects, track your own performance, participate in peer reviews, and compete on leaderboards.</p>
+        </div>
+        <div class="role-card admin">
+          <div class="role-icon"><i data-lucide="shield-check"></i></div>
+          <div class="role-title">HOD / Admin</div>
+          <p class="role-desc">Manage faculty assignments, approve student records, oversee organizational analytics, and control access — with full visibility across sections.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-            <div class="glass-card gc-2">
-                <div class="gc-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <div class="gc-text">
-                    <strong>Online Now</strong>
-                    <span>342 students focused</span>
-                </div>
-            </div>
-        </div>
-    </section>
+  <!-- FACULTY TOOLS GRID -->
+  <section class="tools-bg" id="tools" aria-labelledby="tools-title">
+    <div class="section-inner">
+      <div class="section-head">
+        <div class="section-tag"><i data-lucide="layers"></i> Faculty Toolkit</div>
+        <h2 class="section-title" id="tools-title">20+ Interactive Activities,<br />Ready to Launch</h2>
+        <p class="section-sub">Every tool here is live and functional — built to run in real classroom sessions with real students. No fluff, no filler.</p>
+      </div>
+      <div class="tools-grid" id="tools-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
 
-    <!-- The Story -->
-    <section class="story">
-        <div class="story-content">
-            <h2 style="font-family: 'Outfit'; font-size: 2.5rem; margin-bottom: 24px;">Built by educators, for actual humans.</h2>
-            <p>"We started MindWave after watching brilliant students completely tune out during traditional lectures. We didn't want to build another sterile testing tool or lifeless dashboard. We wanted to build a digital space that feels like the best, most energetic group study session you've ever had."</p>
-            <div class="founder-sig">
-                <div class="sig-avatar">
-                   <img src="images/teacher_avatar.png" alt="Sarah, Founder">
-                </div>
-                <div>
-                   <strong>Sarah Jenkins</strong>
-                   <span>Former High School Teacher & Product Lead</span>
-                </div>
-            </div>
+  <!-- LIVE SESSION HIGHLIGHT -->
+  <section class="live-section" id="live" aria-labelledby="live-title">
+    <div class="section-inner">
+      <div class="live-inner">
+        <div>
+          <div class="section-tag"><i data-lucide="radio"></i> Live Sessions</div>
+          <h2 class="section-title" id="live-title">Real-Time Classroom Control</h2>
+          <p class="section-sub" style="margin-bottom: 36px;">Launch a session, watch responses roll in live, manage the pace, and review results instantly — all with built-in anti-cheat.</p>
+          <ul class="live-features">
+            <li class="live-feature">
+              <div class="live-feat-icon"><i data-lucide="play-circle"></i></div>
+              <div>
+                <div class="live-feat-title">Live Quiz Launcher</div>
+                <div class="live-feat-desc">Start any activity with a session code — students join in seconds, no signup friction.</div>
+              </div>
+            </li>
+            <li class="live-feature">
+              <div class="live-feat-icon"><i data-lucide="shield-alert"></i></div>
+              <div>
+                <div class="live-feat-title">Anti-Cheat System</div>
+                <div class="live-feat-desc">Tab-switching detection, copy-paste blocking, and focus loss monitoring during assessments.</div>
+              </div>
+            </li>
+            <li class="live-feature">
+              <div class="live-feat-icon"><i data-lucide="trophy"></i></div>
+              <div>
+                <div class="live-feat-title">Live Leaderboard</div>
+                <div class="live-feat-desc">Real-time score updates visible to the whole class — drives healthy competition and engagement.</div>
+              </div>
+            </li>
+            <li class="live-feature">
+              <div class="live-feat-icon"><i data-lucide="video"></i></div>
+              <div>
+                <div class="live-feat-title">Meeting Room</div>
+                <div class="live-feat-desc">Integrated video meeting with mute controls, participant management, and live activity overlays.</div>
+              </div>
+            </li>
+          </ul>
         </div>
-    </section>
+        <div class="live-mockup" aria-hidden="true">
+          <div class="mock-bar">
+            <div class="mock-dot" style="background:#EF4444;"></div>
+            <div class="mock-dot" style="background:#F59E0B;"></div>
+            <div class="mock-dot" style="background:#10B981;"></div>
+            <span class="mock-bar-title">Live Quiz — Section A</span>
+          </div>
+          <div class="mock-body">
+            <div class="mock-question">Which SQL clause is used to filter grouped results?</div>
+            <div class="mock-options">
+              <div class="mock-opt">A &nbsp; WHERE</div>
+              <div class="mock-opt selected">B &nbsp; HAVING ✓</div>
+              <div class="mock-opt">C &nbsp; ORDER BY</div>
+              <div class="mock-opt">D &nbsp; GROUP BY</div>
+            </div>
+            <div style="margin-top:18px;">
+              <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--slate);margin-bottom:6px;">
+                <span>Responses</span><span style="font-weight:700;color:var(--teal);">24 / 30</span>
+              </div>
+              <div class="mock-bar-fill"><div class="mock-bar-fill-inner" style="width:80%;"></div></div>
+            </div>
+            <div class="mock-stat-row">
+              <div class="mock-stat"><div class="mock-stat-val">24</div><div class="mock-stat-lbl">Answered</div></div>
+              <div class="mock-stat"><div class="mock-stat-val" style="color:var(--teal);">67%</div><div class="mock-stat-lbl">Correct</div></div>
+              <div class="mock-stat"><div class="mock-stat-val">1m 42s</div><div class="mock-stat-lbl">Avg Time</div></div>
+              <div class="mock-stat"><div class="mock-stat-val" style="color:var(--orange);">3</div><div class="mock-stat-lbl">Flagged</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <!-- Detailed Feature -->
-    <section class="features">
-        <div class="features-header">
-            <h2>Designed for the human mind,<br>powered by intelligent tools.</h2>
-            <p>We observed hours of physical classroom interactions to build a platform that feels natural, intuitive, and genuinely fun to use instead of feeling like an exam.</p>
-        </div>
-        
-        <div class="grid-2">
-            <div class="feature-image-wrapper">
-                <img src="images/excited_student.png" alt="Excited student looking at tablet in classroom">
-            </div>
-            <div class="feature-text">
-                <h3>Transform passive listeners into active participants.</h3>
-                <p>Education shouldn't feel isolated. MindWave brings the organic energy of group study sessions and the thrill of supportive competition right to the student's screen.</p>
-                <ul class="feature-list">
-                    <li><i class="fas fa-check"></i> <span>Dynamic peer-to-peer activities</span></li>
-                    <li><i class="fas fa-check"></i> <span>Emotional intelligence mapping</span></li>
-                    <li><i class="fas fa-check"></i> <span>Organic reward structures</span></li>
-                </ul>
-                <a href="#" class="btn-outline" style="display: inline-block; margin-top: 36px;">Discover the Psychology</a>
-            </div>
-        </div>
-    </section>
+  <!-- STUDENT FEATURES -->
+  <section class="student-section" id="students" aria-labelledby="student-title">
+    <div class="section-inner">
+      <div class="section-head center">
+        <div class="section-tag"><i data-lucide="graduation-cap"></i> Student Experience</div>
+        <h2 class="section-title" id="student-title">Learning That Goes Beyond the Lecture</h2>
+        <p class="section-sub">Students get a full suite of tools — from AI tutoring to GitHub project tracking — designed to make learning active, not passive.</p>
+      </div>
+      <div class="student-grid" id="student-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
 
-    <!-- Testimonials / Wall of Love -->
-    <section class="testimonials" id="resources">
-        <div class="testimonials-header">
-            <h2>The Wall of Love</h2>
-            <p style="font-size: 1.1rem; color: var(--text-muted);">Don't just take our word for it. Hear from the people learning and teaching every day.</p>
+  <!-- AI STRIP -->
+  <section class="ai-strip" id="ai" aria-labelledby="ai-title">
+    <div class="ai-strip-inner">
+      <div class="section-tag"><i data-lucide="sparkles"></i> AI-Powered</div>
+      <h2 class="section-title" id="ai-title">Intelligence Built In</h2>
+      <p class="section-sub">MindWave integrates AI to help faculty build content faster and students learn smarter.</p>
+      <div class="ai-cards">
+        <div class="ai-card">
+          <div class="ai-card-icon"><i data-lucide="wand-2"></i></div>
+          <div class="ai-card-title">AI Game Builder</div>
+          <p class="ai-card-desc">Faculty describe a topic — AI generates a full interactive game (quiz, scenario, unjumble) in seconds, ready to deploy.</p>
         </div>
-        <div class="test-grid">
-            <div class="test-card">
-                <p>"Honestly, I used to dread online quizzes. They felt so sterile. But seeing the live leaderboard and getting immediate feedback makes it feel like an actual game. It's the first time I've ever looked forward to a knowledge check."</p>
-                <div class="test-author">
-                    <div class="test-avatar"><img src="images/student_avatar.png" alt="Student"></div>
-                    <div>
-                        <strong style="font-family: 'Outfit'; display: block;">Jason P.</strong>
-                        <span style="color: var(--text-muted); font-size: 0.9rem;">Computer Science Major</span>
-                    </div>
-                </div>
-            </div>
-            <div class="test-card">
-                <p>"The tools are incredible, but what really sold me is the empathy in the design. It doesn't treat my students like data points; it treats them like people. The engagement we've seen since switching is unbelievable."</p>
-                <div class="test-author">
-                    <div class="test-avatar"><img src="images/teacher_avatar.png" alt="Teacher"></div>
-                    <div>
-                        <strong style="font-family: 'Outfit'; display: block;">Dr. Emily Chen</strong>
-                        <span style="color: var(--text-muted); font-size: 0.9rem;">Associate Professor</span>
-                    </div>
-                </div>
-            </div>
+        <div class="ai-card">
+          <div class="ai-card-icon"><i data-lucide="bot"></i></div>
+          <div class="ai-card-title">AI Tutor</div>
+          <p class="ai-card-desc">Students get an always-available AI tutor that answers questions, explains concepts, and guides problem-solving step by step.</p>
         </div>
-    </section>
+        <div class="ai-card">
+          <div class="ai-card-icon"><i data-lucide="bar-chart-2"></i></div>
+          <div class="ai-card-title">Smart Analytics</div>
+          <p class="ai-card-desc">Faculty dashboards surface patterns — which students are struggling, which questions failed, and where to revisit topics.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <!-- Statistics -->
-    <section class="stats">
-        <div class="stats-grid">
-            <div class="stat-item">
-                <h4>2.4M+</h4>
-                <p>Students Engaged</p>
-            </div>
-            <div class="stat-item">
-                <h4>98%</h4>
-                <p>Satisfaction Rate</p>
-            </div>
-            <div class="stat-item">
-                <h4>500+</h4>
-                <p>Global Campuses</p>
-            </div>
-            <div class="stat-item">
-                <h4>30%</h4>
-                <p>Grade Improvement</p>
-            </div>
+  <!-- FOOTER -->
+  <footer role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo">Mind<span>Wave</span></a>
+          <p class="footer-tagline">A classroom engagement platform built for institutions that take teaching seriously.</p>
         </div>
-    </section>
+        <div class="footer-links">
+          <div class="footer-col">
+            <h4>Platform</h4>
+            <ul>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#tools">Tools</a></li>
+              <li><a href="#students">For Students</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Login</h4>
+            <ul>
+              <li><a href="student-login.html">Student Login</a></li>
+              <li><a href="admin-login.html">Faculty Login</a></li>
+              <li><a href="admin-login.html">Admin Login</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="privacy.html">Privacy Policy</a></li>
+              <li><a href="terms.html">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">© 2025 MindWave. Built for real classrooms.</p>
+        <div class="footer-badges">
+          <span class="footer-badge"><i data-lucide="lock"></i> Secure</span>
+          <span class="footer-badge"><i data-lucide="server"></i> Self-Hosted</span>
+          <span class="footer-badge"><i data-lucide="shield-check"></i> Role-Based Access</span>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-brand">
-                <a href="#" class="brand-logo">
-                    <i class="fas fa-brain"></i> MindWave
-                </a>
-                <p>Building the future of empathetic, high-impact learning experiences for forward-looking institutions worldwide.</p>
-            </div>
-            <div style="display: flex; gap: 80px;">
-                <div>
-                    <h4 style="margin-bottom: 24px; font-weight: 700;">Platform</h4>
-                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px; color: var(--text-muted); font-weight: 500;">
-                        <li>Live Quizzes</li>
-                        <li>AI Tutor</li>
-                        <li>Analytics Dashboard</li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 style="margin-bottom: 24px; font-weight: 700;">Company</h4>
-                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px; color: var(--text-muted); font-weight: 500;">
-                        <li>About Us</li>
-                        <li>Careers</li>
-                        <li>Contact Sales</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 MindWave Inc. All rights reserved.</p>
-            <div class="social-icons" style="display: flex; gap: 20px; font-size: 1.25rem;">
-                <i class="fab fa-twitter"></i>
-                <i class="fab fa-linkedin"></i>
-                <i class="fab fa-instagram"></i>
-            </div>
-        </div>
-    </footer>
+  <script>
+    // ─── LUCIDE ICONS ───
+    lucide.createIcons();
 
-    <script>
-        // Simple navbar background effect on scroll
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                document.getElementById('navbar').classList.add('scrolled');
-            } else {
-                document.getElementById('navbar').classList.remove('scrolled');
-            }
-        });
-    </script>
+    // ─── FACULTY TOOLS ───
+    const tools = [
+      { name: 'Live Quiz',         icon: 'brain'          },
+      { name: 'Poll',              icon: 'bar-chart-2'    },
+      { name: 'Word Cloud',        icon: 'cloud'          },
+      { name: 'Spinner (Pick)',     icon: 'rotate-cw'      },
+      { name: 'Unjumble',          icon: 'shuffle'        },
+      { name: 'SQL Challenge',     icon: 'database'       },
+      { name: 'Bug Injection',     icon: 'bug'            },
+      { name: 'Brainstorm',        icon: 'lightbulb'      },
+      { name: 'Drawing Activity',  icon: 'pencil'         },
+      { name: 'Drop Pin',          icon: 'map-pin'        },
+      { name: 'Ranking',           icon: 'list-ordered'   },
+      { name: 'Video Response',    icon: 'video'          },
+      { name: 'Open Ended',        icon: 'message-square' },
+      { name: 'Scenario',          icon: 'layers'         },
+      { name: 'Fill in the Blank', icon: 'type'           },
+      { name: 'NPS Survey',        icon: 'sliders'        },
+      { name: 'Scale / Rating',    icon: 'gauge'          },
+      { name: 'Crossword',         icon: 'grid'           },
+      { name: 'Type Answer',       icon: 'keyboard'       },
+      { name: 'Slides',            icon: 'layout-template'},
+    ];
+
+    const toolsGrid = document.getElementById('tools-grid');
+    tools.forEach(t => {
+      toolsGrid.insertAdjacentHTML('beforeend', `
+        <div class="tool-chip">
+          <div class="tool-chip-icon"><i data-lucide="${t.icon}"></i></div>
+          <span class="tool-chip-name">${t.name}</span>
+        </div>
+      `);
+    });
+
+    // ─── STUDENT FEATURES ───
+    const studentFeatures = [
+      { title: 'AI Tutor',              icon: 'bot',         desc: 'Ask anything. Get instant, step-by-step explanations tailored to your syllabus.' },
+      { title: 'Code Practice',         icon: 'code-2',      desc: 'Practice coding in-browser with live output and language support across multiple stacks.' },
+      { title: 'GitHub Submissions',    icon: 'github',      desc: 'Submit GitHub project links tied to faculty-created assignments — tracked & graded.' },
+      { title: 'Leaderboard',           icon: 'trophy',      desc: 'See where you stand in real-time during live sessions and across the semester.' },
+      { title: 'Peer Reviews',          icon: 'users',       desc: 'Review your peers\' work and get structured feedback on your own submissions.' },
+      { title: 'Performance Charts',    icon: 'trending-up', desc: 'Visual breakdowns of quiz scores, attendance, and activity participation over time.' },
+      { title: 'Achievements',          icon: 'award',       desc: 'Earn badges for milestones — completing streaks, top scores, and consistent participation.' },
+      { title: 'Goals & Study Plans',   icon: 'target',      desc: 'Set personal study goals and track progress with built-in study recommendations.' },
+    ];
+
+    const studentGrid = document.getElementById('student-grid');
+    studentFeatures.forEach(f => {
+      studentGrid.insertAdjacentHTML('beforeend', `
+        <div class="student-card">
+          <div class="student-card-icon"><i data-lucide="${f.icon}"></i></div>
+          <div class="student-card-title">${f.title}</div>
+          <p class="student-card-desc">${f.desc}</p>
+        </div>
+      `);
+    });
+
+    // Re-run Lucide after dynamic injection
+    lucide.createIcons();
+
+    // ─── STICKY NAV SHADOW ───
+    window.addEventListener('scroll', () => {
+      document.querySelector('nav').style.boxShadow =
+        window.scrollY > 10 ? '0 2px 20px rgba(0,0,0,0.08)' : 'none';
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — MindWave</title>
+  <meta name="description" content="Sign in to MindWave. Choose your role to continue." />
+  <link rel="icon" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:        #06B6D4;
+      --teal-dark:   #0891B2;
+      --teal-light:  #CCFBF1;
+      --orange:      #F97316;
+      --orange-light:#FFF7ED;
+      --navy:        #0F172A;
+      --slate:       #475569;
+      --slate-light: #94A3B8;
+      --white:       #FFFFFF;
+      --card-bg:     #F8FAFC;
+      --border:      #E2E8F0;
+      --radius:      20px;
+      --radius-sm:   12px;
+      --shadow:      0 4px 24px rgba(6,182,212,0.10);
+      --shadow-lg:   0 12px 48px rgba(6,182,212,0.18);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--white);
+      color: var(--navy);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BLOBS ── */
+    .blob {
+      position: fixed;
+      border-radius: 70% 30% 60% 40% / 50% 60% 40% 50%;
+      z-index: 0;
+      pointer-events: none;
+      animation: blobFloat 9s ease-in-out infinite;
+    }
+    .blob-tl {
+      top: -100px; left: -100px;
+      width: 480px; height: 480px;
+      background: var(--teal-light);
+      opacity: 0.65;
+    }
+    .blob-br {
+      bottom: -120px; right: -100px;
+      width: 420px; height: 420px;
+      background: var(--teal-light);
+      border-radius: 40% 60% 30% 70% / 60% 40% 70% 30%;
+      opacity: 0.55;
+      animation-delay: -4s; animation-direction: reverse;
+    }
+    .blob-orange {
+      top: 40%; left: -60px;
+      width: 220px; height: 220px;
+      background: var(--orange-light);
+      opacity: 0.55;
+      animation-duration: 12s;
+      border-radius: 50% 40% 60% 40% / 60% 50% 50% 40%;
+    }
+    @keyframes blobFloat {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%      { transform: translate(14px,-20px) scale(1.05); }
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      height: 64px;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 5%;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 1.2rem; font-weight: 800; color: var(--navy);
+    }
+    .nav-logo img { width: 32px; height: 32px; border-radius: 8px; }
+    .nav-logo span { color: var(--teal); }
+    .nav-back {
+      display: inline-flex; align-items: center; gap: 7px;
+      text-decoration: none; color: var(--slate);
+      font-size: 0.88rem; font-weight: 600;
+      padding: 7px 16px; border-radius: 50px;
+      border: 1.5px solid var(--border);
+      transition: all 0.2s;
+    }
+    .nav-back:hover { border-color: var(--teal); color: var(--teal); }
+    .nav-back i { width: 15px; height: 15px; }
+
+    /* ── PAGE ── */
+    .page {
+      min-height: calc(100vh - 64px);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 60px 5%;
+      position: relative; z-index: 1;
+    }
+
+    /* ── HEADER ── */
+    .login-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--orange-light); color: var(--orange);
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 16px; border-radius: 50px;
+      border: 1px solid rgba(249,115,22,0.18);
+      margin-bottom: 20px;
+    }
+    .login-badge i { width: 13px; height: 13px; }
+
+    .login-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900; color: var(--navy);
+      letter-spacing: -0.025em; text-align: center;
+      line-height: 1.12; margin-bottom: 14px;
+    }
+    .login-title .accent { color: var(--teal); }
+
+    .login-sub {
+      font-size: 1rem; color: var(--slate);
+      text-align: center; max-width: 440px;
+      line-height: 1.7; margin-bottom: 56px;
+    }
+
+    /* ── ROLE CARDS ── */
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      width: 100%; max-width: 700px;
+      margin-bottom: 40px;
+    }
+
+    .role-card {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 32px 36px;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex; flex-direction: column;
+      align-items: flex-start;
+      transition: all 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .role-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .role-card.student::before {
+      background: linear-gradient(135deg, rgba(6,182,212,0.04) 0%, rgba(6,182,212,0.01) 100%);
+    }
+    .role-card.faculty::before {
+      background: linear-gradient(135deg, rgba(249,115,22,0.04) 0%, rgba(249,115,22,0.01) 100%);
+    }
+    .role-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
+    .role-card.student:hover { border-color: var(--teal); }
+    .role-card.faculty:hover { border-color: var(--orange); }
+    .role-card:hover::before { opacity: 1; }
+
+    /* Top arrow */
+    .role-card .card-arrow {
+      position: absolute; top: 20px; right: 20px;
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: scale(0.7); transition: all 0.25s;
+    }
+    .role-card.student .card-arrow { background: var(--teal-light); color: var(--teal); }
+    .role-card.faculty .card-arrow { background: var(--orange-light); color: var(--orange); }
+    .role-card:hover .card-arrow { opacity: 1; transform: scale(1); }
+    .card-arrow i { width: 16px; height: 16px; }
+
+    .role-icon-wrap {
+      width: 64px; height: 64px; border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px; transition: all 0.3s;
+    }
+    .role-card.student .role-icon-wrap { background: var(--teal-light); color: var(--teal); }
+    .role-card.faculty .role-icon-wrap { background: var(--orange-light); color: var(--orange); }
+    .role-card:hover .role-icon-wrap { transform: rotate(-6deg) scale(1.1); }
+    .role-icon-wrap i { width: 32px; height: 32px; }
+
+    .role-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .role-card.student .role-label { color: var(--teal); }
+    .role-card.faculty .role-label { color: var(--orange); }
+    .role-label i { width: 12px; height: 12px; }
+
+    .role-name {
+      font-size: 1.3rem; font-weight: 800; color: var(--navy);
+      margin-bottom: 10px; line-height: 1.2;
+    }
+    .role-desc {
+      font-size: 0.88rem; color: var(--slate);
+      line-height: 1.65;
+    }
+
+    .role-card-footer {
+      margin-top: 24px; padding-top: 18px;
+      border-top: 1px solid var(--border);
+      width: 100%;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.82rem; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .role-card.student .role-card-footer { color: var(--teal); }
+    .role-card.faculty .role-card-footer { color: var(--orange); }
+    .role-card-footer i { width: 15px; height: 15px; transition: transform 0.2s; }
+    .role-card:hover .role-card-footer i { transform: translateX(4px); }
+
+    /* ── DIVIDER ── */
+    .login-divider {
+      display: flex; align-items: center; gap: 14px;
+      width: 100%; max-width: 700px;
+      color: var(--slate-light); font-size: 0.82rem; font-weight: 500;
+      margin-bottom: 20px;
+    }
+    .login-divider::before, .login-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── TRUST STRIP ── */
+    .trust-strip {
+      display: flex; align-items: center; gap: 20px;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 0.8rem; font-weight: 600; color: var(--slate);
+      background: var(--card-bg); border: 1px solid var(--border);
+      padding: 7px 16px; border-radius: 50px;
+    }
+    .trust-item i { width: 14px; height: 14px; color: var(--teal); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .role-grid { grid-template-columns: 1fr; max-width: 400px; }
+      .login-title { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BLOBS -->
+  <div class="blob blob-tl"></div>
+  <div class="blob blob-br"></div>
+  <div class="blob blob-orange"></div>
+
+  <!-- NAV -->
+  <nav role="navigation" aria-label="Main navigation">
+    <a href="demo-landing.html" class="nav-logo">
+      <img src="./favicon.png" alt="MindWave" onerror="this.style.display='none'" />
+      Mind<span>Wave</span>
+    </a>
+    <a href="demo-landing.html" class="nav-back" id="back-home-btn">
+      <i data-lucide="arrow-left"></i>
+      Back to Home
+    </a>
+  </nav>
+
+  <!-- PAGE -->
+  <main class="page" id="login-main">
+
+    <!-- HEADER -->
+    <div class="login-badge">
+      <i data-lucide="log-in"></i>
+      Welcome back
+    </div>
+    <h1 class="login-title">
+      Sign in as a <span class="accent">...</span>
+    </h1>
+    <p class="login-sub">
+      Choose your role below to continue to your MindWave dashboard.
+    </p>
+
+    <!-- ROLE CARDS -->
+    <div class="role-grid" role="list">
+
+      <a href="student-login.html" class="role-card student" id="student-login-card" role="listitem" aria-label="Sign in as a Student">
+        <div class="card-arrow"><i data-lucide="arrow-right"></i></div>
+        <div class="role-icon-wrap"><i data-lucide="graduation-cap"></i></div>
+        <div class="role-label"><i data-lucide="circle-dot"></i> Student</div>
+        <div class="role-name">I'm a Student</div>
+        <p class="role-desc">Join live quizzes, access your AI tutor, track performance, submit GitHub projects, and compete on the leaderboard.</p>
+        <div class="role-card-footer">
+          <span>Go to Student Login</span>
+          <i data-lucide="arrow-right"></i>
+        </div>
+      </a>
+
+      <a href="admin-login.html" class="role-card faculty" id="faculty-login-card" role="listitem" aria-label="Sign in as an Educator or Admin">
+        <div class="card-arrow"><i data-lucide="arrow-right"></i></div>
+        <div class="role-icon-wrap"><i data-lucide="presentation"></i></div>
+        <div class="role-label"><i data-lucide="circle-dot"></i> Educator / Admin</div>
+        <div class="role-name">I'm an Educator</div>
+        <p class="role-desc">Create interactive activities, run live sessions, manage your class, view analytics, and configure the AI game builder.</p>
+        <div class="role-card-footer">
+          <span>Go to Faculty Login</span>
+          <i data-lucide="arrow-right"></i>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="login-divider">secure access</div>
+
+    <!-- TRUST STRIP -->
+    <div class="trust-strip" aria-label="Security information">
+      <div class="trust-item"><i data-lucide="lock"></i> Encrypted Sessions</div>
+      <div class="trust-item"><i data-lucide="shield-check"></i> Role-Based Access</div>
+      <div class="trust-item"><i data-lucide="server"></i> Self-Hosted Data</div>
+    </div>
+
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
