@@ -7,72 +7,93 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
-:root{--p:#4F46E5;--p2:#7C3AED;--text:#111827;--muted:#6B7280;--border:#E5E7EB;--danger:#EF4444;--success:#10B981;}
+:root{
+  --teal:#06B6D4;--teal-dark:#0891B2;--teal-light:#CCFBF1;
+  --orange:#F97316;--orange-light:#FFF7ED;
+  --navy:#0F172A;--slate:#475569;--slate-light:#94A3B8;
+  --white:#FFFFFF;--card-bg:#F8FAFC;--border:#E2E8F0;
+  --danger:#EF4444;--success:#10B981;
+}
 body{display:flex;min-height:100vh;}
-.form-panel{width:460px;flex-shrink:0;background:#fff;display:flex;flex-direction:column;padding:44px 52px 36px;position:relative;z-index:2;box-shadow:4px 0 40px rgba(0,0,0,.06);overflow-y:auto;}
-.illus-panel{flex:1;position:relative;background:linear-gradient(135deg,#EEF2FF 0%,#F5F3FF 50%,#EDE9FE 100%);overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.blob{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;}
-.blob1{width:420px;height:420px;background:rgba(99,102,241,.13);top:-60px;right:-80px;}
-.blob2{width:300px;height:300px;background:rgba(139,92,246,.10);bottom:40px;left:20px;}
-.college-bg{position:absolute;inset:0;background:url('../background.jpg') center/cover no-repeat;opacity:.08;}
-.illus-img{position:relative;z-index:1;width:min(520px,86%);filter:drop-shadow(0 20px 40px rgba(79,70,229,.14));}
-.right-brand{position:absolute;top:32px;left:52px;z-index:3;font-size:.82rem;font-weight:700;color:rgba(79,70,229,.5);letter-spacing:.04em;text-transform:uppercase;}
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:36px;}
-.logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--p2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;}
-.logo-name{font-size:1.2rem;font-weight:800;color:var(--text);letter-spacing:-.02em;}
-.logo-name span{background:linear-gradient(135deg,var(--p),var(--p2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.steps{display:flex;gap:6px;margin-bottom:8px;}
+
+/* ── FORM PANEL ── */
+.form-panel{width:460px;flex-shrink:0;background:var(--white);display:flex;flex-direction:column;padding:44px 48px 36px;position:relative;z-index:2;box-shadow:4px 0 40px rgba(6,182,212,0.08);overflow-y:auto;}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:var(--teal);display:flex;align-items:center;justify-content:center;color:white;}
+.logo-icon i{width:19px;height:19px;}
+.logo-name{font-size:1.2rem;font-weight:800;color:var(--navy);letter-spacing:-.02em;}
+.logo-name span{color:var(--teal);}
+.steps{display:flex;gap:6px;margin-bottom:6px;}
 .step-dot{width:24px;height:4px;border-radius:100px;background:var(--border);transition:background .3s;}
-.step-dot.active{background:var(--p);}
-.step-label{font-size:.72rem;color:var(--muted);margin-bottom:24px;}
-.form-title{font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-.03em;margin-bottom:5px;}
-.form-sub{font-size:.87rem;color:var(--muted);margin-bottom:28px;}
+.step-dot.active{background:var(--teal);}
+.step-label{font-size:.72rem;color:var(--slate-light);margin-bottom:22px;}
+.form-title{font-size:1.45rem;font-weight:800;color:var(--navy);letter-spacing:-.02em;margin-bottom:5px;}
+.form-sub{font-size:.87rem;color:var(--slate);margin-bottom:26px;}
 .name-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.field{margin-bottom:16px;}
-.field label{display:block;font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:6px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:.78rem;font-weight:600;color:var(--navy);margin-bottom:6px;}
 .input-wrap{position:relative;}
-.input-wrap .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:.82rem;pointer-events:none;}
-.field input{width:100%;padding:12px 13px 12px 36px;border:1.5px solid var(--border);border-radius:10px;font-size:.9rem;color:var(--text);font-family:'Inter',sans-serif;background:#fff;transition:border-color .2s,box-shadow .2s;}
-.field input::placeholder{color:#C4C9D4;}
-.field input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.1);}
-.pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:.82rem;padding:4px;transition:color .2s;}
-.pw-toggle:hover{color:var(--p);}
+.input-wrap .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--slate-light);pointer-events:none;width:15px;height:15px;}
+.field input{width:100%;padding:12px 13px 12px 36px;border:1.5px solid var(--border);border-radius:10px;font-size:.9rem;color:var(--navy);font-family:'Inter',sans-serif;background:var(--white);transition:border-color .2s,box-shadow .2s;}
+.field input::placeholder{color:#CBD5E1;}
+.field input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(6,182,212,.12);}
+.pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--slate-light);cursor:pointer;padding:4px;transition:color .2s;display:flex;align-items:center;}
+.pw-toggle:hover{color:var(--teal);}
+.pw-toggle i{width:16px;height:16px;}
 .pw-strength{margin-top:6px;display:flex;gap:4px;}
 .pw-bar{flex:1;height:3px;border-radius:100px;background:var(--border);transition:background .3s;}
-.pw-label{font-size:.68rem;color:var(--muted);margin-top:4px;}
-.terms-row{display:flex;align-items:flex-start;gap:9px;margin:14px 0 18px;font-size:.8rem;color:var(--muted);cursor:pointer;user-select:none;}
-.terms-row input{accent-color:var(--p);width:14px;height:14px;margin-top:2px;flex-shrink:0;}
-.terms-row a{color:var(--p);font-weight:600;text-decoration:none;}
+.pw-label{font-size:.68rem;color:var(--slate-light);margin-top:4px;}
+.terms-row{display:flex;align-items:flex-start;gap:9px;margin:12px 0 16px;font-size:.8rem;color:var(--slate);cursor:pointer;user-select:none;}
+.terms-row input{accent-color:var(--teal);width:14px;height:14px;margin-top:2px;flex-shrink:0;}
+.terms-row a{color:var(--teal);font-weight:600;text-decoration:none;}
 .terms-row a:hover{text-decoration:underline;}
-.msg{border-radius:8px;padding:10px 13px;font-size:.82rem;margin-bottom:14px;display:none;align-items:center;gap:8px;}
+.msg{border-radius:8px;padding:10px 13px;font-size:.82rem;margin-bottom:12px;display:none;align-items:center;gap:8px;}
+.msg i{width:15px;height:15px;flex-shrink:0;}
 .err-msg{background:#FEF2F2;border:1px solid #FECACA;color:var(--danger);animation:shake .35s ease;}
 .suc-msg{background:#F0FDF4;border:1px solid #BBF7D0;color:#059669;}
-.info-msg{background:#EEF2FF;border:1px solid #C7D2FE;color:#4338CA;}
+.info-msg{background:var(--teal-light);border:1px solid rgba(6,182,212,.3);color:var(--teal-dark);}
 .msg.show{display:flex;}
 @keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-5px);}40%,80%{transform:translateX(5px);}}
-/* OTP panel */
 #otpPanel{display:none;}
-.otp-wrap{display:flex;gap:8px;margin-bottom:18px;}
-.otp-wrap input{flex:1;padding:14px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:1.3rem;font-weight:700;font-family:monospace;text-align:center;color:var(--text);letter-spacing:.1em;transition:border-color .2s,box-shadow .2s;}
-.otp-wrap input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.1);}
-.resend-link{background:none;border:none;color:var(--p);font-size:.82rem;font-weight:600;cursor:pointer;padding:0;}
-.resend-link:disabled{color:var(--muted);cursor:not-allowed;}
-.submit-btn{width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-size:.93rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(79,70,229,.28);transition:all .3s;margin-bottom:18px;}
-.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.36);}
-.spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.otp-wrap{display:flex;gap:8px;margin-bottom:16px;}
+.otp-wrap input{flex:1;padding:14px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:1.3rem;font-weight:700;font-family:monospace;text-align:center;color:var(--navy);letter-spacing:.1em;transition:border-color .2s,box-shadow .2s;}
+.otp-wrap input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(6,182,212,.12);}
+.resend-link{background:none;border:none;color:var(--teal);font-size:.82rem;font-weight:600;cursor:pointer;padding:0;}
+.resend-link:disabled{color:var(--slate-light);cursor:not-allowed;}
+.submit-btn{width:100%;padding:13px;border:none;border-radius:10px;background:var(--teal);color:white;font-size:.93rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 18px rgba(6,182,212,.35);transition:all .25s;margin-bottom:16px;font-family:'Inter',sans-serif;}
+.submit-btn:hover{background:var(--teal-dark);transform:translateY(-2px);box-shadow:0 8px 28px rgba(6,182,212,.4);}
+.submit-btn .btn-lbl{display:flex;align-items:center;gap:8px;}
+.submit-btn .btn-lbl i{width:16px;height:16px;}
+.spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:none;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .submit-btn.loading .btn-lbl{display:none;}.submit-btn.loading .spin{display:block;}
-.bottom{text-align:center;font-size:.82rem;color:var(--muted);}
-.bottom a{color:var(--p);font-weight:600;text-decoration:none;}
+.bottom{text-align:center;font-size:.82rem;color:var(--slate);}
+.bottom a{color:var(--teal);font-weight:600;text-decoration:none;}
 .bottom a:hover{text-decoration:underline;}
-.bottom-bar{margin-top:auto;padding-top:28px;font-size:.72rem;color:#D1D5DB;text-align:center;}
-.bottom-bar a{color:#9CA3AF;text-decoration:none;}
-@media(max-width:860px){.illus-panel{display:none;}.form-panel{width:100%;max-width:460px;margin:auto;box-shadow:none;padding:36px 28px;}body{background:#FAFAFA;}}
+.bottom-bar{margin-top:auto;padding-top:24px;font-size:.72rem;color:#CBD5E1;text-align:center;}
+.bottom-bar a{color:var(--slate-light);text-decoration:none;margin:0 3px;}
+
+/* ── ILLUS PANEL ── */
+.illus-panel{flex:1;position:relative;background:linear-gradient(135deg,#E0F7FA 0%,#CCFBF1 50%,#E0F2FE 100%);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.illus-blob{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;}
+.illus-blob-1{width:420px;height:420px;background:rgba(6,182,212,.18);top:-60px;right:-80px;}
+.illus-blob-2{width:300px;height:300px;background:rgba(249,115,22,.10);bottom:40px;left:20px;}
+.college-bg{position:absolute;inset:0;background:url('../background.jpg') center/cover no-repeat;opacity:.05;mix-blend-mode:luminosity;}
+.illus-img{position:relative;z-index:1;width:min(520px,86%);filter:drop-shadow(0 20px 40px rgba(6,182,212,.18));animation:heroFloat 6s ease-in-out infinite;}
+@keyframes heroFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
+.illus-brand{position:absolute;top:28px;left:48px;z-index:3;font-size:.78rem;font-weight:700;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;opacity:.75;}
+.illus-badge{position:absolute;bottom:40px;right:40px;z-index:3;background:white;border-radius:14px;padding:12px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 28px rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.15);animation:heroFloat 7s ease-in-out infinite;animation-delay:-2s;}
+.illus-badge-icon{width:36px;height:36px;border-radius:9px;background:var(--teal-light);color:var(--teal);display:flex;align-items:center;justify-content:center;}
+.illus-badge-icon i{width:18px;height:18px;}
+.illus-badge-text strong{display:block;font-size:.82rem;font-weight:700;color:var(--navy);}
+.illus-badge-text small{font-size:.72rem;color:var(--slate-light);}
+
+@media(max-width:860px){.illus-panel{display:none;}.form-panel{width:100%;max-width:460px;margin:auto;box-shadow:none;padding:36px 28px;}body{background:var(--card-bg);}}
 @media(max-width:460px){.form-panel{padding:28px 18px;}.name-row{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -80,7 +101,7 @@ body{display:flex;min-height:100vh;}
 
 <div class="form-panel">
   <div class="logo">
-    <div class="logo-icon"><i class="fas fa-brain"></i></div>
+    <div class="logo-icon"><i data-lucide="brain-circuit"></i></div>
     <div class="logo-name">Mind<span>Wave</span></div>
   </div>
 
@@ -99,15 +120,15 @@ body{display:flex;min-height:100vh;}
       <div class="field">
         <label for="fname">First name</label>
         <div class="input-wrap">
-          <i class="fas fa-user ico"></i>
-          <input type="text" id="fname" placeholder="" required>
+          <i data-lucide="user" class="ico"></i>
+          <input type="text" id="fname" placeholder="First" required>
         </div>
       </div>
       <div class="field">
         <label for="lname">Last name</label>
         <div class="input-wrap">
-          <i class="fas fa-user ico"></i>
-          <input type="text" id="lname" placeholder="" required>
+          <i data-lucide="user" class="ico"></i>
+          <input type="text" id="lname" placeholder="Last" required>
         </div>
       </div>
     </div>
@@ -115,17 +136,17 @@ body{display:flex;min-height:100vh;}
     <div class="field">
       <label for="email">College email</label>
       <div class="input-wrap">
-        <i class="fas fa-envelope ico"></i>
-        <input type="email" id="email" placeholder="" autocomplete="email" required>
+        <i data-lucide="mail" class="ico"></i>
+        <input type="email" id="email" placeholder="name.mca25@cmrit.ac.in" autocomplete="email" required>
       </div>
     </div>
 
     <div class="field">
       <label for="password">Password</label>
       <div class="input-wrap">
-        <i class="fas fa-lock ico"></i>
+        <i data-lucide="lock" class="ico"></i>
         <input type="password" id="password" placeholder="Create a strong password" autocomplete="new-password" required>
-        <button type="button" class="pw-toggle" id="pwToggle"><i class="fas fa-eye" id="eyeIco"></i></button>
+        <button type="button" class="pw-toggle" id="pwToggle"><i data-lucide="eye" id="eyeIco"></i></button>
       </div>
       <div class="pw-strength">
         <div class="pw-bar" id="b1"></div><div class="pw-bar" id="b2"></div>
@@ -139,11 +160,11 @@ body{display:flex;min-height:100vh;}
       I agree to the <a href="terms.html" target="_blank">Terms of Service</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>
     </label>
 
-    <div class="err-msg msg" id="errMsg"><i class="fas fa-circle-exclamation"></i><span id="errTxt"></span></div>
-    <div class="suc-msg msg" id="sucMsg"><i class="fas fa-circle-check"></i><span>Account created! Redirecting to login…</span></div>
+    <div class="err-msg msg" id="errMsg"><i data-lucide="alert-circle"></i><span id="errTxt"></span></div>
+    <div class="suc-msg msg" id="sucMsg"><i data-lucide="check-circle"></i><span>Account created! Redirecting to login…</span></div>
 
     <button type="submit" class="submit-btn" id="submitBtn">
-      <span class="btn-lbl"><i class="fas fa-user-plus"></i> Create Account</span>
+      <span class="btn-lbl"><i data-lucide="user-plus"></i> Create Account</span>
       <div class="spin"></div>
     </button>
 
@@ -159,39 +180,49 @@ body{display:flex;min-height:100vh;}
       <input type="password" id="otpInput" maxlength="6" placeholder="······" autocomplete="one-time-code" inputmode="numeric">
     </div>
 
-    <div class="err-msg msg" id="otpErr"><i class="fas fa-circle-exclamation"></i><span id="otpErrTxt"></span></div>
-    <div class="suc-msg msg" id="otpSuc"><i class="fas fa-circle-check"></i><span id="otpSucTxt"></span></div>
-    <div class="info-msg msg" id="otpInfo"><i class="fas fa-circle-info"></i><span id="otpInfoTxt"></span></div>
+    <div class="err-msg msg" id="otpErr"><i data-lucide="alert-circle"></i><span id="otpErrTxt"></span></div>
+    <div class="suc-msg msg" id="otpSuc"><i data-lucide="check-circle"></i><span id="otpSucTxt"></span></div>
+    <div class="info-msg msg" id="otpInfo"><i data-lucide="info"></i><span id="otpInfoTxt"></span></div>
 
     <button type="button" class="submit-btn" id="verifyBtn">
-      <span class="btn-lbl"><i class="fas fa-shield-check"></i> Verify &amp; Create Account</span>
+      <span class="btn-lbl"><i data-lucide="shield-check"></i> Verify &amp; Create Account</span>
       <div class="spin"></div>
     </button>
 
     <div class="bottom" style="margin-bottom:10px;">
       Didn't receive it? <button class="resend-link" id="resendBtn">Resend code</button>
     </div>
-    <div class="bottom"><a href="student-signup.html"><i class="fas fa-chevron-left" style="font-size:.7rem;"></i> Start over</a></div>
+    <div class="bottom"><a href="student-signup.html"><i data-lucide="chevron-left" style="width:11px;height:11px;vertical-align:middle;"></i> Start over</a></div>
   </div>
 
   <div class="bottom-bar">
-    <a href="privacy.html">Privacy</a> &nbsp;·&nbsp; <a href="terms.html">Terms</a> &nbsp;·&nbsp; &copy; 2025 MindWave Inc.
+    <a href="privacy.html">Privacy</a> &nbsp;·&nbsp; <a href="terms.html">Terms</a> &nbsp;·&nbsp; &copy; 2025 MindWave
   </div>
 </div>
 
 <div class="illus-panel">
   <div class="college-bg"></div>
-  <div class="blob blob1"></div>
-  <div class="blob blob2"></div>
+  <div class="illus-blob illus-blob-1"></div>
+  <div class="illus-blob illus-blob-2"></div>
+  <div class="illus-brand">MindWave · Student Portal</div>
   <img src="student-login-illustration.png" alt="MindWave student illustration" class="illus-img">
-  <div class="right-brand">MindWave · Student Portal</div>
+  <div class="illus-badge">
+    <div class="illus-badge-icon"><i data-lucide="user-plus"></i></div>
+    <div class="illus-badge-text">
+      <strong>Create Account</strong>
+      <small>College email required</small>
+    </div>
+  </div>
 </div>
 
 <script>
+lucide.createIcons();
+
 document.getElementById('pwToggle').addEventListener('click',()=>{
   const pw=document.getElementById('password'),ico=document.getElementById('eyeIco');
   pw.type=pw.type==='password'?'text':'password';
-  ico.classList.toggle('fa-eye');ico.classList.toggle('fa-eye-slash');
+  ico.setAttribute('data-lucide',pw.type==='password'?'eye':'eye-off');
+  lucide.createIcons();
 });
 
 const colors=['#EF4444','#F97316','#EAB308','#10B981'],labels=['Weak','Fair','Good','Strong'];
@@ -202,7 +233,6 @@ document.getElementById('password').addEventListener('input',function(){
   lbl.textContent=v.length?labels[Math.min(s-1,3)]||'Weak':'';lbl.style.color=colors[Math.min(s-1,3)]||'';
 });
 
-// Student email regex: name.dept+year@cmrit.ac.in
 const STUDENT_EMAIL_REGEX=/^[a-z]+\.[a-z]{2,6}\d{2}@cmrit\.ac\.in$/i;
 let pendingEmail='';
 
@@ -215,19 +245,19 @@ document.getElementById('signup-form').addEventListener('submit',async function(
   const btn=document.getElementById('submitBtn');
   err.classList.remove('show');suc.classList.remove('show');
 
-  if(!fname||!lname){errTxt.textContent='Please enter your full name.';err.classList.add('show');return;}
+  if(!fname||!lname){errTxt.textContent='Please enter your full name.';err.classList.add('show');lucide.createIcons();return;}
   if(!STUDENT_EMAIL_REGEX.test(email)){
     errTxt.textContent='Please use your college email (e.g. name.mca25@cmrit.ac.in).';
-    err.classList.add('show');return;
+    err.classList.add('show');lucide.createIcons();return;
   }
-  if(password.length<6){errTxt.textContent='Password must be at least 6 characters.';err.classList.add('show');return;}
-  if(!terms){errTxt.textContent='Please accept the Terms of Service to continue.';err.classList.add('show');return;}
+  if(password.length<6){errTxt.textContent='Password must be at least 6 characters.';err.classList.add('show');lucide.createIcons();return;}
+  if(!terms){errTxt.textContent='Please accept the Terms of Service to continue.';err.classList.add('show');lucide.createIcons();return;}
 
   btn.classList.add('loading');
   try{
     const res=await fetch('/api/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:`${fname} ${lname}`,email,password,role:'student'})});
     const data=await res.json();
-    if(data.ok && data.awaitingVerification){
+    if(data.ok&&data.awaitingVerification){
       pendingEmail=email;
       showOtpPanel(email);
     } else if(data.ok){
@@ -236,8 +266,9 @@ document.getElementById('signup-form').addEventListener('submit',async function(
     } else{
       errTxt.textContent=data.message||'Signup failed. Please try again.';
       err.classList.add('show');err.style.animation='none';requestAnimationFrame(()=>err.style.animation='');
+      lucide.createIcons();
     }
-  }catch(ex){errTxt.textContent='Connection error — please try again.';err.classList.add('show');}
+  }catch(ex){errTxt.textContent='Connection error — please try again.';err.classList.add('show');lucide.createIcons();}
   finally{btn.classList.remove('loading');}
 });
 
@@ -254,27 +285,22 @@ document.getElementById('verifyBtn').addEventListener('click',async()=>{
   const sucEl=document.getElementById('otpSuc'),sucTxt=document.getElementById('otpSucTxt');
   const btn=document.getElementById('verifyBtn');
   [errEl,sucEl,document.getElementById('otpInfo')].forEach(el=>el.classList.remove('show'));
-  if(!otp||otp.length!==6){errTxt.textContent='Please enter the 6-digit code from your email.';errEl.classList.add('show');return;}
+  if(!otp||otp.length!==6){errTxt.textContent='Please enter the 6-digit code from your email.';errEl.classList.add('show');lucide.createIcons();return;}
   btn.classList.add('loading');
   try{
     const res=await fetch('/api/student/verify-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pendingEmail,otp})});
     const data=await res.json();
     if(data.ok){
-      // Store auth and redirect
       if(data.token){localStorage.setItem('token',data.token);localStorage.setItem('auth_token',data.token);}
-      if(data.user){
-        localStorage.setItem('role',data.user.role);
-        localStorage.setItem('email',data.user.email);
-        localStorage.setItem('name',data.user.name||'');
-      }
+      if(data.user){localStorage.setItem('role',data.user.role);localStorage.setItem('email',data.user.email);localStorage.setItem('name',data.user.name||'');}
       sucTxt.textContent='✓ Account created! Taking you to your dashboard…';
-      sucEl.classList.add('show');
+      sucEl.classList.add('show');lucide.createIcons();
       setTimeout(()=>window.location.href='../homepage.html',2000);
     } else {
       errTxt.textContent=data.message||'Verification failed.';
-      errEl.classList.add('show');
+      errEl.classList.add('show');lucide.createIcons();
     }
-  }catch(ex){errTxt.textContent='Connection error — please try again.';errEl.classList.add('show');}
+  }catch(ex){errTxt.textContent='Connection error — please try again.';errEl.classList.add('show');lucide.createIcons();}
   finally{btn.classList.remove('loading');}
 });
 
@@ -294,8 +320,8 @@ document.getElementById('resendBtn').addEventListener('click',async()=>{
     const res=await fetch('/api/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pendingEmail,password:pw||'_resend_',role:'student'})});
     const data=await res.json();
     infoTxt.textContent=data.message||'A new code has been sent.';
-    infoEl.classList.add('show');
-  }catch(ex){errTxt.textContent='Failed to resend. Please try again.';errEl.classList.add('show');}
+    infoEl.classList.add('show');lucide.createIcons();
+  }catch(ex){errTxt.textContent='Failed to resend. Please try again.';errEl.classList.add('show');lucide.createIcons();}
   finally{setTimeout(()=>{btn.disabled=false;btn.textContent='Resend code';},30000);}
 });
 </script>

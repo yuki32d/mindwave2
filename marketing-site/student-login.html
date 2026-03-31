@@ -1,217 +1,464 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Sign In — MindWave</title>
-<meta name="description" content="Sign in to MindWave Student Portal.">
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
-:root{--p:#4F46E5;--p2:#7C3AED;--text:#111827;--muted:#6B7280;--border:#E5E7EB;--bg:#FAFAFA;--danger:#EF4444;}
-body{display:flex;min-height:100vh;}
-.form-panel{width:420px;flex-shrink:0;background:#fff;display:flex;flex-direction:column;padding:52px 52px 40px;position:relative;z-index:2;box-shadow:4px 0 40px rgba(0,0,0,.06);}
-.illus-panel{flex:1;position:relative;background:linear-gradient(135deg,#EEF2FF 0%,#F5F3FF 50%,#EDE9FE 100%);overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.blob{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;}
-.blob1{width:420px;height:420px;background:rgba(99,102,241,.13);top:-60px;right:-80px;}
-.blob2{width:300px;height:300px;background:rgba(139,92,246,.10);bottom:40px;left:20px;}
-.blob3{width:220px;height:220px;background:rgba(6,182,212,.08);top:50%;right:60px;transform:translateY(-50%);}
-.college-bg{position:absolute;inset:0;background:url('../background.jpg') center/cover no-repeat;opacity:.08;}
-.illus-img{position:relative;z-index:1;width:min(560px,88%);filter:drop-shadow(0 20px 40px rgba(79,70,229,.14));}
-.right-brand{position:absolute;top:32px;left:52px;z-index:3;font-size:.82rem;font-weight:700;color:rgba(79,70,229,.5);letter-spacing:.04em;text-transform:uppercase;}
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:48px;}
-.logo-icon{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--p),var(--p2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.05rem;}
-.logo-name{font-size:1.25rem;font-weight:800;color:var(--text);letter-spacing:-.02em;}
-.logo-name span{background:linear-gradient(135deg,var(--p),var(--p2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.form-title{font-size:1.55rem;font-weight:800;color:var(--text);letter-spacing:-.03em;margin-bottom:6px;}
-.form-sub{font-size:.88rem;color:var(--muted);margin-bottom:36px;}
-.steps{display:flex;gap:6px;margin-bottom:32px;}
-.step-dot{width:24px;height:4px;border-radius:100px;background:var(--border);transition:background .3s;}
-.step-dot.active{background:var(--p);}
-.field{margin-bottom:18px;}
-.field label{display:block;font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:7px;}
-.input-wrap{position:relative;}
-.input-wrap .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:.84rem;pointer-events:none;}
-.field input{width:100%;padding:13px 14px 13px 38px;border:1.5px solid var(--border);border-radius:10px;font-size:.93rem;color:var(--text);font-family:'Inter',sans-serif;background:#fff;transition:border-color .2s,box-shadow .2s;}
-.field input::placeholder{color:#C4C9D4;}
-.field input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.1);}
-.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:.84rem;padding:4px;transition:color .2s;}
-.pw-toggle:hover{color:var(--p);}
-.opts-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;font-size:.82rem;}
-.remember{display:flex;align-items:center;gap:7px;color:var(--muted);cursor:pointer;user-select:none;}
-.remember input{accent-color:var(--p);width:14px;height:14px;}
-.forgot{color:var(--p);font-weight:600;text-decoration:none;font-size:.82rem;}
-.forgot:hover{text-decoration:underline;}
-.err-msg{background:#FEF2F2;border:1px solid #FECACA;color:var(--danger);border-radius:8px;padding:10px 13px;font-size:.82rem;margin-bottom:16px;display:none;animation:shake .35s ease;}
-.err-msg.show{display:flex;align-items:center;gap:8px;}
-@keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-5px);}40%,80%{transform:translateX(5px);}}
-.submit-btn{width:100%;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(79,70,229,.28);transition:all .3s;margin-bottom:18px;}
-.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.36);}
-.submit-btn .spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.submit-btn.loading .btn-lbl{display:none;}.submit-btn.loading .spin{display:block;}
-.bottom{text-align:center;font-size:.82rem;color:var(--muted);}
-.bottom a{color:var(--p);font-weight:600;text-decoration:none;}
-.bottom a:hover{text-decoration:underline;}
-.bottom-bar{margin-top:auto;padding-top:32px;font-size:.72rem;color:#D1D5DB;text-align:center;}
-.bottom-bar a{color:#9CA3AF;text-decoration:none;}
-.bottom-bar a:hover{color:var(--p);}
-@media(max-width:860px){.illus-panel{display:none;}.form-panel{width:100%;max-width:460px;margin:auto;box-shadow:none;padding:40px 32px;}body{background:var(--bg);}}
-@media(max-width:460px){.form-panel{padding:32px 22px;}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Sign In — MindWave</title>
+  <meta name="description" content="Sign in to MindWave Student Portal." />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+
+    :root {
+      --teal:        #06B6D4;
+      --teal-dark:   #0891B2;
+      --teal-light:  #CCFBF1;
+      --orange:      #F97316;
+      --orange-light:#FFF7ED;
+      --navy:        #0F172A;
+      --slate:       #475569;
+      --slate-light: #94A3B8;
+      --border:      #E2E8F0;
+      --card-bg:     #F8FAFC;
+      --danger:      #EF4444;
+      --white:       #FFFFFF;
+    }
+
+    body { display: flex; min-height: 100vh; }
+
+    /* ── LEFT: FORM PANEL ── */
+    .form-panel {
+      width: 420px; flex-shrink: 0;
+      background: var(--white);
+      display: flex; flex-direction: column;
+      padding: 48px 48px 36px;
+      position: relative; z-index: 2;
+      box-shadow: 4px 0 40px rgba(6,182,212,0.08);
+    }
+
+    /* Logo */
+    .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 48px; }
+    .logo-icon {
+      width: 38px; height: 38px; border-radius: 11px;
+      background: var(--teal);
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+    }
+    .logo-icon i { width: 20px; height: 20px; }
+    .logo-name { font-size: 1.2rem; font-weight: 800; color: var(--navy); letter-spacing: -0.02em; }
+    .logo-name span { color: var(--teal); }
+
+    /* Titles */
+    .form-title { font-size: 1.5rem; font-weight: 800; color: var(--navy); letter-spacing: -0.02em; margin-bottom: 6px; }
+    .form-sub   { font-size: 0.87rem; color: var(--slate); margin-bottom: 30px; }
+
+    /* Step dots */
+    .steps { display: flex; gap: 6px; margin-bottom: 28px; }
+    .step-dot {
+      width: 28px; height: 4px; border-radius: 100px;
+      background: var(--border); transition: background 0.3s;
+    }
+    .step-dot.active { background: var(--teal); }
+
+    /* Fields */
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--navy); margin-bottom: 7px; }
+    .input-wrap { position: relative; }
+    .input-wrap .ico {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      color: var(--slate-light); pointer-events: none;
+      width: 16px; height: 16px;
+    }
+    .field input {
+      width: 100%; padding: 12px 13px 12px 38px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 0.92rem; color: var(--navy);
+      font-family: 'Inter', sans-serif; background: var(--white);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input::placeholder { color: #CBD5E1; }
+    .field input:focus {
+      outline: none; border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(6,182,212,0.12);
+    }
+    .pw-toggle {
+      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--slate-light);
+      cursor: pointer; padding: 4px; transition: color 0.2s;
+      display: flex; align-items: center;
+    }
+    .pw-toggle:hover { color: var(--teal); }
+    .pw-toggle i { width: 16px; height: 16px; }
+
+    /* Opts row */
+    .opts-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; font-size: 0.82rem;
+    }
+    .remember { display: flex; align-items: center; gap: 7px; color: var(--slate); cursor: pointer; user-select: none; }
+    .remember input { accent-color: var(--teal); width: 14px; height: 14px; }
+    .forgot { color: var(--teal); font-weight: 600; text-decoration: none; font-size: 0.82rem; }
+    .forgot:hover { text-decoration: underline; }
+
+    /* Email display row (step 2) */
+    .email-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.84rem; color: var(--slate);
+      margin-bottom: 18px;
+      background: var(--card-bg); border-radius: 9px;
+      padding: 10px 13px; border: 1px solid var(--border);
+    }
+    .email-row i { width: 16px; height: 16px; color: var(--teal); flex-shrink: 0; }
+    .email-row span { font-weight: 600; color: var(--navy); flex: 1; }
+    .change-btn {
+      background: none; border: none; color: var(--teal);
+      font-size: 0.8rem; font-weight: 700; cursor: pointer;
+      padding: 0; transition: opacity 0.2s;
+    }
+    .change-btn:hover { opacity: 0.7; }
+
+    /* Error */
+    .err-msg {
+      background: #FEF2F2; border: 1px solid #FECACA; color: var(--danger);
+      border-radius: 8px; padding: 10px 13px; font-size: 0.82rem;
+      margin-bottom: 14px; display: none; align-items: center; gap: 8px;
+      animation: shake 0.35s ease;
+    }
+    .err-msg.show { display: flex; }
+    .err-msg i { width: 15px; height: 15px; flex-shrink: 0; }
+    @keyframes shake {
+      0%,100% { transform:translateX(0); }
+      20%,60%  { transform:translateX(-5px); }
+      40%,80%  { transform:translateX(5px); }
+    }
+
+    /* Submit button */
+    .submit-btn {
+      width: 100%; padding: 13px;
+      border: none; border-radius: 10px;
+      background: var(--teal); color: white;
+      font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 18px rgba(6,182,212,0.35);
+      transition: all 0.25s; margin-bottom: 16px;
+      font-family: 'Inter', sans-serif;
+    }
+    .submit-btn:hover { background: var(--teal-dark); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(6,182,212,0.4); }
+    .submit-btn .btn-lbl { display: flex; align-items: center; gap: 8px; }
+    .submit-btn .btn-lbl i { width: 16px; height: 16px; }
+    .submit-btn .spin {
+      width: 17px; height: 17px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+      border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .submit-btn.loading .btn-lbl { display: none; }
+    .submit-btn.loading .spin { display: block; }
+
+    /* Bottom links */
+    .bottom { text-align: center; font-size: 0.82rem; color: var(--slate); }
+    .bottom a { color: var(--teal); font-weight: 600; text-decoration: none; }
+    .bottom a:hover { text-decoration: underline; }
+    .bottom-bar {
+      margin-top: auto; padding-top: 28px;
+      font-size: 0.72rem; color: #CBD5E1; text-align: center;
+    }
+    .bottom-bar a { color: var(--slate-light); text-decoration: none; margin: 0 4px; }
+    .bottom-bar a:hover { color: var(--teal); }
+
+    /* ── RIGHT: ILLUSTRATION PANEL ── */
+    .illus-panel {
+      flex: 1; position: relative;
+      background: linear-gradient(135deg, #E0F7FA 0%, #CCFBF1 50%, #E0F2FE 100%);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .illus-blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(70px); pointer-events: none;
+    }
+    .illus-blob-1 { width:420px; height:420px; background:rgba(6,182,212,0.18); top:-60px; right:-80px; }
+    .illus-blob-2 { width:300px; height:300px; background:rgba(249,115,22,0.10); bottom:40px; left:20px; }
+    .illus-blob-3 { width:220px; height:220px; background:rgba(6,182,212,0.10); top:50%; right:60px; transform:translateY(-50%); }
+    /* tint overlay over the college-bg to pull it into teal world */
+    .college-bg {
+      position: absolute; inset: 0;
+      background: url('../background.jpg') center/cover no-repeat;
+      opacity: 0.05;
+      mix-blend-mode: luminosity;
+    }
+    /* teal colour wash so illustration feels on-brand */
+    .illus-panel::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(6,182,212,0.04);
+      pointer-events: none;
+    }
+    .illus-img {
+      position: relative; z-index: 1;
+      width: min(520px, 85%);
+      filter: drop-shadow(0 20px 40px rgba(6,182,212,0.18));
+      animation: heroFloat 6s ease-in-out infinite;
+    }
+    @keyframes heroFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-14px); }
+    }
+    .illus-brand {
+      position: absolute; top: 28px; left: 48px; z-index: 3;
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--teal); letter-spacing: 0.06em;
+      text-transform: uppercase; opacity: 0.75;
+    }
+
+    /* Student badge on illustration panel */
+    .illus-badge {
+      position: absolute; bottom: 40px; right: 40px; z-index: 3;
+      background: white; border-radius: 14px;
+      padding: 12px 18px;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 28px rgba(6,182,212,0.15);
+      border: 1px solid rgba(6,182,212,0.15);
+      animation: heroFloat 7s ease-in-out infinite;
+      animation-delay: -2s;
+    }
+    .illus-badge-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--teal-light); color: var(--teal);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .illus-badge-icon i { width: 18px; height: 18px; }
+    .illus-badge-text strong { display: block; font-size: 0.82rem; font-weight: 700; color: var(--navy); }
+    .illus-badge-text small  { font-size: 0.72rem; color: var(--slate-light); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) {
+      .illus-panel { display: none; }
+      .form-panel { width: 100%; max-width: 460px; margin: auto; box-shadow: none; padding: 40px 32px; }
+      body { background: var(--card-bg); }
+    }
+    @media (max-width: 460px) {
+      .form-panel { padding: 32px 20px; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="form-panel">
-  <div class="logo">
-    <div class="logo-icon"><i class="fas fa-brain"></i></div>
-    <div class="logo-name">Mind<span>Wave</span></div>
-  </div>
+  <!-- FORM PANEL -->
+  <div class="form-panel">
 
-  <div class="form-title">Sign in to MindWave</div>
-  <div class="form-sub">Use your campus email to continue</div>
+    <div class="logo">
+      <div class="logo-icon"><i data-lucide="brain-circuit"></i></div>
+      <div class="logo-name">Mind<span>Wave</span></div>
+    </div>
 
-  <div class="steps">
-    <div class="step-dot active" id="dot1"></div>
-    <div class="step-dot" id="dot2"></div>
-  </div>
+    <div class="form-title">Sign in to MindWave</div>
+    <div class="form-sub">Use your campus email to continue</div>
 
-  <form id="login-form" novalidate>
+    <div class="steps">
+      <div class="step-dot active" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+    </div>
 
-    <!-- Step 1: email -->
-    <div id="step1">
-      <div class="field">
-        <label for="username">Email</label>
-        <div class="input-wrap">
-          <i class="fas fa-envelope ico"></i>
-          <input type="email" id="username" placeholder="" autocomplete="email" required>
+    <form id="login-form" novalidate>
+
+      <!-- Step 1: Email -->
+      <div id="step1">
+        <div class="field">
+          <label for="username">Email</label>
+          <div class="input-wrap">
+            <i data-lucide="mail" class="ico"></i>
+            <input type="email" id="username" placeholder="name.mca25@cmrit.ac.in" autocomplete="email" required />
+          </div>
+        </div>
+        <div class="opts-row">
+          <label class="remember">
+            <input type="checkbox" id="rem" /> Remember me
+          </label>
+        </div>
+        <div class="err-msg" id="e1">
+          <i data-lucide="alert-circle"></i>
+          <span id="e1t"></span>
+        </div>
+        <button type="button" class="submit-btn" id="nextBtn">
+          <span class="btn-lbl">Next <i data-lucide="arrow-right"></i></span>
+          <div class="spin"></div>
+        </button>
+        <div class="bottom">
+          <a href="website-login.html"><i data-lucide="chevron-left" style="width:11px;height:11px;vertical-align:middle;"></i> Back to role selection</a>
         </div>
       </div>
-      <div class="opts-row">
-        <label class="remember"><input type="checkbox" id="rem"> Remember me</label>
-      </div>
-      <div class="err-msg" id="e1"><i class="fas fa-circle-exclamation"></i><span id="e1t"></span></div>
-      <button type="button" class="submit-btn" id="nextBtn">
-        <span class="btn-lbl">Next <i class="fas fa-arrow-right"></i></span>
-        <div class="spin"></div>
-      </button>
-      <div class="bottom"><a href="website-login.html"><i class="fas fa-chevron-left" style="font-size:.7rem;"></i> Back to role selection</a></div>
-    </div>
 
-    <!-- Step 2: password -->
-    <div id="step2" style="display:none;">
-      <div style="font-size:.84rem;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:8px;">
-        <i class="fas fa-user-circle" style="color:var(--p);font-size:1.1rem;"></i>
-        <span id="emailDisplay" style="font-weight:500;color:var(--text);"></span>
-        <button type="button" id="changeEmail" style="margin-left:auto;background:none;border:none;color:var(--p);font-size:.8rem;font-weight:600;cursor:pointer;">Change</button>
-      </div>
-      <div class="field">
-        <label for="password">Password</label>
-        <div class="input-wrap">
-          <i class="fas fa-lock ico"></i>
-          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
-          <button type="button" class="pw-toggle" id="pwToggle"><i class="fas fa-eye" id="eyeIco"></i></button>
+      <!-- Step 2: Password -->
+      <div id="step2" style="display:none;">
+        <div class="email-row">
+          <i data-lucide="user-circle"></i>
+          <span id="emailDisplay"></span>
+          <button type="button" id="changeEmail" class="change-btn">Change</button>
         </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <i data-lucide="lock" class="ico"></i>
+            <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required />
+            <button type="button" class="pw-toggle" id="pwToggle">
+              <i data-lucide="eye" id="eyeIco"></i>
+            </button>
+          </div>
+        </div>
+        <div class="opts-row">
+          <span></span>
+          <a href="student-forgot-password.html" class="forgot">Need help signing in?</a>
+        </div>
+        <div class="err-msg" id="e2">
+          <i data-lucide="alert-circle"></i>
+          <span id="e2t"></span>
+        </div>
+        <button type="submit" class="submit-btn" id="signInBtn">
+          <span class="btn-lbl"><i data-lucide="log-in"></i> Sign In</span>
+          <div class="spin"></div>
+        </button>
+        <div class="bottom">No account? <a href="student-signup.html">Sign up free</a></div>
       </div>
-      <div class="opts-row">
-        <span></span>
-        <a href="student-forgot-password.html" class="forgot">Need help signing in?</a>
+
+      <!-- Sign-up nudge (step 1 only) -->
+      <div id="socials" style="margin-top:18px;">
+        <p style="text-align:center;font-size:.82rem;color:var(--slate);">
+          Don't have an account? <a href="student-signup.html" style="color:var(--teal);font-weight:700;text-decoration:none;">Sign up free</a>
+        </p>
       </div>
-      <div class="err-msg" id="e2"><i class="fas fa-circle-exclamation"></i><span id="e2t"></span></div>
-      <button type="submit" class="submit-btn" id="signInBtn">
-        <span class="btn-lbl"><i class="fas fa-arrow-right-to-bracket"></i> Sign In</span>
-        <div class="spin"></div>
-      </button>
-      <div class="bottom">No account? <a href="student-signup.html">Sign up free</a></div>
+
+    </form>
+
+    <div class="bottom-bar">
+      <a href="privacy.html">Privacy</a> &nbsp;·&nbsp;
+      <a href="terms.html">Terms</a> &nbsp;·&nbsp;
+      &copy; 2025 MindWave
     </div>
-
-    <!-- Sign-up nudge (step 1 only) -->
-    <div id="socials" style="margin-top:20px;">
-      <p style="text-align:center;font-size:.82rem;color:#6B7280;">
-        Don't have an account? <a href="student-signup.html" style="color:#4F46E5;font-weight:600;text-decoration:none;">Sign up free</a>
-      </p>
-    </div>
-
-  </form>
-
-  <div class="bottom-bar">
-    <a href="privacy.html">Privacy</a> &nbsp;·&nbsp; <a href="terms.html">Terms</a> &nbsp;·&nbsp; &copy; 2025 MindWave Inc.
   </div>
-</div>
 
-<div class="illus-panel">
-  <div class="college-bg"></div>
-  <div class="blob blob1"></div>
-  <div class="blob blob2"></div>
-  <div class="blob blob3"></div>
-  <img src="student-login-illustration.png" alt="MindWave student learning illustration" class="illus-img">
-  <div class="right-brand">MindWave · Student Portal</div>
-</div>
+  <!-- ILLUSTRATION PANEL -->
+  <div class="illus-panel">
+    <div class="college-bg"></div>
+    <div class="illus-blob illus-blob-1"></div>
+    <div class="illus-blob illus-blob-2"></div>
+    <div class="illus-blob illus-blob-3"></div>
+    <div class="illus-brand">MindWave · Student Portal</div>
+    <img src="student-login-illustration.png" alt="MindWave student learning illustration" class="illus-img" />
+    <div class="illus-badge">
+      <div class="illus-badge-icon"><i data-lucide="graduation-cap"></i></div>
+      <div class="illus-badge-text">
+        <strong>Student Portal</strong>
+        <small>Secure campus login</small>
+      </div>
+    </div>
+  </div>
 
-<script>
-const step1=document.getElementById('step1'),step2=document.getElementById('step2'),socials=document.getElementById('socials');
-const emailInput=document.getElementById('username'),emailDisplay=document.getElementById('emailDisplay');
-const dot1=document.getElementById('dot1'),dot2=document.getElementById('dot2');
+  <script>
+    lucide.createIcons();
 
-const STUDENT_EMAIL_REGEX=/^[a-z]+\.[a-z]{2,6}\d{2}@cmrit\.ac\.in$/i;
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const socials = document.getElementById('socials');
+    const emailInput = document.getElementById('username');
+    const emailDisplay = document.getElementById('emailDisplay');
+    const dot1 = document.getElementById('dot1');
+    const dot2 = document.getElementById('dot2');
 
-document.getElementById('nextBtn').addEventListener('click',()=>{
-  const v=emailInput.value.trim(),e1=document.getElementById('e1'),e1t=document.getElementById('e1t');
-  e1.classList.remove('show');
-  if(!v||!STUDENT_EMAIL_REGEX.test(v)){
-    e1t.textContent='Please use your college email (e.g. name.mca25@cmrit.ac.in).';
-    e1.classList.add('show');return;
-  }
-  emailDisplay.textContent=v;
-  step1.style.display='none';step2.style.display='block';socials.style.display='none';
-  dot1.classList.remove('active');dot2.classList.add('active');
-  document.getElementById('password').focus();
-});
+    const STUDENT_EMAIL_REGEX = /^[a-z]+\.[a-z]{2,6}\d{2}@cmrit\.ac\.in$/i;
 
-document.getElementById('changeEmail').addEventListener('click',()=>{
-  step2.style.display='none';step1.style.display='block';socials.style.display='block';
-  dot2.classList.remove('active');dot1.classList.add('active');emailInput.focus();
-});
-
-document.getElementById('pwToggle').addEventListener('click',()=>{
-  const pw=document.getElementById('password'),ico=document.getElementById('eyeIco');
-  if(pw.type==='password'){pw.type='text';ico.classList.replace('fa-eye','fa-eye-slash');}
-  else{pw.type='password';ico.classList.replace('fa-eye-slash','fa-eye');}
-});
-
-document.getElementById('login-form').addEventListener('submit',async function(e){
-  e.preventDefault();
-  const email=emailInput.value.trim(),password=document.getElementById('password').value;
-  const e2=document.getElementById('e2'),e2t=document.getElementById('e2t'),btn=document.getElementById('signInBtn');
-  e2.classList.remove('show');btn.classList.add('loading');
-  try{
-    const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,role:'student'})});
-    const data=await res.json();
-    if(data.ok){
-      ['role','email','token','auth_token','mindwave_token','firstName','lastName','name','profilePhoto','student_activities','readAnnouncements'].forEach(k=>localStorage.removeItem(k));
-      if(data.user){
-        localStorage.setItem('role',data.user.role);
-        localStorage.setItem('email',data.user.email);
-        localStorage.setItem('token',data.token||'authenticated');
-        localStorage.setItem('auth_token',data.token||'authenticated');
-        const full=data.user.name||data.user.fullName||'';
-        localStorage.setItem('firstName',data.user.firstName||full.split(' ')[0]||'');
-        localStorage.setItem('lastName',data.user.lastName||full.split(' ').slice(1).join(' ')||'');
-        localStorage.setItem('name',full||data.user.firstName||'');
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      const v = emailInput.value.trim();
+      const e1 = document.getElementById('e1');
+      const e1t = document.getElementById('e1t');
+      e1.classList.remove('show');
+      if (!v || !STUDENT_EMAIL_REGEX.test(v)) {
+        e1t.textContent = 'Please use your college email (e.g. name.mca25@cmrit.ac.in).';
+        e1.classList.add('show');
+        lucide.createIcons();
+        return;
       }
-      window.location.href='../homepage.html';
-    }else{
-      e2t.textContent=data.message||'Incorrect password. Please try again.';
-      e2.classList.add('show');e2.style.animation='none';requestAnimationFrame(()=>e2.style.animation='');
-    }
-  }catch(ex){e2t.textContent='Connection error — please try again.';e2.classList.add('show');}
-  finally{btn.classList.remove('loading');}
-});
-</script>
+      emailDisplay.textContent = v;
+      step1.style.display = 'none';
+      step2.style.display = 'block';
+      socials.style.display = 'none';
+      dot1.classList.remove('active');
+      dot2.classList.add('active');
+      document.getElementById('password').focus();
+    });
+
+    document.getElementById('changeEmail').addEventListener('click', () => {
+      step2.style.display = 'none';
+      step1.style.display = 'block';
+      socials.style.display = 'block';
+      dot2.classList.remove('active');
+      dot1.classList.add('active');
+      emailInput.focus();
+    });
+
+    document.getElementById('pwToggle').addEventListener('click', () => {
+      const pw = document.getElementById('password');
+      const ico = document.getElementById('eyeIco');
+      if (pw.type === 'password') {
+        pw.type = 'text';
+        ico.setAttribute('data-lucide', 'eye-off');
+      } else {
+        pw.type = 'password';
+        ico.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    });
+
+    document.getElementById('login-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      const password = document.getElementById('password').value;
+      const e2 = document.getElementById('e2');
+      const e2t = document.getElementById('e2t');
+      const btn = document.getElementById('signInBtn');
+      e2.classList.remove('show');
+      btn.classList.add('loading');
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, role: 'student' })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          ['role','email','token','auth_token','mindwave_token','firstName','lastName','name','profilePhoto','student_activities','readAnnouncements']
+            .forEach(k => localStorage.removeItem(k));
+          if (data.user) {
+            localStorage.setItem('role', data.user.role);
+            localStorage.setItem('email', data.user.email);
+            localStorage.setItem('token', data.token || 'authenticated');
+            localStorage.setItem('auth_token', data.token || 'authenticated');
+            const full = data.user.name || data.user.fullName || '';
+            localStorage.setItem('firstName', data.user.firstName || full.split(' ')[0] || '');
+            localStorage.setItem('lastName', data.user.lastName || full.split(' ').slice(1).join(' ') || '');
+            localStorage.setItem('name', full || data.user.firstName || '');
+          }
+          window.location.href = '../homepage.html';
+        } else {
+          e2t.textContent = data.message || 'Incorrect password. Please try again.';
+          e2.classList.add('show');
+          e2.style.animation = 'none';
+          requestAnimationFrame(() => e2.style.animation = '');
+          lucide.createIcons();
+        }
+      } catch (ex) {
+        e2t.textContent = 'Connection error — please try again.';
+        e2.classList.add('show');
+        lucide.createIcons();
+      } finally {
+        btn.classList.remove('loading');
+      }
+    });
+  </script>
 </body>
 </html>
