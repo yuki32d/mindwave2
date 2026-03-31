@@ -1,40 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MindWave — The Classroom Engagement Platform</title>
-  <meta name="description" content="MindWave is a tool-rich classroom platform built for faculty and students. Run live quizzes, polls, SQL games, AI tutoring, and more — all in one place." />
+  <meta name="description"
+    content="MindWave is a tool-rich classroom platform built for faculty and students. Run live quizzes, polls, SQL games, AI tutoring, and more — all in one place." />
   <link rel="icon" href="./favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <link rel="stylesheet" href="../loading-spinner.css" />
   <link rel="stylesheet" href="css/cookie-consent.css" />
   <link rel="stylesheet" href="css/chatbot.css" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --teal:        #06B6D4;
-      --teal-dark:   #0891B2;
-      --teal-light:  #CCFBF1;
-      --orange:      #F97316;
-      --orange-light:#FFF7ED;
-      --navy:        #0F172A;
-      --slate:       #475569;
-      --slate-light: #94A3B8;
-      --white:       #FFFFFF;
-      --card-bg:     #F8FAFC;
-      --border:      #E2E8F0;
-      --radius:      16px;
-      --radius-sm:   10px;
-      --shadow:      0 4px 24px rgba(6,182,212,0.10);
-      --shadow-lg:   0 8px 40px rgba(6,182,212,0.16);
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html { scroll-behavior: smooth; }
+    :root {
+      --teal: #06B6D4;
+      --teal-dark: #0891B2;
+      --teal-light: #CCFBF1;
+      --orange: #F97316;
+      --orange-light: #FFF7ED;
+      --navy: #0F172A;
+      --slate: #475569;
+      --slate-light: #94A3B8;
+      --white: #FFFFFF;
+      --card-bg: #F8FAFC;
+      --border: #E2E8F0;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 4px 24px rgba(6, 182, 212, 0.10);
+      --shadow-lg: 0 8px 40px rgba(6, 182, 212, 0.16);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       background: var(--white);
@@ -45,381 +57,1161 @@
 
     /* ── BLOBS ── */
     .blob-tl {
-      position: absolute; top: -80px; left: -80px;
-      width: 420px; height: 420px;
+      position: absolute;
+      top: -80px;
+      left: -80px;
+      width: 420px;
+      height: 420px;
       background: var(--teal-light);
       border-radius: 70% 30% 60% 40% / 50% 60% 40% 50%;
-      z-index: 0; opacity: 0.7;
+      z-index: 0;
+      opacity: 0.7;
       animation: blobFloat 8s ease-in-out infinite;
     }
+
     .blob-br {
-      position: absolute; bottom: -100px; right: -80px;
-      width: 380px; height: 380px;
+      position: absolute;
+      bottom: -100px;
+      right: -80px;
+      width: 380px;
+      height: 380px;
       background: var(--teal-light);
       border-radius: 40% 60% 30% 70% / 60% 40% 70% 30%;
-      z-index: 0; opacity: 0.6;
+      z-index: 0;
+      opacity: 0.6;
       animation: blobFloat 10s ease-in-out infinite reverse;
     }
+
     @keyframes blobFloat {
-      0%,100% { transform: translate(0,0) scale(1); }
-      50%      { transform: translate(12px,-18px) scale(1.04); }
+
+      0%,
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate(12px, -18px) scale(1.04);
+      }
     }
 
     /* ── NAVBAR ── */
     nav {
-      position: sticky; top: 0; z-index: 200;
-      background: rgba(255,255,255,0.90);
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: rgba(255, 255, 255, 0.90);
       backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border);
-      padding: 0 5%; height: 68px;
-      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       transition: box-shadow 0.3s;
     }
+
     .nav-logo {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 1.25rem; font-weight: 800; color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--navy);
       text-decoration: none;
     }
-    .nav-logo img { width: 34px; height: 34px; border-radius: 8px; }
-    .nav-logo span { color: var(--teal); }
-    .nav-links { display: flex; align-items: center; gap: 8px; list-style: none; }
+
+    .nav-logo img {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+    }
+
+    .nav-logo span {
+      color: var(--teal);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      list-style: none;
+    }
+
     .nav-links a {
-      text-decoration: none; color: var(--slate);
-      font-size: 0.9rem; font-weight: 500;
-      padding: 6px 14px; border-radius: 50px;
+      text-decoration: none;
+      color: var(--slate);
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 50px;
       transition: all 0.2s;
     }
-    .nav-links a:hover { color: var(--teal); background: var(--teal-light); }
-    .nav-links a.active { background: var(--teal); color: white; }
-    .nav-actions { display: flex; align-items: center; gap: 10px; }
+
+    .nav-links a:hover {
+      color: var(--teal);
+      background: var(--teal-light);
+    }
+
+    .nav-links a.active {
+      background: var(--teal);
+      color: white;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .btn-login {
-      text-decoration: none; color: var(--navy);
-      font-size: 0.9rem; font-weight: 600;
-      padding: 8px 20px; border-radius: 50px;
-      border: 1.5px solid var(--border); transition: all 0.2s;
+      text-decoration: none;
+      color: var(--navy);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 50px;
+      border: 1.5px solid var(--border);
+      transition: all 0.2s;
     }
-    .btn-login:hover { border-color: var(--teal); color: var(--teal); }
+
+    .btn-login:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+
     .btn-cta {
-      text-decoration: none; color: white;
-      font-size: 0.9rem; font-weight: 700;
-      padding: 9px 22px; border-radius: 50px;
-      background: var(--teal); transition: all 0.2s;
-      box-shadow: 0 2px 12px rgba(6,182,212,0.35);
+      text-decoration: none;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 9px 22px;
+      border-radius: 50px;
+      background: var(--teal);
+      transition: all 0.2s;
+      box-shadow: 0 2px 12px rgba(6, 182, 212, 0.35);
     }
-    .btn-cta:hover { background: var(--teal-dark); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(6,182,212,0.45); }
+
+    .btn-cta:hover {
+      background: var(--teal-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.45);
+    }
 
     /* ── HERO ── */
     .hero {
-      position: relative; overflow: hidden;
+      position: relative;
+      overflow: hidden;
       min-height: calc(100vh - 68px);
-      display: flex; align-items: center;
+      display: flex;
+      align-items: center;
       padding: 80px 5% 100px;
       background: var(--white);
     }
+
     .hero-inner {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 60px; width: 100%; max-width: 1200px; margin: 0 auto;
-      position: relative; z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 60px;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
-    .hero-text { flex: 1; max-width: 520px; }
+
+    .hero-text {
+      flex: 1;
+      max-width: 520px;
+    }
+
     .hero-badge {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: var(--orange-light); color: var(--orange);
-      font-size: 0.82rem; font-weight: 700;
-      padding: 6px 14px; border-radius: 50px;
-      margin-bottom: 22px; letter-spacing: 0.02em;
-      border: 1px solid rgba(249,115,22,0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--orange-light);
+      color: var(--orange);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 50px;
+      margin-bottom: 22px;
+      letter-spacing: 0.02em;
+      border: 1px solid rgba(249, 115, 22, 0.2);
     }
-    .hero-badge i { width: 14px; height: 14px; }
+
+    .hero-badge i {
+      width: 14px;
+      height: 14px;
+    }
+
     .hero-title {
       font-size: clamp(2.4rem, 5vw, 3.5rem);
-      font-weight: 900; line-height: 1.1;
-      color: var(--navy); margin-bottom: 20px;
+      font-weight: 900;
+      line-height: 1.1;
+      color: var(--navy);
+      margin-bottom: 20px;
       letter-spacing: -0.02em;
     }
-    .hero-title .accent  { color: var(--teal); }
+
+    .hero-title .accent {
+      color: var(--teal);
+    }
+
     .hero-sub {
-      font-size: 1.05rem; color: var(--slate);
-      line-height: 1.75; margin-bottom: 36px; max-width: 440px;
+      font-size: 1.05rem;
+      color: var(--slate);
+      line-height: 1.75;
+      margin-bottom: 36px;
+      max-width: 440px;
     }
-    .hero-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
     .btn-primary {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--teal); color: white;
-      font-size: 0.97rem; font-weight: 700;
-      padding: 14px 30px; border-radius: 50px;
-      text-decoration: none; transition: all 0.25s;
-      box-shadow: 0 4px 20px rgba(6,182,212,0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--teal);
+      color: white;
+      font-size: 0.97rem;
+      font-weight: 700;
+      padding: 14px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.25s;
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4);
     }
-    .btn-primary:hover { background: var(--teal-dark); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(6,182,212,0.5); }
-    .hero-image { flex: 1; max-width: 560px; position: relative; }
+
+    .btn-primary:hover {
+      background: var(--teal-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(6, 182, 212, 0.5);
+    }
+
+    .hero-image {
+      flex: 1;
+      max-width: 560px;
+      position: relative;
+    }
+
     .hero-image img {
-      width: 100%; border-radius: 24px;
-      filter: drop-shadow(0 20px 50px rgba(6,182,212,0.18));
+      width: 100%;
+      border-radius: 24px;
+      filter: drop-shadow(0 20px 50px rgba(6, 182, 212, 0.18));
       animation: heroFloat 6s ease-in-out infinite;
     }
+
     @keyframes heroFloat {
-      0%,100% { transform: translateY(0); }
-      50%      { transform: translateY(-14px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-14px);
+      }
     }
 
     /* ── SECTION BASE ── */
-    section { padding: 100px 5%; }
-    .section-inner { max-width: 1200px; margin: 0 auto; }
+    section {
+      padding: 100px 5%;
+    }
+
+    .section-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
     .section-tag {
-      display: inline-flex; align-items: center; gap: 7px;
-      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--teal);
-      background: var(--teal-light); padding: 5px 14px; border-radius: 50px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--teal);
+      background: var(--teal-light);
+      padding: 5px 14px;
+      border-radius: 50px;
       margin-bottom: 16px;
     }
+
     .section-title {
-      font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 800;
-      color: var(--navy); margin-bottom: 14px; line-height: 1.2;
+      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 14px;
+      line-height: 1.2;
     }
-    .section-sub { font-size: 1rem; color: var(--slate); max-width: 560px; line-height: 1.75; }
-    .section-head { margin-bottom: 56px; }
-    .section-head.center { text-align: center; }
-    .section-head.center .section-sub { margin: 0 auto; }
+
+    .section-sub {
+      font-size: 1rem;
+      color: var(--slate);
+      max-width: 560px;
+      line-height: 1.75;
+    }
+
+    .section-head {
+      margin-bottom: 56px;
+    }
+
+    .section-head.center {
+      text-align: center;
+    }
+
+    .section-head.center .section-sub {
+      margin: 0 auto;
+    }
 
     /* ── ROLES ── */
-    .roles-strip { background: var(--card-bg); }
-    .roles-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+    .roles-strip {
+      background: var(--card-bg);
+    }
+
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
     .role-card {
-      background: white; border-radius: var(--radius);
-      padding: 36px 30px; border: 1.5px solid var(--border);
-      transition: all 0.3s; position: relative; overflow: hidden;
+      background: white;
+      border-radius: var(--radius);
+      padding: 36px 30px;
+      border: 1.5px solid var(--border);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
     }
-    .role-card::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; }
-    .role-card.faculty::before { background: var(--teal); }
-    .role-card.student::before { background: var(--orange); }
-    .role-card.admin::before   { background: #8B5CF6; }
-    .role-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: transparent; }
+
+    .role-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .role-card.faculty::before {
+      background: var(--teal);
+    }
+
+    .role-card.student::before {
+      background: var(--orange);
+    }
+
+    .role-card.admin::before {
+      background: #8B5CF6;
+    }
+
+    .role-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+      border-color: transparent;
+    }
+
     .role-icon {
-      width:52px; height:52px; border-radius:14px;
-      display:flex; align-items:center; justify-content:center; margin-bottom:18px;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
     }
-    .role-card.faculty .role-icon { background: var(--teal-light); color: var(--teal); }
-    .role-card.student .role-icon { background: var(--orange-light); color: var(--orange); }
-    .role-card.admin   .role-icon { background: #EDE9FE; color: #8B5CF6; }
-    .role-icon i { width:26px; height:26px; }
-    .role-title { font-size:1.15rem; font-weight:700; color:var(--navy); margin-bottom:10px; }
-    .role-desc  { font-size:0.92rem; color:var(--slate); line-height:1.7; }
+
+    .role-card.faculty .role-icon {
+      background: var(--teal-light);
+      color: var(--teal);
+    }
+
+    .role-card.student .role-icon {
+      background: var(--orange-light);
+      color: var(--orange);
+    }
+
+    .role-card.admin .role-icon {
+      background: #EDE9FE;
+      color: #8B5CF6;
+    }
+
+    .role-icon i {
+      width: 26px;
+      height: 26px;
+    }
+
+    .role-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+
+    .role-desc {
+      font-size: 0.92rem;
+      color: var(--slate);
+      line-height: 1.7;
+    }
 
     /* ── FACULTY TOOLS ── */
-    .tools-bg { background: white; }
-    .tools-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; }
+    .tools-bg {
+      background: white;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
     .tool-chip {
-      display:flex; align-items:center; gap:12px;
-      background:var(--card-bg); border:1.5px solid var(--border);
-      border-radius:var(--radius-sm); padding:14px 16px; cursor:default;
-      transition:all 0.25s; position:relative; overflow:hidden;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      cursor: default;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
     }
+
     .tool-chip::after {
-      content:''; position:absolute; inset:0;
-      background:linear-gradient(135deg,rgba(6,182,212,0.05),rgba(249,115,22,0.04));
-      opacity:0; transition:opacity 0.3s;
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(249, 115, 22, 0.04));
+      opacity: 0;
+      transition: opacity 0.3s;
     }
-    .tool-chip:hover { border-color:var(--teal); transform:translateY(-3px); box-shadow:0 6px 20px rgba(6,182,212,0.12); }
-    .tool-chip:hover::after { opacity:1; }
+
+    .tool-chip:hover {
+      border-color: var(--teal);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.12);
+    }
+
+    .tool-chip:hover::after {
+      opacity: 1;
+    }
+
     .tool-chip-icon {
-      width:36px; height:36px; border-radius:9px;
-      background:var(--teal-light); color:var(--teal);
-      display:flex; align-items:center; justify-content:center;
-      flex-shrink:0; transition:all 0.25s;
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: var(--teal-light);
+      color: var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.25s;
     }
-    .tool-chip:hover .tool-chip-icon { background:var(--teal); color:white; }
-    .tool-chip-icon i { width:18px; height:18px; }
-    .tool-chip-name { font-size:0.88rem; font-weight:600; color:var(--navy); line-height:1.3; }
+
+    .tool-chip:hover .tool-chip-icon {
+      background: var(--teal);
+      color: white;
+    }
+
+    .tool-chip-icon i {
+      width: 18px;
+      height: 18px;
+    }
+
+    .tool-chip-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--navy);
+      line-height: 1.3;
+    }
 
     /* ── LIVE SESSION ── */
-    .live-section { background: var(--teal-light); }
-    .live-inner { display:grid; grid-template-columns:1fr 1fr; gap:70px; align-items:center; }
-    .live-features { list-style:none; display:flex; flex-direction:column; gap:20px; }
+    .live-section {
+      background: var(--teal-light);
+    }
+
+    .live-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 70px;
+      align-items: center;
+    }
+
+    .live-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
     .live-feature {
-      display:flex; align-items:flex-start; gap:16px;
-      background:white; border-radius:var(--radius-sm);
-      padding:18px 20px; border:1px solid rgba(6,182,212,0.15);
-      transition:all 0.25s;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      background: white;
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      transition: all 0.25s;
     }
-    .live-feature:hover { transform:translateX(6px); box-shadow:var(--shadow); }
+
+    .live-feature:hover {
+      transform: translateX(6px);
+      box-shadow: var(--shadow);
+    }
+
     .live-feat-icon {
-      width:42px; height:42px; border-radius:10px;
-      background:var(--teal-light); color:var(--teal);
-      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--teal-light);
+      color: var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
-    .live-feat-icon i { width:20px; height:20px; }
-    .live-feat-title { font-size:0.97rem; font-weight:700; color:var(--navy); margin-bottom:4px; }
-    .live-feat-desc  { font-size:0.85rem; color:var(--slate); line-height:1.6; }
+
+    .live-feat-icon i {
+      width: 20px;
+      height: 20px;
+    }
+
+    .live-feat-title {
+      font-size: 0.97rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .live-feat-desc {
+      font-size: 0.85rem;
+      color: var(--slate);
+      line-height: 1.6;
+    }
+
     .live-mockup {
-      background:white; border-radius:20px;
-      box-shadow:var(--shadow-lg); overflow:hidden; border:1px solid var(--border);
+      background: white;
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
     }
-    .mock-bar { background:var(--navy); padding:14px 20px; display:flex; align-items:center; gap:10px; }
-    .mock-dot { width:10px; height:10px; border-radius:50%; }
-    .mock-bar-title { color:rgba(255,255,255,0.7); font-size:0.82rem; font-weight:600; margin-left:6px; }
-    .mock-body { padding:20px; }
+
+    .mock-bar {
+      background: var(--navy);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mock-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .mock-bar-title {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    .mock-body {
+      padding: 20px;
+    }
+
     .mock-question {
-      background:var(--teal-light); border-radius:10px;
-      padding:14px 16px; font-size:0.9rem; font-weight:600;
-      color:var(--navy); margin-bottom:14px; border-left:4px solid var(--teal);
+      background: var(--teal-light);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 14px;
+      border-left: 4px solid var(--teal);
     }
-    .mock-options { display:flex; flex-direction:column; gap:9px; }
+
+    .mock-options {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
     .mock-opt {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:10px 14px; border-radius:8px; font-size:0.85rem; font-weight:500;
-      border:1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border: 1.5px solid var(--border);
     }
-    .mock-opt.selected { background:var(--teal); color:white; border-color:var(--teal); }
-    .mock-bar-fill { height:7px; border-radius:50px; background:var(--border); margin-top:16px; overflow:hidden; }
-    .mock-bar-fill-inner { height:100%; background:var(--teal); border-radius:50px; }
-    .mock-stat-row { display:flex; justify-content:space-between; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
-    .mock-stat { text-align:center; }
-    .mock-stat-val { font-size:1.1rem; font-weight:800; color:var(--navy); }
-    .mock-stat-lbl { font-size:0.75rem; color:var(--slate-light); font-weight:500; }
+
+    .mock-opt.selected {
+      background: var(--teal);
+      color: white;
+      border-color: var(--teal);
+    }
+
+    .mock-bar-fill {
+      height: 7px;
+      border-radius: 50px;
+      background: var(--border);
+      margin-top: 16px;
+      overflow: hidden;
+    }
+
+    .mock-bar-fill-inner {
+      height: 100%;
+      background: var(--teal);
+      border-radius: 50px;
+    }
+
+    .mock-stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .mock-stat {
+      text-align: center;
+    }
+
+    .mock-stat-val {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .mock-stat-lbl {
+      font-size: 0.75rem;
+      color: var(--slate-light);
+      font-weight: 500;
+    }
 
     /* ── STUDENT FEATURES ── */
-    .student-section { background:white; }
-    .student-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:22px; }
+    .student-section {
+      background: white;
+    }
+
+    .student-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 22px;
+    }
+
     .student-card {
-      background:var(--card-bg); border:1.5px solid var(--border);
-      border-radius:var(--radius); padding:28px 24px;
-      transition:all 0.3s; cursor:default; position:relative; overflow:hidden;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      transition: all 0.3s;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
     }
+
     .student-card::before {
-      content:''; position:absolute; top:0; left:0; right:0;
-      height:3px; background:linear-gradient(90deg,var(--teal),var(--orange));
-      transform:scaleX(0); transform-origin:left; transition:transform 0.3s;
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--teal), var(--orange));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
     }
-    .student-card:hover { transform:translateY(-5px); box-shadow:var(--shadow-lg); border-color:transparent; }
-    .student-card:hover::before { transform:scaleX(1); }
+
+    .student-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: transparent;
+    }
+
+    .student-card:hover::before {
+      transform: scaleX(1);
+    }
+
     .student-card-icon {
-      width:48px; height:48px; border-radius:12px;
-      display:flex; align-items:center; justify-content:center;
-      margin-bottom:16px; transition:all 0.3s;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      transition: all 0.3s;
     }
-    .student-card:nth-child(odd)  .student-card-icon { background:var(--teal-light); color:var(--teal); }
-    .student-card:nth-child(even) .student-card-icon { background:var(--orange-light); color:var(--orange); }
-    .student-card:hover .student-card-icon { transform:rotate(-6deg) scale(1.1); }
-    .student-card-icon i { width:24px; height:24px; }
-    .student-card-title { font-size:1rem; font-weight:700; color:var(--navy); margin-bottom:8px; }
-    .student-card-desc  { font-size:0.87rem; color:var(--slate); line-height:1.65; }
+
+    .student-card:nth-child(odd) .student-card-icon {
+      background: var(--teal-light);
+      color: var(--teal);
+    }
+
+    .student-card:nth-child(even) .student-card-icon {
+      background: var(--orange-light);
+      color: var(--orange);
+    }
+
+    .student-card:hover .student-card-icon {
+      transform: rotate(-6deg) scale(1.1);
+    }
+
+    .student-card-icon i {
+      width: 24px;
+      height: 24px;
+    }
+
+    .student-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .student-card-desc {
+      font-size: 0.87rem;
+      color: var(--slate);
+      line-height: 1.65;
+    }
 
     /* ── AI STRIP ── */
-    .ai-strip { background:linear-gradient(135deg,var(--navy) 0%,#164E63 100%); padding:80px 5%; }
-    .ai-strip-inner { max-width:1200px; margin:0 auto; display:flex; flex-direction:column; align-items:center; text-align:center; }
-    .ai-strip .section-tag { background:rgba(6,182,212,0.2); color:#67E8F9; }
-    .ai-strip .section-title { color:white; }
-    .ai-strip .section-sub { color:#94A3B8; }
-    .ai-cards { display:flex; gap:28px; margin-top:50px; flex-wrap:wrap; justify-content:center; }
+    .ai-strip {
+      background: linear-gradient(135deg, var(--navy) 0%, #164E63 100%);
+      padding: 80px 5%;
+    }
+
+    .ai-strip-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .ai-strip .section-tag {
+      background: rgba(6, 182, 212, 0.2);
+      color: #67E8F9;
+    }
+
+    .ai-strip .section-title {
+      color: white;
+    }
+
+    .ai-strip .section-sub {
+      color: #94A3B8;
+    }
+
+    .ai-cards {
+      display: flex;
+      gap: 28px;
+      margin-top: 50px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
     .ai-card {
-      background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);
-      border-radius:var(--radius); padding:36px 28px;
-      flex:1; min-width:220px; max-width:300px; text-align:left; transition:all 0.3s;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      flex: 1;
+      min-width: 220px;
+      max-width: 300px;
+      text-align: left;
+      transition: all 0.3s;
     }
-    .ai-card:hover { background:rgba(255,255,255,0.12); transform:translateY(-6px); border-color:rgba(6,182,212,0.4); }
+
+    .ai-card:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-6px);
+      border-color: rgba(6, 182, 212, 0.4);
+    }
+
     .ai-card-icon {
-      width:52px; height:52px; border-radius:14px;
-      background:rgba(6,182,212,0.2); color:#67E8F9;
-      display:flex; align-items:center; justify-content:center; margin-bottom:18px;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(6, 182, 212, 0.2);
+      color: #67E8F9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
     }
-    .ai-card-icon i { width:26px; height:26px; }
-    .ai-card-title { font-size:1.05rem; font-weight:700; color:white; margin-bottom:10px; }
-    .ai-card-desc  { font-size:0.88rem; color:#94A3B8; line-height:1.7; }
+
+    .ai-card-icon i {
+      width: 26px;
+      height: 26px;
+    }
+
+    .ai-card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 10px;
+    }
+
+    .ai-card-desc {
+      font-size: 0.88rem;
+      color: #94A3B8;
+      line-height: 1.7;
+    }
 
     /* ── HOW IT WORKS ── */
-    .how-section { background: var(--card-bg); }
-    .how-steps { display:flex; flex-direction:column; max-width:720px; margin:0 auto; }
+    .how-section {
+      background: var(--card-bg);
+    }
+
+    .how-steps {
+      display: flex;
+      flex-direction: column;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
     .how-step {
-      display:grid; grid-template-columns:72px 1fr; gap:28px;
-      padding-bottom:48px; position:relative;
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 28px;
+      padding-bottom: 48px;
+      position: relative;
     }
-    .how-step:last-child { padding-bottom:0; }
+
+    .how-step:last-child {
+      padding-bottom: 0;
+    }
+
     .how-step::before {
-      content:''; position:absolute; left:35px; top:72px; bottom:0;
-      width:2px; background:linear-gradient(to bottom,var(--teal),rgba(6,182,212,0.05));
+      content: '';
+      position: absolute;
+      left: 35px;
+      top: 72px;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--teal), rgba(6, 182, 212, 0.05));
     }
-    .how-step:last-child::before { display:none; }
+
+    .how-step:last-child::before {
+      display: none;
+    }
+
     .how-num {
-      width:70px; height:70px; border-radius:50%;
-      background:var(--teal); color:white;
-      display:flex; align-items:center; justify-content:center;
-      font-size:1.3rem; font-weight:800;
-      box-shadow:0 6px 24px rgba(6,182,212,0.35);
-      flex-shrink:0;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: var(--teal);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      box-shadow: 0 6px 24px rgba(6, 182, 212, 0.35);
+      flex-shrink: 0;
     }
-    .how-body { padding-top:14px; }
-    .how-body h3 { font-size:1.2rem; font-weight:700; color:var(--navy); margin-bottom:8px; }
-    .how-body p  { font-size:0.93rem; color:var(--slate); line-height:1.75; }
+
+    .how-body {
+      padding-top: 14px;
+    }
+
+    .how-body h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .how-body p {
+      font-size: 0.93rem;
+      color: var(--slate);
+      line-height: 1.75;
+    }
 
     /* ── FAQ ── */
-    .faq-section { background:white; }
-    .faq-list { display:flex; flex-direction:column; max-width:760px; margin:0 auto; }
-    .faq-item { border-bottom:1px solid var(--border); }
-    .faq-q {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:20px 0; cursor:pointer; gap:20px;
+    .faq-section {
+      background: white;
     }
-    .faq-q h3 { font-size:1rem; font-weight:600; color:var(--navy); line-height:1.4; }
-    .faq-icon { color:var(--teal); flex-shrink:0; transition:transform 0.3s; width:18px; height:18px; }
-    .faq-q.open .faq-icon { transform:rotate(45deg); }
-    .faq-a { max-height:0; overflow:hidden; transition:max-height 0.4s ease; }
-    .faq-a.open { max-height:200px; }
-    .faq-a p { padding-bottom:20px; font-size:0.92rem; color:var(--slate); line-height:1.8; }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-q {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      cursor: pointer;
+      gap: 20px;
+    }
+
+    .faq-q h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--navy);
+      line-height: 1.4;
+    }
+
+    .faq-icon {
+      color: var(--teal);
+      flex-shrink: 0;
+      transition: transform 0.3s;
+      width: 18px;
+      height: 18px;
+    }
+
+    .faq-q.open .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+
+    .faq-a.open {
+      max-height: 200px;
+    }
+
+    .faq-a p {
+      padding-bottom: 20px;
+      font-size: 0.92rem;
+      color: var(--slate);
+      line-height: 1.8;
+    }
 
     /* ── CTA BAND ── */
-    .cta-band { background:linear-gradient(135deg,var(--navy) 0%,#164E63 100%); padding:90px 5%; text-align:center; }
-    .cta-band-inner { max-width:640px; margin:0 auto; }
-    .cta-band h2 { font-size:clamp(1.8rem,4vw,2.8rem); font-weight:900; color:white; margin-bottom:14px; letter-spacing:-0.02em; }
-    .cta-band p  { color:#94A3B8; font-size:1rem; margin-bottom:36px; line-height:1.7; }
-    .cta-band .btn-primary { background:white; color:var(--teal); box-shadow:0 8px 30px rgba(0,0,0,0.2); }
-    .cta-band .btn-primary:hover { background:#F0FDFE; }
+    .cta-band {
+      background: linear-gradient(135deg, var(--navy) 0%, #164E63 100%);
+      padding: 90px 5%;
+      text-align: center;
+    }
+
+    .cta-band-inner {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .cta-band h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      color: white;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .cta-band p {
+      color: #94A3B8;
+      font-size: 1rem;
+      margin-bottom: 36px;
+      line-height: 1.7;
+    }
+
+    .cta-band .btn-primary {
+      background: white;
+      color: var(--teal);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .cta-band .btn-primary:hover {
+      background: #F0FDFE;
+    }
 
     /* ── FOOTER ── */
-    footer { background:var(--card-bg); border-top:1px solid var(--border); padding:60px 5% 36px; }
-    .footer-inner { max-width:1200px; margin:0 auto; }
+    footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      padding: 60px 5% 36px;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
     .footer-top {
-      display:flex; justify-content:space-between; align-items:flex-start;
-      gap:60px; padding-bottom:40px; border-bottom:1px solid var(--border); flex-wrap:wrap;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 60px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
     }
-    .footer-brand .nav-logo { margin-bottom:14px; }
-    .footer-tagline { font-size:0.88rem; color:var(--slate); max-width:280px; line-height:1.7; }
-    .footer-links { display:flex; gap:60px; flex-wrap:wrap; }
-    .footer-col h4 { font-size:0.85rem; font-weight:700; color:var(--navy); margin-bottom:16px; text-transform:uppercase; letter-spacing:0.06em; }
-    .footer-col ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
-    .footer-col a { text-decoration:none; color:var(--slate); font-size:0.9rem; transition:color 0.2s; }
-    .footer-col a:hover { color:var(--teal); }
-    .footer-bottom { display:flex; justify-content:space-between; align-items:center; padding-top:28px; flex-wrap:wrap; gap:10px; }
-    .footer-copy { font-size:0.85rem; color:var(--slate-light); }
-    .footer-badges { display:flex; gap:10px; }
+
+    .footer-brand .nav-logo {
+      margin-bottom: 14px;
+    }
+
+    .footer-tagline {
+      font-size: 0.88rem;
+      color: var(--slate);
+      max-width: 280px;
+      line-height: 1.7;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 60px;
+      flex-wrap: wrap;
+    }
+
+    .footer-col h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-col a {
+      text-decoration: none;
+      color: var(--slate);
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .footer-col a:hover {
+      color: var(--teal);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 28px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .footer-copy {
+      font-size: 0.85rem;
+      color: var(--slate-light);
+    }
+
+    .footer-badges {
+      display: flex;
+      gap: 10px;
+    }
+
     .footer-badge {
-      display:flex; align-items:center; gap:6px;
-      font-size:0.78rem; font-weight:600; color:var(--slate);
-      background:white; border:1px solid var(--border);
-      padding:5px 12px; border-radius:50px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--slate);
+      background: white;
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 50px;
     }
-    .footer-badge i { width:13px; height:13px; color:var(--teal); }
+
+    .footer-badge i {
+      width: 13px;
+      height: 13px;
+      color: var(--teal);
+    }
 
     /* ── RESPONSIVE ── */
     @media (max-width:900px) {
-      .hero-inner { flex-direction:column; text-align:center; }
-      .hero-text { max-width:100%; }
-      .hero-actions { justify-content:center; }
-      .hero-image { max-width:480px; }
-      .roles-grid { grid-template-columns:1fr; }
-      .live-inner { grid-template-columns:1fr; }
-      .footer-top { flex-direction:column; }
-      .how-step { grid-template-columns:56px 1fr; }
-      .how-num { width:54px; height:54px; font-size:1.1rem; }
-      .how-step::before { left:27px; }
+      .hero-inner {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .hero-text {
+        max-width: 100%;
+      }
+
+      .hero-actions {
+        justify-content: center;
+      }
+
+      .hero-image {
+        max-width: 480px;
+      }
+
+      .roles-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .live-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-top {
+        flex-direction: column;
+      }
+
+      .how-step {
+        grid-template-columns: 56px 1fr;
+      }
+
+      .how-num {
+        width: 54px;
+        height: 54px;
+        font-size: 1.1rem;
+      }
+
+      .how-step::before {
+        left: 27px;
+      }
     }
+
     @media (max-width:640px) {
-      section { padding:70px 5%; }
-      .nav-links { display:none; }
-      .tools-grid { grid-template-columns:repeat(2,1fr); }
+      section {
+        padding: 70px 5%;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
   </style>
 </head>
+
 <body>
 
   <!-- NAVBAR -->
@@ -437,8 +1229,8 @@
       <li><a href="#pricing">Pricing</a></li>
     </ul>
     <div class="nav-actions">
-      <a href="demo-login.html" class="btn-login" id="nav-login">Log in</a>
-      <a href="demo-login.html" class="btn-cta" id="nav-cta">Get Started</a>
+      <a href="website-login.html" class="btn-login" id="nav-login">Log in</a>
+      <a href="website-signup.html" class="btn-cta" id="nav-cta">Get Started</a>
     </div>
   </nav>
 
@@ -458,7 +1250,8 @@
           Platform
         </h1>
         <p class="hero-sub">
-          MindWave gives faculty 20+ interactive tools — quizzes, SQL games, live polls, AI activities — while giving students a richer way to learn, track progress, and collaborate.
+          MindWave gives faculty 20+ interactive tools — quizzes, SQL games, live polls, AI activities — while giving
+          students a richer way to learn, track progress, and collaborate.
         </p>
         <div class="hero-actions">
           <a href="demo-login.html" class="btn-primary" id="hero-cta">
@@ -479,23 +1272,27 @@
       <div class="section-head center">
         <div class="section-tag"><i data-lucide="users"></i> Who It's For</div>
         <h2 class="section-title" id="roles-title">One Platform. Three Roles.</h2>
-        <p class="section-sub">MindWave is purpose-built for every person in the classroom ecosystem — from the faculty who designs the session to the admin who oversees the department.</p>
+        <p class="section-sub">MindWave is purpose-built for every person in the classroom ecosystem — from the faculty
+          who designs the session to the admin who oversees the department.</p>
       </div>
       <div class="roles-grid">
         <div class="role-card faculty">
           <div class="role-icon"><i data-lucide="presentation"></i></div>
           <div class="role-title">Faculty</div>
-          <p class="role-desc">Create interactive activities, launch live sessions, track participation, run AI-powered games, and review analytics — all from a single dashboard.</p>
+          <p class="role-desc">Create interactive activities, launch live sessions, track participation, run AI-powered
+            games, and review analytics — all from a single dashboard.</p>
         </div>
         <div class="role-card student">
           <div class="role-icon"><i data-lucide="book-open"></i></div>
           <div class="role-title">Students</div>
-          <p class="role-desc">Join live quizzes, get AI tutoring, submit GitHub projects, track your own performance, participate in peer reviews, and compete on leaderboards.</p>
+          <p class="role-desc">Join live quizzes, get AI tutoring, submit GitHub projects, track your own performance,
+            participate in peer reviews, and compete on leaderboards.</p>
         </div>
         <div class="role-card admin">
           <div class="role-icon"><i data-lucide="shield-check"></i></div>
           <div class="role-title">HOD / Admin</div>
-          <p class="role-desc">Manage faculty assignments, approve student records, oversee organizational analytics, and control access — with full visibility across sections.</p>
+          <p class="role-desc">Manage faculty assignments, approve student records, oversee organizational analytics,
+            and control access — with full visibility across sections.</p>
         </div>
       </div>
     </div>
@@ -507,7 +1304,8 @@
       <div class="section-head">
         <div class="section-tag"><i data-lucide="layers"></i> Faculty Toolkit</div>
         <h2 class="section-title" id="tools-title">20+ Interactive Activities,<br />Ready to Launch</h2>
-        <p class="section-sub">Every tool here is live and functional — built to run in real classroom sessions with real students. No fluff, no filler.</p>
+        <p class="section-sub">Every tool here is live and functional — built to run in real classroom sessions with
+          real students. No fluff, no filler.</p>
       </div>
       <div class="tools-grid" id="tools-grid"></div>
     </div>
@@ -520,34 +1318,39 @@
         <div>
           <div class="section-tag"><i data-lucide="radio"></i> Live Sessions</div>
           <h2 class="section-title" id="live-title">Real-Time Classroom Control</h2>
-          <p class="section-sub" style="margin-bottom:36px;">Launch a session, watch responses roll in live, manage the pace, and review results instantly — all with built-in anti-cheat.</p>
+          <p class="section-sub" style="margin-bottom:36px;">Launch a session, watch responses roll in live, manage the
+            pace, and review results instantly — all with built-in anti-cheat.</p>
           <ul class="live-features">
             <li class="live-feature">
               <div class="live-feat-icon"><i data-lucide="play-circle"></i></div>
               <div>
                 <div class="live-feat-title">Live Quiz Launcher</div>
-                <div class="live-feat-desc">Start any activity with a session code — students join in seconds, no signup friction.</div>
+                <div class="live-feat-desc">Start any activity with a session code — students join in seconds, no signup
+                  friction.</div>
               </div>
             </li>
             <li class="live-feature">
               <div class="live-feat-icon"><i data-lucide="shield-alert"></i></div>
               <div>
                 <div class="live-feat-title">Anti-Cheat System</div>
-                <div class="live-feat-desc">Tab-switching detection, copy-paste blocking, and focus loss monitoring during assessments.</div>
+                <div class="live-feat-desc">Tab-switching detection, copy-paste blocking, and focus loss monitoring
+                  during assessments.</div>
               </div>
             </li>
             <li class="live-feature">
               <div class="live-feat-icon"><i data-lucide="trophy"></i></div>
               <div>
                 <div class="live-feat-title">Live Leaderboard</div>
-                <div class="live-feat-desc">Real-time score updates visible to the whole class — drives healthy competition and engagement.</div>
+                <div class="live-feat-desc">Real-time score updates visible to the whole class — drives healthy
+                  competition and engagement.</div>
               </div>
             </li>
             <li class="live-feature">
               <div class="live-feat-icon"><i data-lucide="video"></i></div>
               <div>
                 <div class="live-feat-title">Meeting Room</div>
-                <div class="live-feat-desc">Integrated video meeting with mute controls, participant management, and live activity overlays.</div>
+                <div class="live-feat-desc">Integrated video meeting with mute controls, participant management, and
+                  live activity overlays.</div>
               </div>
             </li>
           </ul>
@@ -568,16 +1371,31 @@
               <div class="mock-opt">D &nbsp; GROUP BY</div>
             </div>
             <div style="margin-top:18px;">
-              <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--slate);margin-bottom:6px;">
+              <div
+                style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--slate);margin-bottom:6px;">
                 <span>Responses</span><span style="font-weight:700;color:var(--teal);">24 / 30</span>
               </div>
-              <div class="mock-bar-fill"><div class="mock-bar-fill-inner" style="width:80%;"></div></div>
+              <div class="mock-bar-fill">
+                <div class="mock-bar-fill-inner" style="width:80%;"></div>
+              </div>
             </div>
             <div class="mock-stat-row">
-              <div class="mock-stat"><div class="mock-stat-val">24</div><div class="mock-stat-lbl">Answered</div></div>
-              <div class="mock-stat"><div class="mock-stat-val" style="color:var(--teal);">67%</div><div class="mock-stat-lbl">Correct</div></div>
-              <div class="mock-stat"><div class="mock-stat-val">1m 42s</div><div class="mock-stat-lbl">Avg Time</div></div>
-              <div class="mock-stat"><div class="mock-stat-val" style="color:var(--orange);">3</div><div class="mock-stat-lbl">Flagged</div></div>
+              <div class="mock-stat">
+                <div class="mock-stat-val">24</div>
+                <div class="mock-stat-lbl">Answered</div>
+              </div>
+              <div class="mock-stat">
+                <div class="mock-stat-val" style="color:var(--teal);">67%</div>
+                <div class="mock-stat-lbl">Correct</div>
+              </div>
+              <div class="mock-stat">
+                <div class="mock-stat-val">1m 42s</div>
+                <div class="mock-stat-lbl">Avg Time</div>
+              </div>
+              <div class="mock-stat">
+                <div class="mock-stat-val" style="color:var(--orange);">3</div>
+                <div class="mock-stat-lbl">Flagged</div>
+              </div>
             </div>
           </div>
         </div>
@@ -591,7 +1409,8 @@
       <div class="section-head center">
         <div class="section-tag"><i data-lucide="graduation-cap"></i> Student Experience</div>
         <h2 class="section-title" id="student-title">Learning That Goes Beyond the Lecture</h2>
-        <p class="section-sub">Students get a full suite of tools — from AI tutoring to GitHub project tracking — designed to make learning active, not passive.</p>
+        <p class="section-sub">Students get a full suite of tools — from AI tutoring to GitHub project tracking —
+          designed to make learning active, not passive.</p>
       </div>
       <div class="student-grid" id="student-grid"></div>
     </div>
@@ -607,17 +1426,20 @@
         <div class="ai-card">
           <div class="ai-card-icon"><i data-lucide="wand-2"></i></div>
           <div class="ai-card-title">AI Game Builder</div>
-          <p class="ai-card-desc">Faculty describe a topic — AI generates a full interactive game (quiz, scenario, unjumble) in seconds, ready to deploy.</p>
+          <p class="ai-card-desc">Faculty describe a topic — AI generates a full interactive game (quiz, scenario,
+            unjumble) in seconds, ready to deploy.</p>
         </div>
         <div class="ai-card">
           <div class="ai-card-icon"><i data-lucide="bot"></i></div>
           <div class="ai-card-title">AI Tutor</div>
-          <p class="ai-card-desc">Students get an always-available AI tutor that answers questions, explains concepts, and guides problem-solving step by step.</p>
+          <p class="ai-card-desc">Students get an always-available AI tutor that answers questions, explains concepts,
+            and guides problem-solving step by step.</p>
         </div>
         <div class="ai-card">
           <div class="ai-card-icon"><i data-lucide="bar-chart-2"></i></div>
           <div class="ai-card-title">Smart Analytics</div>
-          <p class="ai-card-desc">Faculty dashboards surface patterns — which students are struggling, which questions failed, and where to revisit topics.</p>
+          <p class="ai-card-desc">Faculty dashboards surface patterns — which students are struggling, which questions
+            failed, and where to revisit topics.</p>
         </div>
       </div>
     </div>
@@ -636,21 +1458,24 @@
           <div class="how-num">1</div>
           <div class="how-body">
             <h3>Set Up Your Account</h3>
-            <p>Faculty and admins are onboarded by your institution. Log in with your credentials — your department and sections are already configured and waiting.</p>
+            <p>Faculty and admins are onboarded by your institution. Log in with your credentials — your department and
+              sections are already configured and waiting.</p>
           </div>
         </div>
         <div class="how-step">
           <div class="how-num">2</div>
           <div class="how-body">
             <h3>Create or Generate an Activity</h3>
-            <p>Pick from 20+ activity types or let the AI Game Builder generate one from a topic description. Customise it in seconds, then hit Publish.</p>
+            <p>Pick from 20+ activity types or let the AI Game Builder generate one from a topic description. Customise
+              it in seconds, then hit Publish.</p>
           </div>
         </div>
         <div class="how-step">
           <div class="how-num">3</div>
           <div class="how-body">
             <h3>Launch Live & Review Results</h3>
-            <p>Students join via a session code. Watch responses come in real-time, moderate the session, then review the full analytics report instantly after.</p>
+            <p>Students join via a session code. Watch responses come in real-time, moderate the session, then review
+              the full analytics report instantly after.</p>
           </div>
         </div>
       </div>
@@ -671,35 +1496,54 @@
             <h3>Who can use MindWave?</h3>
             <i data-lucide="plus" class="faq-icon"></i>
           </div>
-          <div class="faq-a"><p>MindWave is built for three roles — Faculty (who create and run sessions), Students (who participate and track progress), and HOD/Admin (who manage the institution). Access is role-gated and controlled by your institution's admin.</p></div>
+          <div class="faq-a">
+            <p>MindWave is built for three roles — Faculty (who create and run sessions), Students (who participate and
+              track progress), and HOD/Admin (who manage the institution). Access is role-gated and controlled by your
+              institution's admin.</p>
+          </div>
         </div>
         <div class="faq-item">
           <div class="faq-q" onclick="toggleFaq(this)">
             <h3>How does the live session work?</h3>
             <i data-lucide="plus" class="faq-icon"></i>
           </div>
-          <div class="faq-a"><p>Faculty launch a session which generates a session code. Students enter the code in their dashboard and join instantly. Responses are tracked live, with a real-time leaderboard, anti-cheat monitoring, and a results report available the moment the session ends.</p></div>
+          <div class="faq-a">
+            <p>Faculty launch a session which generates a session code. Students enter the code in their dashboard and
+              join instantly. Responses are tracked live, with a real-time leaderboard, anti-cheat monitoring, and a
+              results report available the moment the session ends.</p>
+          </div>
         </div>
         <div class="faq-item">
           <div class="faq-q" onclick="toggleFaq(this)">
             <h3>What does the anti-cheat system detect?</h3>
             <i data-lucide="plus" class="faq-icon"></i>
           </div>
-          <div class="faq-a"><p>The system monitors tab switches, copy-paste attempts, browser focus loss, and keyboard shortcuts. Each violation is logged and flagged in the faculty dashboard so you can review suspicious activity after the session.</p></div>
+          <div class="faq-a">
+            <p>The system monitors tab switches, copy-paste attempts, browser focus loss, and keyboard shortcuts. Each
+              violation is logged and flagged in the faculty dashboard so you can review suspicious activity after the
+              session.</p>
+          </div>
         </div>
         <div class="faq-item">
           <div class="faq-q" onclick="toggleFaq(this)">
             <h3>Is student data stored securely?</h3>
             <i data-lucide="plus" class="faq-icon"></i>
           </div>
-          <div class="faq-a"><p>Yes. MindWave is self-hosted, meaning your institution's data stays within your own environment. All sessions are encrypted and access is strictly role-based — students can only see their own data.</p></div>
+          <div class="faq-a">
+            <p>Yes. MindWave is self-hosted, meaning your institution's data stays within your own environment. All
+              sessions are encrypted and access is strictly role-based — students can only see their own data.</p>
+          </div>
         </div>
         <div class="faq-item">
           <div class="faq-q" onclick="toggleFaq(this)">
             <h3>Can faculty see individual student performance?</h3>
             <i data-lucide="plus" class="faq-icon"></i>
           </div>
-          <div class="faq-a"><p>Yes. The analytics dashboard shows per-student scores, time taken, correct/incorrect answers, and participation trends across all sessions. HODs can see aggregate data across all faculty sections in their department.</p></div>
+          <div class="faq-a">
+            <p>Yes. The analytics dashboard shows per-student scores, time taken, correct/incorrect answers, and
+              participation trends across all sessions. HODs can see aggregate data across all faculty sections in their
+              department.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -723,7 +1567,8 @@
       <div class="footer-top">
         <div class="footer-brand">
           <a href="#" class="nav-logo">Mind<span>Wave</span></a>
-          <p class="footer-tagline">A classroom engagement platform built for institutions that take teaching seriously.</p>
+          <p class="footer-tagline">A classroom engagement platform built for institutions that take teaching seriously.
+          </p>
         </div>
         <div class="footer-links">
           <div class="footer-col">
@@ -775,26 +1620,26 @@
 
     // Faculty tools
     const tools = [
-      { name:'Live Quiz',         icon:'brain'           },
-      { name:'Poll',              icon:'bar-chart-2'     },
-      { name:'Word Cloud',        icon:'cloud'           },
-      { name:'Spinner (Pick)',    icon:'rotate-cw'       },
-      { name:'Unjumble',          icon:'shuffle'         },
-      { name:'SQL Challenge',     icon:'database'        },
-      { name:'Bug Injection',     icon:'bug'             },
-      { name:'Brainstorm',        icon:'lightbulb'       },
-      { name:'Drawing Activity',  icon:'pencil'          },
-      { name:'Drop Pin',          icon:'map-pin'         },
-      { name:'Ranking',           icon:'list-ordered'    },
-      { name:'Video Response',    icon:'video'           },
-      { name:'Open Ended',        icon:'message-square'  },
-      { name:'Scenario',          icon:'layers'          },
-      { name:'Fill in the Blank', icon:'type'            },
-      { name:'NPS Survey',        icon:'sliders'         },
-      { name:'Scale / Rating',    icon:'gauge'           },
-      { name:'Crossword',         icon:'grid'            },
-      { name:'Type Answer',       icon:'keyboard'        },
-      { name:'Slides',            icon:'layout-template' },
+      { name: 'Live Quiz', icon: 'brain' },
+      { name: 'Poll', icon: 'bar-chart-2' },
+      { name: 'Word Cloud', icon: 'cloud' },
+      { name: 'Spinner (Pick)', icon: 'rotate-cw' },
+      { name: 'Unjumble', icon: 'shuffle' },
+      { name: 'SQL Challenge', icon: 'database' },
+      { name: 'Bug Injection', icon: 'bug' },
+      { name: 'Brainstorm', icon: 'lightbulb' },
+      { name: 'Drawing Activity', icon: 'pencil' },
+      { name: 'Drop Pin', icon: 'map-pin' },
+      { name: 'Ranking', icon: 'list-ordered' },
+      { name: 'Video Response', icon: 'video' },
+      { name: 'Open Ended', icon: 'message-square' },
+      { name: 'Scenario', icon: 'layers' },
+      { name: 'Fill in the Blank', icon: 'type' },
+      { name: 'NPS Survey', icon: 'sliders' },
+      { name: 'Scale / Rating', icon: 'gauge' },
+      { name: 'Crossword', icon: 'grid' },
+      { name: 'Type Answer', icon: 'keyboard' },
+      { name: 'Slides', icon: 'layout-template' },
     ];
     const tg = document.getElementById('tools-grid');
     tools.forEach(t => {
@@ -807,14 +1652,14 @@
 
     // Student features
     const studentFeatures = [
-      { title:'AI Tutor',            icon:'bot',          desc:'Ask anything. Get instant, step-by-step explanations tailored to your syllabus.' },
-      { title:'Code Practice',       icon:'code-2',       desc:'Practice coding in-browser with live output and language support across multiple stacks.' },
-      { title:'GitHub Submissions',  icon:'github',       desc:'Submit GitHub project links tied to faculty-created assignments — tracked & graded.' },
-      { title:'Leaderboard',         icon:'trophy',       desc:'See where you stand in real-time during live sessions and across the semester.' },
-      { title:'Peer Reviews',        icon:'users',        desc:"Review your peers' work and get structured feedback on your own submissions." },
-      { title:'Performance Charts',  icon:'trending-up',  desc:'Visual breakdowns of quiz scores, attendance, and activity participation over time.' },
-      { title:'Achievements',        icon:'award',        desc:'Earn badges for milestones — completing streaks, top scores, and consistent participation.' },
-      { title:'Goals & Study Plans', icon:'target',       desc:'Set personal study goals and track progress with built-in study recommendations.' },
+      { title: 'AI Tutor', icon: 'bot', desc: 'Ask anything. Get instant, step-by-step explanations tailored to your syllabus.' },
+      { title: 'Code Practice', icon: 'code-2', desc: 'Practice coding in-browser with live output and language support across multiple stacks.' },
+      { title: 'GitHub Submissions', icon: 'github', desc: 'Submit GitHub project links tied to faculty-created assignments — tracked & graded.' },
+      { title: 'Leaderboard', icon: 'trophy', desc: 'See where you stand in real-time during live sessions and across the semester.' },
+      { title: 'Peer Reviews', icon: 'users', desc: "Review your peers' work and get structured feedback on your own submissions." },
+      { title: 'Performance Charts', icon: 'trending-up', desc: 'Visual breakdowns of quiz scores, attendance, and activity participation over time.' },
+      { title: 'Achievements', icon: 'award', desc: 'Earn badges for milestones — completing streaks, top scores, and consistent participation.' },
+      { title: 'Goals & Study Plans', icon: 'target', desc: 'Set personal study goals and track progress with built-in study recommendations.' },
     ];
     const sg = document.getElementById('student-grid');
     studentFeatures.forEach(f => {
@@ -845,4 +1690,5 @@
     }
   </script>
 </body>
+
 </html>
