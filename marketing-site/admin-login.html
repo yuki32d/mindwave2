@@ -8,150 +8,145 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
 :root{
-  --p:#4F46E5;
-  --p2:#3730A3;
-  --text:#111827;
-  --muted:#6B7280;
-  --border:#E5E7EB;
-  --bg:#FAFAFA;
-  --danger:#EF4444;
-  --font-heading: 'Outfit', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --teal:#06B6D4;--teal-dark:#0891B2;--teal-light:#CCFBF1;
+  --orange:#F97316;--orange-light:#FFF7ED;
+  --navy:#0F172A;--slate:#475569;--slate-light:#94A3B8;
+  --white:#FFFFFF;--card-bg:#F8FAFC;--border:#E2E8F0;--danger:#EF4444;
 }
 body{display:flex;min-height:100vh;}
-.form-panel{width:420px;flex-shrink:0;background:#fff;display:flex;flex-direction:column;padding:52px 52px 40px;position:relative;z-index:10;box-shadow:4px 0 40px rgba(0,0,0,.06);}
-.illus-panel{
-  flex:1;
-  position:relative;
-  background:linear-gradient(135deg,#F8FAFC 0%,#EEF2FF 50%,#E0E7FF 100%);
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: 40px;
-}
-.premium-texture{position:absolute;inset:0;background:url('admin-premium-texture.png') center/cover no-repeat;opacity:.12;mix-blend-mode:multiply;}
-.college-bg{position:absolute;inset:0;background:url('../background.jpg') center/cover no-repeat;opacity:.06;}
-.blob{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;}
-.blob1{width:420px;height:420px;background:rgba(79,70,229,.12);top:-60px;right:-80px;}
-.blob2{width:300px;height:300px;background:rgba(67,56,202,.08);bottom:40px;left:20px;}
 
-/* --- Branded HUD Styles --- */
-.hud-container {
-  position: relative;
-  z-index: 5;
-  text-align: center;
-  width: 100%;
-  max-width: 800px;
-  animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1);
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.institution-name {
-  font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
-  font-weight: 800;
-  color: var(--p2);
-  letter-spacing: -0.05em;
-  line-height: 1;
-  margin-bottom: 24px;
-  text-shadow: 0 10px 30px rgba(79, 70, 229, 0.1);
-}
-.hud-grid {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.hud-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  padding: 16px 24px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.5);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  min-width: 160px;
-}
-.hud-card i {
-  font-size: 1.2rem;
-  color: var(--p);
-}
-.hud-label {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-}
-.hud-value {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.right-brand{position:absolute;top:32px;left:52px;z-index:3;font-size:.82rem;font-weight:700;color:rgba(79,70,229,.6);letter-spacing:.04em;text-transform:uppercase;}
-
-/* --- Form Styles (Pinned Replica) --- */
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:48px;}
-.logo-icon{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--p),var(--p2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.05rem;}
-.logo-name{font-size:1.25rem;font-weight:800;color:var(--text);letter-spacing:-.02em;}
-.logo-name span{background:linear-gradient(135deg,var(--p),var(--p2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.form-title{font-size:1.55rem;font-weight:800;color:var(--text);letter-spacing:-.03em;margin-bottom:6px;}
-.form-sub{font-size:.88rem;color:var(--muted);margin-bottom:36px;}
-.steps{display:flex;gap:6px;margin-bottom:32px;}
+/* ── FORM PANEL (identical to student-login) ── */
+.form-panel{width:420px;flex-shrink:0;background:var(--white);display:flex;flex-direction:column;padding:48px 48px 36px;position:relative;z-index:2;box-shadow:4px 0 40px rgba(6,182,212,0.08);}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:44px;}
+.logo-icon{width:38px;height:38px;border-radius:11px;background:var(--teal);display:flex;align-items:center;justify-content:center;color:white;}
+.logo-icon i{width:20px;height:20px;}
+.logo-name{font-size:1.2rem;font-weight:800;color:var(--navy);letter-spacing:-.02em;}
+.logo-name span{color:var(--teal);}
+.form-title{font-size:1.5rem;font-weight:800;color:var(--navy);letter-spacing:-.02em;margin-bottom:5px;}
+.form-sub{font-size:.87rem;color:var(--slate);margin-bottom:28px;}
+.steps{display:flex;gap:6px;margin-bottom:26px;}
 .step-dot{width:24px;height:4px;border-radius:100px;background:var(--border);transition:background .3s;}
-.step-dot.active{background:var(--p);}
-.field{margin-bottom:18px;}
-.field label{display:block;font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:7px;}
+.step-dot.active{background:var(--teal);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:.8rem;font-weight:600;color:var(--navy);margin-bottom:7px;}
 .input-wrap{position:relative;}
-.input-wrap .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:.84rem;pointer-events:none;}
-.field input{width:100%;padding:13px 14px 13px 38px;border:1.5px solid var(--border);border-radius:10px;font-size:.93rem;color:var(--text);font-family:'Inter',sans-serif;background:#fff;transition:border-color .2s,box-shadow .2s;}
-.field input::placeholder{color:#C4C9D4;}
-.field input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.1);}
-.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:.84rem;padding:4px;transition:color .2s;}
-.pw-toggle:hover{color:var(--p);}
-.opts-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;font-size:.82rem;}
-.remember{display:flex;align-items:center;gap:7px;color:var(--muted);cursor:pointer;user-select:none;}
-.remember input{accent-color:var(--p);width:14px;height:14px;}
-.forgot{color:var(--p);font-weight:600;text-decoration:none;font-size:.82rem;}
+.input-wrap .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--slate-light);pointer-events:none;width:16px;height:16px;}
+.field input{width:100%;padding:12px 13px 12px 38px;border:1.5px solid var(--border);border-radius:10px;font-size:.92rem;color:var(--navy);font-family:'Inter',sans-serif;background:var(--white);transition:border-color .2s,box-shadow .2s;}
+.field input::placeholder{color:#CBD5E1;}
+.field input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(6,182,212,.12);}
+.pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--slate-light);cursor:pointer;padding:4px;transition:color .2s;display:flex;align-items:center;}
+.pw-toggle:hover{color:var(--teal);}
+.pw-toggle i{width:16px;height:16px;}
+.opts-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font-size:.82rem;}
+.remember{display:flex;align-items:center;gap:7px;color:var(--slate);cursor:pointer;user-select:none;}
+.remember input{accent-color:var(--teal);width:14px;height:14px;}
+.forgot{color:var(--teal);font-weight:600;text-decoration:none;font-size:.82rem;}
 .forgot:hover{text-decoration:underline;}
-.err-msg{background:#FEF2F2;border:1px solid #FECACA;color:var(--danger);border-radius:8px;padding:10px 13px;font-size:.82rem;margin-bottom:16px;display:none;animation:shake .35s ease;}
-.err-msg.show{display:flex;align-items:center;gap:8px;}
+.email-row{display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--slate);margin-bottom:16px;background:var(--card-bg);border-radius:9px;padding:10px 13px;border:1px solid var(--border);}
+.email-row i{width:16px;height:16px;color:var(--teal);flex-shrink:0;}
+.email-row span{font-weight:600;color:var(--navy);flex:1;}
+.change-btn{background:none;border:none;color:var(--teal);font-size:.8rem;font-weight:700;cursor:pointer;padding:0;transition:opacity .2s;}
+.change-btn:hover{opacity:.7;}
+.err-msg{background:#FEF2F2;border:1px solid #FECACA;color:var(--danger);border-radius:8px;padding:10px 13px;font-size:.82rem;margin-bottom:14px;display:none;align-items:center;gap:8px;animation:shake .35s ease;}
+.err-msg.show{display:flex;}
+.err-msg i{width:15px;height:15px;flex-shrink:0;}
 @keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-5px);}40%,80%{transform:translateX(5px);}}
-.submit-btn{width:100%;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(79,70,229,.28);transition:all .3s;margin-bottom:18px;}
-.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.36);}
-.submit-btn .spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.submit-btn{width:100%;padding:13px;border:none;border-radius:10px;background:var(--teal);color:white;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 18px rgba(6,182,212,.35);transition:all .25s;margin-bottom:16px;font-family:'Inter',sans-serif;}
+.submit-btn:hover{background:var(--teal-dark);transform:translateY(-2px);box-shadow:0 8px 28px rgba(6,182,212,.4);}
+.submit-btn .btn-lbl{display:flex;align-items:center;gap:8px;}
+.submit-btn .btn-lbl i{width:16px;height:16px;}
+.spin{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:none;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .submit-btn.loading .btn-lbl{display:none;}.submit-btn.loading .spin{display:block;}
-.bottom{text-align:center;font-size:.82rem;color:var(--muted);}
-.bottom a{color:var(--p);font-weight:600;text-decoration:none;}
+.bottom{text-align:center;font-size:.82rem;color:var(--slate);}
+.bottom a{color:var(--teal);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
 .bottom a:hover{text-decoration:underline;}
-.bottom-bar{margin-top:auto;padding-top:32px;font-size:.72rem;color:#D1D5DB;text-align:center;}
-.bottom-bar a{color:#9CA3AF;text-decoration:none;}
-.bottom-bar a:hover{color:var(--p);}
-@media(max-width:860px){.illus-panel{display:none;}.form-panel{width:100%;max-width:460px;margin:auto;box-shadow:none;padding:40px 32px;}body{background:var(--bg);}}
-@media(max-width:460px){.form-panel{padding:32px 22px;}}
+.bottom a i{width:11px;height:11px;}
+.bottom-bar{margin-top:auto;padding-top:24px;font-size:.72rem;color:#CBD5E1;text-align:center;}
+.bottom-bar a{color:var(--slate-light);text-decoration:none;margin:0 3px;}
+
+/* ── ILLUS PANEL ── */
+.illus-panel{
+  flex:1;position:relative;
+  background:linear-gradient(135deg,#E0F7FA 0%,#CCFBF1 50%,#E0F2FE 100%);
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  padding:48px 40px;
+}
+.illus-blob{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;}
+.illus-blob-1{width:420px;height:420px;background:rgba(6,182,212,.18);top:-60px;right:-80px;}
+.illus-blob-2{width:300px;height:300px;background:rgba(249,115,22,.10);bottom:40px;left:20px;}
+/* College campus bg — more visible like image 1 */
+.college-bg{position:absolute;inset:0;background:url('../background.jpg') center/cover no-repeat;opacity:.10;mix-blend-mode:luminosity;}
+
+.illus-brand{position:absolute;top:28px;left:48px;z-index:5;font-size:.78rem;font-weight:700;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;opacity:.75;}
+
+/* HUD container */
+.hud-container{position:relative;z-index:5;text-align:center;width:100%;max-width:800px;animation:fadeUp .8s cubic-bezier(0.16,1,0.3,1);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+/* Big title — single line, scales to fit */
+.institution-name{
+  font-size:clamp(1.6rem,3.8vw,3.6rem);
+  font-weight:800;
+  color:var(--teal-dark);
+  letter-spacing:-.03em;
+  line-height:1;
+  margin-bottom:24px;
+  white-space:nowrap;
+}
+
+/* Logo directly — no card wrapper, just floating like image 1 */
+.logo-img{
+  height:130px;width:auto;
+  display:block;margin:0 auto 24px;
+  filter:drop-shadow(0 4px 16px rgba(6,182,212,.20));
+}
+
+/* HUD cards — 3 in a row like image 1 */
+.hud-grid{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;}
+.hud-card{
+  background:rgba(255,255,255,0.80);
+  backdrop-filter:blur(10px);
+  padding:16px 24px;border-radius:20px;
+  border:1px solid rgba(255,255,255,0.5);
+  box-shadow:0 10px 25px rgba(0,0,0,.04);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  min-width:160px;transition:all .25s;
+}
+.hud-card:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(6,182,212,.14);border-color:rgba(6,182,212,.25);}
+.hud-card-icon{color:var(--teal);}
+.hud-card-icon i{width:22px;height:22px;}
+.hud-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--slate-light);}
+.hud-value{font-size:.95rem;font-weight:700;color:var(--navy);}
+
+/* Floating badge */
+.illus-badge{position:absolute;bottom:36px;right:36px;z-index:5;background:white;border-radius:14px;padding:12px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 28px rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.15);animation:heroFloat 7s ease-in-out infinite;animation-delay:-2s;}
+.illus-badge-icon{width:36px;height:36px;border-radius:9px;background:var(--teal-light);color:var(--teal);display:flex;align-items:center;justify-content:center;}
+.illus-badge-icon i{width:18px;height:18px;}
+.illus-badge-text strong{display:block;font-size:.82rem;font-weight:700;color:var(--navy);}
+.illus-badge-text small{font-size:.72rem;color:var(--slate-light);}
+@keyframes heroFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+
+.illus-footer{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:.72rem;font-weight:600;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;opacity:.6;}
+
+@media(max-width:860px){.illus-panel{display:none;}.form-panel{width:100%;max-width:420px;margin:auto;box-shadow:none;padding:40px 28px;}body{background:var(--card-bg);}}
+@media(max-width:460px){.form-panel{padding:32px 20px;}}
 </style>
 </head>
 <body>
 
+<!-- FORM PANEL -->
 <div class="form-panel">
   <div class="logo">
-    <div class="logo-icon"><i class="fas fa-brain"></i></div>
-    <div class="logo-name">Mind<span>Wave Admin</span></div>
+    <div class="logo-icon"><i data-lucide="brain-circuit"></i></div>
+    <div class="logo-name">Mind<span>Wave</span></div>
   </div>
 
   <div class="form-title">Sign in to MindWave</div>
@@ -163,98 +158,117 @@ body{display:flex;min-height:100vh;}
   </div>
 
   <form id="login-form" novalidate>
+
+    <!-- Step 1: Email -->
     <div id="step1">
       <div class="field">
         <label for="username">Email</label>
         <div class="input-wrap">
-          <i class="fas fa-envelope ico"></i>
-          <input type="email" id="username" placeholder="" autocomplete="email" required>
+          <i data-lucide="mail" class="ico"></i>
+          <input type="email" id="username" placeholder="name.initial@cmrit.ac.in" autocomplete="email" required>
         </div>
       </div>
       <div class="opts-row">
         <label class="remember"><input type="checkbox" id="rem"> Remember me</label>
       </div>
-      <div class="err-msg" id="e1"><i class="fas fa-circle-exclamation"></i><span id="e1t"></span></div>
+      <div class="err-msg" id="e1"><i data-lucide="alert-circle"></i><span id="e1t"></span></div>
       <button type="button" class="submit-btn" id="nextBtn">
-        <span class="btn-lbl">Next <i class="fas fa-arrow-right"></i></span>
+        <span class="btn-lbl">Next <i data-lucide="arrow-right"></i></span>
         <div class="spin"></div>
       </button>
-      <div class="bottom"><a href="website-login.html"><i class="fas fa-chevron-left" style="font-size:.7rem;"></i> Back to role selection</a></div>
+      <div class="bottom">
+        <a href="website-login.html"><i data-lucide="chevron-left"></i> Back to role selection</a>
+      </div>
     </div>
 
+    <!-- Step 2: Password -->
     <div id="step2" style="display:none;">
-      <div style="font-size:.84rem;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:8px;">
-        <i class="fas fa-user-circle" style="color:var(--p);font-size:1.1rem;"></i>
-        <span id="emailDisplay" style="font-weight:500;color:var(--text);"></span>
-        <button type="button" id="changeEmail" style="margin-left:auto;background:none;border:none;color:var(--p);font-size:.8rem;font-weight:600;cursor:pointer;">Change</button>
+      <div class="email-row">
+        <i data-lucide="user-circle"></i>
+        <span id="emailDisplay"></span>
+        <button type="button" id="changeEmail" class="change-btn">Change</button>
       </div>
       <div class="field">
         <label for="password">Password</label>
         <div class="input-wrap">
-          <i class="fas fa-lock ico"></i>
+          <i data-lucide="lock" class="ico"></i>
           <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
-          <button type="button" class="pw-toggle" id="pwToggle"><i class="fas fa-eye" id="eyeIco"></i></button>
+          <button type="button" class="pw-toggle" id="pwToggle"><i data-lucide="eye" id="eyeIco"></i></button>
         </div>
       </div>
       <div class="opts-row">
         <span></span>
         <a href="admin-forgot-password.html" class="forgot">Need help signing in?</a>
       </div>
-      <div class="err-msg" id="e2"><i class="fas fa-circle-exclamation"></i><span id="e2t"></span></div>
+      <div class="err-msg" id="e2"><i data-lucide="alert-circle"></i><span id="e2t"></span></div>
       <button type="submit" class="submit-btn" id="signInBtn">
-        <span class="btn-lbl"><i class="fas fa-arrow-right-to-bracket"></i> Sign In</span>
+        <span class="btn-lbl"><i data-lucide="log-in"></i> Sign In</span>
         <div class="spin"></div>
       </button>
       <div class="bottom">No account? <a href="admin-signup.html">Sign up free</a></div>
     </div>
 
-    <div id="socials" style="margin-top:20px;">
-      <p style="text-align:center;font-size:.82rem;color:#6B7280;">
-        No account? <a href="admin-signup.html" style="color:var(--p);font-weight:600;text-decoration:none;">Sign up free</a>
+    <!-- Signup nudge -->
+    <div id="socials" style="margin-top:16px;">
+      <p style="text-align:center;font-size:.82rem;color:var(--slate);">
+        No account? <a href="admin-signup.html" style="color:var(--teal);font-weight:700;text-decoration:none;">Sign up free</a>
       </p>
     </div>
+
   </form>
 
   <div class="bottom-bar">
-    <a href="privacy.html">Privacy</a> &nbsp;·&nbsp; <a href="terms.html">Legal</a> &nbsp;·&nbsp; &copy; 2025 MindWave Admin
+    <a href="privacy.html">Privacy</a> &nbsp;·&nbsp;
+    <a href="terms.html">Legal</a> &nbsp;·&nbsp;
+    &copy; 2025 MindWave
   </div>
 </div>
 
+<!-- ILLUSTRATION PANEL -->
 <div class="illus-panel">
-  <div class="premium-texture"></div>
   <div class="college-bg"></div>
-  <div class="blob blob1"></div>
-  <div class="blob blob2"></div>
-  
+  <div class="illus-blob illus-blob-1"></div>
+  <div class="illus-blob illus-blob-2"></div>
+  <div class="illus-brand">MindWave · Admin Portal</div>
+
   <div class="hud-container">
     <div class="institution-name">CMR Institute of Technology</div>
-    <div style="display:flex;justify-content:center;margin-bottom:24px;">
-      <img src="cmrit-removebg-preview.png" alt="CMRIT Logo" style="height:130px;width:auto;filter:drop-shadow(0 4px 16px rgba(79,70,229,0.18));">
-    </div>
+
+    <img src="cmrit-removebg-preview.png" alt="CMRIT Logo" class="logo-img" />
+
     <div class="hud-grid">
       <div class="hud-card">
-        <i class="fas fa-shield-halved"></i>
+        <div class="hud-card-icon"><i data-lucide="shield-check"></i></div>
         <div class="hud-label">Access</div>
         <div class="hud-value">Secure Portal</div>
       </div>
       <div class="hud-card">
-        <i class="fas fa-university"></i>
+        <div class="hud-card-icon"><i data-lucide="landmark"></i></div>
         <div class="hud-label">Authority</div>
         <div class="hud-value">Educational Admin</div>
       </div>
       <div class="hud-card">
-        <i class="fas fa-user-graduate"></i>
+        <div class="hud-card-icon"><i data-lucide="graduation-cap"></i></div>
         <div class="hud-label">Context</div>
         <div class="hud-value">Academic Console</div>
       </div>
     </div>
-    <div style="margin-top:20px;font-size:.78rem;font-weight:600;color:rgba(79,70,229,.55);letter-spacing:.06em;text-transform:uppercase;text-align:center;">Developed by MCA Department 2026</div>
   </div>
 
-  <div class="right-brand">MindWave · Admin Portal</div>
+  <div class="illus-badge">
+    <div class="illus-badge-icon"><i data-lucide="presentation"></i></div>
+    <div class="illus-badge-text">
+      <strong>Faculty &amp; HOD Portal</strong>
+      <small>Authorized access only</small>
+    </div>
+  </div>
+
+  <div class="illus-footer">Developed by MCA Department 2026</div>
 </div>
 
 <script>
+lucide.createIcons();
+
 const step1=document.getElementById('step1'),step2=document.getElementById('step2'),socials=document.getElementById('socials');
 const emailInput=document.getElementById('username'),emailDisplay=document.getElementById('emailDisplay');
 const dot1=document.getElementById('dot1'),dot2=document.getElementById('dot2');
@@ -268,7 +282,7 @@ document.getElementById('nextBtn').addEventListener('click',()=>{
   e1.classList.remove('show');
   if(!v||!isValidAdminEmail(v)){
     e1t.textContent='Use your college email: name.initial@cmrit.ac.in or hod.dept@cmrit.ac.in';
-    e1.classList.add('show');return;
+    e1.classList.add('show');lucide.createIcons();return;
   }
   emailDisplay.textContent=v;
   step1.style.display='none';step2.style.display='block';socials.style.display='none';
@@ -283,8 +297,9 @@ document.getElementById('changeEmail').addEventListener('click',()=>{
 
 document.getElementById('pwToggle').addEventListener('click',()=>{
   const pw=document.getElementById('password'),ico=document.getElementById('eyeIco');
-  if(pw.type==='password'){pw.type='text';ico.classList.replace('fa-eye','fa-eye-slash');}
-  else{pw.type='password';ico.classList.replace('fa-eye-slash','fa-eye');}
+  pw.type=pw.type==='password'?'text':'password';
+  ico.setAttribute('data-lucide',pw.type==='password'?'eye':'eye-off');
+  lucide.createIcons();
 });
 
 document.getElementById('login-form').addEventListener('submit',async function(e){
@@ -305,9 +320,14 @@ document.getElementById('login-form').addEventListener('submit',async function(e
         localStorage.setItem('name',data.user.name||data.user.fullName||'Admin');
       }
       window.location.href='../admin.html';
-    }else{e2t.textContent=data.message||'Authentication failed.';e2.classList.add('show');}
-  }catch(ex){e2t.textContent='System error — please try again.';e2.classList.add('show');}
-  finally{btn.classList.remove('loading');}
+    }else{
+      e2t.textContent=data.message||'Authentication failed.';
+      e2.classList.add('show');lucide.createIcons();
+    }
+  }catch(ex){
+    e2t.textContent='System error — please try again.';
+    e2.classList.add('show');lucide.createIcons();
+  }finally{btn.classList.remove('loading');}
 });
 </script>
 </body>
