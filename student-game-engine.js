@@ -128,13 +128,22 @@ function renderGameList(games) {
         const diff = game.difficulty || 'Normal';
         const diffColor = diff === 'Beginner' ? '#22c55e' : diff === 'Hard' ? '#ef4444' : diff === 'Expert' ? '#8b5cf6' : '#f59e0b';
         const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${ti.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="${ti.icon}"></svg>`;
+        
+        const cardStyle = game.hasPlayed ? 'opacity: 0.7; filter: grayscale(0.5); border-color: rgba(52, 199, 89, 0.4); cursor: not-allowed;' : '';
+        const playBtnText = game.hasPlayed ? 'Completed ✓' : 'Play Now';
+        const playBtnStyle = game.hasPlayed ? 'background:#34c759;' : '';
+        const playBtnIcon = game.hasPlayed ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+
         return `
         <article class="gc-card" data-id="${game._id || game.id}"
-            style="--card-accent:${ti.accent}">
+            style="--card-accent:${game.hasPlayed ? '#34c759' : ti.accent}; ${cardStyle}">
+            
+            ${game.hasPlayed ? `<div style="position:absolute; top:12px; right:-28px; background:#34c759; color:#fff; font-size:10px; font-weight:800; padding:4px 30px; transform:rotate(45deg); z-index:10; box-shadow:0 2px 4px rgba(0,0,0,0.2); letter-spacing:1px; text-transform:uppercase;">Completed</div>` : ''}
+
             <div class="gc-card-play-overlay">
-                <div class="gc-play-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Play Now
+                <div class="gc-play-btn" style="${playBtnStyle}">
+                    ${playBtnIcon}
+                    ${playBtnText}
                 </div>
             </div>
             <div class="gc-card-inner">
@@ -162,13 +171,34 @@ function renderGameList(games) {
         card.addEventListener('click', () => {
             const game = (window.allGames || []).find(g => (g._id || g.id) === card.dataset.id);
             if (game) {
-                // Instead of showing preview here, we can still show it or launch directly.
-                // The user wants a "professional platform" when they click Play Now.
-                showGamePreview(game);
+                if (game.hasPlayed) {
+                    showAlreadyPlayedPopup(game);
+                } else {
+                    showGamePreview(game);
+                }
             }
             else window.location.href = `?id=${card.dataset.id}`;
         });
     });
+}
+
+function showAlreadyPlayedPopup(game) {
+    const overlay = document.createElement('div');
+    overlay.className = 'mw-logout-overlay active';
+    overlay.innerHTML = `
+        <div class="mw-logout-modal" style="text-align:center;">
+            <div class="mw-logout-icon" style="background: rgba(52, 199, 89, 0.15); color: #34c759; margin: 0 auto 20px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <h3 class="mw-logout-title">Test Already Taken</h3>
+            <p class="mw-logout-sub" style="margin-bottom:24px;">You have already submitted your answers for <strong>${game.title}</strong>. Multiple attempts are not permitted.</p>
+            <div class="mw-logout-actions" style="justify-content:center;">
+                <button class="gc-start-btn" style="width:100%; border-radius:12px; background:var(--surface-2); color:var(--text); box-shadow:none; transform:none;" onclick="this.closest('.mw-logout-overlay').remove()">Close</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    if (window.lucide) { lucide.createIcons({ el: overlay }); }
 }
 
 function showGamePreview(game) {

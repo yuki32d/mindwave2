@@ -4530,26 +4530,35 @@ app.get("/api/games", authMiddleware, async (req, res) => {
 app.get("/api/games/published", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.sub);
+    let games = [];
 
     // If user is faculty/admin, show all published games
     if (user.role === 'admin' || user.orgRole === 'faculty' || user.orgRole === 'owner') {
-      const games = await Game.find({ published: true }).populate('createdBy', 'name').sort({ createdAt: -1 });
-      return res.json({ ok: true, games });
+      games = await Game.find({ published: true }).populate('createdBy', 'name').sort({ createdAt: -1 }).lean();
+    } else {
+      // For students, filter by their class identifier
+      const studentClass = `${user.department}-${user.batch}-${user.section}`;
+
+      games = await Game.find({
+        published: true,
+        $or: [
+          { targetClasses: studentClass }, // Exact match for student's class
+          { isPublic: true }, // Public to all students
+          { targetClasses: { $size: 0 } } // Backward compatibility - no classes assigned
+        ]
+      }).populate('createdBy', 'name').sort({ createdAt: -1 }).lean();
     }
 
-    // For students, filter by their class identifier
-    const studentClass = `${user.department}-${user.batch}-${user.section}`;
+    // Check which games the user has already played
+    const submissions = await GameSubmission.find({ studentId: req.user.sub }).select('gameId');
+    const completedGameIds = new Set(submissions.map(sub => sub.gameId.toString()));
 
-    const games = await Game.find({
-      published: true,
-      $or: [
-        { targetClasses: studentClass }, // Exact match for student's class
-        { isPublic: true }, // Public to all students
-        { targetClasses: { $size: 0 } } // Backward compatibility - no classes assigned
-      ]
-    }).populate('createdBy', 'name').sort({ createdAt: -1 });
+    const enrichedGames = games.map(g => ({
+      ...g,
+      hasPlayed: completedGameIds.has(g._id.toString())
+    }));
 
-    res.json({ ok: true, games });
+    res.json({ ok: true, games: enrichedGames });
   } catch (error) {
     console.error("Get published games error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
