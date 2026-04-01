@@ -1071,8 +1071,178 @@
             color: var(--text);
         }
 
-        [data-theme="light"] .confidence-selector label {
-            color: var(--text);
+        /* ── QUIZ CONTROL BUTTON SYSTEM ── */
+        .quiz-control-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .quiz-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 22px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            letter-spacing: 0.01em;
+        }
+
+        .quiz-btn-start {
+            background: var(--green);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(22,163,74,0.25);
+        }
+        .quiz-btn-start:hover {
+            background: #15803d;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(22,163,74,0.35);
+        }
+
+        .quiz-btn-next {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(208,128,0,0.25);
+        }
+        .quiz-btn-next:hover {
+            background: #b87000;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(208,128,0,0.35);
+        }
+
+        .quiz-btn-end {
+            background: rgba(220,38,38,0.1);
+            color: var(--red);
+            border: 1px solid rgba(220,38,38,0.3);
+        }
+        .quiz-btn-end:hover {
+            background: var(--red);
+            color: #fff;
+            border-color: var(--red);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220,38,38,0.25);
+        }
+
+        /* ── QUIZ STATUS BAR ── */
+        .quiz-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .quiz-status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px rgba(22,163,74,0.5);
+            animation: pulse 1.5s infinite;
+            flex-shrink: 0;
+        }
+
+        .quiz-status-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            flex: 1;
+        }
+
+        .quiz-status-badge {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--accent);
+            background: var(--accent-lo);
+            border: 1px solid var(--accent-bdr);
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+
+        /* ── ACTION BUTTON ROW (poll/feedback) ── */
+        .action-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-stop {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            border: 1px solid rgba(220,38,38,0.3);
+            background: rgba(220,38,38,0.1);
+            color: var(--red);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-stop:hover {
+            background: var(--red);
+            color: #fff;
+            border-color: var(--red);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220,38,38,0.25);
+        }
+        .btn-stop:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-download {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            border: 1px solid var(--accent-bdr);
+            background: var(--accent-lo);
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-download:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(208,128,0,0.25);
+        }
+        .btn-download:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
     </style>
 </head>
@@ -1179,11 +1349,11 @@
                             style="display:flex;flex-direction:column;gap:14px;margin-bottom:28px;"></div>
 
                         <!-- Action buttons -->
-                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                            <button class="primary-btn" id="stopPollBtn" style="background:var(--red);">
+                        <div class="action-row">
+                            <button class="btn-stop" id="stopPollBtn">
                                 <i class="fas fa-stop"></i> Stop Collecting
                             </button>
-                            <button class="primary-btn" id="downloadPollBtn" style="width:auto;flex:1;">
+                            <button class="btn-download" id="downloadPollBtn">
                                 <i class="fas fa-file-pdf"></i> Download Report
                             </button>
                         </div>
@@ -1276,7 +1446,7 @@
                             </div>
                         </div>
 
-                        <!-- Progress bar -->
+                <!-- Progress bar -->
                         <div id="fbProgressBars"
                             style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;"></div>
 
@@ -1286,11 +1456,11 @@
                             Waiting for responses…</div>
 
                         <!-- Action buttons -->
-                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                            <button class="primary-btn" id="stopFbBtn" style="background:var(--red);">
+                        <div class="action-row">
+                            <button class="btn-stop" id="stopFbBtn">
                                 <i class="fas fa-stop"></i> Stop Collecting
                             </button>
-                            <button class="primary-btn" id="downloadFbBtn" style="width:auto;flex:1;">
+                            <button class="btn-download" id="downloadFbBtn">
                                 <i class="fas fa-file-pdf"></i> Download Report
                             </button>
                         </div>
