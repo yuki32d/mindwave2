@@ -412,8 +412,9 @@ function updateAnswerDistribution(data) {
     };
 
     display.innerHTML = `
-        <div class="response-counter">
-            <i class="fas fa-users"></i> ${total}/${expected} answered
+        <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="display:flex;align-items:center;gap:6px;"><i class="fas fa-chart-bar" style="color:var(--accent);"></i> Answer Distribution</span>
+            <span class="response-counter"><i class="fas fa-users"></i> ${total}/${expected} answered</span>
         </div>
         <div class="distribution-bars">
             ${createBar('A', A, total, 'red')}
@@ -444,10 +445,16 @@ async function startQuiz() {
                 type: 'start-quiz'
             }));
 
+            // Update status
+            const badge = document.getElementById('quizStatusBadge');
+            if (badge) { badge.textContent = 'Q 1 / ' + (currentQuiz.questions.length); }
+            const label = document.querySelector('.quiz-status-label');
+            if (label) label.textContent = 'Quiz is running — broadcasting to students';
+
             await showNextQuestion();
 
             document.getElementById('startQuizBtn').style.display = 'none';
-            document.getElementById('nextQuestionBtn').style.display = 'inline-block';
+            document.getElementById('nextQuestionBtn').style.display = 'inline-flex';
         } else {
             alert('Failed to start quiz: ' + data.message);
         }
@@ -477,6 +484,12 @@ async function showNextQuestion() {
                 await showFinalLeaderboard();
             } else {
                 displayCurrentQuestion(data.question, data.questionIndex);
+
+                // Update status badge
+                const badge = document.getElementById('quizStatusBadge');
+                if (badge && currentQuiz) {
+                    badge.textContent = `Q ${data.questionIndex + 1} / ${currentQuiz.questions.length}`;
+                }
 
                 ws.send(JSON.stringify({
                     type: 'show-question',

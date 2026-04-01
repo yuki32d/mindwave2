@@ -409,6 +409,7 @@
             justify-content: center;
             font-size: 11px;
             font-weight: 800;
+            flex-shrink: 0;
         }
 
         .question-preview {
@@ -416,12 +417,81 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: var(--text);
         }
 
-        .editor-content h3 {
-            font-size: 18px;
-            font-weight: 800;
+        /* ── QUIZ EDITOR PANEL ── */
+        .editor-content {
+            padding: 4px;
+        }
+
+        .editor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .editor-header h3 {
+            font-size: 15px;
+            font-weight: 800;
+            margin: 0;
+            color: var(--text);
+        }
+
+        .delete-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            background: rgba(220, 38, 38, 0.08);
+            color: var(--red);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .question-input-group {
+            margin-bottom: 20px;
+        }
+
+        .question-input-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .question-input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .question-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-lo);
         }
 
         .answers-grid {
@@ -432,50 +502,104 @@
         }
 
         .answer-option {
-            padding: 16px;
+            padding: 14px 16px;
             border-radius: 12px;
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
             background: var(--surface);
             cursor: pointer;
             position: relative;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .answer-option:hover {
+            border-color: var(--accent-bdr);
         }
 
         .answer-option.correct {
             border-color: var(--green);
-            background: rgba(22, 163, 74, 0.1);
+            background: rgba(22, 163, 74, 0.08);
         }
 
+        .answer-shape {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .answer-option.red { border-left: 4px solid #ef4444; }
+        .answer-option.red .answer-shape { background: #ef4444; }
+        .answer-option.blue { border-left: 4px solid #3b82f6; }
+        .answer-option.blue .answer-shape { background: #3b82f6; }
+        .answer-option.yellow { border-left: 4px solid #f59e0b; }
+        .answer-option.yellow .answer-shape { background: #f59e0b; }
+        .answer-option.green { border-left: 4px solid #10b981; }
+        .answer-option.green .answer-shape { background: #10b981; }
+
         .answer-input {
-            width: 100%;
+            flex: 1;
             background: none;
             border: none;
             color: var(--text);
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
+            font-family: inherit;
+            min-width: 0;
         }
 
         .answer-input:focus {
             outline: none;
         }
 
-        /* Kahoot Colors */
-        .answer-option.red {
-            border-left: 4px solid #ef4444;
+        .correct-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: var(--green);
+            font-size: 14px;
         }
 
-        .answer-option.blue {
-            border-left: 4px solid #3b82f6;
+        .settings-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 4px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
         }
 
-        .answer-option.yellow {
-            border-left: 4px solid #f59e0b;
+        .setting-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 6px;
         }
 
-        .answer-option.green {
-            border-left: 4px solid #10b981;
+        .setting-input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 12px;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 700;
+            transition: border-color 0.2s;
+            font-family: inherit;
         }
 
+        .setting-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* ── QUIZ LIVE – CURRENT QUESTION DISPLAY ── */
         .faculty-question-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -1230,34 +1354,46 @@
                     </div>
 
                     <div class="quiz-control-panel" id="quizControlPanel" style="display: none;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
-                            <div class="card"
-                                style="padding: 20px; text-align: center; border-color: var(--accent-bdr); background: var(--accent-lo);">
-                                <div
-                                    style="font-size: 11px; font-weight: 800; color: var(--accent); margin-bottom: 8px; text-transform: uppercase;">
-                                    Quiz Code</div>
-                                <div id="sessionCodeDisplay"
-                                    style="font-size: 32px; font-weight: 900; letter-spacing: 4px; color: var(--accent);">
-                                    ------</div>
+
+                        <!-- Status Bar -->
+                        <div class="quiz-status-bar">
+                            <div class="quiz-status-dot"></div>
+                            <span class="quiz-status-label">Quiz is live — waiting for students to join</span>
+                            <span class="quiz-status-badge" id="quizStatusBadge">Lobby</span>
+                        </div>
+
+                        <!-- KPI Cards -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                            <div class="card" style="padding: 18px; text-align: center; border-color: var(--accent-bdr); background: var(--accent-lo); margin-bottom:0;">
+                                <div style="font-size: 10px; font-weight: 800; color: var(--accent); margin-bottom: 6px; text-transform: uppercase; letter-spacing:.06em;">Session Code</div>
+                                <div id="sessionCodeDisplay" style="font-size: 30px; font-weight: 900; letter-spacing: 6px; color: var(--accent); font-family: var(--mono);">------</div>
+                                <div style="font-size:11px;color:var(--muted);margin-top:4px;">Share this with students</div>
                             </div>
-                            <div class="card" style="padding: 20px; text-align: center;">
-                                <div
-                                    style="font-size: 11px; font-weight: 800; color: var(--muted); margin-bottom: 8px; text-transform: uppercase;">
-                                    Participants</div>
-                                <div id="participantCount" style="font-size: 32px; font-weight: 900;">0</div>
+                            <div class="card" style="padding: 18px; text-align: center; margin-bottom:0;">
+                                <div style="font-size: 10px; font-weight: 800; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing:.06em;">Participants</div>
+                                <div id="participantCount" style="font-size: 30px; font-weight: 900; color: var(--text);">0</div>
+                                <div style="font-size:11px;color:var(--muted);margin-top:4px;">Students joined</div>
                             </div>
                         </div>
 
-                        <div style="display: flex; gap: 12px;">
-                            <button class="primary-btn" id="startQuizBtn"><i class="fas fa-play"></i> Start</button>
-                            <button class="primary-btn" id="nextQuestionBtn" style="display: none;"><i
-                                    class="fas fa-forward"></i> Next</button>
-                            <button class="primary-btn" id="endQuizBtn" style="background: var(--red);"><i
-                                    class="fas fa-stop"></i> End</button>
+                        <!-- Control Actions -->
+                        <div class="quiz-control-actions">
+                            <button class="quiz-btn quiz-btn-start" id="startQuizBtn">
+                                <i class="fas fa-play"></i> Start Quiz
+                            </button>
+                            <button class="quiz-btn quiz-btn-next" id="nextQuestionBtn" style="display: none;">
+                                <i class="fas fa-forward"></i> Next Question
+                            </button>
+                            <button class="quiz-btn quiz-btn-end" id="endQuizBtn">
+                                <i class="fas fa-stop"></i> End Quiz
+                            </button>
                         </div>
 
-                        <div id="currentQuestionDisplay" style="margin-top: 24px;"></div>
-                        <div id="answerDistribution" style="display: none;"></div>
+                        <!-- Live Content: Current Question + Answer Distribution + Leaderboard -->
+                        <div id="currentQuestionDisplay"></div>
+
+                        <div id="answerDistribution" style="display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-top: 16px;"></div>
+
                         <div id="liveLeaderboard"></div>
                     </div>
                 </section>
