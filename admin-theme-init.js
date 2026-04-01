@@ -5,7 +5,7 @@
  * Also wires the topbar theme toggle button (id="themeToggle") on DOMContentLoaded.
  */
 (function () {
-    var saved = localStorage.getItem('mw_theme') || 'light';
+    var saved = localStorage.getItem('mw_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', saved);
 
     document.addEventListener('DOMContentLoaded', function () {
