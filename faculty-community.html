@@ -1059,7 +1059,7 @@
                             <button class="primary-btn" id="stopPollBtn" style="background:var(--red);">
                                 <i class="fas fa-stop"></i> Stop Collecting
                             </button>
-                            <button class="primary-btn" id="downloadPollBtn" style="width:auto;flex:1;" disabled>
+                            <button class="primary-btn" id="downloadPollBtn" style="width:auto;flex:1;">
                                 <i class="fas fa-file-pdf"></i> Download Report
                             </button>
                         </div>
@@ -1166,7 +1166,7 @@
                             <button class="primary-btn" id="stopFbBtn" style="background:var(--red);">
                                 <i class="fas fa-stop"></i> Stop Collecting
                             </button>
-                            <button class="primary-btn" id="downloadFbBtn" style="width:auto;flex:1;" disabled>
+                            <button class="primary-btn" id="downloadFbBtn" style="width:auto;flex:1;">
                                 <i class="fas fa-file-pdf"></i> Download Report
                             </button>
                         </div>
@@ -1528,7 +1528,7 @@
                 PC.style.display = 'none'; PL.style.display = '';
                 document.getElementById('pollLiveQuestion').textContent = poll.question;
                 activePollId = poll._id; pollStopped = !poll.active;
-                stopPollBtn.disabled = pollStopped; downloadPollBtn.disabled = !pollStopped;
+                stopPollBtn.disabled = pollStopped; 
                 pollStoppedBadge.style.display = pollStopped ? '' : 'none';
                 renderPollBars({ options: poll.options, totals: {}, total: 0 });
                 refreshPollResults();
@@ -1568,6 +1568,19 @@
 
             downloadPollBtn.addEventListener('click', async () => {
                 if (!activePollId) return;
+                if (!pollStopped) {
+                    try {
+                        await CommunityPoll.stopPoll(activePollId);
+                        clearInterval(pollInterval); pollStopped = true;
+                        stopPollBtn.disabled = true;
+                        pollStoppedBadge.style.display = '';
+                        await refreshPollResults();
+                        showToast('✅ Poll stopped successfully.', 'success');
+                    } catch (e) {
+                         showToast('❌ Failed to stop poll'); 
+                         return;
+                    }
+                }
                 const r = await CommunityPoll.getPollResults(activePollId);
                 if (r.ok) generatePollPDF(r);
             });
@@ -1623,7 +1636,7 @@
                 FC.style.display = 'none'; FL.style.display = '';
                 document.getElementById('fbLiveQuestion').textContent = fb.question;
                 activeFbId = fb._id; fbStopped = !fb.active;
-                stopFbBtn.disabled = fbStopped; downloadFbBtn.disabled = !fbStopped;
+                stopFbBtn.disabled = fbStopped; 
                 fbStoppedBadge.style.display = fbStopped ? '' : 'none';
                 refreshFbResults();
                 if (!fbStopped) { clearInterval(fbInterval); fbInterval = setInterval(refreshFbResults, 5000); }
@@ -1659,6 +1672,19 @@
 
             downloadFbBtn.addEventListener('click', async () => {
                 if (!activeFbId) return;
+                if (!fbStopped) {
+                    try {
+                        await CommunityPoll.stopFeedback(activeFbId);
+                        clearInterval(fbInterval); fbStopped = true;
+                        stopFbBtn.disabled = true;
+                        fbStoppedBadge.style.display = '';
+                        await refreshFbResults();
+                        showToast('✅ Feedback stopped successfully.', 'success');
+                    } catch (e) {
+                         showToast('❌ Failed to stop feedback'); 
+                         return;
+                    }
+                }
                 const r = await CommunityPoll.getFeedbackResults(activeFbId);
                 if (r.ok) generateFeedbackPDF(r);
             });
