@@ -1,87 +1,69 @@
 /**
- * MindWave Community Poll Engine
- * Shared localStorage-based state for Quick Poll + Live Feedback
- * Works across faculty-community.html ↔ student-community.html on the same origin
+ * MindWave Community Poll Engine  v2  (MongoDB-backed)
+ * Shared between faculty-community.html and student-community.html
  */
 
-const POLL_KEY   = 'mw_community_poll';
-const FB_KEY     = 'mw_community_feedback';
-
-/* ── HELPERS ── */
-function pollGet()  { try { return JSON.parse(localStorage.getItem(POLL_KEY)  || 'null'); } catch(e){ return null; } }
-function pollSet(v) { localStorage.setItem(POLL_KEY,  JSON.stringify(v)); }
-function fbGet()    { try { return JSON.parse(localStorage.getItem(FB_KEY)    || 'null'); } catch(e){ return null; } }
-function fbSet(v)   { localStorage.setItem(FB_KEY,    JSON.stringify(v)); }
+const API = {
+  getToken() {
+    return localStorage.getItem('token') || localStorage.getItem('mindwave_token') || '';
+  },
+  headers() {
+    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.getToken()}` };
+  },
+  async get(url) {
+    const r = await fetch(url, { headers: this.headers(), credentials: 'include' });
+    return r.json();
+  },
+  async post(url, body) {
+    const r = await fetch(url, { method: 'POST', headers: this.headers(), credentials: 'include', body: JSON.stringify(body) });
+    return r.json();
+  }
+};
 
 window.CommunityPoll = {
-  /* ── FACULTY: launch a poll ── */
-  launchPoll(question, options) {
-    pollSet({ question, options, responses: {}, active: true, launchedAt: Date.now() });
-    window.dispatchEvent(new Event('poll_updated'));
-  },
-  /* ── FACULTY: stop a poll ── */
-  stopPoll() {
-    const p = pollGet();
-    if (p) { p.active = false; pollSet(p); }
-    window.dispatchEvent(new Event('poll_updated'));
-  },
-  /* ── FACULTY: clear poll ── */
-  clearPoll() { localStorage.removeItem(POLL_KEY); window.dispatchEvent(new Event('poll_updated')); },
-  /* ── STUDENT: vote ── */
-  votePoll(optionIndex) {
-    const p = pollGet();
-    if (!p || !p.active) return false;
-    const uid = 'anon_' + Math.random().toString(36).slice(2,9);
-    p.responses[uid] = optionIndex;
-    pollSet(p);
-    window.dispatchEvent(new Event('poll_updated'));
-    return true;
-  },
-  /* ── READ ── */
-  getPoll() { return pollGet(); },
 
-  /* ── FACULTY: launch feedback question ── */
-  launchFeedback(question) {
-    fbSet({ question, responses: {}, active: true, launchedAt: Date.now() });
-    window.dispatchEvent(new Event('feedback_updated'));
-  },
-  stopFeedback() {
-    const f = fbGet();
-    if (f) { f.active = false; fbSet(f); }
-    window.dispatchEvent(new Event('feedback_updated'));
-  },
-  clearFeedback() { localStorage.removeItem(FB_KEY); window.dispatchEvent(new Event('feedback_updated')); },
-  /* ── STUDENT: submit feedback rating ── */
-  submitFeedback(rating, label) {
-    const f = fbGet();
-    if (!f || !f.active) return false;
-    const uid = 'anon_' + Math.random().toString(36).slice(2,9);
-    f.responses[uid] = { rating, label, ts: Date.now() };
-    fbSet(f);
-    window.dispatchEvent(new Event('feedback_updated'));
-    return true;
-  },
-  getFeedback() { return fbGet(); },
+  /* ════════════════ SHARED ════════════════ */
 
-  /* ── REPORT: aggregate poll results ── */
-  getPollResults() {
-    const p = pollGet();
-    if (!p) return null;
-    const totals = {};
-    p.options.forEach((_, i) => { totals[i] = 0; });
-    Object.values(p.responses).forEach(v => { totals[v] = (totals[v] || 0) + 1; });
-    return { question: p.question, options: p.options, totals, total: Object.keys(p.responses).length };
+  /** Faculty: fetch distinct sections/batches/departments from students */
+  getSections()  { return API.get('/api/community/sections'); },
+
+  /* ════════════════ POLL ════════════════ */
+
+  /** Faculty: launch a new poll */
+  launchPoll(question, options, targetSections, targetBatch, targetDepartment) {
+    return API.post('/api/community/poll', { question, options, targetSections, targetBatch, targetDepartment });
   },
 
-  /* ── REPORT: aggregate feedback results ── */
-  getFeedbackResults() {
-    const f = fbGet();
-    if (!f) return null;
-    const labels = { 1:'Very Confused', 2:'Confused', 3:'Neutral', 4:'Confident', 5:'Very Confident' };
-    const totals = { 1:0, 2:0, 3:0, 4:0, 5:0 };
-    Object.values(f.responses).forEach(r => { totals[r.rating] = (totals[r.rating] || 0) + 1; });
-    const total = Object.keys(f.responses).length;
-    const avg = total ? (Object.entries(totals).reduce((s,[k,v]) => s + Number(k)*v, 0) / total).toFixed(2) : '—';
-    return { question: f.question, totals, labels, total, avg };
+  /** Faculty: stop a poll */
+  stopPoll(id) { return API.post(`/api/community/poll/${id}/stop`, {}); },
+
+  /** Faculty: get results of a specific poll */
+  getPollResults(id) { return API.get(`/api/community/poll/${id}/results`); },
+
+  /** Student: get the active poll for their section */
+  getActivePoll() { return API.get('/api/community/poll/active'); },
+
+  /** Student: cast an anonymous vote */
+  votePoll(pollId, optionIndex) { return API.post(`/api/community/poll/${pollId}/vote`, { optionIndex }); },
+
+  /* ════════════════ FEEDBACK ════════════════ */
+
+  /** Faculty: launch live feedback */
+  launchFeedback(question, targetSections, targetBatch, targetDepartment) {
+    return API.post('/api/community/feedback', { question, targetSections, targetBatch, targetDepartment });
+  },
+
+  /** Faculty: stop feedback */
+  stopFeedback(id) { return API.post(`/api/community/feedback/${id}/stop`, {}); },
+
+  /** Faculty: get results of a specific feedback */
+  getFeedbackResults(id) { return API.get(`/api/community/feedback/${id}/results`); },
+
+  /** Student: get the active feedback for their section */
+  getActiveFeedback() { return API.get('/api/community/feedback/active'); },
+
+  /** Student: submit an anonymous rating */
+  submitFeedback(feedbackId, rating, label) {
+    return API.post(`/api/community/feedback/${feedbackId}/respond`, { rating, label });
   }
 };

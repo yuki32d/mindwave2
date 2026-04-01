@@ -1326,105 +1326,116 @@
             transform: translateY(-1px)
         }
     </style>
-    <!-- ══════════ STUDENT POLL + FEEDBACK LOGIC ══════════ -->
+    <!-- ══════════ STUDENT POLL + FEEDBACK LOGIC (MongoDB API) ══════════ -->
     <script>
     (function() {
-        /* ─── helpers ─── */
         const $ = id => document.getElementById(id);
+        const COLORS = ['#6366f1','#f59e0b','#10b981','#ef4444'];
+
+        let activePollId     = null;
+        let activeFbId       = null;
         let hasVotedPoll     = false;
         let hasVotedFeedback = false;
+        let selectedFbRating = null;
+        let selectedFbLabel  = null;
 
         /* ══════════════════════ QUICK POLL ══════════════════════ */
-        function refreshStudentPoll() {
+        async function refreshStudentPoll() {
             if (!window.CommunityPoll) return;
-            const p = CommunityPoll.getPoll();
-
             const waiting = $('pollWaitingCard');
             const active  = $('pollActiveCard');
             const ended   = $('pollEndedCard');
             if (!waiting || !active || !ended) return;
 
-            if (!p) {
-                // no poll exists
-                waiting.style.display = ''; active.style.display = 'none'; ended.style.display = 'none';
-                hasVotedPoll = false;
-                return;
-            }
+            try {
+                const data = await CommunityPoll.getActivePoll();
+                const p = data.poll;
 
-            if (p.active) {
-                // poll is live
+                if (!p) {
+                    waiting.style.display = ''; active.style.display = 'none'; ended.style.display = 'none';
+                    if (activePollId) { hasVotedPoll = false; activePollId = null; }
+                    return;
+                }
+
+                // New poll appeared — reset voted state
+                if (activePollId !== p._id) { hasVotedPoll = false; activePollId = p._id; }
+
                 waiting.style.display = 'none'; ended.style.display = 'none';
                 active.style.display = '';
                 $('studentPollQuestion').textContent = p.question;
 
                 const optContainer = $('studentPollOptions');
                 if (!hasVotedPoll) {
-                    const COLORS = ['#6366f1','#f59e0b','#10b981','#ef4444'];
                     optContainer.innerHTML = p.options.map((opt, i) => `
-                        <button onclick="castPollVote(${i})" style="
+                        <button onclick="castPollVote('${p._id}',${i})" style="
                             width:100%;padding:14px 20px;border-radius:12px;
-                            border:2px solid ${COLORS[i % COLORS.length]}33;
-                            background:${COLORS[i % COLORS.length]}11;
+                            border:2px solid ${COLORS[i%COLORS.length]}33;
+                            background:${COLORS[i%COLORS.length]}11;
                             color:var(--text,#f5f7ff);font-size:.95rem;font-weight:600;
                             cursor:pointer;display:flex;align-items:center;gap:10px;
                             transition:all .15s;text-align:left;">
                             <span style="width:28px;height:28px;border-radius:8px;background:${COLORS[i%COLORS.length]};color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex-shrink:0;">${String.fromCharCode(65+i)}</span>
                             ${opt}
                         </button>`).join('');
+                    const vc = $('pollVoteConfirm');
+                    if (vc) vc.style.display = 'none';
                 } else {
-                    // already voted — show confirmation
                     optContainer.innerHTML = '';
-                    $('pollVoteConfirm').style.display = '';
+                    const vc = $('pollVoteConfirm');
+                    if (vc) vc.style.display = '';
                 }
-            } else {
-                // poll stopped
-                waiting.style.display = 'none'; active.style.display = 'none';
-                ended.style.display = '';
-            }
+            } catch(e) { console.error('Poll refresh error', e); }
         }
 
-        window.castPollVote = function(optionIndex) {
+        window.castPollVote = async function(pollId, optionIndex) {
             if (hasVotedPoll) return;
-            const ok = CommunityPoll.votePoll(optionIndex);
-            if (ok) {
-                hasVotedPoll = true;
-                $('studentPollOptions').innerHTML = '';
-                $('pollVoteConfirm').style.display = '';
-            }
+            try {
+                const data = await CommunityPoll.votePoll(pollId, optionIndex);
+                if (data.ok) {
+                    hasVotedPoll = true;
+                    $('studentPollOptions').innerHTML = '';
+                    const vc = $('pollVoteConfirm');
+                    if (vc) vc.style.display = '';
+                }
+            } catch(e) { console.error('Vote error', e); }
         };
 
         /* ══════════════════════ LIVE FEEDBACK ══════════════════════ */
-        let selectedFbRating = null;
-        let selectedFbLabel  = null;
-
-        function refreshStudentFeedback() {
+        async function refreshStudentFeedback() {
             if (!window.CommunityPoll) return;
-            const f = CommunityPoll.getFeedback();
-
             const waiting = $('fbWaitingCard');
             const active  = $('fbActiveCard');
             const ended   = $('fbEndedCard');
             if (!waiting || !active || !ended) return;
 
-            if (!f) {
-                waiting.style.display = ''; active.style.display = 'none'; ended.style.display = 'none';
-                hasVotedFeedback = false;
-                return;
-            }
+            try {
+                const data = await CommunityPoll.getActiveFeedback();
+                const f = data.feedback;
 
-            if (f.active) {
+                if (!f) {
+                    waiting.style.display = ''; active.style.display = 'none'; ended.style.display = 'none';
+                    if (activeFbId) { hasVotedFeedback = false; activeFbId = null; }
+                    return;
+                }
+
+                if (activeFbId !== f._id) { hasVotedFeedback = false; activeFbId = f._id; selectedFbRating = null; selectedFbLabel = null; }
+
                 waiting.style.display = 'none'; ended.style.display = 'none';
                 active.style.display = '';
                 $('studentFbQuestion').textContent = f.question;
+
+                const submitBtn = $('submitFeedbackBtn');
+                if (submitBtn && hasVotedFeedback) { submitBtn.disabled = true; }
+                if (submitBtn && !hasVotedFeedback && selectedFbRating) { submitBtn.disabled = false; }
+
+                const sc = $('fbSubmitConfirm');
+                if (sc) sc.style.display = hasVotedFeedback ? '' : 'none';
+
                 if (window.lucide) lucide.createIcons({ el: active });
-            } else {
-                // ended
-                waiting.style.display = 'none'; active.style.display = 'none';
-                ended.style.display = '';
-            }
+            } catch(e) { console.error('Feedback refresh error', e); }
         }
 
-        // Emoji button selection
+        // Emoji selection
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('#fbEmojiOptions .emoji-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1440,40 +1451,34 @@
 
             const submitBtn = $('submitFeedbackBtn');
             if (submitBtn) {
-                submitBtn.addEventListener('click', () => {
-                    if (!selectedFbRating || hasVotedFeedback) return;
-                    const ok = CommunityPoll.submitFeedback(selectedFbRating, selectedFbLabel);
-                    if (ok) {
-                        hasVotedFeedback = true;
-                        submitBtn.disabled = true;
-                        document.querySelectorAll('#fbEmojiOptions .emoji-btn').forEach(b => { b.disabled = true; b.style.opacity = '.5'; });
-                        $('fbSubmitConfirm').style.display = '';
-                    }
+                submitBtn.addEventListener('click', async () => {
+                    if (!selectedFbRating || hasVotedFeedback || !activeFbId) return;
+                    try {
+                        const data = await CommunityPoll.submitFeedback(activeFbId, selectedFbRating, selectedFbLabel);
+                        if (data.ok) {
+                            hasVotedFeedback = true;
+                            submitBtn.disabled = true;
+                            document.querySelectorAll('#fbEmojiOptions .emoji-btn').forEach(b => { b.disabled = true; b.style.opacity = '.5'; });
+                            const sc = $('fbSubmitConfirm');
+                            if (sc) sc.style.display = '';
+                        }
+                    } catch(e) { console.error('Feedback submit error', e); }
                 });
             }
-        });
 
-        /* ── Poll for changes every 3 s (localStorage doesn't always fire storage event in same tab) ── */
-        function tick() {
+            // Initial load + 5s refresh
             refreshStudentPoll();
             refreshStudentFeedback();
-        }
-
-        // Also listen to cross-tab storage events
-        window.addEventListener('storage', e => {
-            if (e.key === 'mw_community_poll')     refreshStudentPoll();
-            if (e.key === 'mw_community_feedback') refreshStudentFeedback();
+            setInterval(() => { refreshStudentPoll(); refreshStudentFeedback(); }, 5000);
         });
-        window.addEventListener('poll_updated',     refreshStudentPoll);
-        window.addEventListener('feedback_updated', refreshStudentFeedback);
-
-        document.addEventListener('DOMContentLoaded', () => {
-            tick();
-            setInterval(tick, 3000); // auto-refresh every 3 s
-        });
-        tick();
 
     })();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
     </script>
 
     <script>

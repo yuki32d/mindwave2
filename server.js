@@ -9382,8 +9382,170 @@ if (CLEANUP_ENABLED === 'true') {
 }
 
 // ============================================
+// COMMUNITY POLL & LIVE FEEDBACK — MONGODB
+// ============================================
+
+const communityPollSchema = new mongoose.Schema({
+  question:          { type: String, required: true },
+  options:           { type: [String], required: true },
+  createdBy:         { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  targetSections:    { type: [String], default: [] },
+  targetBatch:       { type: String, default: '' },
+  targetDepartment:  { type: String, default: '' },
+  active:            { type: Boolean, default: true },
+  stoppedAt:         { type: Date },
+  responses:         { type: [{ optionIndex: Number, submittedAt: { type: Date, default: Date.now } }], default: [] },
+}, { timestamps: true });
+communityPollSchema.index({ active: 1, createdAt: -1 });
+const CommunityPoll = mongoose.model('CommunityPoll', communityPollSchema);
+
+const communityFeedbackSchema = new mongoose.Schema({
+  question:          { type: String, required: true },
+  createdBy:         { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  targetSections:    { type: [String], default: [] },
+  targetBatch:       { type: String, default: '' },
+  targetDepartment:  { type: String, default: '' },
+  active:            { type: Boolean, default: true },
+  stoppedAt:         { type: Date },
+  responses:         { type: [{ rating: Number, label: String, submittedAt: { type: Date, default: Date.now } }], default: [] },
+}, { timestamps: true });
+communityFeedbackSchema.index({ active: 1, createdAt: -1 });
+const CommunityFeedback = mongoose.model('CommunityFeedback', communityFeedbackSchema);
+
+function studentMatchesTarget(student, doc) {
+  if (!doc) return false;
+  const secOk  = !doc.targetSections.length || doc.targetSections.includes(student.section);
+  const batOk  = !doc.targetBatch       || doc.targetBatch === student.batch;
+  const deptOk = !doc.targetDepartment  || doc.targetDepartment === student.department;
+  return secOk && batOk && deptOk;
+}
+
+// Faculty: get available sections/batches/departments
+app.get('/api/community/sections', authMiddleware, async (req, res) => {
+  try {
+    const students = await User.find({ role: 'student', isActive: { $ne: false } }).select('section batch department').lean();
+    const sections    = [...new Set(students.map(s => s.section).filter(Boolean))].sort();
+    const batches     = [...new Set(students.map(s => s.batch).filter(Boolean))].sort();
+    const departments = [...new Set(students.map(s => s.department).filter(Boolean))].sort();
+    res.json({ ok: true, sections, batches, departments });
+  } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
+});
+
+// POLL ROUTES
+app.post('/api/community/poll', authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const { question, options, targetSections, targetBatch, targetDepartment } = req.body;
+    if (!question || !options || options.length < 2)
+      return res.status(400).json({ ok: false, message: 'question and at least 2 options required' });
+    await CommunityPoll.updateMany({ createdBy: req.user.sub, active: true }, { active: false, stoppedAt: new Date() });
+    const poll = await CommunityPoll.create({ question, options, createdBy: req.user.sub, targetSections: targetSections || [], targetBatch: targetBatch || '', targetDepartment: targetDepartment || '' });
+    res.json({ ok: true, poll });
+  } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
+});
+
+app.post('/api/community/poll/:id/stop', authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const poll = await CommunityPoll.findOneAndUpdate({ _id: req.params.id, createdBy: req.user.sub }, { active: false, stoppedAt: new Date() }, { new: true });
+    if (!poll) return res.status(404).json({ ok: false, message: 'Poll not found' });
+    res.json({ ok: true, poll });
+  } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
+});
+
+app.get('/api/community/poll/:id/results', authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const poll = await CommunityPoll.findOne({ _id: req.params.id, createdBy: req.user.sub }).lean();
+    if (!poll) return res.status(404).json({ ok: false, message: 'Poll not found' });
+    const totals = {};
+    poll.options.forEach((_, i) => { totals[i] = 0; });
+    poll.responses.forEach(r => { totals[r.optionIndex] = (totals[r.optionIndex] || 0) + 1; });
+    res.json({ ok: true, question: poll.question, options: poll.options, totals, total: poll.responses.length, active: poll.active });
+  } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
+});
+
+app.get('/api/community/poll/active', authMiddleware, async (req, res) => {
+  try {
+    const student = await User.findById(req.user.sub).select('section batch department').lean();
+    if (!student) return res.status(404).json({ ok: false, message: 'User not found' });
+    const polls = await CommunityPoll.find({ active: true }).sort({ createdAt: -1 }).lean();
+    const poll  = polls.find(p => studentMatchesTarget(student, p));
+    if (!poll) return res.json({ ok: true, poll: null });
+    const { responses, ...safe } = poll;
+    res.json({ ok: true, poll: safe });
+  } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
+});
+
+app.post('/api/community/poll/:id/vote', authMiddleware, async (req, res) => {
+  try {
+    const { optionIndex } = req.body;
+    if (optionIndex === undefined) return res.status(400).json({ ok: false, message: 'optionIndex required' });
+    const poll = await CommunityPoll.findOne({ _id: req.params.id, active: true });
+    if (!poll) return res.status(404).json({ ok: false, message: 'Poll not found or stopped' });
+    poll.responses.push({ optionIndex: Number(optionIndex) });
+    await poll.save();
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
+});
+
+// FEEDBACK ROUTES
+app.post('/api/community/feedback', authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const { question, targetSections, targetBatch, targetDepartment } = req.body;
+    if (!question) return res.status(400).json({ ok: false, message: 'question required' });
+    await CommunityFeedback.updateMany({ createdBy: req.user.sub, active: true }, { active: false, stoppedAt: new Date() });
+    const fb = await CommunityFeedback.create({ question, createdBy: req.user.sub, targetSections: targetSections || [], targetBatch: targetBatch || '', targetDepartment: targetDepartment || '' });
+    res.json({ ok: true, feedback: fb });
+  } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
+});
+
+app.post('/api/community/feedback/:id/stop', authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const fb = await CommunityFeedback.findOneAndUpdate({ _id: req.params.id, createdBy: req.user.sub }, { active: false, stoppedAt: new Date() }, { new: true });
+    if (!fb) return res.status(404).json({ ok: false, message: 'Feedback not found' });
+    res.json({ ok: true, feedback: fb });
+  } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
+});
+
+app.get('/api/community/feedback/:id/results', authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const fb = await CommunityFeedback.findOne({ _id: req.params.id, createdBy: req.user.sub }).lean();
+    if (!fb) return res.status(404).json({ ok: false, message: 'Feedback not found' });
+    const totals = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    fb.responses.forEach(r => { totals[r.rating] = (totals[r.rating] || 0) + 1; });
+    const total = fb.responses.length;
+    const avg   = total ? (fb.responses.reduce((s, r) => s + r.rating, 0) / total).toFixed(2) : null;
+    const labels = { 1: 'Very Confused', 2: 'Confused', 3: 'Neutral', 4: 'Confident', 5: 'Very Confident' };
+    res.json({ ok: true, question: fb.question, totals, labels, total, avg, active: fb.active });
+  } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
+});
+
+app.get('/api/community/feedback/active', authMiddleware, async (req, res) => {
+  try {
+    const student = await User.findById(req.user.sub).select('section batch department').lean();
+    if (!student) return res.status(404).json({ ok: false, message: 'User not found' });
+    const items = await CommunityFeedback.find({ active: true }).sort({ createdAt: -1 }).lean();
+    const fb    = items.find(f => studentMatchesTarget(student, f));
+    if (!fb) return res.json({ ok: true, feedback: null });
+    const { responses, ...safe } = fb;
+    res.json({ ok: true, feedback: safe });
+  } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
+});
+
+app.post('/api/community/feedback/:id/respond', authMiddleware, async (req, res) => {
+  try {
+    const { rating, label } = req.body;
+    if (!rating || rating < 1 || rating > 5) return res.status(400).json({ ok: false, message: 'rating 1-5 required' });
+    const fb = await CommunityFeedback.findOne({ _id: req.params.id, active: true });
+    if (!fb) return res.status(404).json({ ok: false, message: 'Feedback not found or stopped' });
+    fb.responses.push({ rating: Number(rating), label: label || '' });
+    await fb.save();
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
+});
+
+// ============================================
 // START SERVER
 // ============================================
+
 
 function listenWithFallback(preferred) {
   let port = Number(preferred) || 8080;
