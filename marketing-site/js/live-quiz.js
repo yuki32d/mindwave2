@@ -5,6 +5,7 @@ let questions = [];
 let currentQuestionIndex = -1;
 let currentQuiz = null;
 let ws = null;
+let isQuizEnded = false;
 
 document.addEventListener('DOMContentLoaded', function () {
     if (!document.getElementById('quizBuilder')) return;
@@ -679,13 +680,34 @@ function displayLeaderboard(leaderboard) {
 }
 
 async function showFinalLeaderboard() {
+    isQuizEnded = true;
     await showLeaderboard();
+    
     document.getElementById('nextQuestionBtn').style.display = 'none';
-    alert('Quiz completed! 🎉');
+    const endBtn = document.getElementById('endQuizBtn');
+    endBtn.innerHTML = '<i class="fas fa-times"></i> Close Session';
+    
+    const badge = document.getElementById('quizStatusBadge');
+    if (badge) badge.textContent = 'Ended';
+    const label = document.querySelector('.quiz-status-label');
+    if (label) label.textContent = 'Quiz completed! Final leaderboard below.';
+    const dot = document.querySelector('.quiz-status-dot');
+    if (dot) dot.style.display = 'none';
+
+    if (typeof showToast === 'function') {
+        showToast('🎉 Quiz completed successfully!', 'success');
+    } else {
+        alert('Quiz completed! 🎉');
+    }
 }
 
 async function endQuiz() {
     if (!currentQuiz) return;
+    
+    if (isQuizEnded) {
+        window.location.reload();
+        return;
+    }
 
     if (!await confirm('Are you sure you want to end this quiz?')) return;
 
@@ -702,6 +724,11 @@ async function endQuiz() {
         const data = await response.json();
 
         if (data.ok) {
+            isQuizEnded = true;
+            
+            // Fetch final leaderboard FIRST so it's fresh
+            await showLeaderboard();
+            
             ws.send(JSON.stringify({
                 type: 'end-quiz'
             }));
@@ -710,8 +737,24 @@ async function endQuiz() {
                 ws.close();
             }
 
-            alert('Quiz ended successfully');
-            window.location.reload();
+            // Update UI to ended state
+            document.getElementById('nextQuestionBtn').style.display = 'none';
+            const endBtn = document.getElementById('endQuizBtn');
+            endBtn.innerHTML = '<i class="fas fa-times"></i> Close Session';
+            
+            const badge = document.getElementById('quizStatusBadge');
+            if (badge) badge.textContent = 'Ended';
+            const label = document.querySelector('.quiz-status-label');
+            if (label) label.textContent = 'Quiz session has ended.';
+            const dot = document.querySelector('.quiz-status-dot');
+            if (dot) dot.style.display = 'none';
+            
+            // Show toast instead of blocking alert
+            if (typeof showToast === 'function') {
+                showToast('✅ Quiz ended successfully. Final leaderboard displayed.', 'success');
+            } else {
+                alert('Quiz ended successfully');
+            }
         } else {
             alert('Failed to end quiz: ' + data.message);
         }
