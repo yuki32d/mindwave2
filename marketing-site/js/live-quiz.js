@@ -637,44 +637,127 @@ function displayLeaderboard(leaderboard) {
         return '';
     };
 
-    let html = `
-        <div class="faculty-leaderboard-panel">
-            <div class="leaderboard-header">
-                <h3><i class="fas fa-trophy"></i> Live Leaderboard</h3>
-                <div class="total-participants">${leaderboard.length} students</div>
-            </div>
-            <div class="leaderboard-table">
-                <div class="leaderboard-table-header">
-                    <div class="col-rank">Rank</div>
-                    <div class="col-name">Student</div>
-                    <div class="col-score">Score</div>
-                </div>
-                <div class="leaderboard-table-body">
-    `;
+    let html = '';
 
-    leaderboard.forEach((player, index) => {
-        const rank = index + 1;
-        const medal = getMedalIcon(rank);
-        const rankClass = getRankClass(rank);
-
+    if (isQuizEnded) {
         html += `
-            <div class="leaderboard-row ${rankClass}" style="animation-delay: ${index * 0.05}s">
-                <div class="col-rank">
-                    <div class="rank-badge ${rankClass}">
-                        ${medal ? medal : rank}
-                    </div>
-                </div>
-                <div class="col-name">${player.name}</div>
-                <div class="col-score">${player.score}</div>
+            <div class="results-hero" style="text-align:center; padding: 2.5rem 0 1.5rem 0;">
+                <h2 style="font-size: 2.4rem; font-weight: 900; background: linear-gradient(135deg, var(--yellow), var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Quiz Complete! 🎉</h2>
+                <p style="color: var(--muted); margin-top: 8px;">Final results for ${leaderboard.length} students</p>
             </div>
         `;
-    });
 
-    html += `
+        if (leaderboard.length > 0) {
+            html += `
+            <div class="podium-section">
+                <h3>🏆 Top 3</h3>
+                <div class="podium" id="podium">
+            `;
+            const top3 = leaderboard.slice(0, 3);
+            const order = [top3[1], top3[0], top3[2]]; // 2nd, 1st, 3rd
+            const medals = ['🥈', '🥇', '🥉'];
+            const heights = ['medium', 'tall', 'short'];
+            const colors = ['rgba(192,192,192,0.2)', 'rgba(255,215,0,0.25)', 'rgba(205,127,50,0.2)'];
+            const positions = [2, 1, 3];
+
+            html += order.map((e, i) => {
+                if (!e) return `<div class="podium-place ${heights[i]} empty"></div>`;
+                const initials = (e.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+                return `
+                <div class="podium-place ${heights[i]}" style="animation-delay:${0.1 + i * 0.15}s">
+                    <div class="podium-medal">${medals[i]}</div>
+                    <div class="podium-avatar" style="background:${colors[i]}">${initials}</div>
+                    <div class="podium-name">${e.name || 'Player'}</div>
+                    <div class="podium-score">${(e.score || 0).toLocaleString()}</div>
+                    <div class="podium-stand" style="background:${colors[i]}">
+                        <div class="stand-number">${positions[i]}</div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            html += `
                 </div>
             </div>
-        </div>
-    `;
+            
+            <div class="lb-list-section">
+                <div class="lb-list-header" style="display:flex; justify-content: space-between; align-items: center;">
+                    <span>Leaderboard</span>
+                    <button onclick="downloadQuizReport()" style="background: var(--accent); color: #fff; border:none; padding: 6px 14px; border-radius: 8px; font-weight:700; cursor:pointer; font-size:12px; display:inline-flex; align-items:center; gap:6px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                        <i class="fas fa-file-csv"></i> Download CSV
+                    </button>
+                </div>
+            `;
+            
+            html += leaderboard.map((e, i) => {
+                return `<div class="lb-row">
+                    <span class="lb-rank">${i < 3 ? ['🥇', '🥈', '🥉'][i] : `#${i + 1}`}</span>
+                    <span class="lb-name">${e.name || 'Player'}</span>
+                    <span class="lb-points">${(e.score || 0).toLocaleString()} pts</span>
+                </div>`;
+            }).join('');
+            
+            html += `</div>`;
+            
+        } else {
+            html += `<div style="text-align:center; padding: 3rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 14px; margin-top:20px;">No participants joined the quiz.</div>`;
+        }
+
+        window.downloadQuizReport = function() {
+            let csv = 'Rank,Student Name,Email,Score\\n';
+            leaderboard.forEach((p, idx) => {
+                csv += `${idx + 1},"${(p.name || '').replace(/"/g, '""')}","${p.email || ''}",${p.score || 0}\\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Quiz_Report_${currentQuiz.sessionCode}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        };
+
+    } else {
+        html = `
+            <div class="faculty-leaderboard-panel">
+                <div class="leaderboard-header">
+                    <h3><i class="fas fa-trophy"></i> Live Leaderboard</h3>
+                    <div class="total-participants">${leaderboard.length} students</div>
+                </div>
+                <div class="leaderboard-table">
+                    <div class="leaderboard-table-header">
+                        <div class="col-rank">Rank</div>
+                        <div class="col-name">Student</div>
+                        <div class="col-score">Score</div>
+                    </div>
+                    <div class="leaderboard-table-body">
+        `;
+
+        leaderboard.forEach((player, index) => {
+            const rank = index + 1;
+            const medal = getMedalIcon(rank);
+            const rankClass = getRankClass(rank);
+
+            html += `
+                <div class="leaderboard-row ${rankClass}" style="animation-delay: ${index * 0.05}s">
+                    <div class="col-rank">
+                        <div class="rank-badge ${rankClass}">
+                            ${medal ? medal : rank}
+                        </div>
+                    </div>
+                    <div class="col-name">${player.name}</div>
+                    <div class="col-score">${player.score}</div>
+                </div>
+            `;
+        });
+
+        html += `
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
     display.innerHTML = html;
 }

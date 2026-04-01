@@ -10793,7 +10793,7 @@ app.post('/api/quiz/:code/start', authMiddleware, requireFaculty, async (req, re
     }
 
     quiz.status = 'question';
-    quiz.currentQuestionIndex = 0;
+    quiz.currentQuestionIndex = -1;
     await quiz.save();
 
     res.json({ ok: true, message: "Quiz started" });
