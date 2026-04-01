@@ -57,9 +57,16 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.08);
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        html, body {
+        html,
+        body {
             margin: 0;
             padding: 0;
             width: 100%;
@@ -152,7 +159,7 @@
         .main {
             flex: 1;
             overflow-y: auto;
-            padding: 24px 16px;
+            padding: 0;
             scrollbar-width: thin;
             scrollbar-color: var(--border) transparent;
             background: var(--bg);
@@ -165,7 +172,7 @@
 
         /* ── PAGE HEADER ── */
         .page-header {
-            margin-bottom: 32px;
+            margin-bottom: 16px;
             text-align: center;
         }
 
@@ -195,10 +202,9 @@
         /* ── CARD ── */
         .card {
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
             padding: 32px;
         }
 
@@ -212,8 +218,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .tool-header {
@@ -325,9 +338,23 @@
             transition: all 0.2s;
         }
 
-        .stat-icon { font-size: 24px; margin-bottom: 8px; }
-        .stat-value { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
-        .stat-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
 
         /* ── QUIZ EDITOR & LIVE DISPLAY ── */
         .question-item {
@@ -341,10 +368,12 @@
             align-items: center;
             gap: 10px;
         }
+
         .question-item.active {
             border-color: var(--accent);
             background: var(--accent-lo);
         }
+
         .question-number {
             width: 24px;
             height: 24px;
@@ -357,6 +386,7 @@
             font-size: 11px;
             font-weight: 800;
         }
+
         .question-preview {
             font-size: 13px;
             white-space: nowrap;
@@ -364,13 +394,19 @@
             text-overflow: ellipsis;
         }
 
-        .editor-content h3 { font-size: 18px; font-weight: 800; margin-bottom: 20px; }
+        .editor-content h3 {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
         .answers-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-top: 12px;
         }
+
         .answer-option {
             padding: 16px;
             border-radius: 12px;
@@ -380,10 +416,12 @@
             position: relative;
             transition: all 0.2s;
         }
+
         .answer-option.correct {
             border-color: var(--green);
             background: rgba(22, 163, 74, 0.1);
         }
+
         .answer-input {
             width: 100%;
             background: none;
@@ -392,13 +430,27 @@
             font-size: 14px;
             font-weight: 600;
         }
-        .answer-input:focus { outline: none; }
-        
+
+        .answer-input:focus {
+            outline: none;
+        }
+
         /* Kahoot Colors */
-        .answer-option.red { border-left: 4px solid #ef4444; }
-        .answer-option.blue { border-left: 4px solid #3b82f6; }
-        .answer-option.yellow { border-left: 4px solid #f59e0b; }
-        .answer-option.green { border-left: 4px solid #10b981; }
+        .answer-option.red {
+            border-left: 4px solid #ef4444;
+        }
+
+        .answer-option.blue {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .answer-option.yellow {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .answer-option.green {
+            border-left: 4px solid #10b981;
+        }
 
         .faculty-question-card {
             background: var(--surface);
@@ -408,17 +460,20 @@
             text-align: center;
             animation: fadeIn 0.4s ease;
         }
+
         .question-text-display {
             font-size: 28px;
             font-weight: 800;
             margin: 32px 0;
             line-height: 1.3;
         }
+
         .faculty-answers-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
+
         .faculty-answer {
             padding: 24px;
             border-radius: 16px;
@@ -430,11 +485,13 @@
             font-weight: 700;
             background: var(--bg);
         }
+
         .faculty-answer.correct {
             border-color: var(--green);
             background: rgba(22, 163, 74, 0.1);
             box-shadow: 0 0 20px rgba(22, 163, 74, 0.2);
         }
+
         .answer-letter {
             width: 32px;
             height: 32px;
@@ -445,14 +502,27 @@
             color: #fff;
             font-weight: 900;
         }
-        .faculty-answer.red .answer-letter { background: #ef4444; }
-        .faculty-answer.blue .answer-letter { background: #3b82f6; }
-        .faculty-answer.yellow .answer-letter { background: #f59e0b; }
-        .faculty-answer.green .answer-letter { background: #10b981; }
+
+        .faculty-answer.red .answer-letter {
+            background: #ef4444;
+        }
+
+        .faculty-answer.blue .answer-letter {
+            background: #3b82f6;
+        }
+
+        .faculty-answer.yellow .answer-letter {
+            background: #f59e0b;
+        }
+
+        .faculty-answer.green .answer-letter {
+            background: #10b981;
+        }
 
         .faculty-timer-container {
             margin: 0 20px;
         }
+
         .faculty-timer-circle {
             width: 50px;
             height: 50px;
@@ -466,9 +536,22 @@
         }
 
         @media (max-width: 768px) {
-            .options-grid, .stats-grid, .answers-grid, .faculty-answers-grid { grid-template-columns: 1fr; }
-            .topbar { padding: 0 16px; }
-            .nav-btn { padding: 8px 10px; font-size: 12px; }
+
+            .options-grid,
+            .stats-grid,
+            .answers-grid,
+            .faculty-answers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                padding: 0 16px;
+            }
+
+            .nav-btn {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
         }
 
         /* ── TOAST NOTIFICATIONS ── */
@@ -507,10 +590,21 @@
             background: rgba(255, 255, 255, 0.9);
         }
 
-        .toast.success { border-left: 4px solid var(--green); }
-        .toast.error { border-left: 4px solid var(--red); }
-        .toast.info { border-left: 4px solid var(--blue); }
-        .toast.warning { border-left: 4px solid var(--accent); }
+        .toast.success {
+            border-left: 4px solid var(--green);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--red);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--blue);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--accent);
+        }
 
         .toast-icon {
             width: 40px;
@@ -525,14 +619,41 @@
             border: 1px solid var(--border);
         }
 
-        .toast.success .toast-icon { color: var(--green); background: rgba(22, 163, 74, 0.1); }
-        .toast.error .toast-icon { color: var(--red); background: rgba(220, 38, 38, 0.1); }
-        .toast.info .toast-icon { color: var(--blue); background: rgba(37, 99, 235, 0.1); }
-        .toast.warning .toast-icon { color: var(--accent); background: var(--accent-lo); }
+        .toast.success .toast-icon {
+            color: var(--green);
+            background: rgba(22, 163, 74, 0.1);
+        }
 
-        .toast-content { flex: 1; }
-        .toast-title { font-weight: 800; font-size: 14px; margin-bottom: 2px; }
-        .toast-msg { font-size: 13px; color: var(--muted); line-height: 1.4; }
+        .toast.error .toast-icon {
+            color: var(--red);
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        .toast.info .toast-icon {
+            color: var(--blue);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .toast.warning .toast-icon {
+            color: var(--accent);
+            background: var(--accent-lo);
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 800;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .toast-msg {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.4;
+        }
 
         .toast-close {
             background: none;
@@ -544,7 +665,9 @@
             font-size: 14px;
         }
 
-        .toast-close:hover { color: var(--text); }
+        .toast-close:hover {
+            color: var(--text);
+        }
 
         .toast-progress {
             position: absolute;
@@ -558,13 +681,27 @@
         }
 
         @keyframes toastSlideIn {
-            from { transform: translateX(50px) translateY(20px); opacity: 0; }
-            to { transform: translateX(0) translateY(0); opacity: 1; }
+            from {
+                transform: translateX(50px) translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0) translateY(0);
+                opacity: 1;
+            }
         }
 
         @keyframes toastSlideOut {
-            from { transform: translateX(0) scale(1); opacity: 1; }
-            to { transform: translateX(20px); opacity: 0; }
+            from {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(20px);
+                opacity: 0;
+            }
         }
 
         /* ── CONFIRM MODAL ── */
@@ -667,24 +804,56 @@
             transform: translateY(-2px);
         }
 
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-overlay.active .confirm-modal { transform: scale(1); }
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-overlay.active .confirm-modal {
+            transform: scale(1);
+        }
 
         /* ═══════════════ THEME TOGGLE BUTTON ═══════════════ */
         .theme-toggle {
-            width: 34px; height: 34px; border-radius: 8px;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
             border: 1px solid var(--border);
             background: var(--surface);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--muted); cursor: pointer; transition: all .14s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .14s;
             flex-shrink: 0;
         }
-        .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
-        .theme-toggle svg { width: 16px; height: 16px; }
-        .theme-toggle .icon-sun  { display: block; }
-        .theme-toggle .icon-moon { display: none; }
-        [data-theme="dark"] .theme-toggle .icon-sun  { display: none; }
-        [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .theme-toggle svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .theme-toggle .icon-sun {
+            display: block;
+        }
+
+        .theme-toggle .icon-moon {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-sun {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-moon {
+            display: block;
+        }
 
         /* ═══════════════ LIGHT THEME OVERRIDES ═══════════════ */
         /* Map marketing-site variables to theme-aware values */
@@ -692,10 +861,12 @@
             --text-white: #111827;
             --text-muted: #6b7280;
         }
+
         [data-theme="dark"] {
             --text-white: #e2e8f0;
             --text-muted: #6b7694;
         }
+
         [data-theme="light"] {
             --text-white: #111827;
             --text-muted: #6b7280;
@@ -721,14 +892,21 @@
             border-color: var(--border);
             color: var(--text);
         }
+
         [data-theme="light"] .emoji-btn:hover {
             background: var(--accent-lo);
             border-color: var(--accent);
-            box-shadow: 0 4px 16px rgba(208,128,0,.15);
+            box-shadow: 0 4px 16px rgba(208, 128, 0, .15);
         }
-        [data-theme="light"] .emoji-btn .label { color: var(--muted); }
+
+        [data-theme="light"] .emoji-btn .label {
+            color: var(--muted);
+        }
+
         [data-theme="light"] .emoji-btn:hover .label,
-        [data-theme="light"] .emoji-btn.selected .label { color: var(--text); }
+        [data-theme="light"] .emoji-btn.selected .label {
+            color: var(--text);
+        }
 
         [data-theme="light"] .stat-card {
             background: var(--bg);
@@ -766,8 +944,24 @@
             </nav>
             <div style="display:flex;align-items:center;gap:8px;">
                 <button id="themeToggle" class="theme-toggle" title="Toggle theme">
-                    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5" />
+                        <line x1="12" y1="1" x2="12" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="23" />
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                        <line x1="1" y1="12" x2="3" y2="12" />
+                        <line x1="21" y1="12" x2="23" y2="12" />
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
+                    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
                 </button>
             </div>
         </header>
@@ -792,7 +986,8 @@
                     <div id="pollCreatorView">
                         <div class="form-group">
                             <label class="form-label">Poll Question</label>
-                            <input type="text" id="pollQuestion" class="input-field" placeholder="e.g., Which SQL clause filters grouped results?" />
+                            <input type="text" id="pollQuestion" class="input-field"
+                                placeholder="e.g., Which SQL clause filters grouped results?" />
                         </div>
                         <div class="options-grid">
                             <input type="text" id="pollOpt0" class="input-field" placeholder="Option A" />
@@ -807,21 +1002,29 @@
 
                     <!-- LIVE RESULTS VIEW -->
                     <div id="pollLiveView" style="display:none;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                        <div
+                            style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
                             <div>
-                                <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">Live Poll Active</div>
+                                <div
+                                    style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">
+                                    Live Poll Active</div>
                                 <div id="pollLiveQuestion" style="font-size:18px;font-weight:700;"></div>
                             </div>
                             <div style="display:flex;gap:10px;">
-                                <div style="text-align:center;background:var(--accent-lo);border:1px solid var(--accent-bdr);border-radius:12px;padding:12px 20px;">
-                                    <div id="pollResponseCount" style="font-size:28px;font-weight:900;color:var(--accent);">0</div>
-                                    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;">Responses</div>
+                                <div
+                                    style="text-align:center;background:var(--accent-lo);border:1px solid var(--accent-bdr);border-radius:12px;padding:12px 20px;">
+                                    <div id="pollResponseCount"
+                                        style="font-size:28px;font-weight:900;color:var(--accent);">0</div>
+                                    <div
+                                        style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;">
+                                        Responses</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Bar chart -->
-                        <div id="pollBarsContainer" style="display:flex;flex-direction:column;gap:14px;margin-bottom:28px;"></div>
+                        <div id="pollBarsContainer"
+                            style="display:flex;flex-direction:column;gap:14px;margin-bottom:28px;"></div>
 
                         <!-- Action buttons -->
                         <div style="display:flex;gap:12px;flex-wrap:wrap;">
@@ -832,7 +1035,10 @@
                                 <i class="fas fa-file-pdf"></i> Download Report
                             </button>
                         </div>
-                        <div id="pollStoppedBadge" style="display:none;margin-top:14px;padding:10px 16px;background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);border-radius:10px;color:var(--green);font-size:13px;font-weight:600;"><i class="fas fa-check-circle"></i> Poll stopped. Download the report below.</div>
+                        <div id="pollStoppedBadge"
+                            style="display:none;margin-top:14px;padding:10px 16px;background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);border-radius:10px;color:var(--green);font-size:13px;font-weight:600;">
+                            <i class="fas fa-check-circle"></i> Poll stopped. Download the report below.
+                        </div>
                     </div>
                 </section>
 
@@ -848,8 +1054,10 @@
                     <div id="fbCreatorView">
                         <div class="form-group">
                             <label class="form-label">Feedback Question</label>
-                            <input type="text" id="fbQuestion" class="input-field" placeholder="e.g., How was today's class?" />
-                            <div style="font-size:12px;color:var(--muted);margin-top:6px;">Students will rate on a 5-point scale: Very Confused → Very Confident</div>
+                            <input type="text" id="fbQuestion" class="input-field"
+                                placeholder="e.g., How was today's class?" />
+                            <div style="font-size:12px;color:var(--muted);margin-top:6px;">Students will rate on a
+                                5-point scale: Very Confused → Very Confident</div>
                         </div>
                         <button class="primary-btn" id="launchFbBtn">
                             <i class="fas fa-paper-plane"></i> Post Question
@@ -858,37 +1066,70 @@
 
                     <!-- LIVE RESULTS VIEW -->
                     <div id="fbLiveView" style="display:none;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                        <div
+                            style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
                             <div>
-                                <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">Collecting Feedback</div>
+                                <div
+                                    style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">
+                                    Collecting Feedback</div>
                                 <div id="fbLiveQuestion" style="font-size:18px;font-weight:700;"></div>
                             </div>
                             <div style="display:flex;gap:10px;">
-                                <div style="text-align:center;background:var(--accent-lo);border:1px solid var(--accent-bdr);border-radius:12px;padding:12px 20px;">
-                                    <div id="fbResponseCount" style="font-size:28px;font-weight:900;color:var(--accent);">0</div>
-                                    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;">Responses</div>
+                                <div
+                                    style="text-align:center;background:var(--accent-lo);border:1px solid var(--accent-bdr);border-radius:12px;padding:12px 20px;">
+                                    <div id="fbResponseCount"
+                                        style="font-size:28px;font-weight:900;color:var(--accent);">0</div>
+                                    <div
+                                        style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;">
+                                        Responses</div>
                                 </div>
-                                <div style="text-align:center;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 20px;">
+                                <div
+                                    style="text-align:center;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 20px;">
                                     <div id="fbAvgScore" style="font-size:28px;font-weight:900;">—</div>
-                                    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;">Avg Score</div>
+                                    <div
+                                        style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;">
+                                        Avg Score</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Emoji stat grid -->
                         <div class="stats-grid" style="margin-bottom:24px;">
-                            <div class="stat-card"><div class="stat-icon">😟</div><div class="stat-value" id="fb-s1">0</div><div class="stat-label">Very Confused</div></div>
-                            <div class="stat-card"><div class="stat-icon">😕</div><div class="stat-value" id="fb-s2">0</div><div class="stat-label">Confused</div></div>
-                            <div class="stat-card"><div class="stat-icon">😐</div><div class="stat-value" id="fb-s3">0</div><div class="stat-label">Neutral</div></div>
-                            <div class="stat-card"><div class="stat-icon">🙂</div><div class="stat-value" id="fb-s4">0</div><div class="stat-label">Confident</div></div>
-                            <div class="stat-card"><div class="stat-icon">😄</div><div class="stat-value" id="fb-s5">0</div><div class="stat-label">Very Confident</div></div>
+                            <div class="stat-card">
+                                <div class="stat-icon">😟</div>
+                                <div class="stat-value" id="fb-s1">0</div>
+                                <div class="stat-label">Very Confused</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">😕</div>
+                                <div class="stat-value" id="fb-s2">0</div>
+                                <div class="stat-label">Confused</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">😐</div>
+                                <div class="stat-value" id="fb-s3">0</div>
+                                <div class="stat-label">Neutral</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🙂</div>
+                                <div class="stat-value" id="fb-s4">0</div>
+                                <div class="stat-label">Confident</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">😄</div>
+                                <div class="stat-value" id="fb-s5">0</div>
+                                <div class="stat-label">Very Confident</div>
+                            </div>
                         </div>
 
                         <!-- Progress bar -->
-                        <div id="fbProgressBars" style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;"></div>
+                        <div id="fbProgressBars"
+                            style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;"></div>
 
                         <!-- Gauge/sentiment label -->
-                        <div id="fbSentimentBanner" style="text-align:center;padding:14px;border-radius:12px;background:var(--bg);border:1px solid var(--border);margin-bottom:24px;font-weight:700;font-size:15px;">Waiting for responses…</div>
+                        <div id="fbSentimentBanner"
+                            style="text-align:center;padding:14px;border-radius:12px;background:var(--bg);border:1px solid var(--border);margin-bottom:24px;font-weight:700;font-size:15px;">
+                            Waiting for responses…</div>
 
                         <!-- Action buttons -->
                         <div style="display:flex;gap:12px;flex-wrap:wrap;">
@@ -899,7 +1140,10 @@
                                 <i class="fas fa-file-pdf"></i> Download Report
                             </button>
                         </div>
-                        <div id="fbStoppedBadge" style="display:none;margin-top:14px;padding:10px 16px;background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);border-radius:10px;color:var(--green);font-size:13px;font-weight:600;"><i class="fas fa-check-circle"></i> Feedback stopped. Download the report below.</div>
+                        <div id="fbStoppedBadge"
+                            style="display:none;margin-top:14px;padding:10px 16px;background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);border-radius:10px;color:var(--green);font-size:13px;font-weight:600;">
+                            <i class="fas fa-check-circle"></i> Feedback stopped. Download the report below.
+                        </div>
                     </div>
                 </section>
 
@@ -914,26 +1158,36 @@
                     <div class="quiz-creator" id="quizBuilder">
                         <div class="form-group">
                             <label class="form-label">Quiz Title</label>
-                            <input type="text" id="quizTitle" class="input-field" placeholder="e.g., JavaScript Basics" />
+                            <input type="text" id="quizTitle" class="input-field"
+                                placeholder="e.g., JavaScript Basics" />
                         </div>
 
                         <div class="form-group">
                             <label class="form-label"><i class="fas fa-robot"></i> AI Generator</label>
-                            <textarea id="aiTopicInput" class="input-field" rows="3" placeholder="Describe topic..."></textarea>
-                            <button class="primary-btn" id="generateAiBtn" style="margin-top: 12px; width: auto; padding: 10px 20px;">
+                            <textarea id="aiTopicInput" class="input-field" rows="3"
+                                placeholder="Describe topic..."></textarea>
+                            <button class="primary-btn" id="generateAiBtn"
+                                style="margin-top: 12px; width: auto; padding: 10px 20px;">
                                 <i class="fas fa-wand-magic-sparkles"></i> Generate
                             </button>
                         </div>
 
-                        <div class="quiz-builder-container" style="display: flex; gap: 20px; border: 1px solid var(--border); border-radius: 12px; padding: 20px; background: var(--bg); margin-bottom: 24px;">
-                            <div class="questions-sidebar" style="width: 200px; border-right: 1px solid var(--border); padding-right: 20px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--muted);">Questions</span>
-                                    <button id="addQuestionBtn" style="background: none; border: none; color: var(--accent); font-weight: 800; font-size: 11px; cursor: pointer;">+ ADD</button>
+                        <div class="quiz-builder-container"
+                            style="display: flex; gap: 20px; border: 1px solid var(--border); border-radius: 12px; padding: 20px; background: var(--bg); margin-bottom: 24px;">
+                            <div class="questions-sidebar"
+                                style="width: 200px; border-right: 1px solid var(--border); padding-right: 20px;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <span
+                                        style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--muted);">Questions</span>
+                                    <button id="addQuestionBtn"
+                                        style="background: none; border: none; color: var(--accent); font-weight: 800; font-size: 11px; cursor: pointer;">+
+                                        ADD</button>
                                 </div>
                                 <div id="questionsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
                             </div>
-                            <div class="question-editor" id="questionEditor" style="flex: 1; min-height: 200px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px;">
+                            <div class="question-editor" id="questionEditor"
+                                style="flex: 1; min-height: 200px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px;">
                                 <p>Select or add a question</p>
                             </div>
                         </div>
@@ -945,20 +1199,29 @@
 
                     <div class="quiz-control-panel" id="quizControlPanel" style="display: none;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
-                            <div class="card" style="padding: 20px; text-align: center; border-color: var(--accent-bdr); background: var(--accent-lo);">
-                                <div style="font-size: 11px; font-weight: 800; color: var(--accent); margin-bottom: 8px; text-transform: uppercase;">Quiz Code</div>
-                                <div id="sessionCodeDisplay" style="font-size: 32px; font-weight: 900; letter-spacing: 4px; color: var(--accent);">------</div>
+                            <div class="card"
+                                style="padding: 20px; text-align: center; border-color: var(--accent-bdr); background: var(--accent-lo);">
+                                <div
+                                    style="font-size: 11px; font-weight: 800; color: var(--accent); margin-bottom: 8px; text-transform: uppercase;">
+                                    Quiz Code</div>
+                                <div id="sessionCodeDisplay"
+                                    style="font-size: 32px; font-weight: 900; letter-spacing: 4px; color: var(--accent);">
+                                    ------</div>
                             </div>
                             <div class="card" style="padding: 20px; text-align: center;">
-                                <div style="font-size: 11px; font-weight: 800; color: var(--muted); margin-bottom: 8px; text-transform: uppercase;">Participants</div>
+                                <div
+                                    style="font-size: 11px; font-weight: 800; color: var(--muted); margin-bottom: 8px; text-transform: uppercase;">
+                                    Participants</div>
                                 <div id="participantCount" style="font-size: 32px; font-weight: 900;">0</div>
                             </div>
                         </div>
 
                         <div style="display: flex; gap: 12px;">
                             <button class="primary-btn" id="startQuizBtn"><i class="fas fa-play"></i> Start</button>
-                            <button class="primary-btn" id="nextQuestionBtn" style="display: none;"><i class="fas fa-forward"></i> Next</button>
-                            <button class="primary-btn" id="endQuizBtn" style="background: var(--red);"><i class="fas fa-stop"></i> End</button>
+                            <button class="primary-btn" id="nextQuestionBtn" style="display: none;"><i
+                                    class="fas fa-forward"></i> Next</button>
+                            <button class="primary-btn" id="endQuizBtn" style="background: var(--red);"><i
+                                    class="fas fa-stop"></i> End</button>
                         </div>
 
                         <div id="currentQuestionDisplay" style="margin-top: 24px;"></div>
@@ -989,7 +1252,7 @@
     <script src="role-page.js"></script>
     <script>
         // ── PROFESSIONAL TOAST SYSTEM ──
-        window.alert = function(message) {
+        window.alert = function (message) {
             showToast(message);
         };
 
@@ -999,20 +1262,20 @@
 
             const toast = document.createElement('div');
             toast.className = `toast`;
-            
+
             let icon = 'info-circle';
             let title = 'Notification';
-            
+
             // Auto-detect type based on symbols or keywords
             const msg = message.toString();
-            if (msg.includes('✅') || msg.toLowerCase().includes('success')) { 
-                type = 'success'; icon = 'check-circle'; title = 'Success'; message = msg.replace('✅', '').trim(); 
-            } else if (msg.includes('❌') || msg.toLowerCase().includes('fail') || msg.toLowerCase().includes('error')) { 
-                type = 'error'; icon = 'exclamation-circle'; title = 'System Error'; message = msg.replace('❌', '').trim(); 
+            if (msg.includes('✅') || msg.toLowerCase().includes('success')) {
+                type = 'success'; icon = 'check-circle'; title = 'Success'; message = msg.replace('✅', '').trim();
+            } else if (msg.includes('❌') || msg.toLowerCase().includes('fail') || msg.toLowerCase().includes('error')) {
+                type = 'error'; icon = 'exclamation-circle'; title = 'System Error'; message = msg.replace('❌', '').trim();
             } else if (msg.includes('⚠️') || msg.toLowerCase().includes('warning')) {
                 type = 'warning'; icon = 'exclamation-triangle'; title = 'Warning'; message = msg.replace('⚠️', '').trim();
             }
-            
+
             toast.classList.add(type);
 
             toast.innerHTML = `
@@ -1056,7 +1319,7 @@
                     osc.start();
                     osc.stop(context.currentTime + 0.1);
                 }
-            } catch(e) {}
+            } catch (e) { }
         }
 
         function hideToast(toast) {
@@ -1066,11 +1329,11 @@
 
         // ── PROFESSIONAL CONFIRM SYSTEM ──
         let confirmResolve;
-        window.confirm = function(message, title = 'Confirm Action') {
+        window.confirm = function (message, title = 'Confirm Action') {
             document.getElementById('confirmMsg').textContent = message;
             document.getElementById('confirmTitle').textContent = title;
             document.getElementById('confirmModal').classList.add('active');
-            
+
             return new Promise((resolve) => {
                 confirmResolve = resolve;
             });
@@ -1091,7 +1354,7 @@
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
-                
+
                 btn.classList.add('active');
                 const section = btn.dataset.section;
                 document.getElementById(section + 'Section').classList.add('active');
@@ -1103,30 +1366,49 @@
     </script>
 
     <!-- ═══════════════ SECTION PICKER MODAL ═══════════════ -->
-    <div id="sectionPickerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);z-index:9999;align-items:center;justify-content:center;">
-        <div style="background:var(--surface,#1a1a2e);border:1px solid var(--border,rgba(255,255,255,.1));border-radius:20px;padding:32px;width:480px;max-width:94vw;box-shadow:0 30px 80px rgba(0,0,0,.5);">
+    <div id="sectionPickerModal"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);z-index:9999;align-items:center;justify-content:center;">
+        <div
+            style="background:var(--surface,#1a1a2e);border:1px solid var(--border,rgba(255,255,255,.1));border-radius:20px;padding:32px;width:480px;max-width:94vw;box-shadow:0 30px 80px rgba(0,0,0,.5);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
                 <div>
                     <div id="spmTitle" style="font-size:18px;font-weight:800;">Publish To</div>
-                    <div style="font-size:13px;color:var(--muted);margin-top:3px;">Choose who will see this — leave blank for ALL students</div>
+                    <div style="font-size:13px;color:var(--muted);margin-top:3px;">Choose who will see this — leave
+                        blank for ALL students</div>
                 </div>
-                <button onclick="closeSectionPicker()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px;">✕</button>
+                <button onclick="closeSectionPicker()"
+                    style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px;">✕</button>
             </div>
             <div style="margin-bottom:18px;">
-                <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;">Section</div>
-                <div id="spmSections" style="display:flex;flex-wrap:wrap;gap:8px;"><span style="color:var(--muted);font-size:13px;">Loading...</span></div>
+                <div
+                    style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;">
+                    Section</div>
+                <div id="spmSections" style="display:flex;flex-wrap:wrap;gap:8px;"><span
+                        style="color:var(--muted);font-size:13px;">Loading...</span></div>
             </div>
             <div style="margin-bottom:18px;">
-                <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;">Batch / Year</div>
-                <select id="spmBatch" style="width:100%;padding:10px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:14px;"><option value="">All batches</option></select>
+                <div
+                    style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;">
+                    Batch / Year</div>
+                <select id="spmBatch"
+                    style="width:100%;padding:10px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:14px;">
+                    <option value="">All batches</option>
+                </select>
             </div>
             <div style="margin-bottom:26px;">
-                <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;">Department</div>
-                <select id="spmDept" style="width:100%;padding:10px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:14px;"><option value="">All departments</option></select>
+                <div
+                    style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;">
+                    Department</div>
+                <select id="spmDept"
+                    style="width:100%;padding:10px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:14px;">
+                    <option value="">All departments</option>
+                </select>
             </div>
             <div style="display:flex;gap:10px;">
-                <button onclick="closeSectionPicker()" style="flex:1;padding:12px;border-radius:12px;border:1px solid var(--border);background:none;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
-                <button id="spmLaunchBtn" style="flex:2;padding:12px;border-radius:12px;border:none;background:var(--accent,#d08000);color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <button onclick="closeSectionPicker()"
+                    style="flex:1;padding:12px;border-radius:12px;border:1px solid var(--border);background:none;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
+                <button id="spmLaunchBtn"
+                    style="flex:2;padding:12px;border-radius:12px;border:none;background:var(--accent,#d08000);color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <i class="fas fa-rocket"></i> <span id="spmLaunchLabel">Launch</span>
                 </button>
             </div>
@@ -1135,354 +1417,352 @@
 
     <!-- ═══════════════ POLL + FEEDBACK LOGIC (MongoDB API) ═══════════════ -->
     <script>
-    (function() {
-        const BAR_COLORS = ['#6366f1','#f59e0b','#10b981','#ef4444'];
-        const FB_EMOJIS  = {1:'😟',2:'😕',3:'😐',4:'🙂',5:'😄'};
-        const FB_COLORS  = {1:'#ef4444',2:'#f59e0b',3:'#94a3b8',4:'#22c55e',5:'#6366f1'};
-        const FB_LABELS  = {1:'Very Confused',2:'Confused',3:'Neutral',4:'Confident',5:'Very Confident'};
+        (function () {
+            const BAR_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444'];
+            const FB_EMOJIS = { 1: '😟', 2: '😕', 3: '😐', 4: '🙂', 5: '😄' };
+            const FB_COLORS = { 1: '#ef4444', 2: '#f59e0b', 3: '#94a3b8', 4: '#22c55e', 5: '#6366f1' };
+            const FB_LABELS = { 1: 'Very Confused', 2: 'Confused', 3: 'Neutral', 4: 'Confident', 5: 'Very Confident' };
 
-        let activePollId = null, activeFbId = null;
-        let pollStopped  = false, fbStopped  = false;
-        let spmMode      = null;
-        let pollInterval = null, fbInterval  = null;
+            let activePollId = null, activeFbId = null;
+            let pollStopped = false, fbStopped = false;
+            let spmMode = null;
+            let pollInterval = null, fbInterval = null;
 
-        /* ── SECTION PICKER ── */
-        window.closeSectionPicker = function() {
-            document.getElementById('sectionPickerModal').style.display = 'none';
-        };
+            /* ── SECTION PICKER ── */
+            window.closeSectionPicker = function () {
+                document.getElementById('sectionPickerModal').style.display = 'none';
+            };
 
-        async function openSectionPicker(mode) {
-            spmMode = mode;
-            document.getElementById('spmTitle').textContent = mode === 'poll' ? 'Publish Poll To' : 'Publish Feedback To';
-            document.getElementById('spmLaunchLabel').textContent = mode === 'poll' ? 'Launch Poll' : 'Post Question';
-            document.getElementById('sectionPickerModal').style.display = 'flex';
-            try {
-                const data = await CommunityPoll.getSections();
-                if (data.ok) {
-                    const secCon = document.getElementById('spmSections');
-                    secCon.innerHTML = data.sections.length
-                        ? data.sections.map(s => `<label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:13px;font-weight:600;"><input type="checkbox" value="${s}" style="accent-color:var(--accent);width:15px;height:15px;"> Section ${s}</label>`).join('')
-                        : '<span style="color:var(--muted);font-size:13px;">No sections found (students need to fill profile)</span>';
-                    const batchSel = document.getElementById('spmBatch');
-                    batchSel.innerHTML = '<option value="">All batches</option>' + data.batches.map(b => `<option value="${b}">${b}</option>`).join('');
-                    const deptSel = document.getElementById('spmDept');
-                    deptSel.innerHTML = '<option value="">All departments</option>' + data.departments.map(d => `<option value="${d}">${d}</option>`).join('');
-                }
-            } catch(e) { console.error('Sections load error', e); }
-        }
+            async function openSectionPicker(mode) {
+                spmMode = mode;
+                document.getElementById('spmTitle').textContent = mode === 'poll' ? 'Publish Poll To' : 'Publish Feedback To';
+                document.getElementById('spmLaunchLabel').textContent = mode === 'poll' ? 'Launch Poll' : 'Post Question';
+                document.getElementById('sectionPickerModal').style.display = 'flex';
+                try {
+                    const data = await CommunityPoll.getSections();
+                    if (data.ok) {
+                        const secCon = document.getElementById('spmSections');
+                        secCon.innerHTML = data.sections.length
+                            ? data.sections.map(s => `<label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:13px;font-weight:600;"><input type="checkbox" value="${s}" style="accent-color:var(--accent);width:15px;height:15px;"> Section ${s}</label>`).join('')
+                            : '<span style="color:var(--muted);font-size:13px;">No sections found (students need to fill profile)</span>';
+                        const batchSel = document.getElementById('spmBatch');
+                        batchSel.innerHTML = '<option value="">All batches</option>' + data.batches.map(b => `<option value="${b}">${b}</option>`).join('');
+                        const deptSel = document.getElementById('spmDept');
+                        deptSel.innerHTML = '<option value="">All departments</option>' + data.departments.map(d => `<option value="${d}">${d}</option>`).join('');
+                    }
+                } catch (e) { console.error('Sections load error', e); }
+            }
 
-        document.getElementById('spmLaunchBtn').addEventListener('click', async () => {
-            const sections = [...document.querySelectorAll('#spmSections input:checked')].map(c => c.value);
-            const batch    = document.getElementById('spmBatch').value;
-            const dept     = document.getElementById('spmDept').value;
-            closeSectionPicker();
-            if (spmMode === 'poll') await doLaunchPoll(sections, batch, dept);
-            else                    await doLaunchFeedback(sections, batch, dept);
-        });
-
-        /* ── POLL ── */
-        const PC = document.getElementById('pollCreatorView');
-        const PL = document.getElementById('pollLiveView');
-        const pollCountEl      = document.getElementById('pollResponseCount');
-        const pollBarsEl       = document.getElementById('pollBarsContainer');
-        const pollStoppedBadge = document.getElementById('pollStoppedBadge');
-        const stopPollBtn      = document.getElementById('stopPollBtn');
-        const downloadPollBtn  = document.getElementById('downloadPollBtn');
-
-        function renderPollBars(data) {
-            if (!data) return;
-            let html = '';
-            const total = data.total || 0;
-            data.options.forEach((opt, i) => {
-                const count = data.totals[i] || 0;
-                const pct   = total ? Math.round(count/total*100) : 0;
-                const col   = BAR_COLORS[i % BAR_COLORS.length];
-                html += `<div style="margin-bottom:4px;"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;"><span>${opt || 'Option '+String.fromCharCode(65+i)}</span><span style="color:${col};">${count} (${pct}%)</span></div><div style="height:14px;background:var(--border);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${col};border-radius:99px;transition:width .6s;"></div></div></div>`;
+            document.getElementById('spmLaunchBtn').addEventListener('click', async () => {
+                const sections = [...document.querySelectorAll('#spmSections input:checked')].map(c => c.value);
+                const batch = document.getElementById('spmBatch').value;
+                const dept = document.getElementById('spmDept').value;
+                closeSectionPicker();
+                if (spmMode === 'poll') await doLaunchPoll(sections, batch, dept);
+                else await doLaunchFeedback(sections, batch, dept);
             });
-            pollBarsEl.innerHTML = html;
-        }
 
-        async function refreshPollResults() {
-            if (!activePollId) return;
-            try {
+            /* ── POLL ── */
+            const PC = document.getElementById('pollCreatorView');
+            const PL = document.getElementById('pollLiveView');
+            const pollCountEl = document.getElementById('pollResponseCount');
+            const pollBarsEl = document.getElementById('pollBarsContainer');
+            const pollStoppedBadge = document.getElementById('pollStoppedBadge');
+            const stopPollBtn = document.getElementById('stopPollBtn');
+            const downloadPollBtn = document.getElementById('downloadPollBtn');
+
+            function renderPollBars(data) {
+                if (!data) return;
+                let html = '';
+                const total = data.total || 0;
+                data.options.forEach((opt, i) => {
+                    const count = data.totals[i] || 0;
+                    const pct = total ? Math.round(count / total * 100) : 0;
+                    const col = BAR_COLORS[i % BAR_COLORS.length];
+                    html += `<div style="margin-bottom:4px;"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;"><span>${opt || 'Option ' + String.fromCharCode(65 + i)}</span><span style="color:${col};">${count} (${pct}%)</span></div><div style="height:14px;background:var(--border);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${col};border-radius:99px;transition:width .6s;"></div></div></div>`;
+                });
+                pollBarsEl.innerHTML = html;
+            }
+
+            async function refreshPollResults() {
+                if (!activePollId) return;
+                try {
+                    const r = await CommunityPoll.getPollResults(activePollId);
+                    if (r.ok) { pollCountEl.textContent = r.total; renderPollBars(r); }
+                } catch (e) { }
+            }
+
+            function showPollLive(poll) {
+                PC.style.display = 'none'; PL.style.display = '';
+                document.getElementById('pollLiveQuestion').textContent = poll.question;
+                activePollId = poll._id; pollStopped = !poll.active;
+                stopPollBtn.disabled = pollStopped; downloadPollBtn.disabled = !pollStopped;
+                pollStoppedBadge.style.display = pollStopped ? '' : 'none';
+                renderPollBars({ options: poll.options, totals: {}, total: 0 });
+                refreshPollResults();
+                if (!pollStopped) { clearInterval(pollInterval); pollInterval = setInterval(refreshPollResults, 5000); }
+            }
+
+            document.getElementById('launchPollBtn').addEventListener('click', () => {
+                const q = document.getElementById('pollQuestion').value.trim();
+                const opts = [0, 1, 2, 3].map(i => document.getElementById('pollOpt' + i).value.trim()).filter(Boolean);
+                if (!q) { showToast('⚠️ Please enter a poll question.'); return; }
+                if (opts.length < 2) { showToast('⚠️ Add at least 2 options.'); return; }
+                openSectionPicker('poll');
+            });
+
+            async function doLaunchPoll(sections, batch, dept) {
+                const q = document.getElementById('pollQuestion').value.trim();
+                const opts = [0, 1, 2, 3].map(i => document.getElementById('pollOpt' + i).value.trim()).filter(Boolean);
+                try {
+                    const d = await CommunityPoll.launchPoll(q, opts, sections, batch, dept);
+                    if (!d.ok) { showToast('❌ ' + (d.message || 'Failed')); return; }
+                    showToast('✅ Poll launched! Students can now answer.', 'success');
+                    showPollLive(d.poll);
+                } catch (e) { showToast('❌ Network error'); }
+            }
+
+            stopPollBtn.addEventListener('click', async () => {
+                if (!activePollId) return;
+                try {
+                    await CommunityPoll.stopPoll(activePollId);
+                    clearInterval(pollInterval); pollStopped = true;
+                    stopPollBtn.disabled = true; downloadPollBtn.disabled = false;
+                    pollStoppedBadge.style.display = '';
+                    await refreshPollResults();
+                    showToast('✅ Poll stopped. Download your report.', 'success');
+                } catch (e) { showToast('❌ Failed to stop poll'); }
+            });
+
+            downloadPollBtn.addEventListener('click', async () => {
+                if (!activePollId) return;
                 const r = await CommunityPoll.getPollResults(activePollId);
-                if (r.ok) { pollCountEl.textContent = r.total; renderPollBars(r); }
-            } catch(e) {}
-        }
-
-        function showPollLive(poll) {
-            PC.style.display = 'none'; PL.style.display = '';
-            document.getElementById('pollLiveQuestion').textContent = poll.question;
-            activePollId = poll._id; pollStopped = !poll.active;
-            stopPollBtn.disabled = pollStopped; downloadPollBtn.disabled = !pollStopped;
-            pollStoppedBadge.style.display = pollStopped ? '' : 'none';
-            renderPollBars({ options: poll.options, totals: {}, total: 0 });
-            refreshPollResults();
-            if (!pollStopped) { clearInterval(pollInterval); pollInterval = setInterval(refreshPollResults, 5000); }
-        }
-
-        document.getElementById('launchPollBtn').addEventListener('click', () => {
-            const q    = document.getElementById('pollQuestion').value.trim();
-            const opts = [0,1,2,3].map(i => document.getElementById('pollOpt'+i).value.trim()).filter(Boolean);
-            if (!q)         { showToast('⚠️ Please enter a poll question.'); return; }
-            if (opts.length < 2) { showToast('⚠️ Add at least 2 options.'); return; }
-            openSectionPicker('poll');
-        });
-
-        async function doLaunchPoll(sections, batch, dept) {
-            const q    = document.getElementById('pollQuestion').value.trim();
-            const opts = [0,1,2,3].map(i => document.getElementById('pollOpt'+i).value.trim()).filter(Boolean);
-            try {
-                const d = await CommunityPoll.launchPoll(q, opts, sections, batch, dept);
-                if (!d.ok) { showToast('❌ ' + (d.message || 'Failed')); return; }
-                showToast('✅ Poll launched! Students can now answer.', 'success');
-                showPollLive(d.poll);
-            } catch(e) { showToast('❌ Network error'); }
-        }
-
-        stopPollBtn.addEventListener('click', async () => {
-            if (!activePollId) return;
-            try {
-                await CommunityPoll.stopPoll(activePollId);
-                clearInterval(pollInterval); pollStopped = true;
-                stopPollBtn.disabled = true; downloadPollBtn.disabled = false;
-                pollStoppedBadge.style.display = '';
-                await refreshPollResults();
-                showToast('✅ Poll stopped. Download your report.', 'success');
-            } catch(e) { showToast('❌ Failed to stop poll'); }
-        });
-
-        downloadPollBtn.addEventListener('click', async () => {
-            if (!activePollId) return;
-            const r = await CommunityPoll.getPollResults(activePollId);
-            if (r.ok) generatePollPDF(r);
-        });
-
-        /* ── FEEDBACK ── */
-        const FC = document.getElementById('fbCreatorView');
-        const FL = document.getElementById('fbLiveView');
-        const fbCountEl      = document.getElementById('fbResponseCount');
-        const fbAvgEl        = document.getElementById('fbAvgScore');
-        const fbProgressEl   = document.getElementById('fbProgressBars');
-        const fbSentimentEl  = document.getElementById('fbSentimentBanner');
-        const fbStoppedBadge = document.getElementById('fbStoppedBadge');
-        const stopFbBtn      = document.getElementById('stopFbBtn');
-        const downloadFbBtn  = document.getElementById('downloadFbBtn');
-
-        const getSentiment = avg => {
-            if (!avg) return 'Waiting for responses…';
-            const v = parseFloat(avg);
-            return v < 1.8 ? '😟 Class is Very Confused — revisit the topic.'
-                 : v < 2.6 ? '😕 Class is somewhat Confused — slow down.'
-                 : v < 3.5 ? '😐 Class is Neutral — engagement could be higher.'
-                 : v < 4.3 ? '🙂 Class feels Confident — great progress!'
-                 : '😄 Class is Very Confident — excellent session!';
-        };
-
-        function renderFbBars(r) {
-            if (!r) return;
-            let html = '';
-            const total = r.total || 0;
-            [1,2,3,4,5].forEach(k => {
-                const count = r.totals[k] || 0;
-                const pct   = total ? Math.round(count/total*100) : 0;
-                const col   = FB_COLORS[k];
-                html += `<div style="margin-bottom:4px;"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;"><span>${FB_EMOJIS[k]} ${FB_LABELS[k]}</span><span style="color:${col};">${count} (${pct}%)</span></div><div style="height:12px;background:var(--border);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${col};border-radius:99px;transition:width .6s;"></div></div></div>`;
+                if (r.ok) generatePollPDF(r);
             });
-            fbProgressEl.innerHTML = html;
-        }
 
-        async function refreshFbResults() {
-            if (!activeFbId) return;
-            try {
+            /* ── FEEDBACK ── */
+            const FC = document.getElementById('fbCreatorView');
+            const FL = document.getElementById('fbLiveView');
+            const fbCountEl = document.getElementById('fbResponseCount');
+            const fbAvgEl = document.getElementById('fbAvgScore');
+            const fbProgressEl = document.getElementById('fbProgressBars');
+            const fbSentimentEl = document.getElementById('fbSentimentBanner');
+            const fbStoppedBadge = document.getElementById('fbStoppedBadge');
+            const stopFbBtn = document.getElementById('stopFbBtn');
+            const downloadFbBtn = document.getElementById('downloadFbBtn');
+
+            const getSentiment = avg => {
+                if (!avg) return 'Waiting for responses…';
+                const v = parseFloat(avg);
+                return v < 1.8 ? '😟 Class is Very Confused — revisit the topic.'
+                    : v < 2.6 ? '😕 Class is somewhat Confused — slow down.'
+                        : v < 3.5 ? '😐 Class is Neutral — engagement could be higher.'
+                            : v < 4.3 ? '🙂 Class feels Confident — great progress!'
+                                : '😄 Class is Very Confident — excellent session!';
+            };
+
+            function renderFbBars(r) {
+                if (!r) return;
+                let html = '';
+                const total = r.total || 0;
+                [1, 2, 3, 4, 5].forEach(k => {
+                    const count = r.totals[k] || 0;
+                    const pct = total ? Math.round(count / total * 100) : 0;
+                    const col = FB_COLORS[k];
+                    html += `<div style="margin-bottom:4px;"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;"><span>${FB_EMOJIS[k]} ${FB_LABELS[k]}</span><span style="color:${col};">${count} (${pct}%)</span></div><div style="height:12px;background:var(--border);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${col};border-radius:99px;transition:width .6s;"></div></div></div>`;
+                });
+                fbProgressEl.innerHTML = html;
+            }
+
+            async function refreshFbResults() {
+                if (!activeFbId) return;
+                try {
+                    const r = await CommunityPoll.getFeedbackResults(activeFbId);
+                    if (!r.ok) return;
+                    fbCountEl.textContent = r.total;
+                    fbAvgEl.textContent = r.avg || '—';
+                    [1, 2, 3, 4, 5].forEach(k => { const el = document.getElementById('fb-s' + k); if (el) el.textContent = r.totals[k] || 0; });
+                    renderFbBars(r);
+                    fbSentimentEl.textContent = getSentiment(r.avg);
+                } catch (e) { }
+            }
+
+            function showFbLive(fb) {
+                FC.style.display = 'none'; FL.style.display = '';
+                document.getElementById('fbLiveQuestion').textContent = fb.question;
+                activeFbId = fb._id; fbStopped = !fb.active;
+                stopFbBtn.disabled = fbStopped; downloadFbBtn.disabled = !fbStopped;
+                fbStoppedBadge.style.display = fbStopped ? '' : 'none';
+                refreshFbResults();
+                if (!fbStopped) { clearInterval(fbInterval); fbInterval = setInterval(refreshFbResults, 5000); }
+            }
+
+            document.getElementById('launchFbBtn').addEventListener('click', () => {
+                const q = document.getElementById('fbQuestion').value.trim();
+                if (!q) { showToast('⚠️ Please enter a feedback question.'); return; }
+                openSectionPicker('feedback');
+            });
+
+            async function doLaunchFeedback(sections, batch, dept) {
+                const q = document.getElementById('fbQuestion').value.trim();
+                try {
+                    const d = await CommunityPoll.launchFeedback(q, sections, batch, dept);
+                    if (!d.ok) { showToast('❌ ' + (d.message || 'Failed')); return; }
+                    showToast('✅ Feedback posted! Students can now respond.', 'success');
+                    showFbLive(d.feedback);
+                } catch (e) { showToast('❌ Network error'); }
+            }
+
+            stopFbBtn.addEventListener('click', async () => {
+                if (!activeFbId) return;
+                try {
+                    await CommunityPoll.stopFeedback(activeFbId);
+                    clearInterval(fbInterval); fbStopped = true;
+                    stopFbBtn.disabled = true; downloadFbBtn.disabled = false;
+                    fbStoppedBadge.style.display = '';
+                    await refreshFbResults();
+                    showToast('✅ Feedback stopped. Download your report.', 'success');
+                } catch (e) { showToast('❌ Failed to stop feedback'); }
+            });
+
+            downloadFbBtn.addEventListener('click', async () => {
+                if (!activeFbId) return;
                 const r = await CommunityPoll.getFeedbackResults(activeFbId);
-                if (!r.ok) return;
-                fbCountEl.textContent = r.total;
-                fbAvgEl.textContent   = r.avg || '—';
-                [1,2,3,4,5].forEach(k => { const el = document.getElementById('fb-s'+k); if(el) el.textContent = r.totals[k]||0; });
-                renderFbBars(r);
-                fbSentimentEl.textContent = getSentiment(r.avg);
-            } catch(e) {}
-        }
-
-        function showFbLive(fb) {
-            FC.style.display = 'none'; FL.style.display = '';
-            document.getElementById('fbLiveQuestion').textContent = fb.question;
-            activeFbId = fb._id; fbStopped = !fb.active;
-            stopFbBtn.disabled = fbStopped; downloadFbBtn.disabled = !fbStopped;
-            fbStoppedBadge.style.display = fbStopped ? '' : 'none';
-            refreshFbResults();
-            if (!fbStopped) { clearInterval(fbInterval); fbInterval = setInterval(refreshFbResults, 5000); }
-        }
-
-        document.getElementById('launchFbBtn').addEventListener('click', () => {
-            const q = document.getElementById('fbQuestion').value.trim();
-            if (!q) { showToast('⚠️ Please enter a feedback question.'); return; }
-            openSectionPicker('feedback');
-        });
-
-        async function doLaunchFeedback(sections, batch, dept) {
-            const q = document.getElementById('fbQuestion').value.trim();
-            try {
-                const d = await CommunityPoll.launchFeedback(q, sections, batch, dept);
-                if (!d.ok) { showToast('❌ ' + (d.message || 'Failed')); return; }
-                showToast('✅ Feedback posted! Students can now respond.', 'success');
-                showFbLive(d.feedback);
-            } catch(e) { showToast('❌ Network error'); }
-        }
-
-        stopFbBtn.addEventListener('click', async () => {
-            if (!activeFbId) return;
-            try {
-                await CommunityPoll.stopFeedback(activeFbId);
-                clearInterval(fbInterval); fbStopped = true;
-                stopFbBtn.disabled = true; downloadFbBtn.disabled = false;
-                fbStoppedBadge.style.display = '';
-                await refreshFbResults();
-                showToast('✅ Feedback stopped. Download your report.', 'success');
-            } catch(e) { showToast('❌ Failed to stop feedback'); }
-        });
-
-        downloadFbBtn.addEventListener('click', async () => {
-            if (!activeFbId) return;
-            const r = await CommunityPoll.getFeedbackResults(activeFbId);
-            if (r.ok) generateFeedbackPDF(r);
-        });
-
-        /* ── PDF ── */
-        function generatePollPDF(r) {
-            const d = new Date(), date = d.toLocaleDateString('en-IN'), time = d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-            const instructor = (localStorage.getItem('firstName')||'')+ ' '+(localStorage.getItem('lastName')||'Faculty');
-            const total = r.total||0;
-            let rows = '';
-            r.options.forEach((opt,i) => {
-                const count = r.totals[i]||0, pct = total ? Math.round(count/total*100):0;
-                const bar = `<div style="display:inline-block;width:${pct}%;max-width:200px;min-width:2px;height:12px;background:#6366f1;border-radius:6px;"></div>`;
-                rows += `<tr style="border-bottom:1px solid #e5e7eb;"><td style="padding:10px 12px;font-weight:600;">${String.fromCharCode(65+i)}. ${opt}</td><td style="padding:10px 12px;text-align:center;font-weight:700;">${count}</td><td style="padding:10px 12px;text-align:center;">${pct}%</td><td style="padding:10px 12px;">${bar}</td></tr>`;
+                if (r.ok) generateFeedbackPDF(r);
             });
-            const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Poll Report</title><style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Inter',sans-serif;color:#111827;background:#fff;padding:48px;}.header{display:flex;justify-content:space-between;border-bottom:3px solid #6366f1;padding-bottom:20px;margin-bottom:32px;}.brand{font-size:22px;font-weight:900;color:#6366f1;}.brand span{color:#111827;}.meta{font-size:12px;color:#6b7280;text-align:right;}h1{font-size:28px;font-weight:800;margin-bottom:6px;}.sub{color:#6b7280;font-size:14px;margin-bottom:32px;}.kpi-row{display:flex;gap:20px;margin-bottom:32px;}.kpi{flex:1;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;text-align:center;}.kpi-val{font-size:36px;font-weight:900;color:#6366f1;}.kpi-lbl{font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-top:4px;}table{width:100%;border-collapse:collapse;}thead{background:#6366f1;color:#fff;}thead td{padding:12px 14px;font-size:12px;font-weight:700;text-transform:uppercase;}tbody tr:nth-child(even){background:#f9fafb;}.footer{margin-top:40px;text-align:center;font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:16px;}</style></head><body>
+
+            /* ── PDF ── */
+            function generatePollPDF(r) {
+                const d = new Date(), date = d.toLocaleDateString('en-IN'), time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                const instructor = (localStorage.getItem('firstName') || '') + ' ' + (localStorage.getItem('lastName') || 'Faculty');
+                const total = r.total || 0;
+                let rows = '';
+                r.options.forEach((opt, i) => {
+                    const count = r.totals[i] || 0, pct = total ? Math.round(count / total * 100) : 0;
+                    const bar = `<div style="display:inline-block;width:${pct}%;max-width:200px;min-width:2px;height:12px;background:#6366f1;border-radius:6px;"></div>`;
+                    rows += `<tr style="border-bottom:1px solid #e5e7eb;"><td style="padding:10px 12px;font-weight:600;">${String.fromCharCode(65 + i)}. ${opt}</td><td style="padding:10px 12px;text-align:center;font-weight:700;">${count}</td><td style="padding:10px 12px;text-align:center;">${pct}%</td><td style="padding:10px 12px;">${bar}</td></tr>`;
+                });
+                const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Poll Report</title><style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Inter',sans-serif;color:#111827;background:#fff;padding:48px;}.header{display:flex;justify-content:space-between;border-bottom:3px solid #6366f1;padding-bottom:20px;margin-bottom:32px;}.brand{font-size:22px;font-weight:900;color:#6366f1;}.brand span{color:#111827;}.meta{font-size:12px;color:#6b7280;text-align:right;}h1{font-size:28px;font-weight:800;margin-bottom:6px;}.sub{color:#6b7280;font-size:14px;margin-bottom:32px;}.kpi-row{display:flex;gap:20px;margin-bottom:32px;}.kpi{flex:1;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;text-align:center;}.kpi-val{font-size:36px;font-weight:900;color:#6366f1;}.kpi-lbl{font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-top:4px;}table{width:100%;border-collapse:collapse;}thead{background:#6366f1;color:#fff;}thead td{padding:12px 14px;font-size:12px;font-weight:700;text-transform:uppercase;}tbody tr:nth-child(even){background:#f9fafb;}.footer{margin-top:40px;text-align:center;font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:16px;}</style></head><body>
                 <div class="header"><div><div class="brand">Mind<span>Wave</span></div><div style="font-size:12px;color:#6b7280;margin-top:4px;">Faculty Community – Quick Poll Report</div></div><div class="meta">Generated by ${instructor}<br>${date} at ${time}</div></div>
                 <h1>${r.question}</h1><p class="sub">Anonymous poll · No student identification stored</p>
-                <div class="kpi-row"><div class="kpi"><div class="kpi-val">${total}</div><div class="kpi-lbl">Total Responses</div></div><div class="kpi"><div class="kpi-val">${r.options.length}</div><div class="kpi-lbl">Options</div></div><div class="kpi"><div class="kpi-val">${total>0?r.options[Object.entries(r.totals).sort((a,b)=>b[1]-a[1])[0][0]]:'—'}</div><div class="kpi-lbl">Top Answer</div></div></div>
+                <div class="kpi-row"><div class="kpi"><div class="kpi-val">${total}</div><div class="kpi-lbl">Total Responses</div></div><div class="kpi"><div class="kpi-val">${r.options.length}</div><div class="kpi-lbl">Options</div></div><div class="kpi"><div class="kpi-val">${total > 0 ? r.options[Object.entries(r.totals).sort((a, b) => b[1] - a[1])[0][0]] : '—'}</div><div class="kpi-lbl">Top Answer</div></div></div>
                 <table><thead><tr><td>Option</td><td style="text-align:center;">Votes</td><td style="text-align:center;">%</td><td>Distribution</td></tr></thead><tbody>${rows}</tbody></table>
                 <div class="footer">MindWave – Classroom Engagement Platform &nbsp;|&nbsp; Automatically generated · Anonymous data only.</div>
             </body></html>`;
-            const w = window.open('','_blank','width=900,height=700'); w.document.write(html); w.document.close(); setTimeout(()=>w.print(),800);
-        }
+                const w = window.open('', '_blank', 'width=900,height=700'); w.document.write(html); w.document.close(); setTimeout(() => w.print(), 800);
+            }
 
-        function generateFeedbackPDF(r) {
-            const d = new Date(), date = d.toLocaleDateString('en-IN'), time = d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-            const instructor = (localStorage.getItem('firstName')||'')+ ' '+(localStorage.getItem('lastName')||'Faculty');
-            const total = r.total||0;
-            const emojis = {1:'😟',2:'😕',3:'😐',4:'🙂',5:'😄'}, colors = {1:'#ef4444',2:'#f59e0b',3:'#94a3b8',4:'#22c55e',5:'#6366f1'}, labels = {1:'Very Confused',2:'Confused',3:'Neutral',4:'Confident',5:'Very Confident'};
-            let rows = '';
-            [1,2,3,4,5].forEach(k => {
-                const count = r.totals[k]||0, pct = total ? Math.round(count/total*100):0;
-                const bar = `<div style="display:inline-block;width:${pct}%;max-width:200px;min-width:2px;height:12px;background:${colors[k]};border-radius:6px;"></div>`;
-                rows += `<tr style="border-bottom:1px solid #e5e7eb;"><td style="padding:10px 12px;font-size:18px;">${emojis[k]}</td><td style="padding:10px 12px;font-weight:600;">${labels[k]}</td><td style="padding:10px 12px;text-align:center;font-weight:700;color:${colors[k]};">${count}</td><td style="padding:10px 12px;text-align:center;">${pct}%</td><td style="padding:10px 12px;">${bar}</td></tr>`;
-            });
-            const sentiment = parseFloat(r.avg);
-            const sentLabel = isNaN(sentiment)?'No data':sentiment<1.8?'Very Confused':sentiment<2.6?'Confused':sentiment<3.5?'Neutral':sentiment<4.3?'Confident':'Very Confident';
-            const sentColor = isNaN(sentiment)?'#6b7280':sentiment<1.8?'#ef4444':sentiment<2.6?'#f59e0b':sentiment<3.5?'#94a3b8':sentiment<4.3?'#22c55e':'#6366f1';
-            const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Feedback Report</title><style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Inter',sans-serif;color:#111827;background:#fff;padding:48px;}.header{display:flex;justify-content:space-between;border-bottom:3px solid #a855f7;padding-bottom:20px;margin-bottom:32px;}.brand{font-size:22px;font-weight:900;color:#a855f7;}.brand span{color:#111827;}.meta{font-size:12px;color:#6b7280;text-align:right;}h1{font-size:28px;font-weight:800;margin-bottom:6px;}.sub{color:#6b7280;font-size:14px;margin-bottom:32px;}.kpi-row{display:flex;gap:20px;margin-bottom:32px;}.kpi{flex:1;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;text-align:center;}.kpi-val{font-size:36px;font-weight:900;}.kpi-lbl{font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-top:4px;}.sent{background:#f3f4f6;border-left:4px solid ${sentColor};border-radius:8px;padding:16px;margin-bottom:28px;font-size:15px;font-weight:600;color:${sentColor};}table{width:100%;border-collapse:collapse;}thead{background:#a855f7;color:#fff;}thead td{padding:12px 14px;font-size:12px;font-weight:700;text-transform:uppercase;}tbody tr:nth-child(even){background:#f9fafb;}.footer{margin-top:40px;text-align:center;font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:16px;}</style></head><body>
+            function generateFeedbackPDF(r) {
+                const d = new Date(), date = d.toLocaleDateString('en-IN'), time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                const instructor = (localStorage.getItem('firstName') || '') + ' ' + (localStorage.getItem('lastName') || 'Faculty');
+                const total = r.total || 0;
+                const emojis = { 1: '😟', 2: '😕', 3: '😐', 4: '🙂', 5: '😄' }, colors = { 1: '#ef4444', 2: '#f59e0b', 3: '#94a3b8', 4: '#22c55e', 5: '#6366f1' }, labels = { 1: 'Very Confused', 2: 'Confused', 3: 'Neutral', 4: 'Confident', 5: 'Very Confident' };
+                let rows = '';
+                [1, 2, 3, 4, 5].forEach(k => {
+                    const count = r.totals[k] || 0, pct = total ? Math.round(count / total * 100) : 0;
+                    const bar = `<div style="display:inline-block;width:${pct}%;max-width:200px;min-width:2px;height:12px;background:${colors[k]};border-radius:6px;"></div>`;
+                    rows += `<tr style="border-bottom:1px solid #e5e7eb;"><td style="padding:10px 12px;font-size:18px;">${emojis[k]}</td><td style="padding:10px 12px;font-weight:600;">${labels[k]}</td><td style="padding:10px 12px;text-align:center;font-weight:700;color:${colors[k]};">${count}</td><td style="padding:10px 12px;text-align:center;">${pct}%</td><td style="padding:10px 12px;">${bar}</td></tr>`;
+                });
+                const sentiment = parseFloat(r.avg);
+                const sentLabel = isNaN(sentiment) ? 'No data' : sentiment < 1.8 ? 'Very Confused' : sentiment < 2.6 ? 'Confused' : sentiment < 3.5 ? 'Neutral' : sentiment < 4.3 ? 'Confident' : 'Very Confident';
+                const sentColor = isNaN(sentiment) ? '#6b7280' : sentiment < 1.8 ? '#ef4444' : sentiment < 2.6 ? '#f59e0b' : sentiment < 3.5 ? '#94a3b8' : sentiment < 4.3 ? '#22c55e' : '#6366f1';
+                const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Feedback Report</title><style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Inter',sans-serif;color:#111827;background:#fff;padding:48px;}.header{display:flex;justify-content:space-between;border-bottom:3px solid #a855f7;padding-bottom:20px;margin-bottom:32px;}.brand{font-size:22px;font-weight:900;color:#a855f7;}.brand span{color:#111827;}.meta{font-size:12px;color:#6b7280;text-align:right;}h1{font-size:28px;font-weight:800;margin-bottom:6px;}.sub{color:#6b7280;font-size:14px;margin-bottom:32px;}.kpi-row{display:flex;gap:20px;margin-bottom:32px;}.kpi{flex:1;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;text-align:center;}.kpi-val{font-size:36px;font-weight:900;}.kpi-lbl{font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-top:4px;}.sent{background:#f3f4f6;border-left:4px solid ${sentColor};border-radius:8px;padding:16px;margin-bottom:28px;font-size:15px;font-weight:600;color:${sentColor};}table{width:100%;border-collapse:collapse;}thead{background:#a855f7;color:#fff;}thead td{padding:12px 14px;font-size:12px;font-weight:700;text-transform:uppercase;}tbody tr:nth-child(even){background:#f9fafb;}.footer{margin-top:40px;text-align:center;font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:16px;}</style></head><body>
                 <div class="header"><div><div class="brand">Mind<span>Wave</span></div><div style="font-size:12px;color:#6b7280;margin-top:4px;">Faculty Community – Live Feedback Report</div></div><div class="meta">Generated by ${instructor}<br>${date} at ${time}</div></div>
                 <h1>${r.question}</h1><p class="sub">Anonymous feedback · No student identification stored</p>
-                <div class="kpi-row"><div class="kpi"><div class="kpi-val" style="color:#a855f7;">${total}</div><div class="kpi-lbl">Total Responses</div></div><div class="kpi"><div class="kpi-val" style="color:${sentColor};">${r.avg||'—'}</div><div class="kpi-lbl">Avg Score (1–5)</div></div><div class="kpi"><div class="kpi-val" style="color:${sentColor};">${sentLabel}</div><div class="kpi-lbl">Overall Sentiment</div></div></div>
-                <div class="sent">🎯 Class Sentiment: ${sentLabel} (avg: ${r.avg||'—'} / 5.00)</div>
+                <div class="kpi-row"><div class="kpi"><div class="kpi-val" style="color:#a855f7;">${total}</div><div class="kpi-lbl">Total Responses</div></div><div class="kpi"><div class="kpi-val" style="color:${sentColor};">${r.avg || '—'}</div><div class="kpi-lbl">Avg Score (1–5)</div></div><div class="kpi"><div class="kpi-val" style="color:${sentColor};">${sentLabel}</div><div class="kpi-lbl">Overall Sentiment</div></div></div>
+                <div class="sent">🎯 Class Sentiment: ${sentLabel} (avg: ${r.avg || '—'} / 5.00)</div>
                 <table><thead><tr><td>Emoji</td><td>Rating</td><td style="text-align:center;">Count</td><td style="text-align:center;">%</td><td>Distribution</td></tr></thead><tbody>${rows}</tbody></table>
                 <div class="footer">MindWave – Classroom Engagement Platform &nbsp;|&nbsp; Automatically generated · Anonymous data only.</div>
             </body></html>`;
-            const w = window.open('','_blank','width=900,height=700'); w.document.write(html); w.document.close(); setTimeout(()=>w.print(),800);
-        }
+                const w = window.open('', '_blank', 'width=900,height=700'); w.document.write(html); w.document.close(); setTimeout(() => w.print(), 800);
+            }
 
-    })();
+        })();
     </script>
-        /* ── COLOUR PALETTE for bars ── */
-        const BAR_COLORS = ['#6366f1','#f59e0b','#10b981','#ef4444'];
+    /* ── COLOUR PALETTE for bars ── */
+    const BAR_COLORS = ['#6366f1','#f59e0b','#10b981','#ef4444'];
 
-        /* ════════════════════════════════ QUICK POLL ════════════════════════════════ */
-        const launchPollBtn  = document.getElementById('launchPollBtn');
-        const stopPollBtn    = document.getElementById('stopPollBtn');
-        const downloadPollBtn= document.getElementById('downloadPollBtn');
-        const pollCreatorView= document.getElementById('pollCreatorView');
-        const pollLiveView   = document.getElementById('pollLiveView');
-        const pollLiveQ      = document.getElementById('pollLiveQuestion');
-        const pollCountEl    = document.getElementById('pollResponseCount');
-        const pollBarsEl     = document.getElementById('pollBarsContainer');
-        const pollStoppedBadge = document.getElementById('pollStoppedBadge');
+    /* ════════════════════════════════ QUICK POLL ════════════════════════════════ */
+    const launchPollBtn = document.getElementById('launchPollBtn');
+    const stopPollBtn = document.getElementById('stopPollBtn');
+    const downloadPollBtn= document.getElementById('downloadPollBtn');
+    const pollCreatorView= document.getElementById('pollCreatorView');
+    const pollLiveView = document.getElementById('pollLiveView');
+    const pollLiveQ = document.getElementById('pollLiveQuestion');
+    const pollCountEl = document.getElementById('pollResponseCount');
+    const pollBarsEl = document.getElementById('pollBarsContainer');
+    const pollStoppedBadge = document.getElementById('pollStoppedBadge');
 
-        function renderPollBars(data){
-            if (!data) return;
-            let html = '';
-            const total = data.total || 1;
-            data.options.forEach((opt, i) => {
-                const count = data.totals[i] || 0;
-                const pct   = total ? Math.round(count / total * 100) : 0;
-                const col   = BAR_COLORS[i % BAR_COLORS.length];
-                html += `
-                    <div>
-                        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;">
-                            <span>${opt || 'Option ' + String.fromCharCode(65+i)}</span>
-                            <span style="color:${col};">${count} (${pct}%)</span>
-                        </div>
-                        <div style="height:14px;background:var(--border);border-radius:99px;overflow:hidden;">
-                            <div style="height:100%;width:${pct}%;background:${col};border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1);"></div>
-                        </div>
-                    </div>`;
-            });
-            pollBarsEl.innerHTML = html;
-        }
+    function renderPollBars(data){
+    if (!data) return;
+    let html = '';
+    const total = data.total || 1;
+    data.options.forEach((opt, i) => {
+    const count = data.totals[i] || 0;
+    const pct = total ? Math.round(count / total * 100) : 0;
+    const col = BAR_COLORS[i % BAR_COLORS.length];
+    html += `
+    <div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;">
+            <span>${opt || 'Option ' + String.fromCharCode(65+i)}</span>
+            <span style="color:${col};">${count} (${pct}%)</span>
+        </div>
+        <div style="height:14px;background:var(--border);border-radius:99px;overflow:hidden;">
+            <div
+                style="height:100%;width:${pct}%;background:${col};border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1);">
+            </div>
+        </div>
+    </div>`;
+    });
+    pollBarsEl.innerHTML = html;
+    }
 
-        function refreshPollUI(){
-            const p = CommunityPoll.getPoll();
-            if (!p) {
-                pollCreatorView.style.display = '';
-                pollLiveView.style.display = 'none';
-                return;
-            }
-            pollCreatorView.style.display = 'none';
-            pollLiveView.style.display = '';
-            pollLiveQ.textContent = p.question;
-            const results = CommunityPoll.getPollResults();
-            pollCountEl.textContent = results.total;
-            renderPollBars(results);
-            // stopped?
-            if (!p.active) {
-                stopPollBtn.disabled = true;
-                downloadPollBtn.disabled = false;
-                pollStoppedBadge.style.display = '';
-            } else {
-                stopPollBtn.disabled = false;
-                downloadPollBtn.disabled = true;
-                pollStoppedBadge.style.display = 'none';
-            }
-        }
+    function refreshPollUI(){
+    const p = CommunityPoll.getPoll();
+    if (!p) {
+    pollCreatorView.style.display = '';
+    pollLiveView.style.display = 'none';
+    return;
+    }
+    pollCreatorView.style.display = 'none';
+    pollLiveView.style.display = '';
+    pollLiveQ.textContent = p.question;
+    const results = CommunityPoll.getPollResults();
+    pollCountEl.textContent = results.total;
+    renderPollBars(results);
+    // stopped?
+    if (!p.active) {
+    stopPollBtn.disabled = true;
+    downloadPollBtn.disabled = false;
+    pollStoppedBadge.style.display = '';
+    } else {
+    stopPollBtn.disabled = false;
+    downloadPollBtn.disabled = true;
+    pollStoppedBadge.style.display = 'none';
+    }
+    }
 
-        launchPollBtn.addEventListener('click', () => {
-            const q = document.getElementById('pollQuestion').value.trim();
-            const opts = [
-                document.getElementById('pollOpt0').value.trim(),
-                document.getElementById('pollOpt1').value.trim(),
-                document.getElementById('pollOpt2').value.trim(),
-                document.getElementById('pollOpt3').value.trim()
-            ].filter(o => o);
-            if (!q)         { showToast('⚠️ Please enter a poll question.'); return; }
-            if (opts.length < 2){ showToast('⚠️ Add at least 2 options.'); return; }
-            CommunityPoll.launchPoll(q, opts);
-            showToast('✅ Poll launched! Students can now answer.', 'success');
-            refreshPollUI();
-        });
-
-        stopPollBtn.addEventListener('click', () => {
-            CommunityPoll.stopPoll();
-            showToast('✅ Poll stopped. Download your report.', 'success');
-            refreshPollUI();
+    launchPollBtn.addEventListener('click', () => {
+    const q = document.getElementById('pollQuestion').value.trim();
+    const opts = [
+    document.getElementById('pollOpt0').value.trim(),
+    document.getElementById('pollOpt1').value.trim(),
+    document.getElementById('pollOpt2').value.trim(),
+    document.getElementById('pollOpt3').value.trim()
+    ].filter(o => o);
+    if (!q) { showToast('⚠️ Please enter a poll question.'); return; }
+    if (opts.length < 2){ showToast('⚠️ Add at least 2 options.'); return; } CommunityPoll.launchPoll(q, opts);
+        showToast('✅ Poll launched! Students can now answer.', 'success' ); refreshPollUI(); });
+        stopPollBtn.addEventListener('click', ()=> {
+        CommunityPoll.stopPoll();
+        showToast('✅ Poll stopped. Download your report.', 'success');
+        refreshPollUI();
         });
 
         downloadPollBtn.addEventListener('click', () => {
-            const r = CommunityPoll.getPollResults();
-            if (!r) return;
-            generatePollPDF(r);
+        const r = CommunityPoll.getPollResults();
+        if (!r) return;
+        generatePollPDF(r);
         });
 
         // Listen for storage changes (student votes arrive via storage event)
@@ -1490,178 +1770,313 @@
         window.addEventListener('poll_updated', refreshPollUI);
 
         /* ════════════════════════════════ LIVE FEEDBACK ════════════════════════════════ */
-        const launchFbBtn   = document.getElementById('launchFbBtn');
-        const stopFbBtn     = document.getElementById('stopFbBtn');
+        const launchFbBtn = document.getElementById('launchFbBtn');
+        const stopFbBtn = document.getElementById('stopFbBtn');
         const downloadFbBtn = document.getElementById('downloadFbBtn');
         const fbCreatorView = document.getElementById('fbCreatorView');
-        const fbLiveView    = document.getElementById('fbLiveView');
-        const fbLiveQ       = document.getElementById('fbLiveQuestion');
-        const fbCountEl     = document.getElementById('fbResponseCount');
-        const fbAvgEl       = document.getElementById('fbAvgScore');
-        const fbProgressEl  = document.getElementById('fbProgressBars');
+        const fbLiveView = document.getElementById('fbLiveView');
+        const fbLiveQ = document.getElementById('fbLiveQuestion');
+        const fbCountEl = document.getElementById('fbResponseCount');
+        const fbAvgEl = document.getElementById('fbAvgScore');
+        const fbProgressEl = document.getElementById('fbProgressBars');
         const fbSentimentEl = document.getElementById('fbSentimentBanner');
         const fbStoppedBadge= document.getElementById('fbStoppedBadge');
-        const FB_EMOJIS     = {1:'😟',2:'😕',3:'😐',4:'🙂',5:'😄'};
-        const FB_COLORS     = {1:'#ef4444',2:'#f59e0b',3:'#94a3b8',4:'#22c55e',5:'#6366f1'};
-        const FB_LABELS     = {1:'Very Confused',2:'Confused',3:'Neutral',4:'Confident',5:'Very Confident'};
+        const FB_EMOJIS = {1:'😟',2:'😕',3:'😐',4:'🙂',5:'😄'};
+        const FB_COLORS = {1:'#ef4444',2:'#f59e0b',3:'#94a3b8',4:'#22c55e',5:'#6366f1'};
+        const FB_LABELS = {1:'Very Confused',2:'Confused',3:'Neutral',4:'Confident',5:'Very Confident'};
 
         function getSentimentText(avg){
-            if (avg === '—') return 'Waiting for responses…';
-            const v = parseFloat(avg);
-            if (v < 1.8) return '😟 Class is Very Confused — consider revisiting the topic.';
-            if (v < 2.6) return '😕 Class is somewhat Confused — slow down and check in.';
-            if (v < 3.5) return '😐 Class is Neutral — engagement could be higher.';
-            if (v < 4.3) return '🙂 Class feels Confident — great progress!';
-            return '😄 Class is Very Confident — excellent session!';
-        }
-
-        function renderFbProgress(r){
-            if (!r) return;
-            let html = '';
-            const total = r.total || 1;
-            [1,2,3,4,5].forEach(k => {
-                const count = r.totals[k] || 0;
-                const pct   = total ? Math.round(count/total*100) : 0;
-                const col   = FB_COLORS[k];
-                html += `
-                    <div>
-                        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;">
-                            <span>${FB_EMOJIS[k]} ${FB_LABELS[k]}</span>
-                            <span style="color:${col};">${count} (${pct}%)</span>
-                        </div>
-                        <div style="height:12px;background:var(--border);border-radius:99px;overflow:hidden;">
-                            <div style="height:100%;width:${pct}%;background:${col};border-radius:99px;transition:width .6s;"></div>
-                        </div>
-                    </div>`;
+        if (avg === '—') return 'Waiting for responses…';
+        const v = parseFloat(avg);
+        if (v < 1.8) return '😟 Class is Very Confused — consider revisiting the topic.' ; if (v < 2.6)
+            return '😕 Class is somewhat Confused — slow down and check in.' ; if (v < 3.5)
+            return '😐 Class is Neutral — engagement could be higher.' ; if (v < 4.3)
+            return '🙂 Class feels Confident — great progress!' ;
+            return '😄 Class is Very Confident — excellent session!' ; } function renderFbProgress(r){ if (!r) return;
+            let html='' ; const total=r.total || 1; [1,2,3,4,5].forEach(k=> {
+            const count = r.totals[k] || 0;
+            const pct = total ? Math.round(count/total*100) : 0;
+            const col = FB_COLORS[k];
+            html += `
+            <div>
+                <div
+                    style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;">
+                    <span>${FB_EMOJIS[k]} ${FB_LABELS[k]}</span>
+                    <span style="color:${col};">${count} (${pct}%)</span>
+                </div>
+                <div style="height:12px;background:var(--border);border-radius:99px;overflow:hidden;">
+                    <div style="height:100%;width:${pct}%;background:${col};border-radius:99px;transition:width .6s;">
+                    </div>
+                </div>
+            </div>`;
             });
             fbProgressEl.innerHTML = html;
-        }
+            }
 
-        function refreshFbUI(){
+            function refreshFbUI(){
             const f = CommunityPoll.getFeedback();
             if (!f) {
-                fbCreatorView.style.display = '';
-                fbLiveView.style.display = 'none';
-                return;
+            fbCreatorView.style.display = '';
+            fbLiveView.style.display = 'none';
+            return;
             }
             fbCreatorView.style.display = 'none';
             fbLiveView.style.display = '';
             fbLiveQ.textContent = f.question;
             const r = CommunityPoll.getFeedbackResults();
             fbCountEl.textContent = r.total;
-            fbAvgEl.textContent   = r.avg;
+            fbAvgEl.textContent = r.avg;
             [1,2,3,4,5].forEach(k => {
-                const el = document.getElementById('fb-s'+k);
-                if (el) el.textContent = r.totals[k] || 0;
+            const el = document.getElementById('fb-s'+k);
+            if (el) el.textContent = r.totals[k] || 0;
             });
             renderFbProgress(r);
             fbSentimentEl.textContent = getSentimentText(r.avg);
             if (!f.active) {
-                stopFbBtn.disabled   = true;
-                downloadFbBtn.disabled = false;
-                fbStoppedBadge.style.display = '';
+            stopFbBtn.disabled = true;
+            downloadFbBtn.disabled = false;
+            fbStoppedBadge.style.display = '';
             } else {
-                stopFbBtn.disabled   = false;
-                downloadFbBtn.disabled = true;
-                fbStoppedBadge.style.display = 'none';
+            stopFbBtn.disabled = false;
+            downloadFbBtn.disabled = true;
+            fbStoppedBadge.style.display = 'none';
             }
-        }
+            }
 
-        launchFbBtn.addEventListener('click', () => {
+            launchFbBtn.addEventListener('click', () => {
             const q = document.getElementById('fbQuestion').value.trim();
             if (!q) { showToast('⚠️ Please enter a feedback question.'); return; }
             CommunityPoll.launchFeedback(q);
             showToast('✅ Feedback question posted! Students can now respond.', 'success');
             refreshFbUI();
-        });
+            });
 
-        stopFbBtn.addEventListener('click', () => {
+            stopFbBtn.addEventListener('click', () => {
             CommunityPoll.stopFeedback();
             showToast('✅ Feedback stopped. Download your report.', 'success');
             refreshFbUI();
-        });
+            });
 
-        downloadFbBtn.addEventListener('click', () => {
+            downloadFbBtn.addEventListener('click', () => {
             const r = CommunityPoll.getFeedbackResults();
             if (!r) return;
             generateFeedbackPDF(r);
-        });
+            });
 
-        window.addEventListener('storage',       e => { if(e.key==='mw_community_feedback') refreshFbUI(); });
-        window.addEventListener('feedback_updated', refreshFbUI);
+            window.addEventListener('storage', e => { if(e.key==='mw_community_feedback') refreshFbUI(); });
+            window.addEventListener('feedback_updated', refreshFbUI);
 
-        /* ── Initial render on page load ── */
-        document.addEventListener('DOMContentLoaded', () => {
+            /* ── Initial render on page load ── */
+            document.addEventListener('DOMContentLoaded', () => {
             refreshPollUI();
             refreshFbUI();
-        });
-        refreshPollUI();
-        refreshFbUI();
+            });
+            refreshPollUI();
+            refreshFbUI();
 
-        /* ════════════════════════════════ PDF GENERATION ════════════════════════════════ */
-        function generatePollPDF(r) {
-            const d    = new Date();
+            /* ════════════════════════════════ PDF GENERATION ════════════════════════════════ */
+            function generatePollPDF(r) {
+            const d = new Date();
             const date = d.toLocaleDateString('en-IN');
             const time = d.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
-            const instructor = (localStorage.getItem('firstName')||'') + ' ' + (localStorage.getItem('lastName')||'Faculty');
+            const instructor = (localStorage.getItem('firstName')||'') + ' ' +
+            (localStorage.getItem('lastName')||'Faculty');
             const total = r.total || 0;
 
             let rows = '';
             r.options.forEach((opt, i) => {
-                const count = r.totals[i] || 0;
-                const pct   = total ? Math.round(count/total*100) : 0;
-                const bar   = '<div style="display:inline-block;width:'+pct+'%;max-width:200px;min-width:2px;height:12px;background:#6366f1;border-radius:6px;"></div>';
-                rows += `<tr style="border-bottom:1px solid #e5e7eb;">
-                    <td style="padding:10px 12px;font-weight:600;">${String.fromCharCode(65+i)}. ${opt}</td>
-                    <td style="padding:10px 12px;text-align:center;font-weight:700;">${count}</td>
-                    <td style="padding:10px 12px;text-align:center;">${pct}%</td>
-                    <td style="padding:10px 12px;">${bar}</td></tr>`;
+            const count = r.totals[i] || 0;
+            const pct = total ? Math.round(count/total*100) : 0;
+            const bar = '<div
+                style="display:inline-block;width:'+pct+'%;max-width:200px;min-width:2px;height:12px;background:#6366f1;border-radius:6px;">
+            </div>';
+            rows += `<tr style="border-bottom:1px solid #e5e7eb;">
+                <td style="padding:10px 12px;font-weight:600;">${String.fromCharCode(65+i)}. ${opt}</td>
+                <td style="padding:10px 12px;text-align:center;font-weight:700;">${count}</td>
+                <td style="padding:10px 12px;text-align:center;">${pct}%</td>
+                <td style="padding:10px 12px;">${bar}</td>
+            </tr>`;
             });
 
-            const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Poll Report – MindWave</title><style>
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-                *{margin:0;padding:0;box-sizing:border-box;}
-                body{font-family:'Inter',sans-serif;color:#111827;background:#fff;padding:48px;}
-                .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #6366f1;padding-bottom:20px;margin-bottom:32px;}
-                .brand{font-size:22px;font-weight:900;color:#6366f1;}  .brand span{color:#111827;}
-                .meta{font-size:12px;color:#6b7280;text-align:right;}
-                h1{font-size:28px;font-weight:800;margin-bottom:6px;}
-                .sub{color:#6b7280;font-size:14px;margin-bottom:32px;}
-                .kpi-row{display:flex;gap:20px;margin-bottom:32px;}
-                .kpi{flex:1;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;text-align:center;}
-                .kpi-val{font-size:36px;font-weight:900;color:#6366f1;}
-                .kpi-lbl{font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-top:4px;}
-                table{width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;}
-                thead{background:#6366f1;color:#fff;} thead td{padding:12px 14px;font-size:12px;font-weight:700;text-transform:uppercase;}
-                tbody tr:nth-child(even){background:#f9fafb;}
-                .footer{margin-top:40px;text-align:center;font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:16px;}
-            </style></head><body>
+            const html = `
+            <!DOCTYPE html>
+            <html>
+
+            <head>
+                <meta charset="UTF-8">
+                <title>Poll Report – MindWave</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+
+                    body {
+                        font-family: 'Inter', sans-serif;
+                        color: #111827;
+                        background: #fff;
+                        padding: 48px;
+                    }
+
+                    .header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        border-bottom: 3px solid #6366f1;
+                        padding-bottom: 20px;
+                        margin-bottom: 32px;
+                    }
+
+                    .brand {
+                        font-size: 22px;
+                        font-weight: 900;
+                        color: #6366f1;
+                    }
+
+                    .brand span {
+                        color: #111827;
+                    }
+
+                    .meta {
+                        font-size: 12px;
+                        color: #6b7280;
+                        text-align: right;
+                    }
+
+                    h1 {
+                        font-size: 28px;
+                        font-weight: 800;
+                        margin-bottom: 6px;
+                    }
+
+                    .sub {
+                        color: #6b7280;
+                        font-size: 14px;
+                        margin-bottom: 32px;
+                    }
+
+                    .kpi-row {
+                        display: flex;
+                        gap: 20px;
+                        margin-bottom: 32px;
+                    }
+
+                    .kpi {
+                        flex: 1;
+                        background: #f9fafb;
+                        border: 1px solid #e5e7eb;
+                        border-radius: 12px;
+                        padding: 16px 20px;
+                        text-align: center;
+                    }
+
+                    .kpi-val {
+                        font-size: 36px;
+                        font-weight: 900;
+                        color: #6366f1;
+                    }
+
+                    .kpi-lbl {
+                        font-size: 11px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        color: #6b7280;
+                        margin-top: 4px;
+                    }
+
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        border: 1px solid #e5e7eb;
+                        border-radius: 12px;
+                        overflow: hidden;
+                    }
+
+                    thead {
+                        background: #6366f1;
+                        color: #fff;
+                    }
+
+                    thead td {
+                        padding: 12px 14px;
+                        font-size: 12px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                    }
+
+                    tbody tr:nth-child(even) {
+                        background: #f9fafb;
+                    }
+
+                    .footer {
+                        margin-top: 40px;
+                        text-align: center;
+                        font-size: 11px;
+                        color: #9ca3af;
+                        border-top: 1px solid #e5e7eb;
+                        padding-top: 16px;
+                    }
+                </style>
+            </head>
+
+            <body>
                 <div class="header">
-                    <div><div class="brand">Mind<span>Wave</span></div><div style="font-size:12px;color:#6b7280;margin-top:4px;">Faculty Community – Quick Poll Report</div></div>
+                    <div>
+                        <div class="brand">Mind<span>Wave</span></div>
+                        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Faculty Community – Quick Poll Report
+                        </div>
+                    </div>
                     <div class="meta">Generated by ${instructor}<br>${date} at ${time}</div>
                 </div>
                 <h1>${r.question}</h1>
                 <p class="sub">Anonymous poll · All responses are collected without student identification</p>
                 <div class="kpi-row">
-                    <div class="kpi"><div class="kpi-val">${total}</div><div class="kpi-lbl">Total Responses</div></div>
-                    <div class="kpi"><div class="kpi-val">${r.options.length}</div><div class="kpi-lbl">Options</div></div>
-                    <div class="kpi"><div class="kpi-val">${total>0 ? r.options[Object.entries(r.totals).sort((a,b)=>b[1]-a[1])[0][0]] : '—'}</div><div class="kpi-lbl">Top Answer</div></div>
+                    <div class="kpi">
+                        <div class="kpi-val">${total}</div>
+                        <div class="kpi-lbl">Total Responses</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-val">${r.options.length}</div>
+                        <div class="kpi-lbl">Options</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-val">${total>0 ?
+                            r.options[Object.entries(r.totals).sort((a,b)=>b[1]-a[1])[0][0]] : '—'}</div>
+                        <div class="kpi-lbl">Top Answer</div>
+                    </div>
                 </div>
-                <table><thead><tr><td>Option</td><td style="text-align:center;">Votes</td><td style="text-align:center;">%</td><td>Distribution</td></tr></thead><tbody>${rows}</tbody></table>
-                <div class="footer">MindWave – Classroom Engagement Platform &nbsp;|&nbsp; This report is automatically generated and contains anonymous data.</div>
-            </body></html>`;
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Option</td>
+                            <td style="text-align:center;">Votes</td>
+                            <td style="text-align:center;">%</td>
+                            <td>Distribution</td>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <div class="footer">MindWave – Classroom Engagement Platform &nbsp;|&nbsp; This report is automatically
+                    generated and contains anonymous data.</div>
+            </body>
+
+            </html>`;
 
             const w = window.open('', '_blank', 'width=900,height=700');
             w.document.write(html);
             w.document.close();
             setTimeout(() => w.print(), 800);
-        }
+            }
 
-        function generateFeedbackPDF(r) {
-            const d    = new Date();
+            function generateFeedbackPDF(r) {
+            const d = new Date();
             const date = d.toLocaleDateString('en-IN');
             const time = d.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
-            const instructor = (localStorage.getItem('firstName')||'') + ' ' + (localStorage.getItem('lastName')||'Faculty');
+            const instructor = (localStorage.getItem('firstName')||'') + ' ' +
+            (localStorage.getItem('lastName')||'Faculty');
             const total = r.total || 0;
             const emojis = {1:'😟',2:'😕',3:'😐',4:'🙂',5:'😄'};
             const colors = {1:'#ef4444',2:'#f59e0b',3:'#94a3b8',4:'#22c55e',5:'#6366f1'};
@@ -1669,68 +2084,221 @@
 
             let rows = '';
             [1,2,3,4,5].forEach(k => {
-                const count = r.totals[k] || 0;
-                const pct   = total ? Math.round(count/total*100) : 0;
-                const bar   = '<div style="display:inline-block;width:'+pct+'%;max-width:200px;min-width:2px;height:12px;background:'+colors[k]+';border-radius:6px;"></div>';
-                rows += `<tr style="border-bottom:1px solid #e5e7eb;"><td style="padding:10px 12px;font-size:18px;">${emojis[k]}</td><td style="padding:10px 12px;font-weight:600;">${labels[k]}</td><td style="padding:10px 12px;text-align:center;font-weight:700;color:${colors[k]};">${count}</td><td style="padding:10px 12px;text-align:center;">${pct}%</td><td style="padding:10px 12px;">${bar}</td></tr>`;
+            const count = r.totals[k] || 0;
+            const pct = total ? Math.round(count/total*100) : 0;
+            const bar = '<div
+                style="display:inline-block;width:'+pct+'%;max-width:200px;min-width:2px;height:12px;background:'+colors[k]+';border-radius:6px;">
+            </div>';
+            rows += `<tr style="border-bottom:1px solid #e5e7eb;">
+                <td style="padding:10px 12px;font-size:18px;">${emojis[k]}</td>
+                <td style="padding:10px 12px;font-weight:600;">${labels[k]}</td>
+                <td style="padding:10px 12px;text-align:center;font-weight:700;color:${colors[k]};">${count}</td>
+                <td style="padding:10px 12px;text-align:center;">${pct}%</td>
+                <td style="padding:10px 12px;">${bar}</td>
+            </tr>`;
             });
 
             const sentiment = parseFloat(r.avg);
             const sentLabel = isNaN(sentiment) ? 'No data' :
-                sentiment < 1.8 ? 'Very Confused' :
-                sentiment < 2.6 ? 'Confused' :
-                sentiment < 3.5 ? 'Neutral' :
-                sentiment < 4.3 ? 'Confident' : 'Very Confident';
-            const sentColor = isNaN(sentiment) ? '#6b7280' :
-                sentiment < 1.8 ? '#ef4444' :
-                sentiment < 2.6 ? '#f59e0b' :
-                sentiment < 3.5 ? '#94a3b8' :
-                sentiment < 4.3 ? '#22c55e' : '#6366f1';
+            sentiment < 1.8 ? 'Very Confused' : sentiment < 2.6 ? 'Confused' : sentiment < 3.5 ? 'Neutral' : sentiment <
+                4.3 ? 'Confident' : 'Very Confident' ; const sentColor=isNaN(sentiment) ? '#6b7280' : sentiment < 1.8
+                ? '#ef4444' : sentiment < 2.6 ? '#f59e0b' : sentiment < 3.5 ? '#94a3b8' : sentiment < 4.3 ? '#22c55e'
+                : '#6366f1' ; const html=`<!DOCTYPE html>
+                <html>
 
-            const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Feedback Report – MindWave</title><style>
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-                *{margin:0;padding:0;box-sizing:border-box;}
-                body{font-family:'Inter',sans-serif;color:#111827;background:#fff;padding:48px;}
-                .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #a855f7;padding-bottom:20px;margin-bottom:32px;}
-                .brand{font-size:22px;font-weight:900;color:#a855f7;}  .brand span{color:#111827;}
-                .meta{font-size:12px;color:#6b7280;text-align:right;}
-                h1{font-size:28px;font-weight:800;margin-bottom:6px;}
-                .sub{color:#6b7280;font-size:14px;margin-bottom:32px;}
-                .kpi-row{display:flex;gap:20px;margin-bottom:32px;}
-                .kpi{flex:1;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;text-align:center;}
-                .kpi-val{font-size:36px;font-weight:900;}
-                .kpi-lbl{font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-top:4px;}
-                .sentiment-banner{background:#f3f4f6;border-left:4px solid ${sentColor};border-radius:8px;padding:16px 20px;margin-bottom:28px;font-size:15px;font-weight:600;color:${sentColor};}
-                table{width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;}
-                thead{background:#a855f7;color:#fff;} thead td{padding:12px 14px;font-size:12px;font-weight:700;text-transform:uppercase;}
-                tbody tr:nth-child(even){background:#f9fafb;}
-                .footer{margin-top:40px;text-align:center;font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:16px;}
-            </style></head><body>
-                <div class="header">
-                    <div><div class="brand">Mind<span>Wave</span></div><div style="font-size:12px;color:#6b7280;margin-top:4px;">Faculty Community – Live Feedback Report</div></div>
-                    <div class="meta">Generated by ${instructor}<br>${date} at ${time}</div>
-                </div>
-                <h1>${r.question}</h1>
-                <p class="sub">Anonymous feedback · Responses collected without student identification</p>
-                <div class="kpi-row">
-                    <div class="kpi"><div class="kpi-val" style="color:#a855f7;">${total}</div><div class="kpi-lbl">Total Responses</div></div>
-                    <div class="kpi"><div class="kpi-val" style="color:${sentColor};">${r.avg}</div><div class="kpi-lbl">Avg Score (1–5)</div></div>
-                    <div class="kpi"><div class="kpi-val" style="color:${sentColor};">${sentLabel}</div><div class="kpi-lbl">Overall Sentiment</div></div>
-                </div>
-                <div class="sentiment-banner">🎯 Class Sentiment: ${sentLabel} (avg score: ${r.avg} / 5.00)</div>
-                <table><thead><tr><td>Emoji</td><td>Rating</td><td style="text-align:center;">Count</td><td style="text-align:center;">%</td><td>Distribution</td></tr></thead><tbody>${rows}</tbody></table>
-                <div class="footer">MindWave – Classroom Engagement Platform &nbsp;|&nbsp; This report is automatically generated and contains anonymous data.</div>
-            </body></html>`;
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Feedback Report – MindWave</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
-            const w = window.open('', '_blank', 'width=900,height=700');
-            w.document.write(html);
-            w.document.close();
-            setTimeout(() => w.print(), 800);
-        }
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
 
-    })();
-    </script>
-    <script src="marketing-site/js/live-quiz.js"></script>
+                        body {
+                            font-family: 'Inter', sans-serif;
+                            color: #111827;
+                            background: #fff;
+                            padding: 48px;
+                        }
+
+                        .header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: flex-start;
+                            border-bottom: 3px solid #a855f7;
+                            padding-bottom: 20px;
+                            margin-bottom: 32px;
+                        }
+
+                        .brand {
+                            font-size: 22px;
+                            font-weight: 900;
+                            color: #a855f7;
+                        }
+
+                        .brand span {
+                            color: #111827;
+                        }
+
+                        .meta {
+                            font-size: 12px;
+                            color: #6b7280;
+                            text-align: right;
+                        }
+
+                        h1 {
+                            font-size: 28px;
+                            font-weight: 800;
+                            margin-bottom: 6px;
+                        }
+
+                        .sub {
+                            color: #6b7280;
+                            font-size: 14px;
+                            margin-bottom: 32px;
+                        }
+
+                        .kpi-row {
+                            display: flex;
+                            gap: 20px;
+                            margin-bottom: 32px;
+                        }
+
+                        .kpi {
+                            flex: 1;
+                            background: #f9fafb;
+                            border: 1px solid #e5e7eb;
+                            border-radius: 12px;
+                            padding: 16px 20px;
+                            text-align: center;
+                        }
+
+                        .kpi-val {
+                            font-size: 36px;
+                            font-weight: 900;
+                        }
+
+                        .kpi-lbl {
+                            font-size: 11px;
+                            font-weight: 700;
+                            text-transform: uppercase;
+                            color: #6b7280;
+                            margin-top: 4px;
+                        }
+
+                        .sentiment-banner {
+                            background: #f3f4f6;
+
+                            border-left:4px solid $ {
+                                sentColor
+                            }
+
+                            ;
+                            border-radius:8px;
+                            padding:16px 20px;
+                            margin-bottom:28px;
+                            font-size:15px;
+                            font-weight:600;
+
+                            color:$ {
+                                sentColor
+                            }
+
+                            ;
+                        }
+
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border: 1px solid #e5e7eb;
+                            border-radius: 12px;
+                            overflow: hidden;
+                        }
+
+                        thead {
+                            background: #a855f7;
+                            color: #fff;
+                        }
+
+                        thead td {
+                            padding: 12px 14px;
+                            font-size: 12px;
+                            font-weight: 700;
+                            text-transform: uppercase;
+                        }
+
+                        tbody tr:nth-child(even) {
+                            background: #f9fafb;
+                        }
+
+                        .footer {
+                            margin-top: 40px;
+                            text-align: center;
+                            font-size: 11px;
+                            color: #9ca3af;
+                            border-top: 1px solid #e5e7eb;
+                            padding-top: 16px;
+                        }
+                    </style>
+                </head>
+
+                <body>
+                    <div class="header">
+                        <div>
+                            <div class="brand">Mind<span>Wave</span></div>
+                            <div style="font-size:12px;color:#6b7280;margin-top:4px;">Faculty Community – Live Feedback
+                                Report</div>
+                        </div>
+                        <div class="meta">Generated by ${instructor}<br>${date} at ${time}</div>
+                    </div>
+                    <h1>${r.question}</h1>
+                    <p class="sub">Anonymous feedback · Responses collected without student identification</p>
+                    <div class="kpi-row">
+                        <div class="kpi">
+                            <div class="kpi-val" style="color:#a855f7;">${total}</div>
+                            <div class="kpi-lbl">Total Responses</div>
+                        </div>
+                        <div class="kpi">
+                            <div class="kpi-val" style="color:${sentColor};">${r.avg}</div>
+                            <div class="kpi-lbl">Avg Score (1–5)</div>
+                        </div>
+                        <div class="kpi">
+                            <div class="kpi-val" style="color:${sentColor};">${sentLabel}</div>
+                            <div class="kpi-lbl">Overall Sentiment</div>
+                        </div>
+                    </div>
+                    <div class="sentiment-banner">🎯 Class Sentiment: ${sentLabel} (avg score: ${r.avg} / 5.00)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <td>Emoji</td>
+                                <td>Rating</td>
+                                <td style="text-align:center;">Count</td>
+                                <td style="text-align:center;">%</td>
+                                <td>Distribution</td>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <div class="footer">MindWave – Classroom Engagement Platform &nbsp;|&nbsp; This report is
+                        automatically generated and contains anonymous data.</div>
+                </body>
+
+                </html>`;
+
+                const w = window.open('', '_blank', 'width=900,height=700');
+                w.document.write(html);
+                w.document.close();
+                setTimeout(() => w.print(), 800);
+                }
+
+                })();
+                </script>
+                <script src="marketing-site/js/live-quiz.js"></script>
 </body>
 
 </html>
