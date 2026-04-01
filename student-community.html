@@ -871,7 +871,8 @@
 
                 <!-- ------------------- POLL SECTION ------------------- -->
                 <div id="pollSection" class="cm-section">
-                    <div class="cm-feature-card">
+                    <!-- WAITING STATE -->
+                    <div class="cm-feature-card" id="pollWaitingCard">
                         <div class="cf-icon" style="background:rgba(99,102,241,.12);">
                             <i data-lucide="clock" style="width:36px;height:36px;color:#6366f1;"></i>
                         </div>
@@ -881,48 +882,89 @@
                             <span></span><span></span><span></span>
                         </div>
                     </div>
+
+                    <!-- ACTIVE POLL STATE -->
+                    <div class="cm-feature-card" id="pollActiveCard" style="display:none;">
+                        <div class="cf-icon" style="background:rgba(99,102,241,.12);">
+                            <i data-lucide="bar-chart-3" style="width:36px;height:36px;color:#6366f1;"></i>
+                        </div>
+                        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6366f1;margin-bottom:10px;">Live Poll</div>
+                        <h2 id="studentPollQuestion" style="font-size:1.2rem;margin-bottom:24px;line-height:1.4;">Loading…</h2>
+                        <div id="studentPollOptions" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;"></div>
+                        <div id="pollVoteConfirm" style="display:none;padding:14px;border-radius:12px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);color:#6366f1;font-weight:700;">
+                            ✅ Your anonymous vote was recorded!
+                        </div>
+                    </div>
+
+                    <!-- ENDED STATE -->
+                    <div class="cm-feature-card" id="pollEndedCard" style="display:none;">
+                        <div class="cf-icon" style="background:rgba(22,163,74,.12);">
+                            <i data-lucide="check-circle" style="width:36px;height:36px;color:#22c55e;"></i>
+                        </div>
+                        <h2>Poll Ended</h2>
+                        <p>The instructor has closed this poll. Thanks for participating!</p>
+                    </div>
                 </div>
 
                 <!-- ------------------- FEEDBACK SECTION ------------------- -->
                 <div id="feedbackSection" class="cm-section">
-                    <div class="cm-feature-card">
+                    <!-- WAITING -->
+                    <div class="cm-feature-card" id="fbWaitingCard">
                         <div class="cf-icon" style="background:rgba(168,85,247,.12);">
                             <i data-lucide="heart-handshake" style="width:36px;height:36px;color:#a855f7;"></i>
                         </div>
-                        <h2>How are you feeling?</h2>
-                        <p>Your feedback is anonymous and helps improve the lesson.</p>
+                        <h2>No Feedback Question Yet</h2>
+                        <p>Your instructor hasn't posted a feedback question yet. Check back soon!</p>
+                        <div class="pulse-indicator" style="margin-top:16px;"><span></span><span></span><span></span></div>
+                    </div>
+
+                    <!-- ACTIVE -->
+                    <div class="cm-feature-card" id="fbActiveCard" style="display:none;">
+                        <div class="cf-icon" style="background:rgba(168,85,247,.12);">
+                            <i data-lucide="message-circle-heart" style="width:36px;height:36px;color:#a855f7;"></i>
+                        </div>
+                        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#a855f7;margin-bottom:10px;">Live Feedback</div>
+                        <h2 id="studentFbQuestion" style="font-size:1.2rem;margin-bottom:8px;">Loading…</h2>
+                        <p style="color:var(--text-secondary);font-size:.9rem;margin-bottom:24px;">Your feedback is anonymous and helps improve the lesson.</p>
                         <div class="confidence-selector">
-                            <div class="emoji-options">
-                                <button class="emoji-btn" data-value="1">
-                                    <span class="emoji"><i data-lucide="frown"
-                                            style="width:28px;height:28px;color:#ef4444;"></i></span>
+                            <div class="emoji-options" id="fbEmojiOptions">
+                                <button class="emoji-btn" data-value="1" data-label="Very Confused">
+                                    <span class="emoji"><i data-lucide="frown" style="width:28px;height:28px;color:#ef4444;"></i></span>
                                     <span class="label">Very Confused</span>
                                 </button>
-                                <button class="emoji-btn" data-value="2">
-                                    <span class="emoji"><i data-lucide="alert-circle"
-                                            style="width:28px;height:28px;color:#f59e0b;"></i></span>
+                                <button class="emoji-btn" data-value="2" data-label="Confused">
+                                    <span class="emoji"><i data-lucide="alert-circle" style="width:28px;height:28px;color:#f59e0b;"></i></span>
                                     <span class="label">Confused</span>
                                 </button>
-                                <button class="emoji-btn" data-value="3">
-                                    <span class="emoji"><i data-lucide="meh"
-                                            style="width:28px;height:28px;color:#94a3b8;"></i></span>
+                                <button class="emoji-btn" data-value="3" data-label="Neutral">
+                                    <span class="emoji"><i data-lucide="meh" style="width:28px;height:28px;color:#94a3b8;"></i></span>
                                     <span class="label">Neutral</span>
                                 </button>
-                                <button class="emoji-btn" data-value="4">
-                                    <span class="emoji"><i data-lucide="smile"
-                                            style="width:28px;height:28px;color:#22c55e;"></i></span>
+                                <button class="emoji-btn" data-value="4" data-label="Confident">
+                                    <span class="emoji"><i data-lucide="smile" style="width:28px;height:28px;color:#22c55e;"></i></span>
                                     <span class="label">Confident</span>
                                 </button>
-                                <button class="emoji-btn" data-value="5">
-                                    <span class="emoji"><i data-lucide="star"
-                                            style="width:28px;height:28px;color:#6366f1;"></i></span>
+                                <button class="emoji-btn" data-value="5" data-label="Very Confident">
+                                    <span class="emoji"><i data-lucide="star" style="width:28px;height:28px;color:#6366f1;"></i></span>
                                     <span class="label">Very Confident</span>
                                 </button>
                             </div>
                         </div>
-                        <button class="cm-btn-primary" id="submitFeedbackBtn" disabled style="margin-top:8px;">
+                        <button class="cm-btn-primary" id="submitFeedbackBtn" disabled style="margin-top:16px;">
                             <i data-lucide="send"></i> Submit Feedback
                         </button>
+                        <div id="fbSubmitConfirm" style="display:none;margin-top:14px;padding:12px;border-radius:12px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.3);color:#a855f7;font-weight:700;">
+                            ✅ Your anonymous feedback was submitted!
+                        </div>
+                    </div>
+
+                    <!-- ENDED -->
+                    <div class="cm-feature-card" id="fbEndedCard" style="display:none;">
+                        <div class="cf-icon" style="background:rgba(22,163,74,.12);">
+                            <i data-lucide="check-circle" style="width:36px;height:36px;color:#22c55e;"></i>
+                        </div>
+                        <h2>Feedback Closed</h2>
+                        <p>The instructor has closed the feedback session. Thank you for your response!</p>
                     </div>
                 </div>
 
@@ -1135,6 +1177,7 @@
         }
     </script>
 
+    <script src="community-poll-engine.js"></script>
     <script src="student-community.js">
         function doLogout() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
@@ -1283,6 +1326,156 @@
             transform: translateY(-1px)
         }
     </style>
+    <!-- ══════════ STUDENT POLL + FEEDBACK LOGIC ══════════ -->
+    <script>
+    (function() {
+        /* ─── helpers ─── */
+        const $ = id => document.getElementById(id);
+        let hasVotedPoll     = false;
+        let hasVotedFeedback = false;
+
+        /* ══════════════════════ QUICK POLL ══════════════════════ */
+        function refreshStudentPoll() {
+            if (!window.CommunityPoll) return;
+            const p = CommunityPoll.getPoll();
+
+            const waiting = $('pollWaitingCard');
+            const active  = $('pollActiveCard');
+            const ended   = $('pollEndedCard');
+            if (!waiting || !active || !ended) return;
+
+            if (!p) {
+                // no poll exists
+                waiting.style.display = ''; active.style.display = 'none'; ended.style.display = 'none';
+                hasVotedPoll = false;
+                return;
+            }
+
+            if (p.active) {
+                // poll is live
+                waiting.style.display = 'none'; ended.style.display = 'none';
+                active.style.display = '';
+                $('studentPollQuestion').textContent = p.question;
+
+                const optContainer = $('studentPollOptions');
+                if (!hasVotedPoll) {
+                    const COLORS = ['#6366f1','#f59e0b','#10b981','#ef4444'];
+                    optContainer.innerHTML = p.options.map((opt, i) => `
+                        <button onclick="castPollVote(${i})" style="
+                            width:100%;padding:14px 20px;border-radius:12px;
+                            border:2px solid ${COLORS[i % COLORS.length]}33;
+                            background:${COLORS[i % COLORS.length]}11;
+                            color:var(--text,#f5f7ff);font-size:.95rem;font-weight:600;
+                            cursor:pointer;display:flex;align-items:center;gap:10px;
+                            transition:all .15s;text-align:left;">
+                            <span style="width:28px;height:28px;border-radius:8px;background:${COLORS[i%COLORS.length]};color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex-shrink:0;">${String.fromCharCode(65+i)}</span>
+                            ${opt}
+                        </button>`).join('');
+                } else {
+                    // already voted — show confirmation
+                    optContainer.innerHTML = '';
+                    $('pollVoteConfirm').style.display = '';
+                }
+            } else {
+                // poll stopped
+                waiting.style.display = 'none'; active.style.display = 'none';
+                ended.style.display = '';
+            }
+        }
+
+        window.castPollVote = function(optionIndex) {
+            if (hasVotedPoll) return;
+            const ok = CommunityPoll.votePoll(optionIndex);
+            if (ok) {
+                hasVotedPoll = true;
+                $('studentPollOptions').innerHTML = '';
+                $('pollVoteConfirm').style.display = '';
+            }
+        };
+
+        /* ══════════════════════ LIVE FEEDBACK ══════════════════════ */
+        let selectedFbRating = null;
+        let selectedFbLabel  = null;
+
+        function refreshStudentFeedback() {
+            if (!window.CommunityPoll) return;
+            const f = CommunityPoll.getFeedback();
+
+            const waiting = $('fbWaitingCard');
+            const active  = $('fbActiveCard');
+            const ended   = $('fbEndedCard');
+            if (!waiting || !active || !ended) return;
+
+            if (!f) {
+                waiting.style.display = ''; active.style.display = 'none'; ended.style.display = 'none';
+                hasVotedFeedback = false;
+                return;
+            }
+
+            if (f.active) {
+                waiting.style.display = 'none'; ended.style.display = 'none';
+                active.style.display = '';
+                $('studentFbQuestion').textContent = f.question;
+                if (window.lucide) lucide.createIcons({ el: active });
+            } else {
+                // ended
+                waiting.style.display = 'none'; active.style.display = 'none';
+                ended.style.display = '';
+            }
+        }
+
+        // Emoji button selection
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('#fbEmojiOptions .emoji-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (hasVotedFeedback) return;
+                    document.querySelectorAll('#fbEmojiOptions .emoji-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedFbRating = Number(btn.dataset.value);
+                    selectedFbLabel  = btn.dataset.label;
+                    const submitBtn = $('submitFeedbackBtn');
+                    if (submitBtn) submitBtn.disabled = false;
+                });
+            });
+
+            const submitBtn = $('submitFeedbackBtn');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', () => {
+                    if (!selectedFbRating || hasVotedFeedback) return;
+                    const ok = CommunityPoll.submitFeedback(selectedFbRating, selectedFbLabel);
+                    if (ok) {
+                        hasVotedFeedback = true;
+                        submitBtn.disabled = true;
+                        document.querySelectorAll('#fbEmojiOptions .emoji-btn').forEach(b => { b.disabled = true; b.style.opacity = '.5'; });
+                        $('fbSubmitConfirm').style.display = '';
+                    }
+                });
+            }
+        });
+
+        /* ── Poll for changes every 3 s (localStorage doesn't always fire storage event in same tab) ── */
+        function tick() {
+            refreshStudentPoll();
+            refreshStudentFeedback();
+        }
+
+        // Also listen to cross-tab storage events
+        window.addEventListener('storage', e => {
+            if (e.key === 'mw_community_poll')     refreshStudentPoll();
+            if (e.key === 'mw_community_feedback') refreshStudentFeedback();
+        });
+        window.addEventListener('poll_updated',     refreshStudentPoll);
+        window.addEventListener('feedback_updated', refreshStudentFeedback);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            tick();
+            setInterval(tick, 3000); // auto-refresh every 3 s
+        });
+        tick();
+
+    })();
+    </script>
+
     <script>
         // Initialise all Lucide icons on the community page
         document.addEventListener('DOMContentLoaded', () => {
