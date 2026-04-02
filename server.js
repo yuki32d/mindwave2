@@ -10518,15 +10518,21 @@ app.post('/api/quiz/generate-from-text', authMiddleware, requireFaculty, async (
       return res.status(500).json({ ok: false, message: "Groq AI API key not configured" });
     }
 
-    const prompt = `You are a quiz generator. Based on the following topic, create 10 multiple-choice quiz questions.
+    // Parse the requested question count from the topic text (e.g. "give me 20 questions")
+    const countMatch = topic.match(/\b(\d+)\s*questions?\b/i);
+    const questionCount = countMatch ? Math.min(Math.max(parseInt(countMatch[1], 10), 1), 50) : 10;
 
-Topic: ${topic}
+    const prompt = `You are a quiz generator. Based on the following topic/instructions, create exactly ${questionCount} multiple-choice quiz questions.
+
+Topic/Instructions: ${topic}
 
 For each question, provide:
 1. Question text
 2. Four options (A, B, C, D)
 3. The correct answer (0 for A, 1 for B, 2 for C, 3 for D)
 4. Time limit in seconds (10-30 seconds based on difficulty)
+
+IMPORTANT: You MUST generate exactly ${questionCount} questions. Do not stop early.
 
 Return ONLY a valid JSON array with this exact structure:
 [
@@ -10539,6 +10545,7 @@ Return ONLY a valid JSON array with this exact structure:
 ]
 
 Return ONLY the JSON array, no additional text or explanation.`;
+
 
     const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -10559,7 +10566,7 @@ Return ONLY the JSON array, no additional text or explanation.`;
           }
         ],
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: Math.max(4000, questionCount * 200)
       })
     });
 
