@@ -3373,12 +3373,15 @@ app.get("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
       facultyDepartment = parts[parts.length - 1].replace(/[0-9]/g, '').toUpperCase();
     }
 
-    // Students in this faculty's department
+    // ── Real engagement matching /api/engagement ──
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // Get total students (matching admin analytics: exclude organization)
     const students = await User.find({
-      department: { $regex: new RegExp(`^${facultyDepartment}$`, 'i') },
       role: 'student',
-      isActive: true
-    }).select('_id department batch section');
+      userType: { $ne: 'organization' }
+    }).select('_id batch section department');
 
     const classSet = new Set();
     const studentIds = students.map(s => {
@@ -3388,27 +3391,29 @@ app.get("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
       return s._id;
     });
 
-    // ── Real engagement & completion from GameSubmission ──
     let avgEngagement = 0;
     let completionRate = 0;
 
-    if (gamesCreated > 0 && studentIds.length > 0) {
-      // Get all submissions for games created by this faculty
+    // Get active students (submitted ANY games in last 7 days - matching admin analytics)
+    const activeSubmissions = await GameSubmission.find({
+      createdAt: { $gte: sevenDaysAgo }
+    }).distinct("studentId");
+
+    const activeStudents = activeSubmissions.length;
+    avgEngagement = students.length > 0
+      ? Math.min(100, Math.round((activeStudents / students.length) * 100))
+      : 0;
+
+    // Keep completion rate specific to this faculty's games
+    if (gamesCreated > 0) {
       const gameIds = await Game.find({ createdBy: user._id }).select('_id');
       const submissions = await GameSubmission.find({
         gameId: { $in: gameIds.map(g => g._id) }
-      }).select('studentId isCorrect score');
+      }).select('isCorrect');
 
       const totalSubmissions = submissions.length;
-      const uniqueStudents   = new Set(submissions.map(s => s.studentId.toString())).size;
-      const correctSubs      = submissions.filter(s => s.isCorrect).length;
+      const correctSubs = submissions.filter(s => s.isCorrect).length;
 
-      // Engagement = % of dept students who played at least 1 game
-      avgEngagement = studentIds.length > 0
-        ? Math.round((uniqueStudents / studentIds.length) * 100)
-        : 0;
-
-      // Completion rate = % of submissions marked correct
       completionRate = totalSubmissions > 0
         ? Math.round((correctSubs / totalSubmissions) * 100)
         : 0;
