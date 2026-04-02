@@ -1691,3 +1691,74 @@ a {
     max-width: 420px;
     line-height: 1.6;
 }
+
+/* ── CUSTOM SIDEBAR SCROLL INDICATOR ── */
+.mw-sidebar {
+    position: relative;
+}
+
+/* The scrollable nav area must allow overflow */
+.mw-sidebar-nav {
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.mw-sidebar-nav::-webkit-scrollbar {
+    display: none;
+}
+
+/* Track — thin bar on the right inner edge */
+.mw-sidebar-scroll-track {
+    position: absolute;
+    right: 3px;
+    top: 60px;       /* below logo area */
+    bottom: 70px;    /* above footer */
+    width: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 99px;
+    z-index: 20;
+    opacity: 0.3;
+    transition: opacity 0.25s ease, width 0.2s ease;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.mw-sidebar:hover .mw-sidebar-scroll-track,
+.mw-sidebar-scroll-track.mw-scroll-visible {
+    opacity: 1;
+    width: 8px;
+}
+
+[data-theme="light"] .mw-sidebar-scroll-track {
+    background: rgba(0, 0, 0, 0.07);
+}
+
+/* Thumb — the draggable glowing pill */
+.mw-sidebar-scroll-thumb {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    min-height: 32px;
+    border-radius: 99px;
+    background: linear-gradient(180deg, var(--accent, #6366f1), #a78bfa);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.75), 0 0 3px rgba(167, 139, 250, 0.5);
+    cursor: grab;
+    transition: height 0.08s ease;
+    animation: mwScrollPulse 2.5s ease-in-out infinite;
+}
+
+.mw-sidebar-scroll-thumb:active {
+    cursor: grabbing;
+    animation: none;
+    box-shadow: 0 0 16px rgba(99, 102, 241, 1), 0 0 6px rgba(167, 139, 250, 0.8);
+}
+
+[data-theme="light"] .mw-sidebar-scroll-thumb {
+    background: linear-gradient(180deg, #4f46e5, #818cf8);
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.6), 0 0 3px rgba(129, 140, 248, 0.4);
+}
+
+@keyframes mwScrollPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(99, 102, 241, 0.5), 0 0 3px rgba(167, 139, 250, 0.3); }
+    50%       { box-shadow: 0 0 14px rgba(99, 102, 241, 0.9), 0 0 5px rgba(167, 139, 250, 0.6); }
+}

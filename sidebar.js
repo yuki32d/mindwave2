@@ -86,3 +86,78 @@
         loadUserProfile();
     });
 })();
+
+// ── Custom Student Sidebar Scroll Indicator ──
+(function () {
+    function initScrollBar() {
+        const sidebar = document.querySelector('.mw-sidebar');
+        const navEl = document.querySelector('.mw-sidebar-nav');
+        if (!sidebar || !navEl) return;
+
+        // Inject track + thumb if not already present
+        if (sidebar.querySelector('.mw-sidebar-scroll-track')) return;
+        const track = document.createElement('div');
+        track.className = 'mw-sidebar-scroll-track';
+        const thumb = document.createElement('div');
+        thumb.className = 'mw-sidebar-scroll-thumb';
+        track.appendChild(thumb);
+        sidebar.appendChild(track);
+
+        let isDragging = false, dragStartY = 0, dragStartScrollTop = 0;
+
+        function updateThumb() {
+            const { scrollTop, scrollHeight, clientHeight } = navEl;
+            const trackH = track.clientHeight;
+            if (scrollHeight <= clientHeight) { thumb.style.opacity = '0'; return; }
+            thumb.style.opacity = '1';
+            const thumbH = Math.max(32, trackH * (clientHeight / scrollHeight));
+            const maxTop = trackH - thumbH;
+            thumb.style.height = thumbH + 'px';
+            thumb.style.top = (scrollTop / (scrollHeight - clientHeight)) * maxTop + 'px';
+        }
+
+        navEl.addEventListener('scroll', updateThumb, { passive: true });
+
+        // Click on track → jump
+        track.addEventListener('mousedown', function (e) {
+            if (e.target === thumb) return;
+            e.preventDefault();
+            const r = track.getBoundingClientRect();
+            const thumbH = thumb.offsetHeight;
+            const ratio = Math.min(Math.max(0, e.clientY - r.top - thumbH / 2), track.clientHeight - thumbH) / (track.clientHeight - thumbH);
+            navEl.scrollTop = ratio * (navEl.scrollHeight - navEl.clientHeight);
+        });
+
+        // Drag thumb
+        thumb.addEventListener('mousedown', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            isDragging = true;
+            dragStartY = e.clientY;
+            dragStartScrollTop = navEl.scrollTop;
+            thumb.style.animationPlayState = 'paused';
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', function (e) {
+            if (!isDragging) return;
+            const ratio = (e.clientY - dragStartY) / (track.clientHeight - thumb.offsetHeight);
+            navEl.scrollTop = dragStartScrollTop + ratio * (navEl.scrollHeight - navEl.clientHeight);
+        });
+
+        document.addEventListener('mouseup', function () {
+            if (isDragging) {
+                isDragging = false;
+                thumb.style.animationPlayState = '';
+                document.body.style.userSelect = '';
+            }
+        });
+
+        updateThumb();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initScrollBar);
+    } else {
+        initScrollBar();
+    }
+})();
