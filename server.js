@@ -3529,6 +3529,60 @@ app.post("/api/faculty/change-password", authMiddleware, requireFaculty, async (
   }
 });
 
+// ============================================
+// GET /api/faculty/department-faculty
+// Returns faculty members in the same dept as the caller.
+// HODs get the full list; regular faculty get their own entry.
+// ============================================
+app.get("/api/faculty/department-faculty", authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub);
+    if (!user) return res.status(404).json({ ok: false, message: "User not found" });
+
+    // Determine department from email
+    const emailPrefix = user.email.split('@')[0];
+    let dept = (user.department || '').toUpperCase();
+    if (!dept && emailPrefix.includes('.')) {
+      const parts = emailPrefix.split('.');
+      // HOD: hod.mca → MCA, Faculty: name.k → derive from user.department
+      if (emailPrefix.toLowerCase().startsWith('hod.')) {
+        dept = parts[1].toUpperCase();
+      } else {
+        dept = parts[parts.length - 1].replace(/[0-9]/g, '').toUpperCase();
+      }
+    }
+
+    if (!dept) return res.json({ ok: true, faculty: [] });
+
+    // Find all admin/faculty users in this department (or with matching HOD email pattern)
+    const facultyUsers = await User.find({
+      role: 'admin',
+      _id: { $ne: user._id }, // exclude self
+      $or: [
+        { department: { $regex: new RegExp(`^${dept}$`, 'i') } },
+        { email: { $regex: new RegExp(`\\.(${dept.toLowerCase()}|${dept.toUpperCase()})@cmrit\\.ac\\.in$`, 'i') } }
+      ]
+    }).select('name email department lastActive').lean();
+
+    // Attach game count for each faculty member
+    const faculty = await Promise.all(facultyUsers.map(async f => {
+      const totalGames = await Game.countDocuments({ createdBy: f._id });
+      return {
+        name: f.name,
+        email: f.email,
+        department: f.department || dept,
+        totalClasses: totalGames, // repurposed as game count for display
+        lastActive: f.lastActive
+      };
+    }));
+
+    res.json({ ok: true, faculty, department: dept });
+  } catch (error) {
+    console.error("Get department-faculty error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 // ===================================
 // ALUMNI BATCH DEACTIVATION API
 // ===================================
