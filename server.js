@@ -3470,6 +3470,38 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
   }
 });
 
+// Update faculty profile photo
+app.post("/api/faculty/profile/photo", express.json({ limit: "5mb" }), authMiddleware, requireFaculty, async (req, res) => {
+  try {
+    const { photoData } = req.body;
+    if (!photoData || typeof photoData !== "string" || (!photoData.startsWith("data:image/") && !photoData.startsWith("http"))) {
+      return res.status(400).json({ ok: false, message: "Invalid photo data" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.sub,
+      { $set: { profilePhoto: photoData } },
+      { new: true }
+    );
+
+    if (!updatedUser) return res.status(404).json({ ok: false, message: "User not found" });
+
+    // Log the activity
+    await UserActivity.create({
+      userId: updatedUser._id,
+      activityType: 'profile_update',
+      description: 'Updated profile picture',
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.json({ ok: true, message: "Profile photo updated successfully" });
+  } catch (error) {
+    console.error("Update faculty profile photo error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 // Get faculty recent activity
 app.get("/api/faculty/activity", authMiddleware, requireFaculty, async (req, res) => {
   try {

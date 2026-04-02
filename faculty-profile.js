@@ -112,16 +112,26 @@ function initAvatarUpload() {
             const src = e.target.result;
             setAvatarSrc(src);
             try {
-                const fd = new FormData();
-                fd.append('photo', file);
                 const res = await fetch(`${API}/faculty/profile/photo`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${tok()}` },
-                    body: fd
+                    headers: { 
+                        'Authorization': `Bearer ${tok()}`,
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({ photoData: src })
                 });
-                showToast(res.ok ? 'Photo updated!' : 'Saved locally only', res.ok ? 'success' : 'warn');
-            } catch (_) {
-                showToast('Saved locally only', 'warn');
+                
+                if (res.ok) {
+                    showToast('Photo saved to database!', 'success');
+                    if (typeof window.syncAdminProfileName === 'function') {
+                        window.syncAdminProfileName();
+                    }
+                } else {
+                    showToast('Failed to save to database', 'warn');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error, saved locally only', 'warn');
             }
         };
         reader.readAsDataURL(file);
