@@ -97,10 +97,62 @@
         }
     }
 
+    // 4. Global Profile Sync (MongoDB)
+    window.syncAdminProfileName = async function() {
+        const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+        if (!token) return;
+
+        try {
+            const res = await fetch(`${window.location.origin}/api/faculty/profile`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) return; // If unauthorized or failed, just silently ignore
+
+            const data = await res.json();
+            if (!data.ok) return;
+
+            const name = data.displayName || data.name || 'Faculty Member';
+            const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'FA';
+
+            // 1. Sidebar - Admin Full Dashboard specific targets
+            const sbName = document.getElementById('adminDisplayName');
+            if (sbName) sbName.textContent = name;
+            const sbAv = document.getElementById('adminAvatarInitials');
+            if (sbAv) sbAv.textContent = initials;
+
+            // 2. Sidebar - Faculty specific targets (from faculty-profile layout)
+            const sideName = document.getElementById('sideName');
+            if (sideName) sideName.textContent = name;
+            const sideAv = document.getElementById('sideAv');
+            if (sideAv) sideAv.textContent = initials;
+
+            // 3. Topbar wrap globally
+            const topAv = document.getElementById('topAv') || document.querySelector('.profile-av');
+            if (topAv) topAv.textContent = initials;
+            const topNameDropdown = document.getElementById('topName') || document.querySelector('.profile-toggle small');
+            if (topNameDropdown) topNameDropdown.textContent = name.split(' ')[0];
+
+            // If photoUrl exists, we can inject an img element
+            if (data.profilePhoto) {
+                const imgStr = `<img src="${data.profilePhoto}" alt="Photo" style="width:100%;height:100%;object-fit:cover;">`;
+                if (sbAv) sbAv.innerHTML = imgStr;
+                if (sideAv) sideAv.innerHTML = imgStr;
+                // If it's a small topnav avatar, it needs a border radius
+                if (topAv) topAv.innerHTML = `<img src="${data.profilePhoto}" alt="Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+            }
+
+        } catch (error) {
+            console.error('Failed to sync global profile name from MongoDB', error);
+        }
+    };
+
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
         injectLogoutModal();
         syncSidebarLinks();
+        if (typeof window.syncAdminProfileName === 'function') {
+            window.syncAdminProfileName();
+        }
 
         // Wire up logout button in sidebar
         const signOutBtn = document.getElementById('signOutControl') || document.querySelector('button[style*="color:#f87171"]');

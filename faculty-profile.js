@@ -430,11 +430,14 @@ function initSave() {
             });
             if (!res.ok) throw new Error('Save failed');
 
-            localStorage.setItem('userName', payload.displayName);
-            localStorage.setItem('name',     payload.displayName);
             setText('aboutDept',   deptLabel(payload.department));
             setText('aboutOffice', payload.officeHours || 'Not set');
             setText('aboutBio',    payload.bio         || 'No bio added yet.');
+
+            // Sync the immediate UI globally using the new MongoDB sync function
+            if (typeof window.syncAdminProfileName === 'function') {
+                await window.syncAdminProfileName();
+            }
 
             const s = document.getElementById('saveStatus');
             if (s) { s.textContent = 'All changes saved ✓'; s.className = 'save-status saved'; }
