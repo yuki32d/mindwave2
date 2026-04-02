@@ -176,38 +176,46 @@
 
         .sidebar-scroll-track {
             position: absolute;
-            right: 4px;
+            right: 3px;
             top: var(--topbar-h);
-            bottom: 58px; /* side-foot height */
-            width: 3px;
-            background: rgba(255, 255, 255, 0.05);
+            bottom: 58px;
+            width: 6px;
+            background: rgba(255, 255, 255, 0.06);
             border-radius: 99px;
-            z-index: 10;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
+            z-index: 20;
+            opacity: 0.35;
+            transition: opacity 0.25s ease, width 0.2s ease;
+            cursor: pointer;
         }
 
         .sidebar:hover .sidebar-scroll-track,
         .sidebar-scroll-track.visible {
             opacity: 1;
+            width: 8px;
         }
 
         .sidebar-scroll-thumb {
             position: absolute;
             left: 0;
-            width: 3px;
-            min-height: 24px;
+            width: 100%;
+            min-height: 32px;
             border-radius: 99px;
-            background: linear-gradient(180deg, var(--s-active-txt), #f97316);
-            box-shadow: 0 0 8px rgba(245, 166, 35, 0.7), 0 0 2px rgba(245, 166, 35, 0.5);
-            transition: top 0.12s ease, height 0.12s ease;
-            animation: scrollThumbPulse 2s ease-in-out infinite;
+            background: linear-gradient(180deg, #f5a623, #f97316);
+            box-shadow: 0 0 10px rgba(245, 166, 35, 0.8), 0 0 3px rgba(245, 166, 35, 0.6);
+            cursor: grab;
+            transition: height 0.08s ease;
+            animation: scrollThumbPulse 2.5s ease-in-out infinite;
+        }
+
+        .sidebar-scroll-thumb:active {
+            cursor: grabbing;
+            animation: none;
+            box-shadow: 0 0 16px rgba(245, 166, 35, 1), 0 0 6px rgba(249, 115, 22, 0.8);
         }
 
         @keyframes scrollThumbPulse {
-            0%, 100% { box-shadow: 0 0 6px rgba(245, 166, 35, 0.5), 0 0 2px rgba(245, 166, 35, 0.4); }
-            50% { box-shadow: 0 0 12px rgba(245, 166, 35, 0.9), 0 0 4px rgba(245, 166, 35, 0.7); }
+            0%, 100% { box-shadow: 0 0 8px rgba(245, 166, 35, 0.6), 0 0 3px rgba(245, 166, 35, 0.4); }
+            50% { box-shadow: 0 0 14px rgba(245, 166, 35, 1), 0 0 5px rgba(249, 115, 22, 0.7); }
         }
 
         .nav-section {
@@ -2719,41 +2727,75 @@
             if (e.target === this) this.classList.remove('show');
         });
 
-        // ── Custom Sidebar Scroll Indicator ──
+        // ── Custom Sidebar Scroll Indicator (interactive) ──
         (function () {
             const scrollEl = document.querySelector('.side-scroll');
             const track = document.getElementById('sideScrollTrack');
             const thumb = document.getElementById('sideScrollThumb');
             if (!scrollEl || !track || !thumb) return;
 
-            let hideTimer;
+            let isDragging = false;
+            let dragStartY = 0;
+            let dragStartScrollTop = 0;
 
             function updateThumb() {
                 const { scrollTop, scrollHeight, clientHeight } = scrollEl;
                 const trackH = track.clientHeight;
                 if (scrollHeight <= clientHeight) {
-                    thumb.style.display = 'none';
+                    thumb.style.opacity = '0';
                     return;
                 }
-                thumb.style.display = 'block';
-                const ratio = clientHeight / scrollHeight;
-                const thumbH = Math.max(24, trackH * ratio);
+                thumb.style.opacity = '1';
+                const thumbH = Math.max(32, trackH * (clientHeight / scrollHeight));
                 const maxTop = trackH - thumbH;
                 const thumbTop = (scrollTop / (scrollHeight - clientHeight)) * maxTop;
                 thumb.style.height = thumbH + 'px';
                 thumb.style.top = thumbTop + 'px';
             }
 
-            function showTrack() {
-                track.classList.add('visible');
-                clearTimeout(hideTimer);
-                hideTimer = setTimeout(() => track.classList.remove('visible'), 1500);
-            }
+            // Scroll → update thumb
+            scrollEl.addEventListener('scroll', updateThumb, { passive: true });
 
-            scrollEl.addEventListener('scroll', () => {
-                updateThumb();
-                showTrack();
-            }, { passive: true });
+            // Click on track → jump scroll
+            track.addEventListener('mousedown', function (e) {
+                if (e.target === thumb) return; // let thumb handler take over
+                e.preventDefault();
+                const trackRect = track.getBoundingClientRect();
+                const clickY = e.clientY - trackRect.top;
+                const trackH = track.clientHeight;
+                const thumbH = thumb.offsetHeight;
+                const targetTop = Math.min(Math.max(0, clickY - thumbH / 2), trackH - thumbH);
+                const ratio = targetTop / (trackH - thumbH);
+                scrollEl.scrollTop = ratio * (scrollEl.scrollHeight - scrollEl.clientHeight);
+            });
+
+            // Drag thumb
+            thumb.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isDragging = true;
+                dragStartY = e.clientY;
+                dragStartScrollTop = scrollEl.scrollTop;
+                thumb.style.animationPlayState = 'paused';
+                document.body.style.userSelect = 'none';
+            });
+
+            document.addEventListener('mousemove', function (e) {
+                if (!isDragging) return;
+                const delta = e.clientY - dragStartY;
+                const trackH = track.clientHeight;
+                const thumbH = thumb.offsetHeight;
+                const scrollRatio = delta / (trackH - thumbH);
+                scrollEl.scrollTop = dragStartScrollTop + scrollRatio * (scrollEl.scrollHeight - scrollEl.clientHeight);
+            });
+
+            document.addEventListener('mouseup', function () {
+                if (isDragging) {
+                    isDragging = false;
+                    thumb.style.animationPlayState = '';
+                    document.body.style.userSelect = '';
+                }
+            });
 
             // Initial render
             updateThumb();
