@@ -1,354 +1,1032 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <script src="admin-theme-init.js"></script>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="favicon.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faculty Profile | MindWave Admin</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="auth-guard.js"></script>
-    <style>
-        /* ── TOKENS ── */
-        :root {
-            --bg: #f4f6fb;
-            --surface: #ffffff;
-            --border: #e5e9f2;
-            --accent: #d08000;
-            --accent-lo: rgba(208, 128, 0, 0.10);
-            --accent-bdr: rgba(208, 128, 0, 0.25);
-            --text: #111827;
-            --muted: #6b7280;
-            --green: #16a34a;
-            --red: #dc2626;
-            --blue: #2563eb;
-            --shadow: 0 1px 4px rgba(0, 0, 0, 0.07), 0 4px 16px rgba(0, 0, 0, 0.05);
-            --radius: 14px;
-            --mono: 'JetBrains Mono', monospace;
-            --sidebar-w: 240px;
-            --topbar-h: 58px;
-            --s-bg: #0f1c2e;
-            --s-border: rgba(255, 255, 255, 0.08);
-            --s-text: #cbd5e1;
-            --s-muted: #4a5e7a;
-            --s-hover: rgba(255, 255, 255, 0.06);
-            --s-active-bg: rgba(208, 128, 0, 0.15);
-            --s-active-txt: #f5a623;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-        }
+  <script src="admin-theme-init.js"></script>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faculty Profile | MindWave</title>
+  <meta name="description" content="Faculty and HOD profile dashboard for MindWave — CMRIT Academic Portal.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="auth-guard.js"></script>
+  <style>
+    /* ═══════════════════════════════════════════════ TOKENS */
+    :root {
+      --bg: #f0f4fb;
+      --surface: #ffffff;
+      --surface2: #f8fafd;
+      --border: #e4eaf4;
+      --accent: #d08000;
+      --accent-lo: rgba(208,128,0,0.10);
+      --accent-bdr: rgba(208,128,0,0.25);
+      --accent-grad: linear-gradient(135deg,#e09000,#d08000);
+      --hod-accent: #06B6D4;
+      --hod-lo: rgba(6,182,212,0.10);
+      --hod-bdr: rgba(6,182,212,0.25);
+      --hod-grad: linear-gradient(135deg,#06B6D4,#0891B2);
+      --text: #0f1923;
+      --text2: #3d4a5e;
+      --muted: #7b8aaa;
+      --green: #16a34a;
+      --green-lo: rgba(22,163,74,0.10);
+      --red: #dc2626;
+      --red-lo: rgba(220,38,38,0.10);
+      --blue: #2563eb;
+      --blue-lo: rgba(37,99,235,0.10);
+      --purple: #7c3aed;
+      --purple-lo: rgba(124,58,237,0.10);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04);
+      --shadow: 0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06);
+      --shadow-lg: 0 4px 20px rgba(0,0,0,0.10), 0 16px 48px rgba(0,0,0,0.08);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    [data-theme="dark"] {
+      --bg: #080d14;
+      --surface: #0f1823;
+      --surface2: #141e2e;
+      --border: rgba(255,255,255,0.07);
+      --text: #e8eef8;
+      --text2: #a0b0cc;
+      --muted: #57698a;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+      --shadow: 0 2px 8px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
+      --shadow-lg: 0 4px 20px rgba(0,0,0,0.5), 0 16px 48px rgba(0,0,0,0.4);
+    }
 
-        [data-theme="dark"] {
-            --bg: #0d1117;
-            --surface: #161b27;
-            --border: rgba(255, 255, 255, 0.08);
-            --text: #e2e8f0;
-            --muted: #6b7694;
-            --shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
-        }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 80% -10%, var(--accent-lo) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at -10% 80%, rgba(37,99,235,0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    [data-role="hod"] body::before {
+      background:
+        radial-gradient(ellipse 80% 60% at 80% -10%, var(--hod-lo) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at -10% 80%, rgba(37,99,235,0.05) 0%, transparent 60%);
+    }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    input, textarea, select { font-family: inherit; }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { min-height: 100%; }
-        body { font-family: 'Inter', sans-serif; font-size: 14px; background: var(--bg); color: var(--text); padding: 40px 20px; position: relative; }
-        a { text-decoration: none; color: inherit; }
-        button { font-family: inherit; cursor: pointer; border: none; background: none; }
-        input, textarea, select { font-family: inherit; }
+    /* ═══════════════════════════════════════════════ LAYOUT */
+    .page-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+      position: relative;
+      z-index: 1;
+    }
 
-        /* ── STANDALONE LAYOUT ── */
-        .profile-container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    /* ═══════════════════════════════════════════════ TOPBAR */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: var(--accent-grad);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px var(--accent-lo);
+      transition: 0.3s;
+    }
+    .brand-logo:hover { transform: rotate(-5deg) scale(1.05); }
+    .brand-logo i { width: 24px; height: 24px; }
+    .brand-text h2 { font-size: 20px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+    .brand-text span { font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .icon-btn {
+      width: 40px; height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+      background: var(--surface);
+      transition: 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+    .icon-btn:hover { color: var(--text); border-color: var(--accent); }
+    .icon-btn i { width: 16px; height: 16px; }
+    .logout-btn {
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--red-lo);
+      color: var(--red);
+      border: 1px solid rgba(220,38,38,0.15);
+      transition: 0.2s;
+    }
+    .logout-btn:hover { background: rgba(220,38,38,0.18); transform: translateY(-1px); }
 
-        /* Background ornament */
-        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top right, var(--accent-lo) 0%, transparent 60%); pointer-events: none; z-index: -1; }
+    /* ═══════════════════════════════════════════════ ROLE PILL */
+    .role-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      border: 1px solid;
+      backdrop-filter: blur(8px);
+    }
+    .role-pill.faculty { background: var(--accent-lo); border-color: var(--accent-bdr); color: var(--accent); }
+    .role-pill.hod { background: var(--hod-lo); border-color: var(--hod-bdr); color: var(--hod-accent); }
+    .role-pill i { width: 12px; height: 12px; }
 
-        /* ── PROFILE PAGE CONTENT ── */
-        .profile-hero-card { display: flex; align-items: center; gap: 28px; padding: 40px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow); }
-        .profile-hero-card::before { content: ''; position: absolute; top: -50%; right: -10%; width: 400px; height: 200%; background: radial-gradient(circle, var(--accent-lo) 0%, transparent 70%); opacity: 0.6; pointer-events: none; }
-        
-        .hero-avatar { width: 110px; height: 110px; border-radius: 28px; background: linear-gradient(135deg, var(--accent), #ff9f00); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 800; flex-shrink: 0; position: relative; border: 4px solid var(--surface); box-shadow: 0 8px 30px rgba(208, 128, 0, 0.3); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .hero-avatar::after { content: ''; position: absolute; inset: -8px; border-radius: 34px; border: 2px solid var(--accent-bdr); opacity: 0; transition: 0.3s; }
-        .hero-avatar:hover { transform: translateY(-5px) scale(1.02); }
-        .hero-avatar:hover::after { opacity: 1; transform: scale(1.05); }
-        .hero-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 24px; }
+    /* ═══════════════════════════════════════════════ HERO CARD */
+    .hero-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 28px;
+      padding: 36px 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card::after {
+      content: '';
+      position: absolute;
+      top: -60%;
+      right: -8%;
+      width: 380px; height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-lo) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-card.hod::after { background: radial-gradient(circle, var(--hod-lo) 0%, transparent 70%); }
 
-        .hero-info h1 { font-size: 36px; font-weight: 800; letter-spacing: -.035em; margin-bottom: 4px; background: linear-gradient(to right, var(--text), var(--muted)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero-info p { color: var(--muted); font-size: 15px; margin-bottom: 16px; font-weight: 500; }
-        .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: var(--accent-lo); border: 1px solid var(--accent-bdr); color: var(--accent); border-radius: 100px; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; backdrop-filter: blur(4px); }
-        .hero-badge svg { width: 12px; height: 12px; }
+    .avatar-wrap { position: relative; flex-shrink: 0; }
+    .avatar {
+      width: 100px; height: 100px;
+      border-radius: 24px;
+      background: var(--accent-grad);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px; font-weight: 800;
+      box-shadow: 0 8px 30px rgba(208,128,0,0.35);
+      transition: 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .avatar.hod-variant {
+      background: var(--hod-grad);
+      box-shadow: 0 8px 30px rgba(6,182,212,0.35);
+    }
+    .avatar:hover { transform: translateY(-4px) scale(1.04); }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; }
+    .avatar-upload-hint {
+      position: absolute;
+      bottom: -6px; right: -6px;
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+    .avatar-upload-hint:hover { color: var(--accent); border-color: var(--accent); }
+    .avatar-upload-hint i { width: 13px; height: 13px; }
+    input#profilePhotoInput { display: none; }
 
-        .tabs-nav { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 1px; }
-        .tab-btn { padding: 10px 20px; font-size: 13px; font-weight: 700; color: var(--muted); border-bottom: 2px solid transparent; transition: 0.2s; position: relative; bottom: -1px; }
-        .tab-btn:hover { color: var(--text); }
-        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .hero-info { flex: 1; min-width: 0; }
+    .hero-info h1 {
+      font-size: 32px; font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: 1.05;
+      margin-bottom: 5px;
+    }
+    .hero-info .hero-email { color: var(--muted); font-size: 14px; font-weight: 500; margin-bottom: 14px; }
+    .hero-info .hero-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .meta-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 11px; font-weight: 600; color: var(--text2);
+    }
+    .meta-chip i { width: 12px; height: 12px; color: var(--muted); }
+    .hero-dept-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 14px;
+      background: var(--accent-lo);
+      border: 1px solid var(--accent-bdr);
+      border-radius: 100px;
+      font-size: 11px; font-weight: 700; color: var(--accent);
+    }
+    .hero-dept-badge.hod { background: var(--hod-lo); border-color: var(--hod-bdr); color: var(--hod-accent); }
+    .hero-dept-badge i { width: 12px; height: 12px; }
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn .3s ease both; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    /* ═══════════════════════════════════════════════ TABS */
+    .tabs-nav {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+      position: relative;
+    }
+    .tab-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 10px 18px;
+      font-size: 13px; font-weight: 700;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      transition: 0.2s;
+      position: relative;
+      bottom: -1px;
+      border-radius: 8px 8px 0 0;
+    }
+    .tab-btn i { width: 14px; height: 14px; }
+    .tab-btn:hover { color: var(--text); background: var(--surface2); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: transparent; }
+    .tab-btn.active.hod-mode { color: var(--hod-accent); border-bottom-color: var(--hod-accent); }
+    .tab-content { display: none; animation: fadeIn .3s ease both; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Global Cards & Stats */
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px; }
-        .card-head { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-        .card-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-        .card-title svg { width: 15px; height: 15px; color: var(--accent); }
-        
-        .stats-strip { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface); }
-        .stat-box { padding: 24px; border-right: 1px solid var(--border); transition: 0.2s; position: relative; overflow: hidden; }
-        .stat-box:last-child { border-right: none; }
-        .stat-box:hover { background: var(--bg); }
-        .stat-box::after { content: ''; position: absolute; bottom: 0; left: 24px; right: 24px; height: 2px; background: var(--accent); transform: scaleX(0); transition: 0.3s; transform-origin: left; }
-        .stat-box:hover::after { transform: scaleX(1); }
-        .stat-key { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; letter-spacing: .05em; }
-        .stat-val { font-family: var(--mono); font-size: 28px; font-weight: 800; color: var(--text); }
+    /* ═══════════════════════════════════════════════ CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .card-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-title {
+      font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; gap: 8px;
+      text-transform: uppercase; letter-spacing: .04em;
+    }
+    .card-title i { width: 16px; height: 16px; color: var(--accent); }
+    .card-title i.hod-icon { color: var(--hod-accent); }
+    .card-body { padding: 20px; }
 
-        /* Lists */
-        .list { display: flex; flex-direction: column; gap: 10px; padding: 18px; }
-        .activity-item { display: flex; align-items: center; gap: 14px; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; transition: 0.2s; }
-        .activity-item:hover { border-color: var(--accent); transform: translateX(4px); }
-        .activity-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid var(--border); }
-        .activity-info h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
-        .activity-info p { font-size: 11px; color: var(--muted); }
-        .activity-time { margin-left: auto; font-size: 10px; font-weight: 700; color: var(--muted); font-family: var(--mono); }
+    /* ═══════════════════════════════════════════════ STATS GRID */
+    .stats-grid {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stats-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .stats-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .stats-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+      transition: 0.25s;
+    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--accent-bdr); }
+    .stat-card.hod:hover { border-color: var(--hod-bdr); }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      bottom: -20px; right: -20px;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      opacity: 0.06;
+      background: var(--accent);
+    }
+    .stat-card .stat-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .stat-card .stat-icon i { width: 18px; height: 18px; }
+    .si-orange { background: var(--accent-lo); color: var(--accent); }
+    .si-teal   { background: var(--hod-lo);   color: var(--hod-accent); }
+    .si-green  { background: var(--green-lo);  color: var(--green); }
+    .si-blue   { background: var(--blue-lo);   color: var(--blue); }
+    .si-purple { background: var(--purple-lo); color: var(--purple); }
+    .si-red    { background: var(--red-lo);    color: var(--red); }
+    .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
+    .stat-val   { font-family: var(--mono); font-size: 30px; font-weight: 700; color: var(--text); line-height: 1; }
+    .stat-sub   { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-        .classes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding: 18px; }
-        .class-card { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 18px; transition: 0.2s; cursor: pointer; }
-        .class-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    /* ═══════════════════════════════════════════════ CLASSES GRID */
+    .classes-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap: 14px; }
+    .class-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .class-card:hover { border-color: var(--accent-bdr); transform: translateY(-3px); box-shadow: var(--shadow); }
+    .class-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .class-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--accent-lo); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+    .class-icon i { width: 17px; height: 17px; }
+    .class-name { font-weight: 700; font-size: 14px; line-height: 1.2; }
+    .class-code { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+    .class-stats { display: flex; gap: 14px; }
+    .class-stat { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--text2); }
+    .class-stat i { width: 13px; height: 13px; color: var(--muted); }
 
-        /* Forms in Admin Style */
-        .form-body { padding: 20px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 13px; transition: 0.2s; }
-        .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); outline: none; }
-        .form-group input[readonly] { opacity: 0.6; cursor: not-allowed; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    /* ═══════════════════════════════════════════════ ACTIVITY LIST */
+    .activity-list { display: flex; flex-direction: column; gap: 10px; }
+    .activity-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: 0.2s;
+    }
+    .activity-item:hover { border-color: var(--accent-bdr); transform: translateX(4px); }
+    .activity-dot { width: 36px; height: 36px; border-radius: 10px; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 17px; border: 1px solid var(--border); flex-shrink: 0; }
+    .activity-content h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .activity-content p { font-size: 11px; color: var(--muted); }
+    .activity-time { margin-left: auto; font-size: 10px; font-weight: 700; color: var(--muted); font-family: var(--mono); white-space: nowrap; }
 
-        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; transition: 0.2s; }
-        .btn-primary { background: var(--accent); color: #fff; }
-        .btn-primary:hover { background: #b87000; transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-lo); }
-        .btn-danger { background: rgba(220, 38, 38, 0.1); color: var(--red); border: 1px solid rgba(220, 38, 38, 0.2); }
-        .btn-danger:hover { background: rgba(220, 38, 38, 0.2); border-color: var(--red); }
+    /* ═══════════════════════════════════════════════ HOD DEPARTMENT OVERVIEW */
+    .dept-overview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .faculty-list { display: flex; flex-direction: column; gap: 10px; }
+    .faculty-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: 0.2s;
+    }
+    .faculty-row:hover { border-color: var(--hod-bdr); }
+    .faculty-avatar-sm {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      background: var(--hod-grad);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .faculty-row-info h4 { font-size: 13px; font-weight: 700; margin-bottom: 1px; }
+    .faculty-row-info p { font-size: 11px; color: var(--muted); }
+    .faculty-row-badge {
+      margin-left: auto;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 10px; font-weight: 700;
+      background: var(--green-lo);
+      color: var(--green);
+    }
 
-        .save-bar { position: sticky; bottom: 0; padding: 16px 22px; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: flex-end; z-index: 10; }
+    /* ═══════════════════════════════════════════════ FORM ELEMENTS */
+    .form-grid { display: grid; gap: 18px; }
+    .form-grid-2 { grid-template-columns: 1fr 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 13px;
+      transition: 0.2s;
+      outline: none;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-lo);
+    }
+    .hod-mode .form-group input:focus,
+    .hod-mode .form-group textarea:focus,
+    .hod-mode .form-group select:focus {
+      border-color: var(--hod-accent);
+      box-shadow: 0 0 0 3px var(--hod-lo);
+    }
+    .form-group input[readonly],
+    .form-group input:disabled {
+      opacity: 0.6; cursor: not-allowed;
+    }
+    .form-group select option { background: var(--surface); color: var(--text); }
 
-        /* Switches */
-        .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
-        .switch { position: relative; width: 44px; height: 22px; background: var(--border); border-radius: 100px; cursor: pointer; transition: 0.2s; }
-        .switch.active { background: var(--accent); }
-        .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: 0.2s; }
-        .switch.active::after { transform: translateX(22px); }
+    /* Avatar Upload Row */
+    .avatar-upload-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px;
+      background: var(--surface2);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+    }
+    .avatar-sm-preview {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: var(--accent-grad);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 17px;
+      overflow: hidden;
+    }
+    .avatar-sm-preview.hod-variant { background: var(--hod-grad); }
+    .avatar-sm-preview img { width: 100%; height: 100%; object-fit: cover; }
 
-    </style>
+    /* Notification Toggles */
+    .toggle-list { display: flex; flex-direction: column; gap: 2px; }
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-label h4 { font-size: 13px; font-weight: 600; margin-bottom: 1px; }
+    .toggle-label p { font-size: 11px; color: var(--muted); }
+    .switch {
+      position: relative; width: 46px; height: 24px;
+      background: var(--border);
+      border-radius: 100px; cursor: pointer; transition: 0.25s;
+      flex-shrink: 0;
+    }
+    .switch.active { background: var(--accent); }
+    .hod-mode .switch.active { background: var(--hod-accent); }
+    .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.16); }
+    .switch.active::after { transform: translateX(22px); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 13px; font-weight: 700;
+      transition: 0.2s;
+    }
+    .btn i { width: 15px; height: 15px; }
+    .btn-primary { background: var(--accent-grad); color: #fff; box-shadow: 0 4px 14px var(--accent-lo); }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(208,128,0,0.3); }
+    .btn-hod { background: var(--hod-grad); color: #fff; box-shadow: 0 4px 14px var(--hod-lo); }
+    .btn-hod:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-danger { background: var(--red-lo); color: var(--red); border: 1px solid rgba(220,38,38,0.2); }
+    .btn-danger:hover { background: rgba(220,38,38,0.18); }
+    .btn-ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-full { width: 100%; }
+
+    .save-bar {
+      position: sticky; bottom: 0;
+      padding: 16px 20px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 10;
+    }
+
+    /* ═══════════════════════════════════════════════ EMPTY STATES */
+    .empty-state {
+      padding: 48px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-state i { width: 40px; height: 40px; opacity: 0.4; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; }
+
+    /* ═══════════════════════════════════════════════ INFO CARDS */
+    .info-card {
+      padding: 16px 18px;
+      border-radius: 12px;
+      border: 1px solid;
+      font-size: 12px; font-weight: 600; line-height: 1.6;
+    }
+    .info-card.accent { background: var(--accent-lo); border-color: var(--accent-bdr); color: var(--accent); }
+    .info-card.hod { background: var(--hod-lo); border-color: var(--hod-bdr); color: var(--hod-accent); }
+    .info-card.green { background: var(--green-lo); border-color: rgba(22,163,74,0.2); color: var(--green); }
+
+    /* ═══════════════════════════════════════════════ PROGRESS BAR */
+    .progress-bar-wrap { margin-top: 8px; }
+    .progress-bar-track { height: 6px; border-radius: 100px; background: var(--border); overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 100px; background: var(--accent-grad); transition: width 1s ease; }
+    .progress-bar-fill.hod-fill { background: var(--hod-grad); }
+    .progress-bar-fill.green-fill { background: linear-gradient(90deg,#16a34a,#22c55e); }
+    .progress-bar-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* ═══════════════════════════════════════════════ PAGE ANIMATION */
+    @keyframes slideUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+    .page-wrap { animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1); }
+
+    /* ═══════════════════════════════════════════════ RESPONSIVE */
+    @media (max-width: 768px) {
+      .stats-grid.cols-4 { grid-template-columns: repeat(2,1fr); }
+      .stats-grid.cols-3 { grid-template-columns: repeat(2,1fr); }
+      .dept-overview { grid-template-columns: 1fr; }
+      .hero-card { flex-direction: column; align-items: flex-start; gap: 16px; padding: 24px; }
+      .hero-info h1 { font-size: 24px; }
+      .form-grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
+<body>
+<div class="page-wrap">
 
-    <div class="profile-container">
-        <!-- Minimal Header -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 40px; height: 40px; border-radius: 12px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--accent-lo);">
-                    <i data-lucide="brain-circuit" style="width: 22px;"></i>
-                </div>
-                <div>
-                    <h2 style="font-weight: 850; font-size: 20px; letter-spacing: -.03em; line-height: 1;">MindWave</h2>
-                    <span style="font-size: 10px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: .05em;">Faculty Profile</span>
-                </div>
-            </div>
-            
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <button class="theme-toggle" id="themeToggle" title="Toggle Theme" style="width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--muted);">
-                    <i data-lucide="sun" class="icon-sun"></i>
-                    <i data-lucide="moon" class="icon-moon"></i>
-                </button>
-                <button id="logoutBtn" style="font-size: 12px; font-weight: 700; color: var(--red); padding: 8px 16px; border-radius: 8px; background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.1);">Logout</button>
-            </div>
+  <!-- ══ TOPBAR ══ -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-logo">
+        <i data-lucide="brain-circuit"></i>
+      </div>
+      <div class="brand-text">
+        <h2>MindWave</h2>
+        <span id="portalLabel">Faculty Profile</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="themeToggle" title="Toggle Theme">
+        <i data-lucide="sun" class="icon-sun"></i>
+        <i data-lucide="moon" class="icon-moon"></i>
+      </button>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <!-- ══ HERO CARD ══ -->
+  <div class="hero-card" id="heroCard">
+    <div class="avatar-wrap">
+      <div class="avatar" id="profileAvatar">
+        <span id="avatarInitials">FA</span>
+      </div>
+      <div class="avatar-upload-hint" id="avatarUploadHint" title="Change Photo">
+        <i data-lucide="camera"></i>
+      </div>
+      <input type="file" id="profilePhotoInput" accept="image/*">
+    </div>
+    <div class="hero-info">
+      <h1 id="profileName">Loading...</h1>
+      <p class="hero-email" id="profileEmail">—</p>
+      <div class="hero-meta" id="heroMeta">
+        <div class="role-pill faculty" id="rolePill">
+          <i data-lucide="award"></i>
+          <span id="rolePillText">Faculty Member</span>
         </div>
-                
-                <!-- Hero Card -->
-                <div class="profile-hero-card">
-                    <div class="hero-avatar" id="profileAvatar">
-                        <span id="avatarInitials">FA</span>
-                    </div>
-                        <div class="hero-info">
-                            <h1 id="profileName">Jeeban</h1>
-                            <p id="profileEmail">jeeban.mca@cmrit.ac.in</p>
-                            <div class="hero-badge" id="roleBadge">👨‍🏫 Faculty Member</div>
-                        </div>
-                </div>
+        <div class="hero-dept-badge" id="heroDeptBadge" style="display:none;">
+          <i data-lucide="building-2"></i>
+          <span id="heroDeptText">Department</span>
+        </div>
+        <div class="meta-chip" id="heroLastSeen" style="display:none;">
+          <i data-lucide="clock"></i>
+          <span id="heroLastSeenText">Recently active</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-                <!-- Tabs -->
-                <nav class="tabs-nav">
-                    <button class="tab-btn active" data-tab="overview">Overview</button>
-                    <button class="tab-btn" data-tab="classes">My Classes</button>
-                    <button class="tab-btn" data-tab="activity">Recent Activity</button>
-                    <button class="tab-btn" data-tab="settings">Profile Settings</button>
-                </nav>
+  <!-- ══ TABS ══ -->
+  <nav class="tabs-nav" id="tabsNav">
+    <button class="tab-btn active" data-tab="overview">
+      <i data-lucide="layout-dashboard"></i> Overview
+    </button>
+    <button class="tab-btn" data-tab="classes" id="tabClasses">
+      <i data-lucide="book-open"></i> My Classes
+    </button>
+    <!-- HOD only tab -->
+    <button class="tab-btn hod-only" data-tab="department" id="tabDepartment" style="display:none;">
+      <i data-lucide="users"></i> Department
+    </button>
+    <button class="tab-btn" data-tab="activity">
+      <i data-lucide="activity"></i> Activity
+    </button>
+    <button class="tab-btn" data-tab="settings">
+      <i data-lucide="settings"></i> Settings
+    </button>
+  </nav>
 
-                <!-- Overview Tab -->
-                <div class="tab-content active" id="overview">
-                    <div class="card">
-                        <div class="stats-strip">
-                            <div class="stat-box">
-                                <div class="stat-key"><i data-lucide="book-open"></i> Classes</div>
-                                <div class="stat-val" id="totalClasses">0</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-key"><i data-lucide="users"></i> Students</div>
-                                <div class="stat-val" id="totalStudents">0</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-key"><i data-lucide="gamepad-2"></i> Games</div>
-                                <div class="stat-val" id="gamesCreated">0</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div class="card">
-                            <div class="card-head"><div class="card-title"><i data-lucide="bar-chart"></i> Performance</div></div>
-                            <div class="stats-strip">
-                                <div class="stat-box" style="border-bottom: 1px solid var(--border);">
-                                    <div class="stat-key">Engagement</div>
-                                    <div class="stat-val" id="avgEngagement" style="color:var(--green);">0%</div>
-                                </div>
-                                <div class="stat-box">
-                                    <div class="stat-key">Completion</div>
-                                    <div class="stat-val" id="completionRate" style="color:var(--blue);">0%</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-head"><div class="card-title"><i data-lucide="info"></i> About Me</div></div>
-                            <div class="form-body">
-                                <div class="form-group">
-                                    <label>Department</label>
-                                    <div id="department" style="font-weight: 600;">Not set</div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Professional Bio</label>
-                                    <div id="bioInfo" style="color: var(--muted); font-size: 13px; line-height: 1.6;">No bio available. Add one in settings!</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Classes Tab -->
-                <div class="tab-content" id="classes">
-                    <div class="card">
-                        <div class="card-head"><div class="card-title"><i data-lucide="book"></i> Registered Classes</div></div>
-                        <div class="classes-grid" id="classesGrid">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Activity Tab -->
-                <div class="tab-content" id="activity">
-                    <div class="card">
-                        <div class="card-head"><div class="card-title"><i data-lucide="activity"></i> Audit Log</div></div>
-                        <div class="list" id="activityList">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Settings Tab -->
-                <div class="tab-content" id="settings">
-                    <div class="two-col" style="display: grid; grid-template-columns: 1fr 340px; gap: 20px;">
-                        <div>
-                            <div class="card">
-                                <div class="card-head"><div class="card-title"><i data-lucide="user"></i> Personal Details</div></div>
-                                <div class="form-body">
-                                    <div class="form-group">
-                                        <label>Profile Photo</label>
-                                        <div style="display: flex; align-items: center; gap: 16px; padding: 12px; background: var(--bg); border: 1px dashed var(--border); border-radius: 12px;">
-                                            <div id="settingsAvatarPreview" style="width: 50px; height: 50px; border-radius: 12px; background: var(--accent); color:#fff; display: flex; align-items: center; justify-content: center; font-weight: 800;">FA</div>
-                                            <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;">
-                                            <button class="btn btn-primary" id="uploadPhotoBtn" style="padding: 6px 12px; font-size: 11px;">Update Photo</button>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Display Name</label>
-                                        <input type="text" id="displayName" placeholder="Professional Name">
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label>Email (Read-only)</label>
-                                            <input type="email" id="emailInput" readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Department</label>
-                                            <input type="text" id="departmentInput" placeholder="e.g. Science">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Bio</label>
-                                        <textarea id="bioInput" rows="4" placeholder="Brief professional description..."></textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Office Hours</label>
-                                        <input type="text" id="officeHours" placeholder="e.g. Mon-Fri 10-12 PM">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-head"><div class="card-title"><i data-lucide="lock" style="color:var(--red);"></i> Security</div></div>
-                                <div class="form-body">
-                                    <div class="form-group">
-                                        <label>Current Password</label>
-                                        <input type="password" id="currentPassword" placeholder="••••••••">
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label>New Password</label>
-                                            <input type="password" id="newPassword" placeholder="••••••••">
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Confirm Password</label>
-                                            <input type="password" id="confirmPassword" placeholder="••••••••">
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-danger" id="changePasswordBtn" style="width: 100%; justify-content: center;">Update Security Credentials</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="card">
-                                <div class="card-head"><div class="card-title"><i data-lucide="bell"></i> Notifications</div></div>
-                                <div class="form-body">
-                                    <div class="toggle-row">
-                                        <span style="font-size: 12px; font-weight: 600;">Email Updates</span>
-                                        <div class="switch active" id="emailNotifToggle"></div>
-                                    </div>
-                                    <div class="toggle-row">
-                                        <span style="font-size: 12px; font-weight: 600;">Student Alerts</span>
-                                        <div class="switch active" id="classNotifToggle"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="card" style="border-color: var(--accent-bdr); background: var(--accent-lo);">
-                                <div class="form-body">
-                                    <p style="font-size: 12px; color: var(--accent); font-weight: 600; line-height: 1.5;">Make sure to save your changes before leaving this tab.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="save-bar">
-                        <button class="btn btn-primary" id="saveSettingsBtn"><i data-lucide="save"></i> Save All Changes</button>
-                    </div>
-                </div>
-
-            </div>
+  <!-- ══════════════════════════════ OVERVIEW TAB ══ -->
+  <div class="tab-content active" id="overview">
+    <!-- Stats Row (Faculty) -->
+    <div class="stats-grid cols-3" id="facultyStatsGrid">
+      <div class="stat-card">
+        <div class="stat-icon si-orange"><i data-lucide="book-open"></i></div>
+        <div class="stat-label">My Classes</div>
+        <div class="stat-val" id="totalClasses">0</div>
+        <div class="stat-sub">Registered classes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-blue"><i data-lucide="users"></i></div>
+        <div class="stat-label">Total Students</div>
+        <div class="stat-val" id="totalStudents">0</div>
+        <div class="stat-sub">Across all classes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-purple"><i data-lucide="gamepad-2"></i></div>
+        <div class="stat-label">Games Created</div>
+        <div class="stat-val" id="gamesCreated">0</div>
+        <div class="stat-sub">Interactive tools</div>
+      </div>
     </div>
 
-    <script src="faculty-profile.js"></script>
-    <script src="admin-logout-handler.js"></script>
-</body>
+    <!-- Stats Row (HOD) — hidden by default -->
+    <div class="stats-grid cols-4" id="hodStatsGrid" style="display:none;">
+      <div class="stat-card hod">
+        <div class="stat-icon si-teal"><i data-lucide="users"></i></div>
+        <div class="stat-label">Faculty Under HOD</div>
+        <div class="stat-val" id="hodFacultyCount">0</div>
+        <div class="stat-sub">Department faculty</div>
+      </div>
+      <div class="stat-card hod">
+        <div class="stat-icon si-blue"><i data-lucide="graduation-cap"></i></div>
+        <div class="stat-label">Total Students</div>
+        <div class="stat-val" id="hodStudentCount">0</div>
+        <div class="stat-sub">Department-wide</div>
+      </div>
+      <div class="stat-card hod">
+        <div class="stat-icon si-green"><i data-lucide="trending-up"></i></div>
+        <div class="stat-label">Avg Engagement</div>
+        <div class="stat-val" id="hodEngagement">—</div>
+        <div class="stat-sub">Department average</div>
+      </div>
+      <div class="stat-card hod">
+        <div class="stat-icon si-orange"><i data-lucide="gamepad-2"></i></div>
+        <div class="stat-label">Games (Dept)</div>
+        <div class="stat-val" id="hodGamesTotal">0</div>
+        <div class="stat-sub">All faculty games</div>
+      </div>
+    </div>
 
+    <!-- Performance & Bio Row -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <!-- Performance Card -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i data-lucide="bar-chart-2"></i> Performance</div>
+        </div>
+        <div class="card-body">
+          <div style="margin-bottom:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:600;color:var(--muted);">Engagement Rate</span>
+              <span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green);" id="avgEngagement">0%</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill green-fill" id="engagementBar" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:600;color:var(--muted);">Completion Rate</span>
+              <span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--blue);" id="completionRate">0%</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="completionBar" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Me Card -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i data-lucide="info"></i> About</div>
+        </div>
+        <div class="card-body">
+          <div style="margin-bottom:14px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px;">Department</div>
+            <div id="deptDisplay" style="font-weight:700;font-size:14px;">—</div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px;">Office Hours</div>
+            <div id="officeHoursDisplay" style="font-size:13px;color:var(--text2);">Not set</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Bio</div>
+            <div id="bioDisplay" style="font-size:13px;color:var(--muted);line-height:1.7;">No bio added yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOD Department Overview (hidden for faculty) -->
+    <div id="hodOverviewSection" style="display:none;">
+      <div class="dept-overview">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i data-lucide="users" class="hod-icon"></i> Faculty Members</div>
+          </div>
+          <div class="card-body">
+            <div class="faculty-list" id="deptFacultyList">
+              <div class="empty-state">
+                <i data-lucide="user-x"></i>
+                <p>No faculty records found.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i data-lucide="pie-chart" class="hod-icon"></i> Dept Analytics</div>
+          </div>
+          <div class="card-body" id="hodAnalyticsCard">
+            <div style="margin-bottom:16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;">Student-Teacher Ratio</div>
+              <div style="font-family:var(--mono);font-size:22px;font-weight:700;" id="st_ratio">—</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;">
+                <span style="font-size:12px;font-weight:600;color:var(--muted);">Dept Engagement</span>
+                <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--hod-accent);" id="deptEngagementPct">0%</span>
+              </div>
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill hod-fill" id="deptEngagementBar" style="width:0%"></div>
+              </div>
+            </div>
+            <a href="faculty-dataanalytics.html" class="btn btn-hod btn-full" style="font-size:12px;">
+              <i data-lucide="external-link"></i> Full Analytics
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ CLASSES TAB ══ -->
+  <div class="tab-content" id="classes">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i data-lucide="book"></i> Registered Classes</div>
+        <a href="faculty-classroom.html" class="btn btn-ghost" style="padding:6px 14px;font-size:11px;">
+          <i data-lucide="plus"></i> Manage
+        </a>
+      </div>
+      <div class="card-body">
+        <div class="classes-grid" id="classesGrid">
+          <div class="empty-state">
+            <i data-lucide="book-x"></i>
+            <p>Loading classes...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ DEPARTMENT TAB (HOD only) ══ -->
+  <div class="tab-content" id="department">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i data-lucide="building-2" class="hod-icon"></i> Department Overview</div>
+      </div>
+      <div class="card-body">
+        <div class="info-card hod" style="margin-bottom:16px;">
+          You are viewing the <strong id="hodDeptFull">your department</strong> as Head of Department. All metrics below are aggregated for your department.
+        </div>
+        <div class="faculty-list" id="departmentFacultyListFull">
+          <div class="empty-state"><i data-lucide="loader"></i><p>Loading faculty...</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ ACTIVITY TAB ══ -->
+  <div class="tab-content" id="activity">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i data-lucide="activity"></i> Recent Activity</div>
+      </div>
+      <div class="card-body">
+        <div class="activity-list" id="activityList">
+          <div class="empty-state"><i data-lucide="inbox"></i><p>No recent activity.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SETTINGS TAB ══ -->
+  <div class="tab-content" id="settings">
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;">
+      <!-- Left column -->
+      <div>
+        <!-- Personal Details -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i data-lucide="user"></i> Personal Details</div>
+          </div>
+          <div class="card-body">
+            <!-- Avatar Upload -->
+            <div class="form-group" style="margin-bottom:18px;">
+              <label>Profile Photo</label>
+              <div class="avatar-upload-row">
+                <div class="avatar-sm-preview" id="settingsAvatarPreview">FA</div>
+                <div>
+                  <div style="font-weight:600;font-size:12px;margin-bottom:3px;">Upload a new photo</div>
+                  <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">JPG, PNG or GIF · Max 2MB</div>
+                  <button class="btn btn-ghost" id="uploadPhotoBtn" style="padding:5px 12px;font-size:11px;">
+                    <i data-lucide="upload"></i> Choose File
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-grid form-grid-2">
+              <div class="form-group">
+                <label>Display Name</label>
+                <input type="text" id="displayName" placeholder="Your full name">
+              </div>
+              <div class="form-group">
+                <label>Email (Read-only)</label>
+                <input type="email" id="emailInput" readonly>
+              </div>
+            </div>
+
+            <div class="form-grid form-grid-2" style="margin-top:14px;">
+              <!-- Faculty gets a department SELECT; HOD gets a read-only input -->
+              <div class="form-group" id="deptSelectGroup">
+                <label>Department</label>
+                <select id="departmentSelect">
+                  <option value="">Select Department</option>
+                  <option value="MCA">MCA — Master of Computer Applications</option>
+                  <option value="CSE">CSE — Computer Science & Engineering</option>
+                  <option value="ECE">ECE — Electronics & Communication</option>
+                  <option value="ISE">ISE — Information Science & Engineering</option>
+                  <option value="AIML">AIML — Artificial Intelligence & Machine Learning</option>
+                  <option value="MECH">MECH — Mechanical Engineering</option>
+                  <option value="CIVIL">CIVIL — Civil Engineering</option>
+                  <option value="EEE">EEE — Electrical & Electronics</option>
+                  <option value="BCA">BCA — Bachelor of Computer Applications</option>
+                  <option value="MBA">MBA — Master of Business Administration</option>
+                </select>
+              </div>
+              <div class="form-group" id="deptReadOnlyGroup" style="display:none;">
+                <label>Department (HOD)</label>
+                <input type="text" id="hodDeptReadOnly" readonly>
+              </div>
+              <div class="form-group">
+                <label>Office Hours</label>
+                <input type="text" id="officeHours" placeholder="e.g. Mon-Fri 10am–12pm">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top:14px;">
+              <label>Professional Bio</label>
+              <textarea id="bioInput" rows="4" placeholder="Brief professional description about yourself..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <i data-lucide="shield" style="color:var(--red);"></i> Security
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-grid" style="gap:12px;">
+              <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" id="currentPassword" placeholder="••••••••">
+              </div>
+              <div class="form-grid form-grid-2">
+                <div class="form-group">
+                  <label>New Password</label>
+                  <input type="password" id="newPassword" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                  <label>Confirm Password</label>
+                  <input type="password" id="confirmPassword" placeholder="••••••••">
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:16px;">
+              <button class="btn btn-danger btn-full" id="changePasswordBtn">
+                <i data-lucide="lock"></i> Update Password
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div>
+        <!-- Notifications -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i data-lucide="bell"></i> Notifications</div>
+          </div>
+          <div class="card-body">
+            <div class="toggle-list">
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <h4>Email Updates</h4>
+                  <p>Receive platform news via email</p>
+                </div>
+                <div class="switch active" id="emailNotifToggle"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <h4>Student Alerts</h4>
+                  <p>Notify when students submit work</p>
+                </div>
+                <div class="switch active" id="studentAlertToggle"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">
+                  <h4>Quiz Results</h4>
+                  <p>Live quiz completion alerts</p>
+                </div>
+                <div class="switch" id="quizResultToggle"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><i data-lucide="link"></i> Quick Links</div>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:8px;">
+            <a href="faculty-classroom.html" class="btn btn-ghost btn-full" style="justify-content:flex-start;">
+              <i data-lucide="monitor-play"></i> My Classroom
+            </a>
+            <a href="faculty-dataanalytics.html" class="btn btn-ghost btn-full" style="justify-content:flex-start;">
+              <i data-lucide="bar-chart-2"></i> Analytics Dashboard
+            </a>
+            <a href="ai-game-builder.html" class="btn btn-ghost btn-full" style="justify-content:flex-start;">
+              <i data-lucide="sparkles"></i> AI Game Builder
+            </a>
+            <a href="manage-students.html" class="btn btn-ghost btn-full" style="justify-content:flex-start;" id="manageStudentsLink">
+              <i data-lucide="users"></i> Manage Students
+            </a>
+          </div>
+        </div>
+
+        <div class="info-card accent">
+          💡 Changes to your profile are auto-saved when you click "Save All Changes" below.
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Bar -->
+    <div class="save-bar">
+      <span style="font-size:12px;color:var(--muted);" id="saveStatus">No unsaved changes</span>
+      <button class="btn btn-primary" id="saveSettingsBtn">
+        <i data-lucide="save"></i> Save All Changes
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script src="admin-logout-handler.js"></script>
+<script src="faculty-profile.js"></script>
+</body>
 </html>
