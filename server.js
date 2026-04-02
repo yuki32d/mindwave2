@@ -3356,16 +3356,16 @@ app.get("/api/faculty/classes", authMiddleware, async (req, res) => {
 // FACULTY PROFILE & ACTIVITY ENDPOINTS
 // ============================================
 
-// Get faculty profile and statistics
+// Get faculty profile and statistics — real-time MongoDB metrics
 app.get("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res) => {
   try {
     const user = await User.findById(req.user.sub);
     if (!user) return res.status(404).json({ ok: false, message: "User not found" });
 
-    // Fetch statistics
+    // Count games created by this faculty
     const gamesCreated = await Game.countDocuments({ createdBy: user._id });
-    
-    // Calculate student and class counts based on department (same logic as /api/faculty/classes)
+
+    // Determine department
     const emailPrefix = user.email.split('@')[0];
     let facultyDepartment = user.department || emailPrefix.toUpperCase();
     if (emailPrefix.includes('.')) {
@@ -3373,18 +3373,46 @@ app.get("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
       facultyDepartment = parts[parts.length - 1].replace(/[0-9]/g, '').toUpperCase();
     }
 
+    // Students in this faculty's department
     const students = await User.find({
       department: { $regex: new RegExp(`^${facultyDepartment}$`, 'i') },
       role: 'student',
       isActive: true
-    });
+    }).select('_id department batch section');
 
     const classSet = new Set();
-    students.forEach(s => {
+    const studentIds = students.map(s => {
       if (s.department && s.batch && s.section) {
         classSet.add(`${s.department}-${s.batch}-${s.section}`);
       }
+      return s._id;
     });
+
+    // ── Real engagement & completion from GameSubmission ──
+    let avgEngagement = 0;
+    let completionRate = 0;
+
+    if (gamesCreated > 0 && studentIds.length > 0) {
+      // Get all submissions for games created by this faculty
+      const gameIds = await Game.find({ createdBy: user._id }).select('_id');
+      const submissions = await GameSubmission.find({
+        gameId: { $in: gameIds.map(g => g._id) }
+      }).select('studentId isCorrect score');
+
+      const totalSubmissions = submissions.length;
+      const uniqueStudents   = new Set(submissions.map(s => s.studentId.toString())).size;
+      const correctSubs      = submissions.filter(s => s.isCorrect).length;
+
+      // Engagement = % of dept students who played at least 1 game
+      avgEngagement = studentIds.length > 0
+        ? Math.round((uniqueStudents / studentIds.length) * 100)
+        : 0;
+
+      // Completion rate = % of submissions marked correct
+      completionRate = totalSubmissions > 0
+        ? Math.round((correctSubs / totalSubmissions) * 100)
+        : 0;
+    }
 
     res.json({
       ok: true,
@@ -3394,13 +3422,14 @@ app.get("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
       department: user.department || facultyDepartment,
       bio: user.bio || "",
       officeHours: user.officeHours || "",
+      profilePhoto: user.profilePhoto || null,
+      lastActive: user.lastActive || null,
       role: user.orgRole || user.role,
       totalClasses: classSet.size,
       totalStudents: students.length,
-      gamesCreated: gamesCreated,
-      avgEngagement: 85, // Placeholder metric
-      totalTeachingTime: 124, // Placeholder metric
-      completionRate: 92 // Placeholder metric
+      gamesCreated,
+      avgEngagement,
+      completionRate
     });
   } catch (error) {
     console.error("Get faculty profile error:", error);

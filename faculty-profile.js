@@ -1,375 +1,331 @@
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // MINDWAVE — FACULTY PROFILE JS
-// Supports dual role: Faculty & HOD
-// Role detected from email format:
+// Real-time MongoDB data | Role: Faculty / HOD
+// Email patterns (same as admin-login.html + server.js):
 //   Faculty → name.initial@cmrit.ac.in
 //   HOD     → hod.dept@cmrit.ac.in
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
-const API_BASE = window.location.origin + '/api';
+const API = window.location.origin + '/api';
 
-// ── ROLE DETECTION ──────────────────────────────────────
+// ── REGEX (mirrors server.js exactly) ────────────────────────────
 const FACULTY_REGEX = /^[a-z]+\.[a-z]@cmrit\.ac\.in$/i;
 const HOD_REGEX     = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
 
 function detectRole(email) {
     if (!email) return 'faculty';
-    if (HOD_REGEX.test(email)) return 'hod';
-    return 'faculty';
+    return HOD_REGEX.test(email) ? 'hod' : 'faculty';
 }
 
-function extractHODDepartment(email) {
-    if (!email) return null;
-    const match = email.match(HOD_REGEX);
-    if (match) return match[1].toUpperCase(); // e.g. "mca" → "MCA"
-    return null;
+function extractHODDept(email) {
+    const m = (email || '').match(HOD_REGEX);
+    return m ? m[1].toUpperCase() : null;
 }
 
 const DEPT_LABELS = {
-    MCA:   'MCA — Master of Computer Applications',
-    CSE:   'CSE — Computer Science & Engineering',
-    ECE:   'ECE — Electronics & Communication',
-    ISE:   'ISE — Information Science & Engineering',
-    AIML:  'AIML — AI & Machine Learning',
-    MECH:  'MECH — Mechanical Engineering',
+    MCA: 'MCA — Master of Computer Applications',
+    CSE: 'CSE — Computer Science & Engineering',
+    ECE: 'ECE — Electronics & Communication',
+    ISE: 'ISE — Information Science & Engineering',
+    AIML: 'AIML — AI & Machine Learning',
+    MECH: 'MECH — Mechanical Engineering',
     CIVIL: 'CIVIL — Civil Engineering',
-    EEE:   'EEE — Electrical & Electronics',
-    BCA:   'BCA — Bachelor of Computer Applications',
-    MBA:   'MBA — Master of Business Administration'
+    EEE: 'EEE — Electrical & Electronics',
+    BCA: 'BCA — Bachelor of Computer Applications',
+    MBA: 'MBA — Master of Business Administration',
 };
+const DEPT_LABEL = (key) => DEPT_LABELS[(key || '').toUpperCase()] || key || '—';
 
-// ── GLOBAL STATE ─────────────────────────────────────────
-let currentRole = 'faculty';
-let currentEmail = '';
-let hodDept = null;
+// ── STATE ─────────────────────────────────────────────────────────
+let _role = 'faculty';
+let _hodDept = null;
+let _refreshInterval = null;
 
-// ── TABS ─────────────────────────────────────────────────
+// ── AUTH TOKEN ───────────────────────────────────────────────────
+function token() {
+    return localStorage.getItem('token') || localStorage.getItem('auth_token') || '';
+}
+
+function authHeaders() {
+    return { 'Authorization': `Bearer ${token()}`, 'Content-Type': 'application/json' };
+}
+
+// ── TABS ─────────────────────────────────────────────────────────
 function initTabs() {
-    const tabBtns     = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabBtns.forEach(btn => {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            const target = btn.dataset.tab;
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
-            const targetEl = document.getElementById(target);
-            if (targetEl) targetEl.classList.add('active');
+            const el = document.getElementById(btn.dataset.tab);
+            if (el) el.classList.add('active');
         });
     });
 }
 
-// ── THEME ────────────────────────────────────────────────
-function initTheme() {
-    const btn = document.getElementById('themeToggle');
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-        const cur   = document.documentElement.getAttribute('data-theme') || 'light';
-        const next  = cur === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('admin-theme', next);
-    });
-}
-
-// ── LOGOUT ───────────────────────────────────────────────
+// ── LOGOUT ───────────────────────────────────────────────────────
 function initLogout() {
     const btn = document.getElementById('logoutBtn');
-    if (btn) {
-        btn.addEventListener('click', e => {
-            e.preventDefault();
-            if (window.performLogout) {
-                performLogout();
-            } else {
-                localStorage.clear();
-                window.location.href = 'marketing-site/admin-login.html';
-            }
-        });
-    }
+    if (btn) btn.addEventListener('click', e => {
+        e.preventDefault();
+        if (window.performLogout) performLogout();
+        else { localStorage.clear(); window.location.href = 'marketing-site/admin-login.html'; }
+    });
 }
 
-// ── SWITCHES (Notification Toggles) ─────────────────────
+// ── SWITCHES ─────────────────────────────────────────────────────
 function initSwitches() {
     document.querySelectorAll('.switch').forEach(sw => {
-        sw.addEventListener('click', () => sw.classList.toggle('active'));
+        sw.addEventListener('click', () => sw.classList.toggle('on'));
     });
 }
 
-// ── AVATAR UPLOAD ────────────────────────────────────────
+// ── AVATAR UPLOAD ────────────────────────────────────────────────
 function initAvatarUpload() {
-    const hint  = document.getElementById('avatarUploadHint');
-    const input = document.getElementById('profilePhotoInput');
-    const uploadBtn = document.getElementById('uploadPhotoBtn');
+    const input      = document.getElementById('profilePhotoInput');
+    const camBadge   = document.getElementById('camBadge');
+    const uploadBtn  = document.getElementById('uploadPhotoBtn');
 
-    [hint, uploadBtn].forEach(el => {
-        if (el) el.addEventListener('click', () => input && input.click());
-    });
+    [camBadge, uploadBtn].forEach(el => el?.addEventListener('click', () => input?.click()));
 
-    if (input) {
-        input.addEventListener('change', async () => {
-            const file = input.files[0];
-            if (!file) return;
-            if (file.size > 2 * 1024 * 1024) {
-                return showToast('File too large — max 2MB', 'error');
+    input?.addEventListener('change', async () => {
+        const file = input.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) return showToast('File too large (max 2MB)', 'error');
+
+        const reader = new FileReader();
+        reader.onload = async e => {
+            const src = e.target.result;
+            // Update hero avatar
+            const heroAv = document.getElementById('heroAvatar');
+            const smPrev = document.getElementById('settingsAvatarPreview');
+            if (heroAv) heroAv.innerHTML = `<img src="${src}" alt="Photo">`;
+            if (smPrev) smPrev.innerHTML = `<img src="${src}" alt="Photo" style="width:100%;height:100%;object-fit:cover;border-radius:7px;">`;
+
+            // Upload to server
+            try {
+                const fd = new FormData();
+                fd.append('photo', file);
+                const res = await fetch(`${API}/faculty/profile/photo`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token()}` },
+                    body: fd
+                });
+                if (res.ok) showToast('Photo updated!', 'success');
+                else showToast('Photo saved locally only', 'warn');
+            } catch (_) {
+                showToast('Upload skipped — saved locally', 'warn');
             }
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const dataUrl = e.target.result;
-                // Update UI previews
-                updateAvatarImage(dataUrl);
-                // Upload to server
-                try {
-                    const token = localStorage.getItem('token');
-                    const formData = new FormData();
-                    formData.append('photo', file);
-                    const res = await fetch(`${API_BASE}/faculty/profile/photo`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}` },
-                        body: formData
-                    });
-                    if (res.ok) showToast('Photo updated!', 'success');
-                } catch (_) {
-                    showToast('Could not upload — saved locally only', 'warn');
-                }
-            };
-            reader.readAsDataURL(file);
-        });
-    }
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
-function updateAvatarImage(src) {
-    const heroAvatar = document.getElementById('profileAvatar');
-    const smPreview  = document.getElementById('settingsAvatarPreview');
-    const imgHtml    = `<img src="${src}" alt="Profile Photo" style="width:100%;height:100%;object-fit:cover;border-radius:20px;">`;
-    if (heroAvatar) heroAvatar.innerHTML = imgHtml;
-    if (smPreview) smPreview.innerHTML = `<img src="${src}" alt="Profile Photo" style="width:100%;height:100%;object-fit:cover;border-radius:9px;">`;
-}
-
-// ── ROLE-BASED UI SETUP ──────────────────────────────────
+// ── ROLE UI SETUP ────────────────────────────────────────────────
 function applyRoleUI(role, email, dept) {
-    currentRole  = role;
-    currentEmail = email;
-    hodDept      = dept;
-
+    _role    = role;
+    _hodDept = dept;
     const isHOD = role === 'hod';
 
-    // Portal label
-    const label = document.getElementById('portalLabel');
-    if (label) label.textContent = isHOD ? 'HOD Profile' : 'Faculty Profile';
+    // Portal label & breadcrumb
+    setText('portalLabel', isHOD ? 'HOD Profile' : 'Faculty Profile');
+    setText('breadcrumbRole', isHOD ? 'HOD Dashboard' : 'Faculty Profile');
+    setText('pageTitle', isHOD ? 'HOD Dashboard' : 'My Profile');
+    setText('pageSub', isHOD
+        ? `Head of Department · ${DEPT_LABEL(dept)}`
+        : 'Manage your account and view your teaching statistics');
 
-    // Hero card class
+    // Role badge
+    const badge     = document.getElementById('roleBadge');
+    const badgeTxt  = document.getElementById('roleBadgeText');
+    if (badge) badge.className = `role-badge ${isHOD ? 'hod' : 'faculty'}`;
+    if (badgeTxt) badgeTxt.textContent = isHOD ? 'Head of Department' : 'Faculty Member';
+
+    // Hero card glow
     const heroCard = document.getElementById('heroCard');
-    if (heroCard && isHOD) heroCard.classList.add('hod');
+    if (heroCard && isHOD) heroCard.classList.add('hod-hero');
 
-    // Role pill
-    const pill     = document.getElementById('rolePill');
-    const pillText = document.getElementById('rolePillText');
-    if (pill && pillText) {
-        if (isHOD) {
-            pill.className = 'role-pill hod';
-            pillText.textContent = 'Head of Department';
-        } else {
-            pill.className = 'role-pill faculty';
-            pillText.textContent = 'Faculty Member';
-        }
+    // Hero dept pill
+    const deptPill = document.getElementById('heroDeptPill');
+    const deptTxt  = document.getElementById('heroDeptText');
+    if (deptPill && dept) {
+        deptPill.style.display = '';
+        deptPill.className = `dept-pill ${isHOD ? 'hod' : 'fac'}`;
+        if (deptTxt) deptTxt.textContent = DEPT_LABEL(dept);
     }
 
-    // Dept badge in hero
-    const heroDeptBadge = document.getElementById('heroDeptBadge');
-    const heroDeptText  = document.getElementById('heroDeptText');
-    if (isHOD && dept) {
-        const fullLabel = DEPT_LABELS[dept] || dept + ' Department';
-        if (heroDeptBadge) {
-            heroDeptBadge.style.display = '';
-            heroDeptBadge.classList.add('hod');
-        }
-        if (heroDeptText) heroDeptText.textContent = fullLabel;
+    // Hero avatar colour
+    const heroAv = document.getElementById('heroAvatar');
+    if (heroAv && isHOD) heroAv.classList.add('hod-av');
 
-        // Fill HOD dept label in dept tab
-        const hodDeptFull = document.getElementById('hodDeptFull');
-        if (hodDeptFull) hodDeptFull.textContent = (DEPT_LABELS[dept] || dept + ' Department');
+    // Settings avatar colour
+    const smPrev = document.getElementById('settingsAvatarPreview');
+    if (smPrev && isHOD) smPrev.classList.add('hod-av');
 
-        // HOD readonly
-        const roGroup = document.getElementById('deptReadOnlyGroup');
-        const selGroup = document.getElementById('deptSelectGroup');
-        const roInput  = document.getElementById('hodDeptReadOnly');
-        if (roGroup)  roGroup.style.display = '';
-        if (selGroup) selGroup.style.display = 'none';
-        if (roInput)  roInput.value = DEPT_LABELS[dept] || dept + ' Department';
-    }
-
-    // Stats grids
-    const facultyGrid = document.getElementById('facultyStatsGrid');
-    const hodGrid     = document.getElementById('hodStatsGrid');
-    const hodOverview = document.getElementById('hodOverviewSection');
-
+    // Stats strips
+    const facCard = document.getElementById('facultyStatsCard');
+    const hodCard = document.getElementById('hodStatsCard');
     if (isHOD) {
-        if (facultyGrid) facultyGrid.style.display = 'none';
-        if (hodGrid)     hodGrid.style.display     = '';
-        if (hodOverview) hodOverview.style.display  = '';
+        if (facCard) facCard.style.display = 'none';
+        if (hodCard) hodCard.style.display = '';
+        // Show HOD overview panels
+        const hodOv = document.getElementById('hodOverview');
+        if (hodOv) hodOv.style.display = '';
+        // Show department tab
+        const tabDept = document.getElementById('tabDept');
+        if (tabDept) tabDept.style.display = '';
+        // Dept label in dept tab
+        setText('hodDeptLabel', DEPT_LABEL(dept));
     }
 
-    // HOD-only tabs
-    const tabDept = document.getElementById('tabDepartment');
-    if (tabDept && isHOD) tabDept.style.display = '';
-
-    // Colour active tab borders
-    const activeTabs = document.querySelectorAll('.tab-btn.active');
-    activeTabs.forEach(t => { if (isHOD) t.classList.add('hod-mode'); });
-
-    // HOD quick link: manage students
-    const msLink = document.getElementById('manageStudentsLink');
-    if (msLink && isHOD) {
-        msLink.innerHTML = '<i data-lucide="users-2"></i> Manage Faculty';
-        msLink.href = 'admin-students.html';
+    // Department field in settings
+    const selWrap = document.getElementById('deptSelectWrap');
+    const roWrap  = document.getElementById('deptReadOnlyWrap');
+    const roInput = document.getElementById('deptReadOnly');
+    if (isHOD) {
+        if (selWrap) selWrap.style.display = 'none';
+        if (roWrap)  roWrap.style.display  = '';
+        if (roInput) roInput.value = DEPT_LABEL(dept);
     }
 
-    // HOD avatar gets teal gradient
-    const avatar = document.getElementById('profileAvatar');
-    if (avatar && isHOD) avatar.classList.add('hod-variant');
-    const smPreview = document.getElementById('settingsAvatarPreview');
-    if (smPreview && isHOD) smPreview.classList.add('hod-variant');
+    // HOD quick links
+    const studLink = document.getElementById('studentsLink');
+    if (studLink && isHOD) {
+        studLink.innerHTML = '<i data-lucide="users-2"></i> Manage Faculty';
+        studLink.href = 'admin-students.html';
+    }
 
-    // Re-render icons after DOM changes
+    // Active tab colour for HOD
+    if (isHOD) {
+        document.querySelectorAll('.tab-btn.active').forEach(t => t.classList.add('hod-tab'));
+    }
+
     if (window.lucide) lucide.createIcons();
 }
 
-// ── LOAD PROFILE ─────────────────────────────────────────
-async function loadFacultyProfile() {
+// ── LOAD PROFILE (real MongoDB) ──────────────────────────────────
+async function loadProfile() {
     try {
-        const token = localStorage.getItem('token');
-        if (!token) { window.location.href = 'marketing-site/admin-login.html'; return; }
+        const t = token();
+        if (!t) { window.location.href = 'marketing-site/admin-login.html'; return; }
 
-        const response = await fetch(`${API_BASE}/faculty/profile`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const res  = await fetch(`${API}/faculty/profile`, {
+            headers: { 'Authorization': `Bearer ${t}` }
         });
 
-        if (!response.ok) throw new Error('Profile fetch failed');
-        const data = await response.json();
+        if (res.status === 401) { window.location.href = 'marketing-site/admin-login.html'; return; }
+        if (!res.ok) throw new Error('Profile fetch failed');
+
+        const data = await res.json();
         renderProfile(data);
     } catch (err) {
-        console.warn('Profile API failed, using local fallback:', err.message);
-        // Local localStorage fallback for demo/dev
-        const email = localStorage.getItem('userEmail') || localStorage.getItem('email') || '';
-        const name  = localStorage.getItem('userName')  || localStorage.getItem('name')  || 'Faculty Member';
-        renderProfile({ email, name });
+        console.warn('Profile API error, using localStorage fallback:', err.message);
+        renderProfile({
+            email: localStorage.getItem('email') || localStorage.getItem('userEmail') || '',
+            name:  localStorage.getItem('name')  || localStorage.getItem('userName')  || 'Faculty Member'
+        });
     }
 }
 
 function renderProfile(data) {
     const email = data.email || '';
-    const name  = data.name || data.displayName || 'Faculty Member';
+    const name  = data.name  || data.displayName || 'Faculty Member';
     const role  = detectRole(email);
-    const dept  = extractHODDepartment(email) || data.department || '';
+    const dept  = extractHODDept(email) || (data.department || '').toUpperCase() || '';
 
-    // Apply role-specific UI changes
-    applyRoleUI(role, email, dept.toUpperCase ? dept.toUpperCase() : dept);
-
-    // Hero name + email
-    const nameEl  = document.getElementById('profileName');
-    const emailEl = document.getElementById('profileEmail');
-    if (nameEl)  nameEl.textContent  = name;
-    if (emailEl) emailEl.textContent = email;
-
-    // Initials
-    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'FA';
-    const avatarInit   = document.getElementById('avatarInitials');
-    const smPreview    = document.getElementById('settingsAvatarPreview');
-    if (avatarInit && !document.getElementById('profileAvatar').querySelector('img')) {
-        avatarInit.textContent = initials;
+    // Apply role-specific UI (only once)
+    if (!document.documentElement.dataset.roleApplied) {
+        applyRoleUI(role, email, dept);
+        document.documentElement.dataset.roleApplied = '1';
     }
-    if (smPreview && !smPreview.querySelector('img')) smPreview.textContent = initials;
 
-    // Photo
-    if (data.photoUrl) updateAvatarImage(data.photoUrl);
+    // Hero
+    setText('heroName',  name);
+    setText('heroEmail', email);
+    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'FA';
+    const heroAv = document.getElementById('heroAvatar');
+    if (heroAv && !heroAv.querySelector('img')) setText('heroInitials', initials);
+    const smPrev = document.getElementById('settingsAvatarPreview');
+    if (smPrev && !smPrev.querySelector('img')) smPrev.textContent = initials;
+    if (data.photoUrl) {
+        if (heroAv) heroAv.innerHTML = `<img src="${data.photoUrl}" alt="Photo">`;
+        if (smPrev) smPrev.innerHTML = `<img src="${data.photoUrl}" alt="Photo" style="width:100%;height:100%;object-fit:cover;border-radius:7px;">`;
+    }
 
-    // Determine dept label
-    let deptKey   = (data.department || dept || '').toUpperCase();
-    let deptLabel = DEPT_LABELS[deptKey] || data.department || 'Not set';
+    // Role stats
+    if (role === 'faculty') {
+        setText('statClasses',  data.totalClasses  ?? 0);
+        setText('statStudents', data.totalStudents ?? 0);
+        setText('statGames',    data.gamesCreated  ?? 0);
+    } else {
+        // HOD gets aggregated dept stats
+        setText('hodFacCount', data.totalClasses  ?? '—'); // repurposed: faculty in dept
+        setText('hodStudCount', data.totalStudents ?? '—');
+        setText('hodEngmt',    data.avgEngagement != null ? `${data.avgEngagement}%` : '—');
+        setText('hodGames',    data.gamesCreated   ?? 0);
+        setText('deptEngPct',  data.avgEngagement != null ? `${data.avgEngagement}%` : '—');
+        setBar('deptEngBar', data.avgEngagement ?? 0);
+    }
 
-    // Stats
-    const statMap = {
-        totalClasses:   data.totalClasses   || 0,
-        totalStudents:  data.totalStudents   || 0,
-        gamesCreated:   data.gamesCreated    || 0,
-        avgEngagement:  `${data.avgEngagement   || 0}%`,
-        completionRate: `${data.completionRate  || 0}%`,
-        hodFacultyCount: data.hodFacultyCount   || 0,
-        hodStudentCount: data.hodStudentCount   || 0,
-        hodEngagement:   data.hodEngagement ? `${data.hodEngagement}%` : '—',
-        hodGamesTotal:   data.hodGamesTotal     || 0
-    };
-    Object.entries(statMap).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = val;
-    });
-
-    // Progress bars
-    const engPct  = data.avgEngagement  || 0;
-    const cmpPct  = data.completionRate || 0;
-    const deptPct = data.hodEngagement  || 0;
-    setBar('engagementBar',   engPct);
-    setBar('completionBar',   cmpPct);
-    setBar('deptEngagementBar', deptPct);
-
-    const deptEngPctEl = document.getElementById('deptEngagementPct');
-    if (deptEngPctEl) deptEngPctEl.textContent = `${deptPct}%`;
-
-    // About section
-    setText('deptDisplay',       deptLabel);
-    setText('officeHoursDisplay', data.officeHours || 'Not set');
-    setText('bioDisplay',         data.bio         || 'No bio added yet.');
+    // Performance bars
+    const eng = data.avgEngagement  ?? 0;
+    const cmp = data.completionRate ?? 0;
+    setText('engPct', `${eng}%`);
+    setText('cmpPct', `${cmp}%`);
+    setBar('engBar', eng);
+    setBar('cmpBar', cmp);
 
     // HOD ratio
-    const ratio = data.hodFacultyCount
-        ? Math.round((data.hodStudentCount || 0) / data.hodFacultyCount) + ':1'
+    const ratio = (data.totalClasses && data.totalStudents)
+        ? `${Math.round(data.totalStudents / data.totalClasses)}:1`
         : '—';
-    setText('st_ratio', ratio);
+    setText('stRatio', ratio);
+
+    // About
+    const deptKey   = dept || (data.department || '').toUpperCase();
+    const deptLabel = DEPT_LABEL(deptKey);
+    setText('aboutDept',   deptLabel);
+    setText('aboutOffice', data.officeHours || 'Not set');
+    setText('aboutBio',    data.bio         || 'No bio added yet.');
 
     // Form fields
-    const fields = {
-        displayName:      name,
-        emailInput:       email,
-        officeHours:      data.officeHours || '',
-        bioInput:         data.bio         || ''
-    };
-    Object.entries(fields).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (el) el.value = val;
-    });
-
-    // Department control
-    if (currentRole === 'faculty') {
+    setInput('displayName',   name);
+    setInput('emailInput',    email);
+    setInput('officeHours',   data.officeHours || '');
+    setInput('bioInput',      data.bio         || '');
+    if (role === 'faculty') {
         const sel = document.getElementById('departmentSelect');
         if (sel) sel.value = deptKey;
+    }
+
+    // Last-active chip
+    if (data.lastActive) {
+        const el = document.getElementById('heroLastActive');
+        if (el) {
+            el.style.display = '';
+            setText('heroLastActiveText', 'Active ' + formatTime(data.lastActive));
+        }
     }
 
     if (window.lucide) lucide.createIcons();
 }
 
-function setBar(id, pct) {
-    const el = document.getElementById(id);
-    if (el) setTimeout(() => { el.style.width = Math.min(100, pct) + '%'; }, 200);
-}
-function setText(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-}
-
-// ── LOAD CLASSES ─────────────────────────────────────────
+// ── LOAD CLASSES (real MongoDB) ──────────────────────────────────
 async function loadClasses() {
     const container = document.getElementById('classesGrid');
     if (!container) return;
 
     try {
-        const token   = localStorage.getItem('token');
-        const res     = await fetch(`${API_BASE}/faculty/classes`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const res = await fetch(`${API}/faculty/classes`, {
+            headers: { 'Authorization': `Bearer ${token()}` }
         });
         if (!res.ok) throw new Error('Classes fetch failed');
-        const classes = await res.json();
-        renderClasses(classes, container);
-    } catch (_) {
+        const data  = await res.json();
+        // API returns { ok, department, classes: [{id, displayName, ...}] }
+        const arr   = Array.isArray(data) ? data : (data.classes || []);
+        renderClasses(arr, container);
+    } catch (err) {
+        console.warn('Classes fetch failed:', err.message);
         renderClasses([], container);
     }
 }
@@ -386,80 +342,73 @@ function renderClasses(classes, container) {
     }
     container.innerHTML = classes.map(c => `
         <div class="class-card">
-            <div class="class-card-header">
+            <div class="class-card-top">
                 <div class="class-icon"><i data-lucide="book-open"></i></div>
                 <div>
-                    <div class="class-name">${c.name || 'Untitled Class'}</div>
-                    <div class="class-code">${c.code || 'N/A'}</div>
+                    <div class="class-name">${c.displayName || c.name || c.id || 'Class'}</div>
+                    <div class="class-code">${c.id || c.code || ''}</div>
                 </div>
             </div>
-            <div class="class-stats">
-                <span class="class-stat"><i data-lucide="users"></i>${c.studentCount || 0} Students</span>
-                <span class="class-stat"><i data-lucide="gamepad-2"></i>${c.gameCount || 0} Games</span>
-                <span class="class-stat"><i data-lucide="calendar"></i>${c.semester || 'Sem?'}</span>
+            <div class="class-footer">
+                <span class="class-stat"><i data-lucide="users"></i>${c.studentCount ?? '—'} Students</span>
+                <span class="class-stat"><i data-lucide="gamepad-2"></i>${c.gameCount ?? '—'} Games</span>
             </div>
         </div>
     `).join('');
     if (window.lucide) lucide.createIcons();
 }
 
-// ── LOAD ACTIVITY ────────────────────────────────────────
+// ── LOAD ACTIVITY (real MongoDB) ─────────────────────────────────
 async function loadActivity() {
     const container = document.getElementById('activityList');
     if (!container) return;
-
     try {
-        const token = localStorage.getItem('token');
-        const res   = await fetch(`${API_BASE}/faculty/activity`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const res = await fetch(`${API}/faculty/activity`, {
+            headers: { 'Authorization': `Bearer ${token()}` }
         });
         if (!res.ok) throw new Error('Activity fetch failed');
-        const activities = await res.json();
-        renderActivity(activities, container);
+        const data = await res.json();
+        renderActivity(Array.isArray(data) ? data : [], container);
     } catch (_) {
         renderActivity([], container);
     }
 }
 
-function renderActivity(activities, container) {
-    if (!activities || activities.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <i data-lucide="inbox"></i>
-                <p>No recent activity logged.</p>
-            </div>`;
+function renderActivity(items, container) {
+    if (!items.length) {
+        container.innerHTML = `<div class="empty-state"><i data-lucide="inbox"></i><p>No recent activity logged.</p></div>`;
         if (window.lucide) lucide.createIcons();
         return;
     }
-    container.innerHTML = activities.map(item => `
-        <div class="activity-item">
-            <div class="activity-dot">${item.icon || '📝'}</div>
-            <div class="activity-content">
+    container.innerHTML = items.map(item => `
+        <div class="pulse-item">
+            <div class="p-icon">${item.icon || '📝'}</div>
+            <div class="p-body">
                 <h4>${item.title || 'System Action'}</h4>
                 <p>${item.description || ''}</p>
+                <div class="p-meta"><span>${formatTime(item.timestamp)}</span></div>
             </div>
-            <div class="activity-time">${formatTime(item.timestamp)}</div>
         </div>
     `).join('');
 }
 
-// ── LOAD HOD DEPARTMENT FACULTY ───────────────────────────
+// ── LOAD HOD DEPT FACULTY (real MongoDB) ─────────────────────────
 async function loadDeptFaculty() {
-    if (currentRole !== 'hod') return;
-    const containers = ['deptFacultyList', 'departmentFacultyListFull'];
+    if (_role !== 'hod') return;
+    const targets = ['deptFacultyList', 'deptFacultyFull'];
     try {
-        const token = localStorage.getItem('token');
-        const res   = await fetch(`${API_BASE}/faculty/department-faculty`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const res = await fetch(`${API}/faculty/department-faculty`, {
+            headers: { 'Authorization': `Bearer ${token()}` }
         });
         if (!res.ok) throw new Error('Dept faculty fetch failed');
-        const faculty = await res.json();
-        containers.forEach(id => {
+        const data    = await res.json();
+        const faculty = Array.isArray(data) ? data : (data.faculty || []);
+        targets.forEach(id => {
             const el = document.getElementById(id);
             if (el) renderDeptFaculty(faculty, el);
         });
     } catch (_) {
-        containers.forEach(id => {
+        targets.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.innerHTML = `<div class="empty-state"><i data-lucide="users-x"></i><p>Could not load department faculty.</p></div>`;
         });
@@ -467,180 +416,177 @@ async function loadDeptFaculty() {
 }
 
 function renderDeptFaculty(faculty, container) {
-    if (!faculty || faculty.length === 0) {
-        container.innerHTML = `<div class="empty-state"><i data-lucide="users-x"></i><p>No faculty found in this department.</p></div>`;
+    if (!faculty.length) {
+        container.innerHTML = `<div class="empty-state"><i data-lucide="users-x"></i><p>No faculty found in your department.</p></div>`;
         if (window.lucide) lucide.createIcons();
         return;
     }
     container.innerHTML = faculty.map(f => {
-        const initials = (f.name || 'F').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        const init = (f.name || 'F').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
         return `
             <div class="faculty-row">
-                <div class="faculty-avatar-sm">${initials}</div>
+                <div class="faculty-av-sm">${init}</div>
                 <div class="faculty-row-info">
-                    <h4>${f.name || 'Unknown'}</h4>
+                    <h4>${f.name  || 'Unknown'}</h4>
                     <p>${f.email || ''}</p>
                 </div>
-                <span class="faculty-row-badge">${f.totalClasses || 0} Classes</span>
+                <span class="fc-badge">${f.totalClasses || 0} Classes</span>
             </div>
         `;
     }).join('');
 }
 
-// ── SAVE SETTINGS ────────────────────────────────────────
+// ── SAVE SETTINGS ────────────────────────────────────────────────
 function initSave() {
-    const saveBtn = document.getElementById('saveSettingsBtn');
-    const saveStatus = document.getElementById('saveStatus');
-
-    // Track changes
+    // Track unsaved changes
     ['displayName','officeHours','bioInput','departmentSelect'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', () => {
-            if (saveStatus) saveStatus.textContent = 'Unsaved changes…';
+            const st = document.getElementById('saveStatus');
+            if (st) { st.textContent = 'Unsaved changes…'; st.className = 'save-status unsaved'; }
         });
     });
 
-    if (saveBtn) {
-        saveBtn.addEventListener('click', async () => {
-            const dept = currentRole === 'hod'
-                ? hodDept
-                : (document.getElementById('departmentSelect')?.value || '');
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn?.addEventListener('click', async () => {
+        const dept = _role === 'hod'
+            ? _hodDept
+            : (document.getElementById('departmentSelect')?.value || '');
 
-            const payload = {
-                displayName: document.getElementById('displayName')?.value || '',
-                department:  dept,
-                bio:         document.getElementById('bioInput')?.value     || '',
-                officeHours: document.getElementById('officeHours')?.value  || ''
-            };
+        const payload = {
+            displayName: document.getElementById('displayName')?.value  || '',
+            department:  dept,
+            bio:         document.getElementById('bioInput')?.value     || '',
+            officeHours: document.getElementById('officeHours')?.value  || ''
+        };
 
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i data-lucide="loader-2"></i> Saving…';
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner"></span> Saving…';
+
+        try {
+            const res = await fetch(`${API}/faculty/profile`, {
+                method: 'PUT',
+                headers: authHeaders(),
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error('Save failed');
+
+            localStorage.setItem('userName', payload.displayName);
+            localStorage.setItem('name',     payload.displayName);
+            // Update about section
+            const deptLabel = DEPT_LABEL(payload.department);
+            setText('aboutDept',   deptLabel);
+            setText('aboutOffice', payload.officeHours || 'Not set');
+            setText('aboutBio',    payload.bio         || 'No bio added yet.');
+            const dp = document.getElementById('heroDeptText');
+            if (dp) dp.textContent = deptLabel;
+
+            const st = document.getElementById('saveStatus');
+            if (st) { st.textContent = 'All changes saved ✓'; st.className = 'save-status saved'; }
+            showToast('Profile updated!', 'success');
+        } catch (err) {
+            console.error(err);
+            showToast('Failed to save — check connection', 'error');
+            const st = document.getElementById('saveStatus');
+            if (st) { st.textContent = 'Save failed'; st.className = 'save-status'; }
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i data-lucide="save"></i> Save All Changes';
             if (window.lucide) lucide.createIcons();
-
-            try {
-                const token = localStorage.getItem('token');
-                const res   = await fetch(`${API_BASE}/faculty/profile`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-                if (!res.ok) throw new Error('Save failed');
-                localStorage.setItem('userName', payload.displayName);
-                // Sync bio/dept/officeHours in overview
-                setText('deptDisplay',        DEPT_LABELS[payload.department] || payload.department || 'Not set');
-                setText('officeHoursDisplay', payload.officeHours || 'Not set');
-                setText('bioDisplay',         payload.bio         || 'No bio added yet.');
-                if (saveStatus) saveStatus.textContent = 'All changes saved ✓';
-                showToast('Profile updated!', 'success');
-            } catch (err) {
-                console.error(err);
-                showToast('Failed to save profile', 'error');
-                if (saveStatus) saveStatus.textContent = 'Save failed — check connection';
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = '<i data-lucide="save"></i> Save All Changes';
-                if (window.lucide) lucide.createIcons();
-            }
-        });
-    }
+        }
+    });
 
     // Password change
-    const passBtn = document.getElementById('changePasswordBtn');
-    if (passBtn) {
-        passBtn.addEventListener('click', async () => {
-            const oldPass  = document.getElementById('currentPassword')?.value  || '';
-            const newPass  = document.getElementById('newPassword')?.value       || '';
-            const confPass = document.getElementById('confirmPassword')?.value   || '';
+    document.getElementById('changePasswordBtn')?.addEventListener('click', async () => {
+        const old  = document.getElementById('currentPassword')?.value || '';
+        const nw   = document.getElementById('newPassword')?.value     || '';
+        const conf = document.getElementById('confirmPassword')?.value || '';
+        if (!old || !nw) return showToast('Fill in all password fields', 'error');
+        if (nw !== conf)  return showToast('Passwords do not match', 'error');
+        if (nw.length < 6) return showToast('Min 6 characters', 'error');
 
-            if (!oldPass || !newPass) return showToast('Fill in all password fields', 'error');
-            if (newPass !== confPass)  return showToast('Passwords do not match', 'error');
-            if (newPass.length < 6)   return showToast('New password must be ≥ 6 chars', 'error');
-
-            passBtn.disabled = true;
-            try {
-                const token = localStorage.getItem('token');
-                const res   = await fetch(`${API_BASE}/faculty/change-password`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ currentPassword: oldPass, newPassword: newPass })
-                });
-                if (!res.ok) throw new Error('Password change failed');
-                ['currentPassword','newPassword','confirmPassword'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.value = '';
-                });
-                showToast('Password changed successfully!', 'success');
-            } catch (err) {
-                showToast('Password update failed', 'error');
-            } finally {
-                passBtn.disabled = false;
+        try {
+            const res = await fetch(`${API}/faculty/change-password`, {
+                method: 'POST',
+                headers: authHeaders(),
+                body: JSON.stringify({ currentPassword: old, newPassword: nw })
+            });
+            if (!res.ok) {
+                const d = await res.json().catch(() => ({}));
+                throw new Error(d.message || 'Failed');
             }
-        });
-    }
+            ['currentPassword','newPassword','confirmPassword'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            showToast('Password changed!', 'success');
+        } catch (err) {
+            showToast(err.message || 'Password update failed', 'error');
+        }
+    });
 }
 
-// ── TOAST NOTIFICATION ───────────────────────────────────
-function showToast(msg, type = 'success') {
-    const existing = document.getElementById('mw-toast');
-    if (existing) existing.remove();
-
-    const colors = {
-        success: ['var(--green-lo)', 'var(--green)',  'rgba(22,163,74,0.2)'],
-        error:   ['var(--red-lo)',   'var(--red)',    'rgba(220,38,38,0.2)'],
-        warn:    ['var(--accent-lo)','var(--accent)', 'var(--accent-bdr)']
-    };
-    const [bg, color, border] = colors[type] || colors.success;
-
-    const toast = document.createElement('div');
-    toast.id = 'mw-toast';
-    toast.style.cssText = `
-        position:fixed;bottom:32px;right:32px;z-index:9999;
-        padding:12px 20px;border-radius:12px;
-        background:${bg};color:${color};border:1px solid ${border};
-        font-size:13px;font-weight:700;font-family:'Inter',sans-serif;
-        display:flex;align-items:center;gap:8px;
-        box-shadow:0 4px 20px rgba(0,0,0,0.12);
-        animation:slideInToast .3s cubic-bezier(0.16,1,0.3,1);
-    `;
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-
-    if (!document.getElementById('toast-style')) {
-        const s = document.createElement('style');
-        s.id = 'toast-style';
-        s.textContent = `@keyframes slideInToast{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}`;
-        document.head.appendChild(s);
-    }
-
-    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3500);
+// ── AUTO-REFRESH (every 30 s) ────────────────────────────────────
+function startAutoRefresh() {
+    if (_refreshInterval) clearInterval(_refreshInterval);
+    _refreshInterval = setInterval(() => {
+        loadProfile();
+        loadClasses();
+        loadActivity();
+        if (_role === 'hod') loadDeptFaculty();
+    }, 30_000);
 }
 
-// ── TIME FORMATTER ───────────────────────────────────────
+// ── HELPERS ──────────────────────────────────────────────────────
+function setText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = String(val ?? '');
+}
+
+function setInput(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val ?? '';
+}
+
+function setBar(id, pct) {
+    const el = document.getElementById(id);
+    if (el) setTimeout(() => { el.style.width = Math.min(100, Math.max(0, Number(pct))) + '%'; }, 300);
+}
+
 function formatTime(ts) {
-    if (!ts) return 'Recent';
+    if (!ts) return 'recently';
     const diff = (Date.now() - new Date(ts)) / 1000;
-    if (diff < 60)    return 'Just now';
+    if (diff < 60)    return 'just now';
     if (diff < 3600)  return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return new Date(ts).toLocaleDateString();
 }
 
-// ── INIT ─────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+    document.querySelectorAll('.mw-toast').forEach(t => t.remove());
+    const el = document.createElement('div');
+    el.className = `mw-toast ${type}`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) lucide.createIcons();
     initTabs();
-    initTheme();
     initLogout();
     initSwitches();
     initAvatarUpload();
     initSave();
-    loadFacultyProfile();
-    loadClasses();
-    loadActivity();
+
+    // Load all data
+    Promise.all([
+        loadProfile(),
+        loadClasses(),
+        loadActivity()
+    ]).then(() => {
+        if (_role === 'hod') loadDeptFaculty();
+        startAutoRefresh();
+    });
 });
