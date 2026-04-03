@@ -799,14 +799,14 @@
                 <div class="greeting-row" style="margin-bottom:24px;">
                     <div>
                         <div class="greeting-name" style="font-size:1.6rem;">Community</div>
-                        <div class="greeting-date">Share projects, collaborate, and connect with fellow students.</div>
+                        <div class="greeting-date">Participate in polls, share feedback, join live quizzes, and take part in class discussions.</div>
                     </div>
                 </div>
 
                 <!-- -- Tab bar -- -->
                 <div class="cm-tabs">
 
-                    <button class="cm-tab" data-section="poll">
+                    <button class="cm-tab active" data-section="poll">
                         <i data-lucide="bar-chart-3"></i> Quick Poll
                     </button>
                     <button class="cm-tab" data-section="feedback">
@@ -820,52 +820,9 @@
                     </button>
                 </div>
 
-                <!-- ------------------- FEED SECTION ------------------- -->
-                <div id="communitySection" class="cm-section active">
-
-                    <!-- Search + sort -->
-                    <div class="cm-toolbar">
-                        <div class="cm-search">
-                            <i data-lucide="search"></i>
-                            <!-- NOTE: reusing the topbar #searchInput via JS; this is a visual duplicate handled by student-community.js -->
-                            <input type="text" id="searchInputAlt" placeholder="Search posts..." autocomplete="off">
-                        </div>
-                        <div class="cm-sort-group" id="sortBtns">
-                            <button class="cm-sort-btn active" data-sort="recent"><i data-lucide="clock-4"></i>
-                                Recent</button>
-                            <button class="cm-sort-btn" data-sort="popular"><i data-lucide="flame"></i> Popular</button>
-                            <button class="cm-sort-btn" data-sort="trending"><i data-lucide="trending-up"></i>
-                                Trending</button>
-                        </div>
-                    </div>
-
-                    <!-- Trending tags -->
-                    <div class="cm-tags-bar" id="trendingTags">
-                        <span class="cm-tags-label"><i data-lucide="tag"></i> &nbsp;Tags</span>
-                        <div id="tagList">
-                            <span style="color:var(--text-secondary);font-size:.82rem;">No trending tags yet</span>
-                        </div>
-                    </div>
-
-                    <!-- Posts feed -->
-                    <div id="postsContainer">
-                        <!-- Default empty state; replaced by JS -->
-                        <div class="cm-empty">
-                            <div class="cm-empty-icon"><i data-lucide="message-square-plus"
-                                    style="width:56px;height:56px;color:var(--accent,#6366f1);opacity:.5;"></i></div>
-                            <h3>No posts yet</h3>
-                            <p>Be the first to share something with the community!</p>
-                        </div>
-                    </div>
-
-                    <!-- Load more -->
-                    <div class="load-more-container" id="loadMoreContainer" style="display:none;">
-                        <button id="loadMoreBtn">Load More Posts</button>
-                    </div>
-                </div>
 
                 <!-- ------------------- POLL SECTION ------------------- -->
-                <div id="pollSection" class="cm-section">
+                <div id="pollSection" class="cm-section active">
                     <!-- WAITING STATE -->
                     <div class="cm-feature-card" id="pollWaitingCard">
                         <div class="cf-icon" style="background:rgba(99,102,241,.12);">
@@ -1192,7 +1149,7 @@
             });
 
             // -- Section tabs --
-            const sections = ['communitySection', 'pollSection', 'feedbackSection', 'quizSection', 'discussionsSection'];
+            const sections = ['pollSection', 'feedbackSection', 'quizSection', 'discussionsSection'];
             document.querySelectorAll('.cm-tab[data-section]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const target = btn.dataset.section + 'Section';
@@ -1204,8 +1161,6 @@
                         const sec = el(id);
                         if (sec) sec.classList.toggle('active', id === target);
                     });
-                    // If "My Posts" tab
-                    if (btn.dataset.my === '1' && typeof showMyPosts === 'function') showMyPosts();
                 });
             });
 
@@ -1217,13 +1172,7 @@
                 });
             });
 
-            // -- Sync topbar search ? community search --
-            const topSearch = el('searchInput');
-            const altSearch = el('searchInputAlt');
-            if (topSearch && altSearch) {
-                topSearch.addEventListener('input', e => { altSearch.value = e.target.value; altSearch.dispatchEvent(new Event('input')); });
-                altSearch.addEventListener('input', e => { topSearch.value = e.target.value; });
-            }
+
 
             // -- Modal helpers --
             // The existing student-community.js opens/closes via class .active on .modal
