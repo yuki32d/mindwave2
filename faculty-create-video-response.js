@@ -101,8 +101,8 @@ async function publishActivity() {
 
         if (response.ok) {
             const result = await response.json();
-            alert('✅ Video response activity published successfully!');
-            window.location.href = 'admin.html';
+            showProfessionalPopup('Published!', 'Video response activity published successfully.');
+
         } else {
             throw new Error('Failed to publish activity');
         }

@@ -156,8 +156,8 @@ async function publishGameWithClasses(targetClasses, isPublic) {
         });
 
         if (response.ok) {
-            alert('✅ Sorter Game published successfully!');
-            window.location.href = 'admin.html';
+            showProfessionalPopup('Published!', 'Tech Sorter game published successfully.');
+
         } else {
             const error = await response.json();
             alert('Failed to publish: ' + (error.message || 'Unknown error'));

@@ -63,8 +63,8 @@ async function publishGameWithClasses(targetClasses, isPublic) {
         });
 
         if (response.ok) {
-            alert('✅ Code Challenge published successfully!');
-            window.location.href = 'admin.html';
+            showProfessionalPopup('Published!', 'Code Challenge published successfully.');
+
         } else {
             const error = await response.json();
             alert('Failed to publish: ' + (error.message || 'Unknown error'));

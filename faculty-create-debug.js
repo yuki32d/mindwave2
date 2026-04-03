@@ -126,8 +126,8 @@ async function publishGameWithClasses(targetClasses, isPublic) {
         });
 
         if (response.ok) {
-            alert('✅ Debug game published successfully!');
-            window.location.href = 'admin.html';
+            showProfessionalPopup('Published!', 'Bug Hunt game published successfully.');
+
         } else {
             const error = await response.json();
             alert('Failed to publish: ' + (error.message || 'Unknown error'));

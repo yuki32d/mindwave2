@@ -87,8 +87,8 @@ async function publishGameWithClasses(targetClasses, isPublic) {
         });
 
         if (response.ok) {
-            alert('✅ Syntax Game published successfully!');
-            window.location.href = 'admin.html';
+            showProfessionalPopup('Published!', 'Syntax Fill-in game published successfully.');
+
         } else {
             const error = await response.json();
             alert('Failed to publish: ' + (error.message || 'Unknown error'));

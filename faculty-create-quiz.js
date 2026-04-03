@@ -173,8 +173,8 @@ async function publishGameWithClasses(targetClasses, isPublic) {
         if (response.ok) {
             const result = await response.json();
             console.log('=== SUCCESS ===');
-            alert('✅ Quiz published successfully!');
-            window.location.href = 'admin.html';
+            showProfessionalPopup('Published!', 'Quiz published successfully.');
+
         } else {
             const error = await response.json();
             console.error('=== ERROR RESPONSE ===', error);

@@ -171,8 +171,8 @@ async function publishGameWithClasses(targetClasses, isPublic) {
         });
         const data = await res.json();
         if (data.ok) {
-            alert('✅ Coding challenge published! Students will find it in Code Practice.');
-            window.location.href = 'admin.html';
+            showProfessionalPopup('Published!', 'Coding challenge published successfully. Students will find it in Code Practice.');
+
         } else {
             alert('Failed to publish: ' + data.message);
         }

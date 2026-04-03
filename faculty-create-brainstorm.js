@@ -62,8 +62,8 @@ async function publishBoard() {
 
         if (response.ok) {
             const result = await response.json();
-            alert('✅ Brainstorm board published successfully!');
-            window.location.href = 'admin.html';
+            showProfessionalPopup('Published!', 'Brainstorm board published successfully.');
+
         } else {
             throw new Error('Failed to publish board');
         }

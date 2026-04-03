@@ -235,9 +235,9 @@ async function publishGameWithClasses(targetClasses, isPublic) {
             body: JSON.stringify(gameData)
         });
         if (response.ok) {
-            const label = gameData.type === 'sql-scenario' ? '✅ SQL Scenario' : '✅ SQL Challenge';
-            alert(`${label} published successfully!`);
-            window.location.href = 'admin.html';
+            const label = gameData.type === 'sql-scenario' ? 'SQL Scenario' : 'SQL Challenge';
+            showProfessionalPopup('Published!', `${label} published successfully.`);
+
         } else {
             const error = await response.json();
             alert('Failed to publish: ' + (error.message || 'Unknown error'));

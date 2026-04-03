@@ -144,3 +144,50 @@ window.addEventListener('click', (event) => {
         closePublishModal();
     }
 });
+
+// ══════════════════════════════════════════
+//  Professional Success Popup (global)
+// ══════════════════════════════════════════
+function showProfessionalPopup(title, message) {
+    // Remove any existing popup first
+    const existing = document.getElementById('successPopupOverlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'successPopupOverlay';
+    overlay.className = 'sp-overlay';
+    overlay.innerHTML = `
+        <div class="sp-box" role="dialog" aria-modal="true" aria-labelledby="spTitle">
+            <div class="sp-icon-wrap">
+                <svg class="sp-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="sp-circle" cx="26" cy="26" r="25" stroke-width="2"/>
+                    <path class="sp-check" d="M14 26l9 9 15-18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"/>
+                </svg>
+            </div>
+            <h2 class="sp-title" id="spTitle">${title}</h2>
+            <p class="sp-message">${message}</p>
+            <button class="sp-ok-btn" id="spOkBtn">OK</button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // Animate in
+    requestAnimationFrame(() => overlay.classList.add('sp-visible'));
+
+    // OK closes the popup
+    document.getElementById('spOkBtn').addEventListener('click', () => {
+        overlay.classList.remove('sp-visible');
+        overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
+    });
+
+    // Also close on backdrop click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.classList.remove('sp-visible');
+            overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
+        }
+    });
+}
+
+window.showProfessionalPopup = showProfessionalPopup;
