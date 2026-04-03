@@ -1529,6 +1529,7 @@
                 <button class="nav-btn active" data-section="poll">📊 Quick Poll</button>
                 <button class="nav-btn" data-section="feedback">💬 Live Feedback</button>
                 <button class="nav-btn" data-section="quiz">🏆 Live Quiz</button>
+                <button class="nav-btn" data-section="discussions">💭 Discussions</button>
             </nav>
             <div style="display:flex;align-items:center;gap:8px;">
                 <button id="themeToggle" class="theme-toggle" title="Toggle theme">
@@ -1837,6 +1838,162 @@
                         <div id="liveLeaderboard"></div>
                     </div>
                 </section>
+
+                <!-- ═══════ DISCUSSION BOARD SECTION ═══════ -->
+                <section id="discussionsSection" class="tool-card card">
+                    <div class="tool-header">
+                        <div class="tool-icon"><i class="fas fa-comments"></i></div>
+                        <div class="tool-header-text">
+                            <h2 class="tool-title">Discussion Board</h2>
+                            <p class="tool-desc">Create threaded prompts, grade responses, and track student engagement in one place</p>
+                        </div>
+                        <button class="primary-btn" id="discNewBtn" style="width:auto;padding:10px 20px;font-size:13px;">
+                            <i class="fas fa-plus"></i> New Discussion
+                        </button>
+                    </div>
+
+                    <!-- LIST VIEW -->
+                    <div id="discListView">
+                        <div id="discListContainer"
+                            style="display:flex;flex-direction:column;gap:12px;"></div>
+                        <div id="discListEmpty" style="display:none;text-align:center;padding:48px 24px;">
+                            <div style="font-size:3rem;margin-bottom:16px;">💭</div>
+                            <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">No discussions yet</h3>
+                            <p style="color:var(--muted);font-size:.9rem;">Create your first prompt to start a class conversation.</p>
+                        </div>
+                    </div>
+
+                    <!-- CREATE / EDIT FORM -->
+                    <div id="discFormView" style="display:none;">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+                            <button id="discBackBtn" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                            <h3 id="discFormTitle" style="font-size:15px;font-weight:800;margin:0;">New Discussion</h3>
+                        </div>
+
+                        <input type="hidden" id="discEditId">
+
+                        <!-- Title + Description -->
+                        <div class="form-group">
+                            <label class="form-label">Title <span style="color:var(--red)">*</span></label>
+                            <input type="text" id="discTitle" class="input-field" placeholder="e.g., Week 3 Reflection: Algorithms">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description / Context</label>
+                            <textarea id="discDescription" class="input-field" rows="3" style="resize:vertical;" placeholder="Provide background reading or lecture notes reference..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Instructions for Students</label>
+                            <textarea id="discInstructions" class="input-field" rows="3" style="resize:vertical;" placeholder="Write at least 150 words. Reply to two peers and explain your reasoning..."></textarea>
+                        </div>
+
+                        <!-- Settings -->
+                        <div style="border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px;">
+                            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:14px;">Settings</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                                    <input type="checkbox" id="discThreaded" checked style="accent-color:var(--accent);width:15px;height:15px;">
+                                    <span style="font-size:13px;font-weight:600;">Threaded replies</span>
+                                </label>
+                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                                    <input type="checkbox" id="discPostBeforeView" style="accent-color:var(--accent);width:15px;height:15px;">
+                                    <span style="font-size:13px;font-weight:600;">Post-before-view</span>
+                                </label>
+                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                                    <input type="checkbox" id="discIsPublic" checked style="accent-color:var(--accent);width:15px;height:15px;">
+                                    <span style="font-size:13px;font-weight:600;">Public (all sections)</span>
+                                </label>
+                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                                    <input type="checkbox" id="discGradingEnabled" style="accent-color:var(--accent);width:15px;height:15px;">
+                                    <span style="font-size:13px;font-weight:600;">Enable grading</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Grading (conditionally shown) -->
+                        <div id="discGradingPanel" style="display:none;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px;">
+                            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:14px;">Grading</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Total Points</label>
+                                    <input type="number" id="discPoints" class="input-field" value="100" min="1">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Rubric Notes</label>
+                                    <input type="text" id="discRubric" class="input-field" placeholder="Clarity, depth, references...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Deadlines -->
+                        <div style="border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:24px;">
+                            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:14px;">Deadlines & Access</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Available From</label>
+                                    <input type="datetime-local" id="discAvailableFrom" class="input-field">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Available Until</label>
+                                    <input type="datetime-local" id="discAvailableTo" class="input-field">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Due Date</label>
+                                    <input type="datetime-local" id="discDueAt" class="input-field">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="primary-btn" id="discSaveBtn">
+                            <i class="fas fa-paper-plane"></i> <span id="discSaveBtnText">Publish Discussion</span>
+                        </button>
+                    </div>
+
+                    <!-- MODERATION / DETAIL VIEW -->
+                    <div id="discDetailView" style="display:none;">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+                            <button id="discDetailBackBtn" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                                <i class="fas fa-arrow-left"></i> All Discussions
+                            </button>
+                            <h3 id="discDetailTitle" style="font-size:16px;font-weight:800;margin:0;flex:1;"></h3>
+                            <button id="discAnalyticsBtn" style="background:var(--accent-lo);border:1px solid var(--accent-bdr);color:var(--accent);padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;">
+                                <i class="fas fa-chart-bar"></i> Analytics
+                            </button>
+                        </div>
+
+                        <!-- Analytics Panel (hidden by default) -->
+                        <div id="discAnalyticsPanel" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;">
+                            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:14px;">Participation Analytics</div>
+                            <div id="discAnalyticsContent" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;"></div>
+                        </div>
+
+                        <!-- Replies Feed -->
+                        <div id="discRepliesFeed" style="display:flex;flex-direction:column;gap:14px;"></div>
+                        <div id="discRepliesEmpty" style="display:none;text-align:center;padding:40px;color:var(--muted);">No replies yet.</div>
+
+                        <!-- Grade Modal -->
+                        <div id="discGradeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center;">
+                            <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;width:480px;max-width:94vw;">
+                                <h3 style="font-size:16px;font-weight:800;margin:0 0 6px;">Grade Response</h3>
+                                <p id="discGradeAuthor" style="font-size:13px;color:var(--muted);margin:0 0 20px;"></p>
+                                <div class="form-group">
+                                    <label class="form-label">Score (pts)</label>
+                                    <input type="number" id="gradeScore" class="input-field" min="0" placeholder="e.g. 85">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Feedback to Student</label>
+                                    <textarea id="gradeFeedback" class="input-field" rows="3" style="resize:vertical;" placeholder="Great insight! Consider adding more examples..."></textarea>
+                                </div>
+                                <div style="display:flex;gap:10px;margin-top:16px;">
+                                    <button id="discGradeCancelBtn" style="flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--border);background:none;color:var(--muted);font-weight:600;cursor:pointer;">Cancel</button>
+                                    <button id="discGradeSubmitBtn" class="primary-btn" style="flex:2;"><i class="fas fa-check"></i> Save Grade</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
             </div>
         </main>
     </div>
@@ -1971,6 +2128,316 @@
 
         // Initialize Lucide icons
         if (window.lucide) lucide.createIcons();
+    </script>
+
+    <!-- ═══════ DISCUSSION BOARD ENGINE ═══════ -->
+    <script>
+    (function () {
+        const API_BASE = '/api/discussions';
+        const token = () => localStorage.getItem('token') || localStorage.getItem('mindwave_token') || '';
+        const headers = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${token()}` });
+        const apiFetch = (url, opts = {}) => fetch(url, { ...opts, headers: headers(), credentials: 'include' }).then(r => r.json());
+
+        let currentDiscId = null;
+        let currentGradeReplyId = null;
+
+        // ── Helpers ──
+        function showView(view) {
+            ['discListView', 'discFormView', 'discDetailView'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = id === view ? '' : 'none';
+            });
+        }
+
+        function formatDate(d) {
+            if (!d) return '—';
+            return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function statusBadge(status) {
+            const map = { active: ['#16a34a', 'Active'], closed: ['#dc2626', 'Closed'], draft: ['#d08000', 'Draft'] };
+            const [color, label] = map[status] || ['#6b7280', status];
+            return `<span style="font-size:10px;font-weight:800;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:${color}20;border:1px solid ${color}50;color:${color}">${label}</span>`;
+        }
+
+        // ── Load Discussion List ──
+        async function loadDiscussions() {
+            showView('discListView');
+            const container = document.getElementById('discListContainer');
+            const empty = document.getElementById('discListEmpty');
+            container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+            empty.style.display = 'none';
+
+            try {
+                const data = await apiFetch(API_BASE);
+                if (!data.ok) throw new Error(data.message);
+
+                const discs = data.discussions || [];
+                if (!discs.length) {
+                    container.innerHTML = '';
+                    empty.style.display = '';
+                    return;
+                }
+
+                container.innerHTML = discs.map(d => `
+                    <div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;align-items:center;gap:14px;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent-bdr)'" onmouseout="this.style.borderColor='var(--border)'">
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+                                <span style="font-size:14px;font-weight:800;color:var(--text);">${d.title}</span>
+                                ${statusBadge(d.status)}
+                                ${d.settings?.postBeforeView ? '<span style="font-size:10px;font-weight:700;background:rgba(99,102,241,.12);color:#818cf8;border:1px solid rgba(99,102,241,.25);padding:2px 8px;border-radius:99px;">Post-first</span>' : ''}
+                                ${d.grading?.enabled ? '<span style="font-size:10px;font-weight:700;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.25);padding:2px 8px;border-radius:99px;">${d.grading.totalPoints} pts</span>' : ''}
+                            </div>
+                            <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.description || 'No description'}</div>
+                            <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--muted);">
+                                <span><i class="fas fa-calendar" style="margin-right:4px;"></i>${formatDate(d.createdAt)}</span>
+                                ${d.deadlines?.dueAt ? `<span><i class="fas fa-clock" style="margin-right:4px;"></i>Due ${formatDate(d.deadlines.dueAt)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-shrink:0;">
+                            <button onclick="openDiscDetail('${d._id}','${d.title.replace(/'/g,'\\&apos;')}')" style="padding:8px 14px;border-radius:10px;background:var(--accent-lo);border:1px solid var(--accent-bdr);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-eye"></i> Moderate</button>
+                            <button onclick="openDiscEdit('${d._id}')" style="padding:8px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-pen"></i></button>
+                            <button onclick="deleteDisc('${d._id}')" style="padding:8px 14px;border-radius:10px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.25);color:var(--red);font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = `<div style="color:var(--red);padding:20px;">${e.message}</div>`;
+            }
+        }
+
+        // ── Open Create Form ──
+        function openDiscCreate() {
+            document.getElementById('discEditId').value = '';
+            document.getElementById('discFormTitle').textContent = 'New Discussion';
+            document.getElementById('discSaveBtnText').textContent = 'Publish Discussion';
+            document.getElementById('discTitle').value = '';
+            document.getElementById('discDescription').value = '';
+            document.getElementById('discInstructions').value = '';
+            document.getElementById('discThreaded').checked = true;
+            document.getElementById('discPostBeforeView').checked = false;
+            document.getElementById('discIsPublic').checked = true;
+            document.getElementById('discGradingEnabled').checked = false;
+            document.getElementById('discGradingPanel').style.display = 'none';
+            document.getElementById('discPoints').value = '100';
+            document.getElementById('discRubric').value = '';
+            document.getElementById('discAvailableFrom').value = '';
+            document.getElementById('discAvailableTo').value = '';
+            document.getElementById('discDueAt').value = '';
+            showView('discFormView');
+        }
+
+        // ── Open Edit Form ──
+        async function openDiscEdit(id) {
+            try {
+                const data = await apiFetch(`${API_BASE}/${id}`);
+                if (!data.ok) throw new Error(data.message);
+                const d = data.discussion;
+
+                document.getElementById('discEditId').value = id;
+                document.getElementById('discFormTitle').textContent = 'Edit Discussion';
+                document.getElementById('discSaveBtnText').textContent = 'Save Changes';
+                document.getElementById('discTitle').value = d.title || '';
+                document.getElementById('discDescription').value = d.description || '';
+                document.getElementById('discInstructions').value = d.instructions || '';
+                document.getElementById('discThreaded').checked = !!d.settings?.threaded;
+                document.getElementById('discPostBeforeView').checked = !!d.settings?.postBeforeView;
+                document.getElementById('discIsPublic').checked = !!d.settings?.isPublic;
+                const gradingEnabled = !!d.grading?.enabled;
+                document.getElementById('discGradingEnabled').checked = gradingEnabled;
+                document.getElementById('discGradingPanel').style.display = gradingEnabled ? '' : 'none';
+                document.getElementById('discPoints').value = d.grading?.totalPoints || 100;
+                document.getElementById('discRubric').value = d.grading?.rubric || '';
+                document.getElementById('discAvailableFrom').value = d.deadlines?.availableFrom ? d.deadlines.availableFrom.slice(0, 16) : '';
+                document.getElementById('discAvailableTo').value = d.deadlines?.availableTo ? d.deadlines.availableTo.slice(0, 16) : '';
+                document.getElementById('discDueAt').value = d.deadlines?.dueAt ? d.deadlines.dueAt.slice(0, 16) : '';
+                showView('discFormView');
+            } catch (e) { showToast('Failed to load discussion: ' + e.message, 'error'); }
+        }
+        window.openDiscEdit = openDiscEdit;
+
+        // ── Open Detail / Moderation View ──
+        async function openDiscDetail(id, title) {
+            currentDiscId = id;
+            document.getElementById('discDetailTitle').textContent = title;
+            document.getElementById('discRepliesFeed').innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);"><i class="fas fa-spinner fa-spin"></i></div>';
+            document.getElementById('discRepliesEmpty').style.display = 'none';
+            document.getElementById('discAnalyticsPanel').style.display = 'none';
+            showView('discDetailView');
+
+            try {
+                const data = await apiFetch(`${API_BASE}/${id}`);
+                if (!data.ok) throw new Error(data.message);
+                renderReplies(data.discussion.replies || []);
+            } catch (e) { showToast('Failed to load replies: ' + e.message, 'error'); }
+        }
+        window.openDiscDetail = openDiscDetail;
+
+        function renderReplies(replies) {
+            const feed = document.getElementById('discRepliesFeed');
+            const empty = document.getElementById('discRepliesEmpty');
+
+            // Pinned first
+            const sorted = [...replies].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+
+            if (!sorted.length) { feed.innerHTML = ''; empty.style.display = ''; return; }
+            empty.style.display = 'none';
+
+            feed.innerHTML = sorted.map(r => `
+                <div style="background:var(--bg);border:1px solid ${r.pinned ? 'var(--accent-bdr)' : 'var(--border)'};border-radius:14px;padding:18px 20px;${r.pinned ? 'box-shadow:0 0 0 2px var(--accent-lo);' : ''}">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a855f7);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;">${(r.authorName || '?').charAt(0).toUpperCase()}</div>
+                        <div style="flex:1;">
+                            <div style="font-size:13px;font-weight:700;">${r.authorName || 'Unknown'}
+                                ${r.authorRole === 'admin' ? '<span style="font-size:10px;background:var(--accent-lo);color:var(--accent);padding:2px 8px;border-radius:99px;font-weight:700;">Instructor</span>' : ''}
+                                ${r.pinned ? '<span style="font-size:10px;background:rgba(99,102,241,.12);color:#818cf8;padding:2px 8px;border-radius:99px;font-weight:700;">📌 Pinned</span>' : ''}
+                                ${r.graded ? `<span style="font-size:10px;background:rgba(22,163,74,.1);color:#16a34a;padding:2px 8px;border-radius:99px;font-weight:700;">✓ ${r.grade}pts</span>` : ''}
+                            </div>
+                            <div style="font-size:11px;color:var(--muted);">${new Date(r.createdAt).toLocaleString('en-IN', {dateStyle:'medium',timeStyle:'short'})}</div>
+                        </div>
+                        <!-- Quick actions -->
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="moderateReply('${r._id}','pin',${!r.pinned})" title="${r.pinned ? 'Unpin' : 'Pin'}" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer;">${r.pinned ? '📎 Unpin' : '📌 Pin'}</button>
+                            <button onclick="moderateReply('${r._id}','hide',true)" title="Hide" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(220,38,38,.3);background:rgba(220,38,38,.08);color:var(--red);font-size:11px;cursor:pointer;"><i class="fas fa-eye-slash"></i> Hide</button>
+                            <button onclick="openGradeModal('${r._id}','${(r.authorName||'').replace(/'/g,'\\&apos;')}',${r.grade || 0},'${(r.feedback||'').replace(/'/g,'\\&apos;')}')" style="padding:6px 10px;border-radius:8px;border:1px solid var(--accent-bdr);background:var(--accent-lo);color:var(--accent);font-size:11px;cursor:pointer;font-weight:700;">⭐ Grade</button>
+                        </div>
+                    </div>
+                    <p style="font-size:14px;line-height:1.65;color:var(--text);margin:0;">${r.content}</p>
+                    ${r.feedback ? `<div style="margin-top:10px;padding:10px 14px;background:rgba(22,163,74,.06);border-left:3px solid #16a34a;border-radius:0 8px 8px 0;font-size:12px;color:var(--muted);"><strong style="color:#16a34a;">Instructor Feedback:</strong> ${r.feedback}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // ── Moderation Actions ──
+        async function moderateReply(replyId, action, value) {
+            const body = action === 'pin' ? { pinned: value } : { hidden: value };
+            try {
+                const data = await apiFetch(`${API_BASE}/${currentDiscId}/replies/${replyId}`, { method: 'PUT', body: JSON.stringify(body) });
+                if (!data.ok) throw new Error(data.message);
+                showToast(action === 'pin' ? (value ? '📌 Reply pinned' : 'Reply unpinned') : '🙈 Reply hidden', 'success');
+                openDiscDetail(currentDiscId, document.getElementById('discDetailTitle').textContent);
+            } catch (e) { showToast('Action failed: ' + e.message, 'error'); }
+        }
+        window.moderateReply = moderateReply;
+
+        // ── Grade Modal ──
+        function openGradeModal(replyId, authorName, currentGrade, currentFeedback) {
+            currentGradeReplyId = replyId;
+            document.getElementById('discGradeAuthor').textContent = `Grading: ${authorName}`;
+            document.getElementById('gradeScore').value = currentGrade || '';
+            document.getElementById('gradeFeedback').value = currentFeedback || '';
+            document.getElementById('discGradeModal').style.display = 'flex';
+        }
+        window.openGradeModal = openGradeModal;
+
+        document.getElementById('discGradeCancelBtn').onclick = () => {
+            document.getElementById('discGradeModal').style.display = 'none';
+        };
+
+        document.getElementById('discGradeSubmitBtn').onclick = async () => {
+            const grade = parseFloat(document.getElementById('gradeScore').value);
+            const feedback = document.getElementById('gradeFeedback').value.trim();
+            if (isNaN(grade) || grade < 0) { showToast('Enter a valid grade', 'error'); return; }
+
+            try {
+                const data = await apiFetch(`${API_BASE}/${currentDiscId}/replies/${currentGradeReplyId}`, {
+                    method: 'PUT', body: JSON.stringify({ grade, feedback })
+                });
+                if (!data.ok) throw new Error(data.message);
+                document.getElementById('discGradeModal').style.display = 'none';
+                showToast(`✓ Grade saved — ${grade} pts`, 'success');
+                openDiscDetail(currentDiscId, document.getElementById('discDetailTitle').textContent);
+            } catch (e) { showToast('Grade save failed: ' + e.message, 'error'); }
+        };
+
+        // ── Analytics ──
+        document.getElementById('discAnalyticsBtn').onclick = async () => {
+            const panel = document.getElementById('discAnalyticsPanel');
+            if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
+            try {
+                const data = await apiFetch(`${API_BASE}/${currentDiscId}/analytics`);
+                if (!data.ok) throw new Error(data.message);
+                document.getElementById('discAnalyticsContent').innerHTML = [
+                    ['💬', 'Total Replies', data.totalReplies],
+                    ['🎓', 'Student Replies', data.studentReplies],
+                    ['👥', 'Participants', data.uniqueParticipants],
+                    ['⭐', 'Graded', data.gradedReplies]
+                ].map(([icon, label, val]) => `
+                    <div style="text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;">
+                        <div style="font-size:28px;font-weight:900;color:var(--accent);">${val}</div>
+                        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-top:4px;">${icon} ${label}</div>
+                    </div>
+                `).join('');
+                panel.style.display = '';
+            } catch (e) { showToast('Analytics error: ' + e.message, 'error'); }
+        };
+
+        // ── Delete ──
+        async function deleteDisc(id) {
+            if (!await window.confirm('Delete this discussion? This cannot be undone.', 'Delete Discussion')) return;
+            try {
+                const data = await apiFetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+                if (!data.ok) throw new Error(data.message);
+                showToast('✓ Discussion deleted', 'success');
+                loadDiscussions();
+            } catch (e) { showToast('Delete failed: ' + e.message, 'error'); }
+        }
+        window.deleteDisc = deleteDisc;
+
+        // ── Save (Create / Edit) ──
+        document.getElementById('discSaveBtn').onclick = async () => {
+            const editId = document.getElementById('discEditId').value;
+            const title = document.getElementById('discTitle').value.trim();
+            if (!title) { showToast('Title is required', 'error'); return; }
+
+            const payload = {
+                title,
+                description: document.getElementById('discDescription').value.trim(),
+                instructions: document.getElementById('discInstructions').value.trim(),
+                settings: {
+                    threaded: document.getElementById('discThreaded').checked,
+                    postBeforeView: document.getElementById('discPostBeforeView').checked,
+                    isPublic: document.getElementById('discIsPublic').checked
+                },
+                grading: {
+                    enabled: document.getElementById('discGradingEnabled').checked,
+                    totalPoints: parseFloat(document.getElementById('discPoints').value) || 100,
+                    rubric: document.getElementById('discRubric').value.trim()
+                },
+                deadlines: {
+                    availableFrom: document.getElementById('discAvailableFrom').value || null,
+                    availableTo: document.getElementById('discAvailableTo').value || null,
+                    dueAt: document.getElementById('discDueAt').value || null
+                }
+            };
+
+            try {
+                const url = editId ? `${API_BASE}/${editId}` : API_BASE;
+                const method = editId ? 'PUT' : 'POST';
+                const data = await apiFetch(url, { method, body: JSON.stringify(payload) });
+                if (!data.ok) throw new Error(data.message);
+                showToast(editId ? '✓ Discussion updated!' : '🚀 Discussion published!', 'success');
+                loadDiscussions();
+            } catch (e) { showToast('Save failed: ' + e.message, 'error'); }
+        };
+
+        // ── Wire UI Events ──
+        document.getElementById('discNewBtn').onclick = openDiscCreate;
+        document.getElementById('discBackBtn').onclick = loadDiscussions;
+        document.getElementById('discDetailBackBtn').onclick = loadDiscussions;
+        document.getElementById('discGradingEnabled').onchange = function () {
+            document.getElementById('discGradingPanel').style.display = this.checked ? '' : 'none';
+        };
+
+        // Auto-load when tab is switched to discussions
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.dataset.section === 'discussions') loadDiscussions();
+            });
+        });
+
+    })();
+    // Append this script block
     </script>
 
     <!-- ═══════════════ SECTION PICKER MODAL ═══════════════ -->

@@ -823,6 +823,9 @@
                     <button class="cm-tab" data-section="quiz">
                         <i data-lucide="trophy"></i> Live Quiz
                     </button>
+                    <button class="cm-tab" data-section="discussions">
+                        <i data-lucide="messages-square"></i> Discussions
+                    </button>
                 </div>
 
                 <!-- ------------------- FEED SECTION ------------------- -->
@@ -985,6 +988,64 @@
                     </div>
                 </div>
 
+                <!-- ─────────────── DISCUSSIONS SECTION ─────────────── -->
+                <div id="discussionsSection" class="cm-section">
+
+                    <!-- LIST VIEW -->
+                    <div id="sDiscListView">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+                            <h3 style="font-size:1rem;font-weight:800;margin:0;">📋 Active Discussions</h3>
+                            <span id="sDiscCount" style="font-size:12px;color:var(--text-secondary);"></span>
+                        </div>
+                        <div id="sDiscContainer" style="display:flex;flex-direction:column;gap:12px;"></div>
+                        <div id="sDiscEmpty" style="display:none;">
+                            <div class="cm-empty">
+                                <div class="cm-empty-icon">💭</div>
+                                <h3>No active discussions</h3>
+                                <p>Your instructor hasn't started any discussions yet.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DETAIL / REPLY VIEW -->
+                    <div id="sDiscDetailView" style="display:none;">
+                        <button id="sDiscBackBtn" style="display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--text-secondary);font-size:13px;cursor:pointer;margin-bottom:20px;">
+                            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Back to Discussions
+                        </button>
+
+                        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;">
+                            <h2 id="sDiscDetailTitle" style="font-size:1.1rem;font-weight:800;margin:0 0 8px;"></h2>
+                            <p id="sDiscDetailDesc" style="font-size:.9rem;color:var(--text-secondary);margin:0 0 14px;"></p>
+                            <div id="sDiscDetailInstructions" style="background:rgba(99,102,241,.08);border-left:3px solid var(--accent,#6366f1);border-radius:0 10px 10px 0;padding:12px 16px;font-size:.85rem;line-height:1.6;"></div>
+                            <div id="sDiscDueInfo" style="margin-top:12px;font-size:11px;color:var(--text-secondary);"></div>
+                        </div>
+
+                        <!-- Post-before-view notice -->
+                        <div id="sDiscPbvNotice" style="display:none;">
+                            <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:14px;padding:18px 22px;margin-bottom:18px;display:flex;align-items:center;gap:12px;">
+                                <i data-lucide="eye-off" style="width:20px;height:20px;color:#f59e0b;flex-shrink:0;"></i>
+                                <div style="font-size:.85rem;"><strong style="color:#f59e0b;">Post-before-view is enabled.</strong> You must post your own response before you can see your peers' replies.</div>
+                            </div>
+                        </div>
+
+                        <!-- Reply composer -->
+                        <div id="sDiscComposer" style="margin-bottom:22px;">
+                            <div class="cm-form-group">
+                                <label style="display:block;font-size:.75rem;font-weight:700;margin-bottom:6px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;">Your Response</label>
+                                <textarea id="sDiscReplyContent" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;background:var(--card);color:var(--text);font-size:.9rem;min-height:120px;resize:vertical;font-family:inherit;" placeholder="Share your thoughts, analysis, or questions..."></textarea>
+                            </div>
+                            <button class="cm-btn-primary" id="sDiscPostBtn" style="max-width:220px;">
+                                <i data-lucide="send" style="width:16px;height:16px;"></i> Post Reply
+                            </button>
+                            <div id="sDiscPostError" style="display:none;margin-top:10px;padding:10px;background:rgba(255,55,95,.1);border:1px solid rgba(255,55,95,.3);border-radius:10px;color:#ff5b87;font-size:.84rem;"></div>
+                        </div>
+
+                        <!-- Replies Feed -->
+                        <div id="sDiscRepliesFeed" style="display:flex;flex-direction:column;gap:14px;"></div>
+                        <div id="sDiscRepliesEmpty" style="display:none;text-align:center;padding:32px;color:var(--text-secondary);font-size:.9rem;">No replies yet. Be the first to start the conversation!</div>
+                    </div>
+                </div>
+
             </div><!-- end mw-content -->
         </div><!-- end mw-main -->
     </div><!-- end mw-app -->
@@ -1106,7 +1167,7 @@
             });
 
             // -- Section tabs --
-            const sections = ['communitySection', 'pollSection', 'feedbackSection', 'quizSection'];
+            const sections = ['communitySection', 'pollSection', 'feedbackSection', 'quizSection', 'discussionsSection'];
             document.querySelectorAll('.cm-tab[data-section]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const target = btn.dataset.section + 'Section';
@@ -1178,6 +1239,187 @@
     </script>
 
     <script src="community-poll-engine.js"></script>
+
+    <!-- ─────────────── STUDENT DISCUSSION ENGINE ─────────────── -->
+    <script>
+    (function () {
+        const API_BASE = '/api/discussions';
+        const token = () => localStorage.getItem('token') || localStorage.getItem('mindwave_token') || '';
+        const headers = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${token()}` });
+        const apiFetch = (url, opts = {}) => fetch(url, { ...opts, headers: headers(), credentials: 'include' }).then(r => r.json());
+
+        let currentDisc = null;
+
+        function showDiscView(view) {
+            ['sDiscListView', 'sDiscDetailView'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = id === view ? '' : 'none';
+            });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function loadDiscussions() {
+            showDiscView('sDiscListView');
+            const container = document.getElementById('sDiscContainer');
+            const empty = document.getElementById('sDiscEmpty');
+            const count = document.getElementById('sDiscCount');
+            container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-secondary);"><i data-lucide="loader" style="width:22px;height:22px;animation:spin 1s linear infinite;"></i> Loading...</div>';
+            empty.style.display = 'none';
+            if (window.lucide) lucide.createIcons();
+
+            try {
+                const data = await apiFetch(API_BASE);
+                if (!data.ok) throw new Error(data.message);
+                const discs = data.discussions || [];
+                count.textContent = `${discs.length} available`;
+                if (!discs.length) { container.innerHTML = ''; empty.style.display = ''; return; }
+
+                container.innerHTML = discs.map(d => `
+                    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;cursor:pointer;transition:border-color .18s,box-shadow .18s;" onclick="openStudentDisc('${d._id}')" onmouseover="this.style.borderColor='rgba(99,102,241,.4)';this.style.boxShadow='0 4px 24px rgba(0,0,0,.18)'" onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:5px;">${d.title}</div>
+                                <div style="font-size:.82rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.description || 'Click to read and participate'}</div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+                                ${d.grading?.enabled ? `<span style="font-size:10px;font-weight:700;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.25);padding:2px 9px;border-radius:99px;">⭐ ${d.grading.totalPoints} pts</span>` : ''}
+                                ${d.settings?.postBeforeView ? '<span style="font-size:10px;font-weight:700;background:rgba(99,102,241,.1);color:#818cf8;border:1px solid rgba(99,102,241,.2);padding:2px 9px;border-radius:99px;">Post-first</span>' : ''}
+                                ${d.deadlines?.dueAt ? `<span style="font-size:10px;color:var(--text-secondary);">Due ${new Date(d.deadlines.dueAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                if (window.lucide) lucide.createIcons();
+            } catch (e) {
+                container.innerHTML = `<div style="color:var(--text-secondary);text-align:center;padding:30px;">${e.message}</div>`;
+            }
+        }
+
+        async function openStudentDisc(id) {
+            showDiscView('sDiscDetailView');
+            document.getElementById('sDiscDetailTitle').textContent = '';
+            document.getElementById('sDiscDetailDesc').textContent = '';
+            document.getElementById('sDiscDetailInstructions').textContent = '';
+            document.getElementById('sDiscRepliesFeed').innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-secondary);">Loading...</div>';
+            document.getElementById('sDiscRepliesEmpty').style.display = 'none';
+            document.getElementById('sDiscPostError').style.display = 'none';
+            document.getElementById('sDiscPbvNotice').style.display = 'none';
+
+            try {
+                const data = await apiFetch(`${API_BASE}/${id}`);
+                if (!data.ok) throw new Error(data.message);
+                currentDisc = data.discussion;
+
+                document.getElementById('sDiscDetailTitle').textContent = currentDisc.title;
+                document.getElementById('sDiscDetailDesc').textContent = currentDisc.description || '';
+                document.getElementById('sDiscDetailInstructions').innerHTML = currentDisc.instructions
+                    ? `<strong style="display:block;margin-bottom:4px;color:var(--text);">Instructions:</strong>${currentDisc.instructions}`
+                    : '<em style="color:var(--text-secondary);">No specific instructions provided.</em>';
+
+                if (currentDisc.deadlines?.dueAt) {
+                    document.getElementById('sDiscDueInfo').textContent = `Due: ${new Date(currentDisc.deadlines.dueAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}`;
+                } else {
+                    document.getElementById('sDiscDueInfo').textContent = '';
+                }
+
+                // Check if post-before-view is active and user hasn't posted
+                const myUserId = getUserId();
+                const hasPosted = (currentDisc.replies || []).some(r => r.authorId === myUserId);
+                if (currentDisc.settings?.postBeforeView && !hasPosted) {
+                    document.getElementById('sDiscPbvNotice').style.display = '';
+                }
+
+                renderStudentReplies(currentDisc.replies || []);
+                if (window.lucide) lucide.createIcons();
+            } catch (e) {
+                document.getElementById('sDiscRepliesFeed').innerHTML = `<div style="color:var(--text-secondary);text-align:center;padding:20px;">${e.message}</div>`;
+            }
+        }
+        window.openStudentDisc = openStudentDisc;
+
+        function getUserId() {
+            // Attempt to decode JWT for userId
+            try {
+                const t = token();
+                if (!t) return null;
+                const payload = JSON.parse(atob(t.split('.')[1]));
+                return payload.id || payload._id || payload.sub;
+            } catch { return null; }
+        }
+
+        function renderStudentReplies(replies) {
+            const feed = document.getElementById('sDiscRepliesFeed');
+            const empty = document.getElementById('sDiscRepliesEmpty');
+            const myUserId = getUserId();
+
+            // Sort: pinned first, then by date
+            const sorted = [...replies].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+
+            if (!sorted.length) { feed.innerHTML = ''; empty.style.display = ''; return; }
+            empty.style.display = 'none';
+
+            feed.innerHTML = sorted.map(r => {
+                const isMe = String(r.authorId) === String(myUserId);
+                return `
+                <div style="background:var(--card);border:1px solid ${r.pinned ? 'rgba(99,102,241,.4)' : isMe ? 'rgba(99,102,241,.2)' : 'var(--border)'};border-radius:14px;padding:16px 18px;${r.pinned ? 'box-shadow:0 0 0 2px rgba(99,102,241,.1);' : ''}">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                        <div style="width:32px;height:32px;border-radius:50%;background:${isMe ? 'linear-gradient(135deg,#6366f1,#a855f7)' : 'var(--card)'};border:${isMe ? 'none' : '1px solid var(--border)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${isMe ? '#fff' : 'var(--text)'}">${(r.authorName || '?').charAt(0).toUpperCase()}</div>
+                        <div style="flex:1;">
+                            <div style="font-size:13px;font-weight:700;color:var(--text);">
+                                ${isMe ? '<span style="color:var(--accent)">You</span>' : r.authorName || 'Student'}
+                                ${r.authorRole === 'admin' ? '<span style="font-size:10px;background:rgba(99,102,241,.1);color:#818cf8;padding:2px 7px;border-radius:99px;font-weight:700;margin-left:4px;">Instructor</span>' : ''}
+                                ${r.pinned ? '<span style="font-size:10px;background:rgba(99,102,241,.1);color:#818cf8;padding:2px 7px;border-radius:99px;font-weight:700;margin-left:4px;">📌 Pinned</span>' : ''}
+                            </div>
+                            <div style="font-size:11px;color:var(--text-secondary);">${new Date(r.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                        </div>
+                        ${r.graded && isMe ? `<div style="text-align:right;"><div style="font-size:16px;font-weight:900;color:#16a34a;">${r.grade}pts</div><div style="font-size:10px;color:var(--text-secondary);">Your Grade</div></div>` : ''}
+                    </div>
+                    <p style="font-size:.9rem;line-height:1.65;color:var(--text);margin:0;">${r.content}</p>
+                    ${r.graded && r.feedback && isMe ? `<div style="margin-top:10px;padding:10px 14px;background:rgba(22,163,74,.06);border-left:3px solid #16a34a;border-radius:0 8px 8px 0;font-size:.82rem;color:var(--text-secondary);"><strong style="color:#16a34a;">Instructor Feedback: </strong>${r.feedback}</div>` : ''}
+                </div>
+            `}).join('');
+        }
+
+        // Post reply
+        document.getElementById('sDiscPostBtn').onclick = async () => {
+            const content = document.getElementById('sDiscReplyContent').value.trim();
+            const errDiv = document.getElementById('sDiscPostError');
+            errDiv.style.display = 'none';
+            if (!content) { errDiv.textContent = 'Please write something before posting.'; errDiv.style.display = ''; return; }
+            if (!currentDisc) return;
+
+            document.getElementById('sDiscPostBtn').disabled = true;
+            document.getElementById('sDiscPostBtn').textContent = 'Posting...';
+            try {
+                const data = await apiFetch(`${API_BASE}/${currentDisc._id}/replies`, {
+                    method: 'POST', body: JSON.stringify({ content })
+                });
+                if (!data.ok) throw new Error(data.message);
+                document.getElementById('sDiscReplyContent').value = '';
+                document.getElementById('sDiscPbvNotice').style.display = 'none';
+                // Reload the discussion to get all replies
+                openStudentDisc(currentDisc._id);
+            } catch (e) {
+                errDiv.textContent = e.message;
+                errDiv.style.display = '';
+            } finally {
+                document.getElementById('sDiscPostBtn').disabled = false;
+                document.getElementById('sDiscPostBtn').innerHTML = '<i data-lucide="send" style="width:16px;height:16px;"></i> Post Reply';
+                if (window.lucide) lucide.createIcons();
+            }
+        };
+
+        document.getElementById('sDiscBackBtn').onclick = loadDiscussions;
+
+        // Wire tab click to load discussions
+        document.querySelectorAll('.cm-tab').forEach(btn => {
+            if (btn.dataset.section === 'discussions') {
+                btn.addEventListener('click', loadDiscussions);
+            }
+        });
+
+    })();
+    </script>
     <script src="student-community.js">
         function doLogout() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']

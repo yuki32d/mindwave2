@@ -1009,6 +1009,66 @@ const CommunityPost = mongoose.model("CommunityPost", communityPostSchema);
 const CommunityComment = mongoose.model("CommunityComment", communityCommentSchema);
 const PostReport = mongoose.model("PostReport", postReportSchema);
 
+// ============================================
+// DISCUSSION BOARD SCHEMA (LMS-style threaded discussions)
+// ============================================
+const discussionReplySchema = new mongoose.Schema({
+  authorId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  authorName:  { type: String },
+  authorRole:  { type: String, enum: ['student', 'admin'], default: 'student' },
+  content:     { type: String, required: true },
+  // Grading (faculty fills these)
+  grade:       { type: Number, min: 0 },
+  feedback:    { type: String },
+  graded:      { type: Boolean, default: false },
+  gradedBy:    { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  gradedAt:    { type: Date },
+  // Moderation
+  pinned:      { type: Boolean, default: false },
+  hidden:      { type: Boolean, default: false }
+}, { timestamps: true });
+
+const discussionSchema = new mongoose.Schema({
+  title:           { type: String, required: true, trim: true },
+  description:     { type: String, default: '' },
+  instructions:    { type: String, default: '' },
+  createdBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  createdByName:   { type: String },
+  // Settings
+  settings: {
+    threaded:        { type: Boolean, default: true },
+    postBeforeView:  { type: Boolean, default: false },
+    allowStudentLikes: { type: Boolean, default: true },
+    isPublic:        { type: Boolean, default: true }
+  },
+  // Grading
+  grading: {
+    enabled:     { type: Boolean, default: false },
+    totalPoints: { type: Number, default: 100 },
+    rubric:      { type: String, default: '' }
+  },
+  // Deadlines
+  deadlines: {
+    dueAt:         { type: Date },
+    availableFrom: { type: Date },
+    availableTo:   { type: Date }
+  },
+  // Target population
+  targetGroups: {
+    sections:    { type: [String], default: [] },
+    batch:       { type: String, default: '' },
+    department:  { type: String, default: '' }
+  },
+  status: { type: String, enum: ['active', 'closed', 'draft'], default: 'active' },
+  replies: [discussionReplySchema]
+}, { timestamps: true });
+
+discussionSchema.index({ createdBy: 1, createdAt: -1 });
+discussionSchema.index({ status: 1 });
+
+if (mongoose.models.Discussion) delete mongoose.models.Discussion;
+const Discussion = mongoose.model("Discussion", discussionSchema);
+
 const globalSettingsSchema = new mongoose.Schema({
   maintenanceMode: { type: Boolean, default: false },
   registrationOpen: { type: Boolean, default: true },
@@ -13581,6 +13641,232 @@ cron.schedule('0 * * * *', async () => {
 
 // Run cleanup on server start
 cleanupOldGames();
+
+// ============================================
+// DISCUSSION BOARD API ROUTES
+// ============================================
+
+// Middleware: verify token (reuses existing verifyToken pattern)
+function verifyDiscToken(req, res, next) {
+  const auth = req.headers['authorization'] || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token) return res.status(401).json({ ok: false, message: 'Unauthorized' });
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ ok: false, message: 'Invalid token' });
+  }
+}
+
+// POST /api/discussions — Create a new discussion (faculty only)
+app.post('/api/discussions', verifyDiscToken, async (req, res) => {
+  try {
+    const { title, description, instructions, settings, grading, deadlines, targetGroups, status } = req.body;
+    if (!title) return res.status(400).json({ ok: false, message: 'Title is required' });
+
+    const user = await User.findById(req.user.id).select('name role');
+    const disc = new Discussion({
+      title, description, instructions,
+      createdBy: req.user.id,
+      createdByName: user?.name || 'Instructor',
+      settings, grading, deadlines, targetGroups,
+      status: status || 'active'
+    });
+    await disc.save();
+    res.json({ ok: true, discussion: disc });
+  } catch (err) {
+    console.error('Discussion create error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// GET /api/discussions — List discussions
+// Faculty sees their own; students see ones that target them or are public
+app.get('/api/discussions', verifyDiscToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('name role section batch department');
+    let query = {};
+    if (user?.role === 'admin') {
+      // Faculty: see all they created
+      query = { createdBy: req.user.id };
+    } else {
+      // Students: see active public discussions or ones targeting their section
+      query = {
+        status: 'active',
+        $or: [
+          { 'settings.isPublic': true },
+          { 'targetGroups.sections': { $in: [user?.section || ''] } },
+          { 'targetGroups.batch': user?.batch || '' }
+        ]
+      };
+      // Respect availability windows
+      const now = new Date();
+      query.$and = [
+        { $or: [{ 'deadlines.availableFrom': { $exists: false } }, { 'deadlines.availableFrom': null }, { 'deadlines.availableFrom': { $lte: now } }] },
+        { $or: [{ 'deadlines.availableTo': { $exists: false } }, { 'deadlines.availableTo': null }, { 'deadlines.availableTo': { $gte: now } }] }
+      ];
+    }
+    const discussions = await Discussion.find(query).sort({ createdAt: -1 }).select('-replies');
+    res.json({ ok: true, discussions });
+  } catch (err) {
+    console.error('Discussion list error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// GET /api/discussions/:id — Get full discussion with replies
+app.get('/api/discussions/:id', verifyDiscToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('role');
+    const disc = await Discussion.findById(req.params.id);
+    if (!disc) return res.status(404).json({ ok: false, message: 'Discussion not found' });
+
+    let replies = disc.replies.filter(r => !r.hidden);
+    
+    // Post-before-view logic for students
+    if (user?.role === 'student' && disc.settings?.postBeforeView) {
+      const hasPosted = disc.replies.some(r => String(r.authorId) === String(req.user.id));
+      if (!hasPosted) {
+        // Return discussion without OTHER students' replies
+        replies = disc.replies.filter(r => String(r.authorId) === String(req.user.id));
+      }
+    }
+
+    res.json({ ok: true, discussion: { ...disc.toObject(), replies } });
+  } catch (err) {
+    console.error('Discussion get error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// PUT /api/discussions/:id — Update discussion (faculty only)
+app.put('/api/discussions/:id', verifyDiscToken, async (req, res) => {
+  try {
+    const disc = await Discussion.findOneAndUpdate(
+      { _id: req.params.id, createdBy: req.user.id },
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+    if (!disc) return res.status(404).json({ ok: false, message: 'Not found or not authorized' });
+    res.json({ ok: true, discussion: disc });
+  } catch (err) {
+    console.error('Discussion update error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// DELETE /api/discussions/:id — Delete discussion (faculty only)
+app.delete('/api/discussions/:id', verifyDiscToken, async (req, res) => {
+  try {
+    const disc = await Discussion.findOneAndDelete({ _id: req.params.id, createdBy: req.user.id });
+    if (!disc) return res.status(404).json({ ok: false, message: 'Not found or not authorized' });
+    res.json({ ok: true, message: 'Discussion deleted' });
+  } catch (err) {
+    console.error('Discussion delete error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// POST /api/discussions/:id/replies — Add a reply (student or faculty)
+app.post('/api/discussions/:id/replies', verifyDiscToken, async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content || !content.trim()) return res.status(400).json({ ok: false, message: 'Content is required' });
+
+    const user = await User.findById(req.user.id).select('name role');
+    const disc = await Discussion.findById(req.params.id);
+    if (!disc) return res.status(404).json({ ok: false, message: 'Discussion not found' });
+    if (disc.status !== 'active') return res.status(400).json({ ok: false, message: 'This discussion is closed' });
+
+    // Check due date
+    if (disc.deadlines?.dueAt && new Date() > new Date(disc.deadlines.dueAt)) {
+      return res.status(400).json({ ok: false, message: 'The deadline for this discussion has passed' });
+    }
+
+    const reply = {
+      authorId:   req.user.id,
+      authorName: user?.name || 'Unknown',
+      authorRole: user?.role === 'admin' ? 'admin' : 'student',
+      content: content.trim()
+    };
+
+    disc.replies.push(reply);
+    await disc.save();
+    const savedReply = disc.replies[disc.replies.length - 1];
+    res.json({ ok: true, reply: savedReply });
+  } catch (err) {
+    console.error('Reply post error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// PUT /api/discussions/:id/replies/:replyId — Grade/Moderate a reply (faculty only)
+app.put('/api/discussions/:id/replies/:replyId', verifyDiscToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('role');
+    if (user?.role !== 'admin') return res.status(403).json({ ok: false, message: 'Faculty only' });
+
+    const disc = await Discussion.findById(req.params.id);
+    if (!disc) return res.status(404).json({ ok: false, message: 'Discussion not found' });
+
+    const reply = disc.replies.id(req.params.replyId);
+    if (!reply) return res.status(404).json({ ok: false, message: 'Reply not found' });
+
+    // Apply updates: grade, feedback, pinned, hidden
+    const { grade, feedback, pinned, hidden } = req.body;
+    if (grade !== undefined) {
+      reply.grade = grade;
+      reply.graded = true;
+      reply.gradedBy = req.user.id;
+      reply.gradedAt = new Date();
+    }
+    if (feedback !== undefined) reply.feedback = feedback;
+    if (pinned !== undefined) reply.pinned = pinned;
+    if (hidden !== undefined) reply.hidden = hidden;
+
+    await disc.save();
+    res.json({ ok: true, reply });
+  } catch (err) {
+    console.error('Reply update error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// GET /api/discussions/:id/analytics — Participation analytics (faculty only)
+app.get('/api/discussions/:id/analytics', verifyDiscToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('role');
+    if (user?.role !== 'admin') return res.status(403).json({ ok: false, message: 'Faculty only' });
+
+    const disc = await Discussion.findById(req.params.id);
+    if (!disc) return res.status(404).json({ ok: false, message: 'Discussion not found' });
+
+    const visibleReplies = disc.replies.filter(r => !r.hidden);
+    const studentReplies = visibleReplies.filter(r => r.authorRole === 'student');
+    
+    // Group by student
+    const byStudent = {};
+    studentReplies.forEach(r => {
+      const key = String(r.authorId);
+      if (!byStudent[key]) byStudent[key] = { name: r.authorName, count: 0, graded: 0 };
+      byStudent[key].count++;
+      if (r.graded) byStudent[key].graded++;
+    });
+
+    res.json({
+      ok: true,
+      totalReplies: visibleReplies.length,
+      studentReplies: studentReplies.length,
+      uniqueParticipants: Object.keys(byStudent).length,
+      gradedReplies: studentReplies.filter(r => r.graded).length,
+      participants: Object.values(byStudent)
+    });
+  } catch (err) {
+    console.error('Discussion analytics error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
 
 // Start server
 const httpServer = listenWithFallback(PORT);
