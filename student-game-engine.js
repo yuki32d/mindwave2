@@ -26,6 +26,20 @@ document.addEventListener('DOMContentLoaded', () => {
         initGamePlayer(gameId);
     } else {
         initGameLobby();
+        
+        // REFRESH MECHANISM: Listen for completion signal from other tabs
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'mw_game_refresh') {
+                console.log('Game completion detected in another tab. Refreshing lobby...');
+                initGameLobby();
+            }
+        });
+
+        // REFRESH MECHANISM: Refresh UI when student returns to this tab
+        window.addEventListener('focus', () => {
+            console.log('Tab focused. Ensuring game list is up to date...');
+            initGameLobby();
+        });
     }
 
     // Setup filter listeners
@@ -1504,6 +1518,9 @@ async function saveResult(game, score, totalPoints, startTime, studentAnswers = 
         if (!response.ok) {
             throw new Error('Failed to submit game result');
         }
+
+        // SIGNAL REFRESH: Notify other tabs that a game was completed
+        localStorage.setItem('mw_game_refresh', Date.now());
 
         return true;
     } catch (error) {
