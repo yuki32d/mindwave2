@@ -9655,6 +9655,14 @@ app.get('/api/community/poll/active', authMiddleware, async (req, res) => {
   try {
     const student = await User.findById(req.user.sub).select('section batch department').lean();
     if (!student) return res.status(404).json({ ok: false, message: 'User not found' });
+
+    // Auto-expire polls that have been active for more than 24 hours
+    const expiryCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    await CommunityPoll.updateMany(
+      { active: true, createdAt: { $lt: expiryCutoff } },
+      { active: false, stoppedAt: new Date() }
+    );
+
     const polls = await CommunityPoll.find({ active: true }).sort({ createdAt: -1 }).lean();
     const poll  = polls.find(p => studentMatchesTarget(student, p));
     if (!poll) return res.json({ ok: true, poll: null });
@@ -9662,6 +9670,7 @@ app.get('/api/community/poll/active', authMiddleware, async (req, res) => {
     res.json({ ok: true, poll: safe });
   } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
 });
+
 
 app.post('/api/community/poll/:id/vote', authMiddleware, async (req, res) => {
   try {
@@ -9711,6 +9720,14 @@ app.get('/api/community/feedback/active', authMiddleware, async (req, res) => {
   try {
     const student = await User.findById(req.user.sub).select('section batch department').lean();
     if (!student) return res.status(404).json({ ok: false, message: 'User not found' });
+
+    // Auto-expire feedback sessions that have been active for more than 24 hours
+    const expiryCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    await CommunityFeedback.updateMany(
+      { active: true, createdAt: { $lt: expiryCutoff } },
+      { active: false, stoppedAt: new Date() }
+    );
+
     const items = await CommunityFeedback.find({ active: true }).sort({ createdAt: -1 }).lean();
     const fb    = items.find(f => studentMatchesTarget(student, f));
     if (!fb) return res.json({ ok: true, feedback: null });

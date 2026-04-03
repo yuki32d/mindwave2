@@ -1573,6 +1573,14 @@
                         return;
                     }
 
+                    // Client-side staleness guard: treat polls older than 24h as expired
+                    const pollAge = Date.now() - new Date(p.createdAt).getTime();
+                    if (pollAge > 24 * 60 * 60 * 1000) {
+                        waiting.style.display = ''; active.style.display = 'none'; ended.style.display = 'none';
+                        if (activePollId) { hasVotedPoll = false; activePollId = null; }
+                        return;
+                    }
+
                     // New poll appeared — reset voted state
                     if (activePollId !== p._id) { hasVotedPoll = false; activePollId = p._id; }
 
