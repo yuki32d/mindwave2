@@ -13695,20 +13695,34 @@ app.get('/api/discussions', verifyDiscToken, async (req, res) => {
       query = { createdBy: userId };
     } else {
       // Students: see active public discussions or ones targeting their section
+      const now = new Date();
       query = {
         status: 'active',
-        $or: [
-          { 'settings.isPublic': true },
-          { 'targetGroups.sections': { $in: [user?.section || ''] } },
-          { 'targetGroups.batch': user?.batch || '' }
+        $and: [
+          // Must be public OR target this student's section/batch
+          {
+            $or: [
+              { 'settings.isPublic': true },
+              { 'targetGroups.sections': { $in: [user?.section || '__none__'] } },
+              { 'targetGroups.batch': { $eq: user?.batch || '__none__' } }
+            ]
+          },
+          // Availability window: availableFrom is unset OR has already passed
+          {
+            $or: [
+              { 'deadlines.availableFrom': null },
+              { 'deadlines.availableFrom': { $lte: now } }
+            ]
+          },
+          // Availability window: availableTo is unset OR hasn't expired yet
+          {
+            $or: [
+              { 'deadlines.availableTo': null },
+              { 'deadlines.availableTo': { $gte: now } }
+            ]
+          }
         ]
       };
-      // Respect availability windows
-      const now = new Date();
-      query.$and = [
-        { $or: [{ 'deadlines.availableFrom': { $exists: false } }, { 'deadlines.availableFrom': null }, { 'deadlines.availableFrom': { $lte: now } }] },
-        { $or: [{ 'deadlines.availableTo': { $exists: false } }, { 'deadlines.availableTo': null }, { 'deadlines.availableTo': { $gte: now } }] }
-      ];
     }
     const discussions = await Discussion.find(query).sort({ createdAt: -1 }).select('-replies');
     res.json({ ok: true, discussions });
