@@ -13646,10 +13646,11 @@ cleanupOldGames();
 // DISCUSSION BOARD API ROUTES
 // ============================================
 
-// Middleware: verify token (reuses existing verifyToken pattern)
+// Middleware: verify token (reuses existing authMiddleware pattern)
+// Note: JWT payload uses 'sub' for user ID (see signToken function above)
 function verifyDiscToken(req, res, next) {
   const auth = req.headers['authorization'] || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : (req.cookies?.mindwave_token || null);
   if (!token) return res.status(401).json({ ok: false, message: 'Unauthorized' });
   try {
     req.user = jwt.verify(token, JWT_SECRET);
@@ -13665,10 +13666,11 @@ app.post('/api/discussions', verifyDiscToken, async (req, res) => {
     const { title, description, instructions, settings, grading, deadlines, targetGroups, status } = req.body;
     if (!title) return res.status(400).json({ ok: false, message: 'Title is required' });
 
-    const user = await User.findById(req.user.id).select('name role');
+    const userId = req.user.sub;                                          // <-- fixed: sub not id
+    const user = await User.findById(userId).select('name role');
     const disc = new Discussion({
       title, description, instructions,
-      createdBy: req.user.id,
+      createdBy: userId,
       createdByName: user?.name || 'Instructor',
       settings, grading, deadlines, targetGroups,
       status: status || 'active'
@@ -13685,11 +13687,12 @@ app.post('/api/discussions', verifyDiscToken, async (req, res) => {
 // Faculty sees their own; students see ones that target them or are public
 app.get('/api/discussions', verifyDiscToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('name role section batch department');
+    const userId = req.user.sub;                                          // <-- fixed
+    const user = await User.findById(userId).select('name role section batch department');
     let query = {};
     if (user?.role === 'admin') {
       // Faculty: see all they created
-      query = { createdBy: req.user.id };
+      query = { createdBy: userId };
     } else {
       // Students: see active public discussions or ones targeting their section
       query = {
@@ -13718,7 +13721,8 @@ app.get('/api/discussions', verifyDiscToken, async (req, res) => {
 // GET /api/discussions/:id — Get full discussion with replies
 app.get('/api/discussions/:id', verifyDiscToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('role');
+    const userId = req.user.sub;                                          // <-- fixed
+    const user = await User.findById(userId).select('role');
     const disc = await Discussion.findById(req.params.id);
     if (!disc) return res.status(404).json({ ok: false, message: 'Discussion not found' });
 
@@ -13726,10 +13730,10 @@ app.get('/api/discussions/:id', verifyDiscToken, async (req, res) => {
     
     // Post-before-view logic for students
     if (user?.role === 'student' && disc.settings?.postBeforeView) {
-      const hasPosted = disc.replies.some(r => String(r.authorId) === String(req.user.id));
+      const hasPosted = disc.replies.some(r => String(r.authorId) === String(userId));
       if (!hasPosted) {
         // Return discussion without OTHER students' replies
-        replies = disc.replies.filter(r => String(r.authorId) === String(req.user.id));
+        replies = disc.replies.filter(r => String(r.authorId) === String(userId));
       }
     }
 
@@ -13743,8 +13747,9 @@ app.get('/api/discussions/:id', verifyDiscToken, async (req, res) => {
 // PUT /api/discussions/:id — Update discussion (faculty only)
 app.put('/api/discussions/:id', verifyDiscToken, async (req, res) => {
   try {
+    const userId = req.user.sub;                                          // <-- fixed
     const disc = await Discussion.findOneAndUpdate(
-      { _id: req.params.id, createdBy: req.user.id },
+      { _id: req.params.id, createdBy: userId },
       { $set: req.body },
       { new: true, runValidators: true }
     );
@@ -13759,7 +13764,8 @@ app.put('/api/discussions/:id', verifyDiscToken, async (req, res) => {
 // DELETE /api/discussions/:id — Delete discussion (faculty only)
 app.delete('/api/discussions/:id', verifyDiscToken, async (req, res) => {
   try {
-    const disc = await Discussion.findOneAndDelete({ _id: req.params.id, createdBy: req.user.id });
+    const userId = req.user.sub;                                          // <-- fixed
+    const disc = await Discussion.findOneAndDelete({ _id: req.params.id, createdBy: userId });
     if (!disc) return res.status(404).json({ ok: false, message: 'Not found or not authorized' });
     res.json({ ok: true, message: 'Discussion deleted' });
   } catch (err) {
@@ -13774,7 +13780,8 @@ app.post('/api/discussions/:id/replies', verifyDiscToken, async (req, res) => {
     const { content } = req.body;
     if (!content || !content.trim()) return res.status(400).json({ ok: false, message: 'Content is required' });
 
-    const user = await User.findById(req.user.id).select('name role');
+    const userId = req.user.sub;                                          // <-- fixed
+    const user = await User.findById(userId).select('name role');
     const disc = await Discussion.findById(req.params.id);
     if (!disc) return res.status(404).json({ ok: false, message: 'Discussion not found' });
     if (disc.status !== 'active') return res.status(400).json({ ok: false, message: 'This discussion is closed' });
@@ -13785,7 +13792,7 @@ app.post('/api/discussions/:id/replies', verifyDiscToken, async (req, res) => {
     }
 
     const reply = {
-      authorId:   req.user.id,
+      authorId:   userId,
       authorName: user?.name || 'Unknown',
       authorRole: user?.role === 'admin' ? 'admin' : 'student',
       content: content.trim()
@@ -13804,7 +13811,8 @@ app.post('/api/discussions/:id/replies', verifyDiscToken, async (req, res) => {
 // PUT /api/discussions/:id/replies/:replyId — Grade/Moderate a reply (faculty only)
 app.put('/api/discussions/:id/replies/:replyId', verifyDiscToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('role');
+    const userId = req.user.sub;                                          // <-- fixed
+    const user = await User.findById(userId).select('role');
     if (user?.role !== 'admin') return res.status(403).json({ ok: false, message: 'Faculty only' });
 
     const disc = await Discussion.findById(req.params.id);
@@ -13818,7 +13826,7 @@ app.put('/api/discussions/:id/replies/:replyId', verifyDiscToken, async (req, re
     if (grade !== undefined) {
       reply.grade = grade;
       reply.graded = true;
-      reply.gradedBy = req.user.id;
+      reply.gradedBy = userId;
       reply.gradedAt = new Date();
     }
     if (feedback !== undefined) reply.feedback = feedback;
@@ -13836,7 +13844,8 @@ app.put('/api/discussions/:id/replies/:replyId', verifyDiscToken, async (req, re
 // GET /api/discussions/:id/analytics — Participation analytics (faculty only)
 app.get('/api/discussions/:id/analytics', verifyDiscToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('role');
+    const userId = req.user.sub;                                          // <-- fixed
+    const user = await User.findById(userId).select('role');
     if (user?.role !== 'admin') return res.status(403).json({ ok: false, message: 'Faculty only' });
 
     const disc = await Discussion.findById(req.params.id);
@@ -13867,6 +13876,7 @@ app.get('/api/discussions/:id/analytics', verifyDiscToken, async (req, res) => {
     res.status(500).json({ ok: false, message: 'Server error' });
   }
 });
+
 
 // Start server
 const httpServer = listenWithFallback(PORT);
