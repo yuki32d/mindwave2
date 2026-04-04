@@ -13677,6 +13677,67 @@ function verifyDiscToken(req, res, next) {
   }
 }
 
+// ─── DEBUG ENDPOINT — remove after confirming the fix ─────────────────────────
+// GET /api/discussions/debug — shows ALL docs in DB + what student query returns
+app.get('/api/discussions/debug', verifyDiscToken, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const user = await User.findById(userId).select('name role section batch department');
+
+    // 1. Every discussion in the DB (raw)
+    const all = await Discussion.find({}).sort({ createdAt: -1 }).lean();
+
+    // 2. What the updated student query returns
+    const now = new Date();
+    const studentQuery = {
+      status: 'active',
+      $and: [
+        { $or: [
+            { 'settings.isPublic': true },
+            { 'settings.isPublic': { $exists: false } },
+            { 'settings.isPublic': null },
+            { 'targetGroups.sections': { $in: [user?.section || '__none__'] } },
+            { 'targetGroups.batch': { $eq: user?.batch || '__none__' } }
+        ]},
+        { $or: [
+            { 'deadlines.availableFrom': { $exists: false } },
+            { 'deadlines.availableFrom': null },
+            { 'deadlines.availableFrom': { $lte: now } }
+        ]},
+        { $or: [
+            { 'deadlines.availableTo': { $exists: false } },
+            { 'deadlines.availableTo': null },
+            { 'deadlines.availableTo': { $gte: now } }
+        ]}
+      ]
+    };
+    const studentVisible = await Discussion.find(studentQuery).lean();
+
+    res.json({
+      ok: true,
+      callerRole: user?.role,
+      callerSection: user?.section,
+      callerBatch: user?.batch,
+      totalInDB: all.length,
+      studentVisibleCount: studentVisible.length,
+      allDiscussions: all.map(d => ({
+        _id: d._id,
+        title: d.title,
+        status: d.status,
+        'settings.isPublic': d.settings?.isPublic,
+        settingsRaw: d.settings,
+        targetGroups: d.targetGroups,
+        deadlines: d.deadlines,
+        createdAt: d.createdAt
+      })),
+      studentVisible: studentVisible.map(d => ({ _id: d._id, title: d.title }))
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+// ──────────────────────────────────────────────────────────────────────────────
+
 // POST /api/discussions — Create a new discussion (faculty only)
 app.post('/api/discussions', verifyDiscToken, async (req, res) => {
   try {
@@ -13701,51 +13762,22 @@ app.post('/api/discussions', verifyDiscToken, async (req, res) => {
 });
 
 // GET /api/discussions — List discussions
-// Faculty sees their own; students see ones that target them or are public
+// Faculty sees their own; students see all active discussions
 app.get('/api/discussions', verifyDiscToken, async (req, res) => {
   try {
-    const userId = req.user.sub;                                          // <-- fixed
+    const userId = req.user.sub;
     const user = await User.findById(userId).select('name role section batch department');
     let query = {};
+
     if (user?.role === 'admin') {
-      // Faculty: see all they created
+      // Faculty: see all discussions they created
       query = { createdBy: userId };
     } else {
-      // Students: see active public discussions or ones targeting their section
-      const now = new Date();
-      query = {
-        status: 'active',
-        $and: [
-          // Must be public (or field missing/null which means public by default)
-          // OR target this student's section/batch
-          {
-            $or: [
-              { 'settings.isPublic': true },
-              { 'settings.isPublic': { $exists: false } },
-              { 'settings.isPublic': null },
-              { 'targetGroups.sections': { $in: [user?.section || '__none__'] } },
-              { 'targetGroups.batch': { $eq: user?.batch || '__none__' } }
-            ]
-          },
-          // Availability window: availableFrom is unset OR has already passed
-          {
-            $or: [
-              { 'deadlines.availableFrom': { $exists: false } },
-              { 'deadlines.availableFrom': null },
-              { 'deadlines.availableFrom': { $lte: now } }
-            ]
-          },
-          // Availability window: availableTo is unset OR hasn't expired yet
-          {
-            $or: [
-              { 'deadlines.availableTo': { $exists: false } },
-              { 'deadlines.availableTo': null },
-              { 'deadlines.availableTo': { $gte: now } }
-            ]
-          }
-        ]
-      };
+      // Students: see ALL active discussions
+      // (isPublic restriction removed — teachers expect all students to see their posts)
+      query = { status: 'active' };
     }
+
     const discussions = await Discussion.find(query).sort({ createdAt: -1 }).select('-replies');
     res.json({ ok: true, discussions });
   } catch (err) {
