@@ -1013,51 +1013,51 @@ const PostReport = mongoose.model("PostReport", postReportSchema);
 // DISCUSSION BOARD SCHEMA (LMS-style threaded discussions)
 // ============================================
 const discussionReplySchema = new mongoose.Schema({
-  authorId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  authorName:  { type: String },
-  authorRole:  { type: String, enum: ['student', 'admin'], default: 'student' },
-  content:     { type: String, required: true },
+  authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  authorName: { type: String },
+  authorRole: { type: String, enum: ['student', 'admin'], default: 'student' },
+  content: { type: String, required: true },
   // Grading (faculty fills these)
-  grade:       { type: Number, min: 0 },
-  feedback:    { type: String },
-  graded:      { type: Boolean, default: false },
-  gradedBy:    { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  gradedAt:    { type: Date },
+  grade: { type: Number, min: 0 },
+  feedback: { type: String },
+  graded: { type: Boolean, default: false },
+  gradedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  gradedAt: { type: Date },
   // Moderation
-  pinned:      { type: Boolean, default: false },
-  hidden:      { type: Boolean, default: false }
+  pinned: { type: Boolean, default: false },
+  hidden: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const discussionSchema = new mongoose.Schema({
-  title:           { type: String, required: true, trim: true },
-  description:     { type: String, default: '' },
-  instructions:    { type: String, default: '' },
-  createdBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  createdByName:   { type: String },
+  title: { type: String, required: true, trim: true },
+  description: { type: String, default: '' },
+  instructions: { type: String, default: '' },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  createdByName: { type: String },
   // Settings
   settings: {
-    threaded:        { type: Boolean, default: true },
-    postBeforeView:  { type: Boolean, default: false },
+    threaded: { type: Boolean, default: true },
+    postBeforeView: { type: Boolean, default: false },
     allowStudentLikes: { type: Boolean, default: true },
-    isPublic:        { type: Boolean, default: true }
+    isPublic: { type: Boolean, default: true }
   },
   // Grading
   grading: {
-    enabled:     { type: Boolean, default: false },
+    enabled: { type: Boolean, default: false },
     totalPoints: { type: Number, default: 100 },
-    rubric:      { type: String, default: '' }
+    rubric: { type: String, default: '' }
   },
   // Deadlines
   deadlines: {
-    dueAt:         { type: Date },
+    dueAt: { type: Date },
     availableFrom: { type: Date },
-    availableTo:   { type: Date }
+    availableTo: { type: Date }
   },
   // Target population
   targetGroups: {
-    sections:    { type: [String], default: [] },
-    batch:       { type: String, default: '' },
-    department:  { type: String, default: '' }
+    sections: { type: [String], default: [] },
+    batch: { type: String, default: '' },
+    department: { type: String, default: '' }
   },
   status: { type: String, enum: ['active', 'closed', 'draft'], default: 'active' },
   replies: [discussionReplySchema]
@@ -1623,10 +1623,10 @@ app.post('/api/coding-scenario/analyze', async (req, res) => {
   const langName = langLabels[language] || language;
   const ioHint = language === 'python' ? 'Use standard input (input()) and print() for I/O.'
     : language === 'javascript' ? 'Read from a variable named `input` and use console.log() for output.'
-    : language === 'cpp' ? 'Use cin for input and cout for output. Include necessary headers.'
-    : language === 'c' ? 'Use scanf for input and printf for output. Include stdio.h.'
-    : language === 'java' ? 'Use Scanner(System.in) for input and System.out.println for output. Class must be named Main.'
-    : '';
+      : language === 'cpp' ? 'Use cin for input and cout for output. Include necessary headers.'
+        : language === 'c' ? 'Use scanf for input and printf for output. Include stdio.h.'
+          : language === 'java' ? 'Use Scanner(System.in) for input and System.out.println for output. Class must be named Main.'
+            : '';
 
   const tcText = testCases.map((tc, i) => `Test ${i + 1}: Input: ${tc.input || '(none)'}, Expected Output: ${tc.expected}`).join('\n');
 
@@ -4813,16 +4813,16 @@ app.get("/api/games/debug", async (req, res) => {
 // Game Submission Endpoint - Save student game results
 app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, res) => {
   try {
-    const { 
-      gameId, 
-      score, 
-      isCorrect, 
-      studentAnswers, 
-      startedAt, 
-      completedAt, 
+    const {
+      gameId,
+      score,
+      isCorrect,
+      studentAnswers,
+      startedAt,
+      completedAt,
       durationSeconds,
       cheatingAttempts,
-      cheatLogs 
+      cheatLogs
     } = req.body;
 
     if (!gameId) {
@@ -4867,8 +4867,8 @@ app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, re
     // Broadcast real-time update to analytics dashboard
     const io = req.app.get('io');
     if (io) {
-      io.emit('game-submitted', { 
-        gameId, 
+      io.emit('game-submitted', {
+        gameId,
         studentId: req.user.sub,
         score: submission.score
       });
@@ -6963,12 +6963,12 @@ app.get("/api/projects/my", authMiddleware, async (req, res) => {
 
     // Fetch peer reviews for these projects
     const enrichedProjects = await Promise.all(projects.map(async (project) => {
-      const peerReviews = await PeerReview.find({ 
+      const peerReviews = await PeerReview.find({
         submissionId: project._id,
         status: 'submitted'
       })
-      .populate('reviewerId', 'name displayName')
-      .lean();
+        .populate('reviewerId', 'name displayName')
+        .lean();
 
       return {
         ...project,
@@ -9575,37 +9575,37 @@ if (CLEANUP_ENABLED === 'true') {
 // ============================================
 
 const communityPollSchema = new mongoose.Schema({
-  question:          { type: String, required: true },
-  options:           { type: [String], required: true },
-  createdBy:         { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  targetSections:    { type: [String], default: [] },
-  targetBatch:       { type: String, default: '' },
-  targetDepartment:  { type: String, default: '' },
-  active:            { type: Boolean, default: true },
-  stoppedAt:         { type: Date },
-  responses:         { type: [{ optionIndex: Number, submittedAt: { type: Date, default: Date.now } }], default: [] },
+  question: { type: String, required: true },
+  options: { type: [String], required: true },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  targetSections: { type: [String], default: [] },
+  targetBatch: { type: String, default: '' },
+  targetDepartment: { type: String, default: '' },
+  active: { type: Boolean, default: true },
+  stoppedAt: { type: Date },
+  responses: { type: [{ optionIndex: Number, submittedAt: { type: Date, default: Date.now } }], default: [] },
 }, { timestamps: true });
 communityPollSchema.index({ active: 1, createdAt: -1 });
 const CommunityPoll = mongoose.model('CommunityPoll', communityPollSchema);
 
 const communityFeedbackSchema = new mongoose.Schema({
-  question:          { type: String, required: true },
-  createdBy:         { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  targetSections:    { type: [String], default: [] },
-  targetBatch:       { type: String, default: '' },
-  targetDepartment:  { type: String, default: '' },
-  active:            { type: Boolean, default: true },
-  stoppedAt:         { type: Date },
-  responses:         { type: [{ rating: Number, label: String, submittedAt: { type: Date, default: Date.now } }], default: [] },
+  question: { type: String, required: true },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  targetSections: { type: [String], default: [] },
+  targetBatch: { type: String, default: '' },
+  targetDepartment: { type: String, default: '' },
+  active: { type: Boolean, default: true },
+  stoppedAt: { type: Date },
+  responses: { type: [{ rating: Number, label: String, submittedAt: { type: Date, default: Date.now } }], default: [] },
 }, { timestamps: true });
 communityFeedbackSchema.index({ active: 1, createdAt: -1 });
 const CommunityFeedback = mongoose.model('CommunityFeedback', communityFeedbackSchema);
 
 function studentMatchesTarget(student, doc) {
   if (!doc) return false;
-  const secOk  = !doc.targetSections.length || doc.targetSections.includes(student.section);
-  const batOk  = !doc.targetBatch       || doc.targetBatch === student.batch;
-  const deptOk = !doc.targetDepartment  || doc.targetDepartment === student.department;
+  const secOk = !doc.targetSections.length || doc.targetSections.includes(student.section);
+  const batOk = !doc.targetBatch || doc.targetBatch === student.batch;
+  const deptOk = !doc.targetDepartment || doc.targetDepartment === student.department;
   return secOk && batOk && deptOk;
 }
 
@@ -9613,8 +9613,8 @@ function studentMatchesTarget(student, doc) {
 app.get('/api/community/sections', authMiddleware, async (req, res) => {
   try {
     const students = await User.find({ role: 'student', isActive: { $ne: false } }).select('section batch department').lean();
-    const sections    = [...new Set(students.map(s => s.section).filter(Boolean))].sort();
-    const batches     = [...new Set(students.map(s => s.batch).filter(Boolean))].sort();
+    const sections = [...new Set(students.map(s => s.section).filter(Boolean))].sort();
+    const batches = [...new Set(students.map(s => s.batch).filter(Boolean))].sort();
     const departments = [...new Set(students.map(s => s.department).filter(Boolean))].sort();
     res.json({ ok: true, sections, batches, departments });
   } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
@@ -9664,7 +9664,7 @@ app.get('/api/community/poll/active', authMiddleware, async (req, res) => {
     );
 
     const polls = await CommunityPoll.find({ active: true }).sort({ createdAt: -1 }).lean();
-    const poll  = polls.find(p => studentMatchesTarget(student, p));
+    const poll = polls.find(p => studentMatchesTarget(student, p));
     if (!poll) return res.json({ ok: true, poll: null });
     const { responses, ...safe } = poll;
     res.json({ ok: true, poll: safe });
@@ -9710,7 +9710,7 @@ app.get('/api/community/feedback/:id/results', authMiddleware, requireFaculty, a
     const totals = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     fb.responses.forEach(r => { totals[r.rating] = (totals[r.rating] || 0) + 1; });
     const total = fb.responses.length;
-    const avg   = total ? (fb.responses.reduce((s, r) => s + r.rating, 0) / total).toFixed(2) : null;
+    const avg = total ? (fb.responses.reduce((s, r) => s + r.rating, 0) / total).toFixed(2) : null;
     const labels = { 1: 'Very Confused', 2: 'Confused', 3: 'Neutral', 4: 'Confident', 5: 'Very Confident' };
     res.json({ ok: true, question: fb.question, totals, labels, total, avg, active: fb.active });
   } catch (err) { res.status(500).json({ ok: false, message: err.message }); }
@@ -9729,7 +9729,7 @@ app.get('/api/community/feedback/active', authMiddleware, async (req, res) => {
     );
 
     const items = await CommunityFeedback.find({ active: true }).sort({ createdAt: -1 }).lean();
-    const fb    = items.find(f => studentMatchesTarget(student, f));
+    const fb = items.find(f => studentMatchesTarget(student, f));
     if (!fb) return res.json({ ok: true, feedback: null });
     const { responses, ...safe } = fb;
     res.json({ ok: true, feedback: safe });
@@ -10295,24 +10295,24 @@ app.get('/api/google-classroom/courses', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id || req.user.sub;
     console.log(`[Google API Route] Request to /courses from userId: ${userId}`);
-    
+
     // Use global User model directly
     const courses = await googleClassroomService.getCourses(userId, { User });
     res.json({ ok: true, courses, count: courses.length });
   } catch (error) {
     console.error('[Google API Route Error] /courses:', error);
-    
-    if (error.message.includes('User not connected to Google') || 
-        error.message.includes('Google Classroom not connected') ||
-        error.message.includes('Invalid Credentials') ||
-        error.code === 401) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
+
+    if (error.message.includes('User not connected to Google') ||
+      error.message.includes('Google Classroom not connected') ||
+      error.message.includes('Invalid Credentials') ||
+      error.code === 401) {
+      return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
-    
-    res.status(500).json({ 
-        ok: false, 
-        message: error.message || 'Internal Server Error fetching courses',
-        stack: error.stack 
+
+    res.status(500).json({
+      ok: false,
+      message: error.message || 'Internal Server Error fetching courses',
+      stack: error.stack
     });
   }
 });
@@ -10321,18 +10321,18 @@ app.get('/api/google-classroom/courses/:courseId/materials', authMiddleware, asy
   try {
     const userId = req.user.id || req.user.sub;
     if (!userId) throw new Error('User ID missing from token');
-    
+
     const User = mongoose.model('User');
     const models = { User };
     const materials = await googleClassroomService.getCourseMaterials(userId, req.params.courseId, models);
     res.json({ ok: true, materials, count: materials.length });
   } catch (error) {
     console.error('[Google API Error] Get materials:', error);
-    if (error.message.includes('User not connected to Google') || 
-        error.message.includes('Google Classroom not connected') ||
-        error.message.includes('connection expired') ||
-        error.code === 401) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
+    if (error.message.includes('User not connected to Google') ||
+      error.message.includes('Google Classroom not connected') ||
+      error.message.includes('connection expired') ||
+      error.code === 401) {
+      return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -10347,11 +10347,11 @@ app.get('/api/google-classroom/courses/:courseId/assignments', authMiddleware, a
     res.json({ ok: true, assignments, count: assignments.length });
   } catch (error) {
     console.error('[Google API Error] Get assignments:', error);
-    if (error.message.includes('User not connected to Google') || 
-        error.message.includes('Google Classroom not connected') ||
-        error.message.includes('connection expired') ||
-        error.code === 401) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
+    if (error.message.includes('User not connected to Google') ||
+      error.message.includes('Google Classroom not connected') ||
+      error.message.includes('connection expired') ||
+      error.code === 401) {
+      return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -10366,11 +10366,11 @@ app.get('/api/google-classroom/courses/:courseId/announcements', authMiddleware,
     res.json({ ok: true, announcements, count: announcements.length });
   } catch (error) {
     console.error('[Google API Error] Get announcements:', error);
-    if (error.message.includes('User not connected to Google') || 
-        error.message.includes('Google Classroom not connected') ||
-        error.message.includes('connection expired') ||
-        error.code === 401) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
+    if (error.message.includes('User not connected to Google') ||
+      error.message.includes('Google Classroom not connected') ||
+      error.message.includes('connection expired') ||
+      error.code === 401) {
+      return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -10385,11 +10385,11 @@ app.post('/api/google-classroom/courses/:courseId/materials', authMiddleware, re
     res.json({ ok: true, material });
   } catch (error) {
     console.error('[Google API Error] Upload material:', error);
-    if (error.message.includes('User not connected to Google') || 
-        error.message.includes('Google Classroom not connected') ||
-        error.message.includes('connection expired') ||
-        error.code === 401) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
+    if (error.message.includes('User not connected to Google') ||
+      error.message.includes('Google Classroom not connected') ||
+      error.message.includes('connection expired') ||
+      error.code === 401) {
+      return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -10404,11 +10404,11 @@ app.post('/api/google-classroom/courses/:courseId/assignments', authMiddleware, 
     res.json({ ok: true, assignment });
   } catch (error) {
     console.error('[Google API Error] Create assignment:', error);
-    if (error.message.includes('User not connected to Google') || 
-        error.message.includes('Google Classroom not connected') ||
-        error.message.includes('connection expired') ||
-        error.code === 401) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
+    if (error.message.includes('User not connected to Google') ||
+      error.message.includes('Google Classroom not connected') ||
+      error.message.includes('connection expired') ||
+      error.code === 401) {
+      return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -10427,11 +10427,11 @@ app.post('/api/google-drive/upload', authMiddleware, async (req, res) => {
     res.json({ ok: true, file });
   } catch (error) {
     console.error('[Google API Error] Drive upload:', error);
-    if (error.message.includes('User not connected to Google') || 
-        error.message.includes('Google Classroom not connected') ||
-        error.message.includes('connection expired') ||
-        error.code === 401) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
+    if (error.message.includes('User not connected to Google') ||
+      error.message.includes('Google Classroom not connected') ||
+      error.message.includes('connection expired') ||
+      error.code === 401) {
+      return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -10455,11 +10455,11 @@ app.get('/api/google-classroom/courses/:courseId/assignments/:assignmentId/submi
     res.json({ ok: true, submissions, count: submissions.length });
   } catch (error) {
     console.error('[Google API Error] Get submissions:', error);
-    if (error.message.includes('User not connected to Google') || 
-        error.message.includes('Google Classroom not connected') ||
-        error.message.includes('connection expired') ||
-        error.code === 401) {
-        return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
+    if (error.message.includes('User not connected to Google') ||
+      error.message.includes('Google Classroom not connected') ||
+      error.message.includes('connection expired') ||
+      error.code === 401) {
+      return res.status(401).json({ ok: false, message: 'Google Classroom connection expired. Please reconnect.' });
     }
     res.status(500).json({ ok: false, message: error.message, stack: error.stack });
   }
@@ -13091,90 +13091,90 @@ cron.schedule("0 * * * *", async () => {
   try {
     const User = mongoose.model('User');
     const Knowledge = mongoose.model('Knowledge');
-    
+
     // Find all users who are teachers/admins with activated Google Integration
-    const teachers = await User.find({ 
+    const teachers = await User.find({
       googleAccessToken: { $exists: true, $ne: null },
       role: { $in: ['admin', 'faculty'] } // Also handle 'faculty' if used in orgRole
     });
 
     for (const user of teachers) {
-        try {
-            const oauth2Client = new google.auth.OAuth2(
-              GOOGLE_CLIENT_ID,
-              GOOGLE_CLIENT_SECRET,
-              GOOGLE_REDIRECT_URI
-            );
-            oauth2Client.setCredentials({
-              access_token: user.googleAccessToken,
-              refresh_token: user.googleRefreshToken
-            });
-            const classroom = google.classroom({ version: 'v1', auth: oauth2Client });
-            const drive = google.drive({ version: 'v3', auth: oauth2Client });
+      try {
+        const oauth2Client = new google.auth.OAuth2(
+          GOOGLE_CLIENT_ID,
+          GOOGLE_CLIENT_SECRET,
+          GOOGLE_REDIRECT_URI
+        );
+        oauth2Client.setCredentials({
+          access_token: user.googleAccessToken,
+          refresh_token: user.googleRefreshToken
+        });
+        const classroom = google.classroom({ version: 'v1', auth: oauth2Client });
+        const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
-            // Fetch active courses
-            const response = await classroom.courses.list({ courseStates: ['ACTIVE'], pageSize: 15 });
-            const courses = response.data.courses || [];
+        // Fetch active courses
+        const response = await classroom.courses.list({ courseStates: ['ACTIVE'], pageSize: 15 });
+        const courses = response.data.courses || [];
 
-            for (const course of courses) {
-                const materialsRes = await classroom.courses.courseWorkMaterials.list({
-                    courseId: course.id,
-                    pageSize: 20 // Just check recent ones on auto-sync
-                });
-                const materials = materialsRes.data.courseWorkMaterial || [];
+        for (const course of courses) {
+          const materialsRes = await classroom.courses.courseWorkMaterials.list({
+            courseId: course.id,
+            pageSize: 20 // Just check recent ones on auto-sync
+          });
+          const materials = materialsRes.data.courseWorkMaterial || [];
 
-                for (const item of materials) {
-                  const title = item.title || 'Untitled Material';
-                  const description = item.description || '';
-                  const sourceId = item.id;
+          for (const item of materials) {
+            const title = item.title || 'Untitled Material';
+            const description = item.description || '';
+            const sourceId = item.id;
 
-                  // 1. Process description
-                  if (description) {
-                    await chunkAndSaveText(Knowledge, description, course.id, user._id, title, "MATERIAL_DESC", `${sourceId}-desc`);
-                  }
-
-                  // 2. Process attached files
-                  if (item.materials && item.materials.length > 0) {
-                    for (const attachment of item.materials) {
-                      if (attachment.driveFile && attachment.driveFile.driveFile) {
-                        const driveFileId = attachment.driveFile.driveFile.id;
-                        const fileTitle = attachment.driveFile.driveFile.title;
-
-                        // Only process if we haven't chunked this sourceId recently
-                        // (BulkWrite upsert handles duplicates, but we want to save API calls)
-                        const existing = await Knowledge.findOne({ sourceId: driveFileId });
-                        if (existing) continue; 
-                        
-                        try {
-                          let fileResponse;
-                          try {
-                              fileResponse = await drive.files.export({ fileId: driveFileId, mimeType: 'text/plain' });
-                          } catch (exportErr) {
-                              fileResponse = await drive.files.get({ fileId: driveFileId, alt: 'media' }, { responseType: 'arraybuffer' });
-                          }
-
-                          let rawText = "";
-                          if (typeof fileResponse.data === 'string') {
-                              rawText = fileResponse.data;
-                          } else if (fileResponse.data instanceof Buffer || fileResponse.data instanceof ArrayBuffer) {
-                              try {
-                                  let pdfData = await pdfParse(Buffer.from(fileResponse.data));
-                                  rawText = pdfData.text;
-                              } catch(e) {}
-                          }
-
-                          if (rawText && rawText.trim().length > 0) {
-                            await chunkAndSaveText(Knowledge, rawText, course.id, user._id, fileTitle, "DRIVE_FILE", driveFileId);
-                          }
-                        } catch (err) {}
-                      }
-                    }
-                  }
-                }
+            // 1. Process description
+            if (description) {
+              await chunkAndSaveText(Knowledge, description, course.id, user._id, title, "MATERIAL_DESC", `${sourceId}-desc`);
             }
-        } catch (teacherErr) {
-            console.log(`[RAG Tracker] Skip teacher sync for ${user.email} - API Auth Expired or Invalid.`);
+
+            // 2. Process attached files
+            if (item.materials && item.materials.length > 0) {
+              for (const attachment of item.materials) {
+                if (attachment.driveFile && attachment.driveFile.driveFile) {
+                  const driveFileId = attachment.driveFile.driveFile.id;
+                  const fileTitle = attachment.driveFile.driveFile.title;
+
+                  // Only process if we haven't chunked this sourceId recently
+                  // (BulkWrite upsert handles duplicates, but we want to save API calls)
+                  const existing = await Knowledge.findOne({ sourceId: driveFileId });
+                  if (existing) continue;
+
+                  try {
+                    let fileResponse;
+                    try {
+                      fileResponse = await drive.files.export({ fileId: driveFileId, mimeType: 'text/plain' });
+                    } catch (exportErr) {
+                      fileResponse = await drive.files.get({ fileId: driveFileId, alt: 'media' }, { responseType: 'arraybuffer' });
+                    }
+
+                    let rawText = "";
+                    if (typeof fileResponse.data === 'string') {
+                      rawText = fileResponse.data;
+                    } else if (fileResponse.data instanceof Buffer || fileResponse.data instanceof ArrayBuffer) {
+                      try {
+                        let pdfData = await pdfParse(Buffer.from(fileResponse.data));
+                        rawText = pdfData.text;
+                      } catch (e) { }
+                    }
+
+                    if (rawText && rawText.trim().length > 0) {
+                      await chunkAndSaveText(Knowledge, rawText, course.id, user._id, fileTitle, "DRIVE_FILE", driveFileId);
+                    }
+                  } catch (err) { }
+                }
+              }
+            }
+          }
         }
+      } catch (teacherErr) {
+        console.log(`[RAG Tracker] Skip teacher sync for ${user.email} - API Auth Expired or Invalid.`);
+      }
     }
   } catch (error) {
     console.error("[RAG Tracker] Auto-Sync Failed:", error);
@@ -13197,7 +13197,7 @@ app.post('/api/admin/sync-classroom', async (req, res) => {
 
     const User = mongoose.model('User');
     const Knowledge = mongoose.model('Knowledge');
-    
+
     const user = await User.findById(userId);
     if (!user || !user.googleAccessToken) {
       return res.status(401).json({ success: false, message: "Google Classroom connection expired. Please reconnect." });
@@ -13246,10 +13246,10 @@ app.post('/api/admin/sync-classroom', async (req, res) => {
           if (attachment.driveFile && attachment.driveFile.driveFile) {
             const driveFileId = attachment.driveFile.driveFile.id;
             const fileTitle = attachment.driveFile.driveFile.title;
-            
+
             try {
               console.log(`[RAG Sync] Processing file: ${fileTitle} (${driveFileId})`);
-              
+
               // Skip if already processed (optional but good for performance)
               const existing = await Knowledge.findOne({ sourceId: driveFileId });
               if (existing) {
@@ -13259,28 +13259,28 @@ app.post('/api/admin/sync-classroom', async (req, res) => {
 
               let fileResponse;
               try {
-                  fileResponse = await drive.files.export({
-                      fileId: driveFileId,
-                      mimeType: 'text/plain'
-                  });
+                fileResponse = await drive.files.export({
+                  fileId: driveFileId,
+                  mimeType: 'text/plain'
+                });
               } catch (exportErr) {
-                  fileResponse = await drive.files.get({
-                      fileId: driveFileId,
-                      alt: 'media'
-                  }, { responseType: 'arraybuffer' });
+                fileResponse = await drive.files.get({
+                  fileId: driveFileId,
+                  alt: 'media'
+                }, { responseType: 'arraybuffer' });
               }
 
               let rawText = "";
               if (typeof fileResponse.data === 'string') {
-                  rawText = fileResponse.data;
+                rawText = fileResponse.data;
               } else if (fileResponse.data instanceof Buffer || fileResponse.data instanceof ArrayBuffer || Buffer.isBuffer(fileResponse.data)) {
-                  try {
-                      const pdfData = await pdfParse(Buffer.from(fileResponse.data));
-                      rawText = pdfData.text;
-                  } catch (pdfErr) {
-                      console.log(`[RAG Sync] Failed to parse PDF ${fileTitle}:`, pdfErr.message);
-                      continue; 
-                  }
+                try {
+                  const pdfData = await pdfParse(Buffer.from(fileResponse.data));
+                  rawText = pdfData.text;
+                } catch (pdfErr) {
+                  console.log(`[RAG Sync] Failed to parse PDF ${fileTitle}:`, pdfErr.message);
+                  continue;
+                }
               }
 
               if (rawText && rawText.trim().length > 0) {
@@ -13293,9 +13293,9 @@ app.post('/api/admin/sync-classroom', async (req, res) => {
 
             } catch (err) {
               if (err.code === 403 || err.message.includes('permission') || err.message.includes('Forbidden')) {
-                  console.error(`[RAG Sync] PERMISSION ERROR on ${fileTitle}: You likely need to disconnect and reconnect your Google account to grant new Drive permissions.`);
+                console.error(`[RAG Sync] PERMISSION ERROR on ${fileTitle}: You likely need to disconnect and reconnect your Google account to grant new Drive permissions.`);
               } else {
-                  console.log(`[RAG Sync] Error processing ${fileTitle}:`, err.message);
+                console.log(`[RAG Sync] Error processing ${fileTitle}:`, err.message);
               }
             }
           }
@@ -13314,41 +13314,41 @@ app.post('/api/admin/sync-classroom', async (req, res) => {
 
 // Helper for Google Classroom Sync
 async function chunkAndSaveText(KnowledgeModel, fullText, courseId, teacherId, sourceTitle, sourceType, sourceId) {
-    const words = fullText.split(/\s+/);
-    const chunkSize = 400; 
-    const overlap = 50; 
+  const words = fullText.split(/\s+/);
+  const chunkSize = 400;
+  const overlap = 50;
 
-    let chunks = [];
-    for (let i = 0; i < words.length; i += (chunkSize - overlap)) {
-        const chunk = words.slice(i, i + chunkSize).join(" ");
-        if (chunk.trim().length > 20) { 
-            chunks.push(chunk);
-        }
+  let chunks = [];
+  for (let i = 0; i < words.length; i += (chunkSize - overlap)) {
+    const chunk = words.slice(i, i + chunkSize).join(" ");
+    if (chunk.trim().length > 20) {
+      chunks.push(chunk);
     }
+  }
 
-    const operations = chunks.map((chunkText, index) => {
-        return {
-            updateOne: {
-                filter: { sourceId: sourceId, chunkIndex: index },
-                update: {
-                    $set: {
-                        courseId,
-                        teacherId,
-                        sourceTitle,
-                        sourceType,
-                        textChunk: chunkText,
-                        keywords: chunkText.substring(0, 100).toLowerCase().replace(/[^a-z0-9 ]/g, '')
-                    }
-                },
-                upsert: true
-            }
-        };
-    });
+  const operations = chunks.map((chunkText, index) => {
+    return {
+      updateOne: {
+        filter: { sourceId: sourceId, chunkIndex: index },
+        update: {
+          $set: {
+            courseId,
+            teacherId,
+            sourceTitle,
+            sourceType,
+            textChunk: chunkText,
+            keywords: chunkText.substring(0, 100).toLowerCase().replace(/[^a-z0-9 ]/g, '')
+          }
+        },
+        upsert: true
+      }
+    };
+  });
 
-    if (operations.length > 0) {
-        await KnowledgeModel.bulkWrite(operations);
-    }
-    return operations.length;
+  if (operations.length > 0) {
+    await KnowledgeModel.bulkWrite(operations);
+  }
+  return operations.length;
 }
 
 
@@ -13375,28 +13375,28 @@ app.post('/api/ai-tutor/chat', async (req, res) => {
     // ==========================================
     let ragContext = "";
     try {
-        const Knowledge = mongoose.model('Knowledge');
-        
-        // Very basic search: find chunks that contain words from the student's message
-        // In a production app, this would use Vector Embeddings. For now, regex search.
-        const searchWords = message.split(/\s+/).filter(w => w.length > 4).join('|');
-        if (searchWords.length > 0) {
-            const relevantChunks = await Knowledge.find({
-                textChunk: { $regex: new RegExp(searchWords, 'i') }
-            }).limit(3); // Grab top 3 matching chunks
+      const Knowledge = mongoose.model('Knowledge');
 
-            if (relevantChunks && relevantChunks.length > 0) {
-                ragContext = "\n\n=== RELEVANT COURSE MATERIAL ===\n";
-                relevantChunks.forEach((c, idx) => {
-                    ragContext += `[Source ${idx+1}: ${c.sourceTitle}] ${c.textChunk}\n`;
-                });
-                ragContext += "================================\n";
-                ragContext += "CRITICAL INSTRUCTION: You MUST use the course material above to answer the student's question if it is relevant. Do not contradict the course material.\n";
-            }
+      // Very basic search: find chunks that contain words from the student's message
+      // In a production app, this would use Vector Embeddings. For now, regex search.
+      const searchWords = message.split(/\s+/).filter(w => w.length > 4).join('|');
+      if (searchWords.length > 0) {
+        const relevantChunks = await Knowledge.find({
+          textChunk: { $regex: new RegExp(searchWords, 'i') }
+        }).limit(3); // Grab top 3 matching chunks
+
+        if (relevantChunks && relevantChunks.length > 0) {
+          ragContext = "\n\n=== RELEVANT COURSE MATERIAL ===\n";
+          relevantChunks.forEach((c, idx) => {
+            ragContext += `[Source ${idx + 1}: ${c.sourceTitle}] ${c.textChunk}\n`;
+          });
+          ragContext += "================================\n";
+          ragContext += "CRITICAL INSTRUCTION: You MUST use the course material above to answer the student's question if it is relevant. Do not contradict the course material.\n";
         }
+      }
     } catch (ragErr) {
-        console.error("RAG Retrieval Error:", ragErr);
-        // Continue without RAG if it fails
+      console.error("RAG Retrieval Error:", ragErr);
+      // Continue without RAG if it fails
     }
 
     const systemContent = SAGE_SYSTEM_PROMPT + modeInstruction + subjectCtx + moodCtx + ragContext;
@@ -13631,7 +13631,7 @@ app.get('/api/system/status-history', async (req, res) => {
 cron.schedule('0 * * * *', async () => {
   console.log('Running periodic system health check...');
   const services = ['api', 'db', 'ai', 'cdn'];
-  
+
   for (const service of services) {
     let status = 'operational';
     let latency = 0;
@@ -13692,23 +13692,29 @@ app.get('/api/discussions/debug', verifyDiscToken, async (req, res) => {
     const studentQuery = {
       status: 'active',
       $and: [
-        { $or: [
+        {
+          $or: [
             { 'settings.isPublic': true },
             { 'settings.isPublic': { $exists: false } },
             { 'settings.isPublic': null },
             { 'targetGroups.sections': { $in: [user?.section || '__none__'] } },
             { 'targetGroups.batch': { $eq: user?.batch || '__none__' } }
-        ]},
-        { $or: [
+          ]
+        },
+        {
+          $or: [
             { 'deadlines.availableFrom': { $exists: false } },
             { 'deadlines.availableFrom': null },
             { 'deadlines.availableFrom': { $lte: now } }
-        ]},
-        { $or: [
+          ]
+        },
+        {
+          $or: [
             { 'deadlines.availableTo': { $exists: false } },
             { 'deadlines.availableTo': null },
             { 'deadlines.availableTo': { $gte: now } }
-        ]}
+          ]
+        }
       ]
     };
     const studentVisible = await Discussion.find(studentQuery).lean();
@@ -13795,7 +13801,7 @@ app.get('/api/discussions/:id', verifyDiscToken, async (req, res) => {
     if (!disc) return res.status(404).json({ ok: false, message: 'Discussion not found' });
 
     let replies = disc.replies.filter(r => !r.hidden);
-    
+
     // Post-before-view logic for students
     if (user?.role === 'student' && disc.settings?.postBeforeView) {
       const hasPosted = disc.replies.some(r => String(r.authorId) === String(userId));
@@ -13860,7 +13866,7 @@ app.post('/api/discussions/:id/replies', verifyDiscToken, async (req, res) => {
     }
 
     const reply = {
-      authorId:   userId,
+      authorId: userId,
       authorName: user?.name || 'Unknown',
       authorRole: user?.role === 'admin' ? 'admin' : 'student',
       content: content.trim()
@@ -13921,7 +13927,7 @@ app.get('/api/discussions/:id/analytics', verifyDiscToken, async (req, res) => {
 
     const visibleReplies = disc.replies.filter(r => !r.hidden);
     const studentReplies = visibleReplies.filter(r => r.authorRole === 'student');
-    
+
     // Group by student
     const byStudent = {};
     studentReplies.forEach(r => {
