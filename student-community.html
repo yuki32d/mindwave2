@@ -643,6 +643,72 @@
                 flex-wrap: wrap;
             }
         }
+        /* ── Rich-text description / instructions prose ── */
+        #sDiscDetailDesc,
+        #sDiscDetailInstructions {
+            word-break: break-word;
+            line-height: 1.7;
+        }
+        #sDiscDetailDesc img,
+        #sDiscDetailInstructions img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 6px 0;
+            display: block;
+        }
+        #sDiscDetailDesc a,
+        #sDiscDetailInstructions a {
+            color: var(--accent, #6366f1);
+            text-decoration: underline;
+            word-break: break-all;
+        }
+        #sDiscDetailDesc h1, #sDiscDetailDesc h2, #sDiscDetailDesc h3,
+        #sDiscDetailInstructions h1, #sDiscDetailInstructions h2, #sDiscDetailInstructions h3 {
+            font-weight: 700;
+            margin: .5em 0;
+            color: var(--text);
+        }
+        #sDiscDetailDesc ul, #sDiscDetailDesc ol,
+        #sDiscDetailInstructions ul, #sDiscDetailInstructions ol {
+            padding-left: 1.4em;
+            margin: .4em 0;
+        }
+        #sDiscDetailDesc blockquote,
+        #sDiscDetailInstructions blockquote {
+            border-left: 3px solid var(--accent, #6366f1);
+            margin: .5em 0;
+            padding: 6px 14px;
+            background: rgba(99,102,241,.07);
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+        #sDiscDetailDesc pre,
+        #sDiscDetailInstructions pre {
+            background: rgba(0,0,0,.25);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'Courier New', monospace;
+            font-size: .88em;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        /* Google Drive link badge */
+        #sDiscDetailDesc a[href*="google"],
+        #sDiscDetailInstructions a[href*="google"] {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 13px;
+            border-radius: 8px;
+            background: rgba(66,133,244,.1);
+            border: 1px solid rgba(66,133,244,.3);
+            color: #4285f4 !important;
+            text-decoration: none !important;
+            font-weight: 600;
+            font-size: .88rem;
+        }
     </style>
 </head>
 
@@ -1301,7 +1367,7 @@
                     currentDisc = data.discussion;
 
                     document.getElementById('sDiscDetailTitle').textContent = currentDisc.title;
-                    document.getElementById('sDiscDetailDesc').textContent = currentDisc.description || '';
+                    document.getElementById('sDiscDetailDesc').innerHTML = currentDisc.description || '';
                     document.getElementById('sDiscDetailInstructions').innerHTML = currentDisc.instructions
                         ? `<strong style="display:block;margin-bottom:4px;color:var(--text);">Instructions:</strong>${currentDisc.instructions}`
                         : '<em style="color:var(--text-secondary);">No specific instructions provided.</em>';
