@@ -10,13 +10,17 @@ const API = {
   headers() {
     return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.getToken()}` };
   },
+  async _parse(r) {
+    if (r.status === 429) return { ok: false, rateLimited: true };
+    try { return await r.json(); } catch { return { ok: false, error: 'Invalid response' }; }
+  },
   async get(url) {
     const r = await fetch(url, { headers: this.headers(), credentials: 'include' });
-    return r.json();
+    return this._parse(r);
   },
   async post(url, body) {
     const r = await fetch(url, { method: 'POST', headers: this.headers(), credentials: 'include', body: JSON.stringify(body) });
-    return r.json();
+    return this._parse(r);
   }
 };
 

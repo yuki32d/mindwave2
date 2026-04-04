@@ -1220,7 +1220,11 @@
             const API_BASE = '/api/discussions';
             const token = () => localStorage.getItem('token') || localStorage.getItem('mindwave_token') || '';
             const headers = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${token()}` });
-            const apiFetch = (url, opts = {}) => fetch(url, { ...opts, headers: headers(), credentials: 'include' }).then(r => r.json());
+            const apiFetch = async (url, opts = {}) => {
+                const r = await fetch(url, { ...opts, headers: headers(), credentials: 'include' });
+                if (r.status === 429) return { ok: false, rateLimited: true, message: 'Rate limited — please wait' };
+                try { return await r.json(); } catch { return { ok: false, message: 'Invalid server response' }; }
+            };
 
             let currentDisc = null;
 
@@ -1243,6 +1247,18 @@
 
                 try {
                     const data = await apiFetch(API_BASE);
+                    if (data.rateLimited) {
+                        // Server is rate-limited — show friendly message and auto-retry
+                        count.textContent = '';
+                        container.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-secondary);">
+                            <i data-lucide="clock" style="width:28px;height:28px;opacity:.5;margin-bottom:10px;"></i>
+                            <p style="margin:0 0 12px;">Server is busy — retrying in a moment…</p>
+                            <button onclick="loadDiscussions()" style="padding:8px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text-secondary);cursor:pointer;font-size:.85rem;">Retry Now</button>
+                        </div>`;
+                        if (window.lucide) lucide.createIcons();
+                        setTimeout(loadDiscussions, 15000); // auto-retry after 15s
+                        return;
+                    }
                     if (!data.ok) throw new Error(data.message);
                     const discs = data.discussions || [];
                     count.textContent = `${discs.length} available`;
@@ -1690,10 +1706,10 @@
                     });
                 }
 
-                // Initial load + 5s refresh
+                // Initial load + 30s refresh (reduced from 5s to avoid rate limits on Render free tier)
                 refreshStudentPoll();
                 refreshStudentFeedback();
-                setInterval(() => { refreshStudentPoll(); refreshStudentFeedback(); }, 5000);
+                setInterval(() => { refreshStudentPoll(); refreshStudentFeedback(); }, 30000);
             });
 
         })();
