@@ -1514,6 +1514,187 @@
         .lb-rank { width: 28px; font-size: 1rem; }
         .lb-name { flex: 1; font-weight: 600; color: var(--text); }
         .lb-points { font-weight: 700; color: var(--accent); text-align: right;}
+
+        /* ═══════════════ RICH TEXT EDITOR TOOLBAR ═══════════════ */
+        .disc-editor-wrap { margin-bottom: 20px; }
+
+        .disc-editor-container {
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--bg);
+            transition: border-color .18s, box-shadow .18s;
+        }
+        .disc-editor-container:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-lo);
+        }
+
+        /* ── Menu Bar (Edit / View / Insert …) ── */
+        .disc-toolbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 5px 10px 0;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+        .disc-menu-item {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            transition: color .14s, background .14s;
+            letter-spacing: .01em;
+        }
+        .disc-menu-item:hover { color: var(--text); background: var(--bg); }
+
+        /* ── Icon Toolbar Row ── */
+        .disc-toolbar-icons {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2px;
+            padding: 6px 10px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        .disc-tb-group {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+        }
+        .disc-tb-right { margin-left: auto; }
+
+        .disc-tb-sep {
+            width: 1px;
+            height: 20px;
+            background: var(--border);
+            margin: 0 5px;
+            flex-shrink: 0;
+        }
+
+        /* ── Toolbar Buttons ── */
+        .disc-tb-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 28px;
+            padding: 0 5px;
+            border: none;
+            border-radius: 6px;
+            background: none;
+            color: var(--muted);
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background .13s, color .13s;
+            position: relative;
+            white-space: nowrap;
+        }
+        .disc-tb-btn:hover { background: var(--bg); color: var(--text); }
+        .disc-tb-btn.active { background: var(--accent-lo); color: var(--accent); }
+        .disc-tb-btn:disabled { opacity: .4; cursor: default; }
+        .disc-tb-btn:disabled:hover { background: none; }
+
+        /* Bold / Italic / Underline glyphs */
+        .disc-tb-btn b { font-size: 14px; font-weight: 900; }
+        .disc-tb-btn i { font-style: italic; font-weight: 700; }
+        .disc-tb-btn u { text-decoration: underline; }
+
+        /* ── Selects (font size / block) ── */
+        .disc-select {
+            height: 28px;
+            padding: 0 6px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+            transition: border-color .14s;
+        }
+        .disc-select:focus { border-color: var(--accent); }
+
+        /* ── Color Picker Buttons ── */
+        .disc-color-btn {
+            flex-direction: column;
+            gap: 1px;
+            cursor: pointer;
+            padding: 3px 5px 2px;
+        }
+        .disc-color-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+        .disc-color-bar {
+            display: block;
+            width: 16px;
+            height: 3px;
+            border-radius: 2px;
+            margin-top: 1px;
+        }
+
+        /* ── Google Drive button special ── */
+        .disc-gdrive-btn svg { display: block; }
+
+        /* ── Editable Content Area ── */
+        .disc-editor-area {
+            min-height: 110px;
+            max-height: 340px;
+            overflow-y: auto;
+            padding: 14px 16px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text);
+            background: var(--bg);
+            outline: none;
+            word-break: break-word;
+        }
+        /* Placeholder via ::before */
+        .disc-editor-area:empty::before {
+            content: attr(data-placeholder);
+            color: var(--muted);
+            pointer-events: none;
+            font-style: italic;
+        }
+        /* Typography inside editor */
+        .disc-editor-area h1 { font-size: 1.5rem; font-weight: 800; line-height: 1.3; margin: .5em 0; }
+        .disc-editor-area h2 { font-size: 1.25rem; font-weight: 700; margin: .5em 0; }
+        .disc-editor-area h3 { font-size: 1rem; font-weight: 700; margin: .5em 0; }
+        .disc-editor-area blockquote {
+            border-left: 3px solid var(--accent);
+            margin: .5em 0;
+            padding: 6px 14px;
+            background: var(--accent-lo);
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--muted);
+        }
+        .disc-editor-area pre {
+            background: rgba(0,0,0,.25);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'Courier New', monospace;
+            font-size: .9em;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .disc-editor-area ul, .disc-editor-area ol { padding-left: 1.4em; margin: .4em 0; }
+        .disc-editor-area a { color: var(--accent); text-decoration: underline; }
+        .disc-editor-area hr { border: none; border-top: 1px solid var(--border); margin: .8em 0; }
     </style>
 </head>
 
@@ -1879,13 +2060,215 @@
                             <label class="form-label">Title <span style="color:var(--red)">*</span></label>
                             <input type="text" id="discTitle" class="input-field" placeholder="e.g., Week 3 Reflection: Algorithms">
                         </div>
-                        <div class="form-group">
+                        <!-- ═══ RICH TEXT EDITOR SHARED ═══ -->
+                        <!-- Editor for Description -->
+                        <div class="form-group disc-editor-wrap" id="descEditorWrap">
                             <label class="form-label">Description / Context</label>
-                            <textarea id="discDescription" class="input-field" rows="3" style="resize:vertical;" placeholder="Provide background reading or lecture notes reference..."></textarea>
+                            <div class="disc-editor-container" data-editor="descEditor">
+                                <!-- Menu Bar -->
+                                <div class="disc-toolbar-menu">
+                                    <button class="disc-menu-item" data-menu="file">Edit</button>
+                                    <button class="disc-menu-item" data-menu="view">View</button>
+                                    <button class="disc-menu-item" data-menu="insert">Insert</button>
+                                    <button class="disc-menu-item" data-menu="format">Format</button>
+                                    <button class="disc-menu-item" data-menu="tools">Tools</button>
+                                    <button class="disc-menu-item" data-menu="table">Table</button>
+                                </div>
+                                <!-- Icon Toolbar -->
+                                <div class="disc-toolbar-icons">
+                                    <!-- Font size + style -->
+                                    <div class="disc-tb-group">
+                                        <select class="disc-select" data-cmd="fontSize" title="Font Size">
+                                            <option value="1">8pt</option>
+                                            <option value="2">10pt</option>
+                                            <option value="3" selected>12pt</option>
+                                            <option value="4">14pt</option>
+                                            <option value="5">18pt</option>
+                                            <option value="6">24pt</option>
+                                            <option value="7">36pt</option>
+                                        </select>
+                                        <select class="disc-select" data-cmd="formatBlock" title="Block Style">
+                                            <option value="p" selected>Paragraph</option>
+                                            <option value="h1">Heading 1</option>
+                                            <option value="h2">Heading 2</option>
+                                            <option value="h3">Heading 3</option>
+                                            <option value="blockquote">Quote</option>
+                                            <option value="pre">Code Block</option>
+                                        </select>
+                                    </div>
+                                    <span class="disc-tb-sep"></span>
+                                    <!-- Basic Styling -->
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+                                        <button class="disc-tb-btn disc-italic" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+                                        <button class="disc-tb-btn disc-underline" data-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+                                    </div>
+                                    <!-- Text Color + Highlight -->
+                                    <div class="disc-tb-group">
+                                        <label class="disc-tb-btn disc-color-btn" title="Text Color">
+                                            <span style="font-weight:900;">A</span>
+                                            <input type="color" class="disc-color-input" data-cmd="foreColor" value="#f59e0b">
+                                            <span class="disc-color-bar" style="background:#f59e0b;"></span>
+                                        </label>
+                                        <label class="disc-tb-btn disc-color-btn" title="Highlight">
+                                            <span style="font-weight:900;">✏</span>
+                                            <input type="color" class="disc-color-input" data-cmd="hiliteColor" value="#fef08a">
+                                            <span class="disc-color-bar" style="background:#fef08a;"></span>
+                                        </label>
+                                    </div>
+                                    <!-- Superscript -->
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn" data-cmd="superscript" title="Superscript">T<sup style="font-size:7px">2</sup></button>
+                                        <button class="disc-tb-btn" data-cmd="subscript" title="Subscript">T<sub style="font-size:7px">2</sub></button>
+                                        <button class="disc-tb-btn" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
+                                    </div>
+                                    <span class="disc-tb-sep"></span>
+                                    <!-- Alignment -->
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn" data-cmd="justifyLeft" title="Align Left">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+                                        </button>
+                                        <button class="disc-tb-btn" data-cmd="justifyCenter" title="Center">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+                                        </button>
+                                        <button class="disc-tb-btn" data-cmd="justifyRight" title="Align Right">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
+                                        </button>
+                                    </div>
+                                    <!-- Lists -->
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn" data-cmd="insertUnorderedList" title="Bullet List">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>
+                                        </button>
+                                        <button class="disc-tb-btn" data-cmd="insertOrderedList" title="Numbered List">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4" stroke-linecap="round"/><path d="M4 10h2" stroke-linecap="round"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1" stroke-linecap="round"/></svg>
+                                        </button>
+                                        <button class="disc-tb-btn disc-indent" data-cmd="indent" title="Indent">⇥</button>
+                                        <button class="disc-tb-btn disc-indent" data-cmd="outdent" title="Outdent">⇤</button>
+                                    </div>
+                                    <span class="disc-tb-sep"></span>
+                                    <!-- Insert -->
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn disc-insert-btn" data-action="link" title="Insert Link">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                                        </button>
+                                        <button class="disc-tb-btn disc-insert-btn" data-action="image" title="Insert Image">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                        </button>
+                                        <button class="disc-tb-btn disc-insert-btn" data-action="hr" title="Horizontal Rule">—</button>
+                                    </div>
+                                    <span class="disc-tb-sep"></span>
+                                    <!-- Undo / Redo + extras -->
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn" data-cmd="undo" title="Undo (Ctrl+Z)">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                                        </button>
+                                        <button class="disc-tb-btn" data-cmd="redo" title="Redo">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                                        </button>
+                                    </div>
+                                    <!-- Google Drive icon + Add-ons -->
+                                    <div class="disc-tb-group disc-tb-right">
+                                        <button class="disc-tb-btn disc-gdrive-btn" title="Google Drive (coming soon)" disabled>
+                                            <svg width="15" height="15" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+                                        </button>
+                                        <button class="disc-tb-btn" title="More options">⋮</button>
+                                    </div>
+                                </div>
+                                <!-- Editable Content Area -->
+                                <div id="descEditor" class="disc-editor-area" contenteditable="true" data-placeholder="Provide background reading or lecture notes reference..."></div>
+                            </div>
                         </div>
-                        <div class="form-group">
+
+                        <!-- Editor for Instructions -->
+                        <div class="form-group disc-editor-wrap" id="instrEditorWrap">
                             <label class="form-label">Instructions for Students</label>
-                            <textarea id="discInstructions" class="input-field" rows="3" style="resize:vertical;" placeholder="Write at least 150 words. Reply to two peers and explain your reasoning..."></textarea>
+                            <div class="disc-editor-container" data-editor="instrEditor">
+                                <!-- Menu Bar -->
+                                <div class="disc-toolbar-menu">
+                                    <button class="disc-menu-item" data-menu="file">Edit</button>
+                                    <button class="disc-menu-item" data-menu="view">View</button>
+                                    <button class="disc-menu-item" data-menu="insert">Insert</button>
+                                    <button class="disc-menu-item" data-menu="format">Format</button>
+                                    <button class="disc-menu-item" data-menu="tools">Tools</button>
+                                    <button class="disc-menu-item" data-menu="table">Table</button>
+                                </div>
+                                <!-- Icon Toolbar -->
+                                <div class="disc-toolbar-icons">
+                                    <div class="disc-tb-group">
+                                        <select class="disc-select" data-cmd="fontSize" title="Font Size">
+                                            <option value="1">8pt</option>
+                                            <option value="2">10pt</option>
+                                            <option value="3" selected>12pt</option>
+                                            <option value="4">14pt</option>
+                                            <option value="5">18pt</option>
+                                            <option value="6">24pt</option>
+                                            <option value="7">36pt</option>
+                                        </select>
+                                        <select class="disc-select" data-cmd="formatBlock" title="Block Style">
+                                            <option value="p" selected>Paragraph</option>
+                                            <option value="h1">Heading 1</option>
+                                            <option value="h2">Heading 2</option>
+                                            <option value="h3">Heading 3</option>
+                                            <option value="blockquote">Quote</option>
+                                            <option value="pre">Code Block</option>
+                                        </select>
+                                    </div>
+                                    <span class="disc-tb-sep"></span>
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn" data-cmd="bold" title="Bold"><b>B</b></button>
+                                        <button class="disc-tb-btn disc-italic" data-cmd="italic" title="Italic"><i>I</i></button>
+                                        <button class="disc-tb-btn disc-underline" data-cmd="underline" title="Underline"><u>U</u></button>
+                                    </div>
+                                    <div class="disc-tb-group">
+                                        <label class="disc-tb-btn disc-color-btn" title="Text Color">
+                                            <span style="font-weight:900;">A</span>
+                                            <input type="color" class="disc-color-input" data-cmd="foreColor" value="#f59e0b">
+                                            <span class="disc-color-bar" style="background:#f59e0b;"></span>
+                                        </label>
+                                        <label class="disc-tb-btn disc-color-btn" title="Highlight">
+                                            <span style="font-weight:900;">✏</span>
+                                            <input type="color" class="disc-color-input" data-cmd="hiliteColor" value="#fef08a">
+                                            <span class="disc-color-bar" style="background:#fef08a;"></span>
+                                        </label>
+                                    </div>
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn" data-cmd="superscript" title="Superscript">T<sup style="font-size:7px">2</sup></button>
+                                        <button class="disc-tb-btn" data-cmd="subscript" title="Subscript">T<sub style="font-size:7px">2</sub></button>
+                                        <button class="disc-tb-btn" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
+                                    </div>
+                                    <span class="disc-tb-sep"></span>
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn" data-cmd="justifyLeft" title="Align Left"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg></button>
+                                        <button class="disc-tb-btn" data-cmd="justifyCenter" title="Center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
+                                        <button class="disc-tb-btn" data-cmd="justifyRight" title="Align Right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg></button>
+                                    </div>
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn" data-cmd="insertUnorderedList" title="Bullet List"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg></button>
+                                        <button class="disc-tb-btn" data-cmd="insertOrderedList" title="Ordered List"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1" stroke-linecap="round"/></svg></button>
+                                        <button class="disc-tb-btn disc-indent" data-cmd="indent" title="Indent">⇥</button>
+                                        <button class="disc-tb-btn disc-indent" data-cmd="outdent" title="Outdent">⇤</button>
+                                    </div>
+                                    <span class="disc-tb-sep"></span>
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn disc-insert-btn" data-action="link" title="Insert Link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+                                        <button class="disc-tb-btn disc-insert-btn" data-action="image" title="Insert Image"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></button>
+                                        <button class="disc-tb-btn disc-insert-btn" data-action="hr" title="Horizontal Rule">—</button>
+                                    </div>
+                                    <span class="disc-tb-sep"></span>
+                                    <div class="disc-tb-group">
+                                        <button class="disc-tb-btn" data-cmd="undo" title="Undo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg></button>
+                                        <button class="disc-tb-btn" data-cmd="redo" title="Redo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg></button>
+                                    </div>
+                                    <div class="disc-tb-group disc-tb-right">
+                                        <button class="disc-tb-btn disc-gdrive-btn" title="Google Drive (coming soon)" disabled>
+                                            <svg width="15" height="15" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+                                        </button>
+                                        <button class="disc-tb-btn" title="More options">⋮</button>
+                                    </div>
+                                </div>
+                                <div id="instrEditor" class="disc-editor-area" contenteditable="true" data-placeholder="Write at least 150 words. Reply to two peers and explain your reasoning..."></div>
+                            </div>
                         </div>
 
                         <!-- Settings -->
@@ -2212,8 +2595,8 @@
             document.getElementById('discFormTitle').textContent = 'New Discussion';
             document.getElementById('discSaveBtnText').textContent = 'Publish Discussion';
             document.getElementById('discTitle').value = '';
-            document.getElementById('discDescription').value = '';
-            document.getElementById('discInstructions').value = '';
+            document.getElementById('descEditor').innerHTML = '';
+            document.getElementById('instrEditor').innerHTML = '';
             document.getElementById('discThreaded').checked = true;
             document.getElementById('discPostBeforeView').checked = false;
             document.getElementById('discIsPublic').checked = true;
@@ -2238,8 +2621,8 @@
                 document.getElementById('discFormTitle').textContent = 'Edit Discussion';
                 document.getElementById('discSaveBtnText').textContent = 'Save Changes';
                 document.getElementById('discTitle').value = d.title || '';
-                document.getElementById('discDescription').value = d.description || '';
-                document.getElementById('discInstructions').value = d.instructions || '';
+                document.getElementById('descEditor').innerHTML = d.description || '';
+                document.getElementById('instrEditor').innerHTML = d.instructions || '';
                 document.getElementById('discThreaded').checked = !!d.settings?.threaded;
                 document.getElementById('discPostBeforeView').checked = !!d.settings?.postBeforeView;
                 document.getElementById('discIsPublic').checked = !!d.settings?.isPublic;
@@ -2392,8 +2775,8 @@
 
             const payload = {
                 title,
-                description: document.getElementById('discDescription').value.trim(),
-                instructions: document.getElementById('discInstructions').value.trim(),
+                description: document.getElementById('descEditor').innerHTML.trim(),
+                instructions: document.getElementById('instrEditor').innerHTML.trim(),
                 settings: {
                     threaded: document.getElementById('discThreaded').checked,
                     postBeforeView: document.getElementById('discPostBeforeView').checked,
@@ -2781,6 +3164,137 @@
         })();
     </script>
     <script src="marketing-site/js/live-quiz.js"></script>
+
+    <!-- ═══════ RICH TEXT EDITOR ENGINE ═══════ -->
+    <script>
+    (function initDiscEditors() {
+        // ── Helpers ──────────────────────────────────────────────
+        function editorFor(btn) {
+            const container = btn.closest('.disc-editor-container');
+            if (!container) return null;
+            const id = container.dataset.editor;
+            return id ? document.getElementById(id) : null;
+        }
+
+        function focusEditor(editor) {
+            if (!editor) return;
+            editor.focus();
+        }
+
+        function execCmd(editor, cmd, value = null) {
+            focusEditor(editor);
+            document.execCommand(cmd, false, value);
+        }
+
+        // ── Wire [data-cmd] buttons (execCommand) ─────────────────
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.disc-tb-btn[data-cmd]');
+            if (!btn) return;
+            e.preventDefault();
+            const editor = editorFor(btn);
+            execCmd(editor, btn.dataset.cmd);
+            updateActiveStates(editor);
+        });
+
+        // ── Wire [data-action] custom insert buttons ───────────────
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.disc-tb-btn[data-action]');
+            if (!btn) return;
+            e.preventDefault();
+            const editor = editorFor(btn);
+            const action = btn.dataset.action;
+
+            if (action === 'link') {
+                const url = prompt('Enter URL:', 'https://');
+                if (url) execCmd(editor, 'createLink', url);
+            } else if (action === 'image') {
+                const url = prompt('Enter image URL:', 'https://');
+                if (url) execCmd(editor, 'insertImage', url);
+            } else if (action === 'hr') {
+                focusEditor(editor);
+                document.execCommand('insertHTML', false, '<hr>');
+            }
+            updateActiveStates(editor);
+        });
+
+        // ── Wire select dropdowns ─────────────────────────────────
+        document.addEventListener('change', function(e) {
+            const sel = e.target.closest('.disc-select[data-cmd]');
+            if (!sel) return;
+            const container = sel.closest('.disc-editor-container');
+            if (!container) return;
+            const editor = document.getElementById(container.dataset.editor);
+            focusEditor(editor);
+            document.execCommand(sel.dataset.cmd, false, sel.value);
+        });
+
+        // ── Wire color pickers ────────────────────────────────────
+        document.addEventListener('input', function(e) {
+            const input = e.target;
+            if (!input.classList.contains('disc-color-input')) return;
+            const container = input.closest('.disc-editor-container');
+            if (!container) return;
+            const editor = document.getElementById(container.dataset.editor);
+            // Update the color bar
+            const bar = input.nextElementSibling;
+            if (bar) bar.style.background = input.value;
+            // Apply the color
+            focusEditor(editor);
+            document.execCommand(input.dataset.cmd, false, input.value);
+        });
+
+        // Clicking the label opens the color picker
+        document.addEventListener('click', function(e) {
+            const label = e.target.closest('.disc-color-btn');
+            if (!label) return;
+            const colorInput = label.querySelector('.disc-color-input');
+            if (colorInput) colorInput.click();
+        });
+
+        // ── Update active states (bold/italic/underline) ──────────
+        function updateActiveStates(editor) {
+            if (!editor) return;
+            const container = editor.closest('.disc-editor-container');
+            if (!container) return;
+            ['bold', 'italic', 'underline', 'strikeThrough', 'superscript',
+             'subscript', 'insertUnorderedList', 'insertOrderedList',
+             'justifyLeft', 'justifyCenter', 'justifyRight'].forEach(cmd => {
+                const btn = container.querySelector(`.disc-tb-btn[data-cmd="${cmd}"]`);
+                if (btn) btn.classList.toggle('active', document.queryCommandState(cmd));
+            });
+        }
+
+        // Update active states on selection change
+        document.addEventListener('selectionchange', function() {
+            const active = document.activeElement;
+            if (!active || !active.classList.contains('disc-editor-area')) return;
+            updateActiveStates(active);
+        });
+
+        // ── Prevent losing selection when clicking toolbar ────────
+        document.querySelectorAll('.disc-editor-container').forEach(container => {
+            const toolbar = container.querySelectorAll('.disc-toolbar-icons, .disc-toolbar-menu');
+            toolbar.forEach(row => {
+                row.addEventListener('mousedown', e => {
+                    // Only prevent default for non-interactive elements
+                    if (!e.target.matches('select, input, option')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+
+        // ── Focus styling for menu items ──────────────────────────
+        document.querySelectorAll('.disc-menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Visual feedback — could open a dropdown in future
+                item.classList.add('active');
+                setTimeout(() => item.classList.remove('active'), 200);
+            });
+        });
+
+    })();
+    </script>
 </body>
 
 </html>
