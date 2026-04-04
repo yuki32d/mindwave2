@@ -13716,10 +13716,13 @@ app.get('/api/discussions', verifyDiscToken, async (req, res) => {
       query = {
         status: 'active',
         $and: [
-          // Must be public OR target this student's section/batch
+          // Must be public (or field missing/null which means public by default)
+          // OR target this student's section/batch
           {
             $or: [
               { 'settings.isPublic': true },
+              { 'settings.isPublic': { $exists: false } },
+              { 'settings.isPublic': null },
               { 'targetGroups.sections': { $in: [user?.section || '__none__'] } },
               { 'targetGroups.batch': { $eq: user?.batch || '__none__' } }
             ]
@@ -13727,6 +13730,7 @@ app.get('/api/discussions', verifyDiscToken, async (req, res) => {
           // Availability window: availableFrom is unset OR has already passed
           {
             $or: [
+              { 'deadlines.availableFrom': { $exists: false } },
               { 'deadlines.availableFrom': null },
               { 'deadlines.availableFrom': { $lte: now } }
             ]
@@ -13734,6 +13738,7 @@ app.get('/api/discussions', verifyDiscToken, async (req, res) => {
           // Availability window: availableTo is unset OR hasn't expired yet
           {
             $or: [
+              { 'deadlines.availableTo': { $exists: false } },
               { 'deadlines.availableTo': null },
               { 'deadlines.availableTo': { $gte: now } }
             ]
