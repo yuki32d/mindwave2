@@ -2588,6 +2588,28 @@
 
     <div id="toastContainer" class="toast-container"></div>
 
+    <!-- ═══════ RICH TEXT EDITOR INSERT MODAL ═══════ -->
+    <div id="discInsertModal" class="disc-modal-overlay">
+        <div class="disc-modal">
+            <div class="disc-modal-header">
+                <div class="disc-modal-icon">
+                    <i class="fas fa-link"></i>
+                </div>
+                <div>
+                    <div class="disc-modal-title">Insert</div>
+                    <div class="disc-modal-subtitle">Fill in the details below</div>
+                </div>
+            </div>
+            <div id="discInsertFields">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="disc-modal-actions">
+                <button class="disc-modal-cancel" id="discInsertCancel">Cancel</button>
+                <button class="disc-modal-confirm" id="discInsertOk">Insert</button>
+            </div>
+        </div>
+    </div>
+
     <script src="community-poll-engine.js"></script>
     <script src="role-page.js"></script>
     <script>
@@ -3397,11 +3419,11 @@
             const action = btn.dataset.action;
 
             if (action === 'link') {
-                const url = prompt('Enter URL:', 'https://');
-                if (url) execCmd(editor, 'createLink', url);
+                openDiscModal('link', editor);
             } else if (action === 'image') {
-                const url = prompt('Enter image URL:', 'https://');
-                if (url) execCmd(editor, 'insertImage', url);
+                openDiscModal('image', editor);
+            } else if (action === 'gdrive') {
+                openDiscModal('gdrive', editor);
             } else if (action === 'hr') {
                 focusEditor(editor);
                 document.execCommand('insertHTML', false, '<hr>');
@@ -3483,6 +3505,155 @@
                 item.classList.add('active');
                 setTimeout(() => item.classList.remove('active'), 200);
             });
+        });
+
+        // ── Custom Insert Modals ──────────────────────────────────
+        let _modalEditor = null;
+
+        function openDiscModal(type, editor) {
+            _modalEditor = editor;
+            // Save selection before focus leaves editor
+            editor.focus();
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount) {
+                editor._savedRange = sel.getRangeAt(0).cloneRange();
+            }
+
+            const overlay = document.getElementById('discInsertModal');
+            const titleEl  = overlay.querySelector('.disc-modal-title');
+            const subEl    = overlay.querySelector('.disc-modal-subtitle');
+            const iconEl   = overlay.querySelector('.disc-modal-icon i');
+            const fieldsEl = document.getElementById('discInsertFields');
+            const okBtn    = document.getElementById('discInsertOk');
+
+            if (type === 'link') {
+                iconEl.className = 'fas fa-link';
+                titleEl.textContent = 'Insert Link';
+                subEl.textContent = 'Paste a URL to wrap around the selected text';
+                fieldsEl.innerHTML = `
+                    <div class="disc-modal-field">
+                        <label>URL</label>
+                        <input id="_discLinkUrl" class="disc-modal-input" type="url" placeholder="https://example.com" value="https://" autocomplete="off">
+                    </div>
+                    <div class="disc-modal-field">
+                        <label>Link Text (optional)</label>
+                        <input id="_discLinkText" class="disc-modal-input" type="text" placeholder="Leave blank to use selected text">
+                    </div>`;
+                okBtn.textContent = 'Insert Link';
+                okBtn.onclick = () => {
+                    const url  = document.getElementById('_discLinkUrl').value.trim();
+                    const text = document.getElementById('_discLinkText').value.trim();
+                    if (!url || url === 'https://') { showToast('⚠️ Please enter a valid URL'); return; }
+                    restoreSelection(editor);
+                    if (text) {
+                        document.execCommand('insertHTML', false, `<a href="${url}" target="_blank" rel="noopener">${text}</a>`);
+                    } else {
+                        document.execCommand('createLink', false, url);
+                        // Make link open in new tab
+                        const links = editor.querySelectorAll('a:not([target])');
+                        links.forEach(a => { if (a.href === url) a.target = '_blank'; });
+                    }
+                    closeDiscModal();
+                    updateActiveStates(editor);
+                };
+
+            } else if (type === 'image') {
+                iconEl.className = 'fas fa-image';
+                titleEl.textContent = 'Insert Image';
+                subEl.textContent = 'Paste an image URL or upload a file';
+                fieldsEl.innerHTML = `
+                    <div class="disc-modal-field">
+                        <label>Image URL</label>
+                        <input id="_discImgUrl" class="disc-modal-input" type="url" placeholder="https://example.com/image.png" autocomplete="off">
+                    </div>
+                    <div class="disc-modal-field">
+                        <label>Or upload a file</label>
+                        <input id="_discImgFile" class="disc-modal-input" type="file" accept="image/*" style="padding:8px;cursor:pointer;">
+                    </div>
+                    <div class="disc-modal-field">
+                        <label>Alt Text (accessibility)</label>
+                        <input id="_discImgAlt" class="disc-modal-input" type="text" placeholder="Describe the image...">
+                    </div>`;
+
+                // Live preview from file
+                setTimeout(() => {
+                    document.getElementById('_discImgFile').onchange = function() {
+                        const file = this.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = e => { document.getElementById('_discImgUrl').value = e.target.result; };
+                        reader.readAsDataURL(file);
+                    };
+                }, 50);
+
+                okBtn.textContent = 'Insert Image';
+                okBtn.onclick = () => {
+                    const url = document.getElementById('_discImgUrl').value.trim();
+                    const alt = document.getElementById('_discImgAlt').value.trim() || 'image';
+                    if (!url) { showToast('⚠️ Please enter an image URL or upload a file'); return; }
+                    restoreSelection(editor);
+                    document.execCommand('insertHTML', false, `<img src="${url}" alt="${alt}" style="max-width:100%;border-radius:8px;margin:4px 0;">`);
+                    closeDiscModal();
+                    updateActiveStates(editor);
+                };
+
+            } else if (type === 'gdrive') {
+                iconEl.className = 'fab fa-google-drive';
+                titleEl.textContent = 'Embed Google Drive File';
+                subEl.textContent = 'Paste the shareable link or embed URL from Google Drive';
+                fieldsEl.innerHTML = `
+                    <div class="disc-modal-field">
+                        <label>Google Drive / Docs / Slides URL</label>
+                        <input id="_discDriveUrl" class="disc-modal-input" type="url" placeholder="https://drive.google.com/file/d/..." autocomplete="off">
+                    </div>
+                    <div class="disc-modal-field">
+                        <label>Display Label</label>
+                        <input id="_discDriveLabel" class="disc-modal-input" type="text" placeholder="e.g., Week 3 Lecture Slides">
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:4px;">💡 Tip: In Google Drive, right-click a file → <strong>Share</strong> → <strong>Copy link</strong></div>`;
+                okBtn.textContent = 'Insert Drive Link';
+                okBtn.onclick = () => {
+                    const url   = document.getElementById('_discDriveUrl').value.trim();
+                    const label = document.getElementById('_discDriveLabel').value.trim() || 'Google Drive File';
+                    if (!url || !url.includes('google')) { showToast('⚠️ Please enter a valid Google Drive URL'); return; }
+                    restoreSelection(editor);
+                    const html = `<a href="${url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.3);color:#4285f4;text-decoration:none;font-weight:600;font-size:13px;"><svg width="15" height="15" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0-1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.5l5.85 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>${label}</a>&nbsp;`;
+                    document.execCommand('insertHTML', false, html);
+                    closeDiscModal();
+                    updateActiveStates(editor);
+                };
+            }
+
+            overlay.classList.add('open');
+            setTimeout(() => {
+                const firstInput = fieldsEl.querySelector('input:not([type=file])');
+                if (firstInput) firstInput.focus();
+            }, 80);
+        }
+
+        function restoreSelection(editor) {
+            editor.focus();
+            if (editor._savedRange) {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(editor._savedRange);
+            }
+        }
+
+        function closeDiscModal() {
+            document.getElementById('discInsertModal').classList.remove('open');
+            _modalEditor = null;
+        }
+
+        // Close on overlay click
+        document.getElementById('discInsertModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDiscModal();
+        });
+        document.getElementById('discInsertCancel').onclick = closeDiscModal;
+
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeDiscModal();
         });
 
     })();
