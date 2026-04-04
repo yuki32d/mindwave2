@@ -116,7 +116,7 @@ if (announcementForm) {
 }
 
 window.deleteAnnouncement = async function (id) {
-    if (!confirm("Delete this announcement?")) return;
+    if (!await confirm("Delete this announcement? This cannot be undone.", "Delete Announcement")) return;
     const res = await fetchAPI(`/api/announcements/${id}`, { method: 'DELETE' });
     if (res && res.ok) { loadAnnouncements(); toast('Announcement deleted.'); }
 };
@@ -224,14 +224,13 @@ if (gameForm) {
 }
 
 window.deleteGame = async function (id) {
-    if (confirm('Are you sure you want to delete this game?')) {
-        const res = await fetchAPI(`/api/games/${id}`, { method: 'DELETE' });
-        if (res && res.ok) {
-            loadGames();
-            toast('Game deleted.');
-        } else {
-            toast('Failed to delete: ' + (res ? res.message : 'Unknown error'), 'err');
-        }
+    if (!await confirm('Are you sure you want to delete this game? This cannot be undone.', 'Delete Game')) return;
+    const res = await fetchAPI(`/api/games/${id}`, { method: 'DELETE' });
+    if (res && res.ok) {
+        loadGames();
+        toast('Game deleted.');
+    } else {
+        toast('Failed to delete: ' + (res ? res.message : 'Unknown error'), 'err');
     }
 };
 
