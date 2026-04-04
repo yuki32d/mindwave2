@@ -7,84 +7,104 @@ let currentSearch = '';
 let isLoading = false;
 let hasMorePosts = true;
 
-// DOM Elements
-const postsContainer = document.getElementById('postsContainer');
-const loadingSpinner = document.getElementById('loadingSpinner');
-const createPostBtn = document.getElementById('createPostBtn');
-const myPostsBtn = document.getElementById('myPostsBtn');
-const createPostModal = document.getElementById('createPostModal');
-const postDetailModal = document.getElementById('postDetailModal');
-const closeModalBtn = document.getElementById('closeModalBtn');
-const closeDetailModalBtn = document.getElementById('closeDetailModalBtn');
-const cancelPostBtn = document.getElementById('cancelPostBtn');
-const createPostForm = document.getElementById('createPostForm');
-const postTypeSelect = document.getElementById('postType');
-const mediaUploadGroup = document.getElementById('mediaUploadGroup');
-const projectUrlGroup = document.getElementById('projectUrlGroup');
-const searchInput = document.getElementById('searchInput');
-const filterButtons = document.querySelectorAll('.filter-btn');
-const loadMoreBtn = document.getElementById('loadMoreBtn');
-const loadMoreContainer = document.getElementById('loadMoreContainer');
-const trendingTagsContainer = document.getElementById('tagList');
+// DOM element references — resolved after DOMContentLoaded
+let postsContainer, loadingSpinner, createPostBtn, myPostsBtn;
+let createPostModal, postDetailModal, closeModalBtn, closeDetailModalBtn;
+let cancelPostBtn, createPostForm, postTypeSelect, mediaUploadGroup;
+let projectUrlGroup, searchInput, filterButtons, loadMoreBtn;
+let loadMoreContainer, trendingTagsContainer;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    loadPosts();
-    loadTrendingTags();
+    // Resolve DOM refs now that the document is fully parsed
+    postsContainer        = document.getElementById('postsContainer');
+    loadingSpinner        = document.getElementById('loadingSpinner');
+    createPostBtn         = document.getElementById('createPostBtn');
+    myPostsBtn            = document.getElementById('myPostsBtn');
+    createPostModal       = document.getElementById('createPostModal');
+    postDetailModal       = document.getElementById('postDetailModal');
+    closeModalBtn         = document.getElementById('closeModalBtn');
+    closeDetailModalBtn   = document.getElementById('closeDetailModalBtn');
+    cancelPostBtn         = document.getElementById('cancelPostBtn');
+    createPostForm        = document.getElementById('createPostForm');
+    postTypeSelect        = document.getElementById('postType');
+    mediaUploadGroup      = document.getElementById('mediaUploadGroup');
+    projectUrlGroup       = document.getElementById('projectUrlGroup');
+    searchInput           = document.getElementById('searchInput');
+    filterButtons         = document.querySelectorAll('.filter-btn');
+    loadMoreBtn           = document.getElementById('loadMoreBtn');
+    loadMoreContainer     = document.getElementById('loadMoreContainer');
+    trendingTagsContainer = document.getElementById('tagList');
+
+    if (postsContainer) loadPosts();
+    if (trendingTagsContainer) loadTrendingTags();
     setupEventListeners();
 });
 
 // Event Listeners
 function setupEventListeners() {
-    createPostBtn.addEventListener('click', () => openCreatePostModal());
-    closeModalBtn.addEventListener('click', () => closeCreatePostModal());
-    closeDetailModalBtn.addEventListener('click', () => closePostDetailModal());
-    cancelPostBtn.addEventListener('click', () => closeCreatePostModal());
-    createPostForm.addEventListener('submit', handleCreatePost);
+    if (createPostBtn) createPostBtn.addEventListener('click', () => openCreatePostModal());
+    if (closeModalBtn) closeModalBtn.addEventListener('click', () => closeCreatePostModal());
+    if (closeDetailModalBtn) closeDetailModalBtn.addEventListener('click', () => closePostDetailModal());
+    if (cancelPostBtn) cancelPostBtn.addEventListener('click', () => closeCreatePostModal());
+    if (createPostForm) createPostForm.addEventListener('submit', handleCreatePost);
 
-    postTypeSelect.addEventListener('change', (e) => {
-        const type = e.target.value;
-        mediaUploadGroup.style.display = (type === 'image' || type === 'video') ? 'block' : 'none';
-        projectUrlGroup.style.display = type === 'project' ? 'block' : 'none';
-    });
+    if (postTypeSelect) {
+        postTypeSelect.addEventListener('change', (e) => {
+            const type = e.target.value;
+            if (mediaUploadGroup) mediaUploadGroup.style.display = (type === 'image' || type === 'video') ? 'block' : 'none';
+            if (projectUrlGroup) projectUrlGroup.style.display = type === 'project' ? 'block' : 'none';
+        });
+    }
 
-    filterButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            filterButtons.forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            currentSort = e.target.dataset.sort;
+    if (filterButtons && filterButtons.length) {
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentSort = e.target.dataset.sort;
+                currentPage = 1;
+                hasMorePosts = true;
+                loadPosts(true);
+            });
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce((e) => {
+            currentSearch = e.target.value;
             currentPage = 1;
             hasMorePosts = true;
             loadPosts(true);
+        }, 500));
+    }
+
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
+            currentPage++;
+            loadPosts(false);
         });
-    });
+    }
 
-    searchInput.addEventListener('input', debounce((e) => {
-        currentSearch = e.target.value;
-        currentPage = 1;
-        hasMorePosts = true;
-        loadPosts(true);
-    }, 500));
-
-    loadMoreBtn.addEventListener('click', () => {
-        currentPage++;
-        loadPosts(false);
-    });
-
-    myPostsBtn.addEventListener('click', showMyPosts);
+    if (myPostsBtn) myPostsBtn.addEventListener('click', showMyPosts);
 
     // Close modals on outside click
-    createPostModal.addEventListener('click', (e) => {
-        if (e.target === createPostModal) closeCreatePostModal();
-    });
-    postDetailModal.addEventListener('click', (e) => {
-        if (e.target === postDetailModal) closePostDetailModal();
-    });
+    if (createPostModal) {
+        createPostModal.addEventListener('click', (e) => {
+            if (e.target === createPostModal) closeCreatePostModal();
+        });
+    }
+    if (postDetailModal) {
+        postDetailModal.addEventListener('click', (e) => {
+            if (e.target === postDetailModal) closePostDetailModal();
+        });
+    }
 }
 
 // Load Posts
 async function loadPosts(reset = true) {
     if (isLoading) return;
+    if (!postsContainer) return;   // element not present on this page variant
     isLoading = true;
 
     if (reset) {
@@ -122,13 +142,13 @@ async function loadPosts(reset = true) {
                     </div>
                 `;
                 if (window.lucide) lucide.createIcons();
-                loadMoreContainer.style.display = 'none';
+                if (loadMoreContainer) loadMoreContainer.style.display = 'none';
             } else {
                 data.posts.forEach(post => renderPost(post));
 
                 // Show/hide load more button
                 hasMorePosts = data.pagination.page < data.pagination.pages;
-                loadMoreContainer.style.display = hasMorePosts ? 'block' : 'none';
+                if (loadMoreContainer) loadMoreContainer.style.display = hasMorePosts ? 'block' : 'none';
             }
         }
     } catch (error) {
@@ -461,6 +481,7 @@ function filterByTag(tag) {
 
 // Show My Posts
 async function showMyPosts() {
+    if (!postsContainer) return;
     try {
         const meResponse = await fetch('/api/me', { credentials: 'include' });
         const meData = await meResponse.json();
@@ -483,7 +504,7 @@ async function showMyPosts() {
                 } else {
                     data.posts.forEach(post => renderPost(post));
                 }
-                loadMoreContainer.style.display = 'none';
+                if (loadMoreContainer) loadMoreContainer.style.display = 'none';
             }
         }
     } catch (error) {
@@ -493,15 +514,15 @@ async function showMyPosts() {
 
 // Modal Functions
 function openCreatePostModal() {
-    createPostModal.classList.add('active');
+    if (createPostModal) createPostModal.classList.add('active');
 }
 
 function closeCreatePostModal() {
-    createPostModal.classList.remove('active');
+    if (createPostModal) createPostModal.classList.remove('active');
 }
 
 function closePostDetailModal() {
-    postDetailModal.classList.remove('active');
+    if (postDetailModal) postDetailModal.classList.remove('active');
 }
 
 // Utility Functions
