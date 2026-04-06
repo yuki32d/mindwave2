@@ -1,140 +1,850 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <script src="student-theme-init.js"></script>
-    <script src="auth-guard.js" data-role="student"></script>
+  <script src="student-theme-init.js"></script>
+  <script src="auth-guard.js" data-role="student"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meeting Room - MindWave</title>
   <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;overflow:hidden}
-    body{font-family:'Inter',system-ui,sans-serif;background:#0a0a0f;color:#f0f2ff}
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0a0a0f;
+      color: #f0f2ff
+    }
 
     /* ====== WAITING ROOM ====== */
-    #waitingRoom{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.5rem;background:#0a0a0f;z-index:100}
-    #waitingRoom::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(99,102,241,.12),transparent 70%);pointer-events:none}
-    .wr-logo{display:flex;align-items:center;gap:.75rem;font-size:1.3rem;font-weight:800}
-    .wr-logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff}
-    .wr-card{background:#1a1d2e;border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:2rem;width:calc(100% - 2rem);max-width:400px;display:flex;flex-direction:column;align-items:center;gap:1.25rem;text-align:center}
-    .wr-pulse{width:72px;height:72px;border-radius:50%;background:rgba(99,102,241,.15);display:flex;align-items:center;justify-content:center;color:#6366f1;position:relative}
-    .wr-pulse::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(99,102,241,.3);animation:pulse 2s ease-in-out infinite}
-    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.5}}
-    .wr-pulse svg{width:32px;height:32px}
-    .wr-title{font-size:1.1rem;font-weight:700}
-    .wr-sub{font-size:.85rem;color:#9ea4b6;line-height:1.6}
-    .wr-preview{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;position:relative}
-    .wr-preview video{width:100%;height:100%;object-fit:cover}
-    .wr-cam-off{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;background:rgba(255,255,255,.03);color:#9ea4b6;font-size:.78rem}
-    .wr-cam-off svg{width:24px;height:24px;opacity:.4}
-    .wr-name{font-size:.9rem;color:#9ea4b6}
-    .wr-leave{padding:.6rem 1.4rem;border-radius:10px;border:1px solid rgba(255,92,92,.3);background:rgba(255,92,92,.1);color:#ff5c5c;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s}
-    .wr-leave:hover{background:rgba(255,92,92,.2)}
+    #waitingRoom {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1.5rem;
+      background: #0a0a0f;
+      z-index: 100
+    }
+
+    #waitingRoom::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(99, 102, 241, .12), transparent 70%);
+      pointer-events: none
+    }
+
+    .wr-logo {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      font-size: 1.3rem;
+      font-weight: 800
+    }
+
+    .wr-logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff
+    }
+
+    .wr-card {
+      background: #1a1d2e;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 20px;
+      padding: 2rem;
+      width: calc(100% - 2rem);
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      text-align: center
+    }
+
+    .wr-pulse {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, .15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6366f1;
+      position: relative
+    }
+
+    .wr-pulse::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid rgba(99, 102, 241, .3);
+      animation: pulse 2s ease-in-out infinite
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1
+      }
+
+      50% {
+        transform: scale(1.12);
+        opacity: .5
+      }
+    }
+
+    .wr-pulse svg {
+      width: 32px;
+      height: 32px
+    }
+
+    .wr-title {
+      font-size: 1.1rem;
+      font-weight: 700
+    }
+
+    .wr-sub {
+      font-size: .85rem;
+      color: #9ea4b6;
+      line-height: 1.6
+    }
+
+    .wr-preview {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative
+    }
+
+    .wr-preview video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover
+    }
+
+    .wr-cam-off {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: .5rem;
+      background: rgba(255, 255, 255, .03);
+      color: #9ea4b6;
+      font-size: .78rem
+    }
+
+    .wr-cam-off svg {
+      width: 24px;
+      height: 24px;
+      opacity: .4
+    }
+
+    .wr-name {
+      font-size: .9rem;
+      color: #9ea4b6
+    }
+
+    .wr-leave {
+      padding: .6rem 1.4rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 92, 92, .3);
+      background: rgba(255, 92, 92, .1);
+      color: #ff5c5c;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s
+    }
+
+    .wr-leave:hover {
+      background: rgba(255, 92, 92, .2)
+    }
 
     /* ====== MEETING ROOM ====== */
-    #meetingRoom{position:fixed;inset:0;display:none;flex-direction:column;background:#0a0a0f}
+    #meetingRoom {
+      position: fixed;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      background: #0a0a0f
+    }
 
     /* Top bar */
-    .top-bar{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.25rem;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
-    .top-brand{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:1rem}
-    .top-brand-icon{width:30px;height:30px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff}
-    .top-brand-icon svg{width:15px;height:15px}
-    .meeting-title{font-size:.85rem;color:#9ea4b6;font-weight:400}
-    .top-right{display:flex;align-items:center;gap:.75rem}
-    .top-tag{display:flex;align-items:center;gap:.4rem;font-size:.75rem;padding:.3rem .75rem;border-radius:20px;background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.25)}
-    .top-tag svg{width:12px;height:12px}
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .75rem 1.25rem;
+      background: rgba(255, 255, 255, .03);
+      border-bottom: 1px solid rgba(255, 255, 255, .07);
+      flex-shrink: 0
+    }
+
+    .top-brand {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-weight: 700;
+      font-size: 1rem
+    }
+
+    .top-brand-icon {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff
+    }
+
+    .top-brand-icon svg {
+      width: 15px;
+      height: 15px
+    }
+
+    .meeting-title {
+      font-size: .85rem;
+      color: #9ea4b6;
+      font-weight: 400
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: .75rem
+    }
+
+    .top-tag {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .75rem;
+      padding: .3rem .75rem;
+      border-radius: 20px;
+      background: rgba(34, 197, 94, .12);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, .25)
+    }
+
+    .top-tag svg {
+      width: 12px;
+      height: 12px
+    }
 
     /* Video grid */
-    .video-area { flex: 1; display: flex; flex-direction: column; padding: .75rem; gap: .75rem; overflow: hidden; min-width: 0; }
-    #videoGrid { flex: 1; display: grid; gap: .75rem; overflow: hidden; grid-template-columns: 1fr; }
-    .video-area.layout-2 #videoGrid { grid-template-columns: 1fr 1fr; }
-    .video-area.layout-3 #videoGrid, .video-area.layout-4 #videoGrid { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-    .video-area.layout-5 #videoGrid, .video-area.layout-6 #videoGrid { grid-template-columns: repeat(3, 1fr); }
-    
-    /* Presentation Mode */
-    #presentationArea { flex: 1; min-width: 0; background: #000; border-radius: 14px; position: relative; overflow: hidden; display: none; border: 1px solid rgba(255,255,255,.05); margin: .75rem .37rem .75rem .75rem; }
-    #presentationArea video { width: 100%; height: 100%; object-fit: contain; }
+    .video-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: .75rem;
+      gap: .75rem;
+      overflow: hidden;
+      min-width: 0;
+    }
 
-    .present-mode #presentationArea { display: block; }
-    .present-mode #videoArea { flex: 0 0 280px; padding-left: 0; }
-    .present-mode #videoGrid { grid-template-columns: 1fr !important; grid-template-rows: none !important; overflow-y: auto; display: flex; flex-direction: column; }
-    .present-mode .vtile { height: 160px; flex-shrink: 0; }
-    
-    .pres-label { position: absolute; top: .8rem; left: 1rem; background: rgba(0,0,0,.6); backdrop-filter: blur(8px); padding: .35rem .75rem; border-radius: 8px; font-size: .72rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: .5rem; border: 1px solid rgba(255,255,255,.1); z-index: 10; }
-    .pres-label i { color: #d08000; width: 14px; height: 14px; }
+    #videoGrid {
+      flex: 1;
+      display: grid;
+      gap: .75rem;
+      overflow: hidden;
+      grid-template-columns: 1fr;
+    }
+
+    .video-area.layout-2 #videoGrid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .video-area.layout-3 #videoGrid,
+    .video-area.layout-4 #videoGrid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .video-area.layout-5 #videoGrid,
+    .video-area.layout-6 #videoGrid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Presentation Mode */
+    #presentationArea {
+      flex: 1;
+      min-width: 0;
+      background: #000;
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      display: none;
+      border: 1px solid rgba(255, 255, 255, .05);
+      margin: .75rem .37rem .75rem .75rem;
+    }
+
+    #presentationArea video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .present-mode #presentationArea {
+      display: block;
+    }
+
+    .present-mode #videoArea {
+      flex: 0 0 280px;
+      padding-left: 0;
+    }
+
+    .present-mode #videoGrid {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: none !important;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .present-mode .vtile {
+      height: 160px;
+      flex-shrink: 0;
+    }
+
+    .pres-label {
+      position: absolute;
+      top: .8rem;
+      left: 1rem;
+      background: rgba(0, 0, 0, .6);
+      backdrop-filter: blur(8px);
+      padding: .35rem .75rem;
+      border-radius: 8px;
+      font-size: .72rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      border: 1px solid rgba(255, 255, 255, .1);
+      z-index: 10;
+    }
+
+    .pres-label i {
+      color: #d08000;
+      width: 14px;
+      height: 14px;
+    }
 
     /* Tile */
-    .vtile{background:#141625;border-radius:14px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;border:2px solid transparent;transition:all .2s; aspect-ratio:16/9; min-height:140px; width:100%; }
-    .vtile.speaking{border-color:#22c55e}
-    .vtile video{width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0;z-index:1}
-    .vtile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:#fff;position:absolute;z-index:1}
-    .vtile-label{position:absolute;bottom:.6rem;left:.7rem;display:flex;align-items:center;gap:.4rem;font-size:.78rem;font-weight:600;color:#fff;background:rgba(0,0,0,.55);padding:.25rem .6rem;border-radius:6px;backdrop-filter:blur(4px);z-index:10}
-    .vtile-label svg{width:12px;height:12px}
-    .vtile-host{position:absolute;top:.6rem;left:.7rem;font-size:.66rem;font-weight:700;padding:.18rem .5rem;border-radius:5px;background:rgba(208,128,0,.75);color:#fef3c7;z-index:10;line-height:1}
-    .vtile-muted{position:absolute;top:.6rem;right:.6rem;width:28px;height:28px;background:rgba(255,92,92,.85);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10}
-    .vtile-muted svg{width:13px;height:13px;color:#fff}
+    .vtile {
+      background: #141625;
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid transparent;
+      transition: all .2s;
+      aspect-ratio: 16/9;
+      min-height: 140px;
+      width: 100%;
+    }
+
+    .vtile.speaking {
+      border-color: #22c55e
+    }
+
+    .vtile video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 1
+    }
+
+    .vtile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      position: absolute;
+      z-index: 1
+    }
+
+    .vtile-label {
+      position: absolute;
+      bottom: .6rem;
+      left: .7rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .78rem;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(0, 0, 0, .55);
+      padding: .25rem .6rem;
+      border-radius: 6px;
+      backdrop-filter: blur(4px);
+      z-index: 10
+    }
+
+    .vtile-label svg {
+      width: 12px;
+      height: 12px
+    }
+
+    .vtile-host {
+      position: absolute;
+      top: .6rem;
+      left: .7rem;
+      font-size: .66rem;
+      font-weight: 700;
+      padding: .18rem .5rem;
+      border-radius: 5px;
+      background: rgba(208, 128, 0, .75);
+      color: #fef3c7;
+      z-index: 10;
+      line-height: 1
+    }
+
+    .vtile-muted {
+      position: absolute;
+      top: .6rem;
+      right: .6rem;
+      width: 28px;
+      height: 28px;
+      background: rgba(255, 92, 92, .85);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10
+    }
+
+    .vtile-muted svg {
+      width: 13px;
+      height: 13px;
+      color: #fff
+    }
 
     /* Chat + participants panel */
-    .side-panel{width:320px;background:#111320;border-left:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;flex-shrink:0}
-    .panel-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.07)}
-    .panel-tab{flex:1;padding:.75rem;font-size:.82rem;font-weight:600;background:none;border:none;color:#9ea4b6;cursor:pointer;transition:color .2s,border-color .2s;border-bottom:2px solid transparent;margin-bottom:-1px}
-    .panel-tab.active{color:#f0f2ff;border-bottom-color:#6366f1}
-    .panel-body{flex:1;overflow:hidden;display:flex;flex-direction:column}
-    .tab-view{flex:1;overflow-y:auto;padding:.75rem;display:none}
-    .tab-view.active{display:flex;flex-direction:column;gap:.6rem}
-    .participant-item{display:flex;align-items:center;gap:.65rem;padding:.45rem .5rem;border-radius:9px;background:rgba(255,255,255,.04)}
-    .p-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0}
-    .p-name{font-size:.83rem;font-weight:600;flex:1;color:#f0f2ff}
-    .p-role{font-size:.67rem;color:#9ea4b6;margin-top:.05rem}
-    .p-icons{display:flex;gap:.35rem}
-    .p-icon{width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center}
-    .p-icon svg{width:12px;height:12px;color:#9ea4b6}
-    .p-icon.muted svg{color:#ff5c5c}
-    #chatTab .tab-view{justify-content:flex-end}
-    .chat-msg{padding:.5rem .7rem;border-radius:10px;background:rgba(255,255,255,.05);max-width:85%}
-    .chat-msg.mine{align-self:flex-end;background:rgba(99,102,241,.2)}
-    .chat-sender{font-size:.7rem;font-weight:700;color:#6366f1;margin-bottom:.2rem}
-    .chat-text{font-size:.83rem;line-height:1.5}
-    .chat-time{font-size:.65rem;color:#9ea4b6;margin-top:.2rem}
-    .chat-input-row{display:flex;gap:.5rem;padding:.7rem}
-    .chat-inp{flex:1;padding:.6rem .85rem;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#f0f2ff;font-size:.85rem;outline:none}
-    .chat-inp:focus{border-color:#6366f1}
-    .chat-send{width:38px;height:38px;border-radius:10px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .chat-send svg{width:16px;height:16px}
+    .side-panel {
+      width: 320px;
+      background: #111320;
+      border-left: 1px solid rgba(255, 255, 255, .07);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0
+    }
+
+    .panel-tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, .07)
+    }
+
+    .panel-tab {
+      flex: 1;
+      padding: .75rem;
+      font-size: .82rem;
+      font-weight: 600;
+      background: none;
+      border: none;
+      color: #9ea4b6;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px
+    }
+
+    .panel-tab.active {
+      color: #f0f2ff;
+      border-bottom-color: #6366f1
+    }
+
+    .panel-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column
+    }
+
+    .tab-view {
+      flex: 1;
+      overflow-y: auto;
+      padding: .75rem;
+      display: none
+    }
+
+    .tab-view.active {
+      display: flex;
+      flex-direction: column;
+      gap: .6rem
+    }
+
+    .participant-item {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      padding: .45rem .5rem;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, .04)
+    }
+
+    .p-av {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .72rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0
+    }
+
+    .p-name {
+      font-size: .83rem;
+      font-weight: 600;
+      flex: 1;
+      color: #f0f2ff
+    }
+
+    .p-role {
+      font-size: .67rem;
+      color: #9ea4b6;
+      margin-top: .05rem
+    }
+
+    .p-icons {
+      display: flex;
+      gap: .35rem
+    }
+
+    .p-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, .06);
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .p-icon svg {
+      width: 12px;
+      height: 12px;
+      color: #9ea4b6
+    }
+
+    .p-icon.muted svg {
+      color: #ff5c5c
+    }
+
+    #chatTab .tab-view {
+      justify-content: flex-end
+    }
+
+    .chat-msg {
+      padding: .5rem .7rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .05);
+      max-width: 85%
+    }
+
+    .chat-msg.mine {
+      align-self: flex-end;
+      background: rgba(99, 102, 241, .2)
+    }
+
+    .chat-sender {
+      font-size: .7rem;
+      font-weight: 700;
+      color: #6366f1;
+      margin-bottom: .2rem
+    }
+
+    .chat-text {
+      font-size: .83rem;
+      line-height: 1.5
+    }
+
+    .chat-time {
+      font-size: .65rem;
+      color: #9ea4b6;
+      margin-top: .2rem
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: .5rem;
+      padding: .7rem
+    }
+
+    .chat-inp {
+      flex: 1;
+      padding: .6rem .85rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, .1);
+      background: rgba(255, 255, 255, .05);
+      color: #f0f2ff;
+      font-size: .85rem;
+      outline: none
+    }
+
+    .chat-inp:focus {
+      border-color: #6366f1
+    }
+
+    .chat-send {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
+    }
+
+    .chat-send svg {
+      width: 16px;
+      height: 16px
+    }
 
     /* Bottom controls */
-    .controls{display:flex;align-items:center;justify-content:center;gap:.75rem;padding:.9rem 1.25rem;background:rgba(0,0,0,.6);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.07);flex-shrink:0;flex-wrap:wrap}
-    .ctrl-btn{display:flex;flex-direction:column;align-items:center;gap:.3rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:14px;width:56px;height:56px;cursor:pointer;color:#f0f2ff;font-size:.62rem;transition:background .2s,transform .1s;padding:.5rem .25rem;justify-content:center}
-    .ctrl-btn:hover{background:rgba(255,255,255,.15);transform:translateY(-1px)}
-    .ctrl-btn.muted{background:rgba(255,92,92,.15);border-color:rgba(255,92,92,.3);color:#ff5c5c}
-    .ctrl-btn.active{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.4);color:#a5b4fc}
-    .ctrl-btn svg{width:20px;height:20px}
-    .ctrl-end{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4);color:#f87171;min-width:80px;width:auto;padding:0 1.25rem;flex-direction:row;gap:.5rem;font-size:.82rem;font-weight:600}
-    .ctrl-end:hover{background:rgba(239,68,68,.35)}
-    .ctrl-end svg{width:18px;height:18px}
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .75rem;
+      padding: .9rem 1.25rem;
+      background: rgba(0, 0, 0, .6);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, .07);
+      flex-shrink: 0;
+      flex-wrap: wrap
+    }
+
+    .ctrl-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .3rem;
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 14px;
+      width: 56px;
+      height: 56px;
+      cursor: pointer;
+      color: #f0f2ff;
+      font-size: .62rem;
+      transition: background .2s, transform .1s;
+      padding: .5rem .25rem;
+      justify-content: center
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(255, 255, 255, .15);
+      transform: translateY(-1px)
+    }
+
+    .ctrl-btn.muted {
+      background: rgba(255, 92, 92, .15);
+      border-color: rgba(255, 92, 92, .3);
+      color: #ff5c5c
+    }
+
+    .ctrl-btn.active {
+      background: rgba(99, 102, 241, .2);
+      border-color: rgba(99, 102, 241, .4);
+      color: #a5b4fc
+    }
+
+    .ctrl-btn svg {
+      width: 20px;
+      height: 20px
+    }
+
+    .ctrl-end {
+      background: rgba(239, 68, 68, .2);
+      border-color: rgba(239, 68, 68, .4);
+      color: #f87171;
+      min-width: 80px;
+      width: auto;
+      padding: 0 1.25rem;
+      flex-direction: row;
+      gap: .5rem;
+      font-size: .82rem;
+      font-weight: 600
+    }
+
+    .ctrl-end:hover {
+      background: rgba(239, 68, 68, .35)
+    }
+
+    .ctrl-end svg {
+      width: 18px;
+      height: 18px
+    }
 
     /* Main + panel layout */
-    .meeting-body{display:flex;flex:1;overflow:hidden}
-    .panel-closed .side-panel{display:none}
+    .meeting-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden
+    }
+
+    .panel-closed .side-panel {
+      display: none
+    }
 
     /* Custom Confirm Modal */
-    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; animation: fadeIn .2s ease; }
-    .confirm-card { background: #1a1d2e; border: 1px solid rgba(255,255,255,.08); border-radius: 20px; padding: 1.75rem; width: calc(100% - 2rem); max-width: 380px; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 20px 40px rgba(0,0,0,.4); transform: scale(.95); animation: scaleUp .2s ease forwards; text-align: left; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes scaleUp { to { transform: scale(1); } }
-    .confirm-title { font-size: 1.1rem; font-weight: 700; color: #f0f2ff; display: flex; align-items: center; gap: .75rem; }
-    .confirm-title i { color: #6366f1; width: 22px; height: 22px; }
-    .confirm-msg { font-size: .92rem; color: #9ea4b6; line-height: 1.6; }
-    .confirm-btns { display: flex; gap: .75rem; justify-content: flex-end; margin-top: .5rem; }
-    .c-btn { padding: .65rem 1.25rem; border-radius: 10px; font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .2s; border: none; }
-    .c-btn-cancel { background: rgba(255,255,255,.05); color: #9ea4b6; border: 1px solid rgba(255,255,255,.1); }
-    .c-btn-cancel:hover { background: rgba(255,255,255,.1); color: #f0f2ff; }
-    .c-btn-ok { background: linear-gradient(135deg,#6366f1,#8b5cf6); color: #fff; box-shadow: 0 4px 12px rgba(99,102,241,.3); }
-    .c-btn-ok:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(99,102,241,.4); }
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn .2s ease;
+    }
+
+    .confirm-card {
+      background: #1a1d2e;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 20px;
+      padding: 1.75rem;
+      width: calc(100% - 2rem);
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, .4);
+      transform: scale(.95);
+      animation: scaleUp .2s ease forwards;
+      text-align: left;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes scaleUp {
+      to {
+        transform: scale(1);
+      }
+    }
+
+    .confirm-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f0f2ff;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .confirm-title i {
+      color: #6366f1;
+      width: 22px;
+      height: 22px;
+    }
+
+    .confirm-msg {
+      font-size: .92rem;
+      color: #9ea4b6;
+      line-height: 1.6;
+    }
+
+    .confirm-btns {
+      display: flex;
+      gap: .75rem;
+      justify-content: flex-end;
+      margin-top: .5rem;
+    }
+
+    .c-btn {
+      padding: .65rem 1.25rem;
+      border-radius: 10px;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      border: none;
+    }
+
+    .c-btn-cancel {
+      background: rgba(255, 255, 255, .05);
+      color: #9ea4b6;
+      border: 1px solid rgba(255, 255, 255, .1);
+    }
+
+    .c-btn-cancel:hover {
+      background: rgba(255, 255, 255, .1);
+      color: #f0f2ff;
+    }
+
+    .c-btn-ok {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, .3);
+    }
+
+    .c-btn-ok:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 15px rgba(99, 102, 241, .4);
+    }
   </style>
 </head>
+
 <body>
 
   <!-- Waiting Room -->
@@ -154,7 +864,8 @@
         <div class="wr-cam-off" id="wrCamOff"><i data-lucide="video-off"></i><span>Camera off</span></div>
       </div>
       <div class="wr-name" id="wrName">Connecting...</div>
-      <button class="wr-leave" id="wrLeave"><i data-lucide="log-out" style="width:14px;height:14px;vertical-align:middle;margin-right:.35rem;"></i>Leave</button>
+      <button class="wr-leave" id="wrLeave"><i data-lucide="log-out"
+          style="width:14px;height:14px;vertical-align:middle;margin-right:.35rem;"></i>Leave</button>
     </div>
   </div>
 
@@ -187,8 +898,10 @@
 
       <div class="side-panel" id="sidePanel">
         <div class="panel-tabs">
-          <button class="panel-tab active" id="tabChat" onclick="switchTab('chat')"><i data-lucide="message-square" style="width:14px;height:14px;vertical-align:middle;margin-right:.35rem;"></i>Chat</button>
-          <button class="panel-tab" id="tabParts" onclick="switchTab('participants')"><i data-lucide="users" style="width:14px;height:14px;vertical-align:middle;margin-right:.35rem;"></i>Participants</button>
+          <button class="panel-tab active" id="tabChat" onclick="switchTab('chat')"><i data-lucide="message-square"
+              style="width:14px;height:14px;vertical-align:middle;margin-right:.35rem;"></i>Chat</button>
+          <button class="panel-tab" id="tabParts" onclick="switchTab('participants')"><i data-lucide="users"
+              style="width:14px;height:14px;vertical-align:middle;margin-right:.35rem;"></i>Participants</button>
         </div>
         <div class="panel-body">
           <div class="tab-view active" id="chatView">
@@ -206,7 +919,8 @@
     </div>
 
     <div class="controls">
-      <button class="ctrl-btn" id="btnMic" onclick="toggleMic()" title="Toggle microphone" aria-label="Toggle microphone">
+      <button class="ctrl-btn" id="btnMic" onclick="toggleMic()" title="Toggle microphone"
+        aria-label="Toggle microphone">
         <i data-lucide="mic" id="micIco"></i>
         <span>Mic</span>
       </button>
@@ -248,15 +962,15 @@
   <script>
     //  URL params 
     const p = new URLSearchParams(location.search);
-    const LK_TOKEN  = p.get('lkToken') || '';
-    const LK_WS_URL = p.get('wsUrl')   || 'wss://mindwave-rcbmrzha.livekit.cloud';
-    const ROOM_NAME = p.get('room')    || '';
-    const MY_NAME   = p.get('name')    || 'Student';
-    const TITLE     = p.get('title')   || 'MindWave Class';
-    const START_CAM = p.get('camOn')   !== '0';
-    const START_MIC = p.get('micOn')   !== '0';
+    const LK_TOKEN = p.get('lkToken') || '';
+    const LK_WS_URL = p.get('wsUrl') || 'wss://mindwave-rcbmrzha.livekit.cloud';
+    const ROOM_NAME = p.get('room') || '';
+    const MY_NAME = p.get('name') || 'Student';
+    const TITLE = p.get('title') || 'MindWave Class';
+    const START_CAM = p.get('camOn') !== '0';
+    const START_MIC = p.get('micOn') !== '0';
 
-    if (!LK_TOKEN) { 
+    if (!LK_TOKEN) {
       setTimeout(() => {
         showConfirm('No meeting token. Returning to lobby.', () => { window.location.href = 'student-live-meeting.html'; });
         // Override cancel to also redirect
@@ -285,7 +999,7 @@
         document.getElementById('wrVid').srcObject = wrStream;
         document.getElementById('wrCamOff').style.display = START_CAM ? 'none' : 'flex';
         document.getElementById('wrVid').style.display = START_CAM ? 'block' : 'none';
-      } catch(e) {
+      } catch (e) {
         document.getElementById('wrCamOff').style.display = 'flex';
         document.getElementById('wrVid').style.display = 'none';
       }
@@ -293,7 +1007,7 @@
     startWrPreview();
 
     document.getElementById('wrLeave').onclick = () => {
-      if(wrStream) wrStream.getTracks().forEach(t=>t.stop());
+      if (wrStream) wrStream.getTracks().forEach(t => t.stop());
       window.location.href = 'student-live-meeting.html';
     };
 
@@ -322,21 +1036,21 @@
 
       try {
         await room.connect(LK_WS_URL, LK_TOKEN, { autoSubscribe: true });
-      } catch(e) {
+      } catch (e) {
         showConfirm('Could not connect to meeting. ' + e.message, () => { window.location.href = 'student-live-meeting.html'; });
         document.getElementById('confirmCancel').onclick = () => { window.location.href = 'student-live-meeting.html'; };
         return;
       }
 
       // Stop waiting room stream
-      if(wrStream) { wrStream.getTracks().forEach(t=>t.stop()); wrStream = null; }
+      if (wrStream) { wrStream.getTracks().forEach(t => t.stop()); wrStream = null; }
 
       // Publish local tracks
-      if(START_MIC) {
+      if (START_MIC) {
         localAudio = await LivekitClient.createLocalAudioTrack({ echoCancellation: true, noiseSuppression: true });
         await room.localParticipant.publishTrack(localAudio);
       }
-      if(START_CAM) {
+      if (START_CAM) {
         localVideo = await LivekitClient.createLocalVideoTrack();
         await room.localParticipant.publishTrack(localVideo);
       }
@@ -349,19 +1063,19 @@
       let hasHost = false;
       room.remoteParticipants.forEach(rp => {
         const meta = tryParseMeta(rp.metadata);
-        if(meta && meta.role === 'faculty') hasHost = true;
+        if (meta && meta.role === 'faculty') hasHost = true;
       });
-      if(hasHost || room.remoteParticipants.size > 0) {
+      if (hasHost || room.remoteParticipants.size > 0) {
         showMeetingRoom();
       }
     }
 
     function tryParseMeta(m) {
-      try { return JSON.parse(m||''); } catch { return null; }
+      try { return JSON.parse(m || ''); } catch { return null; }
     }
 
     function showMeetingRoom() {
-      if(metHostJoined) return;
+      if (metHostJoined) return;
       metHostJoined = true;
       document.getElementById('waitingRoom').style.display = 'none';
       document.getElementById('meetingRoom').style.display = 'flex';
@@ -376,25 +1090,25 @@
     function startTimer() {
       startTs = Date.now();
       timerInterval = setInterval(() => {
-        const s = Math.floor((Date.now()-startTs)/1000);
-        const m = Math.floor(s/60).toString().padStart(2,'0');
-        const ss = (s%60).toString().padStart(2,'0');
-        document.getElementById('timerDisplay').textContent = m+':'+ss;
+        const s = Math.floor((Date.now() - startTs) / 1000);
+        const m = Math.floor(s / 60).toString().padStart(2, '0');
+        const ss = (s % 60).toString().padStart(2, '0');
+        document.getElementById('timerDisplay').textContent = m + ':' + ss;
       }, 1000);
     }
 
     //  Participant events 
     function onParticipantConnected(rp) {
       const meta = tryParseMeta(rp.metadata);
-      if(meta && meta.role === 'faculty') showMeetingRoom();
-      else if(!metHostJoined && room.remoteParticipants.size > 0) showMeetingRoom();
+      if (meta && meta.role === 'faculty') showMeetingRoom();
+      else if (!metHostJoined && room.remoteParticipants.size > 0) showMeetingRoom();
       renderParticipants();
-      if(metHostJoined) renderTile(rp);
+      if (metHostJoined) renderTile(rp);
     }
 
     function onParticipantDisconnected(rp) {
-      const el = document.getElementById('tile-'+rp.identity);
-      if(el) el.remove();
+      const el = document.getElementById('tile-' + rp.identity);
+      if (el) el.remove();
       updateGridLayout();
       renderParticipants();
     }
@@ -416,85 +1130,85 @@
     }
 
     function onSpeakersChanged(speakers) {
-      document.querySelectorAll('.vtile').forEach(t=>t.classList.remove('speaking'));
+      document.querySelectorAll('.vtile').forEach(t => t.classList.remove('speaking'));
       speakers.forEach(sp => {
-        const t = document.getElementById('tile-'+sp.identity);
-        if(t) t.classList.add('speaking');
+        const t = document.getElementById('tile-' + sp.identity);
+        if (t) t.classList.add('speaking');
       });
     }
 
     function onDataReceived(data, rp) {
       try {
         const msg = JSON.parse(new TextDecoder().decode(data));
-        if(msg.type === 'chat') addChatMessage(rp ? rp.name||rp.identity : 'Unknown', msg.text, false);
-        if(msg.type === 'hand') addChatMessage('', (rp ? rp.name||rp.identity : 'Someone') + ' raised their hand.', false, true);
+        if (msg.type === 'chat') addChatMessage(rp ? rp.name || rp.identity : 'Unknown', msg.text, false);
+        if (msg.type === 'hand') addChatMessage('', (rp ? rp.name || rp.identity : 'Someone') + ' raised their hand.', false, true);
 
         // Faculty signals
-        if(msg.type === 'mute_all') {
+        if (msg.type === 'mute_all') {
           micOn = false;
-          if(localAudio) localAudio.mute();
-          document.getElementById('micIco').setAttribute('data-lucide','mic-off');
+          if (localAudio) localAudio.mute();
+          document.getElementById('micIco').setAttribute('data-lucide', 'mic-off');
           document.getElementById('btnMic').classList.add('muted');
           lucide.createIcons();
           addChatMessage('', 'Faculty muted all participants.', false, true);
         }
-        if(msg.type === 'unmute_all') {
+        if (msg.type === 'unmute_all') {
           micOn = true;
-          if(localAudio) localAudio.unmute();
-          document.getElementById('micIco').setAttribute('data-lucide','mic');
+          if (localAudio) localAudio.unmute();
+          document.getElementById('micIco').setAttribute('data-lucide', 'mic');
           document.getElementById('btnMic').classList.remove('muted');
           lucide.createIcons();
           addChatMessage('', 'Faculty unmuted all participants.', false, true);
         }
-        if(msg.type === 'mute' && msg.target === room.localParticipant.identity) {
+        if (msg.type === 'mute' && msg.target === room.localParticipant.identity) {
           micOn = false;
-          if(localAudio) localAudio.mute();
-          document.getElementById('micIco').setAttribute('data-lucide','mic-off');
+          if (localAudio) localAudio.mute();
+          document.getElementById('micIco').setAttribute('data-lucide', 'mic-off');
           document.getElementById('btnMic').classList.add('muted');
           lucide.createIcons();
           addChatMessage('', 'Faculty muted your microphone.', false, true);
         }
-        if(msg.type === 'kick' && msg.target === room.localParticipant.identity) {
-          if(room) room.disconnect();
+        if (msg.type === 'kick' && msg.target === room.localParticipant.identity) {
+          if (room) room.disconnect();
           showConfirm('You have been removed from the meeting by the faculty.', () => { window.location.href = 'student-live-meeting.html'; });
           document.getElementById('confirmCancel').onclick = () => { window.location.href = 'student-live-meeting.html'; };
         }
-        if(msg.type === 'meeting_ended') {
-          if(room) room.disconnect();
+        if (msg.type === 'meeting_ended') {
+          if (room) room.disconnect();
           showConfirm('The faculty has ended the meeting.', () => { window.location.href = 'student-live-meeting.html'; });
           document.getElementById('confirmCancel').onclick = () => { window.location.href = 'student-live-meeting.html'; };
         }
-        if(msg.type === 'launch_game') {
-          const name = msg.gameType ? msg.gameType.charAt(0).toUpperCase()+msg.gameType.slice(1) : 'Game';
+        if (msg.type === 'launch_game') {
+          const name = msg.gameType ? msg.gameType.charAt(0).toUpperCase() + msg.gameType.slice(1) : 'Game';
           const gameUrl = `student-game.html?id=${msg.gameId || ''}&auto=1`;
           addChatMessage('', `Faculty launched a ${name} game! <a href="${gameUrl}" target="_blank" style="color:#d08000;text-decoration:underline;font-weight:700;">Click to join →</a>`, false, true);
           // Show a small banner
           showGameBanner(msg);
         }
-        if(msg.type === 'called_on' && msg.target === room.localParticipant.identity) {
+        if (msg.type === 'called_on' && msg.target === room.localParticipant.identity) {
           addChatMessage('', 'Faculty called on you! You may speak.', false, true);
         }
-      } catch {}
+      } catch { }
     }
 
     function showGameBanner(msg) {
       const existing = document.getElementById('gameBanner');
-      if(existing) existing.remove();
+      if (existing) existing.remove();
       const b = document.createElement('div');
       b.id = 'gameBanner';
-      
+
       const gameUrl = `student-game.html?id=${msg.gameId || ''}&auto=1`;
       b.onclick = (e) => {
-        if(e.target.tagName !== 'BUTTON') window.open(gameUrl, '_blank');
+        if (e.target.tagName !== 'BUTTON') window.open(gameUrl, '_blank');
       };
-      
+
       b.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#1a1d2e;border:1px solid rgba(208,128,0,.4);border-radius:14px;padding:.85rem 1.25rem;display:flex;align-items:center;gap:.85rem;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:360px;width:90%;cursor:pointer;transition:transform .2s;';
       b.onmouseover = () => b.style.transform = 'translateX(-50%) scale(1.02)';
       b.onmouseout = () => b.style.transform = 'translateX(-50%) scale(1)';
-      
+
       b.innerHTML = `<div style="width:36px;height:36px;border-radius:9px;background:rgba(208,128,0,.15);display:flex;align-items:center;justify-content:center;color:#d08000;flex-shrink:0">🎮</div><div style="flex:1"><div style="font-size:.83rem;font-weight:700;color:#f0f2ff">New Game Launched!</div><div style="font-size:.75rem;color:#9ea4b6;margin-top:.1rem">Faculty started a ${msg.gameType || 'game'}</div></div><button onclick="document.getElementById('gameBanner').remove()" style="color:#9ea4b6;background:none;border:none;font-size:1.2rem;cursor:pointer;flex-shrink:0">×</button>`;
       document.body.appendChild(b);
-      setTimeout(() => { if(b.parentNode) b.remove(); }, 8000);
+      setTimeout(() => { if (b.parentNode) b.remove(); }, 8000);
     }
 
 
@@ -503,35 +1217,35 @@
       const grid = document.getElementById('videoGrid');
       const id = 'tile-local';
       let tile = document.getElementById(id);
-      if(!tile) {
+      if (!tile) {
         tile = makeTile('local', MY_NAME + ' (You)');
         tile.id = id;
         grid.appendChild(tile);
       }
       const vid = tile.querySelector('video');
       const av = tile.querySelector('.vtile-avatar');
-      if(localVideo && camOn) {
+      if (localVideo && camOn) {
         if (vid.srcObject !== localVideo.mediaStream) {
           localVideo.attach(vid);
         }
-        vid.style.display='block';
-        if(av) av.style.display='none';
+        vid.style.display = 'block';
+        if (av) av.style.display = 'none';
       } else {
-        vid.style.display='none';
-        if(av) av.style.display='flex';
+        vid.style.display = 'none';
+        if (av) av.style.display = 'flex';
       }
       updateGridLayout();
     }
 
     function renderTile(rp) {
-      if(!metHostJoined) return;
+      if (!metHostJoined) return;
       const grid = document.getElementById('videoGrid');
-      const tileId = 'tile-'+rp.identity;
-      if(document.getElementById(tileId)) return;
-      
+      const tileId = 'tile-' + rp.identity;
+      if (document.getElementById(tileId)) return;
+
       const meta = tryParseMeta(rp.metadata);
       const isHost = meta && meta.role === 'faculty';
-      const tile = makeTile(rp.identity, rp.name||rp.identity, isHost);
+      const tile = makeTile(rp.identity, rp.name || rp.identity, isHost);
       tile.id = tileId;
       grid.appendChild(tile);
       attachTrackToTile(tile, null, rp);
@@ -541,8 +1255,8 @@
     function syncAllTiles() {
       renderLocalTile();
       room.remoteParticipants.forEach(rp => {
-        const tid = 'tile-'+rp.identity;
-        if(!document.getElementById(tid)) renderTile(rp);
+        const tid = 'tile-' + rp.identity;
+        if (!document.getElementById(tid)) renderTile(rp);
         else updateTileMedia(rp);
       });
       updateGridLayout();
@@ -553,13 +1267,13 @@
     }
 
     function makeTile(identity, label, isHost) {
-      const cleaned = (label||'?').split(' (')[0];
-      const initials = cleaned.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const cleaned = (label || '?').split(' (')[0];
+      const initials = cleaned.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
       const hue = [...(identity || 'x')].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
       const tile = document.createElement('div');
       tile.className = 'vtile';
       tile.innerHTML = `
-        <div class="vtile-avatar" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue+40},55%,35%)); display:flex; align-items:center; justify-content:center;">${initials}</div>
+        <div class="vtile-avatar" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue + 40},55%,35%)); display:flex; align-items:center; justify-content:center;">${initials}</div>
         <video autoplay playsinline muted style="display:none"></video>
         ${isHost ? '<div class="vtile-host">HOST</div>' : ''}
         <div class="vtile-label"><span>${label}</span></div>
@@ -568,14 +1282,14 @@
     }
 
     function attachTrackToTile(tile, track, rp) {
-      if(!tile) return;
+      if (!tile) return;
       const vid = tile.querySelector('video');
       const av = tile.querySelector('.vtile-avatar');
-      
+
       let hasVid = false;
       // Video
       rp.videoTrackPublications.forEach(pub => {
-        if(pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) {
+        if (pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) {
           if (pub.track.source === 'camera') {
             if (vid.srcObject !== pub.track.mediaStream) {
               pub.track.attach(vid);
@@ -590,20 +1304,20 @@
 
       // Audio
       rp.audioTrackPublications.forEach(pub => {
-        if(pub.isSubscribed && pub.track && pub.kind === 'audio') {
+        if (pub.isSubscribed && pub.track && pub.kind === 'audio') {
           pub.track.attach();
         }
       });
     }
 
     function updateTileMedia(rp) {
-      const tile = document.getElementById('tile-'+rp.identity);
-      if(!tile) return;
+      const tile = document.getElementById('tile-' + rp.identity);
+      if (!tile) return;
       const vid = tile.querySelector('video');
       const av = tile.querySelector('.vtile-avatar');
       let hasVideo = false;
-      rp.videoTrackPublications.forEach(pub => { 
-        if(pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) {
+      rp.videoTrackPublications.forEach(pub => {
+        if (pub.isSubscribed && pub.track && pub.kind === 'video' && !pub.isMuted) {
           if (pub.track.source === 'camera') {
             if (vid.srcObject !== pub.track.mediaStream) {
               pub.track.attach(vid);
@@ -613,25 +1327,25 @@
         }
       });
       vid.style.display = hasVideo ? 'block' : 'none';
-      av.style.display  = hasVideo ? 'none'  : 'flex';
+      av.style.display = hasVideo ? 'none' : 'flex';
     }
 
     function updateGridLayout() {
       const count = document.querySelectorAll('.vtile').length;
       const area = document.getElementById('videoArea');
-      area.className = 'video-area layout-'+Math.min(count,6);
+      area.className = 'video-area layout-' + Math.min(count, 6);
     }
 
     function togglePresentation(track, p, active) {
       const body = document.body;
       const video = document.getElementById('presVideo');
       const label = document.getElementById('presName');
-      
-      if(active && track) {
+
+      if (active && track) {
         track.attach(video);
         label.textContent = (p ? (p.name || p.identity) : 'Someone') + ' is presenting';
         body.classList.add('present-mode');
-        if(panelOpen) togglePanel();
+        if (panelOpen) togglePanel();
       } else {
         video.srcObject = null;
         body.classList.remove('present-mode');
@@ -646,25 +1360,25 @@
       view.innerHTML = '';
 
       const all = [room.localParticipant, ...Array.from(room.remoteParticipants.values())];
-      
+
       // Update tab label with count
       const tabParts = document.getElementById('tabParts');
-      if(tabParts) {
+      if (tabParts) {
         tabParts.innerHTML = `<i data-lucide="users" style="width:14px;height:14px;vertical-align:middle;margin-right:.35rem;"></i>Participants (${all.length})`;
         lucide.createIcons();
       }
 
       all.forEach(p => {
         const name = p.name || p.identity;
-        const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
         const meta = tryParseMeta(p.metadata);
-        const role = (meta && meta.role) ? meta.role.charAt(0).toUpperCase()+meta.role.slice(1) : (p === room.localParticipant ? 'Student (You)' : 'Student');
-        const hue = [...(p.identity||'x')].reduce((a,c) => a+c.charCodeAt(0), 0) % 360;
-        
+        const role = (meta && meta.role) ? meta.role.charAt(0).toUpperCase() + meta.role.slice(1) : (p === room.localParticipant ? 'Student (You)' : 'Student');
+        const hue = [...(p.identity || 'x')].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
+
         const div = document.createElement('div');
         div.className = 'participant-item';
         div.innerHTML = `
-          <div class="p-av" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue+40},50%,32%))">${initials}</div>
+          <div class="p-av" style="background:linear-gradient(135deg,hsl(${hue},60%,40%),hsl(${hue + 40},50%,32%))">${initials}</div>
           <div style="flex:1">
             <div class="p-name">${name}${p === room.localParticipant ? ' (You)' : ''}</div>
             <div class="p-role">${role}</div>
@@ -675,120 +1389,120 @@
     }
 
     //  Chat 
-    function addChatMessage(sender, text, mine, system=false) {
+    function addChatMessage(sender, text, mine, system = false) {
       const view = document.getElementById('chatView');
       const div = document.createElement('div');
-      div.className = 'chat-msg' + (mine?' mine':'');
-      const time = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      div.className = 'chat-msg' + (mine ? ' mine' : '');
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       div.innerHTML = (system ? '' : `<div class="chat-sender">${sender}</div>`) + `<div class="chat-text">${text}</div><div class="chat-time">${time}</div>`;
       view.appendChild(div);
       view.scrollTop = view.scrollHeight;
     }
 
     async function sendChat(text) {
-      if(!room||!text.trim()) return;
-      const payload = JSON.stringify({ type:'chat', text:text.trim() });
-      await room.localParticipant.publishData(new TextEncoder().encode(payload), { reliable:true });
-      addChatMessage(MY_NAME+' (You)', text.trim(), true);
+      if (!room || !text.trim()) return;
+      const payload = JSON.stringify({ type: 'chat', text: text.trim() });
+      await room.localParticipant.publishData(new TextEncoder().encode(payload), { reliable: true });
+      addChatMessage(MY_NAME + ' (You)', text.trim(), true);
     }
 
     document.getElementById('chatSend').onclick = () => {
       const inp = document.getElementById('chatInp');
-      sendChat(inp.value); inp.value='';
+      sendChat(inp.value); inp.value = '';
     };
     document.getElementById('chatInp').addEventListener('keydown', e => {
-      if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); document.getElementById('chatSend').click(); }
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('chatSend').click(); }
     });
 
     function switchTab(tab) {
-      document.getElementById('chatView').classList.toggle('active', tab==='chat');
-      document.getElementById('participantsView').classList.toggle('active', tab==='participants');
-      document.getElementById('chatInputArea').style.display = tab==='chat'?'block':'none';
-      document.getElementById('tabChat').classList.toggle('active', tab==='chat');
-      document.getElementById('tabParts').classList.toggle('active', tab==='participants');
+      document.getElementById('chatView').classList.toggle('active', tab === 'chat');
+      document.getElementById('participantsView').classList.toggle('active', tab === 'participants');
+      document.getElementById('chatInputArea').style.display = tab === 'chat' ? 'block' : 'none';
+      document.getElementById('tabChat').classList.toggle('active', tab === 'chat');
+      document.getElementById('tabParts').classList.toggle('active', tab === 'participants');
       lucide.createIcons();
     }
 
     //  Controls 
     async function toggleMic() {
       micOn = !micOn;
-      if(room) {
-        if(micOn && !localAudio) {
-          localAudio = await LivekitClient.createLocalAudioTrack({ echoCancellation:true });
+      if (room) {
+        if (micOn && !localAudio) {
+          localAudio = await LivekitClient.createLocalAudioTrack({ echoCancellation: true });
           await room.localParticipant.publishTrack(localAudio);
-        } else if(localAudio) {
-          if(micOn) await localAudio.unmute(); else await localAudio.mute();
+        } else if (localAudio) {
+          if (micOn) await localAudio.unmute(); else await localAudio.mute();
         }
       }
-      document.getElementById('micIco').setAttribute('data-lucide', micOn?'mic':'mic-off');
-      document.getElementById('btnMic').classList.toggle('muted',!micOn);
+      document.getElementById('micIco').setAttribute('data-lucide', micOn ? 'mic' : 'mic-off');
+      document.getElementById('btnMic').classList.toggle('muted', !micOn);
       lucide.createIcons();
     }
 
     async function toggleCam() {
       camOn = !camOn;
-      if(room) {
+      if (room) {
         const tile = document.getElementById('tile-local');
         const vid = tile ? tile.querySelector('video') : null;
-        const av  = tile ? tile.querySelector('.vtile-avatar') : null;
-        if(camOn && !localVideo) {
+        const av = tile ? tile.querySelector('.vtile-avatar') : null;
+        if (camOn && !localVideo) {
           localVideo = await LivekitClient.createLocalVideoTrack();
           await room.localParticipant.publishTrack(localVideo);
-          if(vid){ localVideo.attach(vid); vid.style.display='block'; if(av)av.style.display='none'; }
-        } else if(localVideo) {
-          if(camOn){ await localVideo.unmute(); if(vid)vid.style.display='block'; if(av)av.style.display='none'; }
-          else { await localVideo.mute(); if(vid)vid.style.display='none'; if(av)av.style.display='flex'; }
+          if (vid) { localVideo.attach(vid); vid.style.display = 'block'; if (av) av.style.display = 'none'; }
+        } else if (localVideo) {
+          if (camOn) { await localVideo.unmute(); if (vid) vid.style.display = 'block'; if (av) av.style.display = 'none'; }
+          else { await localVideo.mute(); if (vid) vid.style.display = 'none'; if (av) av.style.display = 'flex'; }
         }
       }
-      document.getElementById('camIco').setAttribute('data-lucide', camOn?'video':'video-off');
-      document.getElementById('btnCam').classList.toggle('muted',!camOn);
+      document.getElementById('camIco').setAttribute('data-lucide', camOn ? 'video' : 'video-off');
+      document.getElementById('btnCam').classList.toggle('muted', !camOn);
       lucide.createIcons();
     }
 
     async function toggleScreen() {
-      if(!room) return;
+      if (!room) return;
       try {
-        if(!screenOn) {
-          localScreen = await LivekitClient.createLocalScreenTracks({ audio:true });
+        if (!screenOn) {
+          localScreen = await LivekitClient.createLocalScreenTracks({ audio: true });
           await room.localParticipant.publishTrack(localScreen[0]);
           screenOn = true;
           togglePresentation(localScreen[0], room.localParticipant, true);
         } else {
-          if(localScreen) {
-            for(const t of localScreen) {
+          if (localScreen) {
+            for (const t of localScreen) {
               await room.localParticipant.unpublishTrack(t);
               t.stop();
             }
           }
-          localScreen=null;
-          screenOn=false;
+          localScreen = null;
+          screenOn = false;
           togglePresentation(null, null, false);
         }
-        document.getElementById('screenIco').setAttribute('data-lucide', screenOn?'monitor-off':'monitor');
+        document.getElementById('screenIco').setAttribute('data-lucide', screenOn ? 'monitor-off' : 'monitor');
         document.getElementById('btnScreen').classList.toggle('active', screenOn);
         lucide.createIcons();
-      } catch(e) { console.error(e); }
+      } catch (e) { console.error(e); }
     }
 
     async function raiseHand() {
       handRaised = !handRaised;
       document.getElementById('btnHand').classList.toggle('active', handRaised);
-      if(room) {
-        const payload = JSON.stringify({ type:'hand', raised:handRaised });
-        await room.localParticipant.publishData(new TextEncoder().encode(payload), { reliable:true });
+      if (room) {
+        const payload = JSON.stringify({ type: 'hand', raised: handRaised });
+        await room.localParticipant.publishData(new TextEncoder().encode(payload), { reliable: true });
       }
     }
 
     function togglePanel() {
       panelOpen = !panelOpen;
-      document.getElementById('meetingBody').classList.toggle('panel-closed',!panelOpen);
-      document.getElementById('btnPanel').classList.toggle('active',panelOpen);
+      document.getElementById('meetingBody').classList.toggle('panel-closed', !panelOpen);
+      document.getElementById('btnPanel').classList.toggle('active', panelOpen);
     }
 
     function leaveMeeting() {
       showConfirm('Leave the meeting?', (ok) => {
-        if(ok) {
-          if(room) room.disconnect();
+        if (ok) {
+          if (room) room.disconnect();
           window.location.href = 'student-live-meeting.html';
         }
       });
@@ -806,12 +1520,13 @@
         okBtn.onclick = null;
         cancelBtn.onclick = null;
       };
-      okBtn.onclick = () => { cleanup(); if(callback) callback(true); };
-      cancelBtn.onclick = () => { cleanup(); if(callback) callback(false); };
+      okBtn.onclick = () => { cleanup(); if (callback) callback(true); };
+      cancelBtn.onclick = () => { cleanup(); if (callback) callback(false); };
     }
 
     //  Start 
     connect();
   </script>
 </body>
+
 </html>
