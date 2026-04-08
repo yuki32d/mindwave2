@@ -9754,7 +9754,8 @@ app.post('/api/community/feedback/:id/respond', authMiddleware, async (req, res)
 
 
 function listenWithFallback(preferred) {
-  let port = Number(preferred) || 8080;
+  // Always prefer process.env.PORT (Render injects this automatically)
+  let port = Number(process.env.PORT) || Number(preferred) || 10000;
   let attempts = 0;
   let httpServer;
 
