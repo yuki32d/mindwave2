@@ -21,7 +21,6 @@ import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse'); // RAG
 import fetch from 'node-fetch'; // RAG
 import { WebSocketServer } from 'ws';
 import paymentRoutes from './payment-routes.js';
@@ -9763,7 +9762,7 @@ function listenWithFallback(preferred) {
   let httpServer;
 
   function attempt() {
-    httpServer = app.listen(port, () => {
+    httpServer = app.listen(port, '0.0.0.0', () => {
       console.log(`\n🚀 MINDWAVE Server running on http://localhost:${port}`);
       console.log(`📊 MongoDB: ${mongoose.connection.readyState === 1 ? 'Connected ✅' : 'Disconnected ❌'}`);
 
@@ -13279,7 +13278,9 @@ app.post('/api/admin/sync-classroom', async (req, res) => {
                 rawText = fileResponse.data;
               } else if (fileResponse.data instanceof Buffer || fileResponse.data instanceof ArrayBuffer || Buffer.isBuffer(fileResponse.data)) {
                 try {
-                  const pdfData = await pdfParse(Buffer.from(fileResponse.data));
+                  const pdfParseObj = await import('pdf-parse');
+                  const parseFunc = pdfParseObj.default || pdfParseObj;
+                  const pdfData = await parseFunc(Buffer.from(fileResponse.data));
                   rawText = pdfData.text;
                 } catch (pdfErr) {
                   console.log(`[RAG Sync] Failed to parse PDF ${fileTitle}:`, pdfErr.message);
