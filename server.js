@@ -1149,12 +1149,14 @@ const UserActivity = mongoose.model("UserActivity", userActivitySchema);
 // NOTIFICATION SCHEMA
 // ============================================
 const notificationSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  recipientRole: { type: String }, // For team/role broadcasts
   organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
   type: {
     type: String,
     required: true,
     enum: [
+      'info',
       'trial_expiring',
       'trial_expired',
       'payment_failed',
@@ -1177,6 +1179,7 @@ const notificationSchema = new mongoose.Schema({
   read: { type: Boolean, default: false },
   readAt: { type: Date },
   actionUrl: { type: String }, // URL to navigate when clicked
+  link: { type: String }, // Alternative URL to navigate when clicked
   metadata: { type: mongoose.Schema.Types.Mixed }, // Additional data
   archived: { type: Boolean, default: false },
   archivedAt: { type: Date }
