@@ -1485,19 +1485,17 @@ app.post('/api/chat', async (req, res) => {
 
 // ============================================
 // DEEPGRAM LIVE TRANSCRIPTION
-// Generates a short-lived Deepgram token so the
-// master API key never reaches the browser.
-// Auth: Bearer token OR mindwave_token cookie
+// Returns the Deepgram API key to authenticated users.
+// Protected behind session auth (Bearer OR cookie).
 // ============================================
 app.post('/api/transcription/token', async (req, res) => {
-  // Verify the user is logged in (accept header OR cookie)
   const auth = (req.headers && req.headers['authorization']) || '';
   const bearerToken = auth.startsWith('Bearer ') ? auth.slice(7) : null;
   const cookieToken = req.cookies && req.cookies.mindwave_token;
   const rawToken = bearerToken || cookieToken;
 
   if (!rawToken) {
-    return res.status(401).json({ ok: false, message: 'Unauthorized — please log in.' });
+    return res.status(401).json({ ok: false, message: 'Unauthorized' });
   }
   try {
     jwt.verify(rawToken, JWT_SECRET);
@@ -1506,32 +1504,13 @@ app.post('/api/transcription/token', async (req, res) => {
   }
 
   if (!DEEPGRAM_API_KEY || DEEPGRAM_API_KEY === 'your_deepgram_api_key_here') {
-    return res.status(503).json({ ok: false, message: 'Transcription not configured — add DEEPGRAM_API_KEY to environment variables.' });
+    return res.status(503).json({ ok: false, message: 'Transcription not configured — add DEEPGRAM_API_KEY to your environment variables.' });
   }
 
-  try {
-    const dgRes = await fetch('https://api.deepgram.com/v1/auth/grant', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Token ${DEEPGRAM_API_KEY}`
-      },
-      body: JSON.stringify({ ttl_seconds: 60 })
-    });
-
-    if (!dgRes.ok) {
-      const errText = await dgRes.text();
-      console.error('Deepgram token error:', errText);
-      return res.status(dgRes.status).json({ ok: false, message: 'Could not obtain transcription token from Deepgram.' });
-    }
-
-    const body = await dgRes.json();
-    const key = body.key || body.token || body.access_token;
-    res.json({ ok: true, key });
-  } catch (err) {
-    console.error('Transcription token error:', err);
-    res.status(500).json({ ok: false, message: 'Internal server error' });
-  }
+  // Return the key directly — the /v1/auth/grant temporary-token flow
+  // requires Deepgram Enterprise. Using the key directly via WebSocket
+  // Authorization subprotocol works on ALL Deepgram plans.
+  res.json({ ok: true, key: DEEPGRAM_API_KEY });
 });
 
 
