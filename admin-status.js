@@ -1,282 +1,671 @@
 /**
  * admin-status.js
- * Logic for the Uptime Dashboard.
+ * Real-time system status powered by UptimeRobot API v2.
+ * -------------------------------------------------------
+ * Features:
+ *  - Live monitor status, uptime ratios, response times
+ *  - 90-day uptime bars from log/response data
+ *  - Auto-refresh every 60 seconds with countdown
+ *  - Response-time Chart.js integration
+ *  - API key stored in localStorage (never sent to your backend)
  */
 
-(function() {
-    const TOKEN = localStorage.getItem('token');
-    let uptimeChart = null;
-    
-    let rawHistory = [];
+(function () {
+    'use strict';
 
-    // 1. Uptime Bar Generation from Backend Data
-    async function generateUptimeBars() {
-        const containers = document.querySelectorAll('.service-row');
-        const tooltip = document.getElementById('uptimeTooltip');
-        
-        try {
-            const response = await fetch('/api/system/status-history');
-            const data = await response.json();
-            if (!data.success) throw new Error('Failed to fetch history');
-            
-            rawHistory = data.history;
+    /* ── Constants ── */
+    const LS_KEY           = 'mw_uptimerobot_key';
+    const REFRESH_SECS     = 60;
+    // Server-side proxy (API key stays on Render, never in browser)
+    const PROXY_ENDPOINT   = '/api/uptimerobot/monitors';
+    // Direct UptimeRobot endpoint (fallback if no server key configured)
+    const URT_DIRECT       = 'https://api.uptimerobot.com/v2/getMonitors';
+    const BAR_DAYS         = 90;
 
-            containers.forEach(row => {
-                const serviceId = row.dataset.service;
-                const barContainer = row.querySelector('.uptime-bars');
-                if (!barContainer) return;
+    /* ── State ── */
+    let apiKey          = localStorage.getItem(LS_KEY) || '';
+    let monitors        = [];
+    let rtChart         = null;
+    let refreshTimer    = null;
+    let countdown       = REFRESH_SECS;
 
-                barContainer.innerHTML = '';
-                
-                // Filter history for this service
-                const serviceHistory = rawHistory.filter(h => h.service === serviceId);
+    /* ── DOM Refs ── */
+    const $             = id => document.getElementById(id);
+    const $q            = sel => document.querySelector(sel);
 
-                // Get last 90 measurements (one per day for the bar chart)
-                const dailyStatus = {};
-                serviceHistory.forEach(h => {
-                    const date = new Date(h.timestamp).toDateString();
-                    if (!dailyStatus[date] || h.status !== 'operational') {
-                        dailyStatus[date] = h.status;
-                    }
-                });
+    /* ════════════════════════════════════════
+       1. API KEY MANAGEMENT
+    ════════════════════════════════════════ */
 
-                for (let i = 0; i < 90; i++) {
-                    const bar = document.createElement('div');
-                    bar.className = 'bar';
-                    
-                    const dateObj = new Date();
-                    dateObj.setDate(dateObj.getDate() - (89 - i));
-                    const dateKey = dateObj.toDateString();
-                    const status = dailyStatus[dateKey] || 'operational';
-                    
-                    if (status === 'down') bar.classList.add('down');
-                    else if (status === 'degraded') bar.classList.add('degraded');
-                    
-                    const dateStr = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-                    
-                    if (i === 89) bar.classList.add('today');
-
-                    bar.addEventListener('mouseenter', (e) => {
-                        tooltip.innerHTML = `<strong>${dateStr}</strong><br>${status.charAt(0).toUpperCase() + status.slice(1)}`;
-                        tooltip.style.display = 'block';
-                    });
-                    bar.addEventListener('mousemove', (e) => {
-                        tooltip.style.left = (e.clientX + 10) + 'px';
-                        tooltip.style.top = (e.clientY - 40) + 'px';
-                    });
-                    bar.addEventListener('mouseleave', () => tooltip.style.display = 'none');
-                    
-                    barContainer.appendChild(bar);
-                }
-            });
-
-            // Update chart after history is loaded
-            if (uptimeChart) updateChartData('day');
-        } catch (error) {
-            console.error('Error rendering status bars:', error);
-            logToTerminal('STATUS_ENGINE', 'FETCH_HISTORY_FAILED', 'error');
-        }
-    }
-
-    // Uptime Calculation Helper
-    function getUptimeForRange(range) {
-        if (!rawHistory.length) return { labels: [], points: [] };
-
-        const labels = [];
-        const points = [];
-        const now = new Date();
-
-        if (range === 'day') {
-            // Last 24 hours, grouped by hour
-            for (let i = 0; i < 24; i++) {
-                const hourDate = new Date(now);
-                hourDate.setHours(now.getHours() - (23 - i), 0, 0, 0);
-                
-                // Show date if it's the first label or if hour is 0 (midnight)
-                if (i === 0 || hourDate.getHours() === 0) {
-                    labels.push(hourDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ` ${hourDate.getHours()}:00`);
-                } else {
-                    labels.push(`${hourDate.getHours()}:00`);
-                }
-
-                const hourChecks = rawHistory.filter(h => {
-                    const hDate = new Date(h.timestamp);
-                    return hDate.toDateString() === hourDate.toDateString() && hDate.getHours() === hourDate.getHours();
-                });
-
-                if (hourChecks.length > 0) {
-                    const operational = hourChecks.filter(h => h.status === 'operational').length;
-                    points.push(99.0 + (operational / hourChecks.length));
-                } else {
-                    points.push(100);
-                }
-            }
+    function showBanner(openForEdit = false) {
+        const banner = $('apiBanner');
+        if (!banner) return;
+        if (openForEdit || !apiKey) {
+            banner.classList.remove('hidden');
+            $('apiKeyInput').value = apiKey;
+            $('apiKeyInput').focus();
         } else {
-            // Week (7 days) or Month (30 days)
-            const days = range === 'week' ? 7 : 30;
-            for (let i = 0; i < days; i++) {
-                const dayDate = new Date(now);
-                dayDate.setDate(now.getDate() - (days - 1 - i));
-                labels.push(dayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' }));
+            banner.classList.add('hidden');
+        }
+    }
 
-                const dayChecks = rawHistory.filter(h => new Date(h.timestamp).toDateString() === dayDate.toDateString());
+    function saveKey() {
+        const val = $('apiKeyInput').value.trim();
+        if (!val) { tLog('CONFIG', 'API key cannot be empty.', 'warn'); return; }
+        apiKey = val;
+        localStorage.setItem(LS_KEY, apiKey);
+        $('apiBanner').classList.add('hidden');
+        tLog('CONFIG', 'API key saved. Fetching monitors...', 'ok');
+        fetchAll();
+    }
 
-                if (dayChecks.length > 0) {
-                    const operational = dayChecks.filter(h => h.status === 'operational').length;
-                    points.push(99.0 + (operational / dayChecks.length));
-                } else {
-                    points.push(100);
-                }
+    /* ════════════════════════════════════════
+       2. UPTIMEROBOT API FETCH
+    ════════════════════════════════════════ */
+
+    async function fetchAll() {
+        setRefreshSpinner(true);
+
+        // ── Step 1: Try the server-side proxy (API key stays on Render) ──
+        try {
+            tLog('API', 'POST /api/uptimerobot/monitors (server proxy)', 'info');
+            const res = await fetch(PROXY_ENDPOINT, { method: 'POST' });
+            const data = await res.json();
+
+            if (res.status === 503) {
+                // Server key not configured → fall through to client key
+                tLog('PROXY', 'Server key not set. Trying client key...', 'warn');
+                throw new Error('no_server_key');
+            }
+
+            if (!res.ok || data.stat !== 'ok') {
+                throw new Error(data.error?.message || `HTTP ${res.status}`);
+            }
+
+            monitors = data.monitors || [];
+            tLog('API', `SUCCESS (proxy) · ${monitors.length} monitor(s)`, 'ok');
+            $('apiBanner').classList.add('hidden'); // Hide banner if was open
+            renderAll();
+            scheduleRefresh();
+            return; // Done ✓
+
+        } catch (proxyErr) {
+            if (proxyErr.message !== 'no_server_key') {
+                // Real error — report and stop
+                tLog('API', `ERROR · ${proxyErr.message}`, 'err');
+                renderError(proxyErr.message);
+                setRefreshSpinner(false);
+                return;
             }
         }
 
-        return { labels, points };
+        // ── Step 2: Fallback — use localStorage API key (direct call) ──
+        if (!apiKey) {
+            tLog('CONFIG', 'No API key. Enter your UptimeRobot key.', 'warn');
+            showNoConfig();
+            setRefreshSpinner(false);
+            return;
+        }
+
+        try {
+            tLog('API', 'POST api.uptimerobot.com (direct, localStorage key)', 'info');
+            const body = new URLSearchParams({
+                api_key:              apiKey,
+                format:               'json',
+                logs:                 '1',
+                logs_limit:           '50',
+                response_times:       '1',
+                response_times_limit: '48',
+                custom_uptime_ratio:  '7-30-90',
+                all_time_uptime_ratio: '1'
+            });
+            const res = await fetch(URT_DIRECT, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body:    body.toString()
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (data.stat !== 'ok') throw new Error(data.error?.message || 'UptimeRobot error');
+
+            monitors = data.monitors || [];
+            tLog('API', `SUCCESS (direct) · ${monitors.length} monitor(s)`, 'ok');
+            renderAll();
+            scheduleRefresh();
+
+        } catch (err) {
+            tLog('API', `ERROR · ${err.message}`, 'err');
+            renderError(err.message);
+        } finally {
+            setRefreshSpinner(false);
+        }
     }
 
-    function updateChartData(range) {
-        const { labels, points } = getUptimeForRange(range);
-        uptimeChart.data.labels = labels;
-        uptimeChart.data.datasets[0].data = points;
-        uptimeChart.update();
+    /* ════════════════════════════════════════
+       3. RENDER EVERYTHING
+    ════════════════════════════════════════ */
 
-        // Update the big percentage label
-        const avg = points.length > 0 ? points.reduce((a, b) => a + b, 0) / points.length : 100;
-        const percentEl = document.querySelector('.metrics-section h2 + div + div div:last-child');
-        const bigPercent = document.querySelector('.metrics-section div > div:last-child');
-        if (bigPercent) bigPercent.textContent = `${avg.toFixed(2)}%`;
+    function renderAll() {
+        updateGlobalBanner();
+        updateStats();
+        renderMonitors();
+        renderChart();
+        $('chartSection').style.display = monitors.length ? '' : 'none';
     }
 
-    // 2. Chart.js Initialization
-    function initChart() {
-        const ctx = document.getElementById('uptimeChart')?.getContext('2d');
+    /* ── 3.1 Global Banner ── */
+    function updateGlobalBanner() {
+        const banner   = $('globalBanner');
+        const bannerTxt= $('bannerText');
+        const bannerSub= $('bannerSub');
+        const icon     = $('bannerIcon');
+
+        if (!monitors.length) return;
+
+        const anyDown  = monitors.some(m => m.status === 9);
+        const anyDeg   = monitors.some(m => m.status === 8);
+        const allUp    = !anyDown && !anyDeg;
+
+        banner.className = allUp ? 'ok' : anyDown ? 'down' : 'degraded';
+
+        bannerTxt.textContent = allUp    ? 'All Systems Operational'
+                              : anyDown  ? 'Partial Outage Detected'
+                              : 'Some Services Degraded';
+
+        icon.setAttribute('data-lucide', allUp ? 'check-circle-2' : anyDown ? 'alert-octagon' : 'alert-triangle');
+        lucide.createIcons();
+
+        const now = new Date();
+        $('monitorCount').textContent = monitors.length;
+        $('bannerLastCheck').textContent = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    }
+
+    /* ── 3.2 Stats Cards ── */
+    function updateStats() {
+        if (!monitors.length) return;
+
+        const upCount   = monitors.filter(m => m.status === 2).length;
+        const downCount = monitors.filter(m => m.status === 9).length;
+
+        $('statUp').textContent    = upCount;
+        $('statTotal').textContent = monitors.length;
+        $('statUp').className      = `stat-value ${upCount === monitors.length ? 'green' : downCount > 0 ? 'red' : 'yellow'}`;
+
+        // 7-day avg uptime from custom_uptime_ratio field
+        const ratios = monitors
+            .map(m => {
+                const r = m.custom_uptime_ratio;
+                if (!r) return null;
+                const parts = r.split('-');
+                return parseFloat(parts[0]);
+            })
+            .filter(n => n !== null && !isNaN(n));
+
+        const avg7d = ratios.length ? (ratios.reduce((a,b) => a+b, 0) / ratios.length) : null;
+        const s7d   = $('stat7d');
+        s7d.textContent  = avg7d !== null ? avg7d.toFixed(2) + '%' : '—';
+        s7d.className    = `stat-value ${avg7d === null ? '' : avg7d >= 99.9 ? 'green' : avg7d >= 99 ? 'yellow' : 'red'}`;
+
+        // Avg response time
+        const avgResp = getAvgResponseTime();
+        $('statAvgResp').textContent = avgResp !== null ? avgResp + 'ms' : '—';
+
+        // Incident count: count monitors that have had at least one 'down' log in last 30 days
+        const thirtyDaysAgo = Date.now() - 30 * 86400 * 1000;
+        let incidents = 0;
+        monitors.forEach(m => {
+            if (!m.logs) return;
+            const hadDown = m.logs.some(l => l.type === 1 && l.datetime * 1000 >= thirtyDaysAgo);
+            if (hadDown) incidents++;
+        });
+        $('statIncidents').textContent = incidents;
+        $('statIncidents').className   = `stat-value ${incidents === 0 ? 'green' : incidents <= 2 ? 'yellow' : 'red'}`;
+    }
+
+    function getAvgResponseTime() {
+        let total = 0, count = 0;
+        monitors.forEach(m => {
+            if (m.average_response_time) {
+                total += parseInt(m.average_response_time);
+                count++;
+            } else if (m.response_times && m.response_times.length) {
+                const vals = m.response_times.map(r => r.value);
+                total += vals.reduce((a,b)=>a+b,0) / vals.length;
+                count++;
+            }
+        });
+        return count ? Math.round(total / count) : null;
+    }
+
+    /* ── 3.3 Monitor Cards ── */
+    function renderMonitors() {
+        const container = $('monitorsContainer');
+        container.innerHTML = '';
+
+        if (!monitors.length) {
+            container.innerHTML = `<div class="empty-monitors"><i data-lucide="inbox" style="width:28px;margin-bottom:10px;opacity:0.4;"></i><br>No monitors found. Add monitors in your UptimeRobot dashboard.</div>`;
+            lucide.createIcons();
+            return;
+        }
+
+        monitors.forEach(monitor => {
+            const card = buildMonitorCard(monitor);
+            container.appendChild(card);
+        });
+
+        lucide.createIcons();
+    }
+
+    function buildMonitorCard(m) {
+        const statusClass = statusToClass(m.status);
+        const statusLabel = statusToLabel(m.status);
+        const typeName    = typeToLabel(m.type);
+
+        // Parse custom uptime ratios (7-30-90 days)
+        const ratios = (m.custom_uptime_ratio || '').split('-').map(parseFloat);
+        const r7   = isNaN(ratios[0]) ? null : ratios[0];
+        const r30  = isNaN(ratios[1]) ? null : ratios[1];
+        const r90  = isNaN(ratios[2]) ? null : ratios[2];
+
+        // Latest response time
+        let latestRT = null;
+        if (m.response_times && m.response_times.length) {
+            latestRT = m.response_times[m.response_times.length - 1].value;
+        } else if (m.average_response_time) {
+            latestRT = parseInt(m.average_response_time);
+        }
+
+        const card = document.createElement('div');
+        card.className = `monitor-card ${statusClass}`;
+        card.id = `mcard-${m.id}`;
+
+        card.innerHTML = `
+            <div class="monitor-header">
+                <div class="monitor-name">
+                    <span>${escHtml(m.friendly_name)}</span>
+                    <span class="monitor-type-badge">${typeName}</span>
+                </div>
+                <div class="status-pill ${statusClass}">
+                    <div class="s-dot"></div>
+                    ${statusLabel}
+                </div>
+            </div>
+
+            <div class="uptime-bars" id="bars-${m.id}"></div>
+
+            <div class="monitor-footer">
+                <span style="font-size:11px;color:var(--muted);">${BAR_DAYS} days ago ← → Today</span>
+                ${latestRT !== null ? `<span class="meta-item"><i data-lucide="activity" style="width:11px;height:11px;"></i> ${latestRT}ms</span>` : ''}
+            </div>
+
+            <div class="ratio-badges" style="margin-top:14px;">
+                ${buildRatioBadge('7-day', r7)}
+                ${buildRatioBadge('30-day', r30)}
+                ${buildRatioBadge('90-day', r90)}
+                ${m.url ? `<div style="margin-left:auto;display:flex;align-items:center;"><a href="${escHtml(m.url)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:4px;"><i data-lucide="external-link" style="width:10px;height:10px;"></i>${truncate(m.url, 40)}</a></div>` : ''}
+            </div>
+        `;
+
+        // Build uptime bars from logs
+        setTimeout(() => buildBars(m, card.querySelector(`#bars-${m.id}`)), 0);
+
+        return card;
+    }
+
+    function buildRatioBadge(label, val) {
+        if (val === null) return '';
+        const cls = val >= 99.9 ? 'high' : val >= 99 ? 'mid' : 'low';
+        return `<div class="ratio-badge">
+            <div class="ratio-badge-label">${label}</div>
+            <div class="ratio-badge-val ${cls}">${val.toFixed(2)}%</div>
+        </div>`;
+    }
+
+    function buildBars(monitor, container) {
+        if (!container) return;
+        container.innerHTML = '';
+
+        const tooltip = $('tt');
+
+        // Build a day-keyed map from logs (type 1 = down, 2 = started, 98/99 = down/up)
+        const downDays = new Set();
+        const degradedDays = new Set();
+
+        if (monitor.logs) {
+            monitor.logs.forEach(log => {
+                const d = new Date(log.datetime * 1000);
+                const key = dayKey(d);
+                if (log.type === 1) downDays.add(key);         // DOWN
+                else if (log.type === 5) degradedDays.add(key); // Alert
+            });
+        }
+
+        const today = new Date();
+
+        for (let i = 0; i < BAR_DAYS; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - (BAR_DAYS - 1 - i));
+            const key = dayKey(d);
+
+            const bar = document.createElement('div');
+            bar.className = 'u-bar';
+
+            if (downDays.has(key))     bar.classList.add('down');
+            else if (degradedDays.has(key)) bar.classList.add('degraded');
+            else                       bar.classList.add('up');
+
+            const label = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+            const stLabel = downDays.has(key) ? 'Downtime' : degradedDays.has(key) ? 'Degraded' : 'Operational';
+
+            bar.addEventListener('mouseenter', (e) => {
+                tooltip.innerHTML = `<strong>${label}</strong><br>${stLabel}`;
+                tooltip.style.display = 'block';
+            });
+            bar.addEventListener('mousemove', (e) => {
+                tooltip.style.left = (e.clientX + 12) + 'px';
+                tooltip.style.top  = (e.clientY - 48) + 'px';
+            });
+            bar.addEventListener('mouseleave', () => tooltip.style.display = 'none');
+
+            container.appendChild(bar);
+        }
+    }
+
+    /* ── 3.4 Response Time Chart ── */
+    function renderChart() {
+        if (!monitors.length) return;
+        $('chartSection').style.display = '';
+
+        // Rebuild tabs
+        const tabsEl = $q('.chart-tabs');
+        tabsEl.innerHTML = '<button class="chart-tab active" data-mid="all">All</button>';
+        monitors.forEach(m => {
+            const btn = document.createElement('button');
+            btn.className = 'chart-tab';
+            btn.dataset.mid = m.id;
+            btn.textContent = truncate(m.friendly_name, 16);
+            tabsEl.appendChild(btn);
+        });
+
+        tabsEl.querySelectorAll('.chart-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabsEl.querySelectorAll('.chart-tab').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                drawChart(btn.dataset.mid === 'all' ? null : parseInt(btn.dataset.mid));
+                tLog('CHART', `Monitor filter: ${btn.textContent.trim()}`, 'info');
+            });
+        });
+
+        drawChart(null);
+    }
+
+    function drawChart(monitorId) {
+        const ctx = $('rtChart');
         if (!ctx) return;
 
-        uptimeChart = new Chart(ctx, {
+        // Collect response time data points
+        let rtData = [];
+
+        if (monitorId) {
+            const m = monitors.find(x => x.id === monitorId);
+            if (m && m.response_times) rtData = m.response_times.slice(-48);
+        } else {
+            // Merge all monitors — average by matching timestamp proximity
+            const allRts = [];
+            monitors.forEach(m => {
+                if (m.response_times) m.response_times.forEach(r => allRts.push(r));
+            });
+            allRts.sort((a,b) => a.datetime - b.datetime);
+            rtData = allRts.slice(-60);
+        }
+
+        const labels = rtData.map(r => {
+            const d = new Date(r.datetime * 1000);
+            return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+        });
+        const values = rtData.map(r => r.value);
+
+        const isDark = true;
+        const gridColor = 'rgba(255,255,255,0.05)';
+        const textColor = '#64748b';
+
+        if (rtChart) {
+            rtChart.data.labels = labels;
+            rtChart.data.datasets[0].data = values;
+            rtChart.update('active');
+            return;
+        }
+
+        rtChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [],
+                labels,
                 datasets: [{
-                    label: 'Uptime',
-                    data: [],
+                    label: 'Response Time (ms)',
+                    data: values,
                     borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                    backgroundColor: 'rgba(59,130,246,0.06)',
                     borderWidth: 2,
                     pointRadius: 0,
+                    pointHoverRadius: 4,
                     fill: true,
-                    tension: 0.1
+                    tension: 0.4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: { mode: 'nearest', intersect: false },
                 plugins: {
                     legend: { display: false },
-                    tooltip: { enabled: true }
+                    tooltip: {
+                        backgroundColor: 'rgba(10,14,26,0.95)',
+                        titleColor: '#94a3b8',
+                        bodyColor: '#e2e8f0',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        padding: 10,
+                        callbacks: {
+                            label: ctx => `${ctx.parsed.y} ms`
+                        }
+                    }
                 },
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { font: { size: 10 }, maxRotation: 0 }
+                        ticks: { color: textColor, font: { size: 10 }, maxRotation: 0, maxTicksLimit: 8 },
+                        border: { display: false }
                     },
                     y: {
-                        min: 99,
-                        max: 100,
-                        ticks: { stepSize: 0.2, font: { size: 10 } },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
+                        grid: { color: gridColor },
+                        ticks: { color: textColor, font: { size: 10 }, callback: v => v + 'ms' },
+                        border: { display: false }
                     }
                 }
             }
         });
-        
-        if (rawHistory.length) updateChartData('day');
     }
 
-    // 3. Tab Switching Logic
-    function initTabs() {
-        const tabs = document.querySelectorAll('.tab-btn');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                const range = tab.dataset.range;
-                updateChartData(range);
-                logToTerminal('METRICS', `RANGE_SWITCHED: ${range.toUpperCase()}`, 'ok');
-            });
-        });
-    }
+    /* ════════════════════════════════════════
+       4. AUTO-REFRESH
+    ════════════════════════════════════════ */
 
-    // 4. Real-time Status Heartbeat
-    function updateLiveStatus() {
-        const clock = document.getElementById('lastUpdatedClock');
-        if (clock) {
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-            const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            clock.textContent = `${dateStr}, ${timeStr}`;
-        }
+    function scheduleRefresh() {
+        clearInterval(refreshTimer);
+        countdown = REFRESH_SECS;
+        updateCountdownEl();
 
-        // Pulse the "today" bar
-        document.querySelectorAll('.bar.today').forEach(bar => {
-            bar.style.opacity = bar.style.opacity === '0.5' ? '1' : '0.5';
-        });
-
-        // Fluatuate uptime percentages
-        document.querySelectorAll('.uptime-percent').forEach(el => {
-            if (Math.random() > 0.98) {
-                const current = parseFloat(el.textContent);
-                const noise = (Math.random() - 0.5) * 0.01;
-                el.textContent = `${Math.min(100, Math.max(99.9, current + noise)).toFixed(2)} % uptime`;
+        refreshTimer = setInterval(() => {
+            countdown--;
+            updateCountdownEl();
+            if (countdown <= 0) {
+                tLog('AUTO_REFRESH', 'Scheduled refresh triggered', 'info');
+                fetchAll();
             }
-        });
+        }, 1000);
     }
 
-    // 5. Real Health Check (Ping)
-    async function checkSystemHealth() {
-        try {
-            const start = Date.now();
-            const res = await fetch('/api/health'); 
-            const latency = Date.now() - start;
-            if (res.ok) {
-                logToTerminal('HEALTH_CHECK', `SUCCESS (${latency}ms)`, 'ok');
-            }
-        } catch (error) {
-            logToTerminal('NETWORK', 'CONNECTION_STABLE', 'ok');
-        }
+    function updateCountdownEl() {
+        const el = $('countdownEl');
+        if (el) el.textContent = `Next: ${countdown}s`;
     }
 
-    // Terminal Logger
-    function logToTerminal(module, action, status) {
-        const terminal = document.getElementById('terminal');
+    /* ════════════════════════════════════════
+       5. CLOCK
+    ════════════════════════════════════════ */
+
+    function tickClock() {
+        const el = $('clockEl');
+        if (!el) return;
+        const now = new Date();
+        el.textContent = `${now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})} · ${now.toLocaleTimeString('en-GB')}`;
+    }
+
+    /* ════════════════════════════════════════
+       6. TERMINAL LOGGER
+    ════════════════════════════════════════ */
+
+    function tLog(module, msg, level = 'info') {
+        const term = $('terminal');
+        if (!term) return;
         const time = new Date().toLocaleTimeString('en-US', { hour12: false });
         const line = document.createElement('div');
-        line.className = 'terminal-line';
-        const colorStyle = status === 'ok' ? '#10b981' : (status === 'error' ? '#ef4444' : '#f59e0b');
-        
-        line.innerHTML = `<span style="color: var(--accent);">[${time}]</span> <span style="color: #3b82f6;">${module}</span> ... <span style="color: ${colorStyle}">${action}</span>`;
-        terminal.appendChild(line);
-        terminal.scrollTop = terminal.scrollHeight;
-        if (terminal.children.length > 15) terminal.removeChild(terminal.firstChild);
+        line.className = 't-line';
+        const lvlClass = level === 'ok' ? 't-ok' : level === 'err' ? 't-err' : level === 'warn' ? 't-warn' : 't-info';
+        line.innerHTML = `<span class="t-time">[${time}]</span><span class="t-module"> ${escHtml(module)}</span> <span class="${lvlClass}">→ ${escHtml(msg)}</span>`;
+        term.appendChild(line);
+        term.scrollTop = term.scrollHeight;
+        if (term.children.length > 40) term.removeChild(term.firstChild);
     }
 
-    // Initialize
-    async function init() {
-        await generateUptimeBars();
-        initChart();
-        initTabs();
-        
-        setInterval(updateLiveStatus, 1000);
-        setInterval(checkSystemHealth, 20000);
-        setInterval(generateUptimeBars, 600000); // Refresh bars every 10 mins
-        
-        document.getElementById('refreshBtn')?.addEventListener('click', async () => {
-            logToTerminal('MANUAL_SYNC', 'REFRESHING_DASHBOARD', 'ok');
-            await generateUptimeBars();
-            checkSystemHealth();
+    /* ════════════════════════════════════════
+       7. UI HELPERS
+    ════════════════════════════════════════ */
+
+    function showNoConfig() {
+        const container = $('monitorsContainer');
+        container.innerHTML = `
+            <div class="no-config" id="noConfigState">
+                <div class="no-config-icon">
+                    <i data-lucide="plug-zap" style="width:32px;height:32px;"></i>
+                </div>
+                <h2>Connect UptimeRobot</h2>
+                <p>Enter your UptimeRobot Read-Only API key to see real-time status for all your monitored services.</p>
+                <button class="btn btn-primary" id="heroConfigBtn" style="margin-top:8px;">
+                    <i data-lucide="key" style="width:13px;height:13px;"></i> Enter API Key
+                </button>
+            </div>`;
+        lucide.createIcons();
+        document.getElementById('heroConfigBtn')?.addEventListener('click', () => showBanner(true));
+        $('apiBanner').classList.remove('hidden');
+        $('chartSection').style.display = 'none';
+    }
+
+    function renderError(msg) {
+        const container = $('monitorsContainer');
+        container.innerHTML = `
+            <div class="empty-monitors" style="border-color:rgba(239,68,68,0.2);background:rgba(239,68,68,0.04);">
+                <i data-lucide="alert-triangle" style="width:24px;height:24px;color:var(--red);margin-bottom:8px;"></i>
+                <div style="color:var(--red);font-weight:700;margin-bottom:6px;">Failed to fetch monitors</div>
+                <div style="font-size:12px;color:var(--muted);">${escHtml(msg)}</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:8px;">Check your API key or try again.</div>
+            </div>`;
+        lucide.createIcons();
+    }
+
+    function setRefreshSpinner(on) {
+        const btn = $('refreshBtn');
+        if (!btn) return;
+        btn.classList.toggle('spinning', on);
+        btn.disabled = on;
+    }
+
+    /* ════════════════════════════════════════
+       8. UTILITY
+    ════════════════════════════════════════ */
+
+    function statusToClass(s) {
+        if (s === 2) return 'up';
+        if (s === 9) return 'down';
+        if (s === 8) return 'degraded';
+        if (s === 0) return 'paused';
+        return 'up';
+    }
+
+    function statusToLabel(s) {
+        const map = { 0:'Paused', 1:'Not Checked', 2:'Up', 8:'Seems Down', 9:'Down' };
+        return map[s] || `Status ${s}`;
+    }
+
+    function typeToLabel(t) {
+        const map = { 1:'HTTP', 2:'Keyword', 3:'Ping', 4:'Port', 5:'Heartbeat' };
+        return map[t] || 'Monitor';
+    }
+
+    function dayKey(d) {
+        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    }
+
+    function truncate(str, max) {
+        if (!str) return '';
+        return str.length > max ? str.slice(0, max) + '…' : str;
+    }
+
+    function escHtml(str) {
+        if (typeof str !== 'string') return String(str || '');
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    /* ════════════════════════════════════════
+       9. EVENT LISTENERS
+    ════════════════════════════════════════ */
+
+    function bindEvents() {
+        $('saveKeyBtn')?.addEventListener('click', saveKey);
+        $('cancelKeyBtn')?.addEventListener('click', () => {
+            if (monitors.length) {
+                $('apiBanner').classList.add('hidden');
+            }
+        });
+        $('configBtn')?.addEventListener('click', () => showBanner(true));
+        $('heroConfigBtn')?.addEventListener('click', () => showBanner(true));
+
+        $('apiKeyInput')?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') saveKey();
         });
 
-        logToTerminal('STATUS_ENGINE', 'MONITORING_ACTIVE', 'ok');
+        $('refreshBtn')?.addEventListener('click', () => {
+            if (!apiKey) { showBanner(true); return; }
+            tLog('MANUAL', 'Manual refresh triggered', 'ok');
+            fetchAll();
+        });
+
+        $('subscribeBtn')?.addEventListener('click', () => {
+            window.open('https://status.uptimerobot.com/', '_blank');
+        });
+    }
+
+    /* ════════════════════════════════════════
+       10. INIT
+    ════════════════════════════════════════ */
+
+    function init() {
+        bindEvents();
+        tickClock();
+        setInterval(tickClock, 1000);
+
+        tLog('STATUS_ENGINE', 'MindWave Status Dashboard v2.0 initialized', 'ok');
+
+        if (apiKey) {
+            tLog('CONFIG', 'API key found in storage. Fetching...', 'info');
+            $('apiBanner').classList.add('hidden');
+            fetchAll();
+        } else {
+            tLog('CONFIG', 'No API key configured. Enter key to begin.', 'warn');
+            showBanner(true);
+        }
     }
 
     document.addEventListener('DOMContentLoaded', init);
+
 })();

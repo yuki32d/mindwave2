@@ -6,489 +6,580 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Status | MindWave Admin</title>
+    <title>System Status | MindWave</title>
+    <meta name="description" content="Real-time system status and uptime monitoring for MindWave platform powered by UptimeRobot.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="auth-guard.js"></script>
     <style>
         :root {
-            --bg: #f4f6fb;
-            --surface: #ffffff;
-            --border: #e5e9f2;
-            --accent: #d08000;
-            --accent-lo: rgba(208, 128, 0, 0.10);
-            --accent-bdr: rgba(208, 128, 0, 0.25);
-            --text: #111827;
-            --muted: #6b7280;
-            --green: #16a34a;
-            --red: #dc2626;
-            --blue: #2563eb;
-            --shadow: 0 1px 4px rgba(0, 0, 0, 0.07), 0 4px 16px rgba(0, 0, 0, 0.05);
-            --radius: 14px;
-            --mono: 'JetBrains Mono', monospace;
-            --sidebar-w: 240px;
-            --topbar-h: 58px;
-            --s-bg: #0f1c2e;
-            --s-border: rgba(255, 255, 255, 0.08);
-            --s-text: #cbd5e1;
-            --s-muted: #4a5e7a;
-            --s-hover: rgba(255, 255, 255, 0.06);
-            --s-active-bg: rgba(245, 166, 35, 0.18);
-            --s-active-txt: #f5a623;
-        }
-
-        [data-theme="dark"] {
-            --bg: #0d1117;
-            --surface: #161b27;
-            --border: rgba(255, 255, 255, 0.08);
+            --bg: #080c14;
+            --surface: #0d1220;
+            --surface2: #111827;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.12);
+            --accent: #f5a623;
+            --accent-glow: rgba(245, 166, 35, 0.2);
             --text: #e2e8f0;
-            --muted: #6b7694;
-            --shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+            --muted: #64748b;
+            --muted2: #94a3b8;
+            --green: #10b981;
+            --green-glow: rgba(16,185,129,0.15);
+            --red: #ef4444;
+            --red-glow: rgba(239,68,68,0.15);
+            --yellow: #f59e0b;
+            --yellow-glow: rgba(245,158,11,0.15);
+            --blue: #3b82f6;
+            --blue-glow: rgba(59,130,246,0.12);
+            --shadow: 0 4px 24px rgba(0,0,0,0.5);
+            --radius: 16px;
+            --mono: 'JetBrains Mono', monospace;
+            --topbar-h: 60px;
         }
 
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { font-size: 14px; }
 
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--text);
+            height: 100vh;
             overflow: hidden;
-            height: 100vh;
-        }
-
-        .shell {
-            display: grid;
-            grid-template-columns: 1fr;
-            height: 100vh;
-        }
-
-        /* ── Sidebar ── */
-        .sidebar {
-            background: var(--s-bg);
-            border-right: 1px solid var(--s-border);
             display: flex;
             flex-direction: column;
         }
 
-        .side-logo {
-            height: var(--topbar-h);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 0 20px;
-            border-bottom: 1px solid var(--s-border);
-        }
-
-        .side-logo-mark {
-            width: 30px;
-            height: 30px;
-            background: var(--accent);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-        }
-
-        .side-logo-name {
-            font-weight: 800;
-            font-size: 15px;
-            color: #fff;
-        }
-
-        .side-nav {
-            flex: 1;
-            padding: 20px 10px;
-            overflow-y: auto;
-        }
-
-        .nav-label {
-            font-size: 10px;
-            font-weight: 800;
-            color: var(--s-muted);
-            text-transform: uppercase;
-            letter-spacing: .1em;
-            padding: 0 12px;
-            margin-bottom: 10px;
-            margin-top: 20px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            color: var(--s-text);
-            transition: 0.2s;
-            margin-bottom: 2px;
-            text-decoration: none;
-            font-size: 13px;
-        }
-
-        .nav-item:hover {
-            background: var(--s-hover);
-            color: #fff;
-        }
-
-        .nav-item.active {
-            background: var(--s-active-bg);
-            color: var(--s-active-txt);
-            font-weight: 600;
-        }
-
-        /* ── Main content ── */
-        .main {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
+        /* ── Topbar ── */
         .topbar {
             height: var(--topbar-h);
-            background: var(--surface);
+            background: rgba(13,18,32,0.95);
             border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
             display: flex;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 24px;
             justify-content: space-between;
             flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .topbar-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
+        .back-btn {
+            width: 34px; height: 34px;
+            border-radius: 10px;
+            border: 1px solid var(--border2);
+            background: var(--surface);
+            color: var(--muted2);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+        .back-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+
+        .topbar-divider { width: 1px; height: 20px; background: var(--border); }
+
+        .live-badge {
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 10px; border-radius: 20px;
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.25);
+            font-size: 11px; font-weight: 700;
+            color: var(--green);
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .live-dot {
+            width: 6px; height: 6px; border-radius: 50%;
             background: var(--green);
-            box-shadow: 0 0 12px var(--green);
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(16,185,129,0); }
         }
 
+        .topbar-title { font-weight: 700; font-size: 14px; color: var(--text); }
+        .topbar-sub { font-size: 12px; color: var(--muted); }
+
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .countdown-badge {
+            font-size: 11px; font-weight: 600;
+            color: var(--muted);
+            font-family: var(--mono);
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+        }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 8px 16px; border-radius: 10px;
+            border: 1px solid var(--border2);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn:hover { background: var(--surface2); border-color: var(--border2); }
+        .btn-primary { background: var(--accent); border-color: var(--accent); color: #000; }
+        .btn-primary:hover { background: #e69520; }
+        .btn.spinning svg { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Main scroll area ── */
         .content {
             flex: 1;
             overflow-y: auto;
-            padding: 40px;
+            padding: 32px 40px 60px;
         }
+        .content-inner { max-width: 960px; margin: 0 auto; }
 
-        .uptime-container { margin-top: 20px; }
-        .health-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
-        .health-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .health-title { font-weight: 700; font-size: 16px; }
-
-        .health-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+        /* ── API Config Banner ── */
+        .api-config-banner {
+            background: linear-gradient(135deg, rgba(245,166,35,0.1), rgba(245,166,35,0.04));
+            border: 1px solid rgba(245,166,35,0.3);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            display: flex; align-items: center; gap: 16px;
         }
-
-        .health-title {
-            font-weight: 700;
-            font-size: 16px;
-        }
-
-        .resource-row {
-            margin-bottom: 16px;
-        }
-
-        .resource-label {
-            display: flex;
-            justify-content: space-between;
+        .api-config-banner.hidden { display: none; }
+        .api-config-input {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-family: var(--mono);
             font-size: 12px;
-            margin-bottom: 6px;
-            font-weight: 600;
+            outline: none;
+            transition: 0.2s;
         }
+        .api-config-input:focus { border-color: var(--accent); }
+        .api-config-input::placeholder { color: var(--muted); }
 
-        .progress-bg {
-            height: 8px;
-            background: var(--bg);
-            border-radius: 4px;
+        /* ── Page Header ── */
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 28px;
+        }
+        .page-title-group { display: flex; align-items: center; gap: 14px; }
+        .logo-mark {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--accent), #e67e00);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: #000;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .page-title { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
+        .page-title span { font-weight: 400; color: var(--muted); }
+
+        /* ── Global Status Banner ── */
+        #globalBanner {
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            font-weight: 700;
+            font-size: 17px;
+            display: flex; align-items: center; gap: 14px;
+            transition: all 0.4s ease;
+            position: relative;
             overflow: hidden;
         }
+        #globalBanner::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: inherit;
+            filter: blur(30px);
+            opacity: 0.3;
+            z-index: -1;
+        }
+        #globalBanner.ok { background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.08)); border: 1px solid rgba(16,185,129,0.35); color: #6ee7b7; }
+        #globalBanner.degraded { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.08)); border: 1px solid rgba(245,158,11,0.35); color: #fcd34d; }
+        #globalBanner.down { background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.08)); border: 1px solid rgba(239,68,68,0.35); color: #fca5a5; }
+        #globalBanner .banner-icon { flex-shrink: 0; }
+        .banner-sub { font-size: 12px; font-weight: 500; opacity: 0.75; margin-top: 2px; }
 
-        .progress-bar {
-            height: 100%;
-            height: 100%;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 4px;
+        /* ── Stats Row ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            transition: 0.2s;
+        }
+        .stat-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+        .stat-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+        .stat-value { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; font-family: var(--mono); }
+        .stat-value.green { color: var(--green); }
+        .stat-value.red { color: var(--red); }
+        .stat-value.yellow { color: var(--yellow); }
+        .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+        /* ── Monitor Cards ── */
+        .monitors-section { margin-bottom: 28px; }
+        .section-label {
+            font-size: 11px; font-weight: 700;
+            color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;
+            margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .monitor-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: border-color 0.2s, transform 0.2s;
+            cursor: default;
+            position: relative;
+            overflow: hidden;
+        }
+        .monitor-card::before {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px;
+            border-radius: 2px 0 0 2px;
+            transition: 0.3s;
+        }
+        .monitor-card.up::before { background: var(--green); }
+        .monitor-card.down::before { background: var(--red); }
+        .monitor-card.degraded::before { background: var(--yellow); }
+        .monitor-card.paused::before { background: var(--muted); }
+        .monitor-card:hover { border-color: var(--border2); }
+
+        .monitor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .monitor-name {
+            font-size: 14px; font-weight: 600;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .monitor-type-badge {
+            font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            background: var(--surface2); color: var(--muted); border: 1px solid var(--border);
         }
 
-        .terminal {
-            background: #0a0c10;
-            border-radius: 12px;
-            padding: 20px;
-            font-family: var(--mono);
-            color: #8b949e;
-            font-size: 12px;
-            line-height: 1.6;
-            height: 300px;
-            overflow-y: auto;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
         }
+        .status-pill.up { background: var(--green-glow); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
+        .status-pill.down { background: var(--red-glow); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+        .status-pill.degraded { background: var(--yellow-glow); color: var(--yellow); border: 1px solid rgba(245,158,11,0.25); }
+        .status-pill.paused { background: rgba(100,116,139,0.1); color: var(--muted); border: 1px solid rgba(100,116,139,0.2); }
+        .status-pill .s-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+        .status-pill.up .s-dot { animation: pulse-dot 2s infinite; }
 
-        .terminal-line {
-            margin-bottom: 4px;
+        /* ── Uptime Bars ── */
+        .uptime-bars {
+            display: flex; align-items: stretch; gap: 2px;
+            height: 32px; margin: 10px 0 8px;
         }
-
-        .terminal-time {
-            color: var(--accent);
-            margin-right: 10px;
-        }
-
-        .terminal-cmd {
-            color: #58a6ff;
-        }
-
-        .terminal-ok {
-            color: var(--green);
-        }
-
-        .terminal-err {
-            color: var(--red);
-        }
-
-        .service-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow); }
-        .service-row:last-child { margin-bottom: 0; }
-        .uptime-bars { width: 100%; display: flex; align-items: stretch; gap: 2px; height: 34px; margin: 12px 0; }
-        .bar { 
-            flex: 1; 
-            background: #10b981; 
-            border-radius: 2px; 
-            transition: transform 0.2s, opacity 0.2s; 
-            cursor: pointer;
+        .u-bar {
+            flex: 1;
+            border-radius: 2px;
             min-width: 2px;
-            height: 100%;
+            cursor: pointer;
+            transition: transform 0.15s, opacity 0.15s;
+            position: relative;
         }
-        .bar:hover { transform: scaleY(1.2); opacity: 0.8; }
-        .bar.down { background: #ef4444; }
-        .bar.degraded { background: #f59e0b; }
-        .bar.today { position: relative; }
-        .bar.today::after { 
-            content: ''; position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
-            width: 4px; height: 4px; border-radius: 50%; background: var(--accent);
-        }
+        .u-bar.up { background: var(--green); }
+        .u-bar.down { background: var(--red); }
+        .u-bar.degraded { background: var(--yellow); }
+        .u-bar.no-data { background: var(--border); opacity: 0.5; }
+        .u-bar:hover { transform: scaleY(1.25); opacity: 0.85; }
 
-        /* Tooltip */
-        #uptimeTooltip {
+        .monitor-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 11px; color: var(--muted); font-weight: 500;
+        }
+        .monitor-meta { display: flex; align-items: center; gap: 16px; font-size: 12px; color: var(--muted2); }
+        .meta-item { display: flex; align-items: center; gap: 5px; }
+
+        /* ── Tooltip ── */
+        #tt {
             position: fixed;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
+            background: rgba(10,14,26,0.95);
+            color: var(--text);
             padding: 8px 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 11px;
             pointer-events: none;
             display: none;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            text-align: center;
-            line-height: 1.4;
+            z-index: 9999;
+            border: 1px solid var(--border2);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            text-align: center; line-height: 1.5;
+            white-space: nowrap;
         }
 
-        .metrics-section {
+        /* ── Chart Section ── */
+        .chart-section {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 30px;
-            margin-top: 40px;
-            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 28px;
         }
-        .metrics-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .chart-title { font-size: 15px; font-weight: 700; }
+        .chart-tabs { display: flex; gap: 6px; background: var(--bg); padding: 3px; border-radius: 9px; }
+        .chart-tab {
+            padding: 5px 12px; border-radius: 7px; border: none;
+            background: transparent; color: var(--muted);
+            font-size: 11px; font-weight: 700; cursor: pointer;
+            transition: 0.15s; font-family: 'Inter', sans-serif;
+            text-transform: uppercase; letter-spacing: 0.05em;
         }
-        .metrics-tabs {
-            display: flex;
-            gap: 8px;
-            background: var(--bg);
-            padding: 4px;
-            border-radius: 8px;
+        .chart-tab.active { background: var(--surface2); color: var(--text); }
+        .chart-wrap { height: 200px; position: relative; }
+
+        /* ── Terminal ── */
+        .terminal-section { margin-bottom: 28px; }
+        .terminal {
+            background: #050810;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            font-family: var(--mono);
+            font-size: 11.5px;
+            line-height: 1.8;
+            height: 230px;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 12px rgba(0,0,0,0.6);
         }
-        .tab-btn {
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: none;
-            background: transparent;
+        .terminal::-webkit-scrollbar { width: 4px; }
+        .terminal::-webkit-scrollbar-track { background: transparent; }
+        .terminal::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+        .t-line { margin-bottom: 2px; }
+        .t-time { color: var(--accent); margin-right: 8px; }
+        .t-module { color: #58a6ff; margin-right: 8px; }
+        .t-ok { color: var(--green); }
+        .t-warn { color: var(--yellow); }
+        .t-err { color: var(--red); }
+        .t-info { color: var(--muted2); }
+
+        /* ── Skeleton ── */
+        .skeleton { background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .skel-card { height: 110px; margin-bottom: 12px; border-radius: 14px; }
+
+        /* ── No config state ── */
+        .no-config {
+            text-align: center; padding: 80px 40px;
+            display: flex; flex-direction: column; align-items: center; gap: 16px;
+        }
+        .no-config-icon {
+            width: 72px; height: 72px; border-radius: 20px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            display: flex; align-items: center; justify-content: center;
             color: var(--muted);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
         }
-        .tab-btn.active {
+        .no-config h2 { font-size: 20px; font-weight: 700; }
+        .no-config p { font-size: 13px; color: var(--muted); max-width: 400px; line-height: 1.6; }
+
+        /* ── Scrollbar ── */
+        .content::-webkit-scrollbar { width: 5px; }
+        .content::-webkit-scrollbar-track { background: transparent; }
+        .content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+        /* ── Empty state ── */
+        .empty-monitors {
+            text-align: center; padding: 48px;
             background: var(--surface);
-            color: var(--text);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px dashed var(--border2);
+            border-radius: var(--radius);
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* ── Uptime ratio badges ── */
+        .ratio-badges { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        .ratio-badge {
+            display: flex; flex-direction: column;
+            padding: 8px 12px; border-radius: 10px;
+            background: var(--surface2); border: 1px solid var(--border);
+            min-width: 75px; text-align: center;
+        }
+        .ratio-badge-label { font-size: 10px; color: var(--muted); font-weight: 600; margin-bottom: 3px; text-transform: uppercase; }
+        .ratio-badge-val { font-size: 14px; font-weight: 800; font-family: var(--mono); }
+        .ratio-badge-val.high { color: var(--green); }
+        .ratio-badge-val.mid { color: var(--yellow); }
+        .ratio-badge-val.low { color: var(--red); }
+
+        /* Responsiveness */
+        @media (max-width: 680px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .content { padding: 20px; }
         }
     </style>
 </head>
 
 <body>
-    <div class="shell">
 
-        <!-- Main -->
-        <div class="main">
-            <header class="topbar">
-                <div class="topbar-left">
-                    <a href="admin.html" class="t-btn" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); display: flex; align-items: center; justify-content: center; margin-right: 15px; transition: 0.2s;" title="Back to Overview">
-                        <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
-                    </a>
-                    <div class="status-dot"></div>
-                    <span class="topbar-title">Command Center</span>
-                    <span class="topbar-sub">Operational &middot; <span id="lastUpdatedClock">Checking...</span></span>
-                </div>
-                <div class="topbar-right">
-                    <button id="refreshBtn" class="t-btn"
-                        style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                        <i data-lucide="refresh-cw" style="width: 14px;"></i> Refresh
-                    </button>
-                </div>
-            </header>
+    <!-- Topbar -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <a href="admin.html" class="back-btn" title="Back to Dashboard">
+                <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+            </a>
+            <div class="topbar-divider"></div>
+            <div class="live-badge"><div class="live-dot"></div> Live</div>
+            <span class="topbar-title">System Status</span>
+            <span class="topbar-sub" id="clockEl">—</span>
+        </div>
+        <div class="topbar-right">
+            <span class="countdown-badge" id="countdownEl">Next: —</span>
+            <button class="btn" id="configBtn" title="Configure API Key">
+                <i data-lucide="key" style="width:13px;height:13px;"></i> API Key
+            </button>
+            <button class="btn btn-primary" id="refreshBtn">
+                <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i> Refresh
+            </button>
+        </div>
+    </header>
 
-            <main class="content" style="max-width: 900px; margin: 0 auto; width: 100%;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-top: 20px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div class="side-logo-mark" style="width: 40px; height: 40px;"><i data-lucide="shield" style="width: 24px; height: 24px;"></i></div>
-                        <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.02em;">MindWave <span style="font-weight: 400; color: var(--muted);">Status</span></h1>
-                    </div>
-                    <button class="t-btn" style="padding: 10px 24px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Subscribe to Updates</button>
-                </div>
+    <!-- Main content -->
+    <div class="content">
+        <div class="content-inner">
 
-                <!-- Global Status Banner -->
-                <div id="globalStatusBanner" style="background: #10b981; color: white; padding: 22px; border-radius: 12px; margin-bottom: 40px; font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);">
-                    <i data-lucide="check-circle" style="width: 26px; height: 26px;"></i>
-                    All Systems Operational
-                </div>
-
-                <!-- Services List -->
-                <div class="uptime-container" style="display: flex; flex-direction: column; gap: 4px;">
-                    <!-- API Service -->
-                    <div class="service-row" data-service="api">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                                <i data-lucide="plus-square" style="width: 14px; color: var(--muted); cursor: pointer;"></i> Core API Gateway
-                            </h3>
-                            <span class="service-status" style="color: #10b981; font-weight: 600; font-size: 14px;">Operational</span>
-                        </div>
-                        <div class="uptime-bars">
-                            <!-- Bars generated by JS -->
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); font-weight: 500;">
-                            <span>90 days ago</span>
-                            <span class="uptime-percent">100.0 % uptime</span>
-                            <span>Today</span>
-                        </div>
-                    </div>
-
-                    <!-- Database Service -->
-                    <div class="service-row" data-service="db">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                                <i data-lucide="plus-square" style="width: 14px; color: var(--muted); cursor: pointer;"></i> Main Database Cluster
-                            </h3>
-                            <span class="service-status" style="color: #10b981; font-weight: 600; font-size: 14px;">Operational</span>
-                        </div>
-                        <div class="uptime-bars">
-                            <!-- Bars generated by JS -->
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); font-weight: 500;">
-                            <span>90 days ago</span>
-                            <span class="uptime-percent">99.98 % uptime</span>
-                            <span>Today</span>
-                        </div>
-                    </div>
-
-                    <!-- AI Service -->
-                    <div class="service-row" data-service="ai">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                                <i data-lucide="plus-square" style="width: 14px; color: var(--muted); cursor: pointer;"></i> AI Game Engine (v2)
-                            </h3>
-                            <span class="service-status" style="color: #10b981; font-weight: 600; font-size: 14px;">Operational</span>
-                        </div>
-                        <div class="uptime-bars">
-                            <!-- Bars generated by JS -->
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); font-weight: 500;">
-                            <span>90 days ago</span>
-                            <span class="uptime-percent">100.0 % uptime</span>
-                            <span>Today</span>
-                        </div>
-                    </div>
-
-                    <!-- CDN Service -->
-                    <div class="service-row" data-service="cdn">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                                <i data-lucide="plus-square" style="width: 14px; color: var(--muted); cursor: pointer;"></i> Asset Delivery (CDN)
-                            </h3>
-                            <span class="service-status" style="color: #10b981; font-weight: 600; font-size: 14px;">Operational</span>
-                        </div>
-                        <div class="uptime-bars">
-                            <!-- Bars generated by JS -->
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); font-weight: 500;">
-                            <span>90 days ago</span>
-                            <span class="uptime-percent">100.0 % uptime</span>
-                            <span>Today</span>
-                        </div>
+            <!-- API Config Banner -->
+            <div class="api-config-banner" id="apiBanner">
+                <i data-lucide="key" style="width:20px;height:20px;color:var(--accent);flex-shrink:0;"></i>
+                <div style="flex:1">
+                    <div style="font-weight:700;font-size:13px;margin-bottom:8px;">Connect UptimeRobot</div>
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Enter your Read-Only API key from <strong style="color:var(--muted2);">UptimeRobot → My Settings → API Settings</strong></div>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <input type="password" class="api-config-input" id="apiKeyInput" placeholder="ur123456-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+                        <button class="btn btn-primary" id="saveKeyBtn" style="flex-shrink:0;">
+                            <i data-lucide="check" style="width:13px;height:13px;"></i> Connect
+                        </button>
+                        <button class="btn" id="cancelKeyBtn" style="flex-shrink:0;">Cancel</button>
                     </div>
                 </div>
+            </div>
 
-                <!-- System Metrics Chart Section -->
-                <div class="metrics-section">
-                    <div class="metrics-header">
-                        <h2 style="font-size: 20px; font-weight: 700;">System Metrics</h2>
-                        <div class="metrics-tabs">
-                            <button class="tab-btn active" data-range="day">Day</button>
-                            <button class="tab-btn" data-range="week">Week</button>
-                            <button class="tab-btn" data-range="month">Month</button>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-title-group">
+                    <div class="logo-mark">
+                        <i data-lucide="shield-check" style="width:22px;height:22px;"></i>
+                    </div>
+                    <div>
+                        <h1 class="page-title">MindWave <span>Status</span></h1>
+                        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Real-time monitoring via UptimeRobot</div>
+                    </div>
+                </div>
+                <button class="btn" id="subscribeBtn" style="padding:10px 20px;">
+                    <i data-lucide="bell" style="width:13px;height:13px;"></i> Subscribe
+                </button>
+            </div>
+
+            <!-- Global Banner -->
+            <div id="globalBanner" class="ok">
+                <i data-lucide="check-circle-2" style="width:24px;height:24px;" class="banner-icon" id="bannerIcon"></i>
+                <div>
+                    <div id="bannerText">All Systems Operational</div>
+                    <div class="banner-sub" id="bannerSub">Monitoring <span id="monitorCount">—</span> services · Last checked <span id="bannerLastCheck">—</span></div>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="stats-row" id="statsRow">
+                <div class="stat-card">
+                    <div class="stat-label">Monitors Up</div>
+                    <div class="stat-value green" id="statUp">—</div>
+                    <div class="stat-sub">out of <span id="statTotal">—</span> total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Uptime (7d)</div>
+                    <div class="stat-value" id="stat7d" style="color:var(--muted2);">—</div>
+                    <div class="stat-sub">7-day average</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Response</div>
+                    <div class="stat-value" id="statAvgResp" style="color:var(--blue);">—</div>
+                    <div class="stat-sub">milliseconds</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Incidents (30d)</div>
+                    <div class="stat-value" id="statIncidents" style="color:var(--muted2);">—</div>
+                    <div class="stat-sub">downtime events</div>
+                </div>
+            </div>
+
+            <!-- Monitors List -->
+            <div class="monitors-section">
+                <div class="section-label">Monitors</div>
+                <div id="monitorsContainer">
+                    <!-- Populated by JS -->
+                    <div class="no-config" id="noConfigState">
+                        <div class="no-config-icon">
+                            <i data-lucide="plug-zap" style="width:32px;height:32px;"></i>
                         </div>
-                    </div>
-                    <div style="background: var(--surface); padding: 20px; border-radius: 12px; height: 300px; position: relative;">
-                        <div style="position: absolute; top: 15px; left: 25px; font-size: 15px; font-weight: 600; color: var(--muted);">Site Uptime</div>
-                        <div style="position: absolute; top: 15px; right: 25px; font-size: 20px; font-weight: 700; color: var(--muted);">100%</div>
-                        <canvas id="uptimeChart"></canvas>
+                        <h2>Connect UptimeRobot</h2>
+                        <p>Enter your UptimeRobot Read-Only API key above to see real-time status for all your monitored services.</p>
+                        <button class="btn btn-primary" id="heroConfigBtn" style="margin-top:8px;">
+                            <i data-lucide="key" style="width:13px;height:13px;"></i> Enter API Key
+                        </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- System Logs -->
-                <div class="health-card" style="margin-top: 60px; border: none; background: transparent; padding: 0;">
-                    <div class="health-header" style="border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px;">
-                        <span class="health-title" style="font-size: 18px;">Uptime History & Logs</span>
-                        <i data-lucide="terminal" style="width: 18px; color: var(--muted);"></i>
+            <!-- Response Time Chart -->
+            <div class="chart-section" id="chartSection" style="display:none;">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Response Time</div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Average across all monitors (ms)</div>
                     </div>
-                    <div class="terminal" id="terminal" style="border-radius: 8px; background: #111; color: #aaa;">
-                        <div class="terminal-line"><span class="terminal-time">[10:35:01]</span> <span class="terminal-cmd">INIT_SYSTRAY</span> ... <span class="terminal-ok">DONE</span></div>
+                    <div class="chart-tabs">
+                        <button class="chart-tab active" data-monitor="all">All</button>
                     </div>
                 </div>
-            </main>
+                <div class="chart-wrap">
+                    <canvas id="rtChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Terminal -->
+            <div class="terminal-section" id="terminalSection">
+                <div class="section-label">Event Log</div>
+                <div class="terminal" id="terminal">
+                    <div class="t-line"><span class="t-time">[INIT]</span> <span class="t-module">STATUS_ENGINE</span> <span class="t-info">→ Waiting for API key...</span></div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <div id="uptimeTooltip"></div>
+    <div id="tt"></div>
 
     <script src="admin-logout-handler.js"></script>
     <script src="admin-status.js"></script>
-    <script>
-        lucide.createIcons();
-    </script>
-</body>
+    <script>lucide.createIcons();</script>
 
+</body>
 </html>

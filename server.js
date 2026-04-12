@@ -86,7 +86,9 @@ const {
   BREVO_SENDER_EMAIL = 'rajkumarw88d@gmail.com',
   BREVO_SENDER_NAME = 'MindWave',
   // Deepgram Live Transcription
-  DEEPGRAM_API_KEY
+  DEEPGRAM_API_KEY,
+  // UptimeRobot Monitoring
+  UPTIMEROBOT_API_KEY
 } = process.env;
 
 
@@ -14071,6 +14073,47 @@ app.get('/api/discussions/:id/analytics', verifyDiscToken, async (req, res) => {
   }
 });
 
+
+// ============================================
+// UPTIMEROBOT PROXY ENDPOINT
+// ============================================
+// Securely proxies UptimeRobot API requests so
+// the API key never leaves the server.
+app.post('/api/uptimerobot/monitors', async (req, res) => {
+  if (!UPTIMEROBOT_API_KEY) {
+    return res.status(503).json({ stat: 'fail', error: { message: 'UptimeRobot API key not configured on server. Add UPTIMEROBOT_API_KEY to your Render environment variables.' } });
+  }
+
+  try {
+    const body = new URLSearchParams({
+      api_key:              UPTIMEROBOT_API_KEY,
+      format:               'json',
+      logs:                 '1',
+      logs_limit:           '50',
+      response_times:       '1',
+      response_times_limit: '48',
+      custom_uptime_ratio:  '7-30-90',
+      all_time_uptime_ratio:'1'
+    });
+
+    const urRes = await fetch('https://api.uptimerobot.com/v2/getMonitors', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body:    body.toString()
+    });
+
+    if (!urRes.ok) {
+      return res.status(502).json({ stat: 'fail', error: { message: `UptimeRobot returned HTTP ${urRes.status}` } });
+    }
+
+    const data = await urRes.json();
+    console.log(`[UptimeRobot] Fetched ${data.monitors?.length || 0} monitors`);
+    res.json(data);
+  } catch (err) {
+    console.error('[UptimeRobot proxy error]', err.message);
+    res.status(500).json({ stat: 'fail', error: { message: 'Proxy request failed: ' + err.message } });
+  }
+});
 
 // Start server
 const httpServer = listenWithFallback(PORT);
