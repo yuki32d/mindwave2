@@ -8123,7 +8123,9 @@ app.get("/auth/google/callback", async (req, res) => {
     }
     await user.save();
 
-    res.redirect("/student-courses.html"); // Redirect back to courses page
+    // Redirect to the correct page based on the user's role
+    const isFaculty = user.role === 'admin' || user.role === 'faculty';
+    res.redirect(isFaculty ? "/faculty-classroom.html" : "/student-courses.html");
   } catch (error) {
     console.error("Google Auth Error:", error);
     res.status(500).send("Authentication failed");

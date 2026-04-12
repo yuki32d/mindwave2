@@ -72,6 +72,9 @@ window.connectToGoogle = function () {
 
 // Initialize the interface (when connected)
 function initializeInterface() {
+    // Show the disconnect button in the topbar
+    const disconnectBtn = document.getElementById('disconnectGcrBtn');
+    if (disconnectBtn) disconnectBtn.style.display = '';
     loadCourses();
     setupEventListeners();
 }
@@ -428,4 +431,75 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// ── Disconnect GCR logic ──
+document.addEventListener('DOMContentLoaded', () => {
+    const disconnectBtn = document.getElementById('disconnectGcrBtn');
+    const disconnectModal = document.getElementById('disconnectModal');
+    const cancelBtn = document.getElementById('cancelDisconnectBtn');
+    const confirmBtn = document.getElementById('confirmDisconnectBtn');
+
+    if (disconnectBtn) {
+        disconnectBtn.addEventListener('click', () => {
+            disconnectModal.style.display = 'flex';
+            lucide.createIcons();
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            disconnectModal.style.display = 'none';
+        });
+    }
+
+    // Close modal on backdrop click
+    if (disconnectModal) {
+        disconnectModal.addEventListener('click', (e) => {
+            if (e.target === disconnectModal) disconnectModal.style.display = 'none';
+        });
+    }
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', doDisconnectGcr);
+    }
+});
+
+async function doDisconnectGcr() {
+    const confirmBtn = document.getElementById('confirmDisconnectBtn');
+    if (confirmBtn) { confirmBtn.textContent = 'Disconnecting…'; confirmBtn.disabled = true; }
+
+    const token = localStorage.getItem('token') || localStorage.getItem('mindwave_token');
+    try {
+        const res = await fetch('/api/classroom/disconnect', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            credentials: 'include'
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.message || 'Server error');
+
+        // Hide modal and switch to the connect-prompt state
+        document.getElementById('disconnectModal').style.display = 'none';
+        const disconnectTopBtn = document.getElementById('disconnectGcrBtn');
+        if (disconnectTopBtn) disconnectTopBtn.style.display = 'none';
+        showMessage('Google Classroom disconnected successfully.', 'success');
+        setTimeout(() => {
+            window.showConnectState ? window.showConnectState() : window.location.reload();
+        }, 1000);
+    } catch (e) {
+        showError('Could not disconnect: ' + e.message);
+        if (confirmBtn) {
+            confirmBtn.innerHTML = '<i data-lucide="unlink" style="width:15px;height:15px;"></i> Disconnect';
+            confirmBtn.disabled = false;
+            lucide.createIcons();
+        }
+    }
+}
+
+function showMessage(message, type) {
+    const container = document.getElementById('messageContainer');
+    const cls = type === 'success' ? 'success-message' : 'error-message';
+    container.innerHTML = `<div class="${cls}">${escapeHtml(message)}</div>`;
+    setTimeout(() => container.innerHTML = '', 5000);
 }

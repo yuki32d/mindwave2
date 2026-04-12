@@ -609,6 +609,16 @@
             filter: none;
         }
 
+        .btn-danger {
+            color: var(--red);
+            border-color: rgba(220, 38, 38, .3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(220, 38, 38, .08);
+            border-color: var(--red);
+        }
+
         /* ── Messages ── */
         .msg {
             padding: 12px 16px;
@@ -1015,6 +1025,12 @@
                 <span class="topbar-title">Courses</span>
                 <span class="topbar-sub">Google Classroom Manager</span>
                 <div class="topbar-right">
+                    <!-- Disconnect GCR – only visible when connected -->
+                    <button id="disconnectGcrBtn" class="btn btn-danger"
+                        style="display:none;font-size:12px;padding:7px 12px;"
+                        title="Disconnect Google Classroom">
+                        <i data-lucide="unlink"></i> Disconnect GCR
+                    </button>
                     <button class="t-btn" id="themeToggle" title="Toggle theme">
                         <i data-lucide="sun"></i>
                     </button>
@@ -1289,5 +1305,29 @@
             updateThumb();
         })();
     </script>
+
+    <!-- ── Disconnect GCR Confirmation Modal ── -->
+    <div id="disconnectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.2rem 2rem;width:340px;max-width:90vw;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);animation:gcr-pop .22s cubic-bezier(.34,1.56,.64,1);">
+            <div style="width:60px;height:60px;border-radius:50%;background:rgba(220,38,38,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.1rem;color:var(--red);">
+                <i data-lucide="unlink" style="width:28px;height:28px;"></i>
+            </div>
+            <h3 style="font-size:1.15rem;font-weight:700;margin:0 0 .5rem;color:var(--text);">Disconnect Google Classroom?</h3>
+            <p style="font-size:.875rem;color:var(--muted);margin:0 0 1.8rem;line-height:1.5;">Your Google Classroom account will be unlinked from MindWave. You can reconnect at any time.</p>
+            <div style="display:flex;gap:.75rem;">
+                <button id="cancelDisconnectBtn" style="flex:1;padding:.75rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:var(--bg);color:var(--muted);">Cancel</button>
+                <button id="confirmDisconnectBtn" style="flex:1;padding:.75rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;gap:.4rem;">
+                    <i data-lucide="unlink" style="width:15px;height:15px;"></i> Disconnect
+                </button>
+            </div>
+        </div>
+    </div>
+    <style>
+        @keyframes gcr-pop {
+            from { transform: scale(.88); opacity: 0; }
+            to   { transform: scale(1);  opacity: 1; }
+        }
+    </style>
+
     <script src="admin-logout-handler.js"></script>
 </body>
