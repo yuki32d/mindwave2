@@ -842,6 +842,63 @@
       transform: translateY(-1px);
       box-shadow: 0 6px 15px rgba(99, 102, 241, .4);
     }
+
+    /* ── LIVE CAPTIONS OVERLAY ── */
+    #captionsOverlay {
+      position: absolute;
+      bottom: 2.8rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      pointer-events: none;
+      width: min(680px, 90%);
+      display: none;
+    }
+    #captionsOverlay.visible { display: block; }
+    .cc-bubble {
+      background: rgba(0,0,0,.82);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      border-radius: 10px;
+      padding: .55rem 1rem;
+      font-size: 1rem;
+      line-height: 1.55;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: 0 4px 18px rgba(0,0,0,.5);
+    }
+    .cc-bubble .cc-speaker {
+      font-size: .72rem;
+      font-weight: 700;
+      color: #a5b4fc;
+      display: block;
+      margin-bottom: .2rem;
+    }
+    /* Transcription banner */
+    #transcriptBanner {
+      position: fixed;
+      top: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(99,102,241,.15);
+      border: 1px solid rgba(99,102,241,.35);
+      border-radius: 10px;
+      padding: .4rem 1rem;
+      font-size: .78rem;
+      font-weight: 600;
+      color: #a5b4fc;
+      display: none;
+      align-items: center;
+      gap: .5rem;
+      z-index: 500;
+    }
+    #transcriptBanner .tb-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #6366f1;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
   </style>
 </head>
 
@@ -892,8 +949,21 @@
         <div class="pres-label"><i data-lucide="monitor"></i> <span id="presName">Presentation</span></div>
       </div>
 
-      <div class="video-area layout-1" id="videoArea">
+      <div class="video-area layout-1" id="videoArea" style="position:relative">
         <div id="videoGrid"></div>
+        <!-- Live captions overlay -->
+        <div id="captionsOverlay" role="status" aria-live="polite" aria-label="Live captions">
+          <div class="cc-bubble">
+            <span class="cc-speaker" id="ccSpeakerName"></span>
+            <span id="ccText"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transcription active banner -->
+      <div id="transcriptBanner">
+        <div class="tb-dot"></div>
+        Live Transcription Active
       </div>
 
       <div class="side-panel" id="sidePanel">
@@ -1187,6 +1257,22 @@
         }
         if (msg.type === 'called_on' && msg.target === room.localParticipant.identity) {
           addChatMessage('', 'Faculty called on you! You may speak.', false, true);
+        }
+        // Live transcript messages from faculty
+        if (msg.type === 'transcript_started') {
+          const banner = document.getElementById('transcriptBanner');
+          if (banner) banner.style.display = 'flex';
+          addChatMessage('', '🎙️ Live transcription has been enabled by the faculty.', false, true);
+        }
+        if (msg.type === 'transcript_stopped') {
+          const banner = document.getElementById('transcriptBanner');
+          if (banner) banner.style.display = 'none';
+          const overlay = document.getElementById('captionsOverlay');
+          if (overlay) overlay.classList.remove('visible');
+          addChatMessage('', 'Transcription has been stopped.', false, true);
+        }
+        if (msg.type === 'transcript' && msg.text) {
+          showStudentCaption(msg.speaker || 'Speaker', msg.text);
         }
       } catch { }
     }
@@ -1526,6 +1612,20 @@
 
     //  Start 
     connect();
+
+    // ── Student-side live captions ──
+    let stCcHideTimeout = null;
+    function showStudentCaption(speaker, text) {
+      const overlay = document.getElementById('captionsOverlay');
+      const ccText  = document.getElementById('ccText');
+      const ccName  = document.getElementById('ccSpeakerName');
+      if (!overlay) return;
+      overlay.classList.add('visible');
+      ccName.textContent = speaker + ':';
+      ccText.textContent = text;
+      clearTimeout(stCcHideTimeout);
+      stCcHideTimeout = setTimeout(() => overlay.classList.remove('visible'), 4000);
+    }
   </script>
 </body>
 

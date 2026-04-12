@@ -84,7 +84,9 @@ const {
   // Brevo (Sendinblue) email API
   BREVO_API_KEY,
   BREVO_SENDER_EMAIL = 'rajkumarw88d@gmail.com',
-  BREVO_SENDER_NAME = 'MindWave'
+  BREVO_SENDER_NAME = 'MindWave',
+  // Deepgram Live Transcription
+  DEEPGRAM_API_KEY
 } = process.env;
 
 
@@ -1349,7 +1351,7 @@ app.use(helmet({
       "style-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "http://localhost:8000", "http://localhost:9000"],
       "img-src": ["'self'", "data:", "https:", "http:", "blob:"],
       "font-src": ["'self'", "data:", "https:", "http:"],
-      "connect-src": ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://api.razorpay.com", "https://checkout.razorpay.com", "https://lumberjack.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "wss://meet.jit.si", "wss://*.jitsi.net", "https://*.agora.io", "wss://*.agora.io", "https://*.agoraio.cn", "wss://*.agoraio.cn", "https://api.groq.com", "https://*.livekit.cloud", "wss://*.livekit.cloud", "http://localhost:8000", "ws://localhost:8000", "http://localhost:9000", "ws://localhost:9000"],
+      "connect-src": ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://api.razorpay.com", "https://checkout.razorpay.com", "https://lumberjack.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "wss://meet.jit.si", "wss://*.jitsi.net", "https://*.agora.io", "wss://*.agora.io", "https://*.agoraio.cn", "wss://*.agoraio.cn", "https://api.groq.com", "https://*.livekit.cloud", "wss://*.livekit.cloud", "https://api.deepgram.com", "wss://api.deepgram.com", "wss://*.deepgram.com", "http://localhost:8000", "ws://localhost:8000", "http://localhost:9000", "ws://localhost:9000"],
       "worker-src": ["'self'", "blob:"],
       "frame-src": ["'self'", "*", "https:", "http:", "https://*.youtube.com", "https://youtube.com", "https://*.youtube-nocookie.com", "https://youtube-nocookie.com", "https://player.vimeo.com", "https://vimeo.com", "https://*.vimeo.com", "https://scrimba.com", "https://*.scrimba.com", "https://*.vercel.app", "https://*.netlify.app", "https://*.github.io", "https://*.onrender.com", "https://*.herokuapp.com", "https://*.replit.dev", "https://*.glitch.me", "https://sketchfab.com", "https://*.sketchfab.com", "https://api.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "http://localhost:8000", "http://localhost:9000"],
       "object-src": ["'none'"],
@@ -14040,6 +14042,40 @@ app.get('/api/discussions/:id/analytics', verifyDiscToken, async (req, res) => {
   }
 });
 
+
+// ============================================
+// DEEPGRAM LIVE TRANSCRIPTION
+// Generates a short-lived Deepgram token so the
+// master API key never reaches the browser.
+// ============================================
+app.post('/api/transcription/token', authMiddleware, async (req, res) => {
+  if (!DEEPGRAM_API_KEY) {
+    return res.status(503).json({ ok: false, message: 'Transcription not configured (missing DEEPGRAM_API_KEY).' });
+  }
+  try {
+    // Request a short-lived temporary token (60 s TTL — more than enough to open the WS)
+    const dgRes = await fetch('https://api.deepgram.com/v1/auth/grant', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${DEEPGRAM_API_KEY}`
+      },
+      body: JSON.stringify({ ttl_seconds: 60 })
+    });
+
+    if (!dgRes.ok) {
+      const err = await dgRes.text();
+      console.error('Deepgram token error:', err);
+      return res.status(dgRes.status).json({ ok: false, message: 'Could not obtain transcription token.' });
+    }
+
+    const { key } = await dgRes.json();
+    res.json({ ok: true, key });
+  } catch (err) {
+    console.error('Transcription token error:', err);
+    res.status(500).json({ ok: false, message: 'Internal server error' });
+  }
+});
 
 // Start server
 const httpServer = listenWithFallback(PORT);

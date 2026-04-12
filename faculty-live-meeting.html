@@ -1320,6 +1320,145 @@
       background: rgba(255, 255, 255, .1);
       border-radius: 2px
     }
+
+    /* ── TRANSCRIPT PANEL ── */
+    .ts-seg {
+      display: flex;
+      flex-direction: column;
+      gap: .18rem;
+      padding: .45rem .6rem;
+      border-radius: 9px;
+      background: rgba(255,255,255,.04);
+      border-left: 3px solid transparent;
+      transition: border-color .2s;
+    }
+    .ts-seg:hover { border-left-color: rgba(208,128,0,.5); }
+    .ts-seg.interim { opacity: .55; }
+    .ts-speaker { font-size: .67rem; font-weight: 700; color: #d08000; letter-spacing: .04em; }
+    .ts-text   { font-size: .83rem; line-height: 1.5; }
+    .ts-time   { font-size: .6rem; color: #9ea4b6; }
+    .ts-controls {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .55rem .65rem;
+      border-top: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+    }
+    .ts-btn {
+      padding: .32rem .65rem;
+      border-radius: 7px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.05);
+      color: #9ea4b6;
+      font-size: .72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .14s;
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      font-family: inherit;
+    }
+    .ts-btn:hover { background: rgba(255,255,255,.12); color: #f0f2ff; }
+    .ts-btn.danger:hover { background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.3); color: #f87171; }
+    .ts-font-lbl { font-size: .68rem; color: #9ea4b6; margin-left: auto; }
+    .ts-font-btn {
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.05);
+      color: #9ea4b6;
+      font-size: .8rem; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .14s;
+    }
+    .ts-font-btn:hover { background: rgba(255,255,255,.12); color: #f0f2ff; }
+    .ts-empty {
+      font-size: .82rem; color: #9ea4b6;
+      text-align: center; padding: 1.5rem .5rem;
+      display: flex; flex-direction: column; align-items: center; gap: .5rem;
+    }
+    .ts-empty svg { width: 28px; height: 28px; opacity: .3; }
+
+    /* ── LIVE CAPTIONS OVERLAY ── */
+    #captionsOverlay {
+      position: absolute;
+      bottom: 2.8rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      pointer-events: none;
+      width: min(680px, 90%);
+      display: none;
+    }
+    #captionsOverlay.visible { display: block; }
+    .cc-bubble {
+      background: rgba(0,0,0,.82);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      border-radius: 10px;
+      padding: .55rem 1rem;
+      font-size: 1rem;
+      line-height: 1.55;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: 0 4px 18px rgba(0,0,0,.5);
+    }
+    .cc-bubble .cc-speaker {
+      font-size: .72rem;
+      font-weight: 700;
+      color: #fbbf24;
+      display: block;
+      margin-bottom: .2rem;
+    }
+    /* High-contrast mode */
+    .cc-high-contrast .cc-bubble {
+      background: #000;
+      border: 2px solid #fff;
+      color: #ffff00;
+      font-size: 1.1rem;
+    }
+
+    /* ── CONSENT MODAL ── */
+    #consentModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.75);
+      backdrop-filter: blur(6px);
+      z-index: 5000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn .22s ease;
+    }
+    .consent-card {
+      background: #1a1d2e;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 22px;
+      padding: 2rem;
+      width: calc(100% - 2rem);
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      box-shadow: 0 24px 48px rgba(0,0,0,.5);
+      animation: scaleUp .22s ease forwards;
+    }
+    .consent-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: rgba(99,102,241,.12);
+      border: 1px solid rgba(99,102,241,.3);
+      display: flex; align-items: center; justify-content: center;
+      color: #6366f1;
+    }
+    .consent-icon svg { width: 26px; height: 26px; }
+    .consent-title { font-size: 1.05rem; font-weight: 800; color: #f0f2ff; }
+    .consent-body  { font-size: .85rem; color: #9ea4b6; line-height: 1.65; }
+    .consent-body strong { color: #f0f2ff; }
+    .consent-actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: .25rem; }
   </style>
 </head>
 
@@ -1375,8 +1514,15 @@
         </div>
 
         <!-- Video area -->
-        <div class="video-area layout-1" id="videoArea">
+        <div class="video-area layout-1" id="videoArea" style="position:relative">
           <div id="videoGrid"></div>
+          <!-- Live captions overlay -->
+          <div id="captionsOverlay" role="status" aria-live="polite" aria-label="Live captions">
+            <div class="cc-bubble">
+              <span class="cc-speaker" id="ccSpeakerName"></span>
+              <span id="ccText"></span>
+            </div>
+          </div>
         </div>
 
         <!-- Side Panel -->
@@ -1388,6 +1534,7 @@
               People</button>
             <button class="ptab" id="tab-insights" onclick="switchTab('insights')"><i data-lucide="brain-circuit"></i>
               AI</button>
+            <button class="ptab" id="tab-transcript" onclick="switchTab('transcript')" title="Live Transcript"><i data-lucide="subtitles"></i> CC</button>
             <button class="ptab" id="tab-game" onclick="switchTab('game')"><i data-lucide="gamepad-2"></i> Game</button>
           </div>
           <div class="pbody">
@@ -1437,6 +1584,28 @@
               </button>
             </div>
 
+            <!-- Live Transcript -->
+            <div class="tv" id="tv-transcript" style="flex-direction:column;gap:.45rem" aria-live="polite" aria-label="Live Transcript">
+              <div class="ts-empty" id="tsEmpty">
+                <i data-lucide="mic"></i>
+                <span>Start transcription to see live captions here.</span>
+              </div>
+            </div>
+            <div class="ts-controls" id="tsControls" style="display:none">
+              <button class="ts-btn" id="tsClearBtn" onclick="clearTranscript()" title="Clear transcript">
+                <i data-lucide="trash-2"></i> Clear
+              </button>
+              <button class="ts-btn" onclick="exportTranscriptTxt()" title="Export .txt">
+                <i data-lucide="download"></i> .txt
+              </button>
+              <button class="ts-btn" onclick="exportTranscriptSrt()" title="Export .srt">
+                <i data-lucide="download"></i> .srt
+              </button>
+              <span class="ts-font-lbl">Size</span>
+              <button class="ts-font-btn" id="fontMinus" onclick="changeFontSize(-1)" title="Smaller">−</button>
+              <button class="ts-font-btn" id="fontPlus"  onclick="changeFontSize(+1)" title="Larger">+</button>
+            </div>
+
           </div>
         </div>
       </div>
@@ -1450,6 +1619,9 @@
         <div class="sep"></div>
         <button class="cb" id="btnScreen" onclick="toggleScreen()"><i data-lucide="monitor"
             id="screenIco"></i><span>Share</span></button>
+        <button class="cb" id="btnCC" onclick="toggleTranscription()" title="Live Transcription (CC)">
+          <i data-lucide="subtitles" id="ccIco"></i><span id="ccLabel">CC</span>
+        </button>
         <button class="cb cb-warn" id="btnMuteAll" onclick="toggleMuteAll()"><i data-lucide="mic-off"
             id="muteAllIco"></i><span id="muteAllLabel">Mute All</span></button>
         <div class="sep"></div>
@@ -1505,7 +1677,29 @@
       <div class="sum-actions">
         <button class="sum-btn sum-btn-p" onclick="downloadSummary()"><i data-lucide="download"></i> Download
           Report</button>
+        <button class="sum-btn sum-btn-s" id="sumExportTranscript" onclick="exportTranscriptTxt()" style="display:none">
+          <i data-lucide="subtitles"></i> Transcript
+        </button>
         <button class="sum-btn sum-btn-s" onclick="location.href='admin.html'"><i data-lucide="home"></i> Exit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transcription Consent Modal -->
+  <div id="consentModal">
+    <div class="consent-card">
+      <div class="consent-icon"><i data-lucide="shield-check"></i></div>
+      <div class="consent-title">Enable Live Transcription?</div>
+      <div class="consent-body">
+        Enabling transcription will start real-time speech-to-text for <strong>all participants</strong>.<br><br>
+        🔒 <strong>Privacy Notice:</strong> Audio is processed by Deepgram and is <strong>not stored</strong> — only the text output is retained. All participants will see the active transcription indicator.
+      </div>
+      <div class="consent-actions">
+        <button class="c-btn c-btn-cancel" onclick="closeConsentModal(false)">Cancel</button>
+        <button class="c-btn c-btn-ok" onclick="closeConsentModal(true)">
+          <i data-lucide="subtitles" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>
+          Start Transcription
+        </button>
       </div>
     </div>
   </div>
@@ -2119,11 +2313,14 @@
 
     // ── TABS ──
     function switchTab(tab) {
-      ['chat', 'people', 'insights', 'game'].forEach(t => {
-        document.getElementById('tv-' + t).classList.toggle('active', t === tab);
-        document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+      ['chat', 'people', 'insights', 'game', 'transcript'].forEach(t => {
+        const tv = document.getElementById('tv-' + t);
+        const tb = document.getElementById('tab-' + t);
+        if (tv) tv.classList.toggle('active', t === tab);
+        if (tb) tb.classList.toggle('active', t === tab);
       });
-      document.getElementById('chatInput').style.display = tab === 'chat' ? 'flex' : 'none';
+      document.getElementById('chatInput').style.display    = tab === 'chat'       ? 'flex' : 'none';
+      document.getElementById('tsControls').style.display   = tab === 'transcript' ? 'flex' : 'none';
       if (tab === 'people') renderAllParticipants();
       lucide.createIcons();
     }
@@ -2171,6 +2368,276 @@
     }
 
     lucide.createIcons();
+
+    // ═══════════════════════════════════════════════════
+    // LIVE TRANSCRIPTION — DEEPGRAM WebSocket
+    // ═══════════════════════════════════════════════════
+    let dgSocket      = null;
+    let dgStream      = null;
+    let dgProcessor   = null;
+    let dgContext     = null;
+    let transcriptOn  = false;
+    let transcriptLog = [];   // { speaker, text, time, isFinal }
+    let ccFontSize    = 1;    // rem multiplier
+    let ccHideTimer   = null;
+
+    // ── Consent modal helpers ──
+    function openConsentModal()  { document.getElementById('consentModal').style.display = 'flex'; lucide.createIcons(); }
+    function closeConsentModal(confirmed) {
+      document.getElementById('consentModal').style.display = 'none';
+      if (confirmed) startTranscription();
+    }
+
+    // ── CC Toggle ──
+    async function toggleTranscription() {
+      if (transcriptOn) {
+        stopTranscription();
+      } else {
+        openConsentModal();
+      }
+    }
+
+    // ── Start ──
+    async function startTranscription() {
+      try {
+        // 1. Get a short-lived token from our server
+        const tokenRes = await fetch(API + '/api/transcription/token', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + jwt }
+        });
+        const tokenData = await tokenRes.json();
+        if (!tokenData.ok) throw new Error(tokenData.message || 'Token error');
+        const dgKey = tokenData.key;
+
+        // 2. Capture microphone
+        dgStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        // 3. Open AudioContext → ScriptProcessor pipeline
+        dgContext   = new AudioContext({ sampleRate: 16000 });
+        const src   = dgContext.createMediaStreamSource(dgStream);
+        dgProcessor = dgContext.createScriptProcessor(4096, 1, 1);
+        src.connect(dgProcessor);
+        dgProcessor.connect(dgContext.destination);
+
+        // 4. Open Deepgram WebSocket
+        const params = new URLSearchParams({
+          encoding:        'linear16',
+          sample_rate:     '16000',
+          channels:        '1',
+          language:        'en',
+          model:           'nova-2',
+          smart_format:    'true',
+          punctuate:       'true',
+          interim_results: 'true',
+          diarize:         'true'
+        });
+        dgSocket = new WebSocket(`wss://api.deepgram.com/v1/listen?${params}`, ['token', dgKey]);
+
+        dgSocket.onopen = () => {
+          transcriptOn = true;
+          // Feed audio into WS
+          dgProcessor.onaudioprocess = e => {
+            if (dgSocket.readyState !== WebSocket.OPEN) return;
+            const pcm16 = floatTo16BitPCM(e.inputBuffer.getChannelData(0));
+            dgSocket.send(pcm16);
+          };
+          // Update UI
+          document.getElementById('btnCC').classList.add('active');
+          document.getElementById('ccLabel').textContent = 'CC On';
+          document.getElementById('ccIco').setAttribute('data-lucide', 'subtitles');
+          lucide.createIcons();
+          // Broadcast to students via data channel
+          if (room) room.localParticipant.publishData(
+            new TextEncoder().encode(JSON.stringify({ type: 'transcript_started' })),
+            { reliable: true }
+          );
+          showToast('Live transcription started 🎙️', 'success');
+        };
+
+        dgSocket.onmessage = ev => {
+          const data = JSON.parse(ev.data);
+          if (data.type !== 'Results') return;
+          const alt = data.channel?.alternatives?.[0];
+          if (!alt || !alt.transcript) return;
+
+          const isFinal  = data.is_final;
+          const text     = alt.transcript.trim();
+          const words    = alt.words || [];
+
+          // Speaker diarization: pick the most common speaker label
+          let speaker = 'Faculty';
+          if (words.length) {
+            const counts = {};
+            words.forEach(w => { const s = 'Speaker ' + (w.speaker ?? 0); counts[s] = (counts[s]||0)+1; });
+            speaker = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+          }
+
+          updateCaptionsOverlay(speaker, text, isFinal);
+          updateTranscriptPanel(speaker, text, isFinal, data.start);
+
+          // Broadcast to students
+          if (room && isFinal) {
+            room.localParticipant.publishData(
+              new TextEncoder().encode(JSON.stringify({ type: 'transcript', speaker, text })),
+              { reliable: true }
+            );
+          }
+        };
+
+        dgSocket.onclose = () => {
+          if (transcriptOn) stopTranscription(); // unexpected close → cleanup
+        };
+
+        dgSocket.onerror = err => {
+          console.error('Deepgram WS error:', err);
+          showToast('Transcription error — check API key', 'error');
+          stopTranscription();
+        };
+
+      } catch (e) {
+        console.error('startTranscription error:', e);
+        showToast('Could not start transcription: ' + e.message, 'error');
+        stopTranscription();
+      }
+    }
+
+    // ── Stop ──
+    function stopTranscription() {
+      transcriptOn = false;
+      if (dgSocket) { try { dgSocket.close(); } catch(_){} dgSocket = null; }
+      if (dgProcessor) { try { dgProcessor.disconnect(); } catch(_){} dgProcessor = null; }
+      if (dgContext) { try { dgContext.close(); } catch(_){} dgContext = null; }
+      if (dgStream) { dgStream.getTracks().forEach(t => t.stop()); dgStream = null; }
+
+      document.getElementById('btnCC').classList.remove('active');
+      document.getElementById('ccLabel').textContent = 'CC';
+      document.getElementById('captionsOverlay').classList.remove('visible');
+
+      if (room) room.localParticipant.publishData(
+        new TextEncoder().encode(JSON.stringify({ type: 'transcript_stopped' })),
+        { reliable: true }
+      );
+      showToast('Transcription stopped', 'info');
+    }
+
+    // ── PCM helpers ──
+    function floatTo16BitPCM(float32Array) {
+      const buf = new ArrayBuffer(float32Array.length * 2);
+      const view = new DataView(buf);
+      for (let i = 0; i < float32Array.length; i++) {
+        const s = Math.max(-1, Math.min(1, float32Array[i]));
+        view.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      }
+      return buf;
+    }
+
+    // ── Captions overlay ──
+    let ccHideTimeout = null;
+    function updateCaptionsOverlay(speaker, text, isFinal) {
+      const overlay = document.getElementById('captionsOverlay');
+      const ccText  = document.getElementById('ccText');
+      const ccName  = document.getElementById('ccSpeakerName');
+      if (!text) return;
+      overlay.classList.add('visible');
+      ccName.textContent  = speaker + ':';
+      ccText.textContent  = text;
+      overlay.querySelector('.cc-bubble').style.opacity = isFinal ? '1' : '0.75';
+      clearTimeout(ccHideTimeout);
+      if (isFinal) {
+        ccHideTimeout = setTimeout(() => overlay.classList.remove('visible'), 4000);
+      }
+    }
+
+    // ── Transcript panel ──
+    let interimEl = null;
+    function updateTranscriptPanel(speaker, text, isFinal, startSec) {
+      const panel = document.getElementById('tv-transcript');
+      const empty = document.getElementById('tsEmpty');
+      if (empty) empty.style.display = 'none';
+
+      const ts = new Date((startSec || 0) * 1000).toISOString().substr(11,8);
+
+      if (!isFinal) {
+        if (!interimEl) {
+          interimEl = document.createElement('div');
+          interimEl.className = 'ts-seg interim';
+          panel.appendChild(interimEl);
+        }
+        interimEl.innerHTML = `<span class="ts-speaker">${speaker}</span><span class="ts-text">${text}</span>`;
+        panel.scrollTop = panel.scrollHeight;
+        return;
+      }
+
+      // Commit final segment
+      if (interimEl) { interimEl.remove(); interimEl = null; }
+
+      const entry = { speaker, text, time: Date.now(), ts };
+      transcriptLog.push(entry);
+
+      const seg = document.createElement('div');
+      seg.className = 'ts-seg';
+      seg.innerHTML = `<span class="ts-speaker">${speaker}</span><span class="ts-text" style="font-size:${ccFontSize}rem">${text}</span><span class="ts-time">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>`;
+      panel.appendChild(seg);
+      panel.scrollTop = panel.scrollHeight;
+    }
+
+    // ── Received from student side via DataChannel (echo back captions for faculty view) ──
+    // Already handled in DataReceived — no extra action needed here
+
+    // ── Font size controls ──
+    function changeFontSize(dir) {
+      ccFontSize = Math.max(0.7, Math.min(1.6, ccFontSize + dir * 0.1));
+      document.querySelectorAll('#tv-transcript .ts-text').forEach(el => el.style.fontSize = ccFontSize + 'rem');
+      document.getElementById('captionsOverlay').querySelector('.cc-bubble').style.fontSize = (ccFontSize * 1.05) + 'rem';
+    }
+
+    // ── Clear ──
+    function clearTranscript() {
+      transcriptLog = [];
+      interimEl     = null;
+      const panel = document.getElementById('tv-transcript');
+      panel.innerHTML = `<div class="ts-empty" id="tsEmpty"><i data-lucide="mic"></i><span>Transcript cleared.</span></div>`;
+      lucide.createIcons();
+    }
+
+    // ── Export .txt ──
+    function exportTranscriptTxt() {
+      if (!transcriptLog.length) { showToast('No transcript to export', 'info'); return; }
+      let out = `MINDWAVE LIVE TRANSCRIPT\n========================\nDate: ${new Date().toLocaleString()}\n\n`;
+      transcriptLog.forEach(e => {
+        const t = new Date(e.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        out += `[${t}] ${e.speaker}: ${e.text}\n`;
+      });
+      dlBlob(out, 'text/plain', `Transcript_${new Date().toISOString().slice(0,10)}.txt`);
+    }
+
+    // ── Export .srt ──
+    function exportTranscriptSrt() {
+      if (!transcriptLog.length) { showToast('No transcript to export', 'info'); return; }
+      let out = '';
+      transcriptLog.forEach((e, i) => {
+        const start = msToSrt(e.time);
+        const end   = msToSrt(e.time + 3500);
+        out += `${i+1}\n${start} --> ${end}\n${e.speaker}: ${e.text}\n\n`;
+      });
+      dlBlob(out, 'text/plain', `Transcript_${new Date().toISOString().slice(0,10)}.srt`);
+    }
+
+    function msToSrt(ms) {
+      const totalMs = ms % 1000;
+      const s = Math.floor(ms / 1000) % 60;
+      const m = Math.floor(ms / 60000) % 60;
+      const h = Math.floor(ms / 3600000);
+      return `${pad(h)}:${pad(m)}:${pad(s)},${String(totalMs).padStart(3,'0')}`;
+    }
+    function pad(n) { return String(n).padStart(2,'0'); }
+    function dlBlob(content, mime, filename) {
+      const b = new Blob([content], { type: mime });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(b);
+      a.download = filename;
+      a.click();
+    }
   </script>
 </body>
 
