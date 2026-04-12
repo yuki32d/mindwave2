@@ -13903,6 +13903,20 @@ app.post('/api/discussions/:id/replies', verifyDiscToken, async (req, res) => {
 
     const userId = req.user.sub;                                          // <-- fixed
     const user = await User.findById(userId).select('name role');
+
+    // --- 25-word minimum (students only) ---
+    // Collapse ALL whitespace runs (spaces, tabs, newlines) → single space,
+    // then split so holding spacebar can never inflate the word count.
+    if (user?.role !== 'admin') {
+      const wordCount = content.trim().replace(/\s+/g, ' ').split(' ').filter(w => w.length > 0).length;
+      if (wordCount < 25) {
+        return res.status(400).json({
+          ok: false,
+          message: `Your response is too short. Please write at least 25 words. (You wrote ${wordCount} word${wordCount === 1 ? '' : 's'})`
+        });
+      }
+    }
+
     const disc = await Discussion.findById(req.params.id);
     if (!disc) return res.status(404).json({ ok: false, message: 'Discussion not found' });
     if (disc.status !== 'active') return res.status(400).json({ ok: false, message: 'This discussion is closed' });

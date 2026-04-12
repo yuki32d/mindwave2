@@ -632,6 +632,41 @@
             text-align: center;
         }
 
+        /* ── Word counter ── */
+        .disc-word-counter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+        .disc-word-meter {
+            flex: 1;
+            height: 5px;
+            border-radius: 99px;
+            background: rgba(255,255,255,.08);
+            overflow: hidden;
+        }
+        .disc-word-meter-fill {
+            height: 100%;
+            border-radius: 99px;
+            width: 0%;
+            transition: width .2s, background-color .2s;
+            background: #ef4444;
+        }
+        .disc-word-meter-fill.warn  { background: #f59e0b; }
+        .disc-word-meter-fill.ok    { background: #22c55e; }
+        .disc-word-count-label {
+            font-size: .78rem;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: color .2s;
+            color: var(--text-secondary);
+        }
+        .disc-word-count-label.ok   { color: #22c55e; }
+        .disc-word-count-label.warn { color: #f59e0b; }
+        .disc-word-count-label.bad  { color: #ef4444; }
+
         /* Responsive */
         @media (max-width: 600px) {
             .cm-toolbar {
@@ -1078,6 +1113,13 @@
                                     style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;background:var(--card);color:var(--text);font-size:.9rem;min-height:120px;resize:vertical;font-family:inherit;"
                                     placeholder="Share your thoughts, analysis, or questions..."></textarea>
                             </div>
+                            <!-- Live word counter -->
+                            <div class="disc-word-counter">
+                                <div class="disc-word-meter" title="Word count progress">
+                                    <div class="disc-word-meter-fill" id="sDiscMeterFill"></div>
+                                </div>
+                                <span class="disc-word-count-label bad" id="sDiscWordLabel">0 / 25 words</span>
+                            </div>
                             <button class="cm-btn-primary" id="sDiscPostBtn" style="max-width:220px;">
                                 <i data-lucide="send" style="width:16px;height:16px;"></i> Post Reply
                             </button>
@@ -1436,22 +1478,79 @@
             `}).join('');
             }
 
-            // Post reply
+            // ── Word-count helpers ──────────────────────────────────────────
+            const MIN_WORDS = 25;
+
+            function countRealWords(text) {
+                // Collapse ALL whitespace (spaces, tabs, newlines) so that
+                // holding the spacebar can never inflate the word count.
+                return text.trim().replace(/\s+/g, ' ').split(' ').filter(w => w.length > 0).length;
+            }
+
+            function updateWordCounter(text) {
+                const wc       = countRealWords(text);
+                const pct      = Math.min(100, (wc / MIN_WORDS) * 100);
+                const fill     = document.getElementById('sDiscMeterFill');
+                const label    = document.getElementById('sDiscWordLabel');
+                if (!fill || !label) return wc;
+
+                fill.style.width = pct + '%';
+
+                if (wc >= MIN_WORDS) {
+                    fill.className  = 'disc-word-meter-fill ok';
+                    label.className = 'disc-word-count-label ok';
+                    label.textContent = `✓ ${wc} words — ready to post!`;
+                } else if (wc >= Math.floor(MIN_WORDS * 0.6)) {
+                    fill.className  = 'disc-word-meter-fill warn';
+                    label.className = 'disc-word-count-label warn';
+                    label.textContent = `${wc} / ${MIN_WORDS} words`;
+                } else {
+                    fill.className  = 'disc-word-meter-fill';
+                    label.className = 'disc-word-count-label bad';
+                    label.textContent = `${wc} / ${MIN_WORDS} words`;
+                }
+                return wc;
+            }
+
+            // Live counter — updates on every keystroke
+            document.getElementById('sDiscReplyContent').addEventListener('input', function () {
+                updateWordCounter(this.value);
+            });
+
+            // ── Post reply ──────────────────────────────────────────────────
             document.getElementById('sDiscPostBtn').onclick = async () => {
-                const content = document.getElementById('sDiscReplyContent').value.trim();
-                const errDiv = document.getElementById('sDiscPostError');
+                const textarea = document.getElementById('sDiscReplyContent');
+                const content  = textarea.value;
+                const errDiv   = document.getElementById('sDiscPostError');
                 errDiv.style.display = 'none';
-                if (!content) { errDiv.textContent = 'Please write something before posting.'; errDiv.style.display = ''; return; }
+
+                if (!content.trim()) {
+                    errDiv.textContent = 'Please write something before posting.';
+                    errDiv.style.display = '';
+                    return;
+                }
+
+                // Client-side 25-word guard (mirrors server logic)
+                const wc = countRealWords(content);
+                if (wc < MIN_WORDS) {
+                    errDiv.innerHTML = `<strong>Response too short.</strong> Please write at least <strong>${MIN_WORDS} words</strong> to post your reply. (You have ${wc} word${wc === 1 ? '' : 's'} so far.)`;
+                    errDiv.style.display = '';
+                    textarea.focus();
+                    return;
+                }
+
                 if (!currentDisc) return;
 
-                document.getElementById('sDiscPostBtn').disabled = true;
-                document.getElementById('sDiscPostBtn').textContent = 'Posting...';
+                const btn = document.getElementById('sDiscPostBtn');
+                btn.disabled = true;
+                btn.textContent = 'Posting...';
                 try {
                     const data = await apiFetch(`${API_BASE}/${currentDisc._id}/replies`, {
-                        method: 'POST', body: JSON.stringify({ content })
+                        method: 'POST', body: JSON.stringify({ content: content.trim() })
                     });
                     if (!data.ok) throw new Error(data.message);
-                    document.getElementById('sDiscReplyContent').value = '';
+                    textarea.value = '';
+                    updateWordCounter('');
                     document.getElementById('sDiscPbvNotice').style.display = 'none';
                     // Reload the discussion to get all replies
                     openStudentDisc(currentDisc._id);
@@ -1459,8 +1558,8 @@
                     errDiv.textContent = e.message;
                     errDiv.style.display = '';
                 } finally {
-                    document.getElementById('sDiscPostBtn').disabled = false;
-                    document.getElementById('sDiscPostBtn').innerHTML = '<i data-lucide="send" style="width:16px;height:16px;"></i> Post Reply';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="send" style="width:16px;height:16px;"></i> Post Reply';
                     if (window.lucide) lucide.createIcons();
                 }
             };
