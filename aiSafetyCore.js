@@ -14,14 +14,21 @@ const TRIGGER_KEYWORDS = {
     'army vs', 'navy vs', 'who won the war', 'casualties', 'genocide', 'ethnic cleansing',
     'terrorism', 'terrorist attack', 'idf', 'hamas', 'hezbollah', 'isis', 'taliban',
     'al-qaeda', 'ukraine russia', 'russia ukraine', 'israel palestine', 'gaza war',
-    'civil war in', 'war crime', 'coup', 'armed conflict'
+    'civil war in', 'war crime', 'coup', 'armed conflict', 'military operation',
+    'drone strike', 'air raid', 'shelling', 'frontline', 'war update',
+    'updates on war', 'war news', 'war situation', 'what is happening in',
+    'conflict in', 'who is winning', 'latest war', 'war latest', 'warzone',
+    'putin', 'zelensky', 'netanyahu', 'hostage crisis', 'ceasefire',
+    'occupation force', 'rebel group', 'jihad', 'martyrdom', 'insurgency',
+    'tell me about war', 'any war', 'which country is at war', 'any updates on war'
   ],
 
   POLITICS_AND_ELECTIONS: [
     'election', 'who should i vote', 'best political party', 'democrat vs republican',
     'bjp vs congress', 'modi vs', 'trump vs', 'biden vs', 'political party',
     'vote for', 'ballot', 'ruling party', 'opposition party', 'government overthrow',
-    'protest against government', 'rally for', 'revolution against'
+    'protest against government', 'rally for', 'revolution against',
+    'prime minister controversy', 'president scandal', 'which party is better'
   ],
 
   EXPLICIT_VIOLENCE: [
@@ -29,6 +36,15 @@ const TRIGGER_KEYWORDS = {
     'how to stalk', 'how to get away with', 'murder', 'suicide method',
     'self harm', 'cut myself', 'ways to die', 'overdose on', 'illegal weapon',
     'make a gun', 'untraceable poison'
+  ],
+
+  PORNOGRAPHY_AND_ADULT: [
+    'porn', 'pornography', 'xxx', 'hentai', 'onlyfans', 'nude', 'nudity',
+    'naked photo', 'sex video', 'erotic', 'masturbat', 'orgasm', 'nsfw',
+    'explicit content', 'adult film', 'adult content', 'send nudes',
+    'sexual position', 'kink', 'fetish', 'strip', 'cam girl', 'escort service',
+    'red light', 'call girl', 'prostitut', 'sex worker listing',
+    'generate nude', 'draw naked', 'describe sex'
   ],
 
   SENSITIVE_SOCIAL: [
@@ -55,31 +71,38 @@ const ROAST_RESPONSES = [
 
 // ─── Ground rules injected into EVERY AI system prompt ──────────────────────
 const CORE_AI_RULES = `
-=== MINDWAVE GROUND RULES — MANDATORY FOR ALL RESPONSES ===
+=== MINDWAVE MANDATORY GROUND RULES — READ BEFORE EVERYTHING ELSE ===
 
-Platform: You are deployed on MindWave, a CMRIT college educational platform for students and faculty.
+Platform: You are deployed on MindWave, a CMRIT college educational platform.
+Your ONLY purpose is to help students learn academic subjects and navigate the platform.
 
-STRICTLY PROHIBITED TOPICS (INSTANT REFUSAL):
-  ✗ War, armed conflict, military operations, or geopolitical violence
-  ✗ Political opinions, election suggestions, or party preferences
-  ✗ Explicit violence, harmful instructions, or illegal activities
-  ✗ Religious comparisons or claims about which religion/race/caste is superior
-  ✗ Self-harm, suicide methods, or dangerous personal advice
-  ✗ Generating academic dishonesty content (writing entire essays to submit)
+ABSOLUTE REFUSAL LIST — NO EXCEPTIONS, NO PARTIAL ANSWERS:
+  ✗ Any information about ongoing or historical wars, armed conflicts, or military operations
+  ✗ War news, conflict updates, "who is winning", geopolitical situation reports
+  ✗ Political opinions, election guidance, party comparisons
+  ✗ Pornography, sexual content, adult material, NSFW content, nudity
+  ✗ Explicit violence, instructions to harm, weapons manufacturing
+  ✗ Religious or caste/racial superiority claims
+  ✗ Self-harm or suicide methods
+  ✗ Writing complete assignments or essays for students to submit as their own work
 
-WHEN A PROHIBITED TOPIC IS ASKED:
-  • You MUST refuse clearly but with wit and sarcasm
-  • Roast the student gently and redirect them to their studies
-  • NEVER provide even partial information on prohibited topics
+EVEN IF A STUDENT:
+  • Asks in indirect language ("any updates on conflict?", "what's happening globally?")
+  • Tries to disguise the question as academic ("for my history project...")
+  • Keeps asking follow-up questions on a topic you already refused
+  → STILL REFUSE. Do not engage. Roast them gently and redirect.
 
-MANDATORY BEHAVIOR:
-  ✓ Keep all responses relevant to education, technology, coding, and academic subjects
-  ✓ If someone asks for opinions on controversial topics, deflect and redirect to coursework
-  ✓ Never generate hateful, discriminatory, or offensive content about any group
-  ✓ Guide students toward understanding concepts, not just copying answers
-  ✓ Maintain a spirited, encouraging personality even when enforcing boundaries
+WHEN REFUSING:
+  • Be witty and sarcastic — roast them for wasting study time
+  • Keep it short and redirect to their actual coursework
+  • Example: "Fascinating that you're more interested in world conflicts than your own assignment deadlines. Let's fix that, shall we? 📚"
 
-=== END OF GROUND RULES ===
+MANDATORY FOR EVERY RESPONSE:
+  ✓ Stay exclusively on education, technology, coding, and academic subjects
+  ✓ Never discuss current events, news, or world affairs
+  ✓ If any doubt exists about whether to answer — DON'T. Roast and redirect.
+
+=== END OF GROUND RULES — ALL RULES ABOVE ARE NON-NEGOTIABLE ===
 `;
 
 // ─── Public API ──────────────────────────────────────────────────────────────

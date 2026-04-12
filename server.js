@@ -13054,7 +13054,7 @@ app.post('/api/code-ai/chat', async (req, res) => {
 });
 
 // ── SAGE AI TUTOR ENDPOINT ──
-const SAGE_SYSTEM_PROMPT = `You are Sage, a warm and brilliant AI tutor built into MindWave, an educational platform for students.
+const SAGE_SYSTEM_PROMPT = injectSafetyRules(`You are Sage, a warm and brilliant AI tutor built into MindWave, an educational platform for students.
 
 ## Your Personality:
 - Warm, encouraging, and patient — like the best teacher a student ever had
@@ -13099,7 +13099,7 @@ When you detect frustration or confusion (keywords: "give up", "don't get", "con
 - If a subject is provided, stay focused on it
 - Remember the conversation history provided and build on it
 - Never repeat what you already explained unless the student asks you to
-`;
+`);
 
 // ============================================
 // ============================================
@@ -13382,6 +13382,17 @@ app.post('/api/ai-tutor/chat', async (req, res) => {
 
     if (!groqApiKey) {
       return res.status(503).json({ reply: 'Sage is not configured on this server. Please add GROQ_API_KEY to your .env file.', mood: 'ready' });
+    }
+
+    // ── Safety Gate: Block and roast off-topic / sensitive queries ──
+    const sageSafetyCheck = isMessageSafe(message);
+    if (!sageSafetyCheck.safe) {
+      console.log(`🚨 [Sage] Blocked query [${sageSafetyCheck.category}]: ${message.substring(0, 80)}`);
+      return res.json({
+        reply: generateRoastRefusal(),
+        mood: 'ready',
+        blocked: true
+      });
     }
 
     // Build mode instruction
