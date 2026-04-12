@@ -19,6 +19,7 @@ import cron from "node-cron";
 import compression from "compression";
 import mongoSanitize from "express-mongo-sanitize";
 import * as googleClassroomService from "./googleClassroomService.js";
+import { isMessageSafe, generateRoastRefusal, injectSafetyRules } from "./aiSafetyCore.js";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 import fetch from 'node-fetch'; // RAG
@@ -8615,7 +8616,7 @@ function detectProgrammingLanguage(message) {
 }
 
 // Savage personality system prompt for Blackbox AI
-const SAVAGE_CODING_PROMPT = `You are a coding assistant robot with a funny, savage personality. 🤖🔥
+const SAVAGE_CODING_PROMPT = injectSafetyRules(`You are a coding assistant robot with a funny, savage personality. 🤖🔥
 
 PERSONALITY RULES:
 1. Always be HELPFUL - give correct, detailed code solutions
@@ -8669,7 +8670,7 @@ def hello():
 
 Pro tip: Use a proper code editor with auto-indentation. Your future self will thank you! 🙏"
 
-Remember: Be savage but ALWAYS helpful. Students should laugh AND learn! 😂📚`;
+Remember: Be savage but ALWAYS helpful. Students should laugh AND learn! 😂📚`);
 
 // ============================================
 // CHATBOT ENDPOINT - Hugging Face with Gemini Fallback
@@ -8685,6 +8686,18 @@ app.post("/api/chat", async (req, res) => {
     const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
     const BLACKBOX_API_KEY = process.env.BLACKBOX_API_KEY;
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+
+    // ── Safety Gate: Block and roast off-topic / sensitive queries ──
+    const safetyCheck = isMessageSafe(message);
+    if (!safetyCheck.safe) {
+      console.log(`🚨 Blocked query [${safetyCheck.category}]: ${message.substring(0, 80)}`);
+      return res.json({
+        ok: true,
+        reply: generateRoastRefusal(),
+        api: 'safety-filter',
+        blocked: true
+      });
+    }
 
     let reply = '';
     let usedAPI = 'blackbox';
@@ -8731,6 +8744,9 @@ app.post("/api/chat", async (req, res) => {
 - Be friendly, concise, and supportive
 
 Keep responses short and helpful. Use emojis occasionally. If you don't know something specific, suggest contacting their instructor.`;
+
+    // Inject global safety rules into the system prompt
+    const SAFE_GENERAL_PROMPT = injectSafetyRules(GENERAL_SYSTEM_PROMPT);
 
     // ============================================
     // INTELLIGENT ROUTING: Code → Blackbox, General → Gemini
@@ -8826,7 +8842,7 @@ Keep responses short and helpful. Use emojis occasionally. If you don't know som
 
       const model = genAI.getGenerativeModel({
         model: modelToUse,
-        systemInstruction: GENERAL_SYSTEM_PROMPT
+        systemInstruction: SAFE_GENERAL_PROMPT
       });
 
       const chat = model.startChat({
