@@ -165,7 +165,7 @@ body{display:flex;min-height:100vh;}
         <label for="username">Email</label>
         <div class="input-wrap">
           <i data-lucide="mail" class="ico"></i>
-          <input type="email" id="username" placeholder="name.initial@cmrit.ac.in" autocomplete="email" required>
+          <input type="email" id="username" placeholder="faculty.name@cmrit.ac.in" autocomplete="email" required>
         </div>
       </div>
       <div class="opts-row">
@@ -273,7 +273,7 @@ const step1=document.getElementById('step1'),step2=document.getElementById('step
 const emailInput=document.getElementById('username'),emailDisplay=document.getElementById('emailDisplay');
 const dot1=document.getElementById('dot1'),dot2=document.getElementById('dot2');
 
-const FACULTY_REGEX=/^[a-z]+\.[a-z]@cmrit\.ac\.in$/i;
+const FACULTY_REGEX=/^[a-z][a-z._-]*@cmrit\.ac\.in$/i;
 const HOD_REGEX=/^hod\.[a-z]+@cmrit\.ac\.in$/i;
 function isValidAdminEmail(e){return FACULTY_REGEX.test(e)||HOD_REGEX.test(e);}
 
@@ -281,7 +281,7 @@ document.getElementById('nextBtn').addEventListener('click',()=>{
   const v=emailInput.value.trim(),e1=document.getElementById('e1'),e1t=document.getElementById('e1t');
   e1.classList.remove('show');
   if(!v||!isValidAdminEmail(v)){
-    e1t.textContent='Use your college email: name.initial@cmrit.ac.in or hod.dept@cmrit.ac.in';
+    e1t.textContent='Use your CMRIT faculty email (e.g. faculty.name@cmrit.ac.in). Student emails with numbers are not allowed here.';
     e1.classList.add('show');lucide.createIcons();return;
   }
   emailDisplay.textContent=v;

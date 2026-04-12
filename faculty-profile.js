@@ -6,7 +6,7 @@
 
 const API = window.location.origin + '/api';
 
-const FACULTY_REGEX = /^[a-z]+\.[a-z]@cmrit\.ac\.in$/i;
+const FACULTY_REGEX = /^[a-z][a-z._-]*@cmrit\.ac\.in$/i;
 const HOD_REGEX     = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
 
 function detectRole(email) {

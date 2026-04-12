@@ -138,7 +138,7 @@ body{display:flex;min-height:100vh;}
       <label for="email">College email</label>
       <div class="input-wrap">
         <i data-lucide="mail" class="ico"></i>
-        <input type="email" id="email" placeholder="name.x@cmrit.ac.in or hod.dept@cmrit.ac.in" autocomplete="email" required>
+        <input type="email" id="email" placeholder="faculty.name@cmrit.ac.in or hod.dept@cmrit.ac.in" autocomplete="email" required>
       </div>
     </div>
 
@@ -239,7 +239,7 @@ document.getElementById('password').addEventListener('input',function(){
   lbl.textContent=v.length?labels[Math.min(s-1,3)]||'Weak':'';lbl.style.color=colors[Math.min(s-1,3)]||'';
 });
 
-const FACULTY_REGEX=/^[a-z]+\.[a-z]@cmrit\.ac\.in$/i;
+const FACULTY_REGEX=/^[a-z][a-z._-]*@cmrit\.ac\.in$/i;
 const HOD_REGEX=/^hod\.[a-z]+@cmrit\.ac\.in$/i;
 function isValidAdminEmail(e){return FACULTY_REGEX.test(e)||HOD_REGEX.test(e);}
 
@@ -255,7 +255,7 @@ document.getElementById('signup-form').addEventListener('submit',async function(
   err.classList.remove('show');suc.classList.remove('show');
 
   if(!fname||!lname){errTxt.textContent='Please enter your full name.';err.classList.add('show');lucide.createIcons();return;}
-  if(!isValidAdminEmail(email)){errTxt.textContent='Please use your college email';err.classList.add('show');lucide.createIcons();return;}
+  if(!isValidAdminEmail(email)){errTxt.textContent='Please use your CMRIT faculty email. Student emails (with numbers) are not allowed here.';err.classList.add('show');lucide.createIcons();return;}
   if(password.length<6){errTxt.textContent='Password must be at least 6 characters.';err.classList.add('show');lucide.createIcons();return;}
   if(!terms){errTxt.textContent='Please accept the Terms of Service.';err.classList.add('show');lucide.createIcons();return;}
 

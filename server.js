@@ -1794,8 +1794,8 @@ app.use('/api/', apiLimiter);
 
 // Student: name.dept+year@cmrit.ac.in — e.g. jeeban.mca25@cmrit.ac.in, alex.mba26@cmrit.ac.in
 const STUDENT_EMAIL_REGEX = /^[a-z]+\.[a-z]{2,6}\d{2}@cmrit\.ac\.in$/i;
-// Faculty: firstname.initial@cmrit.ac.in (e.g. jeeban.j@cmrit.ac.in) — no .mca suffix
-const FACULTY_EMAIL_REGEX = /^[a-z]+\.[a-z]@cmrit\.ac\.in$/i;
+// Faculty: any letters/dots/hyphens before @cmrit.ac.in, NO digits allowed (blocks student emails like name.mca25@)
+const FACULTY_EMAIL_REGEX = /^[a-z][a-z._-]*@cmrit\.ac\.in$/i;
 // HOD (super admin): hod.dept@cmrit.ac.in (e.g. hod.mca@cmrit.ac.in)
 const HOD_EMAIL_REGEX = /^hod\.[a-z]+@cmrit\.ac\.in$/i;
 
