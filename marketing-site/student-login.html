@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Student Sign In — MindWave</title>
   <meta name="description" content="Sign in to MindWave Student Portal." />
@@ -273,7 +275,7 @@
           <label for="username">Email</label>
           <div class="input-wrap">
             <i data-lucide="mail" class="ico"></i>
-            <input type="email" id="username" placeholder="name.mca25@cmrit.ac.in" autocomplete="email" required />
+            <input type="email" id="username" placeholder="name.mca25@cmrit.ac.in" autocomplete="email" maxlength="254" spellcheck="false" autocorrect="off" autocapitalize="off" required />
           </div>
         </div>
         <div class="opts-row">
@@ -305,7 +307,7 @@
           <label for="password">Password</label>
           <div class="input-wrap">
             <i data-lucide="lock" class="ico"></i>
-            <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required />
+            <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" maxlength="128" required />
             <button type="button" class="pw-toggle" id="pwToggle">
               <i data-lucide="eye" id="eyeIco"></i>
             </button>
@@ -359,6 +361,7 @@
     </div>
   </div>
 
+  <script src="loginSecurity.js"></script>
   <script>
     lucide.createIcons();
 
@@ -417,6 +420,15 @@
     document.getElementById('login-form').addEventListener('submit', async function (e) {
       e.preventDefault();
       const email = emailInput.value.trim();
+      const pw = document.getElementById('password').value;
+      // Security: check lockout state
+      var __ls = MWLoginSecurity.getLockoutState();
+      if (__ls.locked) { MWLoginSecurity.startCountdown(document.getElementById('signInBtn'), 'Sign In'); return; }
+      // Security: sanitize and injection check
+      var cleanEmailVal = MWLoginSecurity.sanitizeInput(email);
+      if (MWLoginSecurity.isInjectionAttempt(cleanEmailVal) || MWLoginSecurity.isInjectionAttempt(pw)) {
+        e2t.textContent = 'Invalid characters detected in input.'; e2.classList.add('show'); lucide.createIcons(); return;
+      }
       const password = document.getElementById('password').value;
       const e2 = document.getElementById('e2');
       const e2t = document.getElementById('e2t');
@@ -427,7 +439,7 @@
         const res = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, role: 'student' })
+          body: JSON.stringify({ email: cleanEmailVal, password: pw, role: 'student' })
         });
         const data = await res.json();
         if (data.ok) {
@@ -443,10 +455,13 @@
             localStorage.setItem('lastName', data.user.lastName || full.split(' ').slice(1).join(' ') || '');
             localStorage.setItem('name', full || data.user.firstName || '');
           }
+          MWLoginSecurity.clearLockout();
           window.location.href = '../homepage.html';
         } else {
           e2t.textContent = data.message || 'Incorrect password. Please try again.';
           e2.classList.add('show');
+          var __lockState = MWLoginSecurity.recordFailedAttempt();
+          if (__lockState.locked) { MWLoginSecurity.startCountdown(document.getElementById('signInBtn'), 'Sign In'); }
           e2.style.animation = 'none';
           requestAnimationFrame(() => e2.style.animation = '');
           lucide.createIcons();
@@ -454,6 +469,8 @@
       } catch (ex) {
         e2t.textContent = 'Connection error — please try again.';
         e2.classList.add('show');
+          var __lockState = MWLoginSecurity.recordFailedAttempt();
+          if (__lockState.locked) { MWLoginSecurity.startCountdown(document.getElementById('signInBtn'), 'Sign In'); }
         lucide.createIcons();
       } finally {
         btn.classList.remove('loading');

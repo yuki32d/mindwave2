@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Sign In — MindWave</title>
 <meta name="description" content="Sign in to MindWave Admin Portal. Authorized Personnel Only.">
@@ -165,7 +167,7 @@ body{display:flex;min-height:100vh;}
         <label for="username">Email</label>
         <div class="input-wrap">
           <i data-lucide="mail" class="ico"></i>
-          <input type="email" id="username" placeholder="faculty.name@cmrit.ac.in" autocomplete="email" required>
+          <input type="email" id="username" placeholder="faculty.name@cmrit.ac.in" autocomplete="email" maxlength="254" spellcheck="false" autocorrect="off" autocapitalize="off" required>
         </div>
       </div>
       <div class="opts-row">
@@ -192,7 +194,7 @@ body{display:flex;min-height:100vh;}
         <label for="password">Password</label>
         <div class="input-wrap">
           <i data-lucide="lock" class="ico"></i>
-          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
+          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" maxlength="128" required>
           <button type="button" class="pw-toggle" id="pwToggle"><i data-lucide="eye" id="eyeIco"></i></button>
         </div>
       </div>
@@ -266,6 +268,7 @@ body{display:flex;min-height:100vh;}
   <div class="illus-footer">Developed by MCA Department 2026</div>
 </div>
 
+  <script src="loginSecurity.js"></script>
 <script>
 lucide.createIcons();
 
@@ -304,11 +307,15 @@ document.getElementById('pwToggle').addEventListener('click',()=>{
 
 document.getElementById('login-form').addEventListener('submit',async function(e){
   e.preventDefault();
-  const email=emailInput.value.trim(),password=document.getElementById('password').value;
-  const e2=document.getElementById('e2'),e2t=document.getElementById('e2t'),btn=document.getElementById('signInBtn');
+  var __lsA = MWLoginSecurity.getLockoutState();
+  if (__lsA.locked) { MWLoginSecurity.startCountdown(document.getElementById('signInBtn'), 'Sign In'); return; }
+  var __rawEmail=emailInput.value.trim(), __rawPw=document.getElementById('password').value;
+  var __cleanEmail=MWLoginSecurity.sanitizeInput(__rawEmail);
+  var e2=document.getElementById('e2'),e2t=document.getElementById('e2t'),btn=document.getElementById('signInBtn');
+  if (MWLoginSecurity.isInjectionAttempt(__cleanEmail)||MWLoginSecurity.isInjectionAttempt(__rawPw)){e2t.textContent='Invalid characters detected.';e2.classList.add('show');lucide.createIcons();return;}
   e2.classList.remove('show');btn.classList.add('loading');
   try{
-    const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,role:'admin'})});
+    const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:__cleanEmail,password:__rawPw,role:'admin'})});
     const data=await res.json();
     if(data.ok){
       ['role','email','token','name'].forEach(k=>localStorage.removeItem(k));
@@ -319,10 +326,12 @@ document.getElementById('login-form').addEventListener('submit',async function(e
         localStorage.setItem('auth_token',data.token||'authenticated');
         localStorage.setItem('name',data.user.name||data.user.fullName||'Admin');
       }
+      MWLoginSecurity.clearLockout();
       window.location.href='../admin.html';
     }else{
       e2t.textContent=data.message||'Authentication failed.';
       e2.classList.add('show');lucide.createIcons();
+      var __lsF=MWLoginSecurity.recordFailedAttempt(); if(__lsF.locked){MWLoginSecurity.startCountdown(document.getElementById('signInBtn'),'Sign In');}
     }
   }catch(ex){
     e2t.textContent='System error — please try again.';

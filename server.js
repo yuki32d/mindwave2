@@ -1772,10 +1772,12 @@ app.post('/api/run-code-cloud', async (req, res) => {
 });
 
 const authLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 20,
+  windowMs: 15 * 60 * 1000,  // 15-minute window
+  max: 5,                     // 5 login attempts per window per IP
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  message: { ok: false, message: 'Too many login attempts. Please wait 15 minutes and try again.' },
+  skipSuccessfulRequests: true  // Only count failed requests against the limit
 });
 
 // General API rate limiter
@@ -2541,11 +2543,22 @@ app.post("/api/signup", authLimiter, async (req, res) => {
 app.post("/api/login", authLimiter, async (req, res) => {
   const { email, password, role } = req.body || {};
   const safeRole = sanitizeRole(role);
-  if (!email || !password) {
-    return res.status(400).json({ ok: false, message: "Email and password required" });
+
+  // ── Type & length enforcement (blocks NoSQL injection objects) ────────────────
+  if (typeof email !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ ok: false, message: 'Invalid request format.' });
   }
-  if (!validateEmail(email, safeRole)) {
-    return res.status(400).json({ ok: false, message: "Use your campus email" });
+  if (email.length > 254 || password.length > 128) {
+    return res.status(400).json({ ok: false, message: 'Input exceeds maximum allowed length.' });
+  }
+  // Strip dangerous characters from email before using in DB query
+  const cleanEmail = email.toLowerCase().replace(/[<>{}$]/g, '').trim();
+
+  if (!cleanEmail || !password) {
+    return res.status(400).json({ ok: false, message: 'Email and password required' });
+  }
+  if (!validateEmail(cleanEmail, safeRole)) {
+    return res.status(400).json({ ok: false, message: 'Use your campus email' });
   }
 
   try {
@@ -2557,7 +2570,7 @@ app.post("/api/login", authLimiter, async (req, res) => {
       }
     }
 
-    const user = await User.findOne({ email: email.toLowerCase(), role: safeRole });
+    const user = await User.findOne({ email: cleanEmail, role: safeRole });
     if (!user) return res.status(401).json({ ok: false, message: "Invalid credentials" });
 
     const valid = await bcrypt.compare(password, user.password);
@@ -2580,7 +2593,7 @@ app.post("/api/login", authLimiter, async (req, res) => {
       .cookie("mindwave_token", token, {
         httpOnly: true,
         sameSite: "lax",
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 7 * 24 * 60 * 60 * 1000
       })
       .json({
