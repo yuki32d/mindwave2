@@ -744,6 +744,92 @@
             font-weight: 600;
             font-size: .88rem;
         }
+
+        /* ── Reddit-style threaded replies ── */
+        .disc-reply-node  { position:relative; }
+        .disc-thread-gutter {
+            position:absolute; left:14px; top:42px; bottom:8px;
+            width:2px; background:var(--border,rgba(255,255,255,.1));
+            border-radius:2px; cursor:pointer; transition:background .15s;
+        }
+        .disc-thread-gutter:hover { background:var(--accent,#6366f1); }
+        .disc-reply-card {
+            background:var(--card,#161b2e);
+            border:1px solid var(--border,rgba(255,255,255,.08));
+            border-radius:14px; padding:14px 16px; margin-bottom:8px;
+            transition:border-color .18s;
+        }
+        .disc-reply-card.is-pinned { border-color:rgba(99,102,241,.45); box-shadow:0 0 0 2px rgba(99,102,241,.07); }
+        .disc-reply-card.is-mine   { border-color:rgba(99,102,241,.25); }
+        .disc-reply-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+        .disc-reply-avatar {
+            width:30px; height:30px; border-radius:50%;
+            background:var(--card); border:1px solid var(--border);
+            display:flex; align-items:center; justify-content:center;
+            font-size:11px; font-weight:700; flex-shrink:0;
+        }
+        .disc-reply-meta { display:flex; align-items:center; flex-wrap:wrap; gap:5px; flex:1; }
+        .disc-reply-author { font-size:13px; font-weight:700; color:var(--text); }
+        .disc-reply-time   { font-size:11px; color:var(--text-secondary); }
+        .disc-badge { font-size:10px; font-weight:700; padding:2px 7px; border-radius:99px; white-space:nowrap; }
+        .disc-badge-inst  { background:rgba(99,102,241,.12); color:#818cf8; border:1px solid rgba(99,102,241,.25); }
+        .disc-badge-pin   { background:rgba(99,102,241,.12); color:#818cf8; border:1px solid rgba(99,102,241,.25); }
+        .disc-badge-grade { background:rgba(22,163,74,.1);   color:#16a34a; border:1px solid rgba(22,163,74,.25); }
+        .disc-reply-body  { font-size:.9rem; line-height:1.65; color:var(--text); margin-bottom:10px; word-break:break-word; }
+        .disc-reply-fb {
+            margin:6px 0 10px; padding:8px 12px;
+            background:rgba(22,163,74,.06); border-left:3px solid #16a34a;
+            border-radius:0 8px 8px 0; font-size:.82rem; color:var(--text-secondary);
+        }
+        .disc-actions { display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+        .disc-btn-like {
+            display:inline-flex; align-items:center; gap:4px;
+            padding:4px 10px; border-radius:99px;
+            border:1.5px solid var(--border); background:none;
+            color:var(--text-secondary); font-size:.78rem; font-weight:700;
+            cursor:pointer; transition:all .15s;
+        }
+        .disc-btn-like:hover, .disc-btn-like.liked { border-color:#f59e0b; color:#f59e0b; background:rgba(245,158,11,.08); }
+        .disc-btn-act {
+            padding:4px 10px; border-radius:99px;
+            border:1.5px solid var(--border); background:none;
+            color:var(--text-secondary); font-size:.78rem; font-weight:700;
+            cursor:pointer; transition:all .15s;
+        }
+        .disc-btn-act:hover { border-color:var(--accent); color:var(--accent); background:rgba(99,102,241,.08); }
+        .disc-btn-collapse {
+            margin-left:auto; padding:4px 10px; border-radius:99px;
+            border:1.5px solid var(--border); background:none;
+            color:var(--text-secondary); font-size:.77rem; font-weight:600;
+            cursor:pointer; transition:all .15s;
+        }
+        .disc-btn-collapse:hover { border-color:var(--accent); color:var(--text); }
+        .disc-inline-composer {
+            margin-top:10px; padding:12px;
+            background:rgba(99,102,241,.05); border:1px solid rgba(99,102,241,.15);
+            border-radius:12px; animation:mwFadeInDown .15s ease;
+        }
+        @keyframes mwFadeInDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+        .disc-inline-ta {
+            width:100%; min-height:66px; padding:9px 12px;
+            border:1.5px solid var(--border); border-radius:10px;
+            background:var(--card); color:var(--text); font-size:.88rem;
+            font-family:inherit; resize:vertical; transition:border-color .15s;
+        }
+        .disc-inline-ta:focus { outline:none; border-color:var(--accent); }
+        .disc-inline-row { display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
+        .disc-inline-cancel {
+            padding:6px 14px; border-radius:9px; border:1.5px solid var(--border);
+            background:none; color:var(--text-secondary); font-size:.82rem; font-weight:600; cursor:pointer;
+        }
+        .disc-inline-post {
+            padding:6px 16px; border-radius:9px; border:none;
+            background:linear-gradient(135deg,#6366f1,#a855f7); color:#fff;
+            font-size:.82rem; font-weight:700; cursor:pointer; transition:opacity .15s;
+        }
+        .disc-inline-post:hover   { opacity:.88; }
+        .disc-inline-post:disabled{ opacity:.45; cursor:not-allowed; }
+        .disc-children { padding-left:28px; position:relative; }
     </style>
 </head>
 
@@ -1407,6 +1493,7 @@
                     const data = await apiFetch(`${API_BASE}/${id}`);
                     if (!data.ok) throw new Error(data.message);
                     currentDisc = data.discussion;
+                    window._mwCurrentDiscId = currentDisc._id;
 
                     document.getElementById('sDiscDetailTitle').textContent = currentDisc.title;
                     document.getElementById('sDiscDetailDesc').innerHTML = currentDisc.description || '';
@@ -1445,37 +1532,76 @@
                 } catch { return null; }
             }
 
+            // ── Build parent→children tree from flat reply array ──
+            function buildReplyTree(replies) {
+                const map = {}, roots = [];
+                replies.forEach(r => { map[r._id] = { ...r, children: [] }; });
+                replies.forEach(r => {
+                    const pid = r.parentReplyId || null;
+                    if (pid && map[pid]) map[pid].children.push(map[r._id]);
+                    else roots.push(map[r._id]);
+                });
+                // Sort: pinned first, then chronological
+                const sort = arr => { arr.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||new Date(a.createdAt)-new Date(b.createdAt)); arr.forEach(r=>sort(r.children)); return arr; };
+                return sort(roots);
+            }
+
+            // ── Render one reply node recursively ──
+            function renderReplyNode(r, depth, myUserId, _isFaculty) {
+                const isMe   = String(r.authorId) === String(myUserId);
+                const isInst = r.authorRole === 'admin';
+                const init   = (r.authorName || '?').charAt(0).toUpperCase();
+                const tstr   = new Date(r.createdAt).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});
+                const lc     = (r.likes || []).length;
+                const childrenHtml = (r.children || []).map(c => renderReplyNode(c, depth+1, myUserId, _isFaculty)).join('');
+                const hasChildren  = r.children && r.children.length > 0;
+                const avatarStyle  = isMe ? 'background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;border:none;' : '';
+                const discId = currentDisc?._id || '';
+                // Relative indented children container id
+                const cid = 'drc-' + r._id;
+                const mid = 'drm-' + r._id;
+                return `
+<div class="disc-reply-node" style="position:relative;">
+  ${depth > 0 ? `<div class="disc-thread-gutter" onclick="mwDiscCollapse('${r._id}')"></div>` : ''}
+  <div class="disc-reply-card${r.pinned?' is-pinned':''}${isMe?' is-mine':''}">
+    <div class="disc-reply-header">
+      <div class="disc-reply-avatar" style="${avatarStyle}">${init}</div>
+      <div class="disc-reply-meta">
+        <span class="disc-reply-author">${isInst?`<span style="color:var(--accent)">${r.authorName}</span>`:isMe?'<span style="color:var(--accent)">You</span>':r.authorName||'Student'}</span>
+        ${isInst?'<span class="disc-badge disc-badge-inst">Instructor</span>':''}
+        ${r.pinned?'<span class="disc-badge disc-badge-pin">📌 Pinned</span>':''}
+        ${r.graded&&isMe?`<span class="disc-badge disc-badge-grade">⭐ ${r.grade}pts</span>`:''}
+        <span class="disc-reply-time">&bull; ${tstr}</span>
+      </div>
+    </div>
+    <div class="disc-reply-body">${r.content}</div>
+    ${r.graded&&r.feedback&&isMe?`<div class="disc-reply-fb"><strong style="color:#16a34a;">Instructor Feedback:</strong> ${r.feedback}</div>`:''}
+    <div class="disc-actions">
+      <button class="disc-btn-like" id="likeBtn-${r._id}" onclick="mwDiscLike('${discId}','${r._id}',this)">▲ <span id="likeCnt-${r._id}">${lc}</span></button>
+      <button class="disc-btn-act" onclick="mwDiscOpenComposer('${r._id}','${mid}')">💬 Reply</button>
+      ${hasChildren?`<button class="disc-btn-collapse" id="collapseBtn-${r._id}" onclick="mwDiscCollapse('${r._id}')">− ${r.children.length} ${r.children.length===1?'reply':'replies'}</button>`:''}
+    </div>
+    <div id="${mid}" class="disc-inline-composer" style="display:none;">
+      <textarea class="disc-inline-ta" placeholder="Write a reply..."></textarea>
+      <div class="disc-inline-row">
+        <button class="disc-inline-cancel" onclick="mwDiscCloseComposer('${mid}')">Cancel</button>
+        <button class="disc-inline-post" onclick="mwDiscPostThread('${discId}','${r._id}','${mid}')">Post Reply</button>
+      </div>
+    </div>
+  </div>
+  <div id="${cid}" class="disc-children">${childrenHtml}</div>
+</div>`;
+            }
+
             function renderStudentReplies(replies) {
-                const feed = document.getElementById('sDiscRepliesFeed');
+                const feed  = document.getElementById('sDiscRepliesFeed');
                 const empty = document.getElementById('sDiscRepliesEmpty');
-                const myUserId = getUserId();
-
-                // Sort: pinned first, then by date
-                const sorted = [...replies].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
-
-                if (!sorted.length) { feed.innerHTML = ''; empty.style.display = ''; return; }
+                const myId  = getUserId();
+                const roots = buildReplyTree(replies);
+                if (!roots.length) { feed.innerHTML = ''; empty.style.display = ''; return; }
                 empty.style.display = 'none';
-
-                feed.innerHTML = sorted.map(r => {
-                    const isMe = String(r.authorId) === String(myUserId);
-                    return `
-                <div style="background:var(--card);border:1px solid ${r.pinned ? 'rgba(99,102,241,.4)' : isMe ? 'rgba(99,102,241,.2)' : 'var(--border)'};border-radius:14px;padding:16px 18px;${r.pinned ? 'box-shadow:0 0 0 2px rgba(99,102,241,.1);' : ''}">
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                        <div style="width:32px;height:32px;border-radius:50%;background:${isMe ? 'linear-gradient(135deg,#6366f1,#a855f7)' : 'var(--card)'};border:${isMe ? 'none' : '1px solid var(--border)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${isMe ? '#fff' : 'var(--text)'}">${(r.authorName || '?').charAt(0).toUpperCase()}</div>
-                        <div style="flex:1;">
-                            <div style="font-size:13px;font-weight:700;color:var(--text);">
-                                ${isMe ? '<span style="color:var(--accent)">You</span>' : r.authorName || 'Student'}
-                                ${r.authorRole === 'admin' ? '<span style="font-size:10px;background:rgba(99,102,241,.1);color:#818cf8;padding:2px 7px;border-radius:99px;font-weight:700;margin-left:4px;">Instructor</span>' : ''}
-                                ${r.pinned ? '<span style="font-size:10px;background:rgba(99,102,241,.1);color:#818cf8;padding:2px 7px;border-radius:99px;font-weight:700;margin-left:4px;">📌 Pinned</span>' : ''}
-                            </div>
-                            <div style="font-size:11px;color:var(--text-secondary);">${new Date(r.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</div>
-                        </div>
-                        ${r.graded && isMe ? `<div style="text-align:right;"><div style="font-size:16px;font-weight:900;color:#16a34a;">${r.grade}pts</div><div style="font-size:10px;color:var(--text-secondary);">Your Grade</div></div>` : ''}
-                    </div>
-                    <p style="font-size:.9rem;line-height:1.65;color:var(--text);margin:0;">${r.content}</p>
-                    ${r.graded && r.feedback && isMe ? `<div style="margin-top:10px;padding:10px 14px;background:rgba(22,163,74,.06);border-left:3px solid #16a34a;border-radius:0 8px 8px 0;font-size:.82rem;color:var(--text-secondary);"><strong style="color:#16a34a;">Instructor Feedback: </strong>${r.feedback}</div>` : ''}
-                </div>
-            `}).join('');
+                feed.innerHTML = roots.map(r => renderReplyNode(r, 0, myId, false)).join('');
+                if (window.lucide) lucide.createIcons({ el: feed });
             }
 
             // ── Word-count helpers ──────────────────────────────────────────
@@ -1574,6 +1700,74 @@
             });
 
         })();
+
+        // ── Global helpers called from onclick attrs inside dynamic HTML ──
+        window.mwDiscLike = async function(discId, replyId, btn) {
+            try {
+                const tok = localStorage.getItem('token') || localStorage.getItem('mindwave_token') || '';
+                const r = await fetch(`/api/discussions/${discId}/replies/${replyId}/like`, {
+                    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok}, credentials:'include'
+                });
+                const d = await r.json();
+                if (!d.ok) return;
+                const cnt = document.getElementById('likeCnt-' + replyId);
+                if (cnt) cnt.textContent = d.likeCount;
+                if (d.liked) btn.classList.add('liked'); else btn.classList.remove('liked');
+            } catch(e) { console.error('like error', e); }
+        };
+
+        window.mwDiscOpenComposer = function(replyId, composerId) {
+            // Close any already-open composers first
+            document.querySelectorAll('.disc-inline-composer').forEach(el => { el.style.display = 'none'; });
+            const box = document.getElementById(composerId);
+            if (!box) return;
+            box.style.display = '';
+            box.querySelector('.disc-inline-ta').focus();
+        };
+
+        window.mwDiscCloseComposer = function(composerId) {
+            const box = document.getElementById(composerId);
+            if (box) { box.style.display = 'none'; box.querySelector('.disc-inline-ta').value = ''; }
+        };
+
+        window.mwDiscPostThread = async function(discId, parentReplyId, composerId) {
+            const box     = document.getElementById(composerId);
+            const ta      = box?.querySelector('.disc-inline-ta');
+            const postBtn = box?.querySelector('.disc-inline-post');
+            if (!ta || !discId) return;
+            const content = ta.value.trim();
+            if (!content) { ta.style.borderColor = '#ef4444'; setTimeout(()=>ta.style.borderColor='',1200); return; }
+            postBtn.disabled = true; postBtn.textContent = 'Posting...';
+            try {
+                const tok = localStorage.getItem('token') || localStorage.getItem('mindwave_token') || '';
+                const r = await fetch(`/api/discussions/${discId}/replies`, {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+                    credentials:'include',
+                    body: JSON.stringify({ content, parentReplyId })
+                });
+                const d = await r.json();
+                if (!d.ok) throw new Error(d.message);
+                mwDiscCloseComposer(composerId);
+                // Reload the full disc to get updated tree
+                if (window._mwCurrentDiscId) window.openStudentDisc(window._mwCurrentDiscId);
+            } catch(e) {
+                ta.style.borderColor = '#ef4444';
+                ta.placeholder = e.message;
+                setTimeout(()=>{ ta.style.borderColor=''; ta.placeholder='Write a reply...'; },2500);
+            } finally {
+                postBtn.disabled = false; postBtn.textContent = 'Post Reply';
+            }
+        };
+
+        window.mwDiscCollapse = function(replyId) {
+            const children = document.getElementById('drc-' + replyId);
+            const btn = document.getElementById('collapseBtn-' + replyId);
+            if (!children) return;
+            const isHidden = children.style.display === 'none';
+            children.style.display = isHidden ? '' : 'none';
+            if (btn) btn.textContent = (isHidden ? '− ' : '⊕ ') + btn.textContent.replace(/^[−⊕] /,'');
+        };
     </script>
     <script src="student-community.js">
         function doLogout() {

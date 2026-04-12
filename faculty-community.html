@@ -1887,6 +1887,87 @@
             color: var(--muted);
             margin-top: 2px;
         }
+        /* ── Shared threaded reply styles ── */
+        .disc-reply-node  { position:relative; }
+        .disc-thread-gutter {
+            position:absolute; left:14px; top:42px; bottom:8px; width:2px;
+            background:var(--border,rgba(255,255,255,.1)); border-radius:2px;
+            cursor:pointer; transition:background .15s;
+        }
+        .disc-thread-gutter:hover { background:var(--accent); }
+        .disc-reply-card {
+            background:var(--bg); border:1px solid var(--border);
+            border-radius:14px; padding:14px 16px; margin-bottom:8px;
+            transition:border-color .18s;
+        }
+        .disc-reply-card.is-pinned { border-color:var(--accent-bdr); box-shadow:0 0 0 2px var(--accent-lo); }
+        .disc-reply-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+        .disc-reply-avatar {
+            width:32px; height:32px; border-radius:50%; display:flex;
+            align-items:center; justify-content:center;
+            font-size:12px; font-weight:800; color:#fff; flex-shrink:0;
+        }
+        .disc-reply-meta { display:flex; align-items:center; flex-wrap:wrap; gap:5px; }
+        .disc-reply-author { font-size:13px; font-weight:700; }
+        .disc-reply-time   { font-size:11px; color:var(--muted); }
+        .disc-badge { font-size:10px; font-weight:700; padding:2px 7px; border-radius:99px; white-space:nowrap; }
+        .disc-badge-inst  { background:var(--accent-lo); color:var(--accent); border:1px solid var(--accent-bdr); }
+        .disc-badge-pin   { background:rgba(99,102,241,.12); color:#818cf8; border:1px solid rgba(99,102,241,.25); }
+        .disc-badge-grade { background:rgba(22,163,74,.1); color:#16a34a; border:1px solid rgba(22,163,74,.25); }
+        .disc-reply-fb {
+            margin:6px 0 10px; padding:8px 12px;
+            background:rgba(22,163,74,.06); border-left:3px solid #16a34a;
+            border-radius:0 8px 8px 0; font-size:.82rem; color:var(--muted);
+        }
+        .disc-actions { display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-top:8px; }
+        .disc-btn-like {
+            display:inline-flex; align-items:center; gap:4px;
+            padding:4px 10px; border-radius:99px;
+            border:1.5px solid var(--border); background:none;
+            color:var(--muted); font-size:.78rem; font-weight:700;
+            cursor:pointer; transition:all .15s;
+        }
+        .disc-btn-like:hover, .disc-btn-like.liked { border-color:#f59e0b; color:#f59e0b; background:rgba(245,158,11,.08); }
+        .disc-btn-act {
+            padding:4px 10px; border-radius:99px;
+            border:1.5px solid var(--border); background:none;
+            color:var(--muted); font-size:.78rem; font-weight:700;
+            cursor:pointer; transition:all .15s;
+        }
+        .disc-btn-act:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-lo); }
+        .disc-btn-collapse {
+            margin-left:auto; padding:4px 10px; border-radius:99px;
+            border:1.5px solid var(--border); background:none;
+            color:var(--muted); font-size:.77rem; font-weight:600;
+            cursor:pointer; transition:all .15s;
+        }
+        .disc-btn-collapse:hover { border-color:var(--accent); color:var(--text); }
+        .disc-inline-composer {
+            margin-top:10px; padding:12px;
+            background:var(--accent-lo); border:1px solid var(--accent-bdr);
+            border-radius:12px; animation:mwFadeInDown .15s ease;
+        }
+        @keyframes mwFadeInDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+        .disc-inline-ta {
+            width:100%; min-height:66px; padding:9px 12px;
+            border:1.5px solid var(--border); border-radius:10px;
+            background:var(--surface); color:var(--text); font-size:.88rem;
+            font-family:inherit; resize:vertical; transition:border-color .15s;
+        }
+        .disc-inline-ta:focus { outline:none; border-color:var(--accent); }
+        .disc-inline-row { display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
+        .disc-inline-cancel {
+            padding:6px 14px; border-radius:9px; border:1.5px solid var(--border);
+            background:none; color:var(--muted); font-size:.82rem; font-weight:600; cursor:pointer;
+        }
+        .disc-inline-post {
+            padding:6px 16px; border-radius:9px; border:none;
+            background:var(--accent); color:#fff;
+            font-size:.82rem; font-weight:700; cursor:pointer; transition:opacity .15s;
+        }
+        .disc-inline-post:hover   { opacity:.88; }
+        .disc-inline-post:disabled{ opacity:.45; cursor:not-allowed; }
+        .disc-children { padding-left:28px; position:relative; }
     </style>
 </head>
 
@@ -2856,6 +2937,7 @@
         // ── Open Detail / Moderation View ──
         async function openDiscDetail(id, title) {
             currentDiscId = id;
+            window._mwFacCurrentDiscId = id;
             document.getElementById('discDetailTitle').textContent = title;
             document.getElementById('discRepliesFeed').innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);"><i class="fas fa-spinner fa-spin"></i></div>';
             document.getElementById('discRepliesEmpty').style.display = 'none';
@@ -2870,39 +2952,75 @@
         }
         window.openDiscDetail = openDiscDetail;
 
+        // ── Build tree from flat replies ──
+        function buildFacReplyTree(replies) {
+            const map = {}, roots = [];
+            replies.forEach(r => { map[r._id] = { ...r, children: [] }; });
+            replies.forEach(r => {
+                const pid = r.parentReplyId || null;
+                if (pid && map[pid]) map[pid].children.push(map[r._id]);
+                else roots.push(map[r._id]);
+            });
+            const sort = arr => { arr.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||new Date(a.createdAt)-new Date(b.createdAt)); arr.forEach(r=>sort(r.children)); return arr; };
+            return sort(roots);
+        }
+
+        function renderFacReplyNode(r, depth) {
+            const isInst = r.authorRole === 'admin';
+            const init   = (r.authorName || '?').charAt(0).toUpperCase();
+            const tstr   = new Date(r.createdAt).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});
+            const lc     = (r.likes || []).length;
+            const childrenHtml = (r.children || []).map(c => renderFacReplyNode(c, depth+1)).join('');
+            const hasChildren  = r.children && r.children.length > 0;
+            const cid = 'fdrc-' + r._id;
+            const mid = 'fdrm-' + r._id;
+            const safeAuthor = (r.authorName||'').replace(/'/g,'&apos;');
+            const safeFeedback = (r.feedback||'').replace(/'/g,'&apos;');
+            return `
+<div class="disc-reply-node" style="position:relative;">
+  ${depth > 0 ? `<div class="disc-thread-gutter" onclick="mwDiscCollapse('${r._id}')"></div>` : ''}
+  <div class="disc-reply-card${r.pinned?' is-pinned':''}" style="--card:var(--bg);">
+    <div class="disc-reply-header">
+      <div class="disc-reply-avatar" style="background:linear-gradient(135deg,var(--accent),#a855f7);color:#fff;border:none;">${init}</div>
+      <div class="disc-reply-meta" style="flex:1;">
+        <span class="disc-reply-author">${r.authorName||'Unknown'}</span>
+        ${isInst?'<span class="disc-badge disc-badge-inst">Instructor</span>':''}
+        ${r.pinned?'<span class="disc-badge disc-badge-pin">📌 Pinned</span>':''}
+        ${r.graded?`<span class="disc-badge disc-badge-grade">✓ ${r.grade}pts</span>`:''}
+        <span class="disc-reply-time">&bull; ${tstr}</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button onclick="moderateReply('${r._id}','pin',${!r.pinned})" style="padding:5px 9px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer;">${r.pinned?'📎 Unpin':'📌 Pin'}</button>
+        <button onclick="moderateReply('${r._id}','hide',true)" style="padding:5px 9px;border-radius:8px;border:1px solid rgba(220,38,38,.3);background:rgba(220,38,38,.06);color:var(--red);font-size:11px;cursor:pointer;"><i class="fas fa-eye-slash"></i> Hide</button>
+        <button onclick="openGradeModal('${r._id}','${safeAuthor}',${r.grade||0},'${safeFeedback}')" style="padding:5px 9px;border-radius:8px;border:1px solid var(--accent-bdr);background:var(--accent-lo);color:var(--accent);font-size:11px;cursor:pointer;font-weight:700;">⭐ Grade</button>
+      </div>
+    </div>
+    <div class="disc-reply-body" style="font-size:.9rem;line-height:1.65;color:var(--text);margin-bottom:10px;">${r.content}</div>
+    ${r.feedback?`<div class="disc-reply-fb"><strong style="color:#16a34a;">Instructor Feedback:</strong> ${r.feedback}</div>`:''}
+    <div class="disc-actions">
+      <button class="disc-btn-like" id="likeBtn-${r._id}" onclick="mwFacDiscLike('${r._id}',this)">▲ <span id="likeCnt-${r._id}">${lc}</span></button>
+      <button class="disc-btn-act" onclick="mwFacOpenComposer('${r._id}','${mid}')">💬 Reply</button>
+      ${hasChildren?`<button class="disc-btn-collapse" id="collapseBtn-${r._id}" onclick="mwDiscCollapse('${r._id}')">− ${r.children.length} ${r.children.length===1?'reply':'replies'}</button>`:''}
+    </div>
+    <div id="${mid}" class="disc-inline-composer" style="display:none;">
+      <textarea class="disc-inline-ta" placeholder="Write a reply as instructor..."></textarea>
+      <div class="disc-inline-row">
+        <button class="disc-inline-cancel" onclick="mwFacCloseComposer('${mid}')">Cancel</button>
+        <button class="disc-inline-post" onclick="mwFacPostThread('${r._id}','${mid}')">Post Reply</button>
+      </div>
+    </div>
+  </div>
+  <div id="${cid}" class="disc-children">${childrenHtml}</div>
+</div>`;
+        }
+
         function renderReplies(replies) {
-            const feed = document.getElementById('discRepliesFeed');
+            const feed  = document.getElementById('discRepliesFeed');
             const empty = document.getElementById('discRepliesEmpty');
-
-            // Pinned first
-            const sorted = [...replies].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
-
-            if (!sorted.length) { feed.innerHTML = ''; empty.style.display = ''; return; }
+            const roots = buildFacReplyTree(replies);
+            if (!roots.length) { feed.innerHTML = ''; empty.style.display = ''; return; }
             empty.style.display = 'none';
-
-            feed.innerHTML = sorted.map(r => `
-                <div style="background:var(--bg);border:1px solid ${r.pinned ? 'var(--accent-bdr)' : 'var(--border)'};border-radius:14px;padding:18px 20px;${r.pinned ? 'box-shadow:0 0 0 2px var(--accent-lo);' : ''}">
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a855f7);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;">${(r.authorName || '?').charAt(0).toUpperCase()}</div>
-                        <div style="flex:1;">
-                            <div style="font-size:13px;font-weight:700;">${r.authorName || 'Unknown'}
-                                ${r.authorRole === 'admin' ? '<span style="font-size:10px;background:var(--accent-lo);color:var(--accent);padding:2px 8px;border-radius:99px;font-weight:700;">Instructor</span>' : ''}
-                                ${r.pinned ? '<span style="font-size:10px;background:rgba(99,102,241,.12);color:#818cf8;padding:2px 8px;border-radius:99px;font-weight:700;">📌 Pinned</span>' : ''}
-                                ${r.graded ? `<span style="font-size:10px;background:rgba(22,163,74,.1);color:#16a34a;padding:2px 8px;border-radius:99px;font-weight:700;">✓ ${r.grade}pts</span>` : ''}
-                            </div>
-                            <div style="font-size:11px;color:var(--muted);">${new Date(r.createdAt).toLocaleString('en-IN', {dateStyle:'medium',timeStyle:'short'})}</div>
-                        </div>
-                        <!-- Quick actions -->
-                        <div style="display:flex;gap:6px;">
-                            <button onclick="moderateReply('${r._id}','pin',${!r.pinned})" title="${r.pinned ? 'Unpin' : 'Pin'}" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer;">${r.pinned ? '📎 Unpin' : '📌 Pin'}</button>
-                            <button onclick="moderateReply('${r._id}','hide',true)" title="Hide" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(220,38,38,.3);background:rgba(220,38,38,.08);color:var(--red);font-size:11px;cursor:pointer;"><i class="fas fa-eye-slash"></i> Hide</button>
-                            <button onclick="openGradeModal('${r._id}','${(r.authorName||'').replace(/'/g,'\\&apos;')}',${r.grade || 0},'${(r.feedback||'').replace(/'/g,'\\&apos;')}')" style="padding:6px 10px;border-radius:8px;border:1px solid var(--accent-bdr);background:var(--accent-lo);color:var(--accent);font-size:11px;cursor:pointer;font-weight:700;">⭐ Grade</button>
-                        </div>
-                    </div>
-                    <p style="font-size:14px;line-height:1.65;color:var(--text);margin:0;">${r.content}</p>
-                    ${r.feedback ? `<div style="margin-top:10px;padding:10px 14px;background:rgba(22,163,74,.06);border-left:3px solid #16a34a;border-radius:0 8px 8px 0;font-size:12px;color:var(--muted);"><strong style="color:#16a34a;">Instructor Feedback:</strong> ${r.feedback}</div>` : ''}
-                </div>
-            `).join('');
+            feed.innerHTML = roots.map(r => renderFacReplyNode(r, 0)).join('');
         }
 
         // ── Moderation Actions ──
@@ -3035,6 +3153,75 @@
 
     })();
     // Append this script block
+
+    // ── Faculty thread helper globals ──
+    window.mwFacDiscLike = async function(replyId, btn) {
+        try {
+            const tok = localStorage.getItem('token') || localStorage.getItem('mindwave_token') || '';
+            const discId = window._mwFacCurrentDiscId;
+            if (!discId) return;
+            const r = await fetch(`/api/discussions/${discId}/replies/${replyId}/like`, {
+                method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok}, credentials:'include'
+            });
+            const d = await r.json();
+            if (!d.ok) return;
+            const cnt = document.getElementById('likeCnt-' + replyId);
+            if (cnt) cnt.textContent = d.likeCount;
+            if (d.liked) btn.classList.add('liked'); else btn.classList.remove('liked');
+        } catch(e) { console.error('fac like error', e); }
+    };
+    window.mwFacOpenComposer = function(replyId, composerId) {
+        document.querySelectorAll('.disc-inline-composer').forEach(el => { el.style.display = 'none'; });
+        const box = document.getElementById(composerId);
+        if (!box) return;
+        box.style.display = '';
+        box.querySelector('.disc-inline-ta').focus();
+    };
+    window.mwFacCloseComposer = function(composerId) {
+        const box = document.getElementById(composerId);
+        if (box) { box.style.display = 'none'; box.querySelector('.disc-inline-ta').value = ''; }
+    };
+    window.mwFacPostThread = async function(parentReplyId, composerId) {
+        const box     = document.getElementById(composerId);
+        const ta      = box?.querySelector('.disc-inline-ta');
+        const postBtn = box?.querySelector('.disc-inline-post');
+        const discId  = window._mwFacCurrentDiscId;
+        if (!ta || !discId) return;
+        const content = ta.value.trim();
+        if (!content) { ta.style.borderColor = '#ef4444'; setTimeout(()=>ta.style.borderColor='',1200); return; }
+        postBtn.disabled = true; postBtn.textContent = 'Posting...';
+        try {
+            const tok = localStorage.getItem('token') || localStorage.getItem('mindwave_token') || '';
+            const r = await fetch(`/api/discussions/${discId}/replies`, {
+                method:'POST',
+                headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+                credentials:'include',
+                body: JSON.stringify({ content, parentReplyId })
+            });
+            const d = await r.json();
+            if (!d.ok) throw new Error(d.message);
+            mwFacCloseComposer(composerId);
+            const title = document.getElementById('discDetailTitle').textContent;
+            window.openDiscDetail(discId, title);
+        } catch(e) {
+            ta.style.borderColor = '#ef4444';
+            ta.placeholder = e.message;
+            setTimeout(()=>{ ta.style.borderColor=''; ta.placeholder='Write a reply as instructor...'; },2500);
+        } finally {
+            postBtn.disabled = false; postBtn.textContent = 'Post Reply';
+        }
+    };
+    // mwDiscCollapse is shared with student page — define only if not already defined
+    if (!window.mwDiscCollapse) {
+        window.mwDiscCollapse = function(replyId) {
+            const children = document.getElementById('fdrc-' + replyId);
+            const btn = document.getElementById('collapseBtn-' + replyId);
+            if (!children) return;
+            const isHidden = children.style.display === 'none';
+            children.style.display = isHidden ? '' : 'none';
+            if (btn) btn.textContent = (isHidden ? '− ' : '⊕ ') + btn.textContent.replace(/^[−⊕] /,'');
+        };
+    }
     </script>
 
     <!-- ═══════════════ SECTION PICKER MODAL ═══════════════ -->

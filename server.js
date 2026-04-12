@@ -1017,6 +1017,10 @@ const discussionReplySchema = new mongoose.Schema({
   authorName: { type: String },
   authorRole: { type: String, enum: ['student', 'admin'], default: 'student' },
   content: { type: String, required: true },
+  // Threaded replies — null means top-level reply
+  parentReplyId: { type: mongoose.Schema.Types.ObjectId, default: null },
+  // Upvotes (array of user IDs who liked this reply)
+  likes: { type: [mongoose.Schema.Types.ObjectId], default: [] },
   // Grading (faculty fills these)
   grade: { type: Number, min: 0 },
   feedback: { type: String },
@@ -13898,16 +13902,15 @@ app.delete('/api/discussions/:id', verifyDiscToken, async (req, res) => {
 // POST /api/discussions/:id/replies — Add a reply (student or faculty)
 app.post('/api/discussions/:id/replies', verifyDiscToken, async (req, res) => {
   try {
-    const { content } = req.body;
+    const { content, parentReplyId } = req.body;
     if (!content || !content.trim()) return res.status(400).json({ ok: false, message: 'Content is required' });
 
-    const userId = req.user.sub;                                          // <-- fixed
+    const userId = req.user.sub;
     const user = await User.findById(userId).select('name role');
 
-    // --- 25-word minimum (students only) ---
-    // Collapse ALL whitespace runs (spaces, tabs, newlines) → single space,
-    // then split so holding spacebar can never inflate the word count.
-    if (user?.role !== 'admin') {
+    // --- 25-word minimum only for TOP-LEVEL replies (students only) ---
+    // Sub-replies (parentReplyId set) have NO word restriction.
+    if (user?.role !== 'admin' && !parentReplyId) {
       const wordCount = content.trim().replace(/\s+/g, ' ').split(' ').filter(w => w.length > 0).length;
       if (wordCount < 25) {
         return res.status(400).json({
@@ -13916,6 +13919,7 @@ app.post('/api/discussions/:id/replies', verifyDiscToken, async (req, res) => {
         });
       }
     }
+
 
     const disc = await Discussion.findById(req.params.id);
     if (!disc) return res.status(404).json({ ok: false, message: 'Discussion not found' });
@@ -13930,7 +13934,8 @@ app.post('/api/discussions/:id/replies', verifyDiscToken, async (req, res) => {
       authorId: userId,
       authorName: user?.name || 'Unknown',
       authorRole: user?.role === 'admin' ? 'admin' : 'student',
-      content: content.trim()
+      content: content.trim(),
+      parentReplyId: parentReplyId || null
     };
 
     disc.replies.push(reply);
@@ -13939,6 +13944,29 @@ app.post('/api/discussions/:id/replies', verifyDiscToken, async (req, res) => {
     res.json({ ok: true, reply: savedReply });
   } catch (err) {
     console.error('Reply post error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// POST /api/discussions/:id/replies/:replyId/like — Toggle upvote on a reply
+app.post('/api/discussions/:id/replies/:replyId/like', verifyDiscToken, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const disc = await Discussion.findById(req.params.id);
+    if (!disc) return res.status(404).json({ ok: false, message: 'Discussion not found' });
+    const reply = disc.replies.id(req.params.replyId);
+    if (!reply) return res.status(404).json({ ok: false, message: 'Reply not found' });
+
+    const already = (reply.likes || []).some(id => id.toString() === userId.toString());
+    if (already) {
+      reply.likes = reply.likes.filter(id => id.toString() !== userId.toString());
+    } else {
+      reply.likes.push(userId);
+    }
+    await disc.save();
+    res.json({ ok: true, liked: !already, likeCount: reply.likes.length });
+  } catch (err) {
+    console.error('Reply like error:', err);
     res.status(500).json({ ok: false, message: 'Server error' });
   }
 });
