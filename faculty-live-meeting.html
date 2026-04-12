@@ -9,6 +9,7 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="auth-guard.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -1595,11 +1596,8 @@
               <button class="ts-btn" id="tsClearBtn" onclick="clearTranscript()" title="Clear transcript">
                 <i data-lucide="trash-2"></i> Clear
               </button>
-              <button class="ts-btn" onclick="exportTranscriptTxt()" title="Export .txt">
-                <i data-lucide="download"></i> .txt
-              </button>
-              <button class="ts-btn" onclick="exportTranscriptSrt()" title="Export .srt">
-                <i data-lucide="download"></i> .srt
+              <button class="ts-btn" onclick="exportTranscriptPDF()" title="Export branded PDF" style="color:#6366f1;border-color:rgba(99,102,241,.35);background:rgba(99,102,241,.08)">
+                <i data-lucide="file-text"></i> Export PDF
               </button>
               <span class="ts-font-lbl">Size</span>
               <button class="ts-font-btn" id="fontMinus" onclick="changeFontSize(-1)" title="Smaller">−</button>
@@ -1677,8 +1675,8 @@
       <div class="sum-actions">
         <button class="sum-btn sum-btn-p" onclick="downloadSummary()"><i data-lucide="download"></i> Download
           Report</button>
-        <button class="sum-btn sum-btn-s" id="sumExportTranscript" onclick="exportTranscriptTxt()" style="display:none">
-          <i data-lucide="subtitles"></i> Transcript
+        <button class="sum-btn sum-btn-s" id="sumExportTranscript" onclick="exportTranscriptPDF()" style="display:none">
+          <i data-lucide="file-text"></i> Transcript PDF
         </button>
         <button class="sum-btn sum-btn-s" onclick="location.href='admin.html'"><i data-lucide="home"></i> Exit</button>
       </div>
@@ -2600,43 +2598,142 @@
       lucide.createIcons();
     }
 
-    // ── Export .txt ──
-    function exportTranscriptTxt() {
+    // ── Export branded PDF (matches MindWave report style) ──
+    function exportTranscriptPDF() {
       if (!transcriptLog.length) { showToast('No transcript to export', 'info'); return; }
-      let out = `MINDWAVE LIVE TRANSCRIPT\n========================\nDate: ${new Date().toLocaleString()}\n\n`;
-      transcriptLog.forEach(e => {
-        const t = new Date(e.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-        out += `[${t}] ${e.speaker}: ${e.text}\n`;
-      });
-      dlBlob(out, 'text/plain', `Transcript_${new Date().toISOString().slice(0,10)}.txt`);
-    }
+      if (!window.jspdf) { showToast('PDF library not loaded yet, try again in a moment.', 'error'); return; }
 
-    // ── Export .srt ──
-    function exportTranscriptSrt() {
-      if (!transcriptLog.length) { showToast('No transcript to export', 'info'); return; }
-      let out = '';
-      transcriptLog.forEach((e, i) => {
-        const start = msToSrt(e.time);
-        const end   = msToSrt(e.time + 3500);
-        out += `${i+1}\n${start} --> ${end}\n${e.speaker}: ${e.text}\n\n`;
-      });
-      dlBlob(out, 'text/plain', `Transcript_${new Date().toISOString().slice(0,10)}.srt`);
-    }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageW = 210;
+      const margin = 14;
+      const contentW = pageW - margin * 2;
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      const facultyName = localStorage.getItem('name') || localStorage.getItem('firstName') || 'Faculty';
+      const titleText = meetingTitle || 'MindWave Live Class';
 
-    function msToSrt(ms) {
-      const totalMs = ms % 1000;
-      const s = Math.floor(ms / 1000) % 60;
-      const m = Math.floor(ms / 60000) % 60;
-      const h = Math.floor(ms / 3600000);
-      return `${pad(h)}:${pad(m)}:${pad(s)},${String(totalMs).padStart(3,'0')}`;
-    }
-    function pad(n) { return String(n).padStart(2,'0'); }
-    function dlBlob(content, mime, filename) {
-      const b = new Blob([content], { type: mime });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(b);
-      a.download = filename;
-      a.click();
+      // ── Header bar ──
+      doc.setFillColor(99, 102, 241);           // indigo
+      doc.rect(0, 0, pageW, 22, 'F');
+      doc.setFontSize(15);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.text('MindWave', margin, 10);
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Live Session – Transcript Report', margin, 16.5);
+      doc.text(`Generated by ${facultyName}`, pageW - margin, 10, { align: 'right' });
+      doc.text(`${dateStr} at ${timeStr}`, pageW - margin, 16.5, { align: 'right' });
+
+      // ── Thin accent line ──
+      doc.setDrawColor(99, 102, 241);
+      doc.setLineWidth(0.6);
+      doc.line(margin, 26, pageW - margin, 26);
+
+      // ── Meeting title ──
+      doc.setTextColor(20, 20, 40);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text(titleText, margin, 36);
+
+      // ── Metadata row ──
+      const durationSec = startTs ? Math.floor((Date.now() - startTs) / 1000) : 0;
+      const durStr = durationSec > 0
+        ? `${Math.floor(durationSec / 60)}m ${durationSec % 60}s`
+        : 'N/A';
+      const partCount = room ? (room.remoteParticipants.size + 1) : 1;
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 100, 130);
+      doc.text(`Duration: ${durStr}   ·   Participants: ${partCount}   ·   Segments: ${transcriptLog.length}`, margin, 42);
+
+      // ── Section title ──
+      let y = 52;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(99, 102, 241);
+      doc.text('LIVE TRANSCRIPT', margin, y);
+      doc.setDrawColor(99, 102, 241);
+      doc.setLineWidth(0.3);
+      doc.line(margin, y + 1.5, pageW - margin, y + 1.5);
+      y += 9;
+
+      // ── Table header ──
+      const colTime = margin;
+      const colSpk  = margin + 22;
+      const colText = margin + 50;
+      const rowH    = 7.5;
+
+      doc.setFillColor(240, 240, 252);
+      doc.rect(margin, y - 5, contentW, rowH, 'F');
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(60, 60, 90);
+      doc.text('TIME', colTime, y);
+      doc.text('SPEAKER', colSpk, y);
+      doc.text('TRANSCRIPT', colText, y);
+      y += rowH;
+
+      // ── Rows ──
+      doc.setFont('helvetica', 'normal');
+      transcriptLog.forEach((entry, i) => {
+        const tStr = new Date(entry.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        // Wrap long text
+        const wrapped = doc.splitTextToSize(entry.text, contentW - 38);
+        const cellH   = Math.max(rowH, wrapped.length * 4.5);
+
+        // Alternating row bg
+        if (i % 2 === 0) {
+          doc.setFillColor(250, 250, 255);
+          doc.rect(margin, y - 5, contentW, cellH, 'F');
+        }
+
+        doc.setFontSize(7.5);
+        doc.setTextColor(80, 80, 110);
+        doc.text(tStr, colTime, y);
+
+        doc.setTextColor(99, 102, 241);
+        doc.setFont('helvetica', 'bold');
+        doc.text(entry.speaker, colSpk, y);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30, 30, 50);
+        doc.text(wrapped, colText, y);
+
+        y += cellH;
+        if (y > 272) {
+          doc.addPage();
+          y = 20;
+          // Repeat mini-header on new page
+          doc.setFillColor(99, 102, 241);
+          doc.rect(0, 0, pageW, 10, 'F');
+          doc.setFontSize(7.5);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(255, 255, 255);
+          doc.text(`MindWave  –  ${titleText}  (continued)`, margin, 7);
+          y = 18;
+        }
+      });
+
+      // ── Footer ──
+      const pageCount = doc.getNumberOfPages();
+      for (let p = 1; p <= pageCount; p++) {
+        doc.setPage(p);
+        doc.setDrawColor(220, 220, 235);
+        doc.setLineWidth(0.3);
+        doc.line(margin, 284, pageW - margin, 284);
+        doc.setFontSize(7);
+        doc.setTextColor(160, 160, 180);
+        doc.setFont('helvetica', 'normal');
+        doc.text('MindWave – Classroom Engagement Platform  |  Automatically generated  ·  Confidential', margin, 289);
+        doc.text(`Page ${p} of ${pageCount}`, pageW - margin, 289, { align: 'right' });
+      }
+
+      const filename = `Transcript_${titleText.replace(/\s+/g,'-')}_${now.toISOString().slice(0,10)}.pdf`;
+      doc.save(filename);
+      showToast('Transcript PDF downloaded ✓', 'success');
     }
   </script>
 </body>
