@@ -344,6 +344,50 @@
     closeBtn.addEventListener('click', toggleChat);
     newChatBtn.addEventListener('click', startNewChat);
 
+    // ── Client-side Safety Filter ────────────────────────────────────────────
+    const CLIENT_BLOCKED_KEYWORDS = [
+        // War & Conflict
+        'war','warfare','battle','invasion','airstrike','bomb','nuke','nuclear weapon',
+        'missile','genocide','terrorism','terrorist','idf','hamas','hezbollah','isis',
+        'taliban','al-qaeda','ukraine russia','russia ukraine','israel palestine','gaza war',
+        'war crime','coup','armed conflict','drone strike','air raid','shelling','warzone',
+        'frontline','war update','updates on war','war news','who is winning','latest war',
+        'putin','zelensky','netanyahu','hostage crisis','ceasefire','insurgency',
+        'tell me about war','any war','which country is at war','any updates on war',
+        // Pornography
+        'porn','pornography','xxx','hentai','onlyfans','nude','nudity','naked photo',
+        'sex video','erotic','masturbat','orgasm','nsfw','explicit content','adult film',
+        'send nudes','sexual position','kink','fetish','cam girl','escort','prostitut',
+        'generate nude','draw naked','describe sex','whats porn','what is porn',
+        // Violence
+        'how to kill','how to make a bomb','suicide method','self harm','cut myself',
+        'ways to die','overdose on','illegal weapon',
+        // Politics
+        'election','best political party','bjp vs','modi vs','trump vs','which party is better'
+    ];
+
+    const CLIENT_ROASTS = [
+        "Oh wow, you're asking about *that* on a STUDY platform? Bold move. Maybe channel that energy into the assignment due tomorrow. 📚",
+        "Sir/Ma'am, this is a school portal. We serve knowledge here, not this. Open Google in a separate tab. 🙏",
+        "Ah yes, because nothing screams 'focused student' like asking me about this. Your GPA wants a word. 📉",
+        "Cute question! Almost as cute as the idea of passing finals without studying. Let's focus, shall we? 😏",
+        "I am programmed to help you learn — not to help you avoid learning. Nice try though! 🎓",
+        "Bro. This is MindWave. Not Google. Not Reddit. Not... whatever you were thinking. Back to coursework! ⚡"
+    ];
+
+    function clientSafetyCheck(text) {
+        const lower = text.toLowerCase();
+        for (const kw of CLIENT_BLOCKED_KEYWORDS) {
+            if (lower.includes(kw)) return false;
+        }
+        return true;
+    }
+
+    function clientRoast() {
+        return CLIENT_ROASTS[Math.floor(Math.random() * CLIENT_ROASTS.length)];
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     // Send Message
     async function sendMessage() {
         const text = inputEl.value.trim();
@@ -352,6 +396,12 @@
         // Add User Message
         addMessage(text, 'user');
         inputEl.value = '';
+
+        // Client-side safety check (instant — no network call needed)
+        if (!clientSafetyCheck(text)) {
+            addMessage(clientRoast(), 'bot');
+            return;
+        }
 
         // Show Typing Indicator
         isTyping = true;
@@ -395,6 +445,7 @@
             addMessage(`Network error: ${error.message}. Please check your connection.`, 'bot');
         }
     }
+
 
     sendBtn.addEventListener('click', sendMessage);
     inputEl.addEventListener('keypress', (e) => {
