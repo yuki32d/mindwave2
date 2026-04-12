@@ -2332,7 +2332,7 @@
         }
         doc.setFontSize(7.5);
         doc.setFont('helvetica', isBold ? 'bold' : 'normal');
-        doc.setTextColor(isHeader ? [60, 60, 90] : [30, 30, 50]);
+        if (isHeader) doc.setTextColor(60, 60, 90); else doc.setTextColor(30, 30, 50);
         cols.forEach((c, i) => doc.text(String(c ?? ''), colXs[i], y));
         return y + rowH;
       }
