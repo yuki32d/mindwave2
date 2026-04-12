@@ -1238,22 +1238,29 @@
         window.showConnectState = function () {
             document.getElementById('connectState').style.display = 'block';
             document.getElementById('classroomState').style.display = 'none';
+            const disconnectBtn = document.getElementById('disconnectGcrBtn');
+            if (disconnectBtn) disconnectBtn.style.display = 'none';
         };
     </script>
     <script src="faculty-classroom.js"></script>
     <script>
         // ── Override faculty-classroom.js functions to work with new HTML structure ──
 
-        // showConnectionPrompt: show #connectState instead of replacing .classroom-container
+        // showConnectionPrompt: show #connectState and hide the disconnect button
         window.showConnectionPrompt = function () {
             document.getElementById('connectState').style.display = '';
             document.getElementById('classroomState').style.display = 'none';
+            const disconnectBtn = document.getElementById('disconnectGcrBtn');
+            if (disconnectBtn) disconnectBtn.style.display = 'none';
         };
 
-        // initializeInterface: show workspace and load data
+        // initializeInterface: show workspace, load data, and reveal the disconnect button
         window.initializeInterface = function () {
             document.getElementById('connectState').style.display = 'none';
             document.getElementById('classroomState').style.display = '';
+            // Show the disconnect button in the topbar
+            const disconnectBtn = document.getElementById('disconnectGcrBtn');
+            if (disconnectBtn) disconnectBtn.style.display = 'inline-flex';
             if (typeof loadCourses === 'function') loadCourses();
             if (typeof setupEventListeners === 'function') setupEventListeners();
         };
