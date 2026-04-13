@@ -1,306 +1,1034 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mindwave MOOC - Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --text-dark: #111827;
-            --text-muted: #6b7280;
-            --bg-color: #f3f4f6;
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindWave MOOC — Dashboard</title>
+  <meta name="description" content="Your personalized MOOC learning dashboard — track progress, manage courses, and explore new learning.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Inter', sans-serif; background: #0c0d14; color: #e2e8f0; font-size: 14px; overflow: hidden; }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            background: #f8fafc;
-            color: var(--text-dark);
-            min-height: 100vh;
-        }
+    :root {
+      --bg: #0c0d14;
+      --surface: #131520;
+      --surface-2: #1a1d2e;
+      --surface-3: #1f2235;
+      --border: rgba(255,255,255,0.07);
+      --border-2: rgba(255,255,255,0.13);
+      --text: #e2e8f0;
+      --muted: #7c849e;
+      --accent: #6366f1;
+      --accent-2: #818cf8;
+      --accent-glow: rgba(99,102,241,0.2);
+      --green: #10b981;
+      --orange: #f59e0b;
+      --pink: #ec4899;
+      --red: #f43f5e;
+      --teal: #06b6d4;
+      --sidebar-w: 250px;
+      --topbar-h: 62px;
+      --radius: 14px;
+      --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
 
-        .navbar {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 16px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
+    /* ── SHELL ── */
+    .shell { display: flex; height: 100vh; }
 
-        .navbar-brand {
-            font-size: 20px;
-            font-weight: 800;
-            background: linear-gradient(to right, #4f46e5, #ec4899);
-            -webkit-background-clip: text;
-            color: transparent;
-            text-decoration: none;
-        }
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; flex-shrink: 0;
+      overflow-y: auto; scrollbar-width: none;
+    }
+    .sidebar::-webkit-scrollbar { display: none; }
 
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 600;
-            margin-left: 24px;
-            font-size: 14px;
-            transition: color 0.3s ease;
-        }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 20px 18px; border-bottom: 1px solid var(--border);
+    }
+    .logo-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-icon i { width: 17px; height: 17px; color: #fff; }
+    .logo-text { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
+    .logo-badge {
+      margin-left: auto; font-size: 9px; font-weight: 700;
+      background: rgba(99,102,241,0.18); color: var(--accent-2);
+      border: 1px solid rgba(99,102,241,0.3); border-radius: 999px;
+      padding: 2px 7px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
 
-        .nav-links a:hover {
-            color: var(--primary);
-        }
+    .nav-section { padding: 14px 10px 6px; }
+    .nav-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 0 8px; margin-bottom: 4px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 9px;
+      cursor: pointer; color: var(--muted); font-weight: 500;
+      font-size: 13.5px; text-decoration: none;
+      transition: background var(--transition), color var(--transition);
+      position: relative;
+    }
+    .nav-item i { width: 16px; height: 16px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .nav-item.active { background: rgba(99,102,241,0.15); color: var(--accent-2); }
+    .nav-item.active::before {
+      content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+      width: 3px; border-radius: 0 3px 3px 0; background: var(--accent);
+    }
+    .nav-badge {
+      margin-left: auto; font-size: 10px; font-weight: 700;
+      background: var(--accent); color: #fff;
+      border-radius: 999px; padding: 1px 7px; min-width: 20px; text-align: center;
+    }
+    .nav-divider { height: 1px; background: var(--border); margin: 6px 10px; }
 
-        .btn-logout {
-            cursor: pointer;
-            color: #ef4444;
-            font-weight: 600;
-            margin-left: 24px;
-            font-size: 14px;
-        }
+    /* Faculty role chip */
+    .role-chip {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 999px; padding: 4px 10px; margin: 10px 12px;
+      font-size: 11px; font-weight: 700; color: var(--accent-2);
+    }
+    .role-chip i { width: 12px; height: 12px; }
+    .role-chip.faculty { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.25); color: var(--green); }
 
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 24px;
-        }
+    .sidebar-footer {
+      margin-top: auto; padding: 14px 10px;
+      border-top: 1px solid var(--border);
+    }
+    .user-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 10px; border-radius: 10px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      cursor: pointer; transition: background var(--transition);
+    }
+    .user-card:hover { background: rgba(255,255,255,0.05); }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--pink));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 12px; color: #fff; flex-shrink: 0;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-weight: 600; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--muted); }
 
-        .header-section {
-            margin-bottom: 40px;
-        }
+    /* ── MAIN ── */
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
 
-        .header-section h1 {
-            font-size: 32px;
-            font-weight: 800;
-            margin: 0 0 8px 0;
-            letter-spacing: -1px;
-        }
+    /* ── TOPBAR ── */
+    .topbar {
+      height: var(--topbar-h); background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 26px; gap: 14px; flex-shrink: 0;
+    }
+    .topbar-title { font-size: 14px; font-weight: 600; }
+    .topbar-search {
+      margin-left: auto; display: flex; align-items: center; gap: 8px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 9px; padding: 7px 14px; width: 210px;
+      transition: border-color var(--transition);
+    }
+    .topbar-search:focus-within { border-color: var(--accent); }
+    .topbar-search i { width: 14px; height: 14px; color: var(--muted); flex-shrink: 0; }
+    .topbar-search input { background: none; border: none; outline: none; color: var(--text); font-size: 13px; font-family: inherit; width: 100%; }
+    .topbar-search input::placeholder { color: var(--muted); }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: 12px; }
+    .icon-btn {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background var(--transition); position: relative;
+    }
+    .icon-btn i { width: 15px; height: 15px; color: var(--muted); }
+    .icon-btn:hover { background: rgba(255,255,255,0.07); }
+    .notif-dot {
+      position: absolute; top: 7px; right: 7px;
+      width: 7px; height: 7px; background: var(--red);
+      border-radius: 50%; border: 2px solid var(--surface);
+    }
 
-        .header-section p {
-            color: var(--text-muted);
-            margin: 0;
-            font-size: 16px;
-        }
+    /* ── CONTENT ── */
+    .content { flex: 1; overflow-y: auto; padding: 24px 28px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
 
-        .enrollments-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 24px;
-        }
+    /* ── HERO BANNER ── */
+    .hero-banner {
+      background: linear-gradient(135deg, #1e1f3a 0%, #2d1f4e 50%, #1a2442 100%);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: var(--radius); padding: 28px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px; position: relative; overflow: hidden;
+    }
+    .hero-banner::before {
+      content: ''; position: absolute; right: -60px; top: -60px;
+      width: 250px; height: 250px;
+      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+    }
+    .hero-text h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .hero-text p { color: #9ca3c8; font-size: 13px; }
+    .hero-stats { display: flex; gap: 16px; z-index: 1; }
+    .hero-stat {
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
+      padding: 14px 20px; text-align: center; min-width: 90px;
+    }
+    .hero-stat-val { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+    .hero-stat-lbl { font-size: 11px; color: #9ca3c8; margin-top: 2px; font-weight: 500; }
+    .hero-stat.accent .hero-stat-val { color: var(--accent-2); }
+    .hero-stat.green .hero-stat-val { color: var(--green); }
+    .hero-stat.orange .hero-stat-val { color: var(--orange); }
 
-        .enrollment-card {
-            background: #fff;
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-        }
+    /* ── TABS ── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--surface-2); border-radius: 10px; padding: 4px; width: fit-content; }
+    .tab-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 18px; border-radius: 7px; cursor: pointer;
+      color: var(--muted); font-weight: 600; font-size: 13px;
+      transition: all var(--transition); border: none; background: none; font-family: inherit;
+    }
+    .tab-btn i { width: 14px; height: 14px; }
+    .tab-btn.active { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(99,102,241,0.35); }
+    .tab-btn:not(.active):hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
-        .course-code {
-            font-size: 12px;
-            font-weight: 700;
-            color: #4f46e5;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
+    /* ── KPI GRID ── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    .kpi-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+      transition: border-color var(--transition), transform var(--transition);
+      cursor: default;
+    }
+    .kpi-card:hover { border-color: var(--border-2); transform: translateY(-2px); }
+    .kpi-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .kpi-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+    .kpi-icon-wrap {
+      width: 32px; height: 32px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .kpi-icon-wrap i { width: 16px; height: 16px; }
+    .kpi-icon-wrap.accent { background: rgba(99,102,241,0.15); color: var(--accent-2); }
+    .kpi-icon-wrap.green { background: rgba(16,185,129,0.15); color: var(--green); }
+    .kpi-icon-wrap.orange { background: rgba(245,158,11,0.15); color: var(--orange); }
+    .kpi-icon-wrap.pink { background: rgba(236,72,153,0.15); color: var(--pink); }
+    .kpi-value { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-bottom: 6px; }
+    .kpi-change { font-size: 12px; font-weight: 600; color: var(--green); display: flex; align-items: center; gap: 4px; }
+    .kpi-change i { width: 12px; height: 12px; }
 
-        .course-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 0 0 16px 0;
-            line-height: 1.3;
-        }
+    /* Sparkline */
+    .sparkline { display: flex; align-items: flex-end; gap: 3px; height: 32px; margin-top: 10px; }
+    .spark-bar { flex: 1; border-radius: 3px 3px 0 0; background: rgba(99,102,241,0.25); transition: background var(--transition); }
+    .spark-bar.hi { background: var(--accent); }
 
-        .progress-section {
-            margin-top: auto;
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 16px;
-        }
+    /* ── DASH GRID ── */
+    .dash-grid { display: grid; grid-template-columns: 1fr 320px; gap: 18px; }
+    .dash-col { display: flex; flex-direction: column; gap: 18px; }
 
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
+    /* ── PANEL ── */
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+    }
+    .panel-title { font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .panel-title i { width: 16px; height: 16px; color: var(--accent-2); }
+    .panel-action { font-size: 12px; font-weight: 700; color: var(--accent-2); cursor: pointer; background: none; border: none; font-family: inherit; text-decoration: none; }
+    .panel-action:hover { color: var(--accent); }
+    .panel-body { padding: 18px 20px; }
 
-        .progress-bar-bg {
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
+    /* ── COURSE CARD (enrolled) ── */
+    .course-card-list { display: flex; flex-direction: column; gap: 12px; }
+    .enrolled-card {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .enrolled-card:hover { border-color: var(--border-2); transform: translateX(2px); }
+    .course-color-dot {
+      width: 44px; height: 44px; border-radius: 11px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .course-info { flex: 1; min-width: 0; }
+    .course-code-badge { font-size: 10px; font-weight: 700; color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px; }
+    .course-name { font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; }
+    .progress-wrap {}
+    .progress-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .progress-label { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .progress-pct { font-size: 11px; font-weight: 700; color: var(--accent-2); }
+    .progress-bar { height: 5px; background: rgba(99,102,241,0.15); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(to right, var(--accent), #a78bfa); border-radius: 999px; transition: width 0.5s ease; }
+    .continue-btn {
+      padding: 8px 16px; border-radius: 8px;
+      background: rgba(99,102,241,0.15); color: var(--accent-2);
+      border: 1px solid rgba(99,102,241,0.25); font-size: 12px; font-weight: 700;
+      cursor: pointer; white-space: nowrap; font-family: inherit;
+      transition: all var(--transition);
+    }
+    .continue-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(to right, #4f46e5, #ec4899);
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
+    /* ── INSTRUCTOR COURSE CARDS ── */
+    .instructor-course-card {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px; margin-bottom: 12px;
+      transition: border-color var(--transition);
+    }
+    .instructor-course-card:hover { border-color: rgba(99,102,241,0.3); }
+    .instructor-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .instructor-course-code { font-size: 10px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+    .instructor-course-name { font-size: 14px; font-weight: 700; }
+    .instructor-stats-row { display: flex; gap: 12px; }
+    .i-stat {
+      flex: 1; background: var(--surface-3); border-radius: 9px; padding: 10px 12px; text-align: center;
+    }
+    .i-stat-val { font-size: 18px; font-weight: 800; }
+    .i-stat-lbl { font-size: 10px; color: var(--muted); margin-top: 1px; font-weight: 500; }
+    .i-stat.students .i-stat-val { color: var(--accent-2); }
+    .i-stat.progress .i-stat-val { color: var(--green); }
+    .i-stat.done .i-stat-val { color: var(--orange); }
+    .manage-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; margin-top: 12px;
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: #fff; font-size: 12px; font-weight: 700; border: none;
+      cursor: pointer; font-family: inherit; transition: opacity var(--transition);
+      text-decoration: none;
+    }
+    .manage-btn i { width: 13px; height: 13px; }
+    .manage-btn:hover { opacity: 0.85; }
 
-        .btn-continue {
-            width: 100%;
-            background: #111827;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: center;
-        }
+    /* ── UPCOMING / RIGHT PANEL ── */
+    .upcoming-list { display: flex; flex-direction: column; gap: 10px; }
+    .upcoming-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+    }
+    .upcoming-date-box {
+      text-align: center; min-width: 38px;
+      background: rgba(99,102,241,0.12); border-radius: 8px; padding: 6px 4px;
+    }
+    .upcoming-day { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: var(--accent-2); line-height: 1; }
+    .upcoming-mon { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--muted); }
+    .upcoming-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .upcoming-meta { display: flex; align-items: center; gap: 6px; }
+    .upcoming-time { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 3px; }
+    .upcoming-time i { width: 11px; height: 11px; }
+    .chip {
+      font-size: 10px; font-weight: 700; border-radius: 999px; padding: 2px 8px; letter-spacing: 0.03em;
+    }
+    .chip-live { background: rgba(99,102,241,0.15); color: var(--accent-2); }
+    .chip-quiz { background: rgba(244,63,94,0.15); color: var(--red); }
+    .chip-assign { background: rgba(245,158,11,0.15); color: var(--orange); }
 
-        .btn-continue:hover {
-            background: #374151;
-        }
+    /* ── LEADERBOARD ── */
+    .lb-list { display: flex; flex-direction: column; gap: 8px; }
+    .lb-item {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface-2); border-radius: 9px; padding: 9px 12px;
+      transition: background var(--transition);
+    }
+    .lb-item:hover { background: var(--surface-3); }
+    .lb-rank { font-size: 13px; font-weight: 800; width: 20px; text-align: center; color: var(--muted); }
+    .lb-rank.gold { color: #f59e0b; }
+    .lb-rank.silver { color: #94a3b8; }
+    .lb-rank.bronze { color: #b45309; }
+    .lb-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .lb-name { flex: 1; font-size: 13px; font-weight: 600; }
+    .lb-score { font-size: 12px; font-weight: 700; color: var(--accent-2); }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            background: #fff;
-            border-radius: 20px;
-            border: 1px dashed #cbd5e1;
-            grid-column: 1 / -1;
-        }
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .empty-state i { width: 36px; height: 36px; margin-bottom: 12px; opacity: 0.4; }
+    .empty-state h3 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .empty-state p { font-size: 13px; margin-bottom: 16px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 20px; border-radius: 9px; background: var(--accent);
+      color: #fff; font-size: 13px; font-weight: 700; border: none;
+      cursor: pointer; font-family: inherit; text-decoration: none;
+      transition: all var(--transition);
+    }
+    .btn-primary:hover { background: #5254cc; box-shadow: 0 0 0 3px rgba(99,102,241,0.25); }
+    .btn-primary i { width: 14px; height: 14px; }
 
-        .empty-state h3 {
-            font-size: 20px;
-            margin: 0 0 10px 0;
-        }
+    /* Loading spinner */
+    .loader {
+      display: flex; justify-content: center; padding: 30px;
+    }
+    .spinner {
+      width: 28px; height: 28px; border: 3px solid rgba(99,102,241,0.2);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .empty-state p {
-            color: var(--text-muted);
-            margin: 0 0 24px 0;
-        }
-
-        .btn-primary {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            padding: 10px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-        }
-    </style>
+    /* Quick enroll recommended card */
+    .rec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .rec-card {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .rec-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-2px); }
+    .rec-code { font-size: 10px; font-weight: 700; color: var(--pink); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+    .rec-name { font-size: 13px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+    .rec-duration { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; margin-bottom: 10px; }
+    .rec-duration i { width: 11px; height: 11px; }
+    .enroll-btn {
+      width: 100%; padding: 8px; border-radius: 8px;
+      background: rgba(99,102,241,0.12); color: var(--accent-2);
+      border: 1px solid rgba(99,102,241,0.2); font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: all var(--transition);
+    }
+    .enroll-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  </style>
 </head>
 <body>
+<div class="shell">
 
-    <nav class="navbar">
-        <a href="/mooc/courses.html" class="navbar-brand">Mindwave MOOC</a>
-        <div class="nav-links">
-            <a href="/mooc/courses.html">Browse Courses</a>
-            <span class="btn-logout" onclick="logout()">Logout</span>
-        </div>
-    </nav>
-
-    <div class="dashboard-container">
-        <div class="header-section">
-            <h1 id="greeting">My Learning</h1>
-            <p>Pick up right where you left off.</p>
-        </div>
-
-        <div class="enrollments-grid" id="enrollments-grid">
-            <div style="text-align:center; padding: 40px; grid-column:1/-1;">Loading your courses...</div>
-        </div>
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i data-lucide="brain-circuit"></i></div>
+      <span class="logo-text">MindWave</span>
+      <span class="logo-badge">MOOC</span>
     </div>
 
-    <script>
-        async function loadDashboard() {
-            try {
-                // Fetch user info for greeting
-                const meRes = await fetch('/api/mooc/user/me');
-                if (!meRes.ok) {
-                    window.location.href = '/mooc/login.html';
-                    return;
-                }
-                const meData = await meRes.json();
-                document.getElementById('greeting').textContent = `Welcome back, ${meData.user.name.split(' ')[0]}`;
+    <!-- Role chip shown after auth -->
+    <div id="roleChip" class="role-chip" style="display:none;">
+      <i data-lucide="user-check"></i>
+      <span id="roleChipText">Student</span>
+    </div>
 
-                // Fetch dashboard stats
-                const dashRes = await fetch('/api/mooc/dashboard');
-                const dashData = await dashRes.json();
+    <nav class="nav-section">
+      <div class="nav-label">Main</div>
+      <a href="/mooc/dashboard.html" class="nav-item active">
+        <i data-lucide="layout-dashboard"></i> Dashboard
+      </a>
+      <a href="/mooc/courses.html" class="nav-item">
+        <i data-lucide="book-open"></i> Browse Courses
+      </a>
+      <a href="#" class="nav-item" id="instructorNav" style="display:none;">
+        <i data-lucide="graduation-cap"></i> My Courses
+        <span class="nav-badge" id="instructorCoursesCount">0</span>
+      </a>
+    </nav>
 
-                const grid = document.getElementById('enrollments-grid');
-                grid.innerHTML = '';
+    <div class="nav-divider"></div>
 
-                if (!dashData.enrollments || dashData.enrollments.length === 0) {
-                    grid.innerHTML = `
-                        <div class="empty-state">
-                            <h3>You haven't enrolled in any courses yet</h3>
-                            <p>Explore our catalog to start your learning journey.</p>
-                            <a href="/mooc/courses.html" class="btn-primary">Browse Courses</a>
+    <nav class="nav-section" id="learningNav">
+      <div class="nav-label">Learning</div>
+      <a href="#" class="nav-item" onclick="goToContinue()">
+        <i data-lucide="play-circle"></i> Continue Learning
+      </a>
+      <a href="#" class="nav-item">
+        <i data-lucide="trophy"></i> Leaderboard
+      </a>
+      <a href="#" class="nav-item">
+        <i data-lucide="award"></i> My Certificates
+      </a>
+    </nav>
+
+    <div class="nav-divider"></div>
+
+    <nav class="nav-section">
+      <div class="nav-label">Account</div>
+      <a href="#" class="nav-item">
+        <i data-lucide="user"></i> Profile
+      </a>
+      <a href="#" class="nav-item" onclick="logout()">
+        <i data-lucide="log-out"></i> Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebarAvatar">--</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarName">Loading…</div>
+          <div class="user-role" id="sidebarRole">MOOC Portal</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-title" id="topbarTitle">My Dashboard</div>
+      <div class="topbar-search">
+        <i data-lucide="search"></i>
+        <input type="text" placeholder="Search courses…" id="searchInput">
+      </div>
+      <div class="topbar-actions">
+        <div class="icon-btn" title="Notifications">
+          <i data-lucide="bell"></i>
+          <span class="notif-dot"></span>
+        </div>
+        <div class="icon-btn" onclick="window.location.href='/mooc/courses.html'" title="Browse Courses">
+          <i data-lucide="compass"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content" id="mainContent">
+      <div class="loader"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+function logout() {
+  document.cookie = 'mindwave_mooc_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  localStorage.removeItem('mooc_role');
+  localStorage.removeItem('mooc_name');
+  window.location.href = '/mooc/login.html';
+}
+
+function goToContinue() {
+  document.querySelector('#tab-student')?.click();
+}
+
+function getInitials(name) {
+  if (!name) return '??';
+  const parts = name.trim().split(' ');
+  return parts.length > 1 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : name.substring(0,2).toUpperCase();
+}
+
+const COLORS = ['#6366f1','#ec4899','#10b981','#f59e0b','#06b6d4','#8b5cf6','#f43f5e'];
+const EMOJIS = ['📘','🧪','🌐','💻','🔬','📊','🎯','⚙️','🌍','🧮'];
+function getColor(i) { return COLORS[i % COLORS.length]; }
+function getEmoji(i) { return EMOJIS[i % EMOJIS.length]; }
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+async function init() {
+  try {
+    const meRes = await fetch('/api/mooc/user/me');
+    if (!meRes.ok) { window.location.href = '/mooc/login.html'; return; }
+    const { user } = await meRes.json();
+
+    // Redirect admins
+    if (user.role === 'super_admin') { window.location.href = '/mooc/admin.html'; return; }
+
+    // Update sidebar
+    document.getElementById('sidebarName').textContent = user.name;
+    document.getElementById('sidebarRole').textContent = user.role === 'faculty' ? 'Faculty · MOOC' : 'Student · MOOC';
+    document.getElementById('sidebarAvatar').textContent = getInitials(user.name);
+
+    const chip = document.getElementById('roleChip');
+    chip.style.display = 'flex';
+    if (user.role === 'faculty') {
+      chip.classList.add('faculty');
+      document.getElementById('roleChipText').textContent = 'Faculty Member';
+    } else {
+      document.getElementById('roleChipText').textContent = 'Student';
+    }
+
+    // Render content
+    if (user.role === 'faculty') {
+      await renderFacultyDashboard(user);
+    } else {
+      await renderStudentDashboard(user);
+    }
+  } catch (err) {
+    console.error(err);
+    document.getElementById('mainContent').innerHTML = '<div class="empty-state"><p>Failed to load dashboard. Please try again.</p></div>';
+  }
+}
+
+// ═══════════════════════════════════════════
+// STUDENT DASHBOARD
+// ═══════════════════════════════════════════
+async function renderStudentDashboard(user) {
+  document.getElementById('topbarTitle').textContent = 'Student Dashboard';
+
+  const [dashRes, coursesRes] = await Promise.all([
+    fetch('/api/mooc/dashboard'),
+    fetch('/api/mooc/courses')
+  ]);
+  const dashData = await dashRes.json();
+  const coursesData = await coursesRes.json();
+
+  const enrollments = dashData.enrollments || [];
+  const totalCourses = enrollments.length;
+  const avgProgress = totalCourses > 0 
+    ? Math.round(enrollments.reduce((s,e) => s + (e.progressPercentage||0), 0) / totalCourses)
+    : 0;
+  const completedCount = enrollments.filter(e => (e.progressPercentage||0) >= 100).length;
+
+  // Recommended: courses not yet enrolled
+  const enrolledIds = new Set(enrollments.map(e => e.courseId?._id));
+  const recommended = (coursesData.courses || []).filter(c => !enrolledIds.has(c._id)).slice(0, 3);
+
+  const greeting = getGreeting();
+
+  document.getElementById('mainContent').innerHTML = `
+    <!-- HERO -->
+    <div class="hero-banner">
+      <div class="hero-text">
+        <h1>${greeting}, ${user.name.split(' ')[0]} 👋</h1>
+        <p>Pick up right where you left off. You're doing great!</p>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat accent">
+          <div class="hero-stat-val">${totalCourses}</div>
+          <div class="hero-stat-lbl">Enrolled</div>
+        </div>
+        <div class="hero-stat green">
+          <div class="hero-stat-val">${avgProgress}%</div>
+          <div class="hero-stat-lbl">Avg Progress</div>
+        </div>
+        <div class="hero-stat orange">
+          <div class="hero-stat-val">${completedCount}</div>
+          <div class="hero-stat-lbl">Completed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="dash-grid">
+      <div class="dash-col">
+        <!-- ENROLLED COURSES -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i data-lucide="play-circle"></i> Continue Learning</div>
+            <a href="/mooc/courses.html" class="panel-action">Browse all →</a>
+          </div>
+          <div class="panel-body">
+            ${enrollments.length === 0 
+              ? `<div class="empty-state">
+                  <i data-lucide="book-open"></i>
+                  <h3>No courses yet</h3>
+                  <p>Start your learning journey by enrolling in a course.</p>
+                  <a href="/mooc/courses.html" class="btn-primary"><i data-lucide="compass"></i> Browse Courses</a>
+                </div>`
+              : `<div class="course-card-list">${enrollments.map((e, idx) => {
+                  const c = e.courseId || {};
+                  const pct = Math.round(e.progressPercentage || 0);
+                  return `
+                  <div class="enrolled-card">
+                    <div class="course-color-dot" style="background: ${getColor(idx)}22;">
+                      <span>${getEmoji(idx)}</span>
+                    </div>
+                    <div class="course-info">
+                      <div class="course-code-badge">${c.courseCode || 'MOOC'}</div>
+                      <div class="course-name">${c.title || 'Untitled Course'}</div>
+                      <div class="progress-wrap">
+                        <div class="progress-row">
+                          <span class="progress-label">Progress</span>
+                          <span class="progress-pct">${pct}%</span>
                         </div>
-                    `;
-                    return;
-                }
-
-                dashData.enrollments.forEach(enrollment => {
-                    const course = enrollment.courseId;
-                    if (!course) return; // defensive
-
-                    const progress = enrollment.progressPercentage || 0;
-                    
-                    const template = `
-                        <div class="enrollment-card">
-                            <div class="course-code">${course.courseCode}</div>
-                            <h3 class="course-title">${course.title}</h3>
-                            
-                            <div class="progress-section">
-                                <div class="progress-header">
-                                    <span>Course Progress</span>
-                                    <span>${progress}%</span>
-                                </div>
-                                <div class="progress-bar-bg">
-                                    <div class="progress-bar-fill" style="width: ${progress}%"></div>
-                                </div>
-                                <button class="btn-continue" onclick="continueLearning('${course._id}')">
-                                    ${progress === 0 ? 'Start Course' : 'Continue Learning'}
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    grid.insertAdjacentHTML('beforeend', template);
-                });
-
-            } catch (error) {
-                console.error("Dashboard error:", error);
-                document.getElementById('enrollments-grid').innerHTML = 
-                    '<p style="color:red;">Error loading dashboard. Please try again.</p>';
+                        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+                      </div>
+                    </div>
+                    <button class="continue-btn" onclick="continueLearning('${c._id}')">
+                      ${pct === 0 ? 'Start' : 'Continue'}
+                    </button>
+                  </div>`;
+                }).join('')}</div>`
             }
-        }
+          </div>
+        </div>
 
-        function continueLearning(courseId) {
-            // Placeholder: Normally this would route to /mooc/learn.html?courseId=XYZ
-            alert("This will open the course player for ID: " + courseId);
-            // window.location.href = `/mooc/learn.html?id=${courseId}`;
-        }
+        <!-- RECOMMENDED -->
+        ${recommended.length > 0 ? `
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i data-lucide="sparkles"></i> Recommended Courses</div>
+            <a href="/mooc/courses.html" class="panel-action">See all →</a>
+          </div>
+          <div class="panel-body">
+            <div class="rec-grid">
+              ${recommended.map((c, idx) => `
+                <div class="rec-card">
+                  <div class="rec-code">${c.courseCode}</div>
+                  <div class="rec-name">${c.title}</div>
+                  <div class="rec-duration"><i data-lucide="clock"></i> ${c.duration || 'Self-paced'}</div>
+                  ${c.instructorName ? `<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">👨‍🏫 ${c.instructorName}</div>` : ''}
+                  <button class="enroll-btn" onclick="enroll('${c._id}')">Enroll Now</button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>` : ''}
+      </div>
 
-        function logout() {
-            document.cookie = 'mindwave_mooc_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            window.location.href = '/mooc/login.html';
-        }
+      <!-- RIGHT COLUMN -->
+      <div class="dash-col">
+        <!-- XP RING -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i data-lucide="zap"></i> Your Progress</div>
+          </div>
+          <div class="panel-body" style="text-align:center;">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+              <circle cx="55" cy="55" r="46" fill="none" stroke="url(#pg)" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="${Math.round(2*Math.PI*46)}"
+                stroke-dashoffset="${Math.round(2*Math.PI*46 * (1 - avgProgress/100))}"
+                transform="rotate(-90 55 55)"/>
+              <defs>
+                <linearGradient id="pg" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#6366f1"/>
+                  <stop offset="100%" stop-color="#a78bfa"/>
+                </linearGradient>
+              </defs>
+              <text x="55" y="49" text-anchor="middle" font-size="22" font-weight="900" fill="#e2e8f0">${avgProgress}%</text>
+              <text x="55" y="65" text-anchor="middle" font-size="11" fill="#7c849e">avg progress</text>
+            </svg>
+            <div style="display:flex;gap:10px;margin-top:14px;">
+              <div style="flex:1;background:var(--surface-2);border-radius:9px;padding:10px;text-align:center;">
+                <div style="font-size:18px;font-weight:800;color:var(--accent-2);">${totalCourses}</div>
+                <div style="font-size:10px;color:var(--muted);font-weight:600;">Courses</div>
+              </div>
+              <div style="flex:1;background:var(--surface-2);border-radius:9px;padding:10px;text-align:center;">
+                <div style="font-size:18px;font-weight:800;color:var(--green);">${completedCount}</div>
+                <div style="font-size:10px;color:var(--muted);font-weight:600;">Completed</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        window.onload = loadDashboard;
-    </script>
+        <!-- UPCOMING -->
+        <div class="panel" style="flex:1;">
+          <div class="panel-header">
+            <div class="panel-title"><i data-lucide="calendar"></i> Upcoming</div>
+          </div>
+          <div class="panel-body">
+            <div class="upcoming-list">
+              <div class="upcoming-item">
+                <div class="upcoming-date-box"><div class="upcoming-day">18</div><div class="upcoming-mon">Apr</div></div>
+                <div>
+                  <div class="upcoming-title">Live Q&A Session</div>
+                  <div class="upcoming-meta">
+                    <div class="upcoming-time"><i data-lucide="clock"></i> 11:00 AM</div>
+                    <span class="chip chip-live">Live</span>
+                  </div>
+                </div>
+              </div>
+              <div class="upcoming-item">
+                <div class="upcoming-date-box" style="background:rgba(244,63,94,0.12);">
+                  <div class="upcoming-day" style="color:var(--red);">21</div>
+                  <div class="upcoming-mon">Apr</div>
+                </div>
+                <div>
+                  <div class="upcoming-title">Module Quiz Due</div>
+                  <div class="upcoming-meta">
+                    <div class="upcoming-time"><i data-lucide="clock"></i> 11:59 PM</div>
+                    <span class="chip chip-quiz">Quiz</span>
+                  </div>
+                </div>
+              </div>
+              <div class="upcoming-item">
+                <div class="upcoming-date-box" style="background:rgba(245,158,11,0.12);">
+                  <div class="upcoming-day" style="color:var(--orange);">25</div>
+                  <div class="upcoming-mon">Apr</div>
+                </div>
+                <div>
+                  <div class="upcoming-title">Final Assignment</div>
+                  <div class="upcoming-meta">
+                    <div class="upcoming-time"><i data-lucide="clock"></i> 11:59 PM</div>
+                    <span class="chip chip-assign">Assignment</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  lucide.createIcons();
+}
+
+// ═══════════════════════════════════════════
+// FACULTY DASHBOARD
+// ═══════════════════════════════════════════
+async function renderFacultyDashboard(user) {
+  document.getElementById('topbarTitle').textContent = 'Faculty Dashboard';
+  document.getElementById('instructorNav').style.display = 'flex';
+
+  const [dashRes, instructorRes] = await Promise.all([
+    fetch('/api/mooc/dashboard'),
+    fetch('/api/mooc/instructor/courses')
+  ]);
+  const dashData = await dashRes.json();
+  const instructorData = await instructorRes.json();
+
+  const enrollments = dashData.enrollments || [];
+  const instructorCourses = instructorData.courses || [];
+
+  document.getElementById('instructorCoursesCount').textContent = instructorCourses.length;
+
+  // Faculty KPIs (as instructor)
+  const totalStudents = instructorCourses.reduce((s, c) => s + (c.totalStudents||0), 0);
+  const avgCompletion = instructorCourses.length > 0
+    ? Math.round(instructorCourses.reduce((s, c) => s + (c.avgProgress||0), 0) / instructorCourses.length)
+    : 0;
+  const totalCompleted = instructorCourses.reduce((s, c) => s + (c.completed||0), 0);
+
+  // Personal enrollments
+  const myEnrolled = enrollments.length;
+  const myAvgProgress = myEnrolled > 0
+    ? Math.round(enrollments.reduce((s,e) => s + (e.progressPercentage||0), 0) / myEnrolled)
+    : 0;
+
+  const greeting = getGreeting();
+
+  document.getElementById('mainContent').innerHTML = `
+    <!-- HERO -->
+    <div class="hero-banner">
+      <div class="hero-text">
+        <h1>${greeting}, ${user.name.split(' ')[0]} 👋</h1>
+        <p>You have <strong style="color:var(--accent-2);">${instructorCourses.length}</strong> course${instructorCourses.length !== 1 ? 's' : ''} to manage and ${myEnrolled} personal enrollment${myEnrolled !== 1 ? 's' : ''}.</p>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat accent">
+          <div class="hero-stat-val">${instructorCourses.length}</div>
+          <div class="hero-stat-lbl">Courses Teaching</div>
+        </div>
+        <div class="hero-stat green">
+          <div class="hero-stat-val">${totalStudents}</div>
+          <div class="hero-stat-lbl">Total Students</div>
+        </div>
+        <div class="hero-stat orange">
+          <div class="hero-stat-val">${avgCompletion}%</div>
+          <div class="hero-stat-lbl">Avg Completion</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-instructor" onclick="switchTab('instructor')">
+        <i data-lucide="graduation-cap"></i> Courses I Teach
+        ${instructorCourses.length > 0 ? `<span style="background:rgba(255,255,255,0.2);border-radius:999px;padding:1px 7px;font-size:10px;">${instructorCourses.length}</span>` : ''}
+      </button>
+      <button class="tab-btn" id="tab-student" onclick="switchTab('student')">
+        <i data-lucide="user"></i> My Learning
+        ${myEnrolled > 0 ? `<span style="background:rgba(255,255,255,0.2);border-radius:999px;padding:1px 7px;font-size:10px;">${myEnrolled}</span>` : ''}
+      </button>
+    </div>
+
+    <!-- INSTRUCTOR TAB -->
+    <div class="tab-panel active" id="panel-instructor">
+      <!-- KPI CARDS -->
+      <div class="kpi-grid" style="margin-bottom:20px;">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-label">Total Students</div>
+            <div class="kpi-icon-wrap accent"><i data-lucide="users"></i></div>
+          </div>
+          <div class="kpi-value" style="color:var(--accent-2);">${totalStudents}</div>
+          <div class="kpi-change"><i data-lucide="trending-up"></i> Across all courses</div>
+          <div class="sparkline">
+            ${[40,55,50,70,65,80,100].map((h,i,a)=>`<div class="spark-bar ${i===a.length-1?'hi':''}" style="height:${h}%"></div>`).join('')}
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-label">Avg Completion</div>
+            <div class="kpi-icon-wrap green"><i data-lucide="check-circle"></i></div>
+          </div>
+          <div class="kpi-value" style="color:var(--green);">${avgCompletion}%</div>
+          <div class="kpi-change" style="color:var(--green);"><i data-lucide="trending-up"></i> Platform average</div>
+          <div class="sparkline">
+            ${[30,40,45,55,60,70,100].map((h,i,a)=>`<div class="spark-bar ${i===a.length-1?'hi':''}" style="height:${h}%;${i===a.length-1?'background:var(--green)':''}" ></div>`).join('')}
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-label">Completed</div>
+            <div class="kpi-icon-wrap orange"><i data-lucide="award"></i></div>
+          </div>
+          <div class="kpi-value" style="color:var(--orange);">${totalCompleted}</div>
+          <div class="kpi-change" style="color:var(--orange);"><i data-lucide="award"></i> Students finished</div>
+          <div class="sparkline">
+            ${[20,25,35,40,50,55,100].map((h,i,a)=>`<div class="spark-bar ${i===a.length-1?'hi':''}" style="height:${h}%;${i===a.length-1?'background:var(--orange)':''}" ></div>`).join('')}
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-label">Active Courses</div>
+            <div class="kpi-icon-wrap pink"><i data-lucide="book-marked"></i></div>
+          </div>
+          <div class="kpi-value" style="color:var(--pink);">${instructorCourses.length}</div>
+          <div class="kpi-change" style="color:var(--pink);"><i data-lucide="layers"></i> Assigned by admin</div>
+          <div class="sparkline">
+            ${[60,60,60,80,80,100,100].map((h,i,a)=>`<div class="spark-bar ${i===a.length-1?'hi':''}" style="height:${h}%;${i===a.length-1?'background:var(--pink)':''}" ></div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- COURSE MANAGEMENT -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><i data-lucide="layers"></i> Your Assigned Courses</div>
+          <a href="/mooc/courses.html" class="panel-action">View catalog →</a>
+        </div>
+        <div class="panel-body">
+          ${instructorCourses.length === 0 
+            ? `<div class="empty-state">
+                <i data-lucide="graduation-cap"></i>
+                <h3>No courses assigned yet</h3>
+                <p>The admin hasn't assigned any courses to you as instructor. Check back soon.</p>
+              </div>`
+            : instructorCourses.map((c, idx) => `
+                <div class="instructor-course-card">
+                  <div class="instructor-card-header">
+                    <div>
+                      <div class="instructor-course-code">${c.courseCode}</div>
+                      <div class="instructor-course-name">${c.title}</div>
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);">${c.duration || 'Self-paced'}</div>
+                  </div>
+                  <div class="instructor-stats-row">
+                    <div class="i-stat students">
+                      <div class="i-stat-val">${c.totalStudents}</div>
+                      <div class="i-stat-lbl">Students</div>
+                    </div>
+                    <div class="i-stat progress">
+                      <div class="i-stat-val">${c.avgProgress}%</div>
+                      <div class="i-stat-lbl">Avg Progress</div>
+                    </div>
+                    <div class="i-stat done">
+                      <div class="i-stat-val">${c.completed}</div>
+                      <div class="i-stat-lbl">Completed</div>
+                    </div>
+                  </div>
+                  <div style="margin-top:12px;">
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;">
+                      <span>Class Progress</span><span>${c.avgProgress}%</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${c.avgProgress}%"></div></div>
+                  </div>
+                  <a href="/mooc/courses.html" class="manage-btn">
+                    <i data-lucide="settings"></i> Manage Course
+                  </a>
+                </div>
+              `).join('')
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDENT (MY LEARNING) TAB -->
+    <div class="tab-panel" id="panel-student">
+      ${enrollments.length === 0
+        ? `<div class="panel">
+            <div class="panel-body">
+              <div class="empty-state">
+                <i data-lucide="book-open"></i>
+                <h3>You haven't enrolled in any MOOC courses yet</h3>
+                <p>Browse the catalog and enroll — you'll be counted as a student learner.</p>
+                <a href="/mooc/courses.html" class="btn-primary"><i data-lucide="compass"></i> Browse Courses</a>
+              </div>
+            </div>
+          </div>`
+        : `<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;">
+            <span style="color:var(--green);">ℹ️</span>
+            <span>As a course learner, you are counted as a <strong>student</strong> — separate from your faculty instructor role.</span>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i data-lucide="play-circle"></i> My Enrolled Courses</div>
+            </div>
+            <div class="panel-body">
+              <div class="course-card-list">
+                ${enrollments.map((e, idx) => {
+                  const c = e.courseId || {};
+                  const pct = Math.round(e.progressPercentage || 0);
+                  return `
+                  <div class="enrolled-card">
+                    <div class="course-color-dot" style="background: ${getColor(idx)}22;"><span>${getEmoji(idx)}</span></div>
+                    <div class="course-info">
+                      <div class="course-code-badge">${c.courseCode || 'MOOC'}</div>
+                      <div class="course-name">${c.title || 'Untitled Course'}</div>
+                      <div class="progress-wrap">
+                        <div class="progress-row">
+                          <span class="progress-label">Progress</span>
+                          <span class="progress-pct">${pct}%</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+                      </div>
+                    </div>
+                    <button class="continue-btn" onclick="continueLearning('${c._id}')">
+                      ${pct === 0 ? 'Start' : 'Continue'}
+                    </button>
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>
+          </div>`
+      }
+    </div>
+  `;
+
+  lucide.createIcons();
+}
+
+// ═══════════════════════════════════════════
+// TAB SWITCHER
+// ═══════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════
+async function enroll(courseId) {
+  try {
+    const res = await fetch(`/api/mooc/enroll/${courseId}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) {
+      window.location.reload();
+    } else {
+      alert(data.message || 'Could not enroll.');
+    }
+  } catch (e) { alert('Network error.'); }
+}
+
+function continueLearning(courseId) {
+  alert(`Opening course player for: ${courseId}\n(Course player page coming soon!)`);
+}
+
+function getGreeting() {
+  const h = new Date().getHours();
+  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+}
+
+// Run
+window.onload = init;
+</script>
 </body>
 </html>

@@ -15,6 +15,10 @@ const moocCourseSchema = new mongoose.Schema({
   description: { type: String },
   duration: { type: String }, // e.g. "4 Weeks"
   authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // SuperAdmin creator
+  instructorId: { type: String, default: null },   // Faculty user _id assigned as instructor
+  instructorName: { type: String, default: null },  // Faculty display name
+  category: { type: String, default: 'General' },
+  level: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced'], default: 'Beginner' },
   published: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });

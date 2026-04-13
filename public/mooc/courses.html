@@ -1,316 +1,582 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mindwave MOOC - Courses</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --text-dark: #111827;
-            --text-muted: #6b7280;
-            --bg-color: #f3f4f6;
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Courses — MindWave MOOC</title>
+  <meta name="description" content="Explore MindWave MOOC courses — self-paced, expert-led online learning across all subjects.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { font-family: 'Inter', sans-serif; background: #0c0d14; color: #e2e8f0; min-height: 100vh; }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            background: #f8fafc;
-            color: var(--text-dark);
-            min-height: 100vh;
-        }
+    :root {
+      --bg: #0c0d14;
+      --surface: #131520;
+      --surface-2: #1a1d2e;
+      --border: rgba(255,255,255,0.07);
+      --border-2: rgba(255,255,255,0.13);
+      --text: #e2e8f0;
+      --muted: #7c849e;
+      --accent: #6366f1;
+      --accent-2: #818cf8;
+      --green: #10b981;
+      --orange: #f59e0b;
+      --pink: #ec4899;
+      --teal: #06b6d4;
+      --red: #f43f5e;
+      --radius: 14px;
+      --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
 
-        .navbar {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 16px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
+    /* ── NAV ── */
+    .navbar {
+      background: rgba(19,21,32,0.9); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px; height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .navbar-brand {
+      display: flex; align-items: center; gap: 10px; text-decoration: none;
+    }
+    .brand-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand-icon i { width: 16px; height: 16px; color: #fff; }
+    .brand-name { font-size: 15px; font-weight: 800; color: var(--text); }
+    .brand-name span { color: var(--accent-2); }
+    .brand-badge {
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      background: rgba(99,102,241,0.18); color: var(--accent-2);
+      border: 1px solid rgba(99,102,241,0.3); border-radius: 999px; padding: 2px 7px;
+    }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-link {
+      display: flex; align-items: center; gap: 6px;
+      text-decoration: none; color: var(--muted); font-weight: 600; font-size: 13.5px;
+      padding: 7px 12px; border-radius: 8px; transition: all var(--transition);
+    }
+    .nav-link i { width: 15px; height: 15px; }
+    .nav-link:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+    .nav-link.active { color: var(--accent-2); background: rgba(99,102,241,0.12); }
+    .user-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 999px; padding: 5px 14px 5px 8px;
+      font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer;
+    }
+    .user-pill-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--pink));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; color: #fff;
+    }
+    .btn-logout {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px;
+      background: rgba(244,63,94,0.1); color: var(--red);
+      border: 1px solid rgba(244,63,94,0.2); font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: all var(--transition);
+    }
+    .btn-logout:hover { background: rgba(244,63,94,0.2); }
 
-        .navbar-brand {
-            font-size: 20px;
-            font-weight: 800;
-            background: linear-gradient(to right, #4f46e5, #ec4899);
-            -webkit-background-clip: text;
-            color: transparent;
-            text-decoration: none;
-        }
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #0f1022 0%, #1a1040 50%, #0a1628 100%);
+      padding: 60px 32px 50px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(99,102,241,0.15) 0%, transparent 70%);
+    }
+    .hero h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 12px; position: relative; }
+    .hero h1 span { background: linear-gradient(135deg, var(--accent-2), var(--pink)); -webkit-background-clip: text; color: transparent; }
+    .hero p { font-size: 16px; color: var(--muted); max-width: 560px; margin: 0 auto 28px; line-height: 1.6; position: relative; }
 
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 600;
-            margin-left: 24px;
-            font-size: 14px;
-            transition: color 0.3s ease;
-        }
+    /* ── SEARCH BAR ── */
+    .search-wrap {
+      max-width: 520px; margin: 0 auto;
+      position: relative; z-index: 2;
+    }
+    .search-box {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface-2); border: 1px solid var(--border-2);
+      border-radius: 12px; padding: 12px 18px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .search-box:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+    }
+    .search-box i { width: 18px; height: 18px; color: var(--muted); flex-shrink: 0; }
+    .search-box input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text); font-size: 15px; font-family: inherit;
+    }
+    .search-box input::placeholder { color: var(--muted); }
 
-        .nav-links a:hover {
-            color: var(--primary);
-        }
+    /* ── HERO STATS ── */
+    .hero-stats { display: flex; justify-content: center; gap: 28px; margin-top: 28px; position: relative; }
+    .h-stat { text-align: center; }
+    .h-stat-val { font-size: 26px; font-weight: 900; letter-spacing: -0.02em; }
+    .h-stat-lbl { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
 
-        #user-info {
-            font-weight: 600;
-            font-size: 14px;
-            display: none;
-            align-items: center;
-            gap: 16px;
-        }
+    /* ── CONTENT ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
 
-        .btn-logout {
-            cursor: pointer;
-            color: #ef4444;
-            font-weight: 600;
-        }
+    /* ── FILTERS ── */
+    .filter-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+    .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-chip {
+      display: flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 999px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      font-size: 12.5px; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: all var(--transition);
+    }
+    .filter-chip i { width: 13px; height: 13px; }
+    .filter-chip:hover { color: var(--text); border-color: var(--border-2); }
+    .filter-chip.active { background: rgba(99,102,241,0.15); color: var(--accent-2); border-color: rgba(99,102,241,0.3); }
+    .sort-select {
+      background: var(--surface-2); border: 1px solid var(--border);
+      color: var(--text); padding: 7px 14px; border-radius: 9px;
+      font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; outline: none;
+    }
 
-        .hero {
-            padding: 80px 40px;
-            text-align: center;
-            background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%);
-        }
+    /* ── COURSES GRID ── */
+    .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
 
-        .hero h1 {
-            font-size: 48px;
-            font-weight: 800;
-            margin: 0 0 16px 0;
-            letter-spacing: -1px;
-        }
+    .course-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+    }
+    .course-card:hover {
+      border-color: rgba(99,102,241,0.35);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+    }
+    .course-card-top {
+      height: 90px; position: relative; overflow: hidden;
+      display: flex; align-items: center; padding: 0 20px;
+    }
+    .course-card-emoji { font-size: 36px; z-index: 1; }
+    .course-card-code {
+      margin-left: auto; z-index: 1;
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+      background: rgba(0,0,0,0.3); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 999px; padding: 3px 10px;
+    }
+    .instructor-badge-top {
+      position: absolute; bottom: 10px; left: 20px; z-index: 1;
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 999px;
+      padding: 3px 9px; font-size: 10px; font-weight: 700;
+    }
+    .instructor-badge-top i { width: 11px; height: 11px; }
+    .my-course-badge {
+      position: absolute; top: 10px; right: 10px; z-index: 2;
+      background: rgba(16,185,129,0.9); color: #fff;
+      font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    }
+    .enrolled-badge {
+      position: absolute; top: 10px; right: 10px; z-index: 2;
+      background: rgba(99,102,241,0.9); color: #fff;
+      font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    }
 
-        .hero p {
-            font-size: 18px;
-            color: var(--text-muted);
-            max-width: 600px;
-            margin: 0 auto;
-        }
+    .course-card-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; }
+    .course-title { font-size: 15px; font-weight: 800; margin-bottom: 8px; line-height: 1.3; }
+    .course-desc { font-size: 13px; color: var(--muted); line-height: 1.6; flex: 1; margin-bottom: 14px; }
+    .course-meta-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .meta-chip {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      background: var(--surface-2); border-radius: 6px; padding: 4px 9px;
+    }
+    .meta-chip i { width: 12px; height: 12px; }
+    .level-chip { padding: 4px 9px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .level-beginner { background: rgba(16,185,129,0.12); color: var(--green); }
+    .level-intermediate { background: rgba(245,158,11,0.12); color: var(--orange); }
+    .level-advanced { background: rgba(244,63,94,0.12); color: var(--red); }
 
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 24px;
-        }
+    /* Divider & action row */
+    .course-card-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .instructor-info { display: flex; align-items: center; gap: 7px; }
+    .instructor-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; color: #fff;
+    }
+    .instructor-name { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .unassigned { font-size: 11px; color: var(--muted); font-style: italic; }
 
-        .courses-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
-        }
+    .enroll-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 9px;
+      background: var(--accent); color: #fff;
+      font-size: 12.5px; font-weight: 700; border: none;
+      cursor: pointer; font-family: inherit;
+      transition: all var(--transition);
+    }
+    .enroll-btn:hover { background: #5254cc; box-shadow: 0 4px 14px rgba(99,102,241,0.4); }
+    .enroll-btn i { width: 13px; height: 13px; }
+    .enrolled-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 9px;
+      background: rgba(16,185,129,0.12); color: var(--green);
+      border: 1px solid rgba(16,185,129,0.25);
+      font-size: 12.5px; font-weight: 700; cursor: default;
+    }
+    .enrolled-btn i { width: 13px; height: 13px; }
+    .manage-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 9px;
+      background: rgba(6,182,212,0.12); color: var(--teal);
+      border: 1px solid rgba(6,182,212,0.25);
+      font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit;
+      text-decoration: none;
+    }
+    .manage-btn i { width: 13px; height: 13px; }
 
-        .course-card {
-            background: #fff;
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
+    /* Loading */
+    .loading-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .spinner { width: 30px; height: 30px; border: 3px solid rgba(99,102,241,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .course-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow);
-        }
+    .empty-msg { text-align: center; padding: 50px; color: var(--muted); grid-column: 1/-1; }
+    .empty-msg i { width: 40px; height: 40px; margin-bottom: 14px; opacity: 0.3; }
+    .empty-msg h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
 
-        .course-code {
-            font-size: 12px;
-            font-weight: 700;
-            color: #ec4899;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .course-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 0 0 12px 0;
-            line-height: 1.3;
-        }
-
-        .course-desc {
-            color: var(--text-muted);
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 24px;
-            flex: 1;
-        }
-
-        .course-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: auto;
-            border-top: 1px solid #f3f4f6;
-            padding-top: 16px;
-        }
-
-        .duration {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-enroll {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-enroll:hover {
-            background: var(--primary-hover);
-        }
-
-        .loading-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-    </style>
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      background: var(--surface); border: 1px solid var(--border-2);
+      border-radius: 12px; padding: 14px 20px;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      font-size: 13px; font-weight: 600;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast i { width: 18px; height: 18px; }
+    .toast.success { border-color: rgba(16,185,129,0.3); }
+    .toast.success i { color: var(--green); }
+    .toast.error { border-color: rgba(244,63,94,0.3); }
+    .toast.error i { color: var(--red); }
+  </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <a href="/mooc/courses.html" class="navbar-brand">Mindwave MOOC</a>
-        <div class="nav-links">
-            <a href="/mooc/courses.html">Browse Courses</a>
-            <span id="user-info">
-                <a href="/mooc/dashboard.html" id="dashboard-link">My Dashboard</a>
-                <span id="username-display"></span>
-                <span class="btn-logout" onclick="logout()">Logout</span>
-            </span>
-            <a href="/mooc/login.html" id="login-link">Sign In</a>
-        </div>
-    </nav>
-
-    <div class="hero">
-        <h1>Discover New Frontiers</h1>
-        <p>Explore our Massively Open Online Courses and advance your technical career with premium guided modules.</p>
+<!-- NAV -->
+<nav class="navbar">
+  <a href="/mooc/courses.html" class="navbar-brand">
+    <div class="brand-icon"><i data-lucide="brain-circuit"></i></div>
+    <span class="brand-name">Mind<span>Wave</span></span>
+    <span class="brand-badge">MOOC</span>
+  </a>
+  <div class="nav-links">
+    <a href="/mooc/courses.html" class="nav-link active"><i data-lucide="compass"></i> Browse</a>
+    <a href="/mooc/dashboard.html" class="nav-link" id="dashLink" style="display:none;"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+    <div class="user-pill" id="userPill" style="display:none;">
+      <div class="user-pill-avatar" id="navAvatar">--</div>
+      <span id="navUserName">...</span>
     </div>
+    <a href="/mooc/login.html" id="loginLink" class="nav-link"><i data-lucide="log-in"></i> Sign In</a>
+    <button class="btn-logout" id="logoutBtn" style="display:none;" onclick="logout()">
+      <i data-lucide="log-out"></i> Logout
+    </button>
+  </div>
+</nav>
 
-    <div class="dashboard-container">
-        <div id="loading" class="loading-state">Loading courses...</div>
-        <div class="courses-grid" id="courses-grid">
-            <!-- Populated via JS -->
-        </div>
+<!-- HERO -->
+<div class="hero">
+  <h1>Discover <span>New Frontiers</span></h1>
+  <p>Expert-led MOOC courses — learn at your own pace, earn certificates, and level up your career.</p>
+  <div class="search-wrap">
+    <div class="search-box">
+      <i data-lucide="search"></i>
+      <input type="text" id="liveSearch" placeholder="Search courses, topics, instructors…" oninput="filterCourses()">
     </div>
+  </div>
+  <div class="hero-stats" id="heroStats" style="display:none;">
+    <div class="h-stat">
+      <div class="h-stat-val" id="totalCourseStat" style="color:var(--accent-2);">—</div>
+      <div class="h-stat-lbl">Available Courses</div>
+    </div>
+    <div class="h-stat">
+      <div class="h-stat-val" style="color:var(--green);">Free</div>
+      <div class="h-stat-lbl">Lifetime Access</div>
+    </div>
+    <div class="h-stat">
+      <div class="h-stat-val" style="color:var(--orange);">Self-Paced</div>
+      <div class="h-stat-lbl">Learn Anywhere</div>
+    </div>
+  </div>
+</div>
 
-    <script>
-        let isAuthenticated = false;
+<!-- CONTAINER -->
+<div class="container">
+  <!-- FILTERS -->
+  <div class="filter-bar">
+    <div class="filter-chips">
+      <div class="filter-chip active" onclick="setFilter('all', this)"><i data-lucide="grid-3x3"></i> All Courses</div>
+      <div class="filter-chip" onclick="setFilter('beginner', this)"><i data-lucide="sprout"></i> Beginner</div>
+      <div class="filter-chip" onclick="setFilter('intermediate', this)"><i data-lucide="zap"></i> Intermediate</div>
+      <div class="filter-chip" onclick="setFilter('advanced', this)"><i data-lucide="flame"></i> Advanced</div>
+      <div class="filter-chip" onclick="setFilter('enrolled', this)" id="enrolledFilter" style="display:none;">
+        <i data-lucide="check-circle"></i> My Courses
+      </div>
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="filterCourses()">
+      <option value="newest">Newest First</option>
+      <option value="az">A → Z</option>
+      <option value="enrolled">Most Enrolled</option>
+    </select>
+  </div>
 
-        async function checkAuth() {
-            try {
-                const res = await fetch('/api/mooc/user/me');
-                if (res.ok) {
-                    const data = await res.json();
-                    isAuthenticated = true;
-                    document.getElementById('user-info').style.display = 'flex';
-                    document.getElementById('login-link').style.display = 'none';
-                    document.getElementById('username-display').textContent = data.user.name;
-                }
-            } catch (err) {
-                console.error("Not authenticated");
-            }
+  <!-- GRID -->
+  <div class="courses-grid" id="coursesGrid">
+    <div class="loading-state" style="grid-column:1/-1;">
+      <div class="spinner"></div>
+      <div>Loading courses…</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <i data-lucide="check-circle" id="toastIcon"></i>
+  <span id="toastMsg">Success</span>
+</div>
+
+<script>
+let allCourses = [];
+let enrolledIds = new Set();
+let instructorCourseIds = new Set();
+let currentUser = null;
+let activeFilter = 'all';
+
+const COLORS = ['#6366f1','#ec4899','#10b981','#f59e0b','#06b6d4','#8b5cf6','#f43f5e','#14b8a6'];
+const EMOJIS = ['📘','🧪','🌐','💻','🔬','📊','🎯','⚙️','🌍','🧮','📐','🔐'];
+function getColor(i) { return COLORS[i % COLORS.length]; }
+function getEmoji(i) { return EMOJIS[i % EMOJIS.length]; }
+function getInitials(n) { if (!n) return '??'; const p = n.trim().split(' '); return (p.length>1?p[0][0]+p[p.length-1][0]:n.substring(0,2)).toUpperCase(); }
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  const ico = document.getElementById('toastIcon');
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = `toast ${type}`;
+  ico.setAttribute('data-lucide', type === 'success' ? 'check-circle' : 'alert-circle');
+  lucide.createIcons();
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function init() {
+  // Auth check
+  try {
+    const res = await fetch('/api/mooc/user/me');
+    if (res.ok) {
+      const { user } = await res.json();
+      currentUser = user;
+      document.getElementById('userPill').style.display = 'flex';
+      document.getElementById('dashLink').style.display = 'flex';
+      document.getElementById('logoutBtn').style.display = 'flex';
+      document.getElementById('loginLink').style.display = 'none';
+      document.getElementById('navAvatar').textContent = getInitials(user.name);
+      document.getElementById('navUserName').textContent = user.name.split(' ')[0];
+      document.getElementById('enrolledFilter').style.display = 'flex';
+
+      // Get enrollments
+      const dashRes = await fetch('/api/mooc/dashboard');
+      if (dashRes.ok) {
+        const d = await dashRes.json();
+        (d.enrollments || []).forEach(e => { if (e.courseId?._id) enrolledIds.add(e.courseId._id); });
+      }
+
+      // If faculty, get instructor courses
+      if (user.role === 'faculty') {
+        const iRes = await fetch('/api/mooc/instructor/courses');
+        if (iRes.ok) {
+          const d = await iRes.json();
+          (d.courses||[]).forEach(c => instructorCourseIds.add(c._id));
         }
+      }
 
-        async function loadCourses() {
-            try {
-                const res = await fetch('/api/mooc/courses');
-                const data = await res.json();
+      // Admin redirect
+      if (user.role === 'super_admin') {
+        document.getElementById('dashLink').href = '/mooc/admin.html';
+        document.getElementById('dashLink').querySelector('i').setAttribute('data-lucide','shield');
+      }
+    }
+  } catch(e) {}
 
-                const grid = document.getElementById('courses-grid');
-                grid.innerHTML = '';
-                document.getElementById('loading').style.display = 'none';
+  // Load courses
+  await loadCourses();
+  lucide.createIcons();
+}
 
-                if (data.courses.length === 0) {
-                    grid.innerHTML = '<p style="color:var(--text-muted); text-align:center; grid-column: 1/-1;">No courses published yet.</p>';
-                    return;
-                }
+async function loadCourses() {
+  try {
+    const res = await fetch('/api/mooc/courses');
+    const data = await res.json();
+    allCourses = data.courses || [];
 
-                data.courses.forEach(course => {
-                    const template = `
-                        <div class="course-card">
-                            <div class="course-code">${course.courseCode}</div>
-                            <h3 class="course-title">${course.title}</h3>
-                            <p class="course-desc">${course.description || 'No description available.'}</p>
-                            <div class="course-meta">
-                                <div class="duration">
-                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    ${course.duration || 'Self-paced'}
-                                </div>
-                                <button class="btn-enroll" onclick="enroll('${course._id}')">Enroll</button>
-                            </div>
-                        </div>
-                    `;
-                    grid.insertAdjacentHTML('beforeend', template);
-                });
+    document.getElementById('totalCourseStat').textContent = allCourses.length;
+    document.getElementById('heroStats').style.display = 'flex';
 
-            } catch (error) {
-                console.error('Error loading courses:', error);
-                document.getElementById('loading').textContent = 'Failed to load courses.';
-            }
+    filterCourses();
+  } catch(err) {
+    document.getElementById('coursesGrid').innerHTML =
+      '<div class="empty-msg"><i data-lucide="wifi-off"></i><h3>Failed to load courses</h3><p>Please refresh the page.</p></div>';
+    lucide.createIcons();
+  }
+}
+
+function setFilter(filter, el) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = filter;
+  filterCourses();
+}
+
+function filterCourses() {
+  const q = document.getElementById('liveSearch').value.toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+
+  let filtered = allCourses.filter(c => {
+    const matchSearch = !q ||
+      c.title?.toLowerCase().includes(q) ||
+      c.courseCode?.toLowerCase().includes(q) ||
+      c.description?.toLowerCase().includes(q) ||
+      c.instructorName?.toLowerCase().includes(q);
+
+    const matchFilter =
+      activeFilter === 'all' ? true :
+      activeFilter === 'beginner' ? (c.level || 'Beginner') === 'Beginner' :
+      activeFilter === 'intermediate' ? c.level === 'Intermediate' :
+      activeFilter === 'advanced' ? c.level === 'Advanced' :
+      activeFilter === 'enrolled' ? enrolledIds.has(c._id) : true;
+
+    return matchSearch && matchFilter;
+  });
+
+  // Sort
+  if (sort === 'az') { filtered.sort((a,b) => a.title.localeCompare(b.title)); }
+  else if (sort === 'newest') { filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)); }
+
+  renderGrid(filtered);
+}
+
+function renderGrid(courses) {
+  const grid = document.getElementById('coursesGrid');
+
+  if (courses.length === 0) {
+    grid.innerHTML = `<div class="empty-msg" style="grid-column:1/-1;">
+      <i data-lucide="search-x"></i>
+      <h3>No courses found</h3>
+      <p>Try adjusting your search or filters.</p>
+    </div>`;
+    lucide.createIcons();
+    return;
+  }
+
+  grid.innerHTML = courses.map((c, idx) => {
+    const enrolled = enrolledIds.has(c._id);
+    const isMyInstructor = instructorCourseIds.has(c._id);
+    const color = getColor(idx);
+    const emoji = getEmoji(idx);
+    const level = c.level || 'Beginner';
+    const levelClass = level.toLowerCase();
+    const initials = c.instructorName ? getInitials(c.instructorName) : null;
+
+    return `
+    <div class="course-card" id="card-${c._id}">
+      <div class="course-card-top" style="background: linear-gradient(135deg, ${color}22, ${color}11);">
+        <span class="course-card-emoji">${emoji}</span>
+        <span class="course-card-code" style="color:${color};">${c.courseCode}</span>
+        ${c.instructorName ? `
+          <div class="instructor-badge-top">
+            <i data-lucide="user-check"></i> ${c.instructorName}
+          </div>` : ''}
+        ${isMyInstructor ? '<span class="my-course-badge">You Teach This</span>' : ''}
+        ${enrolled && !isMyInstructor ? '<span class="enrolled-badge">Enrolled</span>' : ''}
+      </div>
+      <div class="course-card-body">
+        <div class="course-title">${c.title}</div>
+        <div class="course-desc">${c.description || 'No description available for this course.'}</div>
+        <div class="course-meta-row">
+          <div class="meta-chip"><i data-lucide="clock"></i> ${c.duration || 'Self-paced'}</div>
+          <span class="level-chip level-${levelClass}">${level}</span>
+          ${c.category ? `<div class="meta-chip"><i data-lucide="tag"></i> ${c.category}</div>` : ''}
+        </div>
+      </div>
+      <div class="course-card-footer">
+        <div class="instructor-info">
+          ${initials
+            ? `<div class="instructor-avatar">${initials}</div>
+               <div class="instructor-name">${c.instructorName}</div>`
+            : `<span class="unassigned">No instructor assigned</span>`}
+        </div>
+        ${isMyInstructor
+          ? `<a href="/mooc/dashboard.html" class="manage-btn"><i data-lucide="settings"></i> Manage</a>`
+          : enrolled
+          ? `<div class="enrolled-btn"><i data-lucide="check-circle"></i> Enrolled</div>`
+          : `<button class="enroll-btn" onclick="enroll('${c._id}', '${c.title.replace(/'/g,"\\'")}')"><i data-lucide="plus-circle"></i> Enroll</button>`
         }
+      </div>
+    </div>`;
+  }).join('');
 
-        async function enroll(courseId) {
-            if (!isAuthenticated) {
-                // Save intention
-                sessionStorage.setItem('mooc_pending_enrollment', courseId);
-                window.location.href = '/mooc/login.html';
-                return;
-            }
+  lucide.createIcons();
+}
 
-            try {
-                const res = await fetch(`/api/mooc/enroll/${courseId}`, { method: 'POST' });
-                const data = await res.json();
-                
-                if (data.ok) {
-                    window.location.href = '/mooc/dashboard.html';
-                } else {
-                    alert(data.message || 'Failed to enroll');
-                }
-            } catch (error) {
-                alert('Network error while enrolling');
-            }
-        }
+async function enroll(courseId, title) {
+  if (!currentUser) {
+    sessionStorage.setItem('mooc_pending_enrollment', courseId);
+    window.location.href = '/mooc/login.html';
+    return;
+  }
 
-        function logout() {
-            document.cookie = 'mindwave_mooc_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            window.location.reload();
-        }
+  const btn = document.querySelector(`#card-${courseId} .enroll-btn`);
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Enrolling…'; lucide.createIcons(); }
 
-        window.onload = async () => {
-            await checkAuth();
-            await loadCourses();
+  try {
+    const res = await fetch(`/api/mooc/enroll/${courseId}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) {
+      enrolledIds.add(courseId);
+      showToast(`Successfully enrolled in "${title}"!`, 'success');
+      filterCourses();
+    } else {
+      showToast(data.message || 'Could not enroll.', 'error');
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="plus-circle"></i> Enroll'; lucide.createIcons(); }
+    }
+  } catch(e) {
+    showToast('Network error. Please try again.', 'error');
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="plus-circle"></i> Enroll'; lucide.createIcons(); }
+  }
+}
 
-            // Check if we came back from login with an enrollment intent
-            const pendingCourse = sessionStorage.getItem('mooc_pending_enrollment');
-            if (pendingCourse && isAuthenticated) {
-                sessionStorage.removeItem('mooc_pending_enrollment');
-                enroll(pendingCourse);
-            }
-        };
-    </script>
+function logout() {
+  document.cookie = 'mindwave_mooc_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  window.location.reload();
+}
+
+window.onload = init;
+</script>
 </body>
 </html>

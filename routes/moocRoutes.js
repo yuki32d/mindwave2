@@ -335,4 +335,145 @@ router.get('/analytics', moocAuthMiddleware, async (req, res) => {
   }
 });
 
+// ============================================
+// INSTRUCTOR MANAGEMENT ROUTES
+// ============================================
+
+// GET /api/mooc/admin/faculty
+// List all users who can be assigned as instructors (faculty from both MoocUser and main User collection)
+router.get('/admin/faculty', moocAuthMiddleware, moocSuperAdminMiddleware, async (req, res) => {
+  try {
+    // Faculty from MOOC user table
+    const moocFaculty = await MoocUser.find({ role: 'faculty' }).select('_id name email role');
+
+    // Faculty from main MindWave users
+    const MainUser = getMainUser();
+    let mainFaculty = [];
+    if (MainUser) {
+      mainFaculty = await MainUser.find({ orgRole: 'faculty' }).select('_id name email orgRole');
+      mainFaculty = mainFaculty.map(u => ({
+        _id: u._id,
+        name: u.name,
+        email: u.email,
+        role: 'faculty',
+        source: 'mindwave'
+      }));
+    }
+
+    const combined = [
+      ...moocFaculty.map(u => ({ _id: u._id, name: u.name, email: u.email, role: u.role, source: 'mooc' })),
+      ...mainFaculty
+    ];
+
+    res.json({ ok: true, faculty: combined });
+  } catch (error) {
+    console.error('MOOC Faculty List Error:', error);
+    res.status(500).json({ ok: false, message: 'Failed to fetch faculty list.' });
+  }
+});
+
+// POST /api/mooc/admin/assign-instructor
+// Assign a faculty member as instructor of a course
+router.post('/admin/assign-instructor', moocAuthMiddleware, moocSuperAdminMiddleware, async (req, res) => {
+  try {
+    const { courseId, facultyUserId, facultyName } = req.body;
+    if (!courseId || !facultyUserId) {
+      return res.status(400).json({ ok: false, message: 'courseId and facultyUserId are required.' });
+    }
+
+    const course = await MoocCourse.findById(courseId);
+    if (!course) return res.status(404).json({ ok: false, message: 'Course not found.' });
+
+    course.instructorId = facultyUserId.toString();
+    course.instructorName = facultyName || 'Instructor';
+    await course.save();
+
+    res.json({ ok: true, message: 'Instructor assigned successfully.', course });
+  } catch (error) {
+    console.error('MOOC Assign Instructor Error:', error);
+    res.status(500).json({ ok: false, message: 'Failed to assign instructor.' });
+  }
+});
+
+// GET /api/mooc/instructor/courses
+// Courses where the logged-in faculty is the assigned instructor
+router.get('/instructor/courses', moocAuthMiddleware, async (req, res) => {
+  try {
+    const userId = req.moocUser.sub;
+    if (!['faculty', 'super_admin'].includes(req.moocUser.role)) {
+      return res.status(403).json({ ok: false, message: 'Faculty access only.' });
+    }
+
+    const courses = await MoocCourse.find({ instructorId: userId.toString() });
+
+    // Get enrollment stats per course
+    const courseData = await Promise.all(courses.map(async (course) => {
+      const enrollments = await MoocEnrollment.find({ courseId: course._id });
+      const totalStudents = enrollments.length;
+      const avgProgress = totalStudents > 0
+        ? (enrollments.reduce((sum, e) => sum + (e.progressPercentage || 0), 0) / totalStudents).toFixed(1)
+        : 0;
+      const completed = enrollments.filter(e => e.progressPercentage >= 100).length;
+      return {
+        ...course.toObject(),
+        totalStudents,
+        avgProgress: parseFloat(avgProgress),
+        completed
+      };
+    }));
+
+    res.json({ ok: true, courses: courseData });
+  } catch (error) {
+    console.error('MOOC Instructor Courses Error:', error);
+    res.status(500).json({ ok: false, message: 'Failed to fetch instructor courses.' });
+  }
+});
+
+// GET /api/mooc/analytics/detailed
+// Full per-course analytics breakdown for admin
+router.get('/analytics/detailed', moocAuthMiddleware, moocSuperAdminMiddleware, async (req, res) => {
+  try {
+    const courses = await MoocCourse.find().select('_id title courseCode instructorName createdAt');
+    const breakdowns = await Promise.all(courses.map(async (course) => {
+      const enrollments = await MoocEnrollment.find({ courseId: course._id });
+      const total = enrollments.length;
+      const avgProg = total > 0
+        ? (enrollments.reduce((s, e) => s + (e.progressPercentage || 0), 0) / total).toFixed(1)
+        : 0;
+      const completed = enrollments.filter(e => (e.progressPercentage || 0) >= 100).length;
+      return {
+        courseId: course._id,
+        title: course.title,
+        courseCode: course.courseCode,
+        instructor: course.instructorName || 'Unassigned',
+        enrolled: total,
+        avgProgress: parseFloat(avgProg),
+        completed
+      };
+    }));
+
+    const totalEnrollments = breakdowns.reduce((s, c) => s + c.enrolled, 0);
+    const uniqueLearnersSet = new Set();
+    const allEnrollments = await MoocEnrollment.find();
+    allEnrollments.forEach(e => uniqueLearnersSet.add(e.userId.toString()));
+
+    res.json({
+      ok: true,
+      summary: {
+        totalEnrollments,
+        uniqueLearners: uniqueLearnersSet.size,
+        activeCourses: courses.length,
+        avgProgress: totalEnrollments > 0
+          ? (allEnrollments.reduce((s, e) => s + (e.progressPercentage || 0), 0) / totalEnrollments).toFixed(1)
+          : 0
+      },
+      courses: breakdowns
+    });
+  } catch (error) {
+    console.error('MOOC Detailed Analytics Error:', error);
+    res.status(500).json({ ok: false, message: 'Failed to load detailed analytics.' });
+  }
+});
+
 export default router;
+

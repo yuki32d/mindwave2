@@ -1,188 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mindwave MOOC - Analytics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #4f46e5;
-            --text-dark: #111827;
-            --text-muted: #6b7280;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --border: #e5e7eb;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-color);
-            color: var(--text-dark);
-        }
-
-        .navbar {
-            background: #111827;
-            color: white;
-            padding: 16px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .navbar-brand {
-            font-size: 20px;
-            font-weight: 800;
-            text-decoration: none;
-            color: white;
-        }
-
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 24px;
-        }
-
-        .header-section {
-            margin-bottom: 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        .header-section h1 {
-            font-size: 32px;
-            font-weight: 800;
-            margin: 0 0 8px 0;
-            letter-spacing: -1px;
-        }
-
-        .header-section p {
-            color: var(--text-muted);
-            margin: 0;
-            font-size: 16px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .stat-value {
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--primary);
-            margin: 0;
-        }
-
-        .stat-desc {
-            font-size: 13px;
-            color: #10b981;
-            margin-top: 8px;
-            font-weight: 500;
-        }
-
-        .loading-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-muted);
-            font-weight: 500;
-            grid-column: 1/-1;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics — MindWave MOOC</title>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #0c0d14; color: #e2e8f0; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .msg { text-align: center; }
+    .spinner { width: 36px; height: 36px; border: 3px solid rgba(99,102,241,0.2); border-top-color: #6366f1; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    p { color: #7c849e; font-size: 14px; }
+  </style>
 </head>
 <body>
-
-    <nav class="navbar">
-        <a href="/mooc/courses.html" class="navbar-brand">Mindwave MOOC <span style="font-size:14px; font-weight:400; opacity:0.8; margin-left:8px;">| Analytics Engine</span></a>
-        <div style="font-weight:600; font-size:14px; cursor:pointer;" onclick="logout()">Logout</div>
-    </nav>
-
-    <div class="dashboard-container">
-        <div class="header-section">
-            <div>
-                <h1 id="greeting">Performance Overview</h1>
-                <p>Track learner engagement and course effectiveness metrics.</p>
-            </div>
-        </div>
-
-        <div class="stats-grid" id="stats-grid">
-            <div id="loading" class="loading-state">Computing analytics...</div>
-            <!-- Populated via JS -->
-        </div>
-
-    </div>
-
-    <script>
-        async function loadAnalytics() {
-            try {
-                const res = await fetch('/api/mooc/analytics');
-                const data = await res.json();
-                
-                const grid = document.getElementById('stats-grid');
-                grid.innerHTML = ''; // clear loading
-
-                if(!data.ok) {
-                    alert(data.message || 'Access Denied');
-                    window.location.href = '/mooc/dashboard.html';
-                    return;
-                }
-
-                const stats = data.stats;
-
-                const cards = [
-                    { label: 'Total Enrollments', value: stats.totalEnrollments, desc: 'Across ' + stats.coursesLoaded + ' courses' },
-                    { label: 'Unique Active Learners', value: stats.uniqueLearners, desc: '+12% from last week' },
-                    { label: 'Average Completion Rate', value: stats.avgProgress + '%', desc: 'Platform average' },
-                    { label: 'Active Courses Hosted', value: stats.coursesLoaded, desc: 'Currently published' }
-                ];
-
-                cards.forEach(c => {
-                    grid.innerHTML += `
-                        <div class="stat-card">
-                            <div class="stat-label">${c.label}</div>
-                            <div class="stat-value">${c.value}</div>
-                            <div class="stat-desc">${c.desc}</div>
-                        </div>
-                    `;
-                });
-
-            } catch (error) {
-                console.error("Analytics error:", error);
-                document.getElementById('loading').textContent = 'Failed to load analytics data.';
-            }
-        }
-
-        function logout() {
-            document.cookie = 'mindwave_mooc_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            window.location.href = '/mooc/login.html';
-        }
-
-        window.onload = loadAnalytics;
-    </script>
+  <div class="msg">
+    <div class="spinner"></div>
+    <p>Redirecting to Admin Analytics…</p>
+  </div>
+  <script>
+    // Analytics is now embedded in the admin panel
+    window.location.replace('/mooc/admin.html');
+  </script>
 </body>
 </html>
