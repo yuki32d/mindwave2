@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Student Sign In — MindWave</title>
   <meta name="description" content="Sign in to MindWave Student Portal." />
@@ -361,7 +362,52 @@
     </div>
   </div>
 
-  <script src="loginSecurity.js"></script>
+  <script>
+  /* ui-core.min.js (inlined) */
+  !function(w){
+    var _k='_mw_ls',_mx=5,_hx=10,_t1=30000,_t2=300000;
+    function _g(){try{return JSON.parse(sessionStorage.getItem(_k))||{c:0,u:0};}catch(e){return{c:0,u:0};}}
+    function _s(st){try{sessionStorage.setItem(_k,JSON.stringify(st));}catch(e){}}
+    var _p=[
+      /\$[a-zA-Z]+/,/\{[^}]*\}/,/<script/i,/javascript\s*:/i,
+      /on[a-z]+\s*=/i,/\bexec\s*\(/i,/\beval\s*\(/i,
+      /--+/,/'\s*(?:OR|AND)\s*'|'\s*=\s*'/i,/\bDROP\b/i,/\bSELECT\b.*\bFROM\b/i
+    ];
+    function _si(v){
+      if(typeof v!=='string')return '';
+      return v.replace(/<[^>]*>/g,'').replace(/[\x00-\x1F\x7F]/g,'').trim();
+    }
+    function _ia(v){
+      if(typeof v!=='string')return true;
+      return _p.some(function(r){return r.test(v);});
+    }
+    function _rf(){
+      var st=_g(); st.c+=1;
+      st.u=Date.now()+(st.c>=_hx?_t2:_t1);
+      _s(st); return _ls();
+    }
+    function _ls(){
+      var st=_g(),rm=Math.max(0,st.u-Date.now());
+      return{locked:st.c>=_mx&&rm>0,remainingMs:rm,count:st.c};
+    }
+    function _cl(){try{sessionStorage.removeItem(_k);}catch(e){}}
+    function _cd(btn,lbl,msg){
+      if(!btn)return; btn.disabled=true;
+      var iv=setInterval(function(){
+        var s=_ls();
+        if(!s.locked){clearInterval(iv);btn.disabled=false;
+          var b=btn.querySelector('.btn-lbl');
+          if(b)b.textContent=lbl; else btn.textContent=lbl;
+          if(msg)msg.textContent='';return;}
+        var sc=Math.ceil(s.remainingMs/1000),tx='Too many attempts. Wait '+sc+'s…';
+        var b=btn.querySelector('.btn-lbl');
+        if(b)b.textContent=tx; else btn.textContent=tx;
+        if(msg)msg.textContent=tx;
+      },500);
+    }
+    w.MWLoginSecurity={sanitizeInput:_si,isInjectionAttempt:_ia,recordFailedAttempt:_rf,getLockoutState:_ls,clearLockout:_cl,startCountdown:_cd};
+  }(window);
+  </script>
   <script>
     lucide.createIcons();
 
