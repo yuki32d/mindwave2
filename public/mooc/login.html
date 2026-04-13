@@ -1,260 +1,536 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mindwave MOOC - Log In</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --text-dark: #111827;
-            --text-muted: #6b7280;
-            --bg-color: #f3f4f6;
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MOOC Sign In — MindWave</title>
+  <meta name="description" content="Sign in to MindWave MOOC Learning Portal." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-dark);
-            overflow: hidden;
-        }
+    :root {
+      --teal:        #06B6D4;
+      --teal-dark:   #0891B2;
+      --teal-light:  #CCFBF1;
+      --orange:      #F97316;
+      --navy:        #0F172A;
+      --slate:       #475569;
+      --slate-light: #94A3B8;
+      --border:      #E2E8F0;
+      --card-bg:     #F8FAFC;
+      --danger:      #EF4444;
+      --white:       #FFFFFF;
+    }
 
-        /* Animated Background Blurs */
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.6;
-            z-index: 0;
-            animation: move 15s infinite alternate;
-        }
+    body { display: flex; min-height: 100vh; }
 
-        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #6366f1; animation-delay: 0s; }
-        .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: #a855f7; animation-delay: -5s; }
-        .blob-3 { top: 40%; left: 60%; width: 300px; height: 300px; background: #ec4899; animation-delay: -10s; }
+    /* ── LEFT: FORM PANEL ── */
+    .form-panel {
+      width: 420px; flex-shrink: 0;
+      background: var(--white);
+      display: flex; flex-direction: column;
+      padding: 48px 48px 36px;
+      position: relative; z-index: 2;
+      box-shadow: 4px 0 40px rgba(6,182,212,0.08);
+    }
 
-        @keyframes move {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(50px, 50px) scale(1.1); }
-        }
+    .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 48px; }
+    .logo-icon {
+      width: 38px; height: 38px; border-radius: 11px;
+      background: var(--teal);
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+    }
+    .logo-icon i { width: 20px; height: 20px; }
+    .logo-name { font-size: 1.2rem; font-weight: 800; color: var(--navy); letter-spacing: -0.02em; }
+    .logo-name span { color: var(--teal); }
+    .logo-badge {
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      background: var(--teal-light); color: var(--teal-dark);
+      padding: 3px 8px; border-radius: 6px; margin-left: 4px;
+    }
 
-        .login-container {
-            position: relative;
-            z-index: 10;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 48px;
-            width: 100%;
-            max-width: 440px;
-            box-shadow: var(--shadow);
-            transform: translateY(20px);
-            opacity: 0;
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+    .form-title { font-size: 1.5rem; font-weight: 800; color: var(--navy); letter-spacing: -0.02em; margin-bottom: 6px; }
+    .form-sub   { font-size: 0.87rem; color: var(--slate); margin-bottom: 30px; }
 
-        @keyframes slideUp {
-            to { transform: translateY(0); opacity: 1; }
-        }
+    .steps { display: flex; gap: 6px; margin-bottom: 28px; }
+    .step-dot {
+      width: 28px; height: 4px; border-radius: 100px;
+      background: var(--border); transition: background 0.3s;
+    }
+    .step-dot.active { background: var(--teal); }
 
-        .logo {
-            text-align: center;
-            margin-bottom: 32px;
-        }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--navy); margin-bottom: 7px; }
+    .input-wrap { position: relative; }
+    .input-wrap .ico {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      color: var(--slate-light); pointer-events: none;
+      width: 16px; height: 16px;
+    }
+    .field input {
+      width: 100%; padding: 12px 13px 12px 38px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 0.92rem; color: var(--navy);
+      font-family: 'Inter', sans-serif; background: var(--white);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input::placeholder { color: #CBD5E1; }
+    .field input:focus {
+      outline: none; border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(6,182,212,0.12);
+    }
+    .pw-toggle {
+      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--slate-light);
+      cursor: pointer; padding: 4px; transition: color 0.2s;
+      display: flex; align-items: center;
+    }
+    .pw-toggle:hover { color: var(--teal); }
+    .pw-toggle i { width: 16px; height: 16px; }
 
-        .logo h1 {
-            font-size: 32px;
-            font-weight: 800;
-            margin: 0;
-            background: linear-gradient(to right, #4f46e5, #ec4899);
-            -webkit-background-clip: text;
-            color: transparent;
-            letter-spacing: -1px;
-        }
+    .opts-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; font-size: 0.82rem;
+    }
+    .remember { display: flex; align-items: center; gap: 7px; color: var(--slate); cursor: pointer; user-select: none; }
+    .remember input { accent-color: var(--teal); width: 14px; height: 14px; }
+    .forgot { color: var(--teal); font-weight: 600; text-decoration: none; font-size: 0.82rem; }
+    .forgot:hover { text-decoration: underline; }
 
-        .logo p {
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 500;
-            margin-top: 8px;
-        }
+    .email-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.84rem; color: var(--slate);
+      margin-bottom: 18px;
+      background: var(--card-bg); border-radius: 9px;
+      padding: 10px 13px; border: 1px solid var(--border);
+    }
+    .email-row i { width: 16px; height: 16px; color: var(--teal); flex-shrink: 0; }
+    .email-row span { font-weight: 600; color: var(--navy); flex: 1; }
+    .change-btn {
+      background: none; border: none; color: var(--teal);
+      font-size: 0.8rem; font-weight: 700; cursor: pointer;
+      padding: 0; transition: opacity 0.2s;
+    }
+    .change-btn:hover { opacity: 0.7; }
 
-        .tabs {
-            display: flex;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 32px;
-        }
+    .err-msg {
+      background: #FEF2F2; border: 1px solid #FECACA; color: var(--danger);
+      border-radius: 8px; padding: 10px 13px; font-size: 0.82rem;
+      margin-bottom: 14px; display: none; align-items: center; gap: 8px;
+      animation: shake 0.35s ease;
+    }
+    .err-msg.show { display: flex; }
+    .err-msg i { width: 15px; height: 15px; flex-shrink: 0; }
+    @keyframes shake {
+      0%,100% { transform:translateX(0); }
+      20%,60%  { transform:translateX(-5px); }
+      40%,80%  { transform:translateX(5px); }
+    }
 
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
+    .submit-btn {
+      width: 100%; padding: 13px;
+      border: none; border-radius: 10px;
+      background: var(--teal); color: white;
+      font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 18px rgba(6,182,212,0.35);
+      transition: all 0.25s; margin-bottom: 16px;
+      font-family: 'Inter', sans-serif;
+    }
+    .submit-btn:hover { background: var(--teal-dark); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(6,182,212,0.4); }
+    .submit-btn .btn-lbl { display: flex; align-items: center; gap: 8px; }
+    .submit-btn .btn-lbl i { width: 16px; height: 16px; }
+    .submit-btn .spin {
+      width: 17px; height: 17px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+      border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .submit-btn.loading .btn-lbl { display: none; }
+    .submit-btn.loading .spin { display: block; }
 
-        .tab.active {
-            background: #fff;
-            color: var(--primary);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
+    .bottom-bar {
+      margin-top: auto; padding-top: 28px;
+      font-size: 0.72rem; color: #CBD5E1; text-align: center;
+    }
+    .bottom-bar a { color: var(--slate-light); text-decoration: none; margin: 0 4px; }
+    .bottom-bar a:hover { color: var(--teal); }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+    /* ── RIGHT: ILLUSTRATION PANEL ── */
+    .illus-panel {
+      flex: 1; position: relative;
+      background: linear-gradient(135deg, #E0F7FA 0%, #CCFBF1 50%, #E0F2FE 100%);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      padding: 48px 40px;
+    }
+    .illus-blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(70px); pointer-events: none;
+    }
+    .illus-blob-1 { width:420px; height:420px; background:rgba(6,182,212,0.18); top:-60px; right:-80px; }
+    .illus-blob-2 { width:300px; height:300px; background:rgba(249,115,22,0.10); bottom:40px; left:20px; }
+    .illus-blob-3 { width:220px; height:220px; background:rgba(6,182,212,0.10); top:50%; right:60px; transform:translateY(-50%); }
+    .illus-brand {
+      position: absolute; top: 28px; left: 48px; z-index: 3;
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--teal); letter-spacing: 0.06em;
+      text-transform: uppercase; opacity: 0.75;
+    }
 
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-dark);
-        }
+    /* HUD Container */
+    .hud-container { position: relative; z-index: 5; text-align: center; width: 100%; max-width: 600px; animation: fadeUp 0.8s cubic-bezier(0.16,1,0.3,1); }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
 
-        .form-control {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 15px;
-            border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 12px;
-            background: rgba(255,255,255,0.8);
-            color: var(--text-dark);
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-        }
+    .illus-headline {
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      font-weight: 800; color: var(--teal-dark);
+      letter-spacing: -0.03em; line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    .illus-sub {
+      font-size: 1rem; color: var(--slate); margin-bottom: 40px; font-weight: 500;
+    }
+    .hud-grid { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+    .hud-card {
+      background: rgba(255,255,255,0.80);
+      backdrop-filter: blur(10px);
+      padding: 16px 20px; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      min-width: 140px; transition: all 0.25s;
+    }
+    .hud-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(6,182,212,0.14); border-color: rgba(6,182,212,0.25); }
+    .hud-card-icon { color: var(--teal); }
+    .hud-card-icon i { width: 22px; height: 22px; }
+    .hud-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--slate-light); }
+    .hud-value { font-size: 0.9rem; font-weight: 700; color: var(--navy); }
 
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-            background: #fff;
-        }
+    .illus-badge {
+      position: absolute; bottom: 36px; right: 36px; z-index: 5;
+      background: white; border-radius: 14px; padding: 12px 18px;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 28px rgba(6,182,212,0.15);
+      border: 1px solid rgba(6,182,212,0.15);
+      animation: heroFloat 7s ease-in-out infinite; animation-delay: -2s;
+    }
+    .illus-badge-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--teal-light); color: var(--teal); display: flex; align-items: center; justify-content: center; }
+    .illus-badge-icon i { width: 18px; height: 18px; }
+    .illus-badge-text strong { display: block; font-size: 0.82rem; font-weight: 700; color: var(--navy); }
+    .illus-badge-text small  { font-size: 0.72rem; color: var(--slate-light); }
+    @keyframes heroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        .submit-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
+    .illus-footer { position: absolute; bottom: 14px; left: 0; right: 0; text-align: center; font-size: 0.72rem; font-weight: 600; color: var(--teal); letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.6; }
 
-        .submit-btn:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
-        }
-
-        .submit-btn:active {
-            transform: translateY(0);
-        }
-
-        .error-message {
-            color: #ef4444;
-            font-size: 13px;
-            font-weight: 500;
-            text-align: center;
-            margin-bottom: 16px;
-            min-height: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .error-message.visible {
-            opacity: 1;
-        }
-
-        .register-fields {
-            display: none;
-        }
-
-        .register-mode .register-fields {
-            display: block;
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 32px 24px;
-                border-radius: 20px;
-                width: 90%;
-            }
-            .logo h1 { font-size: 28px; }
-        }
-    </style>
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) {
+      .illus-panel { display: none; }
+      .form-panel { width: 100%; max-width: 460px; margin: auto; box-shadow: none; padding: 40px 32px; }
+      body { background: var(--card-bg); }
+    }
+    @media (max-width: 460px) {
+      .form-panel { padding: 32px 20px; }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
+<!-- FORM PANEL -->
+<div class="form-panel">
 
-    <div class="login-container">
-        <div class="logo">
-            <h1>Mindwave MOOC</h1>
-            <p id="form-subtitle">Welcome back to your learning journey</p>
+  <div class="logo">
+    <div class="logo-icon"><i data-lucide="brain-circuit"></i></div>
+    <div class="logo-name">Mind<span>Wave</span></div>
+    <span class="logo-badge">MOOC</span>
+  </div>
+
+  <div class="form-title">Sign in to MOOC</div>
+  <div class="form-sub">Enter your registered MOOC email to continue</div>
+
+  <div class="steps">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+  </div>
+
+  <form id="login-form" novalidate>
+
+    <!-- Step 1: Email -->
+    <div id="step1">
+      <div class="field">
+        <label for="username">Email or Username</label>
+        <div class="input-wrap">
+          <i data-lucide="mail" class="ico"></i>
+          <input type="email" id="username" placeholder="you@example.com" autocomplete="email" maxlength="254" spellcheck="false" autocorrect="off" autocapitalize="off" required />
         </div>
-
-        <div class="tabs">
-            <div class="tab active" id="tab-login" onclick="toggleMode('login')">Log In</div>
-            <div class="tab" id="tab-register" onclick="toggleMode('register')">Register</div>
-        </div>
-
-        <div class="error-message" id="error-msg"></div>
-
-        <form id="auth-form">
-            <div class="form-group register-fields">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" class="form-control" placeholder="John Doe">
-            </div>
-
-            <div class="form-group register-fields">
-                <label for="role">Role</label>
-                <select id="role" class="form-control">
-                    <option value="student">Student</option>
-                    <option value="faculty">Faculty</option>
-                    <option value="super_admin">Super Admin</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" class="form-control" placeholder="you@example.com" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" class="form-control" placeholder="••••••••" required>
-            </div>
-
-            <button type="submit" class="submit-btn" id="submit-btn">Sign In</button>
-        </form>
+      </div>
+      <div class="opts-row">
+        <label class="remember">
+          <input type="checkbox" id="rem" /> Remember me
+        </label>
+      </div>
+      <div class="err-msg" id="e1">
+        <i data-lucide="alert-circle"></i>
+        <span id="e1t"></span>
+      </div>
+      <button type="button" class="submit-btn" id="nextBtn">
+        <span class="btn-lbl">Next <i data-lucide="arrow-right"></i></span>
+        <div class="spin"></div>
+      </button>
     </div>
 
-    <script src="/mooc/js/login.js"></script>
+    <!-- Step 2: Password -->
+    <div id="step2" style="display:none;">
+      <div class="email-row">
+        <i data-lucide="user-circle"></i>
+        <span id="emailDisplay"></span>
+        <button type="button" id="changeEmail" class="change-btn">Change</button>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <i data-lucide="lock" class="ico"></i>
+          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" maxlength="128" required />
+          <button type="button" class="pw-toggle" id="pwToggle">
+            <i data-lucide="eye" id="eyeIco"></i>
+          </button>
+        </div>
+      </div>
+      <div class="opts-row">
+        <span></span>
+        <a href="#" class="forgot">Need help signing in?</a>
+      </div>
+      <div class="err-msg" id="e2">
+        <i data-lucide="alert-circle"></i>
+        <span id="e2t"></span>
+      </div>
+      <button type="submit" class="submit-btn" id="signInBtn">
+        <span class="btn-lbl"><i data-lucide="log-in"></i> Sign In</span>
+        <div class="spin"></div>
+      </button>
+    </div>
+
+  </form>
+
+  <div class="bottom-bar">
+    <a href="#">Privacy</a> &nbsp;·&nbsp;
+    <a href="#">Terms</a> &nbsp;·&nbsp;
+    © 2025 MindWave MOOC
+  </div>
+</div>
+
+<!-- ILLUSTRATION PANEL -->
+<div class="illus-panel">
+  <div class="illus-blob illus-blob-1"></div>
+  <div class="illus-blob illus-blob-2"></div>
+  <div class="illus-blob illus-blob-3"></div>
+  <div class="illus-brand">MindWave · MOOC Portal</div>
+
+  <div class="hud-container">
+    <div class="illus-headline">Advance Your<br>Knowledge</div>
+    <div class="illus-sub">Massively Open Online Courses — Learn at your own pace</div>
+
+    <div class="hud-grid">
+      <div class="hud-card">
+        <div class="hud-card-icon"><i data-lucide="book-open"></i></div>
+        <div class="hud-label">Courses</div>
+        <div class="hud-value">Self-Paced</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-card-icon"><i data-lucide="shield-check"></i></div>
+        <div class="hud-label">Access</div>
+        <div class="hud-value">Secure Portal</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-card-icon"><i data-lucide="graduation-cap"></i></div>
+        <div class="hud-label">Mode</div>
+        <div class="hud-value">Expert-Led</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="illus-badge">
+    <div class="illus-badge-icon"><i data-lucide="zap"></i></div>
+    <div class="illus-badge-text">
+      <strong>MOOC Learning</strong>
+      <small>Powered by MindWave</small>
+    </div>
+  </div>
+
+  <div class="illus-footer">Developed by MindWave Platform 2025</div>
+</div>
+
+<!-- Inlined security module (avoids MIME-type external script issues) -->
+<script>
+!function(w){
+  var _k='_mw_mooc_ls',_mx=5,_hx=10,_t1=30000,_t2=300000;
+  function _g(){try{return JSON.parse(sessionStorage.getItem(_k))||{c:0,u:0};}catch(e){return{c:0,u:0};}}
+  function _s(st){try{sessionStorage.setItem(_k,JSON.stringify(st));}catch(e){}}
+  var _p=[/\$[a-zA-Z]+/,/\{[^}]*\}/,/<script/i,/javascript\s*:/i,/on[a-z]+\s*=/i,/\bexec\s*\(/i,/\beval\s*\(/i,/--+/,/'\s*(?:OR|AND)\s*'|'\s*=\s*'/i,/\bDROP\b/i,/\bSELECT\b.*\bFROM\b/i];
+  function _si(v){if(typeof v!=='string')return '';return v.replace(/<[^>]*>/g,'').replace(/[\x00-\x1F\x7F]/g,'').trim();}
+  function _ia(v){if(typeof v!=='string')return true;return _p.some(function(r){return r.test(v);});}
+  function _rf(){var st=_g();st.c+=1;st.u=Date.now()+(st.c>=_hx?_t2:_t1);_s(st);return _ls();}
+  function _ls(){var st=_g(),rm=Math.max(0,st.u-Date.now());return{locked:st.c>=_mx&&rm>0,remainingMs:rm,count:st.c};}
+  function _cl(){try{sessionStorage.removeItem(_k);}catch(e){}}
+  function _cd(btn,lbl){
+    if(!btn)return;btn.disabled=true;
+    var iv=setInterval(function(){
+      var s=_ls();
+      if(!s.locked){clearInterval(iv);btn.disabled=false;var b=btn.querySelector('.btn-lbl');if(b)b.innerHTML=lbl;return;}
+      var sc=Math.ceil(s.remainingMs/1000),tx='Too many attempts. Wait '+sc+'s…';
+      var b=btn.querySelector('.btn-lbl');if(b)b.textContent=tx;
+    },500);
+  }
+  w.MWLoginSecurity={sanitizeInput:_si,isInjectionAttempt:_ia,recordFailedAttempt:_rf,getLockoutState:_ls,clearLockout:_cl,startCountdown:_cd};
+}(window);
+</script>
+
+<script>
+  lucide.createIcons();
+
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const emailInput = document.getElementById('username');
+  const emailDisplay = document.getElementById('emailDisplay');
+  const dot1 = document.getElementById('dot1');
+  const dot2 = document.getElementById('dot2');
+
+  // Step 1 → Step 2
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    const v = emailInput.value.trim();
+    const e1 = document.getElementById('e1');
+    const e1t = document.getElementById('e1t');
+    e1.classList.remove('show');
+
+    if (!v || !v.includes('@')) {
+      e1t.textContent = 'Please enter a valid email address.';
+      e1.classList.add('show');
+      lucide.createIcons();
+      return;
+    }
+
+    emailDisplay.textContent = v;
+    step1.style.display = 'none';
+    step2.style.display = 'block';
+    dot1.classList.remove('active');
+    dot2.classList.add('active');
+    document.getElementById('password').focus();
+  });
+
+  // Go back to Step 1
+  document.getElementById('changeEmail').addEventListener('click', () => {
+    step2.style.display = 'none';
+    step1.style.display = 'block';
+    dot2.classList.remove('active');
+    dot1.classList.add('active');
+    emailInput.focus();
+  });
+
+  // Toggle password visibility
+  document.getElementById('pwToggle').addEventListener('click', () => {
+    const pw = document.getElementById('password');
+    const ico = document.getElementById('eyeIco');
+    if (pw.type === 'password') {
+      pw.type = 'text';
+      ico.setAttribute('data-lucide', 'eye-off');
+    } else {
+      pw.type = 'password';
+      ico.setAttribute('data-lucide', 'eye');
+    }
+    lucide.createIcons();
+  });
+
+  // Form submit → POST /api/mooc/login (MoocUser MongoDB collection)
+  document.getElementById('login-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    var __ls = MWLoginSecurity.getLockoutState();
+    if (__ls.locked) {
+      MWLoginSecurity.startCountdown(document.getElementById('signInBtn'), '<i data-lucide="log-in"></i> Sign In');
+      return;
+    }
+
+    const rawEmail = emailInput.value.trim();
+    const rawPw = document.getElementById('password').value;
+    const cleanEmail = MWLoginSecurity.sanitizeInput(rawEmail);
+
+    const e2  = document.getElementById('e2');
+    const e2t = document.getElementById('e2t');
+    const btn = document.getElementById('signInBtn');
+
+    if (MWLoginSecurity.isInjectionAttempt(cleanEmail) || MWLoginSecurity.isInjectionAttempt(rawPw)) {
+      e2t.textContent = 'Invalid characters detected in input.';
+      e2.classList.add('show');
+      lucide.createIcons();
+      return;
+    }
+
+    e2.classList.remove('show');
+    btn.classList.add('loading');
+
+    try {
+      // Authenticates against MoocUser MongoDB collection via /api/mooc/login
+      const res = await fetch('/api/mooc/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, password: rawPw })
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        // Store MOOC session data
+        localStorage.setItem('mindwave_mooc_token', data.token || '');
+        localStorage.setItem('mooc_role', data.user.role || 'student');
+        localStorage.setItem('mooc_name', data.user.name || '');
+
+        MWLoginSecurity.clearLockout();
+
+        // Role-based redirect
+        const role = data.user.role;
+        if (role === 'super_admin') {
+          window.location.href = '/public/mooc/admin.html';
+        } else {
+          // Check if we have a pending enrollment intent
+          const pending = sessionStorage.getItem('mooc_pending_enrollment');
+          if (pending) {
+            sessionStorage.removeItem('mooc_pending_enrollment');
+            window.location.href = `/public/mooc/courses.html?enroll=${pending}`;
+          } else {
+            window.location.href = '/public/mooc/courses.html';
+          }
+        }
+      } else {
+        e2t.textContent = data.message || 'Incorrect password. Please try again.';
+        e2.classList.add('show');
+        var lockState = MWLoginSecurity.recordFailedAttempt();
+        if (lockState.locked) {
+          MWLoginSecurity.startCountdown(document.getElementById('signInBtn'), '<i data-lucide="log-in"></i> Sign In');
+        }
+        e2.style.animation = 'none';
+        requestAnimationFrame(() => e2.style.animation = '');
+        lucide.createIcons();
+      }
+    } catch (ex) {
+      e2t.textContent = 'Connection error — please try again.';
+      e2.classList.add('show');
+      var lockState = MWLoginSecurity.recordFailedAttempt();
+      if (lockState.locked) {
+        MWLoginSecurity.startCountdown(document.getElementById('signInBtn'), '<i data-lucide="log-in"></i> Sign In');
+      }
+      lucide.createIcons();
+    } finally {
+      btn.classList.remove('loading');
+    }
+  });
+</script>
+
 </body>
 </html>
