@@ -2,7 +2,12 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { MoocUser, MoocCourse, MoocEnrollment } from '../models/MoocModels.js';
-import mongoose from 'mongoose'; // For ObjectId validation
+import mongoose from 'mongoose';
+
+// Lazy-load the main User model (defined in server.js before this router is mounted)
+function getMainUser() {
+  return mongoose.models.User;
+}
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-dev';
@@ -56,6 +61,7 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/mooc/login
+// Tries MoocUser first, then falls back to main Mindwave User collection
 router.post('/login', async (req, res) => {
   const { email, password } = req.body || {};
 
@@ -64,12 +70,58 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    const user = await MoocUser.findOne({ email: email.toLowerCase() });
-    if (!user) return res.status(401).json({ ok: false, message: 'Invalid credentials.' });
+    const normalizedEmail = email.toLowerCase().trim();
 
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) return res.status(401).json({ ok: false, message: 'Invalid credentials.' });
+    // 1. Try MOOC-specific users first
+    let user = await MoocUser.findOne({ email: normalizedEmail });
+    let userRole = user?.role || null;
+    let isValid = false;
 
+    if (user) {
+      isValid = await bcrypt.compare(password, user.password);
+    }
+
+    // 2. Fall back to main Mindwave User collection
+    if (!user || !isValid) {
+      const MainUser = getMainUser();
+      if (MainUser) {
+        const mainUser = await MainUser.findOne({ email: normalizedEmail });
+        if (mainUser) {
+          const mainValid = await bcrypt.compare(password, mainUser.password);
+          if (mainValid) {
+            // Map Mindwave roles to MOOC roles
+            // orgRole: 'owner' | 'admin' | 'faculty' → mooc 'faculty'
+            // orgRole: 'student' or role: 'student' → mooc 'student'
+            // role: 'admin' (platform admin) → mooc 'super_admin'
+            let moocRole = 'student';
+            if (mainUser.role === 'admin') {
+              moocRole = 'super_admin';
+            } else if (['owner', 'admin', 'faculty'].includes(mainUser.orgRole)) {
+              moocRole = 'faculty';
+            }
+
+            const token = jwt.sign(
+              {
+                sub: mainUser._id.toString(),
+                role: moocRole,
+                email: mainUser.email,
+                name: mainUser.name,
+                courseId: null
+              },
+              JWT_SECRET,
+              { expiresIn: '7d' }
+            );
+
+            res.cookie('mindwave_mooc_token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 3600 * 1000 });
+            return res.json({ ok: true, message: 'Login successful', token, user: { name: mainUser.name, role: moocRole } });
+          }
+        }
+      }
+      // Neither collection matched
+      return res.status(401).json({ ok: false, message: 'Invalid credentials.' });
+    }
+
+    // MoocUser found and password valid
     const token = signMoocToken(user);
     res.cookie('mindwave_mooc_token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 3600 * 1000 });
     res.json({ ok: true, message: 'Login successful', token, user: { name: user.name, role: user.role } });
