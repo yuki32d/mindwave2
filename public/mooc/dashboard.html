@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindwave MOOC - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-dark: #111827;
+            --text-muted: #6b7280;
+            --bg-color: #f3f4f6;
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(to right, #4f46e5, #ec4899);
+            -webkit-background-clip: text;
+            color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-left: 24px;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .btn-logout {
+            cursor: pointer;
+            color: #ef4444;
+            font-weight: 600;
+            margin-left: 24px;
+            font-size: 14px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+
+        .header-section {
+            margin-bottom: 40px;
+        }
+
+        .header-section h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            letter-spacing: -1px;
+        }
+
+        .header-section p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .enrollments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .enrollment-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-code {
+            font-size: 12px;
+            font-weight: 700;
+            color: #4f46e5;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .course-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+            line-height: 1.3;
+        }
+
+        .progress-section {
+            margin-top: auto;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-bg {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4f46e5, #ec4899);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .btn-continue {
+            width: 100%;
+            background: #111827;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .btn-continue:hover {
+            background: #374151;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 20px;
+            border: 1px dashed #cbd5e1;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin: 0 0 10px 0;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            margin: 0 0 24px 0;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/mooc/courses.html" class="navbar-brand">Mindwave MOOC</a>
+        <div class="nav-links">
+            <a href="/mooc/courses.html">Browse Courses</a>
+            <span class="btn-logout" onclick="logout()">Logout</span>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="header-section">
+            <h1 id="greeting">My Learning</h1>
+            <p>Pick up right where you left off.</p>
+        </div>
+
+        <div class="enrollments-grid" id="enrollments-grid">
+            <div style="text-align:center; padding: 40px; grid-column:1/-1;">Loading your courses...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            try {
+                // Fetch user info for greeting
+                const meRes = await fetch('/api/mooc/user/me');
+                if (!meRes.ok) {
+                    window.location.href = '/mooc/login.html';
+                    return;
+                }
+                const meData = await meRes.json();
+                document.getElementById('greeting').textContent = `Welcome back, ${meData.user.name.split(' ')[0]}`;
+
+                // Fetch dashboard stats
+                const dashRes = await fetch('/api/mooc/dashboard');
+                const dashData = await dashRes.json();
+
+                const grid = document.getElementById('enrollments-grid');
+                grid.innerHTML = '';
+
+                if (!dashData.enrollments || dashData.enrollments.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <h3>You haven't enrolled in any courses yet</h3>
+                            <p>Explore our catalog to start your learning journey.</p>
+                            <a href="/mooc/courses.html" class="btn-primary">Browse Courses</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                dashData.enrollments.forEach(enrollment => {
+                    const course = enrollment.courseId;
+                    if (!course) return; // defensive
+
+                    const progress = enrollment.progressPercentage || 0;
+                    
+                    const template = `
+                        <div class="enrollment-card">
+                            <div class="course-code">${course.courseCode}</div>
+                            <h3 class="course-title">${course.title}</h3>
+                            
+                            <div class="progress-section">
+                                <div class="progress-header">
+                                    <span>Course Progress</span>
+                                    <span>${progress}%</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" style="width: ${progress}%"></div>
+                                </div>
+                                <button class="btn-continue" onclick="continueLearning('${course._id}')">
+                                    ${progress === 0 ? 'Start Course' : 'Continue Learning'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    grid.insertAdjacentHTML('beforeend', template);
+                });
+
+            } catch (error) {
+                console.error("Dashboard error:", error);
+                document.getElementById('enrollments-grid').innerHTML = 
+                    '<p style="color:red;">Error loading dashboard. Please try again.</p>';
+            }
+        }
+
+        function continueLearning(courseId) {
+            // Placeholder: Normally this would route to /mooc/learn.html?courseId=XYZ
+            alert("This will open the course player for ID: " + courseId);
+            // window.location.href = `/mooc/learn.html?id=${courseId}`;
+        }
+
+        function logout() {
+            document.cookie = 'mindwave_mooc_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = '/mooc/login.html';
+        }
+
+        window.onload = loadDashboard;
+    </script>
+</body>
+</html>

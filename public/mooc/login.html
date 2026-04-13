@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindwave MOOC - Log In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-dark: #111827;
+            --text-muted: #6b7280;
+            --bg-color: #f3f4f6;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        /* Animated Background Blurs */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.6;
+            z-index: 0;
+            animation: move 15s infinite alternate;
+        }
+
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #6366f1; animation-delay: 0s; }
+        .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: #a855f7; animation-delay: -5s; }
+        .blob-3 { top: 40%; left: 60%; width: 300px; height: 300px; background: #ec4899; animation-delay: -10s; }
+
+        @keyframes move {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.1); }
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 10;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 48px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(to right, #4f46e5, #ec4899);
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .logo p {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 32px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #fff;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 15px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.8);
+            color: var(--text-dark);
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            background: #fff;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            margin-bottom: 16px;
+            min-height: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-message.visible {
+            opacity: 1;
+        }
+
+        .register-fields {
+            display: none;
+        }
+
+        .register-mode .register-fields {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 32px 24px;
+                border-radius: 20px;
+                width: 90%;
+            }
+            .logo h1 { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="login-container">
+        <div class="logo">
+            <h1>Mindwave MOOC</h1>
+            <p id="form-subtitle">Welcome back to your learning journey</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" id="tab-login" onclick="toggleMode('login')">Log In</div>
+            <div class="tab" id="tab-register" onclick="toggleMode('register')">Register</div>
+        </div>
+
+        <div class="error-message" id="error-msg"></div>
+
+        <form id="auth-form">
+            <div class="form-group register-fields">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" class="form-control" placeholder="John Doe">
+            </div>
+
+            <div class="form-group register-fields">
+                <label for="role">Role</label>
+                <select id="role" class="form-control">
+                    <option value="student">Student</option>
+                    <option value="faculty">Faculty</option>
+                    <option value="super_admin">Super Admin</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" class="form-control" placeholder="you@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">Sign In</button>
+        </form>
+    </div>
+
+    <script src="/mooc/js/login.js"></script>
+</body>
+</html>

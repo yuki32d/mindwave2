@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindwave MOOC - Super Admin CMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://apis.google.com/js/api.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-dark: #111827;
+            --text-muted: #6b7280;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-dark);
+        }
+
+        .navbar {
+            background: #111827;
+            color: white;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: 800;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .navbar-brand span.badge {
+            background: #ec4899;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: calc(100vh - 64px);
+        }
+
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            display: block;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item.active, .nav-item:hover {
+            background: #f8fafc;
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .main-content {
+            padding: 40px;
+            max-width: 900px;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            margin-top: 0;
+            margin-bottom: 24px;
+            font-size: 24px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-sizing: border-box;
+            background: #f9fafb;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--border);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: var(--primary);
+        }
+
+        .drive-picker-container {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+            background: #f8fafc;
+            margin-bottom: 20px;
+        }
+
+        #selected-file-info {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #10b981;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">Mindwave MOOC <span class="badge">CMS Admin</span></div>
+        <div style="font-weight:600; font-size:14px; cursor:pointer;" onclick="logout()">Logout / Exit Admin</div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <div class="sidebar">
+            <a href="#" class="nav-item active">Curriculum Builder</a>
+            <a href="/mooc/analytics.html" class="nav-item">Analytics</a>
+            <a href="/mooc/courses.html" class="nav-item">View Public Storefront</a>
+        </div>
+
+        <div class="main-content">
+
+            <!-- Course Creation -->
+            <div class="section-card">
+                <h2 class="section-header">1. Create New Course</h2>
+                <form id="course-form">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                        <div class="form-group">
+                            <label>Course Code (Unique)</label>
+                            <input type="text" id="courseCode" class="form-control" placeholder="e.g. CS101" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Duration / Scope</label>
+                            <input type="text" id="duration" class="form-control" placeholder="e.g. 4 Weeks" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Course Title</label>
+                        <input type="text" id="title" class="form-control" placeholder="Introduction to Computer Science" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Course Description</label>
+                        <textarea id="description" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">Create Course</button>
+                    <span id="course-msg" style="margin-left: 16px; font-weight:600; font-size:14px;"></span>
+                </form>
+            </div>
+
+            <!-- Lesson Creation -->
+            <div class="section-card">
+                <h2 class="section-header">2. Add Video Lesson</h2>
+                <form id="lesson-form">
+                    <div class="form-group">
+                        <label>Target Course ID</label>
+                        <select id="targetCourseId" class="form-control" required>
+                            <!-- Populated dynamically -->
+                            <option value="">Select a course...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Lesson Title</label>
+                        <input type="text" id="lessonTitle" class="form-control" required>
+                    </div>
+
+                    <div class="drive-picker-container">
+                        <p style="margin: 0 0 16px 0; color:var(--text-muted); font-size:14px;">
+                            MOOC videos must be hosted on Google Drive. Use the Picker to securely embed without exposing raw video files on our server.
+                        </p>
+                        <button type="button" class="btn-outline" onclick="openGooglePicker()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"></path></svg>
+                            Select Video from Google Drive
+                        </button>
+                        <input type="hidden" id="videoDriveUrl" required>
+                        <div id="selected-file-info"></div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Add Lesson to Course</button>
+                </form>
+            </div>
+
+            <!-- Quiz Creation -->
+            <div class="section-card">
+                <h2 class="section-header">3. Add Quiz to Lesson</h2>
+                <form id="quiz-form">
+                    <div class="form-group">
+                        <label>Target Lesson ID</label>
+                        <input type="text" id="targetLessonId" class="form-control" placeholder="Paste Lesson _id..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Question text</label>
+                        <input type="text" id="questionText" class="form-control" required>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                        <div class="form-group"><label>Option 0</label><input type="text" id="opt0" class="form-control" required></div>
+                        <div class="form-group"><label>Option 1</label><input type="text" id="opt1" class="form-control" required></div>
+                        <div class="form-group"><label>Option 2</label><input type="text" id="opt2" class="form-control" required></div>
+                        <div class="form-group"><label>Option 3</label><input type="text" id="opt3" class="form-control" required></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Correct Option Index (0-3)</label>
+                        <input type="number" id="correctIndex" class="form-control" min="0" max="3" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Create Quiz</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Check Admin Auth
+        async function checkAdminAuth() {
+            const res = await fetch('/api/mooc/user/me');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.user.role !== 'super_admin') {
+                    alert('Access Denied. Super Admin only.');
+                    window.location.href = '/mooc/dashboard.html';
+                }
+            } else {
+                window.location.href = '/mooc/login.html';
+            }
+        }
+
+        async function fetchCourses() {
+            const res = await fetch('/api/mooc/courses');
+            const data = await res.json();
+            const select = document.getElementById('targetCourseId');
+            if(data.courses) {
+                data.courses.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c._id;
+                    opt.textContent = `${c.courseCode} - ${c.title}`;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        document.getElementById('course-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const payload = {
+                courseCode: document.getElementById('courseCode').value,
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                duration: document.getElementById('duration').value
+            };
+            const res = await fetch('/api/mooc/admin/courses', {
+                method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.ok) {
+                document.getElementById('course-msg').textContent = 'Course added! (ID: ' + data.course._id + ')';
+                document.getElementById('course-msg').style.color = '#10b981';
+                e.target.reset();
+                fetchCourses(); // refresh dropdown
+            } else {
+                alert(data.message);
+            }
+        };
+
+        document.getElementById('lesson-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const payload = {
+                courseId: document.getElementById('targetCourseId').value,
+                title: document.getElementById('lessonTitle').value,
+                videoDriveUrl: document.getElementById('videoDriveUrl').value,
+                order: 1
+            };
+            const res = await fetch('/api/mooc/admin/lessons', {
+                method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.ok) {
+                alert('Lesson created! ID: ' + data.lesson._id);
+                e.target.reset();
+                document.getElementById('selected-file-info').textContent = '';
+            }
+        };
+
+        document.getElementById('quiz-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const payload = {
+                lessonId: document.getElementById('targetLessonId').value,
+                question: document.getElementById('questionText').value,
+                options: [
+                    document.getElementById('opt0').value,
+                    document.getElementById('opt1').value,
+                    document.getElementById('opt2').value,
+                    document.getElementById('opt3').value,
+                ],
+                correctOptionIndex: parseInt(document.getElementById('correctIndex').value)
+            };
+            const res = await fetch('/api/mooc/admin/quizzes', {
+                method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.ok) {
+                alert('Quiz created! ID: ' + data.quiz._id);
+                e.target.reset();
+            }
+        };
+
+        // --- Google Drive Picker API Mock / Implementation Frame ---
+        const DEVELOPER_KEY = 'REPLACE_WITH_API_KEY';
+        const CLIENT_ID = 'REPLACE_WITH_CLIENT_ID';
+
+        function openGooglePicker() {
+            // Note: Since this requires an actual Google Cloud OAuth Client ID, this falls back safely.
+            const dummyUrl = 'https://drive.google.com/file/d/1BdummyVideoFileIdXYZ/preview';
+            document.getElementById('videoDriveUrl').value = dummyUrl;
+            document.getElementById('selected-file-info').textContent = 'Selected: "intro-video.mp4" (' + dummyUrl + ')';
+            alert("Google Picker simulated. URL set to dummy Drive link.");
+            
+            // Real implementation would call google.picker.PickerBuilder() here, 
+            // after authenticating via gapi.auth2.getAuthInstance().signIn()
+        }
+
+        function logout() {
+            document.cookie = 'mindwave_mooc_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = '/mooc/login.html';
+        }
+
+        window.onload = async () => {
+            await checkAdminAuth();
+            await fetchCourses();
+        };
+    </script>
+</body>
+</html>

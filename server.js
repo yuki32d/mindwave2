@@ -32,6 +32,7 @@ import { setupPeerReviewRoutes, PeerReview } from './peer-review-backend.js';
 // Live Activity System
 import activitiesRouter from './routes/activities.js';
 import liveSessionsRouter from './routes/live-sessions.js';
+import moocRoutes from './routes/moocRoutes.js';
 // Agora.io Video SDK
 import pkg from 'agora-access-token';
 const { RtcTokenBuilder, RtcRole } = pkg;
@@ -1395,6 +1396,7 @@ app.use(express.static(__dirname, {
 // ============================================
 app.use('/api/activities', activitiesRouter);
 app.use('/api/live-sessions', liveSessionsRouter);
+app.use('/api/mooc', moocRoutes);
 // ── PUBLIC: Student Email Verification (must be BEFORE the auth middleware below) ──
 app.post("/api/student/verify-email", async (req, res) => {
   const { email, otp } = req.body || {};
