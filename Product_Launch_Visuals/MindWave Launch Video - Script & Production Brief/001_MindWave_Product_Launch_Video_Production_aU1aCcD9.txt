@@ -1,0 +1,187 @@
+# MindWave — Product Launch Video
+## Production Brief & Shot-by-Shot Script
+**Duration:** 70 seconds (14 × 5-second beats) | **Platform:** 16:9 landscape, large conference screen | **Tagline:** "Activate Every Mind"
+
+---
+
+## PRODUCTION BRIEF
+
+| Field | Detail |
+|---|---|
+| **Brand** | MindWave E-Learning Platform |
+| **Audience** | Students, teachers, institutions |
+| **Platform** | Big-screen tech event display, 16:9, 1920×1080 |
+| **Duration** | 70 seconds exactly |
+| **Style Reference** | GWI AI Assistant launch video — minimalist, kinetic typography, geometric motion graphics |
+| **Primary Colors** | Cyan/electric blue → deep violet/purple gradient |
+| **Typography** | Bold rounded sans-serif, kinetic reveals, tight line-height |
+| **Background Logic** | White or near-black base; gradient accents and geometric overlays |
+| **Transition Language** | Geometric wipes, grid-line sweeps, particle bursts, hard cuts |
+| **Logo** | Stylized brain, blue-to-purple gradient line-art neural nodes |
+| **CTA** | mindwave.io (or platform URL) |
+
+---
+
+## VOICEOVER SCRIPT (Full Text)
+
+> *What if learning didn't feel like a chore?*
+>
+> *Today's classrooms are stuck — passive lectures, disengaged students, zero feedback.*
+>
+> *There's a better way. Say hello to MindWave.*
+>
+> *Turn every lesson into a game. Quiz battles keep students sharp and hungry.*
+>
+> *Peer Review builds critical thinking — students teach each other, and grow together.*
+>
+> *The Leaderboard ignites friendly competition. Watch engagement soar.*
+>
+> *Seamless Google Classroom integration — your tools, your flow, amplified.*
+>
+> *Teachers get real-time insight. Students get real momentum.*
+>
+> *Classrooms transform. Potential unlocks.*
+>
+> *MindWave. Activate Every Mind.*
+>
+> *Visit mindwave.io and ignite your classroom today.*
+
+---
+
+## 14-BEAT SHOT LIST
+
+---
+
+### Beat 1 — 0:00–0:05 | HOOK
+**Voiceover:** *"What if learning didn't feel like a chore?"*
+**Visual:** Black screen. A single electric-blue arc pulses from center like a neural spark. Bold white question mark scales in, then shatters into geometric fragments.
+**Animation Type:** Kinetic type reveal + particle burst
+**On-Screen Text:** `What if learning didn't feel like a chore?`
+**Color Emphasis:** Deep black + electric cyan pulse
+
+---
+
+### Beat 2 — 0:05–0:10 | PROBLEM (Setup)
+**Voiceover:** *"Today's classrooms are stuck —"*
+**Visual:** White background. A grid of dull grey rectangles (representing desks) slides in from left. Muted, flat icons: a sleeping student emoji silhouette, a lectern, a flat progress bar stuck at 0%.
+**Animation Type:** Grid slide-in, icon stagger
+**On-Screen Text:** `Stuck.`
+**Color Emphasis:** Cool grey / muted white — deliberately dull
+
+---
+
+### Beat 3 — 0:10–0:15 | PROBLEM (Stakes)
+**Voiceover:** *"— passive lectures, disengaged students, zero feedback."*
+**Visual:** Three bold words slam in one at a time — PASSIVE / DISENGAGED / SILENT — each in a different muted grey slab. A red diagonal slash cuts across all three.
+**Animation Type:** Word-slam kinetic type + slash wipe
+**On-Screen Text:** `PASSIVE. DISENGAGED. SILENT.`
+**Color Emphasis:** Grey slabs, red slash accent
+
+---
+
+### Beat 4 — 0:15–0:20 | SOLUTION REVEAL
+**Voiceover:** *"There's a better way. Say hello to MindWave."*
+**Visual:** Red slash explodes into blue-to-purple gradient burst. MindWave brain logo assembles line by line from neural nodes. Logotype fades in below, glowing slightly.
+**Animation Type:** Logo assembly animation, gradient burst from center
+**On-Screen Text:** `MindWave` + brain logo
+**Color Emphasis:** Full cyan-to-violet gradient, white glow
+
+---
+
+### Beat 5 — 0:20–0:25 | FEATURE 1 — Quiz Games
+**Voiceover:** *"Turn every lesson into a game. Quiz battles keep students sharp and hungry."*
+**Visual:** Dark background. A UI mockup of a quiz card flips in (multiple choice, glowing answer options). Score counter ticks up rapidly. Confetti particles in blue/violet burst from correct answer.
+**Animation Type:** Card flip, counter tick-up, particle burst
+**On-Screen Text:** `Quiz Games` (label) + `+250 pts` counter
+**Color Emphasis:** Deep navy background, electric blue UI, violet confetti
+
+---
+
+### Beat 6 — 0:25–0:30 | FEATURE 2 — Peer Review
+**Voiceover:** *"Peer Review builds critical thinking — students teach each other, and grow together."*
+**Visual:** White background. Two student avatar circles connect with a glowing line (peer-to-peer). Stars animate between them. A speech bubble icon with a checkmark floats in.
+**Animation Type:** Line draw between avatars, icon pop-in
+**On-Screen Text:** `Peer Review` + `"Teach. Learn. Grow."`
+**Color Emphasis:** White base, purple gradient connecting line, gold star accent
+
+---
+
+### Beat 7 — 0:30–0:35 | FEATURE 3 — Leaderboard
+**Voiceover:** *"The Leaderboard ignites friendly competition. Watch engagement soar."*
+**Visual:** Dark background. A leaderboard UI mockup slides up from bottom. Rank #1, #2, #3 rows highlight in sequence with a pulse effect. A progress arrow shoots upward off-screen.
+**Animation Type:** List slide-up, row pulse, arrow launch
+**On-Screen Text:** `Leaderboard` + `#1 🔥` rank highlight
+**Color Emphasis:** Dark background, cyan rank highlights, flame emoji accent
+
+---
+
+### Beat 8 — 0:35–0:40 | FEATURE 4 — Google Classroom Integration (Part 1)
+**Voiceover:** *"Seamless Google Classroom integration —"*
+**Visual:** White background. Google Classroom logo fades in, then a MindWave brain logo slides in beside it. A smooth connection arc links them, pulsing.
+**Animation Type:** Logo fade + arc draw connection
+**On-Screen Text:** `Google Classroom` ↔ `MindWave`
+**Color Emphasis:** White base, Google color accent → MindWave blue-violet gradient
+
+---
+
+### Beat 9 — 0:40–0:45 | FEATURE 4 — Google Classroom Integration (Part 2)
+**Voiceover:** *"— your tools, your flow, amplified."*
+**Visual:** The connection arc expands into a full grid of connected student/teacher nodes, all glowing. The word `AMPLIFIED` slams in large across center.
+**Animation Type:** Network expansion, kinetic type slam
+**On-Screen Text:** `AMPLIFIED.`
+**Color Emphasis:** Gradient violet-blue network lines on white
+
+---
+
+### Beat 10 — 0:45–0:50 | TEACHER INSIGHT
+**Voiceover:** *"Teachers get real-time insight. Students get real momentum."*
+**Visual:** Split screen (clean dividing line): Left side — teacher dashboard UI with animated bar charts rising. Right side — student progress ring filling up to 100%.
+**Animation Type:** Split-screen reveal, bar chart grow, ring fill
+**On-Screen Text:** `Real Insight. Real Momentum.`
+**Color Emphasis:** Left = deep violet, Right = electric cyan — mirrored gradient
+
+---
+
+### Beat 11 — 0:50–0:55 | TRANSFORMATION
+**Voiceover:** *"Classrooms transform. Potential unlocks."*
+**Visual:** Dark background. Abstract classroom silhouette (rows of desks) dissolves into a constellation of glowing nodes — students becoming a network. Slow cinematic zoom in.
+**Animation Type:** Morphing dissolve, constellation build, slow zoom
+**On-Screen Text:** `Transform. Unlock.`
+**Color Emphasis:** Dark navy, glowing blue-violet node constellation
+
+---
+
+### Beat 12 — 0:55–1:00 | IMPACT / SOCIAL PROOF
+**Voiceover:** *"Potential unlocks."* *(beat continues)*
+**Visual:** White background. Bold stats animate in sequentially: `10,000+ Students` / `500+ Schools` / `94% Engagement Lift`. Each stat slides in with a geometric underline sweep.
+**Animation Type:** Counter roll-up, sequential stat reveals
+**On-Screen Text:** `10,000+ Students · 500+ Schools · 94% Engagement`
+**Color Emphasis:** White base, blue gradient stat numbers, violet underlines
+
+---
+
+### Beat 13 — 1:00–1:05 | TAGLINE
+**Voiceover:** *"MindWave. Activate Every Mind."*
+**Visual:** Full-bleed blue-to-purple gradient background. MindWave brain logo pulses once, large. Bold logotype `MindWave` below it in white. Then the tagline `Activate Every Mind` resolves in — letter by letter.
+**Animation Type:** Logo pulse, letter-by-letter type reveal
+**On-Screen Text:** `MindWave` + `Activate Every Mind`
+**Color Emphasis:** Full cyan-to-violet gradient hero moment
+
+---
+
+### Beat 14 — 1:05–1:10 | CTA
+**Voiceover:** *"Visit mindwave.io and ignite your classroom today."*
+**Visual:** Gradient background holds. A clean white card slides up from bottom with `mindwave.io` in bold blue. QR code appears beside it (optional). Subtle geometric grid pulses around the card.
+**Animation Type:** Card slide-up, geometric grid pulse, hold
+**On-Screen Text:** `mindwave.io` + `Get Started Today`
+**Color Emphasis:** Violet-blue gradient, white card, cyan CTA text
+
+---
+
+## CONTINUITY NOTES
+
+- **Logo presence:** Brain icon appears in Beat 4 (hero reveal), Beat 13 (tagline moment), and Beat 14 (CTA card). Keep consistent scale relationships.
+- **Typography system:** One typeface family throughout — rounded sans-serif (e.g., Nunito, Poppins, or similar). Weights: Black for headlines, Medium for body.
+- **Transition language:** Use geometric shapes (thin lines, circles, grids) as wipe/reveal devices between every beat — never a plain cut except where impact is intentional (Beat 3 slash).
+- **Audio direction:** Punchy electronic underscore — builds from sparse in Beat 1, peaks at Beat 4 (logo reveal), drives through features, swells at Beat 13, resolves cleanly at Beat 14.
+- **Pacing rule:** Each beat = exactly 5 seconds. No beat should feel rushed or padded — write voiceover to fit naturally within 5 seconds at a moderate pace.
