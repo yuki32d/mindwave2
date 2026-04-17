@@ -6,7 +6,7 @@ This guide will help you deploy the MindWave platform to your college server. Th
 ## Prerequisites
 
 ### Server Requirements
-- **Operating System**: Linux (Ubuntu 20.04+ recommended) or Windows Server
+- **Operating System**: Linux (Ubuntu 20.04+ recommended) or Windows Server![alt text](image-1.png)
 - **Node.js**: Version 16.x or higher
 - **MongoDB**: Version 5.0 or higher
 - **RAM**: Minimum 2GB (4GB recommended)
