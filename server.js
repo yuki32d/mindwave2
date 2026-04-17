@@ -443,9 +443,15 @@ function generateAgoraToken(channelName, uid, role) {
 mongoose.set("strictQuery", true);
 
 mongoose
-  .connect(MONGODB_URI)
+  .connect(MONGODB_URI, {
+    maxPoolSize: 50,          // Up from default 5 — handles concurrent DB queries
+    minPoolSize: 5,           // Keep 5 connections warm
+    serverSelectionTimeoutMS: 5000,  // Fail fast if MongoDB is down
+    socketTimeoutMS: 45000,   // Close idle sockets after 45s
+    family: 4                 // Use IPv4, avoids IPv6 issues on some college servers
+  })
   .then(() => {
-    console.log("Connected to MongoDB");
+    console.log("Connected to MongoDB (pool: 5–50 connections)");
     seedSubjects();
   })
   .catch((err) => {
@@ -1857,19 +1863,22 @@ app.post('/api/run-code-cloud', async (req, res) => {
   }
 });
 
+// ⚠️  COLLEGE NAT WARNING: Students on campus share a single outbound IP.
+// Setting a per-IP auth limit of 5 would lock out ALL students after 5 failed
+// attempts from anyone on campus. We raise it to 30 (still safe, just not per-person).
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,  // 15-minute window
-  max: 5,                     // 5 login attempts per window per IP
+  max: 30,                    // 30 attempts per IP per window (college NAT safe)
   standardHeaders: true,
   legacyHeaders: false,
   message: { ok: false, message: 'Too many login attempts. Please wait 15 minutes and try again.' },
   skipSuccessfulRequests: true  // Only count failed requests against the limit
 });
 
-// General API rate limiter
+// General API rate limiter — raised for college NAT (many users behind 1 IP)
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per window
+  max: 500,  // Raised from 100 — college campus shares IP, 100 was way too low
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many requests, please try again later.'
