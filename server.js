@@ -491,7 +491,10 @@ const userSchema = new mongoose.Schema(
     profilePhoto: { type: String }, // URL to profile photo
     // Activity Tracking
     lastActive: { type: Date, default: Date.now },
-    lastLogin: { type: Date }
+    lastLogin: { type: Date },
+    // Password Reset (for forgot-password flow)
+    resetToken: { type: String },
+    resetTokenExpiry: { type: Date }
   },
   { timestamps: true }
 );
@@ -1322,7 +1325,14 @@ const allowedOrigins = new Set([
   'http://localhost:5500',
   'http://127.0.0.1:5500',
   'http://localhost:8081',
-  'http://127.0.0.1:8081'
+  'http://127.0.0.1:8081',
+  // College server (HTTP and HTTPS, with and without port)
+  'http://203.201.63.38',
+  'https://203.201.63.38',
+  'http://203.201.63.38:8081',
+  'https://203.201.63.38:8081',
+  'http://203.201.63.38:80',
+  'https://203.201.63.38:443'
 ]);
 app.use(
   cors({
@@ -1330,13 +1340,15 @@ app.use(
       if (!origin) return callback(null, true);
       if (
         allowedOrigins.has(origin) ||
-        /^http:\/\/localhost(?::\d+)?$/.test(origin) ||
-        /^http:\/\/127\.0\.0\.1(?::\d+)?$/.test(origin) ||
-        /^http:\/\/192\.168\.\d+\.\d+(?::\d+)?$/.test(origin) ||
+        /^https?:\/\/localhost(?::\d+)?$/.test(origin) ||
+        /^https?:\/\/127\.0\.0\.1(?::\d+)?$/.test(origin) ||
+        /^https?:\/\/192\.168\.\d+\.\d+(?::\d+)?$/.test(origin) ||
+        /^https?:\/\/203\.201\.63\.38(?::\d+)?$/.test(origin) ||
         origin === 'null'
       ) {
         return callback(null, true);
       }
+      console.warn(`[CORS] Blocked origin: ${origin}`);
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true
@@ -1354,14 +1366,15 @@ app.use(helmet({
       "style-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.cloudflare.com", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "http://localhost:8000", "http://localhost:9000"],
       "img-src": ["'self'", "data:", "https:", "http:", "blob:"],
       "font-src": ["'self'", "data:", "https:", "http:"],
-      "connect-src": ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://api.razorpay.com", "https://checkout.razorpay.com", "https://lumberjack.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "wss://meet.jit.si", "wss://*.jitsi.net", "https://*.agora.io", "wss://*.agora.io", "https://*.agoraio.cn", "wss://*.agoraio.cn", "https://api.groq.com", "https://*.livekit.cloud", "wss://*.livekit.cloud", "https://api.deepgram.com", "wss://api.deepgram.com", "wss://*.deepgram.com", "http://localhost:8000", "ws://localhost:8000", "http://localhost:9000", "ws://localhost:9000"],
+      // connect-src: includes unpkg.com (Lucide icons source map), college server IP, and all existing services
+      "connect-src": ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://api.razorpay.com", "https://checkout.razorpay.com", "https://lumberjack.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "wss://meet.jit.si", "wss://*.jitsi.net", "https://*.agora.io", "wss://*.agora.io", "https://*.agoraio.cn", "wss://*.agoraio.cn", "https://api.groq.com", "https://*.livekit.cloud", "wss://*.livekit.cloud", "https://api.deepgram.com", "wss://api.deepgram.com", "wss://*.deepgram.com", "http://localhost:8000", "ws://localhost:8000", "http://localhost:9000", "ws://localhost:9000", "http://203.201.63.38", "https://203.201.63.38", "http://203.201.63.38:8081", "https://203.201.63.38:8081"],
       "worker-src": ["'self'", "blob:"],
       "frame-src": ["'self'", "*", "https:", "http:", "https://*.youtube.com", "https://youtube.com", "https://*.youtube-nocookie.com", "https://youtube-nocookie.com", "https://player.vimeo.com", "https://vimeo.com", "https://*.vimeo.com", "https://scrimba.com", "https://*.scrimba.com", "https://*.vercel.app", "https://*.netlify.app", "https://*.github.io", "https://*.onrender.com", "https://*.herokuapp.com", "https://*.replit.dev", "https://*.glitch.me", "https://sketchfab.com", "https://*.sketchfab.com", "https://api.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "http://localhost:8000", "http://localhost:9000"],
       "object-src": ["'none'"],
       "base-uri": ["'self'"],
       "form-action": ["'self'"],
-      "frame-ancestors": ["'self'"],
-      "upgrade-insecure-requests": []
+      "frame-ancestors": ["'self'"]
+      // NOTE: 'upgrade-insecure-requests' intentionally removed — it breaks self-signed HTTPS deployments
     }
   }
 }));
@@ -1390,6 +1403,32 @@ app.use(express.static(__dirname, {
   etag: true,
   lastModified: true
 }));
+
+// ============================================
+// HEALTH CHECK ENDPOINT — Diagnose college server issues
+// ============================================
+app.get('/api/health', async (req, res) => {
+  const health = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    server: { port: PORT, nodeEnv: process.env.NODE_ENV || 'development' },
+    mongodb: { status: 'unknown', uri: MONGODB_URI ? MONGODB_URI.replace(/:[^:@]+@/, ':****@') : 'not set' },
+    env: {
+      JWT_SECRET: JWT_SECRET ? 'set' : 'MISSING',
+      BREVO_API_KEY: BREVO_API_KEY ? 'set' : 'not set',
+      CLIENT_ORIGIN: CLIENT_ORIGIN || 'default (localhost:8081)'
+    }
+  };
+  try {
+    await mongoose.connection.db.admin().ping();
+    health.mongodb.status = 'connected';
+  } catch (e) {
+    health.mongodb.status = 'error: ' + e.message;
+    health.status = 'degraded';
+  }
+  const statusCode = health.status === 'ok' ? 200 : 503;
+  res.status(statusCode).json(health);
+});
 
 // ============================================
 // LIVE ACTIVITY SYSTEM ROUTES
@@ -2628,11 +2667,13 @@ app.post("/api/login", authLimiter, async (req, res) => {
     await user.save();
 
     const token = signToken(user);
+    // Use secure cookies when the request came over HTTPS (works behind nginx/Nginx proxy on college server)
+    const isSecureConnection = req.secure || req.headers['x-forwarded-proto'] === 'https';
     res
       .cookie("mindwave_token", token, {
         httpOnly: true,
         sameSite: "lax",
-        secure: process.env.NODE_ENV === 'production',
+        secure: isSecureConnection,
         maxAge: 7 * 24 * 60 * 60 * 1000
       })
       .json({
