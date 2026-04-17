@@ -1332,6 +1332,9 @@ const allowedOrigins = new Set([
   'http://127.0.0.1:5500',
   'http://localhost:8081',
   'http://127.0.0.1:8081',
+  // Production domain
+  'https://mindwave-edu.tech',
+  'https://www.mindwave-edu.tech',
   // College server — public IP (HTTP and HTTPS)
   'http://203.201.63.38',
   'https://203.201.63.38',
@@ -1381,7 +1384,7 @@ app.use(helmet({
       "img-src": ["'self'", "data:", "https:", "http:", "blob:"],
       "font-src": ["'self'", "data:", "https:", "http:"],
       // connect-src: college server IPs (public + internal), unpkg.com (Lucide source map), and all services
-      "connect-src": ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://api.razorpay.com", "https://checkout.razorpay.com", "https://lumberjack.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "wss://meet.jit.si", "wss://*.jitsi.net", "https://*.agora.io", "wss://*.agora.io", "https://*.agoraio.cn", "wss://*.agoraio.cn", "https://api.groq.com", "https://*.livekit.cloud", "wss://*.livekit.cloud", "https://api.deepgram.com", "wss://api.deepgram.com", "wss://*.deepgram.com", "http://localhost:8000", "ws://localhost:8000", "http://localhost:9000", "ws://localhost:9000", "http://203.201.63.38", "https://203.201.63.38", "http://203.201.63.38:8081", "https://203.201.63.38:8081", "http://10.201.7.200", "https://10.201.7.200", "http://10.201.7.200:8081", "https://10.201.7.200:8081"],
+      "connect-src": ["'self'", "https://mindwave-edu.tech", "https://www.mindwave-edu.tech", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://api.razorpay.com", "https://checkout.razorpay.com", "https://lumberjack.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "wss://meet.jit.si", "wss://*.jitsi.net", "https://*.agora.io", "wss://*.agora.io", "https://*.agoraio.cn", "wss://*.agoraio.cn", "https://api.groq.com", "https://*.livekit.cloud", "wss://*.livekit.cloud", "https://api.deepgram.com", "wss://api.deepgram.com", "wss://*.deepgram.com", "http://localhost:8000", "ws://localhost:8000", "http://localhost:9000", "ws://localhost:9000", "http://203.201.63.38", "https://203.201.63.38", "http://203.201.63.38:8081", "https://203.201.63.38:8081", "http://10.201.7.200", "https://10.201.7.200", "http://10.201.7.200:8081", "https://10.201.7.200:8081"],
       "worker-src": ["'self'", "blob:"],
       "frame-src": ["'self'", "*", "https:", "http:", "https://*.youtube.com", "https://youtube.com", "https://*.youtube-nocookie.com", "https://youtube-nocookie.com", "https://player.vimeo.com", "https://vimeo.com", "https://*.vimeo.com", "https://scrimba.com", "https://*.scrimba.com", "https://*.vercel.app", "https://*.netlify.app", "https://*.github.io", "https://*.onrender.com", "https://*.herokuapp.com", "https://*.replit.dev", "https://*.glitch.me", "https://sketchfab.com", "https://*.sketchfab.com", "https://api.razorpay.com", "https://meet.jit.si", "https://*.jitsi.net", "http://localhost:8000", "http://localhost:9000"],
       "object-src": ["'none'"],
