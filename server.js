@@ -1421,6 +1421,14 @@ app.use(express.static(__dirname, {
   lastModified: true
 }));
 
+// Privacy Policy & Terms pages (required for Google OAuth verification)
+app.get('/privacy-policy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'privacy-policy.html'));
+});
+app.get('/terms', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'privacy-policy.html')); // reuse for now
+});
+
 // ============================================
 // HEALTH CHECK ENDPOINT — Diagnose college server issues
 // ============================================
