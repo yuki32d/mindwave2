@@ -195,6 +195,9 @@ function applyRoleUI(role, email, dept) {
         el('deptROWrap')?.style  && (el('deptROWrap').style.display = '');
         const roi = document.getElementById('deptROInput');
         if (roi) roi.value = deptLabel(dept);
+        // HOD bypasses the sections requirement — hide those fields entirely
+        el('sectionsTaughtWrap')?.style && (el('sectionsTaughtWrap').style.display = 'none');
+        el('profileIncompleteWarn')?.style && (el('profileIncompleteWarn').style.display = 'none');
     }
 
     if (window.lucide) lucide.createIcons();
@@ -298,6 +301,17 @@ function renderProfile(data) {
     if (role === 'faculty') {
         const s = document.getElementById('departmentSelect');
         if (s) s.value = rawDept;
+
+        // Pre-check saved sections
+        const savedSections = Array.isArray(data.facultySections) ? data.facultySections : [];
+        document.querySelectorAll('.sec-chk').forEach(chk => {
+            chk.checked = savedSections.includes(chk.value);
+        });
+
+        // Show/hide incomplete-profile warning
+        const isIncomplete = !rawDept || savedSections.length === 0;
+        const warn = document.getElementById('profileIncompleteWarn');
+        if (warn) warn.style.display = isIncomplete ? 'flex' : 'none';
     }
 
     if (window.lucide) lucide.createIcons();
@@ -422,11 +436,24 @@ function initSave() {
     document.getElementById('saveBtn')?.addEventListener('click', async () => {
         const saveBtn = document.getElementById('saveBtn');
         const dept = _role === 'hod' ? _hodDept : (document.getElementById('departmentSelect')?.value || '');
+
+        // Collect selected sections (faculty only)
+        const facultySections = _role === 'faculty'
+            ? [...document.querySelectorAll('.sec-chk:checked')].map(c => c.value)
+            : undefined;
+
+        // Validate for faculty
+        if (_role === 'faculty') {
+            if (!dept) return showToast('Please select a Department', 'error');
+            if (!facultySections || facultySections.length === 0) return showToast('Please select at least one Section', 'error');
+        }
+
         const payload = {
             displayName: document.getElementById('displayName')?.value  || '',
             department:  dept,
             bio:         document.getElementById('bioInput')?.value     || '',
-            officeHours: document.getElementById('officeHours')?.value  || ''
+            officeHours: document.getElementById('officeHours')?.value  || '',
+            ...(facultySections !== undefined && { facultySections })
         };
 
         saveBtn.disabled = true;
@@ -443,6 +470,13 @@ function initSave() {
             setText('aboutDept',   deptLabel(payload.department));
             setText('aboutOffice', payload.officeHours || 'Not set');
             setText('aboutBio',    payload.bio         || 'No bio added yet.');
+
+            // Update the incomplete warning after saving
+            if (_role === 'faculty') {
+                const isIncomplete = !payload.department || !payload.facultySections || payload.facultySections.length === 0;
+                const warn = document.getElementById('profileIncompleteWarn');
+                if (warn) warn.style.display = isIncomplete ? 'flex' : 'none';
+            }
 
             // Sync the immediate UI globally using the new MongoDB sync function
             if (typeof window.syncAdminProfileName === 'function') {

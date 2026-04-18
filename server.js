@@ -471,6 +471,8 @@ const userSchema = new mongoose.Schema(
     rollNumber: { type: String }, // Student roll number (e.g., "STU998630")
     batch: { type: String }, // Year/batch (e.g., "2024", "2023")
     section: { type: String, enum: ['A', 'B', 'C', 'D', 'E', ''] }, // Student section
+    // Faculty profile fields
+    facultySections: [{ type: String }], // Array of sections the faculty member teaches (e.g., ['A', 'C'])
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["student", "admin"], default: "student" },
@@ -3630,10 +3632,18 @@ app.get("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
 // Update faculty profile
 app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res) => {
   try {
-    const { displayName, department, bio, officeHours } = req.body;
+    const { displayName, department, bio, officeHours, facultySections } = req.body;
+    
+    const updateData = { $set: { displayName, department, bio, officeHours } };
+    
+    // Only update facultySections if it is provided as an array
+    if (Array.isArray(facultySections)) {
+      updateData.$set.facultySections = facultySections;
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       req.user.sub,
-      { $set: { displayName, department, bio, officeHours } },
+      updateData,
       { new: true }
     );
 

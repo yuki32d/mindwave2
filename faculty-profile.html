@@ -326,6 +326,11 @@
     .mw-toast.error   { background:rgba(220,38,38,.1); color:var(--red);   border:1px solid rgba(220,38,38,.2); }
     .mw-toast.warn    { background:var(--accent-lo);   color:var(--accent); border:1px solid var(--accent-bdr); }
     @keyframes slideInT{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    /* ── SECTION CHECKBOXES ── */
+    .sec-label { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border:1px solid var(--border); border-radius:7px; cursor:pointer; font-size:13px; font-weight:600; transition:.14s; user-select:none; }
+    .sec-label:hover { border-color:var(--accent); color:var(--accent); }
+    .sec-label:has(input:checked) { border-color:var(--accent); background:var(--accent-lo); color:var(--accent); }
+    .sec-label input { accent-color:var(--accent); width:14px; height:14px; }
   </style>
 </head>
 <body>
@@ -599,7 +604,7 @@
                 </div>
                 <div class="form-row">
                   <div class="form-group" id="deptSelWrap">
-                    <label>Department</label>
+                    <label>Department *</label>
                     <select id="departmentSelect">
                       <option value="">Select Department</option>
                       <option value="MCA">MCA — Master of Computer Applications</option>
@@ -623,6 +628,22 @@
                     <input type="text" id="officeHours" placeholder="e.g. Mon–Fri 10am–12pm">
                   </div>
                 </div>
+                <!-- Sections Taught (faculty-only) -->
+                <div class="form-group" id="sectionsTaughtWrap">
+                  <label>Sections Taught * <span style="font-size:10px;color:var(--muted);text-transform:none;font-weight:400;">(Select every section you teach)</span></label>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:7px;" id="sectionCheckboxes">
+                    <label class="sec-label" id="secLbl_A"><input type="checkbox" value="A" class="sec-chk"> Section A</label>
+                    <label class="sec-label" id="secLbl_B"><input type="checkbox" value="B" class="sec-chk"> Section B</label>
+                    <label class="sec-label" id="secLbl_C"><input type="checkbox" value="C" class="sec-chk"> Section C</label>
+                    <label class="sec-label" id="secLbl_D"><input type="checkbox" value="D" class="sec-chk"> Section D</label>
+                    <label class="sec-label" id="secLbl_E"><input type="checkbox" value="E" class="sec-chk"> Section E</label>
+                  </div>
+                </div>
+                <div id="profileIncompleteWarn" style="display:none;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:9px;padding:11px 14px;font-size:12px;color:var(--red);align-items:center;gap:8px;margin-bottom:10px;">
+                  <i data-lucide="alert-triangle" style="width:15px;height:15px;flex-shrink:0;"></i>
+                  <span>Profile incomplete &mdash; students and game builder are locked until you pick a Department and Section.</span>
+                </div>
+
                 <div class="form-group">
                   <label>Bio</label>
                   <textarea id="bioInput" rows="4" placeholder="Brief professional description…"></textarea>
