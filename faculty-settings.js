@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (userData.ok && userData.user) {
             const SUPER_ADMIN_EMAIL = "jeeban.mca@cmrit.ac.in";
-            const isHod = userData.user.role === 'hod' || userData.user.email === SUPER_ADMIN_EMAIL;
+            const isHod = userData.user.isHod === true || userData.user.email === SUPER_ADMIN_EMAIL;
 
             // Faculty Management — super admin only
             const facultyManagementSection = document.getElementById('facultyManagementSection');

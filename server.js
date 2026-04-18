@@ -474,6 +474,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["student", "admin"], default: "student" },
+    isHod: { type: Boolean, default: false }, // Head of Department flag
     userType: { type: String, enum: ["student", "admin", "organization"], default: "student" }, // For routing logic
     // Multi-tenant subscription fields
     organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
