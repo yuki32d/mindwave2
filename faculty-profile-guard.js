@@ -96,7 +96,11 @@
       <div class="fp-step"><span class="fp-step-num">4</span> Click <strong>Save Changes</strong> and return here</div>
     </div>
   `;
-  document.body.appendChild(overlay);
+
+  // Defer body injection — script runs in <head> before <body> exists
+  function appendOverlay() {
+    document.body.appendChild(overlay);
+  }
 
   // ── Check profile completeness ───────────────────────────────
   async function checkProfileGuard() {
@@ -130,10 +134,14 @@
     }
   }
 
-  // Run after DOM is ready
+  // Run after DOM is ready (also appends the overlay once body exists)
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkProfileGuard);
+    document.addEventListener('DOMContentLoaded', () => {
+      appendOverlay();
+      checkProfileGuard();
+    });
   } else {
+    appendOverlay();
     checkProfileGuard();
   }
 })();
