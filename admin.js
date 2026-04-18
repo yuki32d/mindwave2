@@ -525,7 +525,7 @@ if (sidebarSystemStatusBtn) {
         const data = await res.json();
         if (data.ok && data.user) {
             const SUPER_ADMIN_EMAIL = 'jeeban.mca@cmrit.ac.in';
-            const isHod = data.user.isHod === true || data.user.email === SUPER_ADMIN_EMAIL;
+            const isHod = data.user.role === 'hod' || data.user.email === SUPER_ADMIN_EMAIL;
             if (isHod) {
                 const sidebarBtn = document.getElementById('sidebarSystemStatusBtn');
                 const quickBtn   = document.getElementById('systemStatusBtn');
