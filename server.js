@@ -6896,6 +6896,88 @@ app.delete("/api/admin/students/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// ─── FACULTY MANAGEMENT (HOD only) ──────────────────────────────────────────
+
+// Get all faculty (HOD only)
+app.get("/api/admin/faculty", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const HOD_REGEX_LOCAL = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
+    const SUPER_ADMIN_EMAIL_LOCAL = "jeeban.mca@cmrit.ac.in";
+    const isHod = HOD_REGEX_LOCAL.test(currentUser.email || '') || currentUser.email === SUPER_ADMIN_EMAIL_LOCAL;
+
+    if (!isHod) {
+      return res.status(403).json({ ok: false, message: "HOD access required" });
+    }
+
+    // Build query — get all faculty accounts (role=admin, but not the HOD themselves)
+    const query = {
+      role: 'admin',
+      _id: { $ne: currentUser._id }  // exclude self
+    };
+
+    // If HOD (not super-admin), restrict to same department
+    if (!( currentUser.email === SUPER_ADMIN_EMAIL_LOCAL )) {
+      const match = currentUser.email.match(HOD_REGEX_LOCAL);
+      if (match && match[1]) {
+        query.department = match[1].toUpperCase();
+      }
+    }
+
+    const faculty = await User.find(query)
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+    res.json({ ok: true, faculty });
+  } catch (error) {
+    console.error("Get faculty error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// Delete a faculty member (HOD only)
+app.delete("/api/admin/faculty/:id", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const HOD_REGEX_LOCAL = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
+    const SUPER_ADMIN_EMAIL_LOCAL = "jeeban.mca@cmrit.ac.in";
+    const isHod = HOD_REGEX_LOCAL.test(currentUser.email || '') || currentUser.email === SUPER_ADMIN_EMAIL_LOCAL;
+
+    if (!isHod) {
+      return res.status(403).json({ ok: false, message: "HOD access required" });
+    }
+
+    const targetFaculty = await User.findById(req.params.id);
+    if (!targetFaculty) {
+      return res.status(404).json({ ok: false, message: "Faculty member not found" });
+    }
+
+    // Safety: cannot delete another HOD or super-admin
+    if (HOD_REGEX_LOCAL.test(targetFaculty.email || '') || targetFaculty.email === SUPER_ADMIN_EMAIL_LOCAL) {
+      return res.status(403).json({ ok: false, message: "Cannot delete an HOD account" });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+
+    res.json({
+      ok: true,
+      message: "Faculty member removed successfully",
+      faculty: { name: targetFaculty.displayName || targetFaculty.name, email: targetFaculty.email }
+    });
+  } catch (error) {
+    console.error("Delete faculty error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 // Block or unblock a student (admin only)
 app.put("/api/admin/students/:id/block", authMiddleware, async (req, res) => {
   try {

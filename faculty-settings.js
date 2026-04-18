@@ -70,12 +70,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // HOD-only sections
             if (isHod) {
-                const securitySection = document.getElementById('securitySection');
+                const securitySection    = document.getElementById('securitySection');
                 const studentMgmtSection = document.getElementById('studentMgmtSection');
-                const alumniMgmtSection = document.getElementById('alumniMgmtSection');
-                if (securitySection) securitySection.style.display = 'block';
+                const alumniMgmtSection  = document.getElementById('alumniMgmtSection');
+                const facultyMgmtSection = document.getElementById('facultyMgmtSection');
+                if (securitySection)    securitySection.style.display    = 'block';
                 if (studentMgmtSection) studentMgmtSection.style.display = 'block';
-                if (alumniMgmtSection) alumniMgmtSection.style.display = 'block';
+                if (alumniMgmtSection)  alumniMgmtSection.style.display  = 'block';
+                if (facultyMgmtSection) facultyMgmtSection.style.display = 'block';
             }
         }
     } catch (error) {

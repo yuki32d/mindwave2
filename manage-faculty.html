@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="admin-theme-init.js"></script>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWave – Faculty Registry</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="auth-guard.js"></script>
+    <script src="faculty-profile-guard.js?v=2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --border: #e5e9f2;
+            --accent: #d08000;
+            --accent-lo: rgba(208, 128, 0, 0.10);
+            --accent-bdr: rgba(208, 128, 0, 0.25);
+            --text: #111827;
+            --muted: #6b7280;
+            --green: #16a34a;
+            --red: #dc2626;
+            --blue: #2563eb;
+            --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+            --radius: 14px;
+            --topbar-h: 58px;
+        }
+        [data-theme="dark"] {
+            --bg: #0d1117;
+            --surface: #161b27;
+            --border: rgba(255,255,255,0.08);
+            --text: #e2e8f0;
+            --muted: #6b7694;
+            --shadow: 0 1px 4px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+        .shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* TOPBAR */
+        .topbar {
+            height: var(--topbar-h); background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+        [data-theme="dark"] .topbar { background: rgba(22,27,39,0.8); }
+        .back-btn {
+            display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+            border-radius: 12px; color: var(--muted); font-weight: 600; font-size: 13px;
+            transition: all 0.2s; text-decoration: none; border: 1px solid transparent;
+        }
+        .back-btn:hover { color: var(--accent); background: var(--accent-lo); border-color: var(--accent-bdr); }
+
+        /* MAIN */
+        .main { flex: 1; padding: 40px 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .page-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .page-eyebrow { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 8px; }
+        .page-title { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+        .page-subtitle { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+        /* CONTROLS */
+        .controls-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+            padding: 16px; margin-bottom: 24px; box-shadow: var(--shadow);
+            display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+        }
+        [data-theme="dark"] .controls-card { background: rgba(255,255,255,0.02); }
+        .search-box { position: relative; flex: 1; min-width: 280px; }
+        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; }
+        .premium-input {
+            width: 100%; background: var(--bg); border: 1px solid var(--border);
+            padding: 10px 16px 10px 40px; border-radius: 12px; color: var(--text); font-size: 13px; transition: all 0.2s;
+        }
+        .premium-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-lo); }
+        .filter-select {
+            background: var(--bg); border: 1px solid var(--border); padding: 10px 16px;
+            border-radius: 12px; color: var(--text); font-size: 13px; cursor: pointer; transition: all 0.2s;
+        }
+        .action-btn {
+            background: var(--surface); border: 1px solid var(--border); padding: 10px 16px;
+            border-radius: 12px; color: var(--text); font-size: 13px; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .action-btn:hover { background: var(--bg); border-color: var(--muted); }
+        .danger-btn { background: rgba(220,38,38,0.05); color: var(--red); border-color: rgba(220,38,38,0.1); }
+        .danger-btn:hover { background: rgba(220,38,38,0.1); border-color: var(--red); }
+
+        /* BULK ACTIONS */
+        .bulk-actions-row {
+            background: var(--accent-lo); border: 1px solid var(--accent-bdr);
+            border-radius: 12px; padding: 8px 16px; margin-bottom: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 13px; font-weight: 600; color: var(--accent);
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } }
+
+        /* TABLE */
+        .faculty-list { display: flex; flex-direction: column; gap: 12px; }
+        .faculty-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 16px 24px;
+            display: grid; grid-template-columns: 40px 48px 2fr 2fr 1.5fr 1.5fr 1fr 110px;
+            align-items: center; gap: 16px; transition: all 0.2s; box-shadow: var(--shadow);
+        }
+        [data-theme="dark"] .faculty-card { background: rgba(255,255,255,0.02); }
+        .faculty-card:hover { transform: translateY(-2px); border-color: var(--accent-bdr); }
+        .faculty-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--accent-lo); border: 2px solid var(--accent-bdr);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 14px; color: var(--accent); flex-shrink: 0;
+        }
+        .faculty-name { font-weight: 700; font-size: 14px; }
+        .faculty-email { color: var(--muted); font-size: 13px; }
+        .faculty-meta { font-size: 12px; color: var(--muted); }
+        .dept-badge {
+            display: inline-flex; align-items: center; padding: 4px 10px;
+            border-radius: 6px; font-size: 11px; font-weight: 700;
+            background: var(--accent-lo); color: var(--accent); border: 1px solid var(--accent-bdr);
+        }
+
+        /* TABLE HEADER */
+        .table-header {
+            padding: 8px 24px;
+            display: grid; grid-template-columns: 40px 48px 2fr 2fr 1.5fr 1.5fr 1fr 110px;
+            gap: 16px; font-size: 11px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px;
+        }
+
+        /* LOADING */
+        .loading-container { text-align: center; padding: 60px; }
+        .spinner {
+            width: 40px; height: 40px; border: 3px solid var(--border);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 0 auto 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* PAGINATION */
+        .pagination-container { display: flex; justify-content: flex-end; align-items: center; gap: 16px; margin-top: 32px; }
+        .pagination-btn {
+            background: var(--surface); border: 1px solid var(--border); padding: 8px 16px;
+            border-radius: 10px; color: var(--text); font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pagination-btn:not(:disabled):hover { background: var(--bg); }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
+            z-index: 11000; display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .confirm-modal {
+            width: 100%; max-width: 400px; padding: 32px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 24px; text-align: center;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        [data-theme="dark"] .confirm-modal { background: rgba(22,27,39,0.95); }
+        .confirm-icon {
+            width: 64px; height: 64px; border-radius: 20px;
+            background: rgba(220,38,38,0.08); color: var(--red);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin: 0 auto 24px; border: 1px solid rgba(220,38,38,0.2);
+        }
+        .confirm-title { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+        .confirm-msg { font-size: 14px; color: var(--muted); margin-bottom: 32px; line-height: 1.5; white-space: pre-wrap; }
+        .confirm-actions { display: flex; gap: 12px; }
+        .modal-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; border: none; font-family: inherit; }
+        .modal-cancel { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+        .modal-cancel:hover { color: var(--text); border-color: var(--muted); }
+        .modal-confirm { background: var(--red); color: #fff; }
+        .modal-confirm:hover { opacity: 0.9; transform: translateY(-1px); }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-overlay.active .confirm-modal { transform: scale(1); }
+
+        /* TOAST */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 12000; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 16px; border-radius: 12px; box-shadow: var(--shadow);
+            display: flex; gap: 12px; align-items: center;
+            animation: toastIn 0.3s forwards; min-width: 260px; pointer-events: all;
+        }
+        .toast.success { border-left: 4px solid var(--green); }
+        .toast.error   { border-left: 4px solid var(--red); }
+        .toast.info    { border-left: 4px solid var(--blue); }
+        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* ACCESS DENIED */
+        .access-denied { text-align: center; padding: 80px 20px; }
+        .access-denied .icon { font-size: 56px; margin-bottom: 20px; opacity: 0.6; }
+        .access-denied h2 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+        .access-denied p { color: var(--muted); font-size: 14px; }
+
+        @media (max-width: 1024px) {
+            .faculty-card, .table-header { grid-template-columns: 40px 48px 2fr 2fr 1fr 110px; }
+            .col-hide-md { display: none; }
+        }
+        @media (max-width: 768px) {
+            .faculty-card { grid-template-columns: 40px 1fr 110px; }
+            .col-hide-sm { display: none; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <header class="topbar">
+            <div class="topbar-left">
+                <a href="faculty-settings.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Settings
+                </a>
+            </div>
+            <div style="width: 40px;"></div>
+        </header>
+
+        <main class="main">
+            <div id="accessDeniedState" class="access-denied" style="display:none;">
+                <div class="icon">🔒</div>
+                <h2>HOD Access Only</h2>
+                <p>You need HOD-level privileges to manage faculty accounts.</p>
+            </div>
+
+            <div id="mainContent" style="display:none;">
+                <header class="page-header">
+                    <div>
+                        <p class="page-eyebrow">HOD Registry</p>
+                        <h1 class="page-title">Faculty Management</h1>
+                        <p class="page-subtitle">View, search, and remove faculty accounts in your department.</p>
+                    </div>
+                    <div id="facultyCount" style="font-size: 13px; font-weight: 700; color: var(--accent);">Loading...</div>
+                </header>
+
+                <!-- Bulk Actions -->
+                <div class="bulk-actions-row" id="bulkActionsRow" style="display: none;">
+                    <span id="selectedCount">0 selected</span>
+                    <button id="deleteSelectedBtn" class="action-btn danger-btn">
+                        <i class="fas fa-trash-alt"></i> Remove Selected
+                    </button>
+                </div>
+
+                <!-- Controls -->
+                <div class="controls-card">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" class="premium-input" placeholder="Search by name or email...">
+                    </div>
+                    <select id="pageSize" class="filter-select">
+                        <option value="10">10 per page</option>
+                        <option value="20" selected>20 per page</option>
+                        <option value="50">50 per page</option>
+                    </select>
+                    <button id="refreshBtn" class="action-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <!-- Loading -->
+                <div id="loadingState" class="loading-container">
+                    <div class="spinner"></div>
+                    <p style="color: var(--muted); font-size: 13px;">Loading faculty registry…</p>
+                </div>
+
+                <!-- Empty -->
+                <div id="emptyState" style="display:none; text-align:center; padding:60px;">
+                    <i class="fas fa-chalkboard-teacher" style="font-size:40px; color:var(--muted); margin-bottom:16px;"></i>
+                    <h3>No Faculty Found</h3>
+                    <p style="color:var(--muted);">Try adjusting your search.</p>
+                </div>
+
+                <!-- Table -->
+                <div id="tableContainer" style="display:none;">
+                    <div class="table-header">
+                        <div style="padding-left:2px;"><input type="checkbox" id="selectAll"></div>
+                        <div></div>
+                        <div>Name</div>
+                        <div>Email</div>
+                        <div class="col-hide-md">Department</div>
+                        <div class="col-hide-md">Joined</div>
+                        <div class="col-hide-sm">Sections</div>
+                        <div style="text-align:right;">Actions</div>
+                    </div>
+                    <div id="facultyTableBody" class="faculty-list"></div>
+                </div>
+
+                <!-- Pagination -->
+                <div id="paginationContainer" class="pagination-container" style="display:none;">
+                    <button id="prevBtn" class="pagination-btn" disabled>
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <div style="font-size:13px; font-weight:600;">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></div>
+                    <button id="nextBtn" class="pagination-btn" disabled>
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="confirm-modal">
+            <div class="confirm-icon"><i class="fas fa-user-times"></i></div>
+            <div class="confirm-title" id="confirmTitle">Confirm Removal</div>
+            <div class="confirm-msg" id="confirmMsg">Are you sure?</div>
+            <div class="confirm-actions">
+                <button class="modal-btn modal-cancel" id="confirmCancel">Cancel</button>
+                <button class="modal-btn modal-confirm" id="confirmOk">Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="manage-faculty.js"></script>
+    <script>
+        // Override alert/confirm to use toast/modal
+        window.alert = function(msg) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            const type = msg.includes('✅') || msg.includes('success') ? 'success' :
+                         msg.includes('❌') || msg.includes('error') || msg.includes('fail') ? 'error' : 'info';
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            const color = type === 'success' ? 'var(--green)' : type === 'error' ? 'var(--red)' : 'var(--blue)';
+            toast.innerHTML = `<i class="fas ${icon}" style="color:${color};font-size:18px;flex-shrink:0;"></i><span style="font-size:13px;">${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0'; toast.style.transform = 'translateX(20px)'; toast.style.transition = 'all 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        };
+        let confirmResolve;
+        window.confirm = function(msg, title = 'Confirm Removal') {
+            const modal = document.getElementById('confirmModal');
+            document.getElementById('confirmMsg').textContent = msg;
+            document.getElementById('confirmTitle').textContent = title;
+            modal.classList.add('active');
+            return new Promise(res => { confirmResolve = res; });
+        };
+        document.getElementById('confirmOk').onclick = () => {
+            document.getElementById('confirmModal').classList.remove('active');
+            if (confirmResolve) confirmResolve(true);
+        };
+        document.getElementById('confirmCancel').onclick = () => {
+            document.getElementById('confirmModal').classList.remove('active');
+            if (confirmResolve) confirmResolve(false);
+        };
+    </script>
+</body>
+
+</html>
