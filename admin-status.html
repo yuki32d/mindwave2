@@ -465,8 +465,8 @@
     <div class="content">
         <div class="content-inner">
 
-            <!-- API Config Banner -->
-            <div class="api-config-banner" id="apiBanner">
+            <!-- API Config Banner (hidden by default — server proxy auto-connects) -->
+            <div class="api-config-banner hidden" id="apiBanner">
                 <i data-lucide="key" style="width:20px;height:20px;color:var(--accent);flex-shrink:0;"></i>
                 <div style="flex:1">
                     <div style="font-weight:700;font-size:13px;margin-bottom:8px;">Connect UptimeRobot</div>
@@ -578,7 +578,7 @@
     <div id="tt"></div>
 
     <script src="admin-logout-handler.js"></script>
-    <script src="admin-status.js"></script>
+    <script src="admin-status.js?v=2"></script>
     <script>lucide.createIcons();</script>
 
 </body>

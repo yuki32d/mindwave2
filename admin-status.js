@@ -655,15 +655,11 @@
         setInterval(tickClock, 1000);
 
         tLog('STATUS_ENGINE', 'MindWave Status Dashboard v2.0 initialized', 'ok');
+        tLog('CONFIG', 'Checking server proxy for UptimeRobot key...', 'info');
 
-        if (apiKey) {
-            tLog('CONFIG', 'API key found in storage. Fetching...', 'info');
-            $('apiBanner').classList.add('hidden');
-            fetchAll();
-        } else {
-            tLog('CONFIG', 'No API key configured. Enter key to begin.', 'warn');
-            showBanner(true);
-        }
+        // Always try fetchAll() — it checks the server proxy first,
+        // then falls back to the localStorage key, and only then shows the banner.
+        fetchAll();
     }
 
     document.addEventListener('DOMContentLoaded', init);
