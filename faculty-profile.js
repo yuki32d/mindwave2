@@ -453,7 +453,7 @@ function initSave() {
             department:  dept,
             bio:         document.getElementById('bioInput')?.value     || '',
             officeHours: document.getElementById('officeHours')?.value  || '',
-            ...(facultySections !== undefined && { facultySections })
+            facultySections: facultySections || []
         };
 
         saveBtn.disabled = true;
