@@ -503,7 +503,13 @@ const userSchema = new mongoose.Schema(
     lastLogin: { type: Date },
     // Password Reset (for forgot-password flow)
     resetToken: { type: String },
-    resetTokenExpiry: { type: Date }
+    resetTokenExpiry: { type: Date },
+    // AI usage tracking — each key tracks count + startTime for 24hr rolling window
+    aiUsage: {
+      chatbot: { count: { type: Number, default: 0 }, startTime: { type: Date } },
+      tutor:   { count: { type: Number, default: 0 }, startTime: { type: Date } },
+      code:    { count: { type: Number, default: 0 }, startTime: { type: Date } }
+    }
   },
   { timestamps: true }
 );
@@ -1513,9 +1519,69 @@ setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, User);
 
 // ============================================
 // MARKETING CHATBOT — GROQ PROXY
+// ============================================
+// AI USAGE RATE LIMITER — 5 messages per AI per 24 hours
+// ============================================
+const AI_DAILY_LIMIT = 5;
+const AI_WINDOW_MS   = 24 * 60 * 60 * 1000; // 24 hours in ms
+
+function checkAILimit(type) {
+  return async (req, res, next) => {
+    if (!req.user || !req.user.sub) return next(); // Unauthenticated — skip (handled by authMiddleware)
+    try {
+      const user = await User.findById(req.user.sub);
+      if (!user) return res.status(401).json({ ok: false, message: 'User not found' });
+
+      const usage    = user.aiUsage?.[type] || { count: 0, startTime: null };
+      const now      = Date.now();
+      const start    = usage.startTime ? new Date(usage.startTime).getTime() : null;
+      const expired  = !start || (now - start) >= AI_WINDOW_MS;
+
+      if (expired) {
+        // Reset window — grant fresh 5 tokens
+        await User.updateOne({ _id: user._id }, {
+          [`aiUsage.${type}.count`]:     0,
+          [`aiUsage.${type}.startTime`]: new Date()
+        });
+        req._aiType = type;
+        req._aiUser = user._id;
+        return next();
+      }
+
+      if (usage.count >= AI_DAILY_LIMIT) {
+        // Figure out when the window resets
+        const resetAt = new Date(start + AI_WINDOW_MS);
+        const resetStr = resetAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return res.status(429).json({
+          ok: false,
+          limitReached: true,
+          resetsAt: resetAt.toISOString(),
+          resetsAtLocal: resetStr,
+          message: `Usage limit reached. Resets at ${resetStr}.`
+        });
+      }
+
+      req._aiType = type;
+      req._aiUser = user._id;
+      next();
+    } catch (err) {
+      console.error('checkAILimit error:', err);
+      next(); // Don't block on middleware error
+    }
+  };
+}
+
+async function incrementAIUsage(type, userId) {
+  try {
+    await User.updateOne({ _id: userId }, { $inc: { [`aiUsage.${type}.count`]: 1 } });
+  } catch (err) {
+    console.error('incrementAIUsage error:', err);
+  }
+}
+
 // Keeps the API key server-side; browser calls /api/chat
 // ============================================
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', authMiddleware, checkAILimit('chatbot'), async (req, res) => {
   if (!GROQ_API_KEY) {
     return res.status(503).json({ ok: false, message: 'Chatbot not configured (missing GROQ_API_KEY).' });
   }
@@ -1547,7 +1613,10 @@ app.post('/api/chat', async (req, res) => {
     }
 
     const data = await groqRes.json();
-    res.json({ ok: true, reply: data.choices[0].message.content });
+    const reply = data.choices[0].message.content;
+    // Increment usage count only after a successful reply
+    if (req._aiUser) await incrementAIUsage('chatbot', req._aiUser);
+    res.json({ ok: true, reply });
   } catch (err) {
     console.error('Chat proxy error:', err);
     res.status(500).json({ ok: false, message: 'Internal server error' });
@@ -13258,7 +13327,7 @@ const CODE_AI_SYSTEM_PROMPT = `You are an expert programming tutor integrated in
 - Keep responses under 150 words unless the student asks for a detailed explanation
 `;
 
-app.post('/api/code-ai/chat', async (req, res) => {
+app.post('/api/code-ai/chat', authMiddleware, checkAILimit('code'), async (req, res) => {
   try {
     const { message, challengeTitle, challengeDifficulty, language, userCode } = req.body;
     const groqApiKey = process.env.GROQ_API_KEY;
@@ -13299,6 +13368,7 @@ app.post('/api/code-ai/chat', async (req, res) => {
 
     const data = await groqRes.json();
     const reply = data.choices?.[0]?.message?.content || 'No response generated.';
+    if (req._aiUser) await incrementAIUsage('code', req._aiUser);
     res.json({ reply });
 
   } catch (error) {
@@ -13629,7 +13699,7 @@ async function chunkAndSaveText(KnowledgeModel, fullText, courseId, teacherId, s
 }
 
 
-app.post('/api/ai-tutor/chat', async (req, res) => {
+app.post('/api/ai-tutor/chat', authMiddleware, checkAILimit('tutor'), async (req, res) => {
   try {
     const { message, subject, mode, mood, history = [] } = req.body;
     const groqApiKey = process.env.GROQ_API_KEY;
@@ -13726,6 +13796,7 @@ app.post('/api/ai-tutor/chat', async (req, res) => {
     if (replyLower.includes('you can do') || replyLower.includes('don\'t worry') || replyLower.includes('great job') || replyLower.includes('you\'re doing')) resMood = 'encouraging';
     else if (replyLower.includes('what do you think') || replyLower.includes('before i explain') || replyLower.includes('what would you say')) resMood = 'socratic';
 
+    if (req._aiUser) await incrementAIUsage('tutor', req._aiUser);
     res.json({ reply, mood: resMood });
 
   } catch (error) {

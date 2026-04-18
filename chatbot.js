@@ -319,6 +319,93 @@
     let isTyping = false;
     let chatHistory = []; // Store history for context
 
+    // ── AI LIMIT POPUP ─────────────────────────────────────
+    (function injectLimitPopup() {
+        const css = document.createElement('style');
+        css.textContent = `
+        .mw-limit-overlay {
+            display: none; position: fixed; inset: 0; z-index: 999999;
+            background: rgba(0,0,0,0.65); backdrop-filter: blur(8px);
+            align-items: center; justify-content: center;
+        }
+        .mw-limit-overlay.open { display: flex; }
+        .mw-limit-modal {
+            background: #13151f; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 36px 32px 28px;
+            width: 380px; max-width: 92vw; text-align: center;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+            animation: mwLimitPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes mwLimitPop {
+            from { opacity:0; transform:scale(0.88); }
+            to   { opacity:1; transform:scale(1); }
+        }
+        .mw-limit-icon {
+            width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 18px;
+            background: linear-gradient(135deg, #ff6b6b22, #ff6b6b44);
+            border: 1.5px solid #ff6b6b55;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px;
+        }
+        .mw-limit-title {
+            font-size: 18px; font-weight: 800; color: #fff;
+            margin-bottom: 8px; letter-spacing: -0.3px;
+        }
+        .mw-limit-desc {
+            font-size: 13px; color: rgba(255,255,255,0.55);
+            line-height: 1.65; margin-bottom: 6px;
+        }
+        .mw-limit-reset {
+            font-size: 12px; font-weight: 700;
+            color: #0f62fe; margin-bottom: 24px;
+        }
+        .mw-limit-progress {
+            width: 100%; height: 4px; background: rgba(255,255,255,0.08);
+            border-radius: 99px; margin-bottom: 24px; overflow: hidden;
+        }
+        .mw-limit-progress-bar {
+            height: 100%; width: 100%; border-radius: 99px;
+            background: linear-gradient(90deg, #ff6b6b, #ff4757);
+        }
+        .mw-limit-close {
+            width: 100%; padding: 13px; border-radius: 12px; border: none;
+            background: linear-gradient(135deg, #0f62fe, #003ec8);
+            color: #fff; font-size: 14px; font-weight: 700;
+            cursor: pointer; font-family: inherit;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+        .mw-limit-close:hover { opacity: 0.9; transform: translateY(-1px); }
+        `;
+        document.head.appendChild(css);
+
+        const html = `
+        <div class="mw-limit-overlay" id="mwLimitOverlay">
+            <div class="mw-limit-modal">
+                <div class="mw-limit-icon">🚫</div>
+                <div class="mw-limit-title">Usage Limit Reached</div>
+                <div class="mw-limit-desc">You've used all 5 daily messages for <strong>Mindwave AI</strong>. Your limit resets 24 hours from your first message today.</div>
+                <div class="mw-limit-reset" id="mwLimitResetTime"></div>
+                <div class="mw-limit-progress"><div class="mw-limit-progress-bar"></div></div>
+                <button class="mw-limit-close" onclick="document.getElementById('mwLimitOverlay').classList.remove('open')">Got it</button>
+            </div>
+        </div>`;
+        document.body.insertAdjacentHTML('beforeend', html);
+    })();
+
+    function showMwLimitPopup(resetsAt) {
+        const overlay = document.getElementById('mwLimitOverlay');
+        if (!overlay) return;
+        if (resetsAt) {
+            const resetEl = document.getElementById('mwLimitResetTime');
+            if (resetEl) {
+                const d = new Date(resetsAt);
+                resetEl.textContent = 'Resets at ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+        }
+        overlay.classList.add('open');
+        overlay.onclick = e => { if (e.target === overlay) overlay.classList.remove('open'); };
+    }
+
     // Toggle Chat
     function toggleChat() {
         isOpen = !isOpen;
@@ -411,12 +498,23 @@
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || localStorage.getItem('auth_token') || '')
+                },
                 body: JSON.stringify({
                     message: text,
                     history: chatHistory
                 })
             });
+
+            if (response.status === 429) {
+                const data = await response.json().catch(() => ({}));
+                removeMessage(typingId);
+                isTyping = false;
+                showMwLimitPopup(data.resetsAt);
+                return;
+            }
 
             if (!response.ok) {
                 throw new Error(`Server error: ${response.status} ${response.statusText}`);

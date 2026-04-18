@@ -1082,6 +1082,43 @@
             background: #e11d48;
             box-shadow: 0 4px 12px rgba(244, 63, 94, 0.35);
         }
+
+        /* ── AI USAGE LIMIT MODAL ── */
+        .at-limit-overlay {
+            display: none; position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,0.65); backdrop-filter: blur(8px);
+            align-items: center; justify-content: center;
+        }
+        .at-limit-overlay.open { display: flex; }
+        .at-limit-modal {
+            background: var(--surface); border: 1px solid var(--border-2);
+            border-radius: 20px; padding: 36px 32px 28px;
+            width: 380px; max-width: 92vw; text-align: center;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+            animation: at-limitPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes at-limitPop {
+            from { opacity:0; transform:scale(0.88); }
+            to   { opacity:1; transform:scale(1); }
+        }
+        .at-limit-icon {
+            width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 18px;
+            background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(79,70,229,0.2));
+            border: 1.5px solid rgba(124,58,237,0.3);
+            display: flex; align-items: center; justify-content: center; font-size: 26px;
+        }
+        .at-limit-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+        .at-limit-desc  { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 6px; }
+        .at-limit-reset  { font-size: 12px; font-weight: 700; color: #7c3aed; margin-bottom: 24px; }
+        .at-limit-bar { width:100%; height:4px; background: var(--border); border-radius:99px; margin-bottom:24px; overflow:hidden; }
+        .at-limit-bar-fill { height:100%; width:100%; border-radius:99px; background: linear-gradient(90deg,#7c3aed,#4f46e5); }
+        .at-limit-btn {
+            width: 100%; padding: 13px; border-radius: 12px; border: none;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: #fff; font-size: 14px; font-weight: 700;
+            cursor: pointer; font-family: inherit; transition: opacity 0.2s, transform 0.15s;
+        }
+        .at-limit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
     </style>
 </head>
 
@@ -1274,6 +1311,18 @@
         </div>
     </div>
 
+    <!-- AI USAGE LIMIT MODAL -->
+    <div class="at-limit-overlay" id="atLimitOverlay">
+        <div class="at-limit-modal">
+            <div class="at-limit-icon">🚫</div>
+            <div class="at-limit-title">Usage Limit Reached</div>
+            <div class="at-limit-desc">You've used all <strong>5 daily messages</strong> for Sage AI Tutor. Your limit resets 24 hours from your first message today.</div>
+            <div class="at-limit-reset" id="atLimitResetTime"></div>
+            <div class="at-limit-bar"><div class="at-limit-bar-fill"></div></div>
+            <button class="at-limit-btn" onclick="document.getElementById('atLimitOverlay').classList.remove('open')">Got it</button>
+        </div>
+    </div>
+
     <script>
         // -- STATE --
         let currentMode = 'chat';      // 'chat' | 'socratic'
@@ -1424,6 +1473,21 @@
                 });
 
                 removeTyping(typingId);
+
+                if (res.status === 429) {
+                    const limitData = await res.json().catch(() => ({}));
+                    const overlay = document.getElementById('atLimitOverlay');
+                    if (overlay) {
+                        const el = document.getElementById('atLimitResetTime');
+                        if (el && limitData.resetsAt) {
+                            el.textContent = 'Resets at ' + new Date(limitData.resetsAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                        overlay.classList.add('open');
+                        overlay.onclick = e => { if (e.target === overlay) overlay.classList.remove('open'); };
+                    }
+                    setMood('ready');
+                    return;
+                }
 
                 const data = await res.json();
                 const reply = data.reply || 'Sorry, I couldn\'t get a response. Please try again.';
