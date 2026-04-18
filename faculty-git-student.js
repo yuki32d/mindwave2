@@ -922,22 +922,38 @@ async function loadProjectsForAssignment(assignmentId) {
     }
 }
 
-// Navigate: Back to assignments grid
-document.getElementById('backToAssignmentsBtn')?.addEventListener('click', () => {
+// Navigate: Back to assignments grid — reload global stats
+document.getElementById('backToAssignmentsBtn')?.addEventListener('click', async () => {
     currentAssignmentId = null;
+    allProjects = [];
+    // Reset stat display to -- while reloading
+    document.getElementById('totalProjects').textContent = '--';
+    document.getElementById('pendingProjects').textContent = '--';
+    document.getElementById('gradedProjects').textContent = '--';
+    document.getElementById('avgGrade').textContent = '--';
     document.getElementById('projectsView').style.display = 'none';
     document.getElementById('assignmentsView').style.display = 'block';
+    // Re-fetch all projects to get accurate overall stats
+    await loadAllProjects();
     if (window.lucide) window.lucide.createIcons();
 });
 
-// Delete an assignment
+// Delete an assignment (and all its student submissions - cascading)
 async function deleteAssignment(assignmentId) {
-    if (!confirm('Delete this assignment? Student submissions will remain but will no longer be linked to it.')) return;
+    if (!confirm('⚠️ Delete this assignment?\n\nThis will PERMANENTLY DELETE all student project submissions linked to it. This cannot be undone.')) return;
     try {
         const res = await fetch(`/api/assignments/${assignmentId}`, { method: 'DELETE', credentials: 'include' });
         const data = await res.json();
         if (data.ok) {
-            showNotif({ type: 'success', title: 'Deleted', subtitle: 'Assignment removed.' });
+            const removed = data.submissionsRemoved || 0;
+            showNotif({
+                type: 'success',
+                title: 'Assignment Deleted',
+                subtitle: `${removed} student submission${removed !== 1 ? 's' : ''} also removed.`
+            });
+            // Reset stats display since projects changed
+            allProjects = [];
+            updateStats();
             await loadAssignments();
         } else {
             showNotif({ type: 'error', title: 'Failed', subtitle: data.message });
@@ -1016,11 +1032,5 @@ function getAssignmentBadge(project) {
     </span>`;
 }
 
-// Load assignments immediately on page load
+// Load assignments on page load (single call)
 loadAssignments();
-
-
-
-
-loadAssignments();
-

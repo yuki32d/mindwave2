@@ -6985,16 +6985,30 @@ app.post("/api/assignments", authMiddleware, async (req, res) => {
   }
 });
 
-// Get all assignments (faculty sees all; students see only active ones for their section)
+// Get all assignments:
+//   - Admin       → all assignments
+//   - HOD faculty → all assignments (HOD email pattern: hod.xxx@cmrit.ac.in)
+//   - Regular faculty → only their own created assignments
+//   - Students    → active assignments for their section
 app.get("/api/assignments", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.sub;
     const user = await User.findById(userId);
     const now = new Date();
+    const HOD_REGEX = /^hod\.[a-z]+@cmrit\.ac\.in$/i;
     let assignments;
-    if (user && (user.role === 'faculty' || user.role === 'admin')) {
-      // Faculty see all assignments regardless of section
+    if (user && user.role === 'admin') {
+      // Admins see everything
       assignments = await Assignment.find().sort({ createdAt: -1 });
+    } else if (user && user.role === 'faculty') {
+      const isHOD = HOD_REGEX.test(user.email || '');
+      if (isHOD) {
+        // HODs see all assignments across all faculty
+        assignments = await Assignment.find().sort({ createdAt: -1 });
+      } else {
+        // Regular faculty see only their own assignments
+        assignments = await Assignment.find({ createdBy: userId }).sort({ createdAt: -1 });
+      }
     } else {
       // Students only see active assignments for their section (or all-section assignments)
       const studentSection = user ? user.section : null;
@@ -7011,7 +7025,7 @@ app.get("/api/assignments", authMiddleware, async (req, res) => {
   }
 });
 
-// Delete an assignment (faculty only)
+// Delete an assignment (faculty only) — cascades to all student project submissions
 app.delete("/api/assignments/:id", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.sub;
@@ -7019,8 +7033,10 @@ app.delete("/api/assignments/:id", authMiddleware, async (req, res) => {
     if (!user || (user.role !== 'faculty' && user.role !== 'admin')) {
       return res.status(403).json({ ok: false, message: "Only faculty can delete assignments" });
     }
+    // Cascade: remove all project submissions linked to this assignment
+    const deletedSubmissions = await ProjectSubmission.deleteMany({ assignmentId: req.params.id });
     await Assignment.findByIdAndDelete(req.params.id);
-    res.json({ ok: true, message: "Assignment deleted" });
+    res.json({ ok: true, message: "Assignment and all related submissions deleted", submissionsRemoved: deletedSubmissions.deletedCount });
   } catch (error) {
     console.error("Delete assignment error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
@@ -7123,7 +7139,9 @@ app.get("/api/projects/my", authMiddleware, async (req, res) => {
   }
 });
 
-// Faculty gets all projects
+// Faculty gets projects:
+//   - Admin / HOD faculty → all submissions
+//   - Regular faculty     → only submissions under their own assignments
 app.get("/api/projects/all", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.sub;
@@ -7134,7 +7152,30 @@ app.get("/api/projects/all", authMiddleware, async (req, res) => {
     }
 
     const { assignmentFilter } = req.query;
-    const query = assignmentFilter && assignmentFilter !== 'all' ? { assignmentId: assignmentFilter } : {};
+    const HOD_REGEX = /^hod\.[a-z]+@cmrit\.ac\.in$/i;
+    const isHOD = HOD_REGEX.test(user.email || '');
+    let query = {};
+
+    if (user.role === 'faculty' && !isHOD) {
+      // Regular faculty: scope to only their own assignments
+      const myAssignments = await Assignment.find({ createdBy: userId }).select('_id');
+      const myIds = myAssignments.map(a => a._id);
+
+      if (assignmentFilter && assignmentFilter !== 'all') {
+        // Ensure the requested filter actually belongs to this teacher
+        const allowed = myIds.map(id => id.toString()).includes(assignmentFilter);
+        if (!allowed) return res.json({ ok: true, projects: [] });
+        query = { assignmentId: assignmentFilter };
+      } else {
+        query = { assignmentId: { $in: myIds } };
+      }
+    } else {
+      // Admin or HOD — no restriction; honour optional filter
+      if (assignmentFilter && assignmentFilter !== 'all') {
+        query = { assignmentId: assignmentFilter };
+      }
+    }
+
     const projects = await ProjectSubmission.find(query)
       .sort({ submittedAt: -1 })
       .populate('studentId', 'name email')
