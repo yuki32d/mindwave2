@@ -511,6 +511,37 @@ if (systemStatusBtn) {
     });
 }
 
+const sidebarSystemStatusBtn = document.getElementById('sidebarSystemStatusBtn');
+if (sidebarSystemStatusBtn) {
+    sidebarSystemStatusBtn.addEventListener('click', () => {
+        window.location.href = 'admin-status.html';
+    });
+}
+
+// ── HOD-only UI: show System Status + Teacher Sign-up Approvals for HOD/super-admin ──
+(async () => {
+    try {
+        const res = await fetch('/api/me', { credentials: 'include' });
+        const data = await res.json();
+        if (data.ok && data.user) {
+            const SUPER_ADMIN_EMAIL = 'jeeban.mca@cmrit.ac.in';
+            const isHod = data.user.isHod === true || data.user.email === SUPER_ADMIN_EMAIL;
+            if (isHod) {
+                const sidebarBtn = document.getElementById('sidebarSystemStatusBtn');
+                const quickBtn   = document.getElementById('systemStatusBtn');
+                const card       = document.getElementById('teacherApprovalsCard');
+                if (sidebarBtn) sidebarBtn.style.display = '';
+                if (quickBtn)   quickBtn.style.display   = '';
+                if (card)       card.style.display        = '';
+                // Load approvals now that the card is visible
+                loadPendingApprovals();
+            }
+        }
+    } catch (e) {
+        console.error('HOD check failed:', e);
+    }
+})();
+
 const newGameBtn = document.getElementById('newGameBtn');
 if (newGameBtn) {
     newGameBtn.addEventListener('click', () => {

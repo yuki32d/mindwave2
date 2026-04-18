@@ -1403,7 +1403,7 @@
                     <div class="nav-label">System</div>
                     <a href="faculty-settings.html" class="nav-item"><i data-lucide="settings-2"></i> Settings</a>
                     <a href="faculty-ai-config.html" class="nav-item"><i data-lucide="bot"></i> AI Settings</a>
-                    <button class="nav-item" id="systemStatusBtn"><i data-lucide="activity"></i> System Status</button>
+                    <button class="nav-item" id="sidebarSystemStatusBtn" style="display:none;"><i data-lucide="activity"></i> System Status</button>
                     <button class="nav-item" id="signOutControl" style="color:#f87171;"><i data-lucide="log-out"></i>
                         Logout</button>
                 </div>
@@ -1618,7 +1618,7 @@
                                     Builder</button>
                                 <button class="op-btn" id="dataAnalyticsBtn"><i data-lucide="bar-chart-2"></i>
                                     Analytics</button>
-                                <button class="op-btn" id="systemStatusBtn"><i data-lucide="activity"></i>
+                                <button class="op-btn" id="systemStatusBtn" style="display:none;"><i data-lucide="activity"></i>
                                     Status</button>
                             </div>
                         </div>
@@ -1686,8 +1686,9 @@
                                         style="font-size:18px;font-weight:800;font-family:var(--mono);">—</div>
                                 </div>
                             </div>
-                        </div><!-- Pending Teacher Approvals – real-time from /api/admin/pending-signups -->
-                        <div class="card">
+                        </div>
+                        <!-- Pending Teacher Approvals – HOD only -->
+                        <div class="card" id="teacherApprovalsCard" style="display:none;">
                             <div class="card-head">
                                 <div class="card-title"><i data-lucide="user-check"></i> Teacher Sign-up Approvals</div>
                                 <span id="pendingApprovalsCount"
