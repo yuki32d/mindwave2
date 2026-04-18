@@ -53,22 +53,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Failed to load settings:", error);
     }
 
-    // Check if current user is super admin and show Faculty Management section
+    // Check if current user is HOD / super admin and show restricted sections
     try {
         const userResponse = await fetch('/api/me', { credentials: 'include' });
         const userData = await userResponse.json();
 
         if (userData.ok && userData.user) {
             const SUPER_ADMIN_EMAIL = "jeeban.mca@cmrit.ac.in";
-            const facultyManagementSection = document.getElementById('facultyManagementSection');
+            const isHod = userData.user.isHod === true || userData.user.email === SUPER_ADMIN_EMAIL;
 
+            // Faculty Management — super admin only
+            const facultyManagementSection = document.getElementById('facultyManagementSection');
             if (userData.user.email === SUPER_ADMIN_EMAIL && facultyManagementSection) {
                 facultyManagementSection.style.display = 'block';
             }
+
+            // HOD-only sections
+            if (isHod) {
+                const securitySection = document.getElementById('securitySection');
+                const studentMgmtSection = document.getElementById('studentMgmtSection');
+                const alumniMgmtSection = document.getElementById('alumniMgmtSection');
+                if (securitySection) securitySection.style.display = 'block';
+                if (studentMgmtSection) studentMgmtSection.style.display = 'block';
+                if (alumniMgmtSection) alumniMgmtSection.style.display = 'block';
+            }
         }
     } catch (error) {
-        console.error("Failed to check super admin status:", error);
+        console.error("Failed to check user role:", error);
     }
+
 
     // Reset Season Button
     const resetBtn = document.querySelector('.danger-btn');
