@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <script src="admin-theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindWave – Admin Console</title>
+    <title>MindWave � Admin Console</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
@@ -62,7 +62,7 @@
             cursor: pointer;
         }
 
-        /* ── LAYOUT ── */
+        /* -- LAYOUT -- */
         .shell {
             display: grid;
             grid-template-columns: var(--sidebar-w) 1fr;
@@ -70,7 +70,7 @@
             height: 100vh;
         }
 
-        /* ── SIDEBAR ── */
+        /* -- SIDEBAR -- */
         .sidebar {
             --s-bg: #0f1c2e;
             --s-border: rgba(255, 255, 255, 0.08);
@@ -273,7 +273,7 @@
             color: var(--s-muted);
         }
 
-        /* ── TOPBAR ── */
+        /* -- TOPBAR -- */
         .topbar {
             background: var(--surface);
             border-bottom: 1px solid var(--border);
@@ -356,7 +356,7 @@
             height: 16px;
         }
 
-        /* ── MAIN ── */
+        /* -- MAIN -- */
         .main {
             display: flex;
             flex-direction: column;
@@ -374,7 +374,7 @@
             scrollbar-width: thin;
         }
 
-        /* ── CARD ── */
+        /* -- CARD -- */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -420,7 +420,7 @@
             text-decoration: underline;
         }
 
-        /* ── PAGE HEADER ── */
+        /* -- PAGE HEADER -- */
         .page-head {
             display: flex;
             align-items: center;
@@ -485,7 +485,7 @@
             color: var(--accent);
         }
 
-        /* ── STATS ROW ── */
+        /* -- STATS ROW -- */
         .stats-row {
             display: flex;
             gap: 0;
@@ -530,7 +530,7 @@
             margin-top: 3px;
         }
 
-        /* ── PULSE FEED ── */
+        /* -- PULSE FEED -- */
         .pulse-item {
             display: flex;
             gap: 16px;
@@ -588,7 +588,7 @@
             font-weight: 700;
         }
 
-        /* ── ROSTER TABLE ── */
+        /* -- ROSTER TABLE -- */
         .roster-table {
             width: 100%;
             border-collapse: collapse;
@@ -629,7 +629,7 @@
             margin-top: 1px;
         }
 
-        /* ── STATUS TAGS ── */
+        /* -- STATUS TAGS -- */
         .tag {
             display: inline-flex;
             align-items: center;
@@ -665,7 +665,7 @@
             color: var(--blue);
         }
 
-        /* ── APPROVAL QUEUE ── */
+        /* -- APPROVAL QUEUE -- */
         .approval-item {
             display: flex;
             align-items: center;
@@ -755,7 +755,7 @@
             border-color: var(--red);
         }
 
-        /* ── OPS GRID ── */
+        /* -- OPS GRID -- */
         .ops-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -831,7 +831,7 @@
             animation-delay: .18s;
         }
 
-        /* ── DARK THEME ── */
+        /* -- DARK THEME -- */
         [data-theme="dark"] {
             --bg: #0d1117;
             --surface: #161b27;
@@ -849,7 +849,7 @@
             background: #1c2233;
         }
 
-        /* ── THEME TOGGLE BTN ── */
+        /* -- THEME TOGGLE BTN -- */
         .theme-toggle {
             width: 34px;
             height: 34px;
@@ -895,7 +895,7 @@
 <body>
     <div class="shell">
 
-        <!-- ── SIDEBAR ── -->
+        <!-- -- SIDEBAR -- -->
         <aside class="sidebar">
             <div class="logo">
                 <div class="logo-mark"><i data-lucide="shield-check"></i></div>
@@ -945,13 +945,13 @@
             </div>
         </aside>
 
-        <!-- ── TOPBAR ── -->
+        <!-- -- TOPBAR -- -->
         <header class="topbar">
     <script src="admin-theme-init.js"></script>
             <div class="breadcrumb">Admin / <span>Overview</span></div>
             <div class="search">
                 <i data-lucide="search"></i>
-                <input type="text" placeholder="Search students, games, courses…">
+                <input type="text" placeholder="Search students, games, courses�">
             </div>
             <div class="topbar-right">
                 <button class="theme-toggle" id="themeToggle" title="Toggle theme">
@@ -963,7 +963,7 @@
             </div>
         </header>
 
-        <!-- ── MAIN ── -->
+        <!-- -- MAIN -- -->
         <div class="main">
             <div class="content">
 
@@ -971,7 +971,7 @@
                 <div class="page-head">
                     <div>
                         <div class="page-title">Admin Overview</div>
-                        <div class="page-sub">Tuesday, 4 Mar 2026 · CMRIT MindWave Platform</div>
+                        <div class="page-sub">Tuesday, 4 Mar 2026 � CMRIT MindWave Platform</div>
                     </div>
                     <div class="page-actions">
                         <button class="btn btn-ghost"><i data-lucide="download"></i> Export</button>
@@ -988,12 +988,12 @@
                             <div class="stat-box">
                                 <div class="stat-key"><i data-lucide="users"></i> Active Students</div>
                                 <div class="stat-val" style="color:var(--accent);">218</div>
-                                <div class="stat-change" style="color:var(--green);">▲ 12 this week</div>
+                                <div class="stat-change" style="color:var(--green);">? 12 this week</div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-key"><i data-lucide="trending-up"></i> Engagement</div>
                                 <div class="stat-val" style="color:var(--green);">74%</div>
-                                <div class="stat-change" style="color:var(--green);">▲ 8% vs last week</div>
+                                <div class="stat-change" style="color:var(--green);">? 8% vs last week</div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-key"><i data-lucide="gamepad-2"></i> Published Games</div>
@@ -1012,7 +1012,7 @@
                     <div class="card">
                         <div class="card-head">
                             <div class="card-title"><i data-lucide="activity"></i> System Pulse</div>
-                            <span style="font-size:11px;font-family:var(--mono);color:var(--accent);">● Streaming</span>
+                            <span style="font-size:11px;font-family:var(--mono);color:var(--accent);">? Streaming</span>
                         </div>
                         <div class="pulse-item">
                             <div class="p-icon" style="background:var(--accent-lo);"><i data-lucide="megaphone"
@@ -1029,7 +1029,7 @@
                             <div class="p-body">
                                 <h4>Pending Admission Request</h4>
                                 <p>Kiran Patel is requesting access to Cohort Alpha. Credentials verified.</p>
-                                <div class="p-meta"><span>14 min ago</span><a href="#">Review Now →</a></div>
+                                <div class="p-meta"><span>14 min ago</span><a href="#">Review Now ?</a></div>
                             </div>
                         </div>
                         <div class="pulse-item">
@@ -1037,7 +1037,7 @@
                                     style="color:var(--blue);"></i></div>
                             <div class="p-body">
                                 <h4>Game Template Updated</h4>
-                                <p>"SQL Challenge v2.0" — 5 new query scenarios added. Ready to publish.</p>
+                                <p>"SQL Challenge v2.0" � 5 new query scenarios added. Ready to publish.</p>
                                 <div class="p-meta"><span>1 hr ago</span><span>Content Lab</span></div>
                             </div>
                         </div>
@@ -1057,7 +1057,7 @@
                     <div class="card">
                         <div class="card-head">
                             <div class="card-title"><i data-lucide="users"></i> Active Roster</div>
-                            <a href="#" class="card-link">Manage all →</a>
+                            <a href="#" class="card-link">Manage all ?</a>
                         </div>
                         <table class="roster-table">
                             <thead>
@@ -1133,7 +1133,7 @@
                             <div class="a-icon" style="background:var(--accent);"><i data-lucide="user-plus"></i></div>
                             <div>
                                 <div class="a-title">New Student Registration</div>
-                                <div class="a-sub">Kiran Patel · CSE-A · 10 min ago</div>
+                                <div class="a-sub">Kiran Patel � CSE-A � 10 min ago</div>
                             </div>
                             <div class="a-actions">
                                 <button class="a-btn a-ok"><i data-lucide="check"></i></button>
@@ -1144,7 +1144,7 @@
                             <div class="a-icon" style="background:var(--blue);"><i data-lucide="gamepad-2"></i></div>
                             <div>
                                 <div class="a-title">Game Publish Request</div>
-                                <div class="a-sub">SQL Challenge v2 · 30 min ago</div>
+                                <div class="a-sub">SQL Challenge v2 � 30 min ago</div>
                             </div>
                             <div class="a-actions">
                                 <button class="a-btn a-ok"><i data-lucide="check"></i></button>
@@ -1155,7 +1155,7 @@
                             <div class="a-icon" style="background:var(--green);"><i data-lucide="file-text"></i></div>
                             <div>
                                 <div class="a-title">Course Material Upload</div>
-                                <div class="a-sub">OS Notes Week 5 · 1 hr ago</div>
+                                <div class="a-sub">OS Notes Week 5 � 1 hr ago</div>
                             </div>
                             <div class="a-actions">
                                 <button class="a-btn a-ok"><i data-lucide="check"></i></button>
@@ -1167,7 +1167,7 @@
                             </div>
                             <div>
                                 <div class="a-title">Flagged Community Post</div>
-                                <div class="a-sub">Reported content · 2 hr ago</div>
+                                <div class="a-sub">Reported content � 2 hr ago</div>
                             </div>
                             <div class="a-actions">
                                 <button class="a-btn a-ok"><i data-lucide="check"></i></button>

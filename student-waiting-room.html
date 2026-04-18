@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -106,7 +106,7 @@
 
 <body>
     <div class="container">
-        <div class="waiting-animation">⏳</div>
+        <div class="waiting-animation">?</div>
         <h1>Waiting for Faculty</h1>
         <p class="subtitle">Please wait while your instructor joins the meeting</p>
 
@@ -119,10 +119,10 @@
         </div>
 
         <p style="color: #9aa0a6; font-size: 14px; margin-top: 20px;">
-            ⚠️ Do not close this window. You will be redirected automatically when your faculty joins.
+            ?? Do not close this window. You will be redirected automatically when your faculty joins.
         </p>
 
-        <a href="homepage.html" class="back-link">← Back to Dashboard</a>
+        <a href="homepage.html" class="back-link">? Back to Dashboard</a>
     </div>
 
     <script>
@@ -167,14 +167,14 @@
 
                 if (data.facultyJoined) {
                     // Faculty has joined! Redirect to meeting
-                    document.getElementById('statusMessage').textContent = `✅ Faculty has joined! Redirecting you now...`;
+                    document.getElementById('statusMessage').textContent = `? Faculty has joined! Redirecting you now...`;
                     document.getElementById('statusMessage').style.background = 'rgba(52, 199, 89, 0.2)';
 
                     clearInterval(checkInterval);
 
                     // Redirect to Agora student meeting page with meeting code
                     setTimeout(() => {
-                        console.log('🚀 Redirecting to Agora meeting:', meetingCode);
+                        console.log('?? Redirecting to Agora meeting:', meetingCode);
                         window.location.href = `student-live-meeting.html?code=${meetingCode}`;
                     }, 2000);
                 } else {

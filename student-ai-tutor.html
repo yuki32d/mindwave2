@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
 <head>
@@ -6,7 +6,7 @@
     <script src="auth-guard.js" data-role="student"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sage � AI Tutor | MindWave</title>
+    <title>Sage ? AI Tutor | MindWave</title>
     <link rel="stylesheet" href="student-theme.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -204,7 +204,7 @@
             height: calc(100vh - 56px);
         }
 
-        /* -- LEFT PANEL � Sage profile -- */
+        /* -- LEFT PANEL ? Sage profile -- */
         .at-sage-panel {
             width: 240px;
             flex-shrink: 0;
@@ -218,7 +218,7 @@
             /* no scroll */
         }
 
-        /* Profile card � horizontal compact strip */
+        /* Profile card ? horizontal compact strip */
         .at-sage-profile {
             display: flex;
             align-items: center;
@@ -280,7 +280,7 @@
 
         /* removed to save space */
 
-        /* Mood indicator � now inline under name */
+        /* Mood indicator ? now inline under name */
         .at-mood-display {
             display: flex;
             align-items: center;
@@ -337,7 +337,7 @@
             margin: 0 -2px;
         }
 
-        /* Session info � compact 2-col grid */
+        /* Session info ? compact 2-col grid */
         .at-session-info {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1096,7 +1096,7 @@
             <div class="at-sage-avatar-top">
                 <i data-lucide="bot"></i>
             </div>
-            <div class="at-brand-text"><span>Sage</span> � AI Tutor</div>
+            <div class="at-brand-text"><span>Sage</span> ? AI Tutor</div>
         </div>
 
         <!-- Subject Picker -->
@@ -1130,7 +1130,7 @@
     <!-- MAIN LAYOUT -->
     <div class="at-layout">
 
-        <!-- LEFT PANEL � Sage profile -->
+        <!-- LEFT PANEL ? Sage profile -->
         <aside class="at-sage-panel">
 
             <!-- Compact horizontal profile strip -->
@@ -1151,7 +1151,7 @@
             <!-- Divider -->
             <div class="at-panel-divider"></div>
 
-            <!-- Session stats � 2-col grid cards -->
+            <!-- Session stats ? 2-col grid cards -->
             <div class="at-session-info">
                 <div class="at-session-row">
                     <div class="at-session-row-label"><i data-lucide="book-open"></i> Subject</div>
@@ -1174,7 +1174,7 @@
             <!-- Divider -->
             <div class="at-panel-divider"></div>
 
-            <!-- Quick actions � slim borderless rows -->
+            <!-- Quick actions ? slim borderless rows -->
             <div class="at-actions-label">Quick Actions</div>
             <div class="at-actions">
                 <button class="at-action-btn" onclick="quickPrompt('Explain this topic step by step')">
@@ -1206,7 +1206,7 @@
                     </div>
                     <div class="at-welcome-title">Hi! I'm <span>Sage</span></div>
                     <div class="at-welcome-sub">Your personal AI tutor. Pick a subject, ask a question, and I'll guide
-                        you � no cheating, just real understanding.</div>
+                        you ? no cheating, just real understanding.</div>
                     <div class="at-starter-chips">
                         <button class="at-starter-chip"
                             onclick="quickPrompt('Explain photosynthesis in simple terms')"><i data-lucide="leaf"></i>
@@ -1233,7 +1233,7 @@
                 <!-- Socratic mode banner -->
                 <div class="at-socratic-banner" id="socraticBanner">
                     <i data-lucide="help-circle"></i>
-                    Socratic mode is ON � Sage will guide you with questions rather than direct answers.
+                    Socratic mode is ON ? Sage will guide you with questions rather than direct answers.
                 </div>
 
                 <!-- Quick chips -->
@@ -1250,7 +1250,7 @@
 
                 <!-- Input box -->
                 <div class="at-input-wrapper">
-                    <textarea class="at-input" id="chatInput" rows="1" placeholder="Ask Sage anything�"
+                    <textarea class="at-input" id="chatInput" rows="1" placeholder="Ask Sage anything?"
                         onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
                     <button class="at-send-btn" onclick="sendMessage()" id="sendBtn">
                         <i data-lucide="send"></i>
@@ -1334,9 +1334,9 @@
             dot.className = 'at-mood-dot';
             const moods = {
                 ready: { cls: '', text: 'Ready to help' },
-                thinking: { cls: 'thinking', text: 'Thinking�' },
+                thinking: { cls: 'thinking', text: 'Thinking?' },
                 encouraging: { cls: 'encouraging', text: 'Cheering you on!' },
-                explaining: { cls: 'explaining', text: 'Explaining�' }
+                explaining: { cls: 'explaining', text: 'Explaining?' }
             };
             const m = moods[mood] || moods.ready;
             if (m.cls) dot.classList.add(m.cls);
@@ -1447,12 +1447,12 @@
         // -- FALLBACK --
         function getFallback(text, mood) {
             if (mood === 'encouraging') {
-                return `Hey, don't worry � it's completely normal to feel stuck! ??\n\nLet's break this down together. Can you tell me specifically which part is confusing you? Is it the concept itself, the way it's explained, or applying it to problems?`;
+                return `Hey, don't worry ? it's completely normal to feel stuck! ??\n\nLet's break this down together. Can you tell me specifically which part is confusing you? Is it the concept itself, the way it's explained, or applying it to problems?`;
             }
             const t = text.toLowerCase();
             if (t.includes('example')) return `Great question! A real-world example often makes things click. Could you first tell me what you already know about the topic? That way I can tailor the example to your level.`;
-            if (currentMode === 'socratic') return `That's an interesting question! Before I answer � what do you already think the answer might be? Even a rough guess gives us a great starting point. ??`;
-            return `I'd love to help with that! The AI service seems to be having a moment � but let me ask: what specifically would you like to understand better? The more precise your question, the better I can guide you.`;
+            if (currentMode === 'socratic') return `That's an interesting question! Before I answer ? what do you already think the answer might be? Even a rough guess gives us a great starting point. ??`;
+            return `I'd love to help with that! The AI service seems to be having a moment ? but let me ask: what specifically would you like to understand better? The more precise your question, the better I can guide you.`;
         }
 
         // -- RENDER MARKDOWN --
@@ -1467,7 +1467,7 @@
             // Numbered list
             text = text.replace(/^\d+\.\s+(.+)$/gm, '<div style="padding-left:8px;margin:3px 0">$&</div>');
             // Bullet list
-            text = text.replace(/^[-�]\s+(.+)$/gm, '<div style="padding-left:8px;margin:3px 0">� $1</div>');
+            text = text.replace(/^[-?]\s+(.+)$/gm, '<div style="padding-left:8px;margin:3px 0">? $1</div>');
             // Line breaks
             text = text.replace(/\n/g, '<br>');
             return text;
@@ -1534,7 +1534,7 @@
             if (!bubbleText) return;
 
             btn.disabled = true;
-            btn.textContent = 'Simplifying�';
+            btn.textContent = 'Simplifying?';
 
             // Check if panel already exists
             const existing = document.querySelector(`#${msgId} .at-eli5-panel`);
@@ -1544,19 +1544,19 @@
                 const res = await fetch('/api/ai-tutor/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') },
-                    body: JSON.stringify({ message: `Explain this in the simplest possible way, like I'm 5 years old � no jargon, use an analogy:\n\n${bubbleText.substring(0, 500)}`, subject: currentSubject, mode: 'eli5', history: [] })
+                    body: JSON.stringify({ message: `Explain this in the simplest possible way, like I'm 5 years old ? no jargon, use an analogy:\n\n${bubbleText.substring(0, 500)}`, subject: currentSubject, mode: 'eli5', history: [] })
                 });
                 const data = await res.json();
                 const simple = data.reply || 'Let me think of a simpler way to put it...';
 
                 const panel = document.createElement('div');
                 panel.className = 'at-eli5-panel';
-                panel.innerHTML = `<div class="at-eli5-label">? ELI5 � Simplified</div>${renderMarkdown(simple)}`;
+                panel.innerHTML = `<div class="at-eli5-label">? ELI5 ? Simplified</div>${renderMarkdown(simple)}`;
                 btn.parentNode.insertBefore(panel, btn.nextSibling);
             } catch {
                 const panel = document.createElement('div');
                 panel.className = 'at-eli5-panel';
-                panel.innerHTML = `<div class="at-eli5-label">? ELI5</div>Think of it like explaining to a friend over lunch � no textbook language, just the core idea in everyday words.`;
+                panel.innerHTML = `<div class="at-eli5-label">? ELI5</div>Think of it like explaining to a friend over lunch ? no textbook language, just the core idea in everyday words.`;
                 btn.parentNode.insertBefore(panel, btn.nextSibling);
             }
 
@@ -1603,7 +1603,7 @@
                 <div class="at-welcome" id="welcomeScreen">
                     <div class="at-welcome-avatar"><i data-lucide="bot"></i></div>
                     <div class="at-welcome-title">Hi! I'm <span>Sage</span></div>
-                    <div class="at-welcome-sub">Chat cleared. Ready for a fresh start � what shall we explore?</div>
+                    <div class="at-welcome-sub">Chat cleared. Ready for a fresh start ? what shall we explore?</div>
                     <div class="at-starter-chips">
                         <button class="at-starter-chip" onclick="quickPrompt('Explain photosynthesis in simple terms')"><i data-lucide="leaf"></i> Explain photosynthesis</button>
                         <button class="at-starter-chip" onclick="quickPrompt('Help me understand quadratic equations')"><i data-lucide="sigma"></i> Quadratic equations</button>
