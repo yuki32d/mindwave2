@@ -145,6 +145,19 @@
             margin-bottom: 14px;
             box-sizing: border-box;
         }
+        /* ── ADMIN ANALYSIS LIMIT MODAL ── */
+        .admin-limit-overlay { display:none; position:fixed; inset:0; z-index:99999; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); align-items:center; justify-content:center; }
+        .admin-limit-overlay.open { display:flex; }
+        .admin-limit-modal { background:var(--surface); border:1px solid var(--border-2); border-radius:20px; padding:36px 32px 28px; width:380px; max-width:92vw; text-align:center; box-shadow:0 32px 80px rgba(0,0,0,0.5); animation:adminLimitPop 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes adminLimitPop { from { opacity:0; transform:scale(0.88); } to { opacity:1; transform:scale(1); } }
+        .admin-limit-icon { width:60px; height:60px; border-radius:50%; margin:0 auto 18px; background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(37,99,235,0.2)); border:1.5px solid rgba(59,130,246,0.3); display:flex; align-items:center; justify-content:center; font-size:26px; }
+        .admin-limit-title { font-size:18px; font-weight:800; color:var(--text); margin-bottom:8px; }
+        .admin-limit-desc  { font-size:13px; color:var(--muted); line-height:1.65; margin-bottom:6px; }
+        .admin-limit-reset  { font-size:12px; font-weight:700; color:#3b82f6; margin-bottom:24px; }
+        .admin-limit-bar { width:100%; height:4px; background:var(--border); border-radius:99px; margin-bottom:24px; overflow:hidden; }
+        .admin-limit-bar-fill { height:100%; width:100%; border-radius:99px; background:linear-gradient(90deg,#3b82f6,#2563eb); }
+        .admin-limit-btn { width:100%; padding:13px; border-radius:12px; border:none; background:linear-gradient(135deg,#3b82f6,#2563eb); color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:opacity 0.2s,transform 0.15s; }
+        .admin-limit-btn:hover { opacity:0.9; transform:translateY(-1px); }
     </style>
   <script src="faculty-profile-guard.js?v=2"></script>
 </head>
@@ -310,6 +323,18 @@
         });
     </script>
     <script src="publish-modal.js"></script>
-    <script src="faculty-create-sql.js"></script>
+    <script src="faculty-create-sql.js?v=2"></script>
+
+    <!-- ADMIN AI LIMIT MODAL -->
+    <div class="admin-limit-overlay" id="adminLimitOverlay">
+        <div class="admin-limit-modal">
+            <div class="admin-limit-icon">🤖</div>
+            <div class="admin-limit-title" id="adminLimitTitle">Analysis Limit Reached</div>
+            <div class="admin-limit-desc" id="adminLimitDesc">You've hit your daily AI Game Builder Analysis allowance. Your allowance will reset 24 hours from your first use today.</div>
+            <div class="admin-limit-reset" id="adminLimitResetTime"></div>
+            <div class="admin-limit-bar"><div class="admin-limit-bar-fill"></div></div>
+            <button class="admin-limit-btn" onclick="document.getElementById('adminLimitOverlay').classList.remove('open')">Got it</button>
+        </div>
+    </div>
 </body>
 </html>

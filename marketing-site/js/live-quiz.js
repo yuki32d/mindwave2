@@ -76,6 +76,20 @@ async function generateQuestionsWithAI() {
 
         const data = await response.json();
 
+        if (response.status === 429 && data.limitReached) {
+            // Show limit modal
+            const overlay = document.getElementById('adminLimitOverlay');
+            const resetTime = document.getElementById('adminLimitResetTime');
+            if (overlay && resetTime) {
+                const d = new Date(data.resetsAt);
+                resetTime.textContent = 'Resets at ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                overlay.classList.add('open');
+            } else {
+                alert(data.message || 'Daily limit reached');
+            }
+            return;
+        }
+
         if (data.ok) {
             // Clear existing questions
             questions = [];

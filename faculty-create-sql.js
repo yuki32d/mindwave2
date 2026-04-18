@@ -143,6 +143,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({ question })
             });
+            if (response.status === 429) {
+                const data = await response.json().catch(() => ({}));
+                btn.disabled = false;
+                btn.innerHTML = '<span>✨ Analyze with AI</span>';
+                
+                const overlay = document.getElementById('adminLimitOverlay');
+                const resetTime = document.getElementById('adminLimitResetTime');
+                if (overlay && resetTime && data.limitReached) {
+                    const d = new Date(data.resetsAt);
+                    resetTime.textContent = 'Resets at ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    overlay.classList.add('open');
+                } else {
+                    alert(data.message || 'Daily AI analysis limit reached');
+                }
+                return;
+            }
+
             const data = await response.json();
             if (!data.ok || !Array.isArray(data.possibleQueries) || data.possibleQueries.length === 0) {
                 throw new Error(data.message || 'AI returned no possible queries.');

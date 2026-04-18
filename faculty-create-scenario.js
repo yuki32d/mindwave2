@@ -95,6 +95,24 @@ async function analyzeWithAI() {
             },
             body: JSON.stringify({ question, testCases, language })
         });
+        if (res.status === 429) {
+            const data = await res.json().catch(() => ({}));
+            const overlay = document.getElementById('adminLimitOverlay');
+            const resetTime = document.getElementById('adminLimitResetTime');
+            if (overlay && resetTime && data.limitReached) {
+                const d = new Date(data.resetsAt);
+                resetTime.textContent = 'Resets at ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                overlay.classList.add('open');
+            } else {
+                alert(data.message || 'Daily AI analysis limit reached');
+            }
+            statusEl.textContent = `❌ Analysis failed: Limit reached`;
+            statusEl.className = 'cs-ai-status error';
+            analyzeBtn.disabled = false;
+            updateAnalyzeButton();
+            return;
+        }
+
         const data = await res.json();
 
         if (!data.ok || !data.solutions || data.solutions.length === 0) {

@@ -508,7 +508,9 @@ const userSchema = new mongoose.Schema(
     aiUsage: {
       chatbot: { count: { type: Number, default: 0 }, startTime: { type: Date } },
       tutor:   { count: { type: Number, default: 0 }, startTime: { type: Date } },
-      code:    { count: { type: Number, default: 0 }, startTime: { type: Date } }
+      code:    { count: { type: Number, default: 0 }, startTime: { type: Date } },
+      adminQuiz:     { count: { type: Number, default: 0 }, startTime: { type: Date } },
+      adminAnalysis: { count: { type: Number, default: 0 }, startTime: { type: Date } }
     }
   },
   { timestamps: true }
@@ -1522,10 +1524,9 @@ setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, User);
 // ============================================
 // AI USAGE RATE LIMITER — 5 messages per AI per 24 hours
 // ============================================
-const AI_DAILY_LIMIT = 5;
 const AI_WINDOW_MS   = 24 * 60 * 60 * 1000; // 24 hours in ms
 
-function checkAILimit(type) {
+function checkAILimit(type, limit = 5) {
   return async (req, res, next) => {
     if (!req.user || !req.user.sub) return next(); // Unauthenticated — skip (handled by authMiddleware)
     try {
@@ -1548,7 +1549,7 @@ function checkAILimit(type) {
         return next();
       }
 
-      if (usage.count >= AI_DAILY_LIMIT) {
+      if (usage.count >= limit) {
         // Figure out when the window resets
         const resetAt = new Date(start + AI_WINDOW_MS);
         const resetStr = resetAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1659,7 +1660,7 @@ app.post('/api/transcription/token', async (req, res) => {
 // ============================================
 
 // 1. Teacher: Analyze a natural-language SQL question → return array of possible queries
-app.post('/api/sql-scenario/analyze', async (req, res) => {
+app.post('/api/sql-scenario/analyze', authMiddleware, requireFaculty, checkAILimit('adminAnalysis', 6), async (req, res) => {
   const GROQ_KEY = process.env.GROQ_API_KEY;
   if (!GROQ_KEY) {
     return res.status(503).json({ ok: false, message: 'AI not configured (missing GROQ_API_KEY).' });
@@ -1710,6 +1711,8 @@ Example output: ["SELECT * FROM students", "SELECT id, name FROM students WHERE 
       console.error('Failed to parse AI response as JSON array:', rawContent);
       return res.status(500).json({ ok: false, message: 'AI returned an invalid format. Please try again.' });
     }
+
+    if (req._aiUser) await incrementAIUsage('adminAnalysis', req._aiUser);
 
     res.json({ ok: true, possibleQueries });
   } catch (err) {
@@ -1790,7 +1793,7 @@ Student Query: ${studentQuery}`;
 // ============================================
 
 // 1. Faculty: Analyze a coding question & generate reference solutions
-app.post('/api/coding-scenario/analyze', async (req, res) => {
+app.post('/api/coding-scenario/analyze', authMiddleware, requireFaculty, checkAILimit('adminAnalysis', 6), async (req, res) => {
   const GROQ_KEY = process.env.GROQ_API_KEY;
   if (!GROQ_KEY) return res.status(503).json({ ok: false, message: 'AI not configured.' });
 
@@ -1833,6 +1836,9 @@ app.post('/api/coding-scenario/analyze', async (req, res) => {
     } catch (e) {
       solutions = [raw]; // Fallback: use raw text as single solution
     }
+
+    if (req._aiUser) await incrementAIUsage('adminAnalysis', req._aiUser);
+
     res.json({ ok: true, solutions });
   } catch (err) {
     console.error('Coding scenario analyze error:', err);
@@ -11063,6 +11069,30 @@ app.post('/api/quiz/generate-from-text', authMiddleware, requireFaculty, async (
     const countMatch = topic.match(/\b(\d+)\s*questions?\b/i);
     const questionCount = countMatch ? Math.min(Math.max(parseInt(countMatch[1], 10), 1), 50) : 10;
 
+    // --- CHECK ADMIN QUIZ LIMIT (15 questions per 24 hours) ---
+    const ADMIN_QUIZ_LIMIT = 15;
+    const usage = currentUser.aiUsage?.adminQuiz || { count: 0, startTime: null };
+    const now = Date.now();
+    const start = usage.startTime ? new Date(usage.startTime).getTime() : null;
+    const expired = !start || (now - start) >= 24 * 60 * 60 * 1000;
+
+    if (expired) {
+      // Reset window
+      usage.count = 0;
+      usage.startTime = new Date();
+    }
+
+    if (usage.count + questionCount > ADMIN_QUIZ_LIMIT) {
+      const resetAt = new Date((expired ? now : start) + 24 * 60 * 60 * 1000);
+      const remaining = ADMIN_QUIZ_LIMIT - usage.count;
+      return res.status(429).json({
+        ok: false,
+        limitReached: true,
+        resetsAt: resetAt.toISOString(),
+        message: `Allowance exhausted. You requested ${questionCount} questions, but only have ${remaining} left today.`
+      });
+    }
+
     const prompt = `You are a quiz generator. Based on the following topic/instructions, create exactly ${questionCount} multiple-choice quiz questions.
 
 Topic/Instructions: ${topic}
@@ -11149,6 +11179,10 @@ Return ONLY the JSON array, no additional text or explanation.`;
       timeLimit: q.timeLimit || 15,
       points: 1000
     }));
+
+    // Update database usage count after successful generation
+    usage.count += formattedQuestions.length;
+    await User.updateOne({ _id: currentUser._id }, { 'aiUsage.adminQuiz': usage });
 
     res.json({
       ok: true,
