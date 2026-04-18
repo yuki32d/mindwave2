@@ -3644,6 +3644,13 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
       updateData.$set.facultySections = facultySections;
     }
 
+    // DEBUG: Write to file so Antigravity can read it natively
+    const fs = require('fs');
+    fs.writeFileSync('debug_payload.json', JSON.stringify({ 
+      body: req.body, 
+      updateData: updateData 
+    }, null, 2));
+
     const updatedUser = await User.findByIdAndUpdate(
       req.user.sub,
       updateData,
@@ -3671,6 +3678,20 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
   } catch (error) {
     console.error("Update faculty profile error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
+// DEBUG ENDPOINT TO READ FROM WINDOWS
+app.get("/api/debug-faculty-payload", (req, res) => {
+  try {
+    const fs = require('fs');
+    if (fs.existsSync('debug_payload.json')) {
+      res.json(JSON.parse(fs.readFileSync('debug_payload.json')));
+    } else {
+      res.json({ error: "File not found yet" });
+    }
+  } catch (e) {
+    res.json({ error: e.message });
   }
 });
 
