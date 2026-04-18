@@ -3634,6 +3634,7 @@ app.get("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
 // Update faculty profile
 app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res) => {
   try {
+    console.log("PUT /api/faculty/profile req.body:", req.body);
     const { displayName, department, bio, officeHours, facultySections } = req.body;
     
     const updateData = { $set: { displayName, department, bio, officeHours } };
@@ -3660,7 +3661,13 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
       userAgent: req.get('User-Agent')
     });
 
-    res.json({ ok: true, message: "Profile updated successfully", user: updatedUser });
+    res.json({ 
+      ok: true, 
+      message: "Profile updated successfully", 
+      user: updatedUser,
+      debugBody: req.body,
+      debugUpdateData: updateData
+    });
   } catch (error) {
     console.error("Update faculty profile error:", error);
     res.status(500).json({ ok: false, message: "Server error" });
