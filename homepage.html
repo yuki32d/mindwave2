@@ -170,6 +170,30 @@
             background: #1a1d2e;
             border-color: rgba(255, 255, 255, 0.1);
         }
+
+        /* ── SKELETON LOADER ── */
+        .skeleton-box {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            animation: skeleton-pulse 1.5s infinite ease-in-out;
+        }
+        [data-theme="light"] .skeleton-box {
+            background: rgba(0, 0, 0, 0.06);
+            animation: skeleton-pulse-light 1.5s infinite ease-in-out;
+        }
+        @keyframes skeleton-pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        @keyframes skeleton-pulse-light {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.4; }
+        }
+        .skeleton-article { padding: 16px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; background: var(--surface); }
+        .skeleton-game { padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
     </style>
 </head>
 
@@ -444,7 +468,20 @@
                             <!-- announcementFeed ID required by homepage.js -->
                             <div class="mw-panel-body">
                                 <div id="announcementFeed" class="mw-feed-list">
-                                    <div class="empty-state">Loading announcements…</div>
+                                    <div class="skeleton-article">
+                                        <div class="skeleton-box" style="height: 20px; width: 60%; margin-bottom: 8px;"></div>
+                                        <div class="skeleton-box" style="height: 12px; width: 30%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 90%; margin-bottom: 6px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 75%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 22px; width: 50px; border-radius: 12px;"></div>
+                                    </div>
+                                    <div class="skeleton-article">
+                                        <div class="skeleton-box" style="height: 20px; width: 50%; margin-bottom: 8px;"></div>
+                                        <div class="skeleton-box" style="height: 12px; width: 40%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 85%; margin-bottom: 6px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 60%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 22px; width: 50px; border-radius: 12px;"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -458,7 +495,27 @@
                             <!-- gameFeed ID required by homepage.js -->
                             <div class="mw-panel-body">
                                 <div id="gameFeed">
-                                    <div class="empty-state">Loading games…</div>
+                                    <div class="skeleton-game">
+                                        <div class="skeleton-box" style="height: 18px; width: 80%; margin-bottom: 8px;"></div>
+                                        <div class="skeleton-box" style="height: 12px; width: 40%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 100%; margin-bottom: 6px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 60%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 24px; width: 60px; border-radius: 12px;"></div>
+                                    </div>
+                                    <div class="skeleton-game">
+                                        <div class="skeleton-box" style="height: 18px; width: 70%; margin-bottom: 8px;"></div>
+                                        <div class="skeleton-box" style="height: 12px; width: 50%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 90%; margin-bottom: 6px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 80%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 24px; width: 60px; border-radius: 12px;"></div>
+                                    </div>
+                                    <div class="skeleton-game">
+                                        <div class="skeleton-box" style="height: 18px; width: 90%; margin-bottom: 8px;"></div>
+                                        <div class="skeleton-box" style="height: 12px; width: 30%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 80%; margin-bottom: 6px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 70%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 24px; width: 60px; border-radius: 12px;"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -516,8 +573,12 @@
                             <!-- updateFeed ID required by homepage.js -->
                             <div class="mw-panel-body">
                                 <div id="updateFeed" class="mw-feed-list">
-                                    <div class="empty-state">Progress updates will appear here when your mentors post
-                                        them.
+                                    <div class="skeleton-article">
+                                        <div class="skeleton-box" style="height: 18px; width: 60%; margin-bottom: 8px;"></div>
+                                        <div class="skeleton-box" style="height: 12px; width: 30%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 90%; margin-bottom: 6px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 75%; margin-bottom: 16px;"></div>
+                                        <div class="skeleton-box" style="height: 22px; width: 50px; border-radius: 12px;"></div>
                                     </div>
                                 </div>
                             </div>

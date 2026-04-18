@@ -1353,6 +1353,30 @@
         .card {
             animation: fadeUp .22s ease both;
         }
+
+        /* ── SKELETON LOADER ── */
+        .skeleton-box {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            animation: skeleton-pulse 1.5s infinite ease-in-out;
+        }
+        [data-theme="light"] .skeleton-box {
+            background: rgba(0, 0, 0, 0.06);
+            animation: skeleton-pulse-light 1.5s infinite ease-in-out;
+        }
+        @keyframes skeleton-pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        @keyframes skeleton-pulse-light {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.4; }
+        }
+        .skeleton-article { padding: 16px; border-bottom: 1px solid var(--border); margin-bottom: 0px; background: transparent; }
+        .skeleton-game { padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
     </style>
 </head>
 
@@ -1532,7 +1556,20 @@
                                     <button class="submit-btn" type="submit"><i data-lucide="send"></i> Publish
                                         Announcement</button>
                                 </form>
-                                <div class="list" id="announcementList"></div>
+                                <div class="list" id="announcementList">
+                                    <div class="skeleton-article">
+                                        <div class="skeleton-box" style="height: 18px; width: 60%; margin-bottom: 8px;"></div>
+                                        <div class="skeleton-box" style="height: 12px; width: 30%; margin-bottom: 12px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 100%; margin-bottom: 6px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 80%; margin-bottom: 0px;"></div>
+                                    </div>
+                                    <div class="skeleton-article" style="border-bottom:none;">
+                                        <div class="skeleton-box" style="height: 18px; width: 50%; margin-bottom: 8px;"></div>
+                                        <div class="skeleton-box" style="height: 12px; width: 40%; margin-bottom: 12px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 90%; margin-bottom: 6px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 70%; margin-bottom: 0px;"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1556,7 +1593,20 @@
                                     <button class="submit-btn" type="submit"><i data-lucide="file-pen-line"></i> Post
                                         Update</button>
                                 </form>
-                                <div class="list" id="updateList"></div>
+                                <div class="list" id="updateList">
+                                    <div class="skeleton-article">
+                                        <div class="skeleton-box" style="height: 18px; width: 60%; margin-bottom: 8px;"></div>
+                                        <div class="skeleton-box" style="height: 12px; width: 30%; margin-bottom: 12px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 100%; margin-bottom: 6px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 80%; margin-bottom: 0px;"></div>
+                                    </div>
+                                    <div class="skeleton-article" style="border-bottom:none;">
+                                        <div class="skeleton-box" style="height: 18px; width: 70%; margin-bottom: 8px;"></div>
+                                        <div class="skeleton-box" style="height: 12px; width: 20%; margin-bottom: 12px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 85%; margin-bottom: 6px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 60%; margin-bottom: 0px;"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1566,7 +1616,28 @@
                                 <div class="card-title"><i data-lucide="gamepad-2"></i> Game Templates</div>
                                 <a href="interactive-tools-selector.html" class="card-link">Browse all →</a>
                             </div>
-                            <div id="gameTemplateGrid" class="template-grid"></div>
+                            <div id="gameTemplateGrid" class="template-grid">
+                                <div class="game-template-card" style="border:1px solid var(--border); border-radius:10px; padding:16px;">
+                                    <div class="skeleton-box" style="height:32px; width:32px; border-radius:6px; margin-bottom:12px;"></div>
+                                    <div class="skeleton-box" style="height:14px; width:70%; margin-bottom:6px;"></div>
+                                    <div class="skeleton-box" style="height:12px; width:90%; margin-bottom:0;"></div>
+                                </div>
+                                <div class="game-template-card" style="border:1px solid var(--border); border-radius:10px; padding:16px;">
+                                    <div class="skeleton-box" style="height:32px; width:32px; border-radius:6px; margin-bottom:12px;"></div>
+                                    <div class="skeleton-box" style="height:14px; width:60%; margin-bottom:6px;"></div>
+                                    <div class="skeleton-box" style="height:12px; width:80%; margin-bottom:0;"></div>
+                                </div>
+                                <div class="game-template-card" style="border:1px solid var(--border); border-radius:10px; padding:16px;">
+                                    <div class="skeleton-box" style="height:32px; width:32px; border-radius:6px; margin-bottom:12px;"></div>
+                                    <div class="skeleton-box" style="height:14px; width:80%; margin-bottom:6px;"></div>
+                                    <div class="skeleton-box" style="height:12px; width:70%; margin-bottom:0;"></div>
+                                </div>
+                                <div class="game-template-card" style="border:1px solid var(--border); border-radius:10px; padding:16px;">
+                                    <div class="skeleton-box" style="height:32px; width:32px; border-radius:6px; margin-bottom:12px;"></div>
+                                    <div class="skeleton-box" style="height:14px; width:50%; margin-bottom:6px;"></div>
+                                    <div class="skeleton-box" style="height:12px; width:95%; margin-bottom:0;"></div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Published Games -->
@@ -1593,7 +1664,24 @@
                                 </select>
                             </div>
                             <div class="form-body">
-                                <div class="list" id="gameList"></div>
+                                <div class="list" id="gameList">
+                                    <div class="skeleton-article">
+                                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                                            <div class="skeleton-box" style="height: 18px; width: 50%; margin-bottom:0;"></div>
+                                            <div class="skeleton-box" style="height: 24px; width: 60px; border-radius:12px; margin-bottom:0;"></div>
+                                        </div>
+                                        <div class="skeleton-box" style="height: 12px; width: 30%; margin-bottom: 12px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 90%; margin-bottom: 0px;"></div>
+                                    </div>
+                                    <div class="skeleton-article" style="border-bottom:none;">
+                                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                                            <div class="skeleton-box" style="height: 18px; width: 60%; margin-bottom:0;"></div>
+                                            <div class="skeleton-box" style="height: 24px; width: 60px; border-radius:12px; margin-bottom:0;"></div>
+                                        </div>
+                                        <div class="skeleton-box" style="height: 12px; width: 40%; margin-bottom: 12px;"></div>
+                                        <div class="skeleton-box" style="height: 14px; width: 80%; margin-bottom: 0px;"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
