@@ -991,6 +991,16 @@
             .preview-panel { height: 460px; }
             .topbar-nav { display: none; }
         }
+        /* ── ADMIN MAINTENANCE MODAL ── */
+        .admin-limit-overlay { display:none; position:fixed; inset:0; z-index:99999; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); align-items:center; justify-content:center; }
+        .admin-limit-overlay.open { display:flex; }
+        .admin-limit-modal { background:var(--surface); border:1px solid var(--border-2); border-radius:20px; padding:36px 32px 28px; width:380px; max-width:92vw; text-align:center; box-shadow:0 32px 80px rgba(0,0,0,0.5); animation:adminLimitPop 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes adminLimitPop { from { opacity:0; transform:scale(0.88); } to { opacity:1; transform:scale(1); } }
+        .admin-limit-icon { width:60px; height:60px; border-radius:50%; margin:0 auto 18px; background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(220,38,38,0.2)); border:1.5px solid rgba(239,68,68,0.3); display:flex; align-items:center; justify-content:center; font-size:26px; }
+        .admin-limit-title { font-size:18px; font-weight:800; color:var(--text); margin-bottom:8px; }
+        .admin-limit-desc  { font-size:14px; color:var(--muted); line-height:1.65; margin-bottom:24px; }
+        .admin-limit-btn { width:100%; padding:13px; border-radius:12px; border:none; background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:opacity 0.2s,transform 0.15s; }
+        .admin-limit-btn:hover { opacity:0.9; transform:translateY(-1px); }
     </style>
 </head>
 
@@ -1272,7 +1282,7 @@
         const origRender = window.renderGamePreview;
         // The ai-game-builder.js will handle the rest
     </script>
-    <script src="ai-game-builder.js"></script>
+    <script src="ai-game-builder.js?v=2"></script>
     <script src="loading-spinner.js"></script>
     <script>
         // Show preview footer after game renders
@@ -1287,6 +1297,16 @@
         if (pc) observer.observe(pc, { childList: true, subtree: true });
     </script>
     <script src="admin-logout-handler.js"></script>
+
+    <!-- ADMIN MAINTENANCE MODAL -->
+    <div class="admin-limit-overlay" id="adminMaintainOverlay">
+        <div class="admin-limit-modal">
+            <div class="admin-limit-icon">🛠️</div>
+            <div class="admin-limit-title">Under Maintenance</div>
+            <div class="admin-limit-desc">This AI Model is under maintenance and is not available right now. Please try again later.</div>
+            <button class="admin-limit-btn" onclick="document.getElementById('adminMaintainOverlay').classList.remove('open')">Okay</button>
+        </div>
+    </div>
 </body>
 
 </html>

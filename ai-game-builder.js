@@ -24,6 +24,14 @@ async function sendMessage() {
     const message = chatInput.value.trim();
     if (!message) return;
 
+    // MAINTENANCE MODE OVERRIDE
+    const maintainOverlay = document.getElementById('adminMaintainOverlay');
+    if (maintainOverlay) {
+        maintainOverlay.classList.add('open');
+        chatInput.value = '';
+        return;
+    }
+
     // Handle "preview" command locally if game data exists
     if (message.toLowerCase() === 'preview' && currentGameData) {
         addMessage(message, 'user');
