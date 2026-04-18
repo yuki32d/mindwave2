@@ -5973,14 +5973,40 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
       submissionDateMatch = { submittedAt: { $gte: cutoffDate } };
     }
 
+    const currentUser = await User.findById(req.user.sub);
+    if (!currentUser) return res.status(401).json({ ok: false, message: "Unauthorized" });
+
+    // Build isolation match query
+    const matchQuery = {
+      role: 'student',
+      orgRole: { $nin: ['owner', 'admin', 'faculty'] },
+      email: { $ne: SUPER_ADMIN_EMAIL }
+    };
+
+    const isSuperAdmin = (currentUser.email === SUPER_ADMIN_EMAIL) || (currentUser.email === 'admin@mindwave.com');
+    const HOD_REGEX = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
+    const isHod = HOD_REGEX.test(currentUser.email || '');
+
+    if (!isSuperAdmin) {
+      if (isHod) {
+        const match = currentUser.email.match(HOD_REGEX);
+        if (match && match[1]) {
+          matchQuery.department = match[1].toUpperCase();
+        }
+      } else {
+        if (currentUser.department) {
+          matchQuery.department = currentUser.department;
+        }
+        if (Array.isArray(currentUser.facultySections) && currentUser.facultySections.length > 0) {
+          matchQuery.section = { $in: currentUser.facultySections };
+        }
+      }
+    }
+
     // Start from ALL students so those with zero activity still appear
     const studentsData = await User.aggregate([
       {
-        $match: {
-          role: 'student',              // Only real students
-          orgRole: { $nin: ['owner', 'admin', 'faculty'] }, // Exclude HOD / faculty org roles
-          email: { $ne: SUPER_ADMIN_EMAIL }
-        }
+        $match: matchQuery
       },
       // Left-join their game submissions (filtered by time range)
       {
@@ -6716,15 +6742,40 @@ app.get("/api/admin/students", authMiddleware, async (req, res) => {
       return res.status(403).json({ ok: false, message: "Admin access required" });
     }
 
-    // Get only regular students (exclude organization faculty/admin)
-    const students = await User.find({
+    // Build query to get only regular students
+    const query = {
       role: 'student',
       $or: [
         { orgRole: 'student' },
         { orgRole: { $exists: false } },
         { orgRole: null }
       ]
-    })
+    };
+
+    // Apply isolation rules
+    const isSuperAdmin = (currentUser.email === SUPER_ADMIN_EMAIL) || (currentUser.email === 'admin@mindwave.com');
+    const HOD_REGEX = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
+    const isHod = HOD_REGEX.test(currentUser.email || '');
+
+    if (!isSuperAdmin) {
+      if (isHod) {
+        // HOD sees all students in their department
+        const match = currentUser.email.match(HOD_REGEX);
+        if (match && match[1]) {
+          query.department = match[1].toUpperCase();
+        }
+      } else {
+        // Regular faculty sees students in their department and selected sections
+        if (currentUser.department) {
+          query.department = currentUser.department;
+        }
+        if (Array.isArray(currentUser.facultySections) && currentUser.facultySections.length > 0) {
+          query.section = { $in: currentUser.facultySections };
+        }
+      }
+    }
+
+    const students = await User.find(query)
       .select('-password')
       .sort({ createdAt: -1 });
 
