@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -12,7 +12,7 @@
     <script src="admin-theme-init.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <style>
-        /* ── Exact admin.html design tokens ── */
+        /* â”€â”€ Exact admin.html design tokens â”€â”€ */
         :root {
             --bg: #f4f6fb;
             --surface: #ffffff;
@@ -88,14 +88,14 @@
             cursor: pointer;
         }
 
-        /* ── Shell / Layout ── */
+        /* â”€â”€ Shell / Layout â”€â”€ */
         .shell {
             display: flex;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* ── Sidebar (copied from admin.html) ── */
+        /* â”€â”€ Sidebar (copied from admin.html) â”€â”€ */
         .sidebar {
             width: var(--sidebar-w);
             flex-shrink: 0;
@@ -215,7 +215,7 @@
             stroke: var(--s-active-txt);
         }
 
-        /* ── Main area ── */
+        /* â”€â”€ Main area â”€â”€ */
         .main {
             flex: 1;
             display: flex;
@@ -224,7 +224,7 @@
             min-width: 0;
         }
 
-        /* ── Topbar ── */
+        /* â”€â”€ Topbar â”€â”€ */
         .topbar {
             flex-shrink: 0;
             height: var(--topbar-h);
@@ -283,7 +283,7 @@
             height: 15px;
         }
 
-        /* ── Scrollable content ── */
+        /* â”€â”€ Scrollable content â”€â”€ */
         .content {
             flex: 1;
             overflow-y: auto;
@@ -292,7 +292,7 @@
             scrollbar-color: var(--border) transparent;
         }
 
-        /* ── Connect state (when not connected to GCR) ── */
+        /* â”€â”€ Connect state (when not connected to GCR) â”€â”€ */
         .connect-card {
             max-width: 520px;
             margin: 60px auto;
@@ -363,7 +363,7 @@
             margin-top: 1px;
         }
 
-        /* ── Classroom layout (when connected) ── */
+        /* â”€â”€ Classroom layout (when connected) â”€â”€ */
         .classroom-layout {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -418,14 +418,14 @@
             border-color: var(--accent-bdr);
         }
 
-        /* ── Primary content panel ── */
+        /* â”€â”€ Primary content panel â”€â”€ */
         .main-panel {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
-        /* ── Card (reused for upload + lists) ── */
+        /* â”€â”€ Card (reused for upload + lists) â”€â”€ */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -454,7 +454,7 @@
             padding: 20px 22px;
         }
 
-        /* ── Tabs ── */
+        /* â”€â”€ Tabs â”€â”€ */
         .tabs {
             display: flex;
             gap: 4px;
@@ -491,7 +491,7 @@
             display: block;
         }
 
-        /* ── Form elements ── */
+        /* â”€â”€ Form elements â”€â”€ */
         .form-group {
             margin-bottom: 18px;
         }
@@ -567,7 +567,7 @@
             color: var(--muted);
         }
 
-        /* ── Buttons ── */
+        /* â”€â”€ Buttons â”€â”€ */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -619,7 +619,7 @@
             border-color: var(--red);
         }
 
-        /* ── Messages ── */
+        /* â”€â”€ Messages â”€â”€ */
         .msg {
             padding: 12px 16px;
             border-radius: 9px;
@@ -654,7 +654,7 @@
             color: #f43f5e;
         }
 
-        /* ── Material / Assignment items ── */
+        /* â”€â”€ Material / Assignment items â”€â”€ */
         .material-item {
             display: flex;
             align-items: flex-start;
@@ -733,7 +733,7 @@
 
 
 
-        /* Compat — existing JS uses these class names */
+        /* Compat â€” existing JS uses these class names */
         .error-message {
             padding: 12px 16px;
             border-radius: 9px;
@@ -797,14 +797,14 @@
             filter: none;
         }
 
-        /* ── Responsive ── */
+        /* â”€â”€ Responsive â”€â”€ */
         @media (max-width: 860px) {
             .classroom-layout {
                 grid-template-columns: 1fr;
             }
         }
 
-        /* ── Extra sidebar classes (exact admin.html) ── */
+        /* â”€â”€ Extra sidebar classes (exact admin.html) â”€â”€ */
         .side-scroll {
             flex: 1;
             overflow-y: auto;
@@ -817,7 +817,7 @@
             display: none;
         }
 
-        /* ── CUSTOM SIDEBAR SCROLLBAR ── */
+        /* â”€â”€ CUSTOM SIDEBAR SCROLLBAR â”€â”€ */
         .sidebar {
             position: relative;
         }
@@ -862,8 +862,15 @@
         }
 
         @keyframes scrollThumbPulse {
-            0%, 100% { box-shadow: 0 0 8px rgba(245, 166, 35, 0.6), 0 0 3px rgba(245, 166, 35, 0.4); }
-            50% { box-shadow: 0 0 14px rgba(245, 166, 35, 1), 0 0 5px rgba(249, 115, 22, 0.7); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 8px rgba(245, 166, 35, 0.6), 0 0 3px rgba(245, 166, 35, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 14px rgba(245, 166, 35, 1), 0 0 5px rgba(249, 115, 22, 0.7);
+            }
         }
 
         .side-divider {
@@ -959,7 +966,7 @@
 <body>
     <div class="shell">
 
-        <!-- ── Sidebar (exact admin.html) ── -->
+        <!-- â”€â”€ Sidebar (exact admin.html) â”€â”€ -->
         <aside class="sidebar">
             <!-- Custom Scroll Indicator -->
             <div class="sidebar-scroll-track" id="sideScrollTrack">
@@ -1017,7 +1024,7 @@
                 </div>
             </div>
         </aside>
-        <!-- ── Main ── -->
+        <!-- â”€â”€ Main â”€â”€ -->
         <div class="main">
 
             <!-- Topbar -->
@@ -1025,10 +1032,9 @@
                 <span class="topbar-title">Courses</span>
                 <span class="topbar-sub">Google Classroom Manager</span>
                 <div class="topbar-right">
-                    <!-- Disconnect GCR – only visible when connected -->
+                    <!-- Disconnect GCR â€“ only visible when connected -->
                     <button id="disconnectGcrBtn" class="btn btn-danger"
-                        style="display:none;font-size:12px;padding:7px 12px;"
-                        title="Disconnect Google Classroom">
+                        style="display:none;font-size:12px;padding:7px 12px;" title="Disconnect Google Classroom">
                         <i data-lucide="unlink"></i> Disconnect GCR
                     </button>
                     <button class="t-btn" id="themeToggle" title="Toggle theme">
@@ -1041,10 +1047,10 @@
             <div class="content">
                 <div id="messageContainer"></div>
 
-                <!-- ── Connect to GCR state (shown by JS when not connected) ── -->
+                <!-- â”€â”€ Connect to GCR state (shown by JS when not connected) â”€â”€ -->
                 <div id="connectState">
                     <div class="connect-card">
-                        <div class="connect-icon">🔗</div>
+                        <div class="connect-icon"></div>
                         <h2>Connect to Google Classroom</h2>
                         <p>To upload materials and manage your Google Classroom courses from MindWave, you need to
                             connect your Google account first.</p>
@@ -1070,7 +1076,7 @@
                     </div>
                 </div>
 
-                <!-- ── Classroom workspace (shown by JS when connected) ── -->
+                <!-- â”€â”€ Classroom workspace (shown by JS when connected) â”€â”€ -->
                 <div id="classroomState" style="display:none">
                     <div class="classroom-layout">
 
@@ -1134,7 +1140,7 @@
                                                 <div class="file-upload" id="fileUpload">
                                                     <input type="file" id="fileInput"
                                                         accept=".pdf,.ppt,.pptx,.doc,.docx,.txt,.jpg,.png">
-                                                    <div class="file-upload-icon">📁</div>
+                                                    <div class="file-upload-icon">ðŸ“</div>
                                                     <div class="file-upload-text">Click to upload or drag &amp; drop
                                                     </div>
                                                     <div class="file-upload-sub">Supported: PDF, PPT, DOC, TXT, Images
@@ -1194,7 +1200,7 @@
     <script>
         lucide.createIcons();
 
-        // ── Tab switching ──
+        // â”€â”€ Tab switching â”€â”€
         document.querySelectorAll('.tab[data-tab]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const tab = btn.dataset.tab;
@@ -1206,7 +1212,7 @@
             });
         });
 
-        // ── File input display ──
+        // â”€â”€ File input display â”€â”€
         const fileInput = document.getElementById('fileInput');
         const fileNameEl = document.getElementById('fileName');
         const fileUploadZone = document.getElementById('fileUpload');
@@ -1214,7 +1220,7 @@
         fileUploadZone?.addEventListener('click', () => fileInput?.click());
         fileInput?.addEventListener('change', () => {
             if (fileInput.files[0]) {
-                fileNameEl.textContent = '📎 ' + fileInput.files[0].name;
+                fileNameEl.textContent = 'ðŸ“Ž ' + fileInput.files[0].name;
             }
         });
 
@@ -1226,11 +1232,11 @@
             fileUploadZone.style.borderColor = '';
             if (e.dataTransfer.files[0]) {
                 fileInput.files = e.dataTransfer.files;
-                fileNameEl.textContent = '📎 ' + e.dataTransfer.files[0].name;
+                fileNameEl.textContent = 'ðŸ“Ž ' + e.dataTransfer.files[0].name;
             }
         });
 
-        // ── Connect / classroom state toggle (called by faculty-classroom.js) ──
+        // â”€â”€ Connect / classroom state toggle (called by faculty-classroom.js) â”€â”€
         window.showClassroomState = function () {
             document.getElementById('connectState').style.display = 'none';
             document.getElementById('classroomState').style.display = 'block';
@@ -1244,7 +1250,7 @@
     </script>
     <script src="faculty-classroom.js"></script>
     <script>
-        // ── Override faculty-classroom.js functions to work with new HTML structure ──
+        // â”€â”€ Override faculty-classroom.js functions to work with new HTML structure â”€â”€
 
         // showConnectionPrompt: show #connectState and hide the disconnect button
         window.showConnectionPrompt = function () {
@@ -1270,7 +1276,7 @@
             window.location.href = '/auth/google?scope=classroom';
         };
 
-        // ── Custom Sidebar Scroll Indicator (interactive) ──
+        // â”€â”€ Custom Sidebar Scroll Indicator (interactive) â”€â”€
         (function () {
             const scrollEl = document.querySelector('.side-scroll');
             const track = document.getElementById('sideScrollTrack');
@@ -1313,17 +1319,24 @@
         })();
     </script>
 
-    <!-- ── Disconnect GCR Confirmation Modal ── -->
-    <div id="disconnectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center;">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.2rem 2rem;width:340px;max-width:90vw;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);animation:gcr-pop .22s cubic-bezier(.34,1.56,.64,1);">
-            <div style="width:60px;height:60px;border-radius:50%;background:rgba(220,38,38,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.1rem;color:var(--red);">
+    <!-- â”€â”€ Disconnect GCR Confirmation Modal â”€â”€ -->
+    <div id="disconnectModal"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center;">
+        <div
+            style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.2rem 2rem;width:340px;max-width:90vw;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);animation:gcr-pop .22s cubic-bezier(.34,1.56,.64,1);">
+            <div
+                style="width:60px;height:60px;border-radius:50%;background:rgba(220,38,38,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.1rem;color:var(--red);">
                 <i data-lucide="unlink" style="width:28px;height:28px;"></i>
             </div>
-            <h3 style="font-size:1.15rem;font-weight:700;margin:0 0 .5rem;color:var(--text);">Disconnect Google Classroom?</h3>
-            <p style="font-size:.875rem;color:var(--muted);margin:0 0 1.8rem;line-height:1.5;">Your Google Classroom account will be unlinked from MindWave. You can reconnect at any time.</p>
+            <h3 style="font-size:1.15rem;font-weight:700;margin:0 0 .5rem;color:var(--text);">Disconnect Google
+                Classroom?</h3>
+            <p style="font-size:.875rem;color:var(--muted);margin:0 0 1.8rem;line-height:1.5;">Your Google Classroom
+                account will be unlinked from MindWave. You can reconnect at any time.</p>
             <div style="display:flex;gap:.75rem;">
-                <button id="cancelDisconnectBtn" style="flex:1;padding:.75rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:var(--bg);color:var(--muted);">Cancel</button>
-                <button id="confirmDisconnectBtn" style="flex:1;padding:.75rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;gap:.4rem;">
+                <button id="cancelDisconnectBtn"
+                    style="flex:1;padding:.75rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:var(--bg);color:var(--muted);">Cancel</button>
+                <button id="confirmDisconnectBtn"
+                    style="flex:1;padding:.75rem;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;gap:.4rem;">
                     <i data-lucide="unlink" style="width:15px;height:15px;"></i> Disconnect
                 </button>
             </div>
@@ -1331,10 +1344,16 @@
     </div>
     <style>
         @keyframes gcr-pop {
-            from { transform: scale(.88); opacity: 0; }
-            to   { transform: scale(1);  opacity: 1; }
+            from {
+                transform: scale(.88);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
     </style>
-
     <script src="admin-logout-handler.js"></script>
 </body>
