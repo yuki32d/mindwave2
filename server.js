@@ -3045,16 +3045,17 @@ app.get("/api/superadmin/users", authMiddleware, superAdminMiddleware, async (re
 app.get("/api/superadmin/organizations", authMiddleware, superAdminMiddleware, async (req, res) => {
   try {
     const organizations = await Organization.find()
+      .populate('ownerId', 'email')
       .sort({ createdAt: -1 })
       .lean();
 
-    // Get owner emails and member counts
-    const orgsWithDetails = await Promise.all(organizations.map(async (org) => {
-      const owner = await User.findById(org.ownerId).select('email');
-      org.ownerEmail = owner ? owner.email : 'N/A';
+    // Format owner emails and member counts efficiently
+    const orgsWithDetails = organizations.map((org) => {
+      org.ownerEmail = org.ownerId && org.ownerId.email ? org.ownerId.email : 'N/A';
+      org.ownerId = org.ownerId && org.ownerId._id ? org.ownerId._id : org.ownerId; // Restore original field structure
       org.memberCount = org.members ? org.members.length : 0;
       return org;
-    }));
+    });
 
     res.json({
       ok: true,
@@ -3902,16 +3903,26 @@ app.get("/api/faculty/department-faculty", authMiddleware, requireFaculty, async
       ]
     }).select('name email department lastActive').lean();
 
+    // Bulk fetch game counts for all faculty members using a single aggregation pipeline
+    const facultyIds = facultyUsers.map(f => f._id);
+    const gameCounts = await Game.aggregate([
+      { $match: { createdBy: { $in: facultyIds } } },
+      { $group: { _id: "$createdBy", count: { $sum: 1 } } }
+    ]);
+    
+    // Create a fast lookup map
+    const gameCountMap = {};
+    gameCounts.forEach(gc => {
+      gameCountMap[gc._id.toString()] = gc.count;
+    });
+
     // Attach game count for each faculty member
-    const faculty = await Promise.all(facultyUsers.map(async f => {
-      const totalGames = await Game.countDocuments({ createdBy: f._id });
-      return {
-        name: f.name,
-        email: f.email,
-        department: f.department || dept,
-        totalClasses: totalGames, // repurposed as game count for display
-        lastActive: f.lastActive
-      };
+    const faculty = facultyUsers.map(f => ({
+      name: f.name,
+      email: f.email,
+      department: f.department || dept,
+      totalClasses: gameCountMap[f._id.toString()] || 0, // repurposed as game count for display
+      lastActive: f.lastActive
     }));
 
     res.json({ ok: true, faculty, department: dept });
@@ -7858,22 +7869,31 @@ app.get("/api/community/posts/:id/comments", async (req, res) => {
       .populate('author', 'name email')
       .sort({ createdAt: -1 });
 
-    // Get replies for each comment
-    const commentsWithReplies = await Promise.all(
-      comments.map(async (comment) => {
-        const replies = await CommunityComment.find({
-          parentComment: comment._id,
-          isDeleted: false
-        })
-          .populate('author', 'name email')
-          .sort({ createdAt: 1 });
+    // Bulk fetch all replies for all top-level comments in a single query (fixes N+1 database eater)
+    const commentIds = comments.map(c => c._id);
+    const allReplies = await CommunityComment.find({
+      parentComment: { $in: commentIds },
+      isDeleted: false
+    })
+      .populate('author', 'name email')
+      .sort({ createdAt: 1 })
+      .lean();
 
-        return {
-          ...comment.toObject(),
-          replies
-        };
-      })
-    );
+    // Group the replies by parent comment in memory
+    const repliesMap = {};
+    allReplies.forEach(reply => {
+      const parentId = reply.parentComment.toString();
+      if (!repliesMap[parentId]) repliesMap[parentId] = [];
+      repliesMap[parentId].push(reply);
+    });
+
+    // Attach replies to their parent comments
+    const commentsWithReplies = comments.map(comment => {
+      return {
+        ...comment.toObject(),
+        replies: repliesMap[comment._id.toString()] || []
+      };
+    });
 
     res.json({ ok: true, comments: commentsWithReplies });
   } catch (error) {
