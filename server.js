@@ -6825,12 +6825,7 @@ app.get("/api/admin/students", authMiddleware, async (req, res) => {
 
     // Build query to get only regular students
     const query = {
-      role: 'student',
-      $or: [
-        { orgRole: 'student' },
-        { orgRole: { $exists: false } },
-        { orgRole: null }
-      ]
+      role: 'student'
     };
 
     // Apply isolation rules
