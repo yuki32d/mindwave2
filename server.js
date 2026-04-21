@@ -10445,6 +10445,11 @@ function setupWebSocket(server) {
               });
             }
             break;
+
+          case 'ping':
+            // Heartbeat from client to keep connection alive through Nginx proxy
+            ws.send(JSON.stringify({ type: 'pong' }));
+            break;
         }
       } catch (error) {
         console.error('WebSocket message error:', error);
@@ -11530,14 +11535,18 @@ app.post('/api/quiz/:code/next', authMiddleware, requireFaculty, async (req, res
     }
 
     if (quiz.currentQuestionIndex < quiz.questions.length - 1) {
-      quiz.currentQuestionIndex += 1;
-      quiz.status = 'question';
-      await quiz.save();
+      const nextIndex = quiz.currentQuestionIndex + 1;
+      
+      // Atomic update prevents VersionError crash if students answer late
+      await LiveQuizSession.updateOne(
+        { _id: quiz._id },
+        { $set: { currentQuestionIndex: nextIndex, status: 'question' } }
+      );
 
-      const currentQ = quiz.questions[quiz.currentQuestionIndex];
+      const currentQ = quiz.questions[nextIndex];
       res.json({
         ok: true,
-        questionIndex: quiz.currentQuestionIndex,
+        questionIndex: nextIndex,
         question: {
           text: currentQ.text,
           options: currentQ.options,
@@ -11546,9 +11555,10 @@ app.post('/api/quiz/:code/next', authMiddleware, requireFaculty, async (req, res
         }
       });
     } else {
-      quiz.status = 'ended';
-      quiz.endedAt = new Date();
-      await quiz.save();
+      await LiveQuizSession.updateOne(
+        { _id: quiz._id },
+        { $set: { status: 'ended', endedAt: new Date() } }
+      );
 
       res.json({ ok: true, message: "Quiz completed", status: 'ended' });
     }

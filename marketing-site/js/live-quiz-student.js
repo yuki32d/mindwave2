@@ -95,6 +95,13 @@ function connectWebSocket(sessionCode) {
             sessionCode,
             userId
         }));
+
+        // Keep connection alive to prevent Nginx 60s proxy timeout drops
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'ping' }));
+            }
+        }, 30000);
     };
 
     ws.onmessage = (event) => {
