@@ -1410,6 +1410,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 // Sanitize data to prevent MongoDB injection
 app.use(mongoSanitize());
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Serve Jitsi Meet static files first
