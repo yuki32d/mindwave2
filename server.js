@@ -10329,6 +10329,9 @@ function setupWebSocket(server) {
             // Student or faculty joining a quiz session
             currentSessionCode = message.sessionCode;
             userId = message.userId;
+            
+            // Mark if this connection belongs to the teacher
+            ws.isFaculty = (userId === 'faculty' || (userId && userId.startsWith('faculty')) || message.role === 'admin' || message.role === 'faculty');
 
             if (!quizConnections.has(currentSessionCode)) {
               quizConnections.set(currentSessionCode, new Set());
@@ -10338,7 +10341,7 @@ function setupWebSocket(server) {
             // Send confirmation
             ws.send(JSON.stringify({ type: 'joined', sessionCode: currentSessionCode }));
 
-            // Broadcast participant count
+            // Broadcast participant count to everyone
             broadcastToSession(currentSessionCode, {
               type: 'participant-count',
               count: quizConnections.get(currentSessionCode).size
@@ -10394,8 +10397,8 @@ function setupWebSocket(server) {
               // Get participant count for percentage calculation
               const participantCount = (quizConnections.get(currentSessionCode) && quizConnections.get(currentSessionCode).size) || 0;
 
-              // Broadcast updated distribution to all participants
-              broadcastToSession(currentSessionCode, {
+              // Broadcast updated distribution ONLY TO FACULTY to prevent O(n^2) crash
+              broadcastToFaculty(currentSessionCode, {
                 type: 'answer-distribution',
                 questionIndex: qIndex,
                 distribution: {
@@ -10404,15 +10407,8 @@ function setupWebSocket(server) {
                   C: dist.C,
                   D: dist.D,
                   total: dist.total,
-                  expected: participantCount
+                  expected: Math.max(participantCount - 1, 1)
                 }
-              });
-
-              // Also broadcast simple answer-submitted for backward compatibility
-              broadcastToSession(currentSessionCode, {
-                type: 'answer-submitted',
-                userId: userId,
-                questionIndex: qIndex
               });
             }
             break;
@@ -10447,7 +10443,7 @@ function setupWebSocket(server) {
       if (currentSessionCode && quizConnections.has(currentSessionCode)) {
         quizConnections.get(currentSessionCode).delete(ws);
 
-        // Broadcast updated participant count
+        // Broadcast updated participant count to everyone
         if (quizConnections.get(currentSessionCode).size > 0) {
           broadcastToSession(currentSessionCode, {
             type: 'participant-count',
@@ -10468,6 +10464,20 @@ function setupWebSocket(server) {
 
       connections.forEach(client => {
         if (client.readyState === 1) { // WebSocket.OPEN
+          client.send(messageStr);
+        }
+      });
+    }
+  }
+
+  // Helper function to broadcast ONLY to the faculty of a session
+  function broadcastToFaculty(sessionCode, message) {
+    if (quizConnections.has(sessionCode)) {
+      const connections = quizConnections.get(sessionCode);
+      const messageStr = JSON.stringify(message);
+
+      connections.forEach(client => {
+        if (client.readyState === 1 && client.isFaculty) { // WebSocket.OPEN and Faculty only
           client.send(messageStr);
         }
       });
@@ -11152,8 +11162,8 @@ app.post('/api/quiz/generate-from-text', authMiddleware, requireFaculty, async (
     const countMatch = topic.match(/\b(\d+)\s*questions?\b/i);
     const questionCount = countMatch ? Math.min(Math.max(parseInt(countMatch[1], 10), 1), 50) : 10;
 
-    // --- CHECK ADMIN QUIZ LIMIT (15 questions per 24 hours) ---
-    const ADMIN_QUIZ_LIMIT = 15;
+    // --- CHECK ADMIN QUIZ LIMIT (60 questions per 24 hours) ---
+    const ADMIN_QUIZ_LIMIT = 60;
     const usage = currentUser.aiUsage?.adminQuiz || { count: 0, startTime: null };
     const now = Date.now();
     const start = usage.startTime ? new Date(usage.startTime).getTime() : null;
