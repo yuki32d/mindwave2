@@ -3726,13 +3726,6 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
       updateData.$set.facultySections = facultySections;
     }
 
-    // DEBUG: Write to file so Antigravity can read it natively
-    const fs = require('fs');
-    fs.writeFileSync('debug_payload.json', JSON.stringify({
-      body: req.body,
-      updateData: updateData
-    }, null, 2));
-
     const updatedUser = await User.findByIdAndUpdate(
       req.user.sub,
       updateData,
@@ -3753,9 +3746,7 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
     res.json({
       ok: true,
       message: "Profile updated successfully",
-      user: updatedUser,
-      debugBody: req.body,
-      debugUpdateData: updateData
+      user: updatedUser
     });
   } catch (error) {
     console.error("Update faculty profile error:", error);
@@ -3763,19 +3754,7 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
   }
 });
 
-// DEBUG ENDPOINT TO READ FROM WINDOWS
-app.get("/api/debug-faculty-payload", (req, res) => {
-  try {
-    const fs = require('fs');
-    if (fs.existsSync('debug_payload.json')) {
-      res.json(JSON.parse(fs.readFileSync('debug_payload.json')));
-    } else {
-      res.json({ error: "File not found yet" });
-    }
-  } catch (e) {
-    res.json({ error: e.message });
-  }
-});
+// Debug endpoint removed (was using blocking fs.readFileSync)
 
 // Update faculty profile photo
 app.post("/api/faculty/profile/photo", authMiddleware, requireFaculty, async (req, res) => {
@@ -3984,15 +3963,12 @@ app.post("/api/admin/block-pattern", authMiddleware, async (req, res) => {
       return res.status(400).json({ ok: false, message: "This pattern is already blocked" });
     }
 
-    // Find all users matching the pattern
-    const allUsers = await User.find({ role: 'student' });
-    const matchingUsers = allUsers.filter(u => {
-      if (pattern.startsWith('.')) {
-        return u.email.includes(pattern);
-      } else {
-        return u.email === pattern || u.email.endsWith('@' + pattern);
-      }
-    });
+    // Find matching users directly in MongoDB with a regex — never loads all students into RAM
+    const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const emailRegex = pattern.startsWith('.')
+      ? new RegExp(escapedPattern, 'i')
+      : new RegExp(`(^${escapedPattern}$|@${escapedPattern}$)`, 'i');
+    const matchingUsers = await User.find({ role: 'student', email: { $regex: emailRegex } }).select('_id email');
 
     // Deactivate all matching users
     const userIds = matchingUsers.map(u => u._id);
@@ -8116,19 +8092,14 @@ app.get("/api/community/users/:userId/posts", async (req, res) => {
 // Get trending tags
 app.get("/api/community/tags/trending", async (req, res) => {
   try {
-    const posts = await CommunityPost.find({}).select('tags');
-    const tagCounts = {};
-
-    posts.forEach(post => {
-      post.tags.forEach(tag => {
-        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-      });
-    });
-
-    const trendingTags = Object.entries(tagCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([tag, count]) => ({ tag, count }));
+    // Aggregation pipeline: counts tags in MongoDB, never loads posts into RAM
+    const trendingTags = await CommunityPost.aggregate([
+      { $unwind: '$tags' },
+      { $group: { _id: '$tags', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+      { $project: { tag: '$_id', count: 1, _id: 0 } }
+    ]);
 
     res.json({ ok: true, tags: trendingTags });
   } catch (error) {
@@ -14242,8 +14213,8 @@ app.get('/api/discussions/debug', verifyDiscToken, async (req, res) => {
     const userId = req.user.sub;
     const user = await User.findById(userId).select('name role section batch department');
 
-    // 1. Every discussion in the DB (raw)
-    const all = await Discussion.find({}).sort({ createdAt: -1 }).lean();
+    // 1. Every discussion in the DB (raw) — limited to prevent full collection dump
+    const all = await Discussion.find({}).sort({ createdAt: -1 }).limit(200).lean();
 
     // 2. What the updated student query returns
     const now = new Date();
