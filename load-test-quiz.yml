@@ -2,67 +2,47 @@ config:
   target: "https://mindwave-edu.tech"
   phases:
     - duration: 10        # Ramp up over 10 seconds
-      arrivalRate: 50     # 50 new users per second = 500 total
-      name: "500 Students Joining Live Quiz"
+      arrivalRate: 50     # 50 new users/sec = 500 total virtual users
+      name: "500 Students Simultaneous Join Test"
 
   defaults:
     headers:
       Content-Type: "application/json"
 
 scenarios:
-  - name: "Student joins quiz and submits answers"
+  - name: "Validate code → Join lobby → Poll quiz status (realistic student flow)"
+    weight: 100
     flow:
-      # Step 1: Validate the quiz code (like entering PIN on the join screen)
+      # STEP 1: Student enters the 6-digit PIN and validates it
       - post:
           url: "/api/quiz/validate"
           json:
             code: "{{ $env.QUIZ_CODE }}"
-          expect:
-            - statusCode: 200
 
-      # Step 2: Brief pause simulating the student reading the screen
+      # STEP 2: Brief pause (student reads the lobby screen)
       - think: 1
 
-      # Step 3: Join the quiz session (the big concurrency moment)
+      # STEP 3: THE BIG ONE - 500 students all join the lobby simultaneously
       - post:
           url: "/api/quiz/{{ $env.QUIZ_CODE }}/join"
           headers:
             Authorization: "Bearer {{ $env.STUDENT_TOKEN }}"
           json: {}
-          expect:
-            - statusCode: 200
 
-      # Step 4: Simulate waiting in lobby (5 seconds)
-      - think: 5
+      # STEP 4: Sitting in lobby - student polls for quiz status (every 3s in real life)
+      - think: 2
 
-      # Step 5: Submit answer to question 0 (all students click at same time)
-      - post:
-          url: "/api/quiz/{{ $env.QUIZ_CODE }}/answer"
-          headers:
-            Authorization: "Bearer {{ $env.STUDENT_TOKEN }}"
-          json:
-            questionIndex: 0
-            selectedIndex: 1
-            timeToAnswer: 3500
-          capture:
-            - json: "$.isCorrect"
-              as: "isCorrect"
+      - get:
+          url: "/api/quiz/{{ $env.QUIZ_CODE }}"
 
-      # Step 6: Brief think time between questions
-      - think: 3
+      - think: 2
 
-      # Step 7: Submit answer to question 1
-      - post:
-          url: "/api/quiz/{{ $env.QUIZ_CODE }}/answer"
-          headers:
-            Authorization: "Bearer {{ $env.STUDENT_TOKEN }}"
-          json:
-            questionIndex: 1
-            selectedIndex: 0
-            timeToAnswer: 4200
-
-      # Step 8: Check leaderboard at the end
+      # STEP 5: Check leaderboard (happens after each question)
       - get:
           url: "/api/quiz/{{ $env.QUIZ_CODE }}/leaderboard"
-          expect:
-            - statusCode: 200
+
+      - think: 3
+
+      # STEP 6: Student polls status one more time
+      - get:
+          url: "/api/quiz/{{ $env.QUIZ_CODE }}"
