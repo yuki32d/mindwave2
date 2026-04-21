@@ -1966,9 +1966,10 @@ const authLimiter = rateLimit({
 });
 
 // General API rate limiter — raised for college NAT (many users behind 1 IP)
+// ⚠️ LOAD TEST MODE: max raised to 5000 temporarily — revert to 500 after testing!
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500,  // Raised from 100 — college campus shares IP, 100 was way too low
+  max: 5000,  // Temporarily raised for load testing (was 500)
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many requests, please try again later.'

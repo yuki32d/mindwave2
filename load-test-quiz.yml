@@ -1,0 +1,68 @@
+config:
+  target: "https://mindwave-edu.tech"
+  phases:
+    - duration: 10        # Ramp up over 10 seconds
+      arrivalRate: 50     # 50 new users per second = 500 total
+      name: "500 Students Joining Live Quiz"
+
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Student joins quiz and submits answers"
+    flow:
+      # Step 1: Validate the quiz code (like entering PIN on the join screen)
+      - post:
+          url: "/api/quiz/validate"
+          json:
+            code: "{{ $env.QUIZ_CODE }}"
+          expect:
+            - statusCode: 200
+
+      # Step 2: Brief pause simulating the student reading the screen
+      - think: 1
+
+      # Step 3: Join the quiz session (the big concurrency moment)
+      - post:
+          url: "/api/quiz/{{ $env.QUIZ_CODE }}/join"
+          headers:
+            Authorization: "Bearer {{ $env.STUDENT_TOKEN }}"
+          json: {}
+          expect:
+            - statusCode: 200
+
+      # Step 4: Simulate waiting in lobby (5 seconds)
+      - think: 5
+
+      # Step 5: Submit answer to question 0 (all students click at same time)
+      - post:
+          url: "/api/quiz/{{ $env.QUIZ_CODE }}/answer"
+          headers:
+            Authorization: "Bearer {{ $env.STUDENT_TOKEN }}"
+          json:
+            questionIndex: 0
+            selectedIndex: 1
+            timeToAnswer: 3500
+          capture:
+            - json: "$.isCorrect"
+              as: "isCorrect"
+
+      # Step 6: Brief think time between questions
+      - think: 3
+
+      # Step 7: Submit answer to question 1
+      - post:
+          url: "/api/quiz/{{ $env.QUIZ_CODE }}/answer"
+          headers:
+            Authorization: "Bearer {{ $env.STUDENT_TOKEN }}"
+          json:
+            questionIndex: 1
+            selectedIndex: 0
+            timeToAnswer: 4200
+
+      # Step 8: Check leaderboard at the end
+      - get:
+          url: "/api/quiz/{{ $env.QUIZ_CODE }}/leaderboard"
+          expect:
+            - statusCode: 200
