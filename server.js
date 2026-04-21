@@ -1980,6 +1980,11 @@ app.use('/api', paymentRoutes);
 // Apply rate limiting to all API routes
 app.use('/api/', apiLimiter);
 
+// Loader.io verification route
+app.get('/loaderio-3214d98cb980a6edf7e85767282de3cf', (req, res) => res.send('loaderio-3214d98cb980a6edf7e85767282de3cf'));
+app.get('/loaderio-3214d98cb980a6edf7e85767282de3cf.txt', (req, res) => res.send('loaderio-3214d98cb980a6edf7e85767282de3cf'));
+app.get('/loaderio-3214d98cb980a6edf7e85767282de3cf.html', (req, res) => res.send('loaderio-3214d98cb980a6edf7e85767282de3cf'));
+
 // Student: name.dept+year@cmrit.ac.in — e.g. jeeban.mca25@cmrit.ac.in, alex.mba26@cmrit.ac.in
 const STUDENT_EMAIL_REGEX = /^[a-z]+\.[a-z]{2,6}\d{2}@cmrit\.ac\.in$/i;
 // Faculty: any letters/dots/hyphens before @cmrit.ac.in, NO digits allowed (blocks student emails like name.mca25@)
