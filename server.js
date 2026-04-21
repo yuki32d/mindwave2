@@ -5096,12 +5096,25 @@ app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, re
       const correct = studentAnswers.filter(a => a.isCorrect).length;
       const calculatedScore = Math.round((correct / (studentAnswers.length || 1)) * Number(game.totalPoints || 100));
       if (game) {
-        game.stats = game.stats || { totalSessions: 0, totalParticipants: 0, averageScore: 0 };
-        game.stats.totalSessions += 1;
-        const allSubs = await GameSubmission.find({ gameId });
-        const totalScore = allSubs.reduce((acc, s) => acc + (s.score || 0), 0);
-        game.stats.averageScore = Math.round(totalScore / allSubs.length);
-        await game.save();
+        // Run aggregation on the database side to prevent transferring thousands of documents to Node RAM
+        const statsSummary = await GameSubmission.aggregate([
+          { $match: { gameId: new mongoose.Types.ObjectId(gameId) } },
+          { $group: { _id: null, avgScore: { $avg: '$score' }, count: { $sum: 1 } } }
+        ]);
+
+        const avgScore = statsSummary.length > 0 ? Math.round(statsSummary[0].avgScore) : 0;
+        const total = statsSummary.length > 0 ? statsSummary[0].count : 1;
+
+        // Atomic update prevents VersionError crashes during concurrent submits
+        await Game.updateOne(
+          { _id: gameId },
+          { 
+            $set: { 
+              "stats.totalSessions": total,
+              "stats.averageScore": avgScore
+            } 
+          }
+        );
       }
     } catch (e) { console.error("Stats update error:", e); }
 
@@ -11419,35 +11432,34 @@ app.post('/api/quiz/:code/join', authMiddleware, requireStudent, async (req, res
       return res.status(401).json({ ok: false, message: "User not found" });
     }
 
-    const quiz = await LiveQuizSession.findOne({ sessionCode: code });
+    // Use atomic update to prevent race conditions during mass join
+    const updatedQuiz = await LiveQuizSession.findOneAndUpdate(
+      { sessionCode: code },
+      { 
+        $addToSet: { 
+          participants: {
+            studentId: currentUser._id,
+            name: currentUser.name,
+            score: 0,
+            answers: []
+          } 
+        } 
+      },
+      { new: true }
+    );
 
-    if (!quiz) {
+    if (!updatedQuiz) {
       return res.status(404).json({ ok: false, message: "Quiz session not found" });
     }
 
-    if (quiz.status === 'ended') {
+    if (updatedQuiz.status === 'ended') {
       return res.status(400).json({ ok: false, message: "Quiz has ended" });
-    }
-
-    // Check if already joined
-    const existingParticipant = quiz.participants.find(
-      p => p.studentId && p.studentId.toString() === currentUser._id.toString()
-    );
-
-    if (!existingParticipant) {
-      quiz.participants.push({
-        studentId: currentUser._id,
-        name: currentUser.name,
-        score: 0,
-        answers: []
-      });
-      await quiz.save();
     }
 
     res.json({
       ok: true,
       message: "Joined quiz successfully",
-      participantCount: quiz.participants.length
+      participantCount: updatedQuiz.participants.length
     });
 
   } catch (error) {
@@ -11579,28 +11591,44 @@ app.post('/api/quiz/:code/answer', authMiddleware, requireStudent, async (req, r
       pointsEarned = basePoints + Math.max(0, timeBonus);
     }
 
-    // Check if already answered this question
-    const existingAnswer = participant.answers.find(a => a.questionIndex === questionIndex);
-    if (existingAnswer) {
-      return res.status(400).json({ ok: false, message: "Already answered this question" });
+    // Use atomic update to prevent VersionError race conditions during mass answer submissions
+    const updateResult = await LiveQuizSession.findOneAndUpdate(
+      { 
+        sessionCode: code, 
+        "participants.studentId": currentUser._id,
+        "participants.answers.questionIndex": { $ne: questionIndex } // Extra safety to prevent duplicate answers
+      },
+      { 
+        $push: { 
+          "participants.$.answers": {
+            questionIndex,
+            selectedIndex,
+            timeToAnswer,
+            pointsEarned,
+            isCorrect
+          }
+        },
+        $inc: {
+          "participants.$.score": pointsEarned
+        }
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (!updateResult) {
+      return res.status(400).json({ ok: false, message: "Could not save answer (already answered or not found)" });
     }
 
-    participant.answers.push({
-      questionIndex,
-      selectedIndex,
-      timeToAnswer,
-      pointsEarned,
-      isCorrect
-    });
-
-    participant.score += pointsEarned;
-    await quiz.save();
+    // Find the updated participant to return their new total score
+    const updatedParticipant = updateResult.participants.find(
+      p => p.studentId && p.studentId.toString() === currentUser._id.toString()
+    );
 
     res.json({
       ok: true,
       isCorrect,
       pointsEarned,
-      totalScore: participant.score,
+      totalScore: updatedParticipant ? updatedParticipant.score : participant.score + pointsEarned,
       correctAnswer: question.correctIndex
     });
 
