@@ -1965,10 +1965,10 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true  // Only count failed requests against the limit
 });
 
-// General API rate limiter — raised for college NAT (many users behind 1 IP)
+// General API rate limiter — strictly calibrated for College NAT Environments
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500,  // 500 per IP per 15 min — safe for college campus NAT
+  max: 5000,  // 5000 per IP per 15 min — Allows an entire lecture hall mapping to 1 WiFI IP to play a live quiz without getting 429 blocked
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many requests, please try again later.'
