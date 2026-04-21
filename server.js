@@ -507,9 +507,9 @@ const userSchema = new mongoose.Schema(
     // AI usage tracking — each key tracks count + startTime for 24hr rolling window
     aiUsage: {
       chatbot: { count: { type: Number, default: 0 }, startTime: { type: Date } },
-      tutor:   { count: { type: Number, default: 0 }, startTime: { type: Date } },
-      code:    { count: { type: Number, default: 0 }, startTime: { type: Date } },
-      adminQuiz:     { count: { type: Number, default: 0 }, startTime: { type: Date } },
+      tutor: { count: { type: Number, default: 0 }, startTime: { type: Date } },
+      code: { count: { type: Number, default: 0 }, startTime: { type: Date } },
+      adminQuiz: { count: { type: Number, default: 0 }, startTime: { type: Date } },
       adminAnalysis: { count: { type: Number, default: 0 }, startTime: { type: Date } }
     }
   },
@@ -1525,7 +1525,7 @@ setupPeerReviewRoutes(app, authMiddleware, ProjectSubmission, User);
 // ============================================
 // AI USAGE RATE LIMITER — 5 messages per AI per 24 hours
 // ============================================
-const AI_WINDOW_MS   = 24 * 60 * 60 * 1000; // 24 hours in ms
+const AI_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours in ms
 
 function checkAILimit(type, limit = 5) {
   return async (req, res, next) => {
@@ -1534,15 +1534,15 @@ function checkAILimit(type, limit = 5) {
       const user = await User.findById(req.user.sub);
       if (!user) return res.status(401).json({ ok: false, message: 'User not found' });
 
-      const usage    = user.aiUsage?.[type] || { count: 0, startTime: null };
-      const now      = Date.now();
-      const start    = usage.startTime ? new Date(usage.startTime).getTime() : null;
-      const expired  = !start || (now - start) >= AI_WINDOW_MS;
+      const usage = user.aiUsage?.[type] || { count: 0, startTime: null };
+      const now = Date.now();
+      const start = usage.startTime ? new Date(usage.startTime).getTime() : null;
+      const expired = !start || (now - start) >= AI_WINDOW_MS;
 
       if (expired) {
         // Reset window — grant fresh 5 tokens
         await User.updateOne({ _id: user._id }, {
-          [`aiUsage.${type}.count`]:     0,
+          [`aiUsage.${type}.count`]: 0,
           [`aiUsage.${type}.startTime`]: new Date()
         });
         req._aiType = type;
@@ -1968,7 +1968,7 @@ const authLimiter = rateLimit({
 // General API rate limiter — strictly calibrated for College NAT Environments
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5000,  // 5000 per IP per 15 min — Allows an entire lecture hall mapping to 1 WiFI IP to play a live quiz without getting 429 blocked
+  max: 20000,  // 20000 per IP per 15 min — Allows an entire lecture hall mapping to 1 WiFI IP to play a live quiz without getting 429 blocked
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many requests, please try again later.'
@@ -3718,9 +3718,9 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
   try {
     console.log("PUT /api/faculty/profile req.body:", req.body);
     const { displayName, department, bio, officeHours, facultySections } = req.body;
-    
+
     const updateData = { $set: { displayName, department, bio, officeHours } };
-    
+
     // Only update facultySections if it is provided as an array
     if (Array.isArray(facultySections)) {
       updateData.$set.facultySections = facultySections;
@@ -3728,9 +3728,9 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
 
     // DEBUG: Write to file so Antigravity can read it natively
     const fs = require('fs');
-    fs.writeFileSync('debug_payload.json', JSON.stringify({ 
-      body: req.body, 
-      updateData: updateData 
+    fs.writeFileSync('debug_payload.json', JSON.stringify({
+      body: req.body,
+      updateData: updateData
     }, null, 2));
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -3750,9 +3750,9 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
       userAgent: req.get('User-Agent')
     });
 
-    res.json({ 
-      ok: true, 
-      message: "Profile updated successfully", 
+    res.json({
+      ok: true,
+      message: "Profile updated successfully",
       user: updatedUser,
       debugBody: req.body,
       debugUpdateData: updateData
@@ -3914,7 +3914,7 @@ app.get("/api/faculty/department-faculty", authMiddleware, requireFaculty, async
       { $match: { createdBy: { $in: facultyIds } } },
       { $group: { _id: "$createdBy", count: { $sum: 1 } } }
     ]);
-    
+
     // Create a fast lookup map
     const gameCountMap = {};
     gameCounts.forEach(gc => {
@@ -5124,11 +5124,11 @@ app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, re
         // Atomic update prevents VersionError crashes during concurrent submits
         await Game.updateOne(
           { _id: gameId },
-          { 
-            $set: { 
+          {
+            $set: {
               "stats.totalSessions": total,
               "stats.averageScore": avgScore
-            } 
+            }
           }
         );
       }
@@ -6951,7 +6951,7 @@ app.get("/api/admin/faculty", authMiddleware, async (req, res) => {
     };
 
     // If HOD (not super-admin), restrict to same department
-    if (!( currentUser.email === SUPER_ADMIN_EMAIL_LOCAL )) {
+    if (!(currentUser.email === SUPER_ADMIN_EMAIL_LOCAL)) {
       const match = currentUser.email.match(HOD_REGEX_LOCAL);
       if (match && match[1]) {
         query.department = match[1].toUpperCase();
@@ -10367,7 +10367,7 @@ function setupWebSocket(server) {
             // Student or faculty joining a quiz session
             currentSessionCode = message.sessionCode;
             userId = message.userId;
-            
+
             // Mark if this connection belongs to the teacher
             ws.isFaculty = (userId === 'faculty' || (userId && userId.startsWith('faculty')) || message.role === 'admin' || message.role === 'faculty');
 
@@ -11474,15 +11474,15 @@ app.post('/api/quiz/:code/join', authMiddleware, requireStudent, async (req, res
     // Use atomic update to prevent race conditions during mass join
     const updatedQuiz = await LiveQuizSession.findOneAndUpdate(
       { sessionCode: code },
-      { 
-        $addToSet: { 
+      {
+        $addToSet: {
           participants: {
             studentId: currentUser._id,
             name: currentUser.name,
             score: 0,
             answers: []
-          } 
-        } 
+          }
+        }
       },
       { new: true }
     );
@@ -11561,7 +11561,7 @@ app.post('/api/quiz/:code/next', authMiddleware, requireFaculty, async (req, res
 
     if (quiz.currentQuestionIndex < quiz.questions.length - 1) {
       const nextIndex = quiz.currentQuestionIndex + 1;
-      
+
       // Atomic update prevents VersionError crash if students answer late
       await LiveQuizSession.updateOne(
         { _id: quiz._id },
@@ -11637,13 +11637,13 @@ app.post('/api/quiz/:code/answer', authMiddleware, requireStudent, async (req, r
 
     // Use atomic update to prevent VersionError race conditions during mass answer submissions
     const updateResult = await LiveQuizSession.findOneAndUpdate(
-      { 
-        sessionCode: code, 
+      {
+        sessionCode: code,
         "participants.studentId": currentUser._id,
         "participants.answers.questionIndex": { $ne: questionIndex } // Extra safety to prevent duplicate answers
       },
-      { 
-        $push: { 
+      {
+        $push: {
           "participants.$.answers": {
             questionIndex,
             selectedIndex,
@@ -14560,20 +14560,20 @@ app.post('/api/uptimerobot/monitors', async (req, res) => {
 
   try {
     const body = new URLSearchParams({
-      api_key:              UPTIMEROBOT_API_KEY,
-      format:               'json',
-      logs:                 '1',
-      logs_limit:           '50',
-      response_times:       '1',
+      api_key: UPTIMEROBOT_API_KEY,
+      format: 'json',
+      logs: '1',
+      logs_limit: '50',
+      response_times: '1',
       response_times_limit: '48',
-      custom_uptime_ratio:  '7-30-90',
-      all_time_uptime_ratio:'1'
+      custom_uptime_ratio: '7-30-90',
+      all_time_uptime_ratio: '1'
     });
 
     const urRes = await fetch('https://api.uptimerobot.com/v2/getMonitors', {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body:    body.toString()
+      body: body.toString()
     });
 
     if (!urRes.ok) {
