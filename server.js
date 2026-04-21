@@ -4940,7 +4940,7 @@ app.get("/api/games", authMiddleware, async (req, res) => {
       return res.status(403).json({ ok: false, message: "Admin access required" });
     }
 
-    const games = await Game.find().populate('createdBy', 'name').sort({ createdAt: -1 });
+    const games = await Game.find().populate('createdBy', 'name').sort({ createdAt: -1 }).limit(200);
     res.json({ ok: true, games });
   } catch (error) {
     console.error("Get all games error:", error);
@@ -4955,7 +4955,7 @@ app.get("/api/games/published", authMiddleware, async (req, res) => {
 
     // If user is faculty/admin, show all published games
     if (user.role === 'admin' || user.orgRole === 'faculty' || user.orgRole === 'owner') {
-      games = await Game.find({ published: true }).populate('createdBy', 'name').sort({ createdAt: -1 }).lean();
+      games = await Game.find({ published: true }).populate('createdBy', 'name').sort({ createdAt: -1 }).lean().limit(200);
     } else {
       // For students, filter by their class identifier
       const studentClass = `${user.department}-${user.batch}-${user.section}`;
@@ -4991,7 +4991,7 @@ app.get("/api/games/my", authMiddleware, async (req, res) => {
     return res.status(403).json({ ok: false, message: "Only admins can view their games" });
   }
   try {
-    const games = await Game.find({ createdBy: req.user.sub }).sort({ createdAt: -1 });
+    const games = await Game.find({ createdBy: req.user.sub }).sort({ createdAt: -1 }).limit(200);
     res.json({ ok: true, games });
   } catch (error) {
     console.error("Get my games error:", error);
@@ -5035,7 +5035,7 @@ app.delete("/api/games/:id", authMiddleware, requireFaculty, async (req, res) =>
 // DEBUG ENDPOINT - Remove after debugging
 app.get("/api/games/debug", async (req, res) => {
   try {
-    const allGames = await Game.find({}).select('title type published createdAt').sort({ createdAt: -1 });
+    const allGames = await Game.find({}).select('title type published createdAt').sort({ createdAt: -1 }).limit(500);
     const sqlGames = allGames.filter(g => g.type === 'sql-builder' || g.type === 'sql');
     res.json({
       ok: true,
@@ -11009,8 +11009,17 @@ app.post('/api/quiz/generate-from-pdf', authMiddleware, requireFaculty, upload.s
       return res.status(400).json({ ok: false, message: "No PDF file uploaded" });
     }
 
-    // Extract text from PDF using dynamic import
-    const pdfBuffer = req.file.buffer;
+    // Extract text from PDF
+    const fs = require('fs');
+    let pdfBuffer;
+    try {
+      pdfBuffer = fs.readFileSync(req.file.path);
+    } finally {
+      // Always delete the file from the server's hard drive to prevent disk blowout
+      if (req.file.path) {
+        fs.unlinkSync(req.file.path);
+      }
+    }
 
     // Dynamic import for CommonJS module
     const pdfParse = (await import('pdf-parse')).default;
