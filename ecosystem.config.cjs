@@ -10,13 +10,13 @@ module.exports = {
 
       // ── Node.js heap size: allow up to 4GB RAM (server has 8GB, OS+MongoDB need ~3GB) ──
       // Default heap is only ~1.5GB — this lets us handle way more concurrent users
-      node_args: '--max-old-space-size=4096 --optimize-for-size',
+      node_args: '--max-old-space-size=4096',
 
       // ── Auto-restart on crash ────────────────────────────────────────────────
       autorestart: true,
       watch: false,
       max_restarts: 10,
-      min_uptime: '10s',
+      min_uptime: '30s',
 
       // ── Restart if RAM goes above 5.5GB (leaves headroom for MongoDB + OS) ──
       max_memory_restart: '5500M',
