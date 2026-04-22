@@ -155,10 +155,11 @@ function displayQuestion(data) {
 
     // Progress bar
     const prog = document.getElementById('questionProgress');
-    if (prog) prog.textContent = `${data.questionIndex + 1} / ${totalQuestionsCount}`;
+    const displayNum = Math.min(data.questionIndex + 1, totalQuestionsCount); // Bug fix: clamp so it never shows 11/10
+    if (prog) prog.textContent = `${displayNum} / ${totalQuestionsCount}`;
     const progBar = document.getElementById('progressBar');
     if (progBar) {
-        const pct = ((data.questionIndex) / totalQuestionsCount) * 100;
+        const pct = Math.min((data.questionIndex / totalQuestionsCount) * 100, 100); // Bug fix: cap at 100%
         progBar.style.width = pct + '%';
     }
 

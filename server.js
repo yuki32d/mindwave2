@@ -11437,11 +11437,18 @@ app.post('/api/quiz/:code/join', authMiddleware, requireStudent, async (req, res
       return res.status(401).json({ ok: false, message: "User not found" });
     }
 
-    // Use atomic update to prevent race conditions during mass join
+    // Bug fix: Use explicit $ne guard instead of $addToSet.
+    // $addToSet compares subdocuments by identity (each object gets a new _id),
+    // so it ALWAYS inserts, creating duplicate participant entries on reconnect.
+    // This caused Bug 3: the answer endpoint's duplicate-answer check would match
+    // the wrong participant subdocument and reject valid first submissions.
     const updatedQuiz = await LiveQuizSession.findOneAndUpdate(
-      { sessionCode: code },
       {
-        $addToSet: {
+        sessionCode: code,
+        "participants.studentId": { $ne: currentUser._id } // Only insert if NOT already a participant
+      },
+      {
+        $push: {
           participants: {
             studentId: currentUser._id,
             name: currentUser.name,
@@ -11453,18 +11460,21 @@ app.post('/api/quiz/:code/join', authMiddleware, requireStudent, async (req, res
       { new: true }
     );
 
-    if (!updatedQuiz) {
+    // If updatedQuiz is null, it means the student is already a participant — fetch the session
+    const quiz = updatedQuiz || await LiveQuizSession.findOne({ sessionCode: code });
+
+    if (!quiz) {
       return res.status(404).json({ ok: false, message: "Quiz session not found" });
     }
 
-    if (updatedQuiz.status === 'ended') {
+    if (quiz.status === 'ended') {
       return res.status(400).json({ ok: false, message: "Quiz has ended" });
     }
 
     res.json({
       ok: true,
       message: "Joined quiz successfully",
-      participantCount: updatedQuiz.participants.length
+      participantCount: quiz.participants.length
     });
 
   } catch (error) {
@@ -11601,12 +11611,19 @@ app.post('/api/quiz/:code/answer', authMiddleware, requireStudent, async (req, r
       pointsEarned = basePoints + Math.max(0, timeBonus);
     }
 
-    // Use atomic update to prevent VersionError race conditions during mass answer submissions
+    // Bug fix: Use $elemMatch to scope BOTH conditions to the same participant subdocument.
+    // Without $elemMatch, MongoDB can match studentId from one participant and
+    // answers.questionIndex from a different participant (e.g., a duplicate entry),
+    // which causes the update to return null even on a valid first submission.
     const updateResult = await LiveQuizSession.findOneAndUpdate(
       {
         sessionCode: code,
-        "participants.studentId": currentUser._id,
-        "participants.answers.questionIndex": { $ne: questionIndex } // Extra safety to prevent duplicate answers
+        "participants": {
+          $elemMatch: {
+            studentId: currentUser._id,
+            "answers.questionIndex": { $ne: questionIndex } // Prevent duplicate answers for same question
+          }
+        }
       },
       {
         $push: {
