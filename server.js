@@ -1429,33 +1429,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── Lightweight Redis Response Cache ─────────────────────────────────────
-// Cache GET API responses in Redis with a configurable TTL.
-// Cuts MongoDB hits for hot endpoints (game list, leaderboard) by ~80%.
-function withCache(ttlSeconds = 30) {
-  return async (req, res, next) => {
-    if (!redisClient?.isReady) return next(); // gracefully skip if Redis is down
-    const key = `cache:${req.originalUrl}`;
-    try {
-      const cached = await redisClient.get(key);
-      if (cached) {
-        res.setHeader('X-Cache', 'HIT');
-        return res.json(JSON.parse(cached));
-      }
-    } catch (_) { /* cache miss — fall through */ }
-
-    // Intercept res.json so we can store the response
-    const origJson = res.json.bind(res);
-    res.json = async (data) => {
-      if (res.statusCode === 200) {
-        try { await redisClient.setEx(key, ttlSeconds, JSON.stringify(data)); } catch (_) {}
-      }
-      res.setHeader('X-Cache', 'MISS');
-      return origJson(data);
-    };
-    next();
-  };
-}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -4991,25 +4964,46 @@ app.get("/api/games/published", authMiddleware, async (req, res) => {
     const user = await User.findById(req.user.sub);
     let games = [];
 
-    // If user is faculty/admin, show all published games
-    if (user.role === 'admin' || user.orgRole === 'faculty' || user.orgRole === 'owner') {
-      games = await Game.find({ published: true }).populate('createdBy', 'name').sort({ createdAt: -1 }).lean().limit(200);
-    } else {
-      // For students, filter by their class identifier
-      const studentClass = `${user.department}-${user.batch}-${user.section}`;
+    // Build a cache key scoped to the user's role/class so different groups
+    // never share the same cached game list.
+    const isFaculty = user.role === 'admin' || user.orgRole === 'faculty' || user.orgRole === 'owner';
+    const studentClass = isFaculty ? null : `${user.department}-${user.batch}-${user.section}`;
+    const cacheKey = isFaculty ? 'games:admin' : `games:class:${studentClass}`;
 
-      games = await Game.find({
-        published: true,
-        $or: [
-          { targetClasses: studentClass }, // Exact match for student's class
-          { isPublic: true }, // Public to all students
-          { targetClasses: { $size: 0 } } // Backward compatibility - no classes assigned
-        ]
-      }).populate('createdBy', 'name').sort({ createdAt: -1 }).lean();
+    // ── Layer 1: Redis cache (30-second TTL) ─────────────────────────────
+    if (redisClient?.isReady) {
+      try {
+        const cached = await redisClient.get(cacheKey);
+        if (cached) games = JSON.parse(cached);
+      } catch (_) { /* cache miss — fall through */ }
     }
 
-    // Check which games the user has already played
-    const submissions = await GameSubmission.find({ studentId: req.user.sub }).select('gameId');
+    // ── Layer 2: MongoDB query (only on cache miss) ───────────────────────
+    if (!games.length) {
+      if (isFaculty) {
+        games = await Game.find({ published: true })
+          .populate('createdBy', 'name').sort({ createdAt: -1 }).lean().limit(200);
+      } else {
+        games = await Game.find({
+          published: true,
+          $or: [
+            { targetClasses: studentClass },
+            { isPublic: true },
+            { targetClasses: { $size: 0 } }
+          ]
+        }).populate('createdBy', 'name').sort({ createdAt: -1 }).lean();
+      }
+
+      // Store global game list in Redis; personal flags are never cached.
+      if (redisClient?.isReady && games.length) {
+        try { await redisClient.setEx(cacheKey, 30, JSON.stringify(games)); } catch (_) {}
+      }
+    }
+
+    // ── Layer 3: Personalization (always live — never cached) ─────────────
+    // One lightweight indexed query per student to get their completions.
+    const submissions = await GameSubmission.find({ studentId: req.user.sub })
+      .select('gameId').lean();
     const completedGameIds = new Set(submissions.map(sub => sub.gameId.toString()));
 
     const enrichedGames = games.map(g => ({
@@ -5023,6 +5017,7 @@ app.get("/api/games/published", authMiddleware, async (req, res) => {
     res.status(500).json({ ok: false, message: "Server error" });
   }
 });
+
 
 app.get("/api/games/my", authMiddleware, async (req, res) => {
   if (req.user.role !== "admin") {
@@ -5176,103 +5171,115 @@ app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, re
 // Leaderboard Endpoint - Get leaderboard and answer review for a game
 app.get("/api/games/:id/leaderboard", authMiddleware, async (req, res) => {
   try {
-    const gameId = req.params.id;
+    const gameId   = req.params.id;
     const currentStudentId = req.user.sub;
+    const cacheKey = `leaderboard:global:${gameId}`;
 
-    // Verify game exists
-    const game = await Game.findById(gameId);
-    if (!game) {
-      return res.status(404).json({ ok: false, message: "Game not found" });
+    let globalLeaderboard = null;
+
+    // ── Layer 1: Redis cache (15-second TTL) ─────────────────────────────
+    if (redisClient?.isReady) {
+      try {
+        const cached = await redisClient.get(cacheKey);
+        if (cached) globalLeaderboard = JSON.parse(cached);
+      } catch (_) { /* fall through */ }
     }
 
-    // Get all submissions for this game
-    const submissions = await GameSubmission.find({ gameId })
-      .populate('studentId', 'name displayName email')
-      .sort({ score: -1, submittedAt: 1 });
+    // ── Layer 2: Full MongoDB computation (only on cache miss) ────────────
+    if (!globalLeaderboard) {
+      const game = await Game.findById(gameId);
+      if (!game) {
+        return res.status(404).json({ ok: false, message: "Game not found" });
+      }
 
-    if (submissions.length === 0) {
-      return res.json({
-        ok: true,
-        leaderboard: [],
-        currentStudent: null,
-        totalParticipants: 0,
-        answerReview: null
-      });
-    }
+      const submissions = await GameSubmission.find({ gameId })
+        .populate('studentId', 'name displayName email')
+        .sort({ score: -1, submittedAt: 1 });
 
-    // Calculate leaderboard with rankings
-    // Group by student and get their best score
-    const studentBestScores = new Map();
-    submissions.forEach(sub => {
-      const studentId = sub.studentId._id.toString();
-      if (!studentBestScores.has(studentId) || sub.score > studentBestScores.get(studentId).score) {
-        studentBestScores.set(studentId, {
-          studentId: sub.studentId._id,
-          studentName: sub.studentId.displayName || sub.studentId.name,
-          email: sub.studentId.email,
-          score: sub.score,
-          submittedAt: sub.submittedAt,
-          gamesPlayed: 1 // We'll count this properly below
+      if (submissions.length === 0) {
+        return res.json({
+          ok: true, leaderboard: [], currentStudent: null,
+          totalParticipants: 0, answerReview: null
         });
       }
-    });
 
-    // Count games played per student
-    const studentGameCounts = await GameSubmission.aggregate([
-      { $match: { studentId: { $in: Array.from(studentBestScores.keys()).map(id => new mongoose.Types.ObjectId(id)) } } },
-      { $group: { _id: '$studentId', count: { $sum: 1 } } }
-    ]);
-
-    studentGameCounts.forEach(item => {
-      const studentId = item._id.toString();
-      if (studentBestScores.has(studentId)) {
-        studentBestScores.get(studentId).gamesPlayed = item.count;
-      }
-    });
-
-    // Convert to array and sort by score
-    let leaderboardData = Array.from(studentBestScores.values())
-      .sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        return new Date(a.submittedAt) - new Date(b.submittedAt);
+      // Build best-score map per student
+      const studentBestScores = new Map();
+      submissions.forEach(sub => {
+        const sid = sub.studentId._id.toString();
+        if (!studentBestScores.has(sid) || sub.score > studentBestScores.get(sid).score) {
+          studentBestScores.set(sid, {
+            studentId:   sid,  // plain string — safe to JSON-serialize
+            studentName: sub.studentId.displayName || sub.studentId.name,
+            score:       sub.score,
+            submittedAt: sub.submittedAt,
+            gamesPlayed: 1
+          });
+        }
       });
 
-    // Add rankings
-    leaderboardData = leaderboardData.map((entry, index) => ({
-      rank: index + 1,
-      studentName: entry.studentName,
-      score: entry.score,
-      gamesPlayed: entry.gamesPlayed,
-      accuracy: entry.score, // For now, accuracy = score
-      isCurrentStudent: entry.studentId.toString() === currentStudentId
+      // Aggregate games-played counts in one DB round-trip
+      const studentGameCounts = await GameSubmission.aggregate([
+        { $match: { studentId: { $in: Array.from(studentBestScores.keys()).map(id => new mongoose.Types.ObjectId(id)) } } },
+        { $group: { _id: '$studentId', count: { $sum: 1 } } }
+      ]);
+      studentGameCounts.forEach(item => {
+        const sid = item._id.toString();
+        if (studentBestScores.has(sid)) studentBestScores.get(sid).gamesPlayed = item.count;
+      });
+
+      // Build ranked array — NO personal flags stored in cache
+      globalLeaderboard = Array.from(studentBestScores.values())
+        .sort((a, b) => b.score !== a.score ? b.score - a.score : new Date(a.submittedAt) - new Date(b.submittedAt))
+        .map((entry, index) => ({
+          rank:        index + 1,
+          studentId:   entry.studentId,
+          studentName: entry.studentName,
+          score:       entry.score,
+          gamesPlayed: entry.gamesPlayed,
+          accuracy:    entry.score
+        }));
+
+      // Cache the global (non-personal) array for 15 seconds
+      if (redisClient?.isReady) {
+        try { await redisClient.setEx(cacheKey, 15, JSON.stringify(globalLeaderboard)); } catch (_) {}
+      }
+    }
+
+    // ── Layer 3: Personalization (always live — never cached) ─────────────
+    // Stamp isCurrentStudent on each rank entry for this specific student.
+    const personalizedLeaderboard = globalLeaderboard.map(entry => ({
+      ...entry,
+      isCurrentStudent: entry.studentId === currentStudentId
     }));
 
-    // Find current student's data
-    const currentStudentEntry = leaderboardData.find(entry => entry.isCurrentStudent);
+    const currentStudentEntry = personalizedLeaderboard.find(e => e.isCurrentStudent) || null;
 
-    // Get current student's most recent submission for answer review
-    const currentStudentSubmission = submissions.find(
-      sub => sub.studentId._id.toString() === currentStudentId
-    );
-
+    // Single fast query for this student's answer review only
     let answerReview = null;
-    if (currentStudentSubmission && currentStudentSubmission.studentAnswers && currentStudentSubmission.studentAnswers.length > 0) {
+    const mySubmission = await GameSubmission
+      .findOne({ gameId, studentId: currentStudentId })
+      .sort({ submittedAt: -1 })
+      .select('studentAnswers')
+      .lean();
+
+    if (mySubmission?.studentAnswers?.length) {
       answerReview = {
-        questions: currentStudentSubmission.studentAnswers.map(answer => ({
-          questionText: answer.questionText || 'Question',
-          studentAnswer: answer.studentAnswer || 'No answer',
-          correctAnswer: answer.correctAnswer || 'N/A',
-          isCorrect: answer.isCorrect || false
+        questions: mySubmission.studentAnswers.map(a => ({
+          questionText:  a.questionText  || 'Question',
+          studentAnswer: a.studentAnswer || 'No answer',
+          correctAnswer: a.correctAnswer || 'N/A',
+          isCorrect:     a.isCorrect     || false
         }))
       };
     }
 
     res.json({
-      ok: true,
-      leaderboard: leaderboardData,
-      currentStudent: currentStudentEntry || null,
-      totalParticipants: leaderboardData.length,
-      answerReview: answerReview
+      ok:               true,
+      leaderboard:      personalizedLeaderboard,
+      currentStudent:   currentStudentEntry,
+      totalParticipants: personalizedLeaderboard.length,
+      answerReview
     });
 
   } catch (error) {
@@ -5280,6 +5287,7 @@ app.get("/api/games/:id/leaderboard", authMiddleware, async (req, res) => {
     res.status(500).json({ ok: false, message: "Server error: " + error.message });
   }
 });
+
 
 
 // Announcement Endpoints
