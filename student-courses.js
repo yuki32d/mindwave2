@@ -188,14 +188,14 @@ async function showCourseDetails(course) {
     `;
 
     modal.innerHTML = `
-        <div style="background: #1c1f26; border-radius: 16px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
-            <div style="padding: 32px; border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; background: #1c1f26; z-index: 1;">
-                <button id="closeModalBtn" style="position: absolute; top: 24px; right: 24px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 8px;">×</button>
-                <h2 style="margin: 0 0 8px;">${course.name}</h2>
-                <p style="margin: 0; color: var(--text-muted);">${course.section || 'No section'}</p>
+        <div style="background: var(--surface, #1c1f26); border-radius: 16px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid var(--border);">
+            <div style="padding: 32px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface, #1c1f26); z-index: 1;">
+                <button id="closeModalBtn" style="position: absolute; top: 24px; right: 24px; background: none; border: none; color: var(--text, white); font-size: 24px; cursor: pointer; padding: 8px;">×</button>
+                <h2 style="margin: 0 0 8px; color: var(--text);">${course.name}</h2>
+                <p style="margin: 0; color: var(--muted);">${course.section || 'No section'}</p>
             </div>
             <div id="courseDetailsContent" style="padding: 32px;">
-                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <div style="text-align: center; padding: 40px; color: var(--muted);">
                     Loading course details...
                 </div>
             </div>
@@ -248,7 +248,7 @@ async function loadCourseDetails(courseId) {
                     ${announcements.length > 0 ? `
                         <div style="display: grid; gap: 12px;">
                             ${announcements.map(announcement => `
-                                <div style="padding: 16px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                                <div style="padding: 16px; background: var(--surface-2, rgba(255,255,255,0.04)); border-radius: 12px; border: 1px solid var(--border);">
                                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                                         <h4 style="margin: 0; font-size: 16px;">${escapeHtml(announcement.text || 'Announcement')}</h4>
                                         ${announcement.creationTime ? `<span style="font-size: 13px; color: var(--text-muted);">${formatDateTime(announcement.creationTime)}</span>` : ''}
@@ -278,7 +278,7 @@ async function loadCourseDetails(courseId) {
                     ${assignments.length > 0 ? `
                         <div style="display: grid; gap: 12px;">
                             ${assignments.map(work => `
-                                <div style="padding: 16px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                                <div style="padding: 16px; background: var(--surface-2, rgba(255,255,255,0.04)); border-radius: 12px; border: 1px solid var(--border);">
                                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                                         <h4 style="margin: 0; font-size: 16px;">${escapeHtml(work.title)}</h4>
                                         ${work.dueDate ? `<span style="font-size: 13px; color: #ff9500; background: rgba(255,149,0,0.1); padding: 4px 12px; border-radius: 999px;">Due: ${formatDate(work.dueDate)}</span>` : ''}
