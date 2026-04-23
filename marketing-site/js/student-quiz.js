@@ -118,7 +118,8 @@ async function fetchAndDisplayQuestion(questionIndex) {
         const data = await res.json();
         if (data.ok && data.quiz && data.quiz.currentQuestion) {
             const q = data.quiz.currentQuestion;
-            totalQuestionsCount = data.quiz.questions?.length || totalQuestionsCount || 10;
+            // Use the real question count from the server — never fall back to a hardcoded number
+            totalQuestionsCount = data.quiz.questions?.length || data.quiz.totalQuestions || totalQuestionsCount || (questionIndex + 1);
             displayQuestion({
                 questionIndex,
                 question: q.text || q.question || '',
@@ -227,7 +228,8 @@ function startTimer() {
 async function submitAnswer(answerIndex) {
     if (hasAnswered) return;
     hasAnswered = true;
-    clearInterval(timerInterval);
+    // Do NOT stop the timer here — the student wants it to keep counting down after answering.
+    // The timer will stop itself when it reaches 0 (see startTimer).
 
     const timeTaken = (currentQuestion.timeLimit - timeRemaining) * 1000;
     const btns = document.querySelectorAll('.answer-btn');
