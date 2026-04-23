@@ -24,7 +24,7 @@ module.exports = {
       // ── Environment ──────────────────────────────────────────────────────────
       env: {
         NODE_ENV: 'production',
-        PORT: 8081,
+        PORT: 10000,
         // Tune UV threadpool for I/O heavy workloads (file uploads, crypto)
         // Default is 4 — bump to match logical cores available to the process
         UV_THREADPOOL_SIZE: '8'
