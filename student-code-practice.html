@@ -1724,15 +1724,129 @@
         let userCode = {};
         let solved = JSON.parse(localStorage.getItem('cp_solved') || '{}');
         let stats = JSON.parse(localStorage.getItem('cp_stats') || '{"solved":0,"attempted":0,"runs":0,"correct":0}');
-        let DB_CHALLENGES = []; // Fetched from backend
-        let isExamMode = false; // True when a coding-scenario is active
+        let DB_CHALLENGES = []; // Teacher-created coding scenarios
+        let JUDGE_PROBLEMS = []; // LeetCode-style problems from Judge0 backend
+        let isExamMode = false;
+        const API_TOKEN = () => localStorage.getItem('token') || '';
 
         // ── INIT ──
         async function init() {
-            await fetchDBChallenges(); // Load teacher-created coding scenarios from DB
+            await Promise.all([fetchDBChallenges(), fetchJudgeProblems()]);
             renderChallengeList();
             updateStats();
             initMonaco();
+        }
+
+        // ── FETCH JUDGE0 PROBLEMS ──
+        async function fetchJudgeProblems() {
+            try {
+                const res = await fetch('/api/code/problems', {
+                    headers: { 'Authorization': 'Bearer ' + API_TOKEN() }
+                });
+                const data = await res.json();
+                if (data.ok && data.problems) {
+                    JUDGE_PROBLEMS = data.problems.map(p => ({
+                        id: 'judge_' + p.slug,
+                        _slug: p.slug,
+                        _dbId: p._id,
+                        title: p.title,
+                        difficulty: (p.difficulty || 'Easy').toLowerCase(),
+                        category: p.category || 'General',
+                        tags: p.tags || [],
+                        description: p.description || '',
+                        constraints: p.constraints || [],
+                        examples: p.examples || [],
+                        hints: p.hints || [],
+                        starterCode: p.starterCode || {},
+                        xpReward: p.xpReward || 10,
+                        solved: p.solved || false,
+                        isJudge: true
+                    }));
+                    // Sync solved state from server
+                    JUDGE_PROBLEMS.forEach(p => { if (p.solved) solved[p.id] = true; });
+                }
+            } catch (e) { console.warn('Could not fetch judge problems:', e); }
+        }
+
+        // ── POLL SUBMISSION ──
+        async function pollSubmission(submissionId) {
+            const MAX_POLLS = 30; // 15 seconds max
+            for (let i = 0; i < MAX_POLLS; i++) {
+                await new Promise(r => setTimeout(r, 500));
+                try {
+                    const res = await fetch('/api/code/submission/' + submissionId, {
+                        headers: { 'Authorization': 'Bearer ' + API_TOKEN() }
+                    });
+                    const data = await res.json();
+                    if (!data.ok) throw new Error(data.message);
+                    const s = data.submission;
+                    if (s.status === 'COMPLETED' || s.status === 'FAILED') return s;
+                } catch (e) { console.warn('Poll error:', e); }
+            }
+            return null; // Timed out
+        }
+
+        // ── SUBMIT via Judge0 ──
+        async function submitToJudge(challenge, code, lang) {
+            setRunStatus('running', '⚙️ Sending to judge…');
+            try {
+                const res = await fetch('/api/code/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_TOKEN() },
+                    body: JSON.stringify({ problemSlug: challenge._slug, code, language: lang })
+                });
+                const data = await res.json();
+                if (!data.ok) { setRunStatus('fail', '❌ ' + (data.message || 'Submission failed')); return; }
+
+                setRunStatus('running', '⏳ Judging… (this may take a few seconds)');
+                const sub = await pollSubmission(data.submissionId);
+
+                if (!sub) { setRunStatus('fail', '⏱ Judge timed out — please try again'); return; }
+
+                const passed = sub.passedCount || 0;
+                const total = sub.totalCount || 0;
+                const verdict = sub.verdict || 'Unknown';
+                const rt = sub.runtimeMs ? sub.runtimeMs.toFixed(0) + 'ms' : '—';
+                const mem = sub.memoryKb ? (sub.memoryKb / 1024).toFixed(1) + 'MB' : '—';
+
+                if (verdict === 'Accepted') {
+                    setRunStatus('pass', `✅ Accepted — ${passed}/${total} tests passed · ${rt} · ${mem}`);
+                    // Mark solved
+                    if (!solved[challenge.id]) {
+                        solved[challenge.id] = true;
+                        localStorage.setItem('cp_solved', JSON.stringify(solved));
+                        stats.solved++; stats.correct++;
+                        renderChallengeList();
+                        if (sub.xpAwarded > 0) {
+                            xp += sub.xpAwarded;
+                            localStorage.setItem('cp_xp', xp);
+                            document.getElementById('xpVal').textContent = xp;
+                            const badge = document.getElementById('xpBadge');
+                            badge.classList.remove('cp-xp-pop'); void badge.offsetWidth; badge.classList.add('cp-xp-pop');
+                        }
+                    }
+                } else if (verdict === 'Wrong Answer') {
+                    const ftc = sub.failedTestCase;
+                    let detail = `❌ Wrong Answer — ${passed}/${total} passed`;
+                    if (ftc && ftc.input !== 'hidden') detail += `<br><small>Case ${ftc.index}: Input ${JSON.stringify(ftc.input)}<br>Expected: ${JSON.stringify(ftc.expected)}<br>Got: ${JSON.stringify(ftc.got)}</small>`;
+                    setRunStatus('fail', detail);
+                } else if (verdict === 'Time Limit Exceeded') {
+                    setRunStatus('fail', `⏱ Time Limit Exceeded — ${passed}/${total} passed`);
+                } else if (verdict === 'Compile Error') {
+                    setRunStatus('fail', `🔴 Compile Error`);
+                    document.getElementById('consoleBox').innerHTML = `<span style="color:#f87171;font-family:monospace;white-space:pre-wrap;">${escapeHtml(sub.errorMessage || '')}</span>`;
+                    switchRightTab('console', document.querySelectorAll('.cp-output-tabs .cp-tab')[1]);
+                } else {
+                    setRunStatus('fail', `❗ ${verdict} — ${passed}/${total} passed`);
+                    if (sub.errorMessage) document.getElementById('consoleBox').innerHTML = `<span style="color:#f87171;font-family:monospace;white-space:pre-wrap;">${escapeHtml(sub.errorMessage)}</span>`;
+                }
+
+                stats.attempted++;
+                localStorage.setItem('cp_stats', JSON.stringify(stats));
+                updateStats();
+            } catch (e) {
+                setRunStatus('fail', '❌ Network error: ' + e.message);
+            }
         }
 
         // ── FETCH TEACHER CODING SCENARIOS ──
@@ -1771,43 +1885,49 @@
 
         // ── CHALLENGE LIST ──
         function renderChallengeList() {
-            const allChallenges = [...DB_CHALLENGES, ...CHALLENGES];
             const el = document.getElementById('challengeList');
-            // Separator if there are DB challenges
             let html = '';
+
+            // 1. Teacher-assigned scenarios
             if (DB_CHALLENGES.length > 0) {
                 html += `<div style="padding:8px 12px 4px;font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;">🎯 Assigned by Teacher</div>`;
-                html += DB_CHALLENGES.map((c, i) => {
+                html += DB_CHALLENGES.map(c => {
                     const state = solved[c.id] ? 'solved' : '';
                     return `<div class="cp-challenge-item ${state} scenario-item" onclick="selectChallenge('${c.id}')">
       <div class="cp-challenge-num" style="background:rgba(244,63,94,.15);color:#f43f5e;">${state === 'solved' ? '<i data-lucide="check" style="width:10px;height:10px;"></i>' : '!'}</div>
-      <div class="cp-challenge-info">
-        <div class="cp-challenge-name">${c.title}</div>
-        <div class="cp-challenge-cat">${c.category}</div>
-      </div>
-      <span class="cp-diff-badge diff-${c.difficulty}">${c.difficulty}</span>
-    </div>`;
+      <div class="cp-challenge-info"><div class="cp-challenge-name">${c.title}</div><div class="cp-challenge-cat">${c.category}</div></div>
+      <span class="cp-diff-badge diff-${c.difficulty}">${c.difficulty}</span></div>`;
                 }).join('');
-                html += `<div style="padding:8px 12px 4px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-top:6px;">Practice Challenges</div>`;
             }
+
+            // 2. Judge0 problems from DB
+            if (JUDGE_PROBLEMS.length > 0) {
+                html += `<div style="padding:8px 12px 4px;font-size:10px;font-weight:700;color:#6366f1;letter-spacing:.5px;text-transform:uppercase;margin-top:6px;">⚡ Coding Challenges</div>`;
+                html += JUDGE_PROBLEMS.map((c, i) => {
+                    const state = solved[c.id] ? 'solved' : '';
+                    return `<div class="cp-challenge-item ${state}" onclick="selectChallenge('${c.id}')">
+      <div class="cp-challenge-num" style="background:rgba(99,102,241,.15);color:#6366f1;">${state === 'solved' ? '<i data-lucide="check" style="width:10px;height:10px;"></i>' : (i+1)}</div>
+      <div class="cp-challenge-info"><div class="cp-challenge-name">${c.title}</div><div class="cp-challenge-cat">${c.category}</div></div>
+      <span class="cp-diff-badge diff-${c.difficulty}">${c.difficulty}</span></div>`;
+                }).join('');
+            }
+
+            // 3. Legacy local challenges
+            html += `<div style="padding:8px 12px 4px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-top:6px;">Practice Challenges</div>`;
             html += CHALLENGES.map(c => {
                 const state = solved[c.id] ? 'solved' : '';
                 return `<div class="cp-challenge-item ${state}" onclick="selectChallenge(${c.id})">
       <div class="cp-challenge-num">${state === 'solved' ? '<i data-lucide="check" style="width:10px;height:10px;color:var(--green)"></i>' : c.id}</div>
-      <div class="cp-challenge-info">
-        <div class="cp-challenge-name">${c.title}</div>
-        <div class="cp-challenge-cat">${c.category}</div>
-      </div>
-      <span class="cp-diff-badge diff-${c.difficulty}">${c.difficulty}</span>
-    </div>`;
+      <div class="cp-challenge-info"><div class="cp-challenge-name">${c.title}</div><div class="cp-challenge-cat">${c.category}</div></div>
+      <span class="cp-diff-badge diff-${c.difficulty}">${c.difficulty}</span></div>`;
             }).join('');
+
             el.innerHTML = html;
             lucide.createIcons();
         }
 
         function selectChallenge(id) {
-            // Find from DB challenges first, then local
-            const allChallenges = [...DB_CHALLENGES, ...CHALLENGES];
+            const allChallenges = [...DB_CHALLENGES, ...JUDGE_PROBLEMS, ...CHALLENGES];
             currentChallenge = allChallenges.find(c => String(c.id) === String(id));
             if (!currentChallenge) return;
 
@@ -1984,46 +2104,41 @@
             if (!currentChallenge || !editor) return;
             const lang = document.getElementById('langSelect').value;
             const code = editor.getValue();
-            
-            // Check if user is in Custom Input mode and just running (not submitting)
+
+            document.getElementById('runBtn').disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+            switchRightTab('tests', document.querySelectorAll('.cp-output-tabs .cp-tab')[0]);
+
+            // ── SUBMIT: Judge0 backend for isJudge problems ─────────────────
+            if (isSubmit && currentChallenge.isJudge) {
+                await submitToJudge(currentChallenge, code, lang);
+                document.getElementById('runBtn').disabled = false;
+                document.getElementById('submitBtn').disabled = false;
+                return;
+            }
+
+            // ── RUN / legacy submit: local Pyodide execution ─────────────────
             const isCustomMode = document.getElementById('customInputWrap')?.style.display === 'flex';
             let testCases = [];
-            
             if (!isSubmit && isCustomMode) {
-                // Run against custom input only
-                testCases = [{
-                    input: document.getElementById('customInputData').value,
-                    expected: null // Custom tests don't have expected output
-                }];
+                testCases = [{ input: document.getElementById('customInputData').value, expected: null }];
             } else {
-                // Return to tests view and run standard cases
                 switchTestView('tc');
                 testCases = isSubmit ? currentChallenge.testCases : [currentChallenge.testCases[0]];
             }
 
             setRunStatus('running', 'Running…');
-            document.getElementById('runBtn').disabled = true;
-            document.getElementById('submitBtn').disabled = true;
-            switchRightTab('tests', document.querySelectorAll('.cp-output-tabs .cp-tab')[0]);
-
             const results = [];
             let totalOutput = '';
 
             for (const tc of testCases) {
                 try {
                     let { output, error } = await executeCode(lang, code, tc.input);
-                    // Smart diffing: trim trailing spaces per line and multiple blank lines at end
                     output = (output || '').replace(/[ \t]+$/gm, '').trim();
                     const expected = tc.expected ? tc.expected.trim() : null;
-                    
-                    const pass = expected ? (output === expected) : true; // Custom input always "passes"
-                    
-                    // Detect if they failed because they printed extra conversational text
+                    const pass = expected ? (output === expected) : true;
                     let extraTextError = false;
-                    if (expected && !pass && output.endsWith(expected) && output.length > expected.length) {
-                        extraTextError = true;
-                    }
-                    
+                    if (expected && !pass && output.endsWith(expected) && output.length > expected.length) extraTextError = true;
                     totalOutput += output + '\n';
                     results.push({ tc, output, error, pass, expected, extraTextError });
                 } catch (e) {
@@ -2042,46 +2157,28 @@
             if (isSubmit) {
                 stats.attempted++;
                 const allPass = results.every(r => r.pass);
-
-                // For DB coding-scenarios, also do AI logic evaluation
                 if (currentChallenge.isScenario && allPass) {
                     setRunStatus('running', 'Checking with AI…');
                     try {
                         const aiRes = await fetch('/api/coding-scenario/evaluate', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-                            },
-                            body: JSON.stringify({
-                                studentCode: code,
-                                question: currentChallenge.description,
-                                testCases: currentChallenge.testCases,
-                                language: lang
-                            })
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_TOKEN() },
+                            body: JSON.stringify({ studentCode: code, question: currentChallenge.description, testCases: currentChallenge.testCases, language: lang })
                         });
                         const aiData = await aiRes.json();
                         if (aiData.ok) {
-                            const aiFeedback = aiData.feedback || (aiData.isCorrect ? 'Correct!' : 'Incorrect logic.');
-                            setRunStatus(aiData.isCorrect ? 'pass' : 'fail',
-                                aiData.isCorrect
-                                    ? `✅ AI Verified: ${aiFeedback}`
-                                    : `❌ AI Review: ${aiFeedback}`);
+                            const fb = aiData.feedback || (aiData.isCorrect ? 'Correct!' : 'Incorrect logic.');
+                            setRunStatus(aiData.isCorrect ? 'pass' : 'fail', aiData.isCorrect ? `✅ AI Verified: ${fb}` : `❌ AI Review: ${fb}`);
                             if (aiData.isCorrect && !solved[String(currentChallenge.id)]) {
-                                stats.solved++;
-                                stats.correct++;
+                                stats.solved++; stats.correct++;
                                 solved[String(currentChallenge.id)] = true;
                                 localStorage.setItem('cp_solved', JSON.stringify(solved));
                                 renderChallengeList();
-                                if (typeof awardXP === 'function') awardXP(currentChallenge);
                             }
                         }
-                    } catch (e) {
-                        console.warn('AI evaluate error:', e);
-                    }
+                    } catch (e) { console.warn('AI evaluate error:', e); }
                 } else if (!currentChallenge.isScenario && allPass) {
-                    stats.solved++;
-                    stats.correct++;
+                    stats.solved++; stats.correct++;
                     if (!solved[currentChallenge.id]) {
                         solved[currentChallenge.id] = true;
                         localStorage.setItem('cp_solved', JSON.stringify(solved));
