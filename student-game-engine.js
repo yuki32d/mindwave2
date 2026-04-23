@@ -1579,7 +1579,23 @@ function showResult(container, score, totalPoints, startTime, gameId) {
 }
 
 function startTimer(durationMinutes, containerSelector, onFinish) {
-    let timer = durationMinutes * 60;
+    // ── Timer persistence across reloads ──────────────────────────────────
+    // Store the absolute deadline in sessionStorage (tab-specific, auto-clears
+    // when the tab/window is closed). Key is scoped to the game so different
+    // games don't collide.
+    const gameId   = new URLSearchParams(window.location.search).get('id') || 'game';
+    const timerKey = 'mw_timer_end_' + gameId;
+    const now      = Date.now();
+
+    let endTime = parseInt(sessionStorage.getItem(timerKey) || '0');
+    if (!endTime || endTime <= now) {
+        endTime = now + durationMinutes * 60 * 1000;
+        sessionStorage.setItem(timerKey, endTime);
+    }
+
+    function getRemainingSeconds() {
+        return Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+    }
 
     function updateDisplay(t) {
         if (t < 0) t = 0;
@@ -1592,15 +1608,16 @@ function startTimer(durationMinutes, containerSelector, onFinish) {
         }
     }
 
-    setTimeout(() => updateDisplay(timer), 0);
+    setTimeout(() => updateDisplay(getRemainingSeconds()), 0);
 
     if (window.timerInterval) clearInterval(window.timerInterval);
     window.timerInterval = setInterval(() => {
-        timer--;
-        updateDisplay(timer);
+        const remaining = getRemainingSeconds();
+        updateDisplay(remaining);
 
-        if (timer < 0) {
+        if (remaining <= 0) {
             clearInterval(window.timerInterval);
+            sessionStorage.removeItem(timerKey); // clean up so replay starts fresh
             onFinish();
         }
     }, 1000);

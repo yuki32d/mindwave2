@@ -1,5 +1,7 @@
 let perfectCodeEditor;
 let buggyCodeEditor;
+let manualBuggyEditor;
+let currentMode = 'auto'; // 'auto' | 'manual'
 
 // Initialize CodeMirror
 window.addEventListener('DOMContentLoaded', () => {
@@ -18,6 +20,52 @@ window.addEventListener('DOMContentLoaded', () => {
         readOnly: true
     });
 
+    // Manual buggy code editor
+    manualBuggyEditor = CodeMirror.fromTextArea(document.getElementById('manualBuggyCode'), {
+        mode: 'javascript',
+        theme: 'dracula',
+        lineNumbers: true,
+        indentUnit: 4,
+        tabSize: 4
+    });
+
+    // Mode toggle
+    const modeAutoBtn   = document.getElementById('modeAutoBtn');
+    const modeManualBtn = document.getElementById('modeManualBtn');
+    const autoPanel     = document.getElementById('autoModePanel');
+    const manualPanel   = document.getElementById('manualModePanel');
+
+    function setMode(mode) {
+        currentMode = mode;
+        if (mode === 'auto') {
+            autoPanel.style.display   = 'block';
+            manualPanel.style.display = 'none';
+            modeAutoBtn.style.background   = 'var(--primary,#6366f1)';
+            modeAutoBtn.style.color        = '#fff';
+            modeManualBtn.style.background = 'transparent';
+            modeManualBtn.style.color      = 'var(--text-muted,#888)';
+        } else {
+            autoPanel.style.display   = 'none';
+            manualPanel.style.display = 'block';
+            modeManualBtn.style.background = 'var(--primary,#6366f1)';
+            modeManualBtn.style.color      = '#fff';
+            modeAutoBtn.style.background   = 'transparent';
+            modeAutoBtn.style.color        = 'var(--text-muted,#888)';
+            // Pre-fill manual editor with perfect code if it is empty
+            if (!manualBuggyEditor.getValue().trim() && perfectCodeEditor.getValue().trim()) {
+                manualBuggyEditor.setValue(perfectCodeEditor.getValue());
+            }
+            // Sync language mode
+            const lang = document.getElementById('language').value;
+            const cm = lang === 'python' ? 'python' : lang === 'java' ? 'text/x-java' : lang === 'cpp' ? 'text/x-c++src' : 'javascript';
+            manualBuggyEditor.setOption('mode', cm);
+        }
+        lucide.createIcons();
+    }
+
+    modeAutoBtn.addEventListener('click',   () => setMode('auto'));
+    modeManualBtn.addEventListener('click', () => setMode('manual'));
+
     // Update mode when language changes
     document.getElementById('language').addEventListener('change', (e) => {
         const mode = e.target.value === 'python' ? 'python' :
@@ -25,6 +73,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 e.target.value === 'cpp' ? 'text/x-c++src' : 'javascript';
         perfectCodeEditor.setOption('mode', mode);
         buggyCodeEditor.setOption('mode', mode);
+        manualBuggyEditor.setOption('mode', mode);
     });
 
     // Add event listeners for buttons
@@ -34,6 +83,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('publishBtn').addEventListener('click', publishGame);
 });
+
 
 function generatePreview() {
     const code = perfectCodeEditor.getValue();
@@ -56,8 +106,8 @@ function generatePreview() {
 }
 
 async function publishGame() {
-    const title = document.getElementById('gameTitle').value;
-    const description = document.getElementById('gameDesc').value;
+    const title       = document.getElementById('gameTitle').value.trim();
+    const description = document.getElementById('gameDesc').value.trim();
     const perfectCode = perfectCodeEditor.getValue();
 
     if (!title || !description || !perfectCode.trim()) {
@@ -65,40 +115,76 @@ async function publishGame() {
         return;
     }
 
-    const bugCount = parseInt(document.getElementById('bugCount').value);
-    const result = injectBugs(perfectCode, bugCount);
+    let buggyCode, bugs, bugCount;
 
-    if (result.buggyCode === perfectCode) {
-        alert('⚠️ Bug injection failed! The code is too simple or doesn\'t have enough lines to inject bugs.');
-        return;
-    }
+    if (currentMode === 'manual') {
+        // ── MANUAL MODE ──
+        buggyCode = manualBuggyEditor.getValue();
+        if (!buggyCode.trim()) {
+            alert('Please write your buggy code in the manual editor.');
+            return;
+        }
+        if (buggyCode.trim() === perfectCode.trim()) {
+            alert('⚠️ Your buggy code is identical to the perfect code! Please introduce some bugs.');
+            return;
+        }
 
-    if (result.bugs.length === 0) {
-        alert('⚠️ No bugs were injected! Please make sure your code has enough content for bug injection.');
-        return;
+        // Parse bug annotations into a bugs array
+        const annotations = (document.getElementById('bugAnnotations').value || '').trim();
+        bugs = annotations
+            ? annotations.split('\n').filter(Boolean).map((line, i) => {
+                const m = line.match(/^[Ll]ine\s*(\d+)[:\-\s]+(.+)$/);
+                return m
+                    ? { type: 'Manual', line: parseInt(m[1]), description: m[2].trim(), original: '', bugged: '' }
+                    : { type: 'Manual', line: i + 1, description: line.trim(), original: '', bugged: '' };
+            })
+            : [{ type: 'Manual', line: 1, description: 'Custom bug introduced by faculty', original: '', bugged: '' }];
+
+        bugCount = bugs.length;
+
+    } else {
+        // ── AUTO MODE ──
+        bugCount = parseInt(document.getElementById('bugCount').value);
+        const result = injectBugs(perfectCode, bugCount);
+
+        if (result.buggyCode === perfectCode) {
+            alert('⚠️ Bug injection failed! The code is too simple or doesn\'t have enough lines to inject bugs.');
+            return;
+        }
+        if (result.bugs.length === 0) {
+            alert('⚠️ No bugs were injected! Please make sure your code has enough content.');
+            return;
+        }
+
+        buggyCode = result.buggyCode;
+        bugs      = result.bugs;
     }
 
     // Store game data for modal (use global variable)
     window.gameDataToPublish = {
         type: 'bug-hunt',
-        title: title,
-        description: description,
+        title,
+        description,
         difficulty: document.getElementById('difficulty').value,
-        duration: parseInt(document.getElementById('duration').value),
-        language: document.getElementById('language').value,
-        perfectCode: perfectCode,
-        buggyCode: result.buggyCode,
-        bugCount: bugCount,
-        bugs: result.bugs,
-        explanation: document.getElementById('explanation').value,
+        duration:   parseInt(document.getElementById('duration').value),
+        language:   document.getElementById('language').value,
+        perfectCode,
+        buggyCode,
+        bugCount,
+        bugs,
+        explanation: currentMode === 'manual'
+            ? (document.getElementById('bugAnnotations').value || document.getElementById('explanation').value)
+            : document.getElementById('explanation').value,
         totalPoints: parseInt(document.getElementById('totalPoints').value),
-        creator: localStorage.getItem('email') || 'admin',
-        published: true
+        creator:     localStorage.getItem('email') || 'admin',
+        bugMode:     currentMode,
+        published:   true
     };
 
     // Show publish modal instead of directly publishing
     showPublishModal();
 }
+
 
 // Function called by publish modal when confirmed (MUST be global)
 async function publishGameWithClasses(targetClasses, isPublic) {

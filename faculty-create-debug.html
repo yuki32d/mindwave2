@@ -117,29 +117,69 @@
         <div class="gb-card">
             <div class="gb-card-head"><i data-lucide="sliders-horizontal"></i> Bug Configuration</div>
             <div class="gb-card-body">
-                <div class="gb-form-row">
-                    <div class="gb-form-group">
-                        <label for="bugCount">Number of Bugs to Inject</label>
-                        <select id="bugCount">
-                            <option value="1">1 Bug (Easy)</option>
-                            <option value="2">2 Bugs (Medium)</option>
-                            <option value="3" selected>3 Bugs (Hard)</option>
-                            <option value="4">4 Bugs (Very Hard)</option>
-                            <option value="5">5 Bugs (Expert)</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="button" class="gb-btn gb-btn-ghost" id="previewBtn" style="width:100%;">
-                    <i data-lucide="eye"></i> Preview Buggy Code
-                </button>
 
-                <div id="previewContainer" style="display:none;" class="gb-preview-danger">
-                    <div class="gb-preview-danger-head">
-                        <i data-lucide="triangle-alert"></i> Buggy Code Preview (What Students See)
-                    </div>
-                    <div id="bugList" style="margin-bottom:12px;"></div>
-                    <textarea id="buggyCodePreview" readonly class="gb-code-editor" style="min-height:200px;"></textarea>
+                <!-- Mode toggle -->
+                <div style="display:flex;gap:6px;margin-bottom:20px;background:var(--surface-2,rgba(0,0,0,0.12));border:1px solid var(--border);border-radius:10px;padding:4px;">
+                    <button type="button" id="modeAutoBtn"
+                        style="flex:1;padding:9px 12px;border-radius:8px;border:none;background:var(--primary,#6366f1);color:#fff;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;">
+                        <i data-lucide="cpu" style="width:14px;height:14px;"></i> AI Auto-Inject
+                    </button>
+                    <button type="button" id="modeManualBtn"
+                        style="flex:1;padding:9px 12px;border-radius:8px;border:none;background:transparent;color:var(--text-muted,#888);font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;">
+                        <i data-lucide="pencil" style="width:14px;height:14px;"></i> Write My Own Bugs
+                    </button>
                 </div>
+
+                <!-- ─── AUTO MODE ─── -->
+                <div id="autoModePanel">
+                    <div class="gb-form-row">
+                        <div class="gb-form-group">
+                            <label for="bugCount">Number of Bugs to Inject</label>
+                            <select id="bugCount">
+                                <option value="1">1 Bug (Easy)</option>
+                                <option value="2">2 Bugs (Medium)</option>
+                                <option value="3" selected>3 Bugs (Hard)</option>
+                                <option value="4">4 Bugs (Very Hard)</option>
+                                <option value="5">5 Bugs (Expert)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="gb-btn gb-btn-ghost" id="previewBtn" style="width:100%;">
+                        <i data-lucide="eye"></i> Preview Buggy Code
+                    </button>
+
+                    <div id="previewContainer" style="display:none;" class="gb-preview-danger">
+                        <div class="gb-preview-danger-head">
+                            <i data-lucide="triangle-alert"></i> Buggy Code Preview (What Students See)
+                        </div>
+                        <div id="bugList" style="margin-bottom:12px;"></div>
+                        <textarea id="buggyCodePreview" readonly class="gb-code-editor" style="min-height:200px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- ─── MANUAL MODE ─── -->
+                <div id="manualModePanel" style="display:none;">
+                    <p class="gb-helper" style="margin-bottom:16px;">
+                        Write the <strong>intentionally buggy</strong> version yourself.
+                        Students will see this code and must fix it. Grading compares against the Perfect Code above.
+                    </p>
+
+                    <div class="gb-form-group">
+                        <label>Your Buggy Code <span style="font-weight:400;color:var(--text-muted,#888);">(what students see)</span></label>
+                        <textarea id="manualBuggyCode" style="min-height:260px;"></textarea>
+                    </div>
+
+                    <div class="gb-form-group" style="margin-top:18px;">
+                        <label>Bug List <span style="font-weight:400;color:var(--text-muted,#888);">(shown to students after submission)</span></label>
+                        <textarea id="bugAnnotations" rows="5"
+                            style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);outline:none;width:100%;font-family:'JetBrains Mono',monospace;font-size:13px;resize:vertical;"
+                            placeholder="Line 5: Typo — 'retrun' should be 'return'
+Line 12: Wrong operator — used '=' instead of '=='
+Line 20: Missing semicolon"></textarea>
+                        <p class="gb-helper" style="margin-top:6px;">One bug per line. These descriptions are shown as the explanation after students submit.</p>
+                    </div>
+                </div>
+
             </div>
         </div>
 
