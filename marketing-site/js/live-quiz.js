@@ -8,7 +8,7 @@ let ws = null;
 let isQuizEnded = false;
 
 document.addEventListener('DOMContentLoaded', function () {
-    if (!document.getElementById('quizBuilder')) return;
+    if (!document.getElementById('addQuestionBtn')) return;
 
     const generateAiBtn = document.getElementById('generateAiBtn');
     const addQuestionBtn = document.getElementById('addQuestionBtn');
