@@ -556,6 +556,7 @@
             if (exitBtn) {
                 exitBtn.addEventListener('click', () => {
                     if (typeof window.releaseGameLock === 'function') window.releaseGameLock();
+                    window.location.href = 'student-game.html';
                 });
             }
         });
@@ -569,6 +570,7 @@
             if (exitBtn) {
                 exitBtn.addEventListener('click', function() {
                     if (typeof window.releaseGameLock === 'function') window.releaseGameLock();
+                    window.location.href = 'student-game.html';
                 });
             }
         })();
