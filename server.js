@@ -26,6 +26,7 @@ import fetch from 'node-fetch'; // RAG
 import { WebSocketServer } from 'ws';
 import { createClient } from 'redis';
 import paymentRoutes from './payment-routes.js';
+import { judgeSubmission } from './routes/codeExecution.js';
 // Student Performance Analytics
 import studentPerformanceRoutes from './student-performance-routes.js';
 // Peer Review System
@@ -480,8 +481,74 @@ let redisClient = null;
   }
 })();
 
+// ── CodeProblem Schema ────────────────────────────────────────────────────────
+const codeProblemSchema = new mongoose.Schema({
+  slug:         { type: String, required: true, unique: true },
+  title:        { type: String, required: true },
+  difficulty:   { type: String, enum: ['Easy', 'Medium', 'Hard'], default: 'Easy' },
+  category:     { type: String, default: 'Arrays' },
+  tags:         [{ type: String }],
+  description:  { type: String, required: true },
+  constraints:  [{ type: String }],
+  starterCode: {
+    python:     { type: String },
+    javascript: { type: String },
+  },
+  examples: [{
+    input:       { type: String },
+    output:      { type: String },
+    explanation: { type: String },
+  }],
+  hints: [{ type: String }],
+  // Hidden from frontend — used only by the judge worker
+  hiddenTestCases: [{
+    input:          { type: mongoose.Schema.Types.Mixed },
+    expectedOutput: { type: mongoose.Schema.Types.Mixed },
+  }],
+  // Harness templates: %%STUDENT_CODE%%, %%INPUT_JSON%%, %%EXPECTED_JSON%%
+  testHarness: {
+    python:     { type: String },
+    javascript: { type: String },
+  },
+  timeLimitMs:   { type: Number, default: 2000 },
+  memoryLimitMb: { type: Number, default: 256 },
+  xpReward:      { type: Number, default: 10 },
+  isActive:      { type: Boolean, default: true },
+}, { timestamps: true });
+codeProblemSchema.index({ slug: 1 });
+codeProblemSchema.index({ difficulty: 1, isActive: 1 });
+const CodeProblem = mongoose.model('CodeProblem', codeProblemSchema);
+
+// ── CodeSubmission Schema ─────────────────────────────────────────────────────
+const codeSubmissionSchema = new mongoose.Schema({
+  userId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  problemId: { type: mongoose.Schema.Types.ObjectId, ref: 'CodeProblem', required: true },
+  language:  { type: String, enum: ['python', 'javascript', 'java', 'cpp'], default: 'python' },
+  code:      { type: String, required: true },
+
+  // Async lifecycle: PENDING → RUNNING → COMPLETED | FAILED
+  status:  { type: String, enum: ['PENDING', 'RUNNING', 'COMPLETED', 'FAILED'], default: 'PENDING' },
+
+  // Verdict filled in by the execution worker
+  verdict:       { type: String, enum: ['Accepted', 'Wrong Answer', 'Time Limit Exceeded', 'Memory Limit Exceeded', 'Runtime Error', 'Compile Error', null], default: null },
+  runtimeMs:     { type: Number },
+  memoryKb:      { type: Number },
+  passedCount:   { type: Number, default: 0 },
+  totalCount:    { type: Number, default: 0 },
+  failedTestCase:{ type: mongoose.Schema.Types.Mixed },
+  errorMessage:  { type: String },
+
+  // XP awarded on first-time acceptance
+  xpAwarded:     { type: Number, default: 0 },
+  isFirstAccept: { type: Boolean, default: false },
+}, { timestamps: true });
+codeSubmissionSchema.index({ userId: 1, problemId: 1 });
+codeSubmissionSchema.index({ status: 1, createdAt: -1 });
+const CodeSubmission = mongoose.model('CodeSubmission', codeSubmissionSchema);
+
 
 const userSchema = new mongoose.Schema(
+
   {
     name: { type: String, required: true },
     displayName: { type: String }, // Custom display name for leaderboards/profiles
@@ -14660,6 +14727,202 @@ app.post('/api/uptimerobot/monitors', async (req, res) => {
   }
 });
 
+
+// ============================================================
+// CODE PRACTICE API  (Phase 1 — Judge0 judging engine)
+// ============================================================
+
+// Auth helper reused from rest of server
+function requireAuth(req, res, next) {
+  const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
+  if (!token) return res.status(401).json({ ok: false, message: 'Unauthorised' });
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    return res.status(401).json({ ok: false, message: 'Invalid token' });
+  }
+}
+
+// GET /api/code/problems
+// Returns list of all active problems (NO hidden test cases sent to client)
+app.get('/api/code/problems', requireAuth, async (req, res) => {
+  try {
+    const { difficulty, category, search } = req.query;
+    const filter = { isActive: true };
+    if (difficulty) filter.difficulty = difficulty;
+    if (category)   filter.category   = category;
+    if (search)     filter.title      = { $regex: search, $options: 'i' };
+
+    const problems = await CodeProblem.find(filter)
+      .select('-hiddenTestCases -testHarness')   // never expose hidden data
+      .sort({ difficulty: 1, createdAt: 1 })
+      .lean();
+
+    // Attach solve status for the logged-in user
+    const userId = req.user.id || req.user._id;
+    const solved = await CodeSubmission.distinct('problemId', {
+      userId,
+      verdict: 'Accepted',
+    });
+    const solvedSet = new Set(solved.map(id => id.toString()));
+
+    const enriched = problems.map(p => ({
+      ...p,
+      solved: solvedSet.has(p._id.toString()),
+    }));
+
+    res.json({ ok: true, problems: enriched });
+  } catch (err) {
+    console.error('[Code API] GET /problems error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// GET /api/code/problems/:slug
+// Returns full problem detail (visible test cases only, no harness/hidden)
+app.get('/api/code/problems/:slug', requireAuth, async (req, res) => {
+  try {
+    const problem = await CodeProblem.findOne({ slug: req.params.slug, isActive: true })
+      .select('-hiddenTestCases -testHarness')
+      .lean();
+    if (!problem) return res.status(404).json({ ok: false, message: 'Problem not found' });
+
+    // Check if user has already solved it
+    const userId = req.user.id || req.user._id;
+    const accepted = await CodeSubmission.findOne({ userId, problemId: problem._id, verdict: 'Accepted' }).lean();
+
+    res.json({ ok: true, problem: { ...problem, solved: !!accepted } });
+  } catch (err) {
+    console.error('[Code API] GET /problems/:slug error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// POST /api/code/submit
+// Creates a PENDING submission, fires off Judge0 async, returns submissionId immediately
+app.post('/api/code/submit', requireAuth, async (req, res) => {
+  try {
+    const { problemSlug, code, language = 'python' } = req.body;
+    const userId = req.user.id || req.user._id;
+
+    if (!problemSlug || !code) {
+      return res.status(400).json({ ok: false, message: 'problemSlug and code are required' });
+    }
+
+    // Fetch full problem (with harness + hidden cases) — NEVER send this to client
+    const problem = await CodeProblem.findOne({ slug: problemSlug, isActive: true }).lean();
+    if (!problem) return res.status(404).json({ ok: false, message: 'Problem not found' });
+
+    // Create a PENDING submission document
+    const submission = await CodeSubmission.create({
+      userId,
+      problemId: problem._id,
+      language,
+      code,
+      status: 'PENDING',
+      totalCount: problem.hiddenTestCases?.length || 0,
+    });
+
+    // Return the submissionId immediately — don't wait for judging
+    res.json({ ok: true, submissionId: submission._id });
+
+    // ── Run judging in background (non-blocking) ─────────────────────────────
+    setImmediate(async () => {
+      try {
+        await CodeSubmission.findByIdAndUpdate(submission._id, { status: 'RUNNING' });
+
+        const result = await judgeSubmission({ studentCode: code, language, problem });
+
+        // Calculate XP for first-time acceptance
+        let xpAwarded = 0;
+        let isFirstAccept = false;
+        if (result.verdict === 'Accepted') {
+          const prevAccepted = await CodeSubmission.findOne({
+            userId,
+            problemId: problem._id,
+            verdict: 'Accepted',
+            _id: { $ne: submission._id },
+          });
+          if (!prevAccepted) {
+            isFirstAccept = true;
+            xpAwarded = problem.xpReward || 10;
+            // Award XP to user
+            await User.findByIdAndUpdate(userId, { $inc: { xp: xpAwarded } });
+          }
+        }
+
+        await CodeSubmission.findByIdAndUpdate(submission._id, {
+          status: 'COMPLETED',
+          verdict:        result.verdict,
+          runtimeMs:      result.runtimeMs,
+          memoryKb:       result.memoryKb,
+          passedCount:    result.passedCount,
+          totalCount:     result.totalCount,
+          failedTestCase: result.failedTestCase || null,
+          errorMessage:   result.errorMessage  || null,
+          xpAwarded,
+          isFirstAccept,
+        });
+
+        console.log(`[Judge] Submission ${submission._id}: ${result.verdict} (${result.runtimeMs}ms)`);
+      } catch (err) {
+        console.error(`[Judge] Worker error for ${submission._id}:`, err.message);
+        await CodeSubmission.findByIdAndUpdate(submission._id, {
+          status: 'FAILED',
+          verdict: 'Runtime Error',
+          errorMessage: err.message,
+        });
+      }
+    });
+
+  } catch (err) {
+    console.error('[Code API] POST /submit error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// GET /api/code/submission/:id
+// Polling endpoint: frontend calls this every 500ms until status !== PENDING/RUNNING
+app.get('/api/code/submission/:id', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const submission = await CodeSubmission.findOne({
+      _id: req.params.id,
+      userId,          // Ensure users can only poll their own submissions
+    }).select('-code').lean();   // Don't send code back (saves bandwidth)
+
+    if (!submission) return res.status(404).json({ ok: false, message: 'Submission not found' });
+
+    res.json({ ok: true, submission });
+  } catch (err) {
+    console.error('[Code API] GET /submission/:id error:', err);
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
+// GET /api/code/submissions/history/:slug
+// Returns the last 10 submissions by this user for a given problem
+app.get('/api/code/submissions/history/:slug', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const problem = await CodeProblem.findOne({ slug: req.params.slug }).select('_id').lean();
+    if (!problem) return res.status(404).json({ ok: false, message: 'Problem not found' });
+
+    const history = await CodeSubmission.find({ userId, problemId: problem._id })
+      .select('-code -failedTestCase')
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
+
+    res.json({ ok: true, history });
+  } catch (err) {
+    res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
 // Start server
 const httpServer = listenWithFallback(PORT);
+
+
 
