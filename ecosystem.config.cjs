@@ -4,9 +4,9 @@ module.exports = {
       name: 'mindwave',
       script: 'server.js',
 
-      // ── Single process (1 vCPU server — cluster mode gives no benefit) ────────
-      instances: 1,
-      exec_mode: 'fork',
+      // ── Cluster process (Maximize available CPU cores) ────────
+      instances: 'max',
+      exec_mode: 'cluster',
 
       // ── Node.js heap size: allow up to 4GB RAM (server has 8GB, OS+MongoDB need ~3GB) ──
       // Default heap is only ~1.5GB — this lets us handle way more concurrent users
