@@ -12,6 +12,7 @@
        parent tab or OS.
     ============================================================ */
     let startupComplete = false;
+    let gameCompleted = false; // Moved to top so onFullscreenChange can access it reliably
     setTimeout(() => { startupComplete = true; }, 4000);
 
     /* ============================================================
@@ -68,9 +69,12 @@
         `;
         // Clicking the overlay forces re-entry (guaranteed user gesture)
         fsOverlay.addEventListener('click', () => {
-            enterFullscreen()
-                .then(() => setTimeout(hideFsOverlay, 300))
-                .catch(() => {});
+            const req = enterFullscreen();
+            if (req && req.then) {
+                req.then(() => setTimeout(hideFsOverlay, 300)).catch(() => {});
+            } else {
+                setTimeout(hideFsOverlay, 300);
+            }
         });
         document.body.appendChild(fsOverlay);
     }
@@ -82,6 +86,8 @@
     // The delay is critical: Chrome briefly loses document focus on ESC exit,
     // causing requestFullscreen() to fail if called instantly.
     function onFullscreenChange() {
+        if (gameCompleted) return; // Allow clean exit if game is finished
+
         if (!isFullscreen()) {
             // Silent log only — no popup shown to student
             window.cheatingAttempts = (window.cheatingAttempts || 0) + 1;
@@ -96,12 +102,16 @@
             // 100ms delay gives the browser time to return focus to the document
             setTimeout(() => {
                 if (!isFullscreen()) {
-                    enterFullscreen()
-                        .then(() => setTimeout(hideFsOverlay, 300))
-                        .catch(() => {
-                            // Auto re-entry blocked by browser — overlay stays visible
-                            // and is clickable so student can re-enter manually
-                        });
+                    const req = enterFullscreen();
+                    if (req && req.then) {
+                        req.then(() => setTimeout(hideFsOverlay, 300))
+                           .catch(() => {
+                                // Auto re-entry blocked by browser — overlay stays visible
+                                // and is clickable so student can re-enter manually
+                           });
+                    } else {
+                        setTimeout(hideFsOverlay, 300);
+                    }
                 } else {
                     hideFsOverlay(); // already fullscreen again
                 }
@@ -494,7 +504,6 @@
     });
 
     // Block beforeunload / page navigation
-    let gameCompleted = false;
     function beforeUnloadHandler(e) {
         if (gameCompleted) return; // allow exit after game is done
         e.preventDefault();
