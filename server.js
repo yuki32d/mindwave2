@@ -39,6 +39,7 @@ import pkg from 'agora-access-token';
 const { RtcTokenBuilder, RtcRole } = pkg;
 // Socket.IO for real-time chat
 import { Server } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
 // LiveKit Video Conferencing
 import { AccessToken } from 'livekit-server-sdk';
 // Meeting Server removed - using Jitsi Meet instead
@@ -10218,6 +10219,21 @@ function listenWithFallback(preferred) {
 
       // Make io globally accessible for real-time event broadcasting
       app.set('io', io);
+
+      // Attach Redis adapter so Socket.IO works across all PM2 cluster workers
+      (async () => {
+        try {
+          const socketPubClient = createClient({ url: 'redis://127.0.0.1:6379' });
+          const socketSubClient = socketPubClient.duplicate();
+          socketPubClient.on('error', err => console.error('Socket.IO Redis pub error:', err));
+          socketSubClient.on('error', err => console.error('Socket.IO Redis sub error:', err));
+          await Promise.all([socketPubClient.connect(), socketSubClient.connect()]);
+          io.adapter(createAdapter(socketPubClient, socketSubClient));
+          console.log('✅ Socket.IO Redis adapter attached (cluster-ready)');
+        } catch (err) {
+          console.error('❌ Socket.IO Redis adapter error (falling back to local):', err);
+        }
+      })();
 
       // Store active meetings and their participants
       const activeMeetings = new Map();
