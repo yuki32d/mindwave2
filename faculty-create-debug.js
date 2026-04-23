@@ -108,10 +108,17 @@ function generatePreview() {
 async function publishGame() {
     const title       = document.getElementById('gameTitle').value.trim();
     const description = document.getElementById('gameDesc').value.trim();
-    const perfectCode = perfectCodeEditor.getValue();
+    const perfectCode = perfectCodeEditor.getValue().trim();
 
-    if (!title || !description || !perfectCode.trim()) {
-        alert('Please fill in all required fields!');
+    // Base validation — always required
+    if (!title || !description) {
+        alert('Please fill in the Game Title and Description!');
+        return;
+    }
+
+    // In AUTO mode the perfect code is the source — it must be filled
+    if (currentMode === 'auto' && !perfectCode) {
+        alert('Please enter your Perfect Code (the bug-free version) before publishing.');
         return;
     }
 
@@ -119,12 +126,13 @@ async function publishGame() {
 
     if (currentMode === 'manual') {
         // ── MANUAL MODE ──
-        buggyCode = manualBuggyEditor.getValue();
-        if (!buggyCode.trim()) {
-            alert('Please write your buggy code in the manual editor.');
+        buggyCode = manualBuggyEditor.getValue().trim();
+        if (!buggyCode) {
+            alert('Please write your buggy code in the editor.');
             return;
         }
-        if (buggyCode.trim() === perfectCode.trim()) {
+        // Only warn about identical code if perfectCode was also provided
+        if (perfectCode && buggyCode === perfectCode) {
             alert('⚠️ Your buggy code is identical to the perfect code! Please introduce some bugs.');
             return;
         }
@@ -159,6 +167,7 @@ async function publishGame() {
         buggyCode = result.buggyCode;
         bugs      = result.bugs;
     }
+
 
     // Store game data for modal (use global variable)
     window.gameDataToPublish = {
