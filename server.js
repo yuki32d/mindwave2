@@ -1463,26 +1463,24 @@ app.get('/terms', (req, res) => {
 // ============================================
 // HEALTH CHECK ENDPOINT — Diagnose college server issues
 // ============================================
-app.get('/api/health', async (req, res) => {
+app.get('/api/health', (req, res) => {
+  const isDbConnected = mongoose.connection.readyState === 1;
   const health = {
-    status: 'ok',
+    status: isDbConnected ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
     server: { port: PORT, nodeEnv: process.env.NODE_ENV || 'development' },
-    mongodb: { status: 'unknown', uri: MONGODB_URI ? MONGODB_URI.replace(/:[^:@]+@/, ':****@') : 'not set' },
+    mongodb: { 
+      status: isDbConnected ? 'connected' : 'disconnected', 
+      uri: MONGODB_URI ? MONGODB_URI.replace(/:[^:@]+@/, ':****@') : 'not set' 
+    },
     env: {
       JWT_SECRET: JWT_SECRET ? 'set' : 'MISSING',
       BREVO_API_KEY: BREVO_API_KEY ? 'set' : 'not set',
       CLIENT_ORIGIN: CLIENT_ORIGIN || 'default (localhost:8081)'
     }
   };
-  try {
-    await mongoose.connection.db.admin().ping();
-    health.mongodb.status = 'connected';
-  } catch (e) {
-    health.mongodb.status = 'error: ' + e.message;
-    health.status = 'degraded';
-  }
-  const statusCode = health.status === 'ok' ? 200 : 503;
+
+  const statusCode = isDbConnected ? 200 : 503;
   res.status(statusCode).json(health);
 });
 
