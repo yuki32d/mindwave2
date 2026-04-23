@@ -462,6 +462,25 @@ mongoose
     process.exit(1);
   });
 
+// ── Module-level Redis client for API response caching ─────────────────────
+// Used by /api/games/published and /api/games/:id/leaderboard to cache
+// heavy query results. Gracefully degrades to MongoDB if Redis is unavailable.
+let redisClient = null;
+(async () => {
+  try {
+    redisClient = createClient({ url: 'redis://127.0.0.1:6379' });
+    redisClient.on('error', err => {
+      console.warn('[Redis Cache] Connection error — caching disabled:', err.message);
+    });
+    await redisClient.connect();
+    console.log('[Redis Cache] Connected — API caching active');
+  } catch (err) {
+    console.warn('[Redis Cache] Could not connect — running without cache:', err.message);
+    redisClient = null;
+  }
+})();
+
+
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
