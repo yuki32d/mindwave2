@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@socket.io/redis-adapter": "^8.3.0",
     "agora-access-token": "^2.0.4",
     "bcryptjs": "^2.4.3",
     "compression": "^1.8.1",
@@ -34,6 +35,7 @@
     "openai": "^6.9.1",
     "pdf-parse": "1.1.1",
     "razorpay": "^2.9.6",
+    "redis": "^5.12.1",
     "resend": "^6.9.3",
     "simple-peer": "^9.11.1",
     "socket.io": "^4.8.3",

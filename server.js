@@ -24,6 +24,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 import fetch from 'node-fetch'; // RAG
 import { WebSocketServer } from 'ws';
+import { createClient } from 'redis';
 import paymentRoutes from './payment-routes.js';
 // Student Performance Analytics
 import studentPerformanceRoutes from './student-performance-routes.js';
@@ -10200,8 +10201,8 @@ function listenWithFallback(preferred) {
       console.log(`\n🚀 MINDWAVE Server running on http://localhost:${port}`);
       console.log(`📊 MongoDB: ${mongoose.connection.readyState === 1 ? 'Connected ✅' : 'Disconnected ❌'}`);
 
-      // Setup WebSocket server for Live Quiz
-      setupWebSocket(httpServer);
+      // Setup WebSocket server for Live Quiz (Redis Pub/Sub cluster-ready)
+      setupWebSocket(httpServer).catch(err => console.error('WebSocket setup error:', err));
 
       // Setup Socket.IO for meeting chat
       const io = new Server(httpServer, {
@@ -10311,12 +10312,49 @@ function listenWithFallback(preferred) {
 }
 
 // WebSocket Setup for Live Quiz
-function setupWebSocket(server) {
+async function setupWebSocket(server) {
   const wss = new WebSocketServer({ server, path: '/ws/quiz' });
 
-  // Store active quiz sessions and their connections
-  const quizConnections = new Map(); // sessionCode -> Set of WebSocket connections
-  const answerDistribution = new Map(); // sessionCode -> { questionIndex -> { A: 0, B: 0, C: 0, D: 0, total: 0 } }
+  // --- Redis Pub/Sub Setup (enables cross-process broadcasting on PM2 cluster) ---
+  const pubClient = createClient({ socket: { host: '127.0.0.1', port: 6379 } });
+  const subClient = createClient({ socket: { host: '127.0.0.1', port: 6379 } });
+
+  pubClient.on('error', (err) => console.error('Redis pubClient error:', err));
+  subClient.on('error', (err) => console.error('Redis subClient error:', err));
+
+  await pubClient.connect();
+  await subClient.connect();
+
+  // Each PM2 worker process stores only its OWN local WebSocket connections.
+  // Redis coordinates broadcasting across all workers.
+  const quizConnections = new Map(); // sessionCode -> Set of WebSocket connections (local only)
+
+  // --- Subscribe to all quiz channel messages from Redis ---
+  await subClient.pSubscribe('quiz:*', (messageStr, channel) => {
+    try {
+      const { sessionCode, payload, facultyOnly } = JSON.parse(messageStr);
+      // Deliver to local connections on this worker
+      if (quizConnections.has(sessionCode)) {
+        const connections = quizConnections.get(sessionCode);
+        const outStr = JSON.stringify(payload);
+        connections.forEach(client => {
+          if (client.readyState === 1) {
+            if (!facultyOnly || client.isFaculty) {
+              client.send(outStr);
+            }
+          }
+        });
+      }
+    } catch (e) {
+      console.error('Redis sub delivery error:', e);
+    }
+  });
+
+  // Publish a message to ALL workers via Redis
+  function publishToSession(sessionCode, payload, facultyOnly = false) {
+    pubClient.publish(`quiz:${sessionCode}`, JSON.stringify({ sessionCode, payload, facultyOnly }))
+      .catch(err => console.error('Redis publish error:', err));
+  }
 
   wss.on('connection', (ws, req) => {
     console.log('📡 New WebSocket connection');
@@ -10342,20 +10380,21 @@ function setupWebSocket(server) {
             }
             quizConnections.get(currentSessionCode).add(ws);
 
-            // Send confirmation
+            // Send confirmation directly (no need to broadcast via Redis)
             ws.send(JSON.stringify({ type: 'joined', sessionCode: currentSessionCode }));
 
-            // Broadcast participant count to everyone
-            broadcastToSession(currentSessionCode, {
+            // Increment global participant count in Redis and broadcast it
+            await pubClient.incr(`quiz:${currentSessionCode}:participants`);
+            const totalParticipants = await pubClient.get(`quiz:${currentSessionCode}:participants`);
+            publishToSession(currentSessionCode, {
               type: 'participant-count',
-              count: quizConnections.get(currentSessionCode).size
+              count: parseInt(totalParticipants, 10)
             });
             break;
 
           case 'start-quiz':
-            // Faculty starting the quiz
             if (currentSessionCode) {
-              broadcastToSession(currentSessionCode, {
+              publishToSession(currentSessionCode, {
                 type: 'quiz-started',
                 timestamp: Date.now()
               });
@@ -10363,9 +10402,8 @@ function setupWebSocket(server) {
             break;
 
           case 'show-question':
-            // Faculty showing next question
             if (currentSessionCode) {
-              broadcastToSession(currentSessionCode, {
+              publishToSession(currentSessionCode, {
                 type: 'question-shown',
                 questionIndex: message.questionIndex,
                 timestamp: Date.now()
@@ -10374,53 +10412,42 @@ function setupWebSocket(server) {
             break;
 
           case 'submit-answer':
-            // Student submitting answer
+            // Student submitting answer — use Redis atomic increment for accurate tallying
             if (currentSessionCode && message.questionIndex !== undefined && message.selectedAnswer !== undefined) {
-              // Initialize distribution for this session if needed
-              if (!answerDistribution.has(currentSessionCode)) {
-                answerDistribution.set(currentSessionCode, new Map());
-              }
-
-              const sessionDist = answerDistribution.get(currentSessionCode);
-              const qIndex = message.questionIndex;
-
-              // Initialize distribution for this question if needed
-              if (!sessionDist.has(qIndex)) {
-                sessionDist.set(qIndex, { A: 0, B: 0, C: 0, D: 0, total: 0 });
-              }
-
-              const dist = sessionDist.get(qIndex);
               const letters = ['A', 'B', 'C', 'D'];
               const selectedLetter = letters[message.selectedAnswer];
+              const qKey = `quiz:${currentSessionCode}:q${message.questionIndex}`;
 
-              if (selectedLetter && dist[selectedLetter] !== undefined) {
-                dist[selectedLetter]++;
-                dist.total++;
+              if (selectedLetter) {
+                // Atomic increment — safe across all 10 cores simultaneously
+                await pubClient.hIncrBy(qKey, selectedLetter, 1);
+                await pubClient.hIncrBy(qKey, 'total', 1);
+                pubClient.expire(qKey, 86400); // auto-cleanup after 24h
               }
 
-              // Get participant count for percentage calculation
-              const participantCount = (quizConnections.get(currentSessionCode) && quizConnections.get(currentSessionCode).size) || 0;
+              // Read the current tally from Redis
+              const dist = await pubClient.hGetAll(qKey);
+              const participantCount = parseInt(await pubClient.get(`quiz:${currentSessionCode}:participants`) || '1', 10);
 
-              // Broadcast updated distribution ONLY TO FACULTY to prevent O(n^2) crash
-              broadcastToFaculty(currentSessionCode, {
+              // Broadcast updated distribution ONLY TO FACULTY
+              publishToSession(currentSessionCode, {
                 type: 'answer-distribution',
-                questionIndex: qIndex,
+                questionIndex: message.questionIndex,
                 distribution: {
-                  A: dist.A,
-                  B: dist.B,
-                  C: dist.C,
-                  D: dist.D,
-                  total: dist.total,
+                  A: parseInt(dist.A || '0', 10),
+                  B: parseInt(dist.B || '0', 10),
+                  C: parseInt(dist.C || '0', 10),
+                  D: parseInt(dist.D || '0', 10),
+                  total: parseInt(dist.total || '0', 10),
                   expected: Math.max(participantCount - 1, 1)
                 }
-              });
+              }, true); // facultyOnly = true
             }
             break;
 
           case 'show-leaderboard':
-            // Faculty showing leaderboard
             if (currentSessionCode) {
-              broadcastToSession(currentSessionCode, {
+              publishToSession(currentSessionCode, {
                 type: 'leaderboard-shown',
                 leaderboard: message.leaderboard
               });
@@ -10428,12 +10455,13 @@ function setupWebSocket(server) {
             break;
 
           case 'end-quiz':
-            // Faculty ending the quiz
             if (currentSessionCode) {
-              broadcastToSession(currentSessionCode, {
+              publishToSession(currentSessionCode, {
                 type: 'quiz-ended',
                 timestamp: Date.now()
               });
+              // Cleanup Redis keys for this session
+              pubClient.del(`quiz:${currentSessionCode}:participants`);
             }
             break;
 
@@ -10448,52 +10476,27 @@ function setupWebSocket(server) {
       }
     });
 
-    ws.on('close', () => {
+    ws.on('close', async () => {
       if (currentSessionCode && quizConnections.has(currentSessionCode)) {
         quizConnections.get(currentSessionCode).delete(ws);
 
-        // Broadcast updated participant count to everyone
-        if (quizConnections.get(currentSessionCode).size > 0) {
-          broadcastToSession(currentSessionCode, {
-            type: 'participant-count',
-            count: quizConnections.get(currentSessionCode).size
-          });
-        } else {
+        if (quizConnections.get(currentSessionCode).size === 0) {
           quizConnections.delete(currentSessionCode);
+        }
+
+        // Decrement global participant count and broadcast
+        const remaining = await pubClient.decr(`quiz:${currentSessionCode}:participants`);
+        if (remaining > 0) {
+          publishToSession(currentSessionCode, {
+            type: 'participant-count',
+            count: Math.max(0, remaining)
+          });
         }
       }
     });
   });
 
-  // Helper function to broadcast to all connections in a session
-  function broadcastToSession(sessionCode, message) {
-    if (quizConnections.has(sessionCode)) {
-      const connections = quizConnections.get(sessionCode);
-      const messageStr = JSON.stringify(message);
-
-      connections.forEach(client => {
-        if (client.readyState === 1) { // WebSocket.OPEN
-          client.send(messageStr);
-        }
-      });
-    }
-  }
-
-  // Helper function to broadcast ONLY to the faculty of a session
-  function broadcastToFaculty(sessionCode, message) {
-    if (quizConnections.has(sessionCode)) {
-      const connections = quizConnections.get(sessionCode);
-      const messageStr = JSON.stringify(message);
-
-      connections.forEach(client => {
-        if (client.readyState === 1 && client.isFaculty) { // WebSocket.OPEN and Faculty only
-          client.send(messageStr);
-        }
-      });
-    }
-  }
-
-  console.log('✅ WebSocket server initialized on /ws/quiz');
+  console.log('✅ WebSocket server initialized on /ws/quiz (Redis Pub/Sub cluster-ready)');
 }
 
 // ==================== SCHOOL EVENTS API ====================
