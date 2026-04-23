@@ -377,6 +377,7 @@
             width: 90%;
             text-align: center;
             box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
+            position: relative;
         }
 
         tr.current-student {
@@ -461,6 +462,10 @@
         <!-- -- Scoreboard Modal -- -->
         <div id="scoreboardModal" class="modal" style="display:none;">
             <div class="scoreboard-content">
+                <!-- Exit button — top-right corner -->
+                <button id="backToGamesBtn" style="position:absolute;top:16px;right:16px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;padding:10px 20px;border-radius:12px;font-size:0.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;z-index:2;" onmouseover="this.style.filter='brightness(1.15)';this.style.transform='translateY(-1px)'" onmouseout="this.style.filter='';this.style.transform=''">
+                    <i data-lucide="log-out" style="width:15px;height:15px;"></i> Exit Pro Mode
+                </button>
                 <div style="margin-bottom: 32px;">
                     <div style="width: 64px; height: 64px; background: rgba(251, 191, 36, 0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
                         <i data-lucide="trophy" style="color:#fbbf24;width:32px;height:32px;"></i>
@@ -499,14 +504,7 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 16px;">
-                    <button id="playAgainBtn" class="secondary-btn" style="flex: 1; display:flex; align-items:center; justify-content:center; gap:8px;">
-                        <i data-lucide="rotate-ccw" style="width:18px;height:18px;"></i> Play Again
-                    </button>
-                    <button id="backToGamesBtn" class="submit-btn" style="flex: 1; display:flex; align-items:center; justify-content:center; gap:8px;">
-                        <i data-lucide="gamepad-2" style="width:18px;height:18px;"></i> Exit Pro Mode
-                    </button>
-                </div>
+
             </div>
         </div>
 
