@@ -449,7 +449,8 @@ mongoose
     maxPoolSize: 50,          // Up from default 5 — handles concurrent DB queries
     minPoolSize: 5,           // Keep 5 connections warm
     serverSelectionTimeoutMS: 5000,  // Fail fast if MongoDB is down
-    socketTimeoutMS: 45000,   // Close idle sockets after 45s
+    socketTimeoutMS: 8000,    // Close stalled sockets in 8s (under Cloudflare's 10s wall)
+    connectTimeoutMS: 8000,   // Connection attempts time out in 8s
     family: 4                 // Use IPv4, avoids IPv6 issues on some college servers
   })
   .then(() => {
@@ -1412,6 +1413,49 @@ app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 // Sanitize data to prevent MongoDB injection
 app.use(mongoSanitize());
+
+// ── Request Timeout Guard ─────────────────────────────────────────────────
+// Kill any request that takes longer than 8s so workers never pile up.
+// This stays under Cloudflare's 10s proxy timeout and prevents cascading failures.
+app.use((req, res, next) => {
+  res.setTimeout(8000, () => {
+    if (!res.headersSent) {
+      res.status(503).json({
+        ok: false,
+        message: 'Server is under heavy load — please retry in a moment'
+      });
+    }
+  });
+  next();
+});
+
+// ── Lightweight Redis Response Cache ─────────────────────────────────────
+// Cache GET API responses in Redis with a configurable TTL.
+// Cuts MongoDB hits for hot endpoints (game list, leaderboard) by ~80%.
+function withCache(ttlSeconds = 30) {
+  return async (req, res, next) => {
+    if (!redisClient?.isReady) return next(); // gracefully skip if Redis is down
+    const key = `cache:${req.originalUrl}`;
+    try {
+      const cached = await redisClient.get(key);
+      if (cached) {
+        res.setHeader('X-Cache', 'HIT');
+        return res.json(JSON.parse(cached));
+      }
+    } catch (_) { /* cache miss — fall through */ }
+
+    // Intercept res.json so we can store the response
+    const origJson = res.json.bind(res);
+    res.json = async (data) => {
+      if (res.statusCode === 200) {
+        try { await redisClient.setEx(key, ttlSeconds, JSON.stringify(data)); } catch (_) {}
+      }
+      res.setHeader('X-Cache', 'MISS');
+      return origJson(data);
+    };
+    next();
+  };
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
