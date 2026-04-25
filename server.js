@@ -483,37 +483,37 @@ let redisClient = null;
 
 // ── CodeProblem Schema ────────────────────────────────────────────────────────
 const codeProblemSchema = new mongoose.Schema({
-  slug:         { type: String, required: true, unique: true },
-  title:        { type: String, required: true },
-  difficulty:   { type: String, enum: ['Easy', 'Medium', 'Hard'], default: 'Easy' },
-  category:     { type: String, default: 'Arrays' },
-  tags:         [{ type: String }],
-  description:  { type: String, required: true },
-  constraints:  [{ type: String }],
+  slug: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  difficulty: { type: String, enum: ['Easy', 'Medium', 'Hard'], default: 'Easy' },
+  category: { type: String, default: 'Arrays' },
+  tags: [{ type: String }],
+  description: { type: String, required: true },
+  constraints: [{ type: String }],
   starterCode: {
-    python:     { type: String },
+    python: { type: String },
     javascript: { type: String },
   },
   examples: [{
-    input:       { type: String },
-    output:      { type: String },
+    input: { type: String },
+    output: { type: String },
     explanation: { type: String },
   }],
   hints: [{ type: String }],
   // Hidden from frontend — used only by the judge worker
   hiddenTestCases: [{
-    input:          { type: mongoose.Schema.Types.Mixed },
+    input: { type: mongoose.Schema.Types.Mixed },
     expectedOutput: { type: mongoose.Schema.Types.Mixed },
   }],
   // Harness templates: %%STUDENT_CODE%%, %%INPUT_JSON%%, %%EXPECTED_JSON%%
   testHarness: {
-    python:     { type: String },
+    python: { type: String },
     javascript: { type: String },
   },
-  timeLimitMs:   { type: Number, default: 2000 },
+  timeLimitMs: { type: Number, default: 2000 },
   memoryLimitMb: { type: Number, default: 256 },
-  xpReward:      { type: Number, default: 10 },
-  isActive:      { type: Boolean, default: true },
+  xpReward: { type: Number, default: 10 },
+  isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 codeProblemSchema.index({ slug: 1 });
 codeProblemSchema.index({ difficulty: 1, isActive: 1 });
@@ -521,25 +521,25 @@ const CodeProblem = mongoose.model('CodeProblem', codeProblemSchema);
 
 // ── CodeSubmission Schema ─────────────────────────────────────────────────────
 const codeSubmissionSchema = new mongoose.Schema({
-  userId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   problemId: { type: mongoose.Schema.Types.ObjectId, ref: 'CodeProblem', required: true },
-  language:  { type: String, enum: ['python', 'javascript', 'java', 'cpp'], default: 'python' },
-  code:      { type: String, required: true },
+  language: { type: String, enum: ['python', 'javascript', 'java', 'cpp'], default: 'python' },
+  code: { type: String, required: true },
 
   // Async lifecycle: PENDING → RUNNING → COMPLETED | FAILED
-  status:  { type: String, enum: ['PENDING', 'RUNNING', 'COMPLETED', 'FAILED'], default: 'PENDING' },
+  status: { type: String, enum: ['PENDING', 'RUNNING', 'COMPLETED', 'FAILED'], default: 'PENDING' },
 
   // Verdict filled in by the execution worker
-  verdict:       { type: String, enum: ['Accepted', 'Wrong Answer', 'Time Limit Exceeded', 'Memory Limit Exceeded', 'Runtime Error', 'Compile Error', null], default: null },
-  runtimeMs:     { type: Number },
-  memoryKb:      { type: Number },
-  passedCount:   { type: Number, default: 0 },
-  totalCount:    { type: Number, default: 0 },
-  failedTestCase:{ type: mongoose.Schema.Types.Mixed },
-  errorMessage:  { type: String },
+  verdict: { type: String, enum: ['Accepted', 'Wrong Answer', 'Time Limit Exceeded', 'Memory Limit Exceeded', 'Runtime Error', 'Compile Error', null], default: null },
+  runtimeMs: { type: Number },
+  memoryKb: { type: Number },
+  passedCount: { type: Number, default: 0 },
+  totalCount: { type: Number, default: 0 },
+  failedTestCase: { type: mongoose.Schema.Types.Mixed },
+  errorMessage: { type: String },
 
   // XP awarded on first-time acceptance
-  xpAwarded:     { type: Number, default: 0 },
+  xpAwarded: { type: Number, default: 0 },
   isFirstAccept: { type: Boolean, default: false },
 }, { timestamps: true });
 codeSubmissionSchema.index({ userId: 1, problemId: 1 });
@@ -1555,9 +1555,9 @@ app.get('/api/health', (req, res) => {
     status: isDbConnected ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
     server: { port: PORT, nodeEnv: process.env.NODE_ENV || 'development' },
-    mongodb: { 
-      status: isDbConnected ? 'connected' : 'disconnected', 
-      uri: MONGODB_URI ? MONGODB_URI.replace(/:[^:@]+@/, ':****@') : 'not set' 
+    mongodb: {
+      status: isDbConnected ? 'connected' : 'disconnected',
+      uri: MONGODB_URI ? MONGODB_URI.replace(/:[^:@]+@/, ':****@') : 'not set'
     },
     env: {
       JWT_SECRET: JWT_SECRET ? 'set' : 'MISSING',
@@ -5080,7 +5080,7 @@ app.get("/api/games/published", authMiddleware, async (req, res) => {
 
       // Store global game list in Redis; personal flags are never cached.
       if (redisClient?.isReady && games.length) {
-        try { await redisClient.setEx(cacheKey, 30, JSON.stringify(games)); } catch (_) {}
+        try { await redisClient.setEx(cacheKey, 30, JSON.stringify(games)); } catch (_) { }
       }
     }
 
@@ -5255,7 +5255,7 @@ app.post("/api/game-submissions", authMiddleware, requireStudent, async (req, re
 // Leaderboard Endpoint - Get leaderboard and answer review for a game
 app.get("/api/games/:id/leaderboard", authMiddleware, async (req, res) => {
   try {
-    const gameId   = req.params.id;
+    const gameId = req.params.id;
     const currentStudentId = req.user.sub;
     const cacheKey = `leaderboard:global:${gameId}`;
 
@@ -5293,9 +5293,9 @@ app.get("/api/games/:id/leaderboard", authMiddleware, async (req, res) => {
         const sid = sub.studentId._id.toString();
         if (!studentBestScores.has(sid) || sub.score > studentBestScores.get(sid).score) {
           studentBestScores.set(sid, {
-            studentId:   sid,  // plain string — safe to JSON-serialize
+            studentId: sid,  // plain string — safe to JSON-serialize
             studentName: sub.studentId.displayName || sub.studentId.name,
-            score:       sub.score,
+            score: sub.score,
             submittedAt: sub.submittedAt,
             gamesPlayed: 1
           });
@@ -5316,17 +5316,17 @@ app.get("/api/games/:id/leaderboard", authMiddleware, async (req, res) => {
       globalLeaderboard = Array.from(studentBestScores.values())
         .sort((a, b) => b.score !== a.score ? b.score - a.score : new Date(a.submittedAt) - new Date(b.submittedAt))
         .map((entry, index) => ({
-          rank:        index + 1,
-          studentId:   entry.studentId,
+          rank: index + 1,
+          studentId: entry.studentId,
           studentName: entry.studentName,
-          score:       entry.score,
+          score: entry.score,
           gamesPlayed: entry.gamesPlayed,
-          accuracy:    entry.score
+          accuracy: entry.score
         }));
 
       // Cache the global (non-personal) array for 15 seconds
       if (redisClient?.isReady) {
-        try { await redisClient.setEx(cacheKey, 15, JSON.stringify(globalLeaderboard)); } catch (_) {}
+        try { await redisClient.setEx(cacheKey, 15, JSON.stringify(globalLeaderboard)); } catch (_) { }
       }
     }
 
@@ -5350,18 +5350,18 @@ app.get("/api/games/:id/leaderboard", authMiddleware, async (req, res) => {
     if (mySubmission?.studentAnswers?.length) {
       answerReview = {
         questions: mySubmission.studentAnswers.map(a => ({
-          questionText:  a.questionText  || 'Question',
+          questionText: a.questionText || 'Question',
           studentAnswer: a.studentAnswer || 'No answer',
           correctAnswer: a.correctAnswer || 'N/A',
-          isCorrect:     a.isCorrect     || false
+          isCorrect: a.isCorrect || false
         }))
       };
     }
 
     res.json({
-      ok:               true,
-      leaderboard:      personalizedLeaderboard,
-      currentStudent:   currentStudentEntry,
+      ok: true,
+      leaderboard: personalizedLeaderboard,
+      currentStudent: currentStudentEntry,
       totalParticipants: personalizedLeaderboard.length,
       answerReview
     });
@@ -14751,8 +14751,8 @@ app.get('/api/code/problems', requireAuth, async (req, res) => {
     const { difficulty, category, search } = req.query;
     const filter = { isActive: true };
     if (difficulty) filter.difficulty = difficulty;
-    if (category)   filter.category   = category;
-    if (search)     filter.title      = { $regex: search, $options: 'i' };
+    if (category) filter.category = category;
+    if (search) filter.title = { $regex: search, $options: 'i' };
 
     const problems = await CodeProblem.find(filter)
       .select('-hiddenTestCases -testHarness')   // never expose hidden data
@@ -14854,13 +14854,13 @@ app.post('/api/code/submit', requireAuth, async (req, res) => {
 
         await CodeSubmission.findByIdAndUpdate(submission._id, {
           status: 'COMPLETED',
-          verdict:        result.verdict,
-          runtimeMs:      result.runtimeMs,
-          memoryKb:       result.memoryKb,
-          passedCount:    result.passedCount,
-          totalCount:     result.totalCount,
+          verdict: result.verdict,
+          runtimeMs: result.runtimeMs,
+          memoryKb: result.memoryKb,
+          passedCount: result.passedCount,
+          totalCount: result.totalCount,
           failedTestCase: result.failedTestCase || null,
-          errorMessage:   result.errorMessage  || null,
+          errorMessage: result.errorMessage || null,
           xpAwarded,
           isFirstAccept,
         });
@@ -14923,6 +14923,5 @@ app.get('/api/code/submissions/history/:slug', requireAuth, async (req, res) => 
 
 // Start server
 const httpServer = listenWithFallback(PORT);
-
 
 

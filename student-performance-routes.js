@@ -1,4 +1,4 @@
-﻿// ============================================
+// ============================================
 // STUDENT PERFORMANCE ANALYTICS - API ROUTES
 // ============================================
 // Import this file in server.js to add all student performance endpoints
@@ -195,22 +195,22 @@ router.get('/performance-charts/heatmap', async (req, res) => {
             Assignment.find({ 'submissions.studentId': studentId })
         ]);
 
-        const dk = d => { const dt = new Date(d); return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; };
+        const dk = d => { const dt = new Date(d); return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`; };
         const dayMap = {};
 
-        attRecs.forEach(r => { if (r.status === 'present' || r.status === 'late') { const k = dk(r.date); dayMap[k] = (dayMap[k]||0) + 2; } });
-        gradeRecs.forEach(r => { const k = dk(r.createdAt); dayMap[k] = (dayMap[k]||0) + 1; });
+        attRecs.forEach(r => { if (r.status === 'present' || r.status === 'late') { const k = dk(r.date); dayMap[k] = (dayMap[k] || 0) + 2; } });
+        gradeRecs.forEach(r => { const k = dk(r.createdAt); dayMap[k] = (dayMap[k] || 0) + 1; });
         assignRecs.forEach(a => {
             a.submissions.forEach(s => {
                 if (s.studentId && s.studentId.toString() === studentId.toString() && s.submittedAt && new Date(s.submittedAt) >= since) {
-                    const k = dk(s.submittedAt); dayMap[k] = (dayMap[k]||0) + 2;
+                    const k = dk(s.submittedAt); dayMap[k] = (dayMap[k] || 0) + 2;
                 }
             });
         });
 
         const maxVal = Math.max(1, ...Object.values(dayMap));
         const heatmap = {};
-        for (const [k, v] of Object.entries(dayMap)) heatmap[k] = Math.min(4, Math.ceil((v/maxVal)*4));
+        for (const [k, v] of Object.entries(dayMap)) heatmap[k] = Math.min(4, Math.ceil((v / maxVal) * 4));
 
         res.json({ heatmap, since: since.toISOString(), today: today.toISOString() });
     } catch (error) {
