@@ -855,7 +855,7 @@
 
         /* -- Theme Toggle -- */
         const _root = document.documentElement;
-        document.getElementById('themeToggle').addEventListener('click', () => {
+        document.getElementById('themeToggle')?.addEventListener('click', () => {
             const next = _root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             _root.setAttribute('data-theme', next);
             localStorage.setItem('mw_theme', next);

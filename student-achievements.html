@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -626,8 +626,6 @@
                         onclick="location.href='student-settings.html'">
                         <i data-lucide="settings"></i>
                     </button>
-                    <div class="theme-pill" id="themeToggle" title="Toggle theme">
-                        <div class="theme-pill-knob"></div>
                         <span class="theme-pill-icon active" id="moonIcon"><i data-lucide="moon"></i></span>
                         <span class="theme-pill-icon" id="sunIcon"><i data-lucide="sun"></i></span>
                     </div>
@@ -965,7 +963,7 @@
             localStorage.setItem('theme', theme);
         }
 
-        document.getElementById('themeToggle').addEventListener('click', () => {
+        document.getElementById('themeToggle')?.addEventListener('click', () => {
             const current = document.body.getAttribute('data-theme') || 'dark';
             applyTheme(current === 'dark' ? 'light' : 'dark');
         });
