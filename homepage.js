@@ -561,21 +561,33 @@ async function fetchDashboardSparklines() {
             if (rankEl) {
                 const rankCard = rankEl.closest('.mw-kpi-card');
                 const rankBadge = rankCard?.querySelector('.mw-kpi-change');
+                const rankBars = rankCard?.querySelectorAll('.mw-spark-bar');
+
                 if (u.rank && u.rank > 0) {
                     rankEl.textContent = `#${u.rank}`;
                     if (rankBadge) {
-                        rankBadge.innerHTML = '▲ Climbing!';
+                        const badgeText = u.rank === 1 ? '🥇 Top of the class!'
+                            : u.rank <= 3 ? '🥈 Top 3!'
+                            : u.rank <= 10 ? '▲ Top 10!'
+                            : `▲ Rank #${u.rank}`;
+                        rankBadge.innerHTML = badgeText;
                         rankBadge.className = 'mw-kpi-change up';
                     }
+                    // Clear stale HTML placeholder data — no fake history
+                    rankBars?.forEach(bar => {
+                        bar.style.height = '60%';
+                        bar.setAttribute('data-label', 'Current');
+                        bar.setAttribute('data-value', `Rank #${u.rank}`);
+                    });
                 } else {
                     rankEl.textContent = '—';
                     if (rankBadge) {
                         rankBadge.innerHTML = 'Play games to get ranked';
                         rankBadge.className = 'mw-kpi-change';
                     }
-                    // Flatten rank spark bars to equal low heights (no fake data)
-                    rankCard?.querySelectorAll('.mw-spark-bar').forEach((bar, i) => {
+                    rankBars?.forEach(bar => {
                         bar.style.height = '8%';
+                        bar.setAttribute('data-label', '');
                         bar.setAttribute('data-value', 'Not ranked yet');
                     });
                 }
