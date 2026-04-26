@@ -6797,7 +6797,8 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
         $group: {
           _id: { studentId: '$studentId', gameId: '$gameId' },
           bestScore: { $max: '$score' },
-          lastActivity: { $max: '$submittedAt' }
+          lastActivity: { $max: '$submittedAt' },
+          totalDuration: { $sum: '$durationSeconds' }  // sum all play durations per game
         }
       },
       // Step 2 — roll up per student
@@ -6807,7 +6808,8 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
           totalPoints: { $sum: '$bestScore' },
           gamesPlayed: { $sum: 1 },            // unique games, not total plays
           avgAccuracy: { $avg: '$bestScore' },
-          lastActivity: { $max: '$lastActivity' }
+          lastActivity: { $max: '$lastActivity' },
+          totalTime: { $sum: '$totalDuration' } // total seconds spent across all games
         }
       },
       // Join user info
@@ -6830,6 +6832,7 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
           totalPoints: { $round: ['$totalPoints', 0] },
           gamesPlayed: 1,
           avgAccuracy: { $round: ['$avgAccuracy', 0] },
+          totalTime: 1,                        // seconds — used by faculty analytics, ignored by student UI
           lastActivity: 1
         }
       },

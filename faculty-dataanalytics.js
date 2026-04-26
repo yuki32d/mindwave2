@@ -108,29 +108,36 @@ function getFilters() {
 
 async function renderTopPerformers() {
     const filters = getFilters();
-    const data = await fetchAPI(`/api/analytics/students?timeRange=${filters.timeRange}`);
+
+    // Use the same endpoint as the student leaderboard for consistent rankings
+    const data = await fetchAPI(`/api/leaderboard`);
 
     const topPerformersTable = document.getElementById('topPerformersTable');
 
-    if (!data || !data.ok || !data.students || data.students.length === 0) {
+    if (!data || !data.leaderboard || data.leaderboard.length === 0) {
         topPerformersTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ea4b6;">No student activity yet</td></tr>';
         return;
     }
 
-    let students = data.students;
+    // Map leaderboard fields to what the table expects
+    let students = data.leaderboard.map(p => ({
+        _id: p.studentId,
+        name: p.name,
+        email: p.email,
+        gamesCompleted: p.gamesPlayed,   // unique games played (leaderboard counts unique games)
+        avgScore: p.avgAccuracy,          // avg of best-score-per-game
+        totalTime: p.totalTime || 0               // sum of all play durations in seconds
+    }));
 
-    // Apply filters
+    // Apply optional top-performer filter
     if (filters.topPerformerOnly) {
         students = students.filter(s => s.avgScore >= 70);
     }
 
-    // Only include students who have actually played at least 1 game (matches student leaderboard)
-    students = students.filter(s => s.gamesPlayed > 0 || s.avgScore > 0);
+    // Already sorted by totalPoints desc from server — take top 10
+    students = students.slice(0, 10);
 
-    // Sort by avg score and take top 10
-    students = students.sort((a, b) => b.avgScore - a.avgScore).slice(0, 10);
-
-    // Identify top and bottom performers
+    // Identify top and bottom performers for row highlights
     const topPerformers = students.slice(0, 3).map(s => s.email);
     const bottomPerformers = students.slice(-3).map(s => s.email);
 
