@@ -13,7 +13,7 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+
     <style>
         /* ── Exact admin.html design tokens ── */
         :root {
@@ -1207,47 +1207,8 @@
             buildStudentChart(chartLabels, chartValues);
         };
 
-        // ── Real-time via Socket.IO ──
-        (function setupRealtime() {
-            // Guard: socket.io.js may fail to load if server is cold-starting
-            if (typeof io === 'undefined') {
-                console.warn('📡 Socket.IO not available, skipping real-time updates (HTTP polling still active)');
-                return;
-            }
-            try {
-                // Force polling-only — Render's reverse proxy returns 502 on
-                // WebSocket upgrade attempts, so we skip the upgrade entirely.
-                const socket = io({
-                    transports: ['polling'],
-                    reconnectionAttempts: 3,
-                    reconnectionDelay: 5000,
-                    timeout: 10000
-                });
-
-                socket.on('connect', () => {
-                    console.log('📡 Real-time analytics connected (via polling)');
-                    const dot = document.querySelector('.live-dot');
-                    if (dot) dot.style.boxShadow = '0 0 12px var(--green)';
-                });
-
-                socket.on('connect_error', (error) => {
-                    // Silent — HTTP polling fallback (30s interval) is still active
-                });
-
-                socket.on('game-submitted', (data) => {
-                    console.log('🎮 New game submission received, refreshing dashboard...', data);
-                    if (typeof updateDashboard === 'function') {
-                        updateDashboard();
-                    }
-                });
-
-                socket.on('disconnect', (reason) => {
-                    // Silent — reconnection is automatic
-                });
-            } catch (e) {
-                // Silent — HTTP polling fallback is still active
-            }
-        })();
+        // ── Real-time updates handled by 30s HTTP polling (setInterval in faculty-dataanalytics.js) ──
+        // Socket.IO polling was removed: Render invalidates session IDs on cold-start → 400 Bad Request spam.
     </script>
 
     <script src="admin-logout-handler.js"></script>
