@@ -6223,70 +6223,64 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
     }
 
     // Start from ALL students so those with zero activity still appear
-    const studentsData = await User.aggregate([
+    // Build per-student stats using best-score-per-unique-game (matches /api/leaderboard logic)
+    // Step 1: from GameSubmissions, get best score per (student, game) within this faculty's scope
+    const submissionMatchQuery = { ...submissionDateMatch };
+
+    const bestScoresPerGame = await GameSubmission.aggregate([
+      { $match: submissionMatchQuery },
+      // Group by (studentId, gameId) → best score
       {
-        $match: matchQuery
-      },
-      // Left-join their game submissions (filtered by time range)
-      {
-        $lookup: {
-          from: 'gamesubmissions',
-          let: { sid: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ['$studentId', '$$sid'] },
-                ...submissionDateMatch
-              }
-            }
-          ],
-          as: 'submissions'
+        $group: {
+          _id: { studentId: '$studentId', gameId: '$gameId' },
+          bestScore: { $max: '$score' },
+          isCorrect: { $max: { $cond: ['$isCorrect', 1, 0] } },
+          lastActivity: { $max: '$submittedAt' },
+          totalDuration: { $sum: '$durationSeconds' }
         }
       },
-      // Compute stats
+      // Roll up per student
       {
-        $addFields: {
-          gamesPlayed: { $size: '$submissions' },
-          gamesCompleted: {
-            $size: {
-              $filter: { input: '$submissions', as: 's', cond: { $eq: ['$$s.isCorrect', true] } }
-            }
-          },
-          lastActive: { $max: '$submissions.submittedAt' },
-          totalTime: { $sum: '$submissions.durationSeconds' },
-          averageScore: { $avg: '$submissions.score' }
+        $group: {
+          _id: '$_id.studentId',
+          gamesPlayed: { $sum: 1 },           // unique games, not total plays
+          gamesCompleted: { $sum: '$isCorrect' },
+          avgScore: { $avg: '$bestScore' },   // avg of best scores per game
+          lastActive: { $max: '$lastActivity' },
+          totalTime: { $sum: '$totalDuration' }
         }
-      },
-      {
-        $project: {
-          _id: 1,
-          name: { $ifNull: ['$displayName', '$name'] },
-          email: 1,
-          gamesPlayed: 1,
-          gamesCompleted: 1,
-          lastActive: 1,
-          totalTime: 1,
-          avgScore: { $round: [{ $ifNull: ['$averageScore', 0] }, 0] }
-        }
-      },
-      { $sort: { lastActive: -1, name: 1 } }
+      }
     ]);
 
+    // Build a lookup map: studentId → stats
+    const statsMap = {};
+    bestScoresPerGame.forEach(s => {
+      statsMap[s._id.toString()] = s;
+    });
+
+    // Now fetch all matching students (including those with zero activity)
+    const studentsData = await User.find(matchQuery)
+      .select('_id name displayName email')
+      .lean();
+
     const students = studentsData.map(student => {
-      const completionRate = student.gamesPlayed > 0
-        ? Math.round((student.gamesCompleted / student.gamesPlayed) * 100)
+      const stats = statsMap[student._id.toString()] || {};
+      const gamesPlayed = stats.gamesPlayed || 0;
+      const gamesCompleted = stats.gamesCompleted || 0;
+      const completionRate = gamesPlayed > 0
+        ? Math.round((gamesCompleted / gamesPlayed) * 100)
         : 0;
-      const avgScore = student.avgScore || 0;
+      const avgScore = stats.avgScore != null ? Math.round(stats.avgScore) : 0;
 
       return {
         _id: student._id,
-        name: student.name,
+        name: student.displayName || student.name,
         email: student.email,
-        gamesPlayed: student.gamesPlayed,
-        gamesCompleted: student.gamesCompleted,
+        gamesPlayed,
+        gamesCompleted,
         avgScore,
-        totalTime: student.totalTime || 0,
-        lastActive: student.lastActive || null,
+        totalTime: stats.totalTime || 0,
+        lastActive: stats.lastActive || null,
         completionRate
       };
     });
