@@ -5960,8 +5960,19 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
     // Helper to add game filter to aggregation match
     const gameMatchStage = facultyGameIds ? { gameId: { $in: facultyGameIds } } : {};
 
-    // Get total students (exclude organization/test users — matches admin student directory)
-    const totalStudents = await User.countDocuments({ role: 'student', userType: { $ne: 'organization' } });
+    // Get total students — HOD sees only their department (same as Student Directory),
+    // all others see the global count
+    const HOD_REGEX = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
+    const hodMatch = (req.user.email || '').match(HOD_REGEX);
+    const studentCountQuery = { role: 'student' };
+    if (isHod && hodMatch && hodMatch[1]) {
+      // HOD: scope to their department (e.g. hod.mca@ → department: 'MCA')
+      studentCountQuery.department = hodMatch[1].toUpperCase();
+    } else {
+      // Regular faculty / super admin: platform-wide count
+      studentCountQuery.userType = { $ne: 'organization' };
+    }
+    const totalStudents = await User.countDocuments(studentCountQuery);
 
     // Get total game submissions (excluding admin and super admin, filtered by faculty games)
     const gamesPlayedData = await GameSubmission.aggregate([
