@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <script src="admin-theme-init.js"></script>
     <meta charset="UTF-8">
@@ -7,7 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindWave – Create Bug Hunt</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="game-builder.css">
     <link rel="stylesheet" href="publish-modal.css">
@@ -27,8 +30,9 @@
             border: 1px solid var(--border);
         }
     </style>
-  <script src="faculty-profile-guard.js?v=2"></script>
+    <script src="faculty-profile-guard.js?v=2"></script>
 </head>
+
 <body>
 
     <!-- TOPBAR -->
@@ -56,7 +60,8 @@
             <div class="gb-page-icon"><i data-lucide="bug"></i></div>
             <div>
                 <div class="gb-page-title">Bug Hunt</div>
-                <div class="gb-page-sub">Enter perfect code — the system injects bugs automatically for students to find and fix.</div>
+                <div class="gb-page-sub">Enter perfect code — the system injects bugs automatically for students to find
+                    and fix.</div>
             </div>
         </div>
 
@@ -108,7 +113,8 @@
         <div class="gb-card">
             <div class="gb-card-head"><i data-lucide="code-2"></i> Perfect Code (Working Version)</div>
             <div class="gb-card-body">
-                <p class="gb-helper">Enter the correct, bug-free code. The system will automatically inject bugs based on your configuration below.</p>
+                <p class="gb-helper">Enter the correct, bug-free code. The system will automatically inject bugs based
+                    on your configuration below.</p>
                 <textarea id="perfectCode"></textarea>
             </div>
         </div>
@@ -119,7 +125,8 @@
             <div class="gb-card-body">
 
                 <!-- Mode toggle -->
-                <div style="display:flex;gap:6px;margin-bottom:20px;background:var(--surface-2,rgba(0,0,0,0.12));border:1px solid var(--border);border-radius:10px;padding:4px;">
+                <div
+                    style="display:flex;gap:6px;margin-bottom:20px;background:var(--surface-2,rgba(0,0,0,0.12));border:1px solid var(--border);border-radius:10px;padding:4px;">
                     <button type="button" id="modeAutoBtn"
                         style="flex:1;padding:9px 12px;border-radius:8px;border:none;background:var(--primary,#6366f1);color:#fff;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;">
                         <i data-lucide="cpu" style="width:14px;height:14px;"></i> AI Auto-Inject
@@ -153,30 +160,35 @@
                             <i data-lucide="triangle-alert"></i> Buggy Code Preview (What Students See)
                         </div>
                         <div id="bugList" style="margin-bottom:12px;"></div>
-                        <textarea id="buggyCodePreview" readonly class="gb-code-editor" style="min-height:200px;"></textarea>
+                        <textarea id="buggyCodePreview" readonly class="gb-code-editor"
+                            style="min-height:200px;"></textarea>
                     </div>
                 </div>
 
                 <!-- ─── MANUAL MODE ─── -->
                 <div id="manualModePanel" style="display:none;">
-                    <p class="gb-helper" style="margin-bottom:16px;">
-                        Write the <strong>intentionally buggy</strong> version yourself.
-                        Students will see this code and must fix it. Grading compares against the Perfect Code above.
+                    <p class="gb-helper" style="margin-bottom:16px;" color="red">
+                        ⚠️ Warning: The Manual Mode is currently under development. Please use AI Auto-Inject Mode
+                        instead.
+
                     </p>
 
                     <div class="gb-form-group">
-                        <label>Your Buggy Code <span style="font-weight:400;color:var(--text-muted,#888);">(what students see)</span></label>
+                        <label>Your Buggy Code <span style="font-weight:400;color:var(--text-muted,#888);">(what
+                                students see)</span></label>
                         <textarea id="manualBuggyCode" style="min-height:260px;"></textarea>
                     </div>
 
                     <div class="gb-form-group" style="margin-top:18px;">
-                        <label>Bug List <span style="font-weight:400;color:var(--text-muted,#888);">(shown to students after submission)</span></label>
+                        <label>Bug List <span style="font-weight:400;color:var(--text-muted,#888);">(shown to students
+                                after submission)</span></label>
                         <textarea id="bugAnnotations" rows="5"
                             style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);outline:none;width:100%;font-family:'JetBrains Mono',monospace;font-size:13px;resize:vertical;"
                             placeholder="Line 5: Typo — 'retrun' should be 'return'
 Line 12: Wrong operator — used '=' instead of '=='
 Line 20: Missing semicolon"></textarea>
-                        <p class="gb-helper" style="margin-top:6px;">One bug per line. These descriptions are shown as the explanation after students submit.</p>
+                        <p class="gb-helper" style="margin-top:6px;">One bug per line. These descriptions are shown as
+                            the explanation after students submit.</p>
                     </div>
                 </div>
 
@@ -189,7 +201,8 @@ Line 20: Missing semicolon"></textarea>
             <div class="gb-card-body">
                 <p class="gb-helper">This will be shown to students after they submit their fix.</p>
                 <div class="gb-form-group">
-                    <textarea id="explanation" rows="4" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);outline:none;width:100%;"
+                    <textarea id="explanation" rows="4"
+                        style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);outline:none;width:100%;"
                         placeholder="Explain what the bugs were and how to fix them..."></textarea>
                 </div>
             </div>
@@ -226,7 +239,8 @@ Line 20: Missing semicolon"></textarea>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" id="modalCancelBtn"><i data-lucide="x-circle"></i> Cancel</button>
-                <button class="btn-primary" id="modalConfirmBtn"><i data-lucide="upload-cloud"></i> Publish Game</button>
+                <button class="btn-primary" id="modalConfirmBtn"><i data-lucide="upload-cloud"></i> Publish
+                    Game</button>
             </div>
         </div>
     </div>
@@ -244,4 +258,5 @@ Line 20: Missing semicolon"></textarea>
     <script src="bug-injection.js"></script>
     <script src="faculty-create-debug.js"></script>
 </body>
+
 </html>
