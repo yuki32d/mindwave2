@@ -6836,7 +6836,8 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
           lastActivity: 1
         }
       },
-      { $sort: { totalPoints: -1 } }
+      // Sort: highest score first; ties broken by fastest total time, then earliest submission
+      { $sort: { totalPoints: -1, totalTime: 1, lastActivity: 1 } }
     ]);
 
     // Find current user's stats
