@@ -85,29 +85,100 @@ async function renderGames() {
             return;
         }
 
-        container.innerHTML = games.map((item, index) => `
-            <article class="game-card" data-game-id="${item._id || item.id}" data-game-title="${item.title || 'Untitled Challenge'}" data-game-type="${item.type || ''}">
+        container.innerHTML = games.map((item) => {
+            const isCompleted = !!item.hasPlayed;
+            const actionTag = isCompleted
+                ? `<span class="tag" style="margin-top:12px; cursor:not-allowed; background:rgba(52,199,89,0.18); color:#34c759; border:1px solid rgba(52,199,89,0.35); pointer-events:none;">✓ Completed</span>`
+                : `<span class="tag pink play-btn" style="margin-top:12px; cursor:pointer;">Play</span>`;
+            const cardStyle = isCompleted
+                ? 'opacity:0.72; border-color:rgba(52,199,89,0.35); cursor:not-allowed;'
+                : '';
+
+            return `
+            <article class="game-card" data-game-id="${item._id || item.id}" data-game-title="${item.title || 'Untitled Challenge'}" data-game-type="${item.type || ''}" data-completed="${isCompleted}" style="${cardStyle}">
                 <h3>${item.title || 'Untitled Challenge'}</h3>
                 <p>${item.type || ''} • ${item.difficulty || ''}</p>
-                <p style="margin-top: 12px;">${item.brief || ''}</p>
-                <span class="tag pink play-btn" style="margin-top: 12px; cursor: pointer;">Play</span>
-            </article>
-        `).join('');
+                <p style="margin-top:12px;">${item.brief || ''}</p>
+                ${actionTag}
+            </article>`;
+        }).join('');
 
-        // Add event delegation for play buttons
+        // Add event delegation — only allow click on non-completed games
         container.querySelectorAll('.game-card').forEach(card => {
+            const isCompleted = card.dataset.completed === 'true';
+
+            if (isCompleted) {
+                // Block the whole card and show an informational popup
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showHomepageCompletedPopup(card.dataset.gameTitle);
+                });
+                return;
+            }
+
             const playBtn = card.querySelector('.play-btn');
-            playBtn.addEventListener('click', () => {
-                const gameId = card.dataset.gameId;
-                const gameTitle = card.dataset.gameTitle;
-                const gameType = card.dataset.gameType;
-                startGame(gameId, gameTitle, gameType);
-            });
+            if (playBtn) {
+                playBtn.addEventListener('click', () => {
+                    const gameId = card.dataset.gameId;
+                    const gameTitle = card.dataset.gameTitle;
+                    const gameType = card.dataset.gameType;
+                    startGame(gameId, gameTitle, gameType);
+                });
+            }
         });
     } catch (error) {
         console.error('Failed to fetch games:', error);
         container.innerHTML = '<div class="empty-state">Failed to load games. Please refresh the page.</div>';
     }
+}
+
+// Show a "already completed" popup on the homepage dashboard
+function showHomepageCompletedPopup(gameTitle) {
+    const existing = document.getElementById('mw-completed-popup');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'mw-completed-popup';
+    overlay.style.cssText = `
+        position:fixed; inset:0; background:rgba(0,0,0,.55);
+        backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+        z-index:9999; display:flex; align-items:center; justify-content:center;
+        animation:mwFadeIn .18s ease;
+    `;
+    overlay.innerHTML = `
+        <div style="
+            background:var(--surface,#1e1e2e);
+            border:1px solid rgba(52,199,89,.35);
+            border-radius:20px; padding:2.4rem 2rem 2rem;
+            width:340px; max-width:90vw; text-align:center;
+            box-shadow:0 24px 60px rgba(0,0,0,.5);
+            animation:mwPopUp .22s cubic-bezier(.34,1.56,.64,1);
+        ">
+            <div style="
+                width:64px; height:64px; border-radius:50%;
+                background:rgba(52,199,89,.15); color:#34c759;
+                display:flex; align-items:center; justify-content:center;
+                margin:0 auto 1.2rem; font-size:1.8rem;
+            ">✓</div>
+            <h3 style="font-size:1.2rem; font-weight:700; margin:0 0 .5rem; color:var(--text,#fff);">
+                Already Completed
+            </h3>
+            <p style="font-size:.875rem; color:var(--text-muted,#aaa); margin:0 0 2rem; line-height:1.5;">
+                You've already submitted your answers for <strong>${gameTitle || 'this game'}</strong>. Multiple attempts are not permitted.
+            </p>
+            <button onclick="document.getElementById('mw-completed-popup').remove()"
+                style="
+                    width:100%; padding:.75rem 1rem; border-radius:12px;
+                    font-size:.9rem; font-weight:600; cursor:pointer; border:none;
+                    background:var(--surface-alt,rgba(255,255,255,.08));
+                    color:var(--text,#fff);
+                ">Close</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    // Close on backdrop click
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 }
 
 // Activity tracking system
