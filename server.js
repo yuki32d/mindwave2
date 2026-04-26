@@ -5960,19 +5960,9 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
     // Helper to add game filter to aggregation match
     const gameMatchStage = facultyGameIds ? { gameId: { $in: facultyGameIds } } : {};
 
-    // Get total students — HOD sees only their department (same as Student Directory),
-    // all others see the global count
-    const HOD_REGEX = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
-    const hodMatch = (req.user.email || '').match(HOD_REGEX);
-    const studentCountQuery = { role: 'student' };
-    if (isHod && hodMatch && hodMatch[1]) {
-      // HOD: scope to their department (e.g. hod.mca@ → department: 'MCA')
-      studentCountQuery.department = hodMatch[1].toUpperCase();
-    } else {
-      // Regular faculty / super admin: platform-wide count
-      studentCountQuery.userType = { $ne: 'organization' };
-    }
-    const totalStudents = await User.countDocuments(studentCountQuery);
+    // Get total students — HOD and super admin see all students platform-wide
+    // (hod.mca@cmrit.ac.in is the college-wide super HOD, not per-department)
+    const totalStudents = await User.countDocuments({ role: 'student', userType: { $ne: 'organization' } });
 
     // Get total game submissions (excluding admin and super admin, filtered by faculty games)
     const gamesPlayedData = await GameSubmission.aggregate([
@@ -7005,21 +6995,14 @@ app.get("/api/admin/students", authMiddleware, async (req, res) => {
     const HOD_REGEX = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
     const isHod = HOD_REGEX.test(currentUser.email || '');
 
-    if (!isSuperAdmin) {
-      if (isHod) {
-        // HOD sees all students in their department
-        const match = currentUser.email.match(HOD_REGEX);
-        if (match && match[1]) {
-          query.department = match[1].toUpperCase();
-        }
-      } else {
-        // Regular faculty sees students in their department and selected sections
-        if (currentUser.department) {
-          query.department = currentUser.department;
-        }
-        if (Array.isArray(currentUser.facultySections) && currentUser.facultySections.length > 0) {
-          query.section = { $in: currentUser.facultySections };
-        }
+    // HOD is college-wide super HOD — sees all students, no department filter
+    // Regular faculty sees only their department + sections
+    if (!isSuperAdmin && !isHod) {
+      if (currentUser.department) {
+        query.department = currentUser.department;
+      }
+      if (Array.isArray(currentUser.facultySections) && currentUser.facultySections.length > 0) {
+        query.section = { $in: currentUser.facultySections };
       }
     }
 
