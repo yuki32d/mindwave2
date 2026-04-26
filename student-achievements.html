@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -622,13 +622,6 @@
                     <button class="mw-icon-btn" id="notifBtn" aria-label="Notifications">
                         <i data-lucide="bell"></i>
                     </button>
-                    <button class="mw-icon-btn" id="settingsBtn" aria-label="Settings"
-                        onclick="location.href='student-settings.html'">
-                        <i data-lucide="settings"></i>
-                    </button>
-                        <span class="theme-pill-icon active" id="moonIcon"><i data-lucide="moon"></i></span>
-                        <span class="theme-pill-icon" id="sunIcon"><i data-lucide="sun"></i></span>
-                    </div>
                 </div>
             </header>
 
@@ -947,20 +940,8 @@
         function applyTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             document.body.setAttribute('data-theme', theme);
-            const pill = document.getElementById('themeToggle');
-            const moonIcon = document.getElementById('moonIcon');
-            const sunIcon = document.getElementById('sunIcon');
-            if (theme === 'light') {
-                pill.classList.add('light');
-                moonIcon.classList.remove('active');
-                sunIcon.classList.add('active');
-            } else {
-                pill.classList.remove('light');
-                moonIcon.classList.add('active');
-                sunIcon.classList.remove('active');
-            }
-            if (window.lucide) lucide.createIcons();
             localStorage.setItem('theme', theme);
+            if (window.lucide) lucide.createIcons();
         }
 
         document.getElementById('themeToggle')?.addEventListener('click', () => {
