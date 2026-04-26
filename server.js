@@ -6015,7 +6015,7 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
     const activeStudents = activeStudentsData.length;
     const totalEngagement = totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100) : 0;
 
-    // Get top performer (filtered by faculty games)
+    // Get top performer — best avg score using best-score-per-game (matches leaderboard logic)
     const topPerformerData = await GameSubmission.aggregate([
       { $match: gameMatchStage },
       {
@@ -6033,14 +6033,27 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
           'student.email': { $ne: SUPER_ADMIN_EMAIL }
         }
       },
+      // Step 1: best score per (student, game)
       {
         $group: {
-          _id: '$studentId',
+          _id: { studentId: '$studentId', gameId: '$gameId' },
           name: { $first: { $ifNull: ['$student.displayName', '$student.name'] } },
-          totalScore: { $sum: 1 }
+          bestScore: { $max: '$score' },
+          totalDuration: { $sum: '$durationSeconds' }
         }
       },
-      { $sort: { totalScore: -1 } },
+      // Step 2: roll up per student — avg of best scores
+      {
+        $group: {
+          _id: '$_id.studentId',
+          name: { $first: '$name' },
+          avgScore: { $avg: '$bestScore' },
+          gamesPlayed: { $sum: 1 },
+          totalTime: { $sum: '$totalDuration' }
+        }
+      },
+      // Rank by avg score desc, fastest time as tie-breaker
+      { $sort: { avgScore: -1, totalTime: 1 } },
       { $limit: 1 }
     ]);
 
@@ -6084,7 +6097,8 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
       totalStudents,
       topPerformer: topPerformer ? {
         name: topPerformer.name,
-        totalScore: topPerformer.totalScore
+        avgScore: Math.round(topPerformer.avgScore),
+        gamesPlayed: topPerformer.gamesPlayed
       } : null,
       consistentStudents: consistentStudentsData.length
     });

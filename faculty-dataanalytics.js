@@ -57,9 +57,9 @@ async function renderAnalytics() {
         <article class="insight-card">
             <h3>Top Performer</h3>
             <strong>${topPerformer ? topPerformer.name : 'N/A'}</strong>
-            <div class="trend">${topPerformer ? topPerformer.totalScore : 0} games completed</div>
+            <div class="trend">${topPerformer ? `${topPerformer.avgScore}% avg score · ${topPerformer.gamesPlayed} game${topPerformer.gamesPlayed !== 1 ? 's' : ''}` : 'No activity yet'}</div>
             <div class="bar-meter">
-                <div class="bar-fill" style="width: ${topPerformer ? Math.min(100, (topPerformer.totalScore / 20) * 100) : 0}%;"></div>
+                <div class="bar-fill" style="width: ${topPerformer ? topPerformer.avgScore : 0}%;"></div>
             </div>
         </article>
         <article class="insight-card">
