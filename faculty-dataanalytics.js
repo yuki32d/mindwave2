@@ -283,7 +283,8 @@ async function renderStudentActivity() {
     if (filters.bottomLiners) {
         students = students.sort((a, b) => a.avgScore - b.avgScore).slice(0, 10);
     } else {
-        students = students.sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive));
+        // Default: sort by score desc (consistent with student leaderboard ranking)
+        students = students.sort((a, b) => b.avgScore - a.avgScore || new Date(b.lastActive) - new Date(a.lastActive));
     }
 
     // Identify top and bottom performers for row highlighting
@@ -306,7 +307,7 @@ async function renderStudentActivity() {
                 <td>${student.email}</td>
                 <td>${lastActive}</td>
                 <td>${student.gamesPlayed}</td>
-                <td>${student.completionRate}%</td>
+                <td>${student.avgScore}%</td>
             </tr>
             <tr id="${detailsId}" class="student-activity-details-row" style="display: none;">
                 <td colspan="5" style="padding: 0; background: rgba(255,255,255,0.02);">
