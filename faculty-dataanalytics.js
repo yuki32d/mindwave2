@@ -124,6 +124,9 @@ async function renderTopPerformers() {
         students = students.filter(s => s.avgScore >= 70);
     }
 
+    // Only include students who have actually played at least 1 game (matches student leaderboard)
+    students = students.filter(s => s.gamesPlayed > 0 || s.avgScore > 0);
+
     // Sort by avg score and take top 10
     students = students.sort((a, b) => b.avgScore - a.avgScore).slice(0, 10);
 
