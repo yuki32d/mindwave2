@@ -6798,7 +6798,8 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
           _id: { studentId: '$studentId', gameId: '$gameId' },
           bestScore: { $max: '$score' },
           lastActivity: { $max: '$submittedAt' },
-          totalDuration: { $sum: '$durationSeconds' }  // sum all play durations per game
+          totalDuration: { $sum: '$durationSeconds' },
+          isCorrect: { $max: { $cond: ['$isCorrect', 1, 0] } }  // 1 if completed correctly in any attempt
         }
       },
       // Step 2 — roll up per student
@@ -6807,6 +6808,7 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
           _id: '$_id.studentId',
           totalPoints: { $sum: '$bestScore' },
           gamesPlayed: { $sum: 1 },            // unique games, not total plays
+          gamesCompleted: { $sum: '$isCorrect' }, // unique games completed correctly
           avgAccuracy: { $avg: '$bestScore' },
           lastActivity: { $max: '$lastActivity' },
           totalTime: { $sum: '$totalDuration' } // total seconds spent across all games
@@ -6831,6 +6833,15 @@ app.get("/api/leaderboard", authMiddleware, async (req, res) => {
           email: '$userInfo.email',
           totalPoints: { $round: ['$totalPoints', 0] },
           gamesPlayed: 1,
+          gamesCompleted: 1,
+          completionRate: {
+            $round: [{
+              $multiply: [
+                { $divide: ['$gamesCompleted', { $max: ['$gamesPlayed', 1] }] },
+                100
+              ]
+            }, 0]
+          },
           avgAccuracy: { $round: ['$avgAccuracy', 0] },
           totalTime: 1,                        // seconds — used by faculty analytics, ignored by student UI
           lastActivity: 1

@@ -253,16 +253,27 @@ async function loadStudentDetails(studentId, detailsRow) {
 
 async function renderStudentActivity() {
     const filters = getFilters();
-    const data = await fetchAPI(`/api/analytics/students?timeRange=${filters.timeRange}`);
+
+    // Use the same endpoint as top performers and student leaderboard
+    const data = await fetchAPI(`/api/leaderboard`);
 
     const studentActivityTable = document.getElementById('studentActivityTable');
 
-    if (!data || !data.ok || !data.students || data.students.length === 0) {
+    if (!data || !data.leaderboard || data.leaderboard.length === 0) {
         studentActivityTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ea4b6;">No student activity tracked yet</td></tr>';
         return;
     }
 
-    let students = data.students;
+    // Map leaderboard fields to what the table expects
+    let students = data.leaderboard.map(p => ({
+        _id: p.studentId,
+        name: p.name,
+        email: p.email,
+        lastActive: p.lastActivity,
+        gamesPlayed: p.gamesPlayed,
+        completionRate: p.completionRate ?? 0,
+        avgScore: p.avgAccuracy
+    }));
 
     // Apply filters
     if (filters.engagementDetails) {
@@ -275,13 +286,13 @@ async function renderStudentActivity() {
         students = students.sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive));
     }
 
-    // Identify top and bottom performers for highlighting
-    const allStudents = data.students.sort((a, b) => b.avgScore - a.avgScore);
-    const topPerformers = allStudents.slice(0, 3).map(s => s.email);
-    const bottomPerformers = allStudents.slice(-3).map(s => s.email);
+    // Identify top and bottom performers for row highlighting
+    const sorted = [...students].sort((a, b) => b.avgScore - a.avgScore);
+    const topPerformers = sorted.slice(0, 3).map(s => s.email);
+    const bottomPerformers = sorted.slice(-3).map(s => s.email);
 
     studentActivityTable.innerHTML = students.map((student, index) => {
-        const lastActive = new Date(student.lastActive).toLocaleString();
+        const lastActive = student.lastActive ? new Date(student.lastActive).toLocaleString() : 'N/A';
         let highlightClass = '';
         if (topPerformers.includes(student.email)) highlightClass = 'highlight-green';
         if (bottomPerformers.includes(student.email)) highlightClass = 'highlight-red';
@@ -333,6 +344,7 @@ async function renderStudentActivity() {
                 detailsRow.style.display = 'none';
                 this.querySelector('span').textContent = '▼';
             }
+
         });
     });
 }
