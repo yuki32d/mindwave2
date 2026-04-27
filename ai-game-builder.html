@@ -9,7 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindWave – AI Game Builder</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="auth-guard.js"></script>
     <script src="faculty-profile-guard.js?v=2"></script>
@@ -27,7 +29,7 @@
             --green: #16a34a;
             --red: #dc2626;
             --blue: #2563eb;
-            --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.07), 0 4px 16px rgba(0, 0, 0, 0.05);
             --radius: 14px;
             --mono: 'JetBrains Mono', monospace;
             --topbar-h: 58px;
@@ -36,29 +38,48 @@
         [data-theme="dark"] {
             --bg: #0d1117;
             --surface: #161b27;
-            --border: rgba(255,255,255,0.08);
+            --border: rgba(255, 255, 255, 0.08);
             --text: #e2e8f0;
             --muted: #6b7694;
-            --shadow: 0 1px 4px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
         }
 
         [data-theme="light"] {
             --bg: #f4f6fa;
             --surface: #ffffff;
-            --border: rgba(0,0,0,0.08);
+            --border: rgba(0, 0, 0, 0.08);
             --text: #111827;
             --muted: #6b7280;
-            --shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+            --shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
         }
 
-        [data-theme="light"] .topbar { background: #ffffff; border-bottom: 1px solid rgba(0,0,0,0.08); }
-        [data-theme="light"] .search-bar { background: #f0f2f5; }
-        [data-theme="dark"] .topbar { background: #161b27; }
-        [data-theme="dark"] .search-bar { background: #1c2233; }
+        [data-theme="light"] .topbar {
+            background: #ffffff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        [data-theme="light"] .search-bar {
+            background: #f0f2f5;
+        }
 
-        html, body {
+        [data-theme="dark"] .topbar {
+            background: #161b27;
+        }
+
+        [data-theme="dark"] .search-bar {
+            background: #1c2233;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
             height: 100%;
             overflow: hidden;
             font-family: 'Inter', sans-serif;
@@ -67,9 +88,22 @@
             color: var(--text);
         }
 
-        a { text-decoration: none; color: inherit; }
-        button { font-family: inherit; cursor: pointer; }
-        input, textarea, select { font-family: inherit; font-size: 13px; }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        input,
+        textarea,
+        select {
+            font-family: inherit;
+            font-size: 13px;
+        }
 
         /* ── FULL-SCREEN SHELL (topbar + main) ── */
         .shell {
@@ -110,7 +144,10 @@
             flex-shrink: 0;
         }
 
-        .topbar-logo-mark svg { width: 16px; height: 16px; }
+        .topbar-logo-mark svg {
+            width: 16px;
+            height: 16px;
+        }
 
         .topbar-logo-name {
             font-weight: 800;
@@ -149,7 +186,10 @@
             transition: all .14s;
         }
 
-        .topbar-nav a:hover { background: var(--bg); color: var(--text); }
+        .topbar-nav a:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
 
         .topbar-nav a.active {
             background: var(--accent-lo);
@@ -172,7 +212,11 @@
             height: 34px;
         }
 
-        .search-bar svg { width: 14px; height: 14px; color: var(--muted); }
+        .search-bar svg {
+            width: 14px;
+            height: 14px;
+            color: var(--muted);
+        }
 
         .search-bar input {
             background: none;
@@ -183,7 +227,9 @@
             width: 100%;
         }
 
-        .search-bar input::placeholder { color: var(--muted); }
+        .search-bar input::placeholder {
+            color: var(--muted);
+        }
 
         .topbar-right {
             display: flex;
@@ -205,30 +251,61 @@
             cursor: pointer;
         }
 
-        .t-btn:hover { border-color: var(--accent); color: var(--accent); }
-        .t-btn svg { width: 16px; height: 16px; }
+        .t-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .t-btn svg {
+            width: 16px;
+            height: 16px;
+        }
 
         /* theme toggle */
         .theme-toggle {
-            width: 34px; height: 34px;
+            width: 34px;
+            height: 34px;
             border-radius: 8px;
             border: 1px solid var(--border);
             background: var(--surface);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: var(--muted);
             cursor: pointer;
             transition: all .14s;
         }
 
-        .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
-        .theme-toggle svg { width: 16px; height: 16px; }
-        .theme-toggle .icon-sun { display: block; }
-        .theme-toggle .icon-moon { display: none; }
-        [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
-        [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .theme-toggle svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .theme-toggle .icon-sun {
+            display: block;
+        }
+
+        .theme-toggle .icon-moon {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-sun {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-moon {
+            display: block;
+        }
 
         /* profile */
-        .profile-wrap { position: relative; }
+        .profile-wrap {
+            position: relative;
+        }
 
         .profile-toggle {
             display: flex;
@@ -242,18 +319,27 @@
             transition: border-color .14s;
         }
 
-        .profile-toggle:hover { border-color: var(--accent); }
+        .profile-toggle:hover {
+            border-color: var(--accent);
+        }
 
         .profile-av {
-            width: 24px; height: 24px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: var(--accent);
             color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 10px; font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 800;
         }
 
-        .profile-toggle small { font-size: 12px; font-weight: 700; }
+        .profile-toggle small {
+            font-size: 12px;
+            font-weight: 700;
+        }
 
         .profile-dropdown {
             display: none;
@@ -281,8 +367,13 @@
             transition: background .12s;
         }
 
-        .profile-dropdown a:hover { background: var(--bg); }
-        .profile-dropdown a.danger { color: var(--red); }
+        .profile-dropdown a:hover {
+            background: var(--bg);
+        }
+
+        .profile-dropdown a.danger {
+            color: var(--red);
+        }
 
         /* ── MAIN AREA ── */
         .main {
@@ -299,8 +390,14 @@
             scrollbar-color: var(--border) transparent;
         }
 
-        .content::-webkit-scrollbar { width: 4px; }
-        .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
 
         /* ── PAGE HEADER ── */
         .page-head {
@@ -322,16 +419,22 @@
         }
 
         .page-title-icon {
-            width: 38px; height: 38px;
+            width: 38px;
+            height: 38px;
             border-radius: 10px;
             background: var(--accent-lo);
             border: 1px solid var(--accent-bdr);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: var(--accent);
             flex-shrink: 0;
         }
 
-        .page-title-icon svg { width: 20px; height: 20px; }
+        .page-title-icon svg {
+            width: 20px;
+            height: 20px;
+        }
 
         .page-sub {
             font-size: 12px;
@@ -339,7 +442,10 @@
             margin-top: 3px;
         }
 
-        .page-actions { display: flex; gap: 8px; }
+        .page-actions {
+            display: flex;
+            gap: 8px;
+        }
 
         .btn {
             display: inline-flex;
@@ -354,7 +460,10 @@
             cursor: pointer;
         }
 
-        .btn svg { width: 14px; height: 14px; }
+        .btn svg {
+            width: 14px;
+            height: 14px;
+        }
 
         .btn-primary {
             background: var(--accent);
@@ -364,7 +473,7 @@
         .btn-primary:hover {
             background: #b87000;
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(208,128,0,.3);
+            box-shadow: 0 6px 20px rgba(208, 128, 0, .3);
         }
 
         .btn-ghost {
@@ -373,7 +482,10 @@
             border: 1px solid var(--border);
         }
 
-        .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
 
         /* ── CARD ── */
         .card {
@@ -400,14 +512,19 @@
             gap: 7px;
         }
 
-        .card-title svg { width: 15px; height: 15px; color: var(--accent); }
+        .card-title svg {
+            width: 15px;
+            height: 15px;
+            color: var(--accent);
+        }
 
         /* ── BUILDER LAYOUT ── */
         .builder-shell {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 18px;
-            height: calc(100vh - var(--topbar-h) - 44px - 20px - 46px); /* adjusted for topbar + page-head + padding */
+            height: calc(100vh - var(--topbar-h) - 44px - 20px - 46px);
+            /* adjusted for topbar + page-head + padding */
             min-height: 400px;
             margin-bottom: 24px;
         }
@@ -442,7 +559,11 @@
             margin-bottom: 2px;
         }
 
-        .panel-header-left h2 svg { width: 15px; height: 15px; color: var(--accent); }
+        .panel-header-left h2 svg {
+            width: 15px;
+            height: 15px;
+            color: var(--accent);
+        }
 
         .panel-header-left p {
             font-size: 12px;
@@ -461,8 +582,14 @@
             scrollbar-color: var(--border) transparent;
         }
 
-        .chat-messages::-webkit-scrollbar { width: 3px; }
-        .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .chat-messages::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
 
         .chat-message {
             padding: 10px 14px;
@@ -509,9 +636,13 @@
             outline: none;
         }
 
-        .chat-input-area input::placeholder { color: var(--muted); }
+        .chat-input-area input::placeholder {
+            color: var(--muted);
+        }
 
-        .chat-input-area input:focus { border-color: var(--accent); }
+        .chat-input-area input:focus {
+            border-color: var(--accent);
+        }
 
         .send-btn {
             background: var(--accent);
@@ -530,11 +661,19 @@
         .send-btn:hover {
             background: #b87000;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(208,128,0,.3);
+            box-shadow: 0 4px 12px rgba(208, 128, 0, .3);
         }
 
-        .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-        .send-btn svg { width: 18px; height: 18px; }
+        .send-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .send-btn svg {
+            width: 18px;
+            height: 18px;
+        }
 
         /* ── PREVIEW ── */
         .preview-content {
@@ -545,8 +684,14 @@
             scrollbar-color: var(--border) transparent;
         }
 
-        .preview-content::-webkit-scrollbar { width: 3px; }
-        .preview-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .preview-content::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .preview-content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
 
         .empty-preview {
             display: flex;
@@ -560,16 +705,25 @@
         }
 
         .empty-preview-icon {
-            width: 64px; height: 64px;
+            width: 64px;
+            height: 64px;
             border-radius: 16px;
             background: var(--accent-lo);
             border: 1px solid var(--accent-bdr);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: var(--accent);
         }
 
-        .empty-preview-icon svg { width: 28px; height: 28px; }
-        .empty-preview p { font-size: 13px; }
+        .empty-preview-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .empty-preview p {
+            font-size: 13px;
+        }
 
         .game-preview {
             background: var(--bg);
@@ -585,7 +739,11 @@
             margin-bottom: 6px;
         }
 
-        .game-preview p { font-size: 13px; color: var(--muted); margin: 3px 0; }
+        .game-preview p {
+            font-size: 13px;
+            color: var(--muted);
+            margin: 3px 0;
+        }
 
         .game-meta {
             display: flex;
@@ -615,10 +773,14 @@
 
         .publish-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(22,163,74,.3);
+            box-shadow: 0 6px 18px rgba(22, 163, 74, .3);
         }
 
-        .publish-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .publish-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
 
         /* preview bottom bar */
         .preview-footer {
@@ -634,30 +796,40 @@
             gap: 8px;
         }
 
-        .edit-mode-toggle span { font-size: 12px; color: var(--muted); }
+        .edit-mode-toggle span {
+            font-size: 12px;
+            color: var(--muted);
+        }
 
         .toggle-switch {
             position: relative;
-            width: 40px; height: 22px;
+            width: 40px;
+            height: 22px;
             background: var(--border);
             border-radius: 11px;
             cursor: pointer;
             transition: background .25s;
         }
 
-        .toggle-switch.active { background: var(--accent); }
+        .toggle-switch.active {
+            background: var(--accent);
+        }
 
         .toggle-slider {
             position: absolute;
-            top: 2px; left: 2px;
-            width: 18px; height: 18px;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
             background: white;
             border-radius: 50%;
             transition: transform .25s;
-            box-shadow: 0 1px 3px rgba(0,0,0,.2);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
         }
 
-        .toggle-switch.active .toggle-slider { transform: translateX(18px); }
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(18px);
+        }
 
         /* question item */
         .question-item {
@@ -675,9 +847,13 @@
             margin-bottom: 10px;
         }
 
-        .question-actions { display: flex; gap: 6px; }
+        .question-actions {
+            display: flex;
+            gap: 6px;
+        }
 
-        .edit-btn, .delete-btn {
+        .edit-btn,
+        .delete-btn {
             padding: 5px 10px;
             border-radius: 6px;
             cursor: pointer;
@@ -693,21 +869,25 @@
             border-color: var(--accent-bdr);
         }
 
-        .edit-btn:hover { background: rgba(208,128,0,.2); }
-
-        .delete-btn {
-            background: rgba(220,38,38,.1);
-            color: var(--red);
-            border-color: rgba(220,38,38,.2);
+        .edit-btn:hover {
+            background: rgba(208, 128, 0, .2);
         }
 
-        .delete-btn:hover { background: rgba(220,38,38,.2); }
+        .delete-btn {
+            background: rgba(220, 38, 38, .1);
+            color: var(--red);
+            border-color: rgba(220, 38, 38, .2);
+        }
+
+        .delete-btn:hover {
+            background: rgba(220, 38, 38, .2);
+        }
 
         .add-question-btn {
             width: 100%;
             padding: 10px;
-            background: rgba(22,163,74,.06);
-            border: 2px dashed rgba(22,163,74,.3);
+            background: rgba(22, 163, 74, .06);
+            border: 2px dashed rgba(22, 163, 74, .3);
             border-radius: 10px;
             color: var(--green);
             font-weight: 700;
@@ -717,11 +897,19 @@
             margin-top: 10px;
         }
 
-        .add-question-btn:hover { background: rgba(22,163,74,.12); border-color: rgba(22,163,74,.5); }
+        .add-question-btn:hover {
+            background: rgba(22, 163, 74, .12);
+            border-color: rgba(22, 163, 74, .5);
+        }
 
-        .save-cancel-controls { display: flex; gap: 10px; margin-top: 12px; }
+        .save-cancel-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
 
-        .save-btn, .cancel-btn {
+        .save-btn,
+        .cancel-btn {
             flex: 1;
             padding: 10px;
             border: none;
@@ -732,8 +920,14 @@
             transition: all .15s;
         }
 
-        .save-btn { background: var(--green); color: white; }
-        .save-btn:hover { transform: translateY(-1px); }
+        .save-btn {
+            background: var(--green);
+            color: white;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-1px);
+        }
 
         .cancel-btn {
             background: var(--bg);
@@ -741,7 +935,10 @@
             border: 1px solid var(--border);
         }
 
-        .cancel-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .cancel-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
 
         /* ── TYPING INDICATOR ── */
         .typing-indicator {
@@ -756,23 +953,44 @@
         }
 
         .typing-dot {
-            width: 7px; height: 7px;
+            width: 7px;
+            height: 7px;
             background: var(--muted);
             border-radius: 50%;
             animation: bounce 1.4s infinite ease-in-out both;
         }
 
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
 
         @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
         }
 
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(6px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ── CREATE GAMES SECTION ── */
@@ -791,8 +1009,17 @@
             gap: 7px;
         }
 
-        .section-title svg { width: 16px; height: 16px; color: var(--accent); }
-        .section-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+        .section-title svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent);
+        }
+
+        .section-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
 
         .game-types-grid {
             display: grid;
@@ -830,32 +1057,44 @@
         .game-type-card:hover {
             transform: translateY(-3px);
             border-color: var(--accent-bdr);
-            box-shadow: 0 8px 24px rgba(208,128,0,.15);
+            box-shadow: 0 8px 24px rgba(208, 128, 0, .15);
         }
 
-        .game-type-card:hover::before { opacity: 1; }
+        .game-type-card:hover::before {
+            opacity: 1;
+        }
 
         .template-icon {
-            width: 46px; height: 46px;
+            width: 46px;
+            height: 46px;
             border-radius: 12px;
             background: var(--accent-lo);
             border: 1px solid var(--accent-bdr);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: var(--accent);
-            position: relative; z-index: 1;
+            position: relative;
+            z-index: 1;
             transition: transform .2s;
         }
 
-        .template-icon svg { width: 22px; height: 22px; }
+        .template-icon svg {
+            width: 22px;
+            height: 22px;
+        }
 
-        .game-type-card:hover .template-icon { transform: scale(1.08); }
+        .game-type-card:hover .template-icon {
+            transform: scale(1.08);
+        }
 
         .game-type-card h3 {
             margin: 0;
             font-size: 13px;
             color: var(--text);
             font-weight: 700;
-            position: relative; z-index: 1;
+            position: relative;
+            z-index: 1;
         }
 
         .game-type-card p {
@@ -863,14 +1102,15 @@
             font-size: 11px;
             color: var(--muted);
             line-height: 1.4;
-            position: relative; z-index: 1;
+            position: relative;
+            z-index: 1;
         }
 
         /* ── MODAL ── */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -887,7 +1127,7 @@
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
             animation: fadeUp .2s ease both;
         }
 
@@ -907,7 +1147,11 @@
             color: var(--text);
         }
 
-        .modal-header h3 svg { width: 16px; height: 16px; color: var(--accent); }
+        .modal-header h3 svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent);
+        }
 
         .close-modal {
             background: none;
@@ -915,15 +1159,23 @@
             color: var(--muted);
             font-size: 22px;
             cursor: pointer;
-            width: 30px; height: 30px;
-            display: flex; align-items: center; justify-content: center;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border-radius: 6px;
             transition: background .13s;
         }
 
-        .close-modal:hover { background: var(--bg); color: var(--text); }
+        .close-modal:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
 
-        .form-group { margin-bottom: 14px; }
+        .form-group {
+            margin-bottom: 14px;
+        }
 
         .form-group label {
             display: block;
@@ -948,12 +1200,19 @@
         }
 
         .form-group input::placeholder,
-        .form-group textarea::placeholder { color: var(--muted); }
+        .form-group textarea::placeholder {
+            color: var(--muted);
+        }
 
         .form-group input:focus,
-        .form-group textarea:focus { border-color: var(--accent); }
+        .form-group textarea:focus {
+            border-color: var(--accent);
+        }
 
-        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
 
         .options-grid {
             display: grid;
@@ -962,9 +1221,18 @@
             align-items: center;
         }
 
-        .correct-radio { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
+        .correct-radio {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
 
-        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
 
         .modal-actions button {
             flex: 1;
@@ -977,30 +1245,130 @@
             transition: all .15s;
         }
 
-        .modal-actions .primary { background: var(--accent); color: white; }
-        .modal-actions .primary:hover { background: #b87000; }
-        .modal-actions .secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-        .modal-actions .secondary:hover { border-color: var(--accent); color: var(--accent); }
+        .modal-actions .primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .modal-actions .primary:hover {
+            background: #b87000;
+        }
+
+        .modal-actions .secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .modal-actions .secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
 
         @media (max-width: 900px) {
             .builder-shell {
                 grid-template-columns: 1fr;
                 height: auto;
             }
-            .chat-panel { height: 380px; }
-            .preview-panel { height: 460px; }
-            .topbar-nav { display: none; }
+
+            .chat-panel {
+                height: 380px;
+            }
+
+            .preview-panel {
+                height: 460px;
+            }
+
+            .topbar-nav {
+                display: none;
+            }
         }
+
         /* ── ADMIN MAINTENANCE MODAL ── */
-        .admin-limit-overlay { display:none; position:fixed; inset:0; z-index:99999; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); align-items:center; justify-content:center; }
-        .admin-limit-overlay.open { display:flex; }
-        .admin-limit-modal { background:var(--surface); border:1px solid var(--border-2); border-radius:20px; padding:36px 32px 28px; width:380px; max-width:92vw; text-align:center; box-shadow:0 32px 80px rgba(0,0,0,0.5); animation:adminLimitPop 0.25s cubic-bezier(0.34,1.56,0.64,1); }
-        @keyframes adminLimitPop { from { opacity:0; transform:scale(0.88); } to { opacity:1; transform:scale(1); } }
-        .admin-limit-icon { width:60px; height:60px; border-radius:50%; margin:0 auto 18px; background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(220,38,38,0.2)); border:1.5px solid rgba(239,68,68,0.3); display:flex; align-items:center; justify-content:center; font-size:26px; }
-        .admin-limit-title { font-size:18px; font-weight:800; color:var(--text); margin-bottom:8px; }
-        .admin-limit-desc  { font-size:14px; color:var(--muted); line-height:1.65; margin-bottom:24px; }
-        .admin-limit-btn { width:100%; padding:13px; border-radius:12px; border:none; background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:opacity 0.2s,transform 0.15s; }
-        .admin-limit-btn:hover { opacity:0.9; transform:translateY(-1px); }
+        .admin-limit-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-limit-overlay.open {
+            display: flex;
+        }
+
+        .admin-limit-modal {
+            background: var(--surface);
+            border: 1px solid var(--border-2);
+            border-radius: 20px;
+            padding: 36px 32px 28px;
+            width: 380px;
+            max-width: 92vw;
+            text-align: center;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5);
+            animation: adminLimitPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes adminLimitPop {
+            from {
+                opacity: 0;
+                transform: scale(0.88);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .admin-limit-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 18px;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.2));
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+        }
+
+        .admin-limit-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .admin-limit-desc {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.65;
+            margin-bottom: 24px;
+        }
+
+        .admin-limit-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+
+        .admin-limit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 
@@ -1019,11 +1387,18 @@
             <div class="breadcrumb">Content / <span>AI Builder</span></div>
 
             <nav class="topbar-nav">
-                <a href="admin.html"><i data-lucide="gauge" style="width:13px;height:13px;display:inline;vertical-align:middle;margin-right:4px;"></i>Overview</a>
-                <a href="faculty-classroom.html"><i data-lucide="book-open" style="width:13px;height:13px;display:inline;vertical-align:middle;margin-right:4px;"></i>Courses</a>
-                <a href="interactive-tools-selector.html"><i data-lucide="gamepad-2" style="width:13px;height:13px;display:inline;vertical-align:middle;margin-right:4px;"></i>Game Tools</a>
-                <a href="ai-game-builder.html" class="active"><i data-lucide="bot" style="width:13px;height:13px;display:inline;vertical-align:middle;margin-right:4px;"></i>AI Builder</a>
-                <a href="faculty-dataanalytics.html"><i data-lucide="bar-chart-2" style="width:13px;height:13px;display:inline;vertical-align:middle;margin-right:4px;"></i>Analytics</a>
+                <a href="admin.html"><i data-lucide="gauge"
+                        style="width:13px;height:13px;display:inline;vertical-align:middle;margin-right:4px;"></i>Overview</a>
+                <a href="faculty-classroom.html"><i data-lucide="book-open"
+                        style="width:13px;height:13px;display:inline;vertical-align:middle;margin-right:4px;"></i>Courses</a>
+                <a href="interactive-tools-selector.html"><i data-lucide="gamepad-2"
+                        style="width:13px;height:13px;display:inline;vertical-align:middle;margin-right:4px;"></i>Game
+                    Tools</a>
+                <a href="ai-game-builder.html" class="active"><i data-lucide="bot"
+                        style="width:13px;height:13px;display:inline;vertical-align:middle;margin-right:4px;"></i>AI
+                    Builder</a>
+                <a href="faculty-dataanalytics.html"><i data-lucide="bar-chart-2"
+                        style="width:13px;height:13px;display:inline;vertical-align:middle;margin-right:4px;"></i>Analytics</a>
             </nav>
 
             <div class="search-bar">
@@ -1048,7 +1423,9 @@
                         <a href="faculty-profile.html">Profile</a>
                         <a href="faculty-settings.html">Settings</a>
                         <a href="admin.html">← Dashboard</a>
-                        <a href="#" class="danger" onclick="event.preventDefault(); typeof performLogout==='function' && performLogout();">Sign out</a>
+                        <a href="#" class="danger"
+                            onclick="event.preventDefault(); typeof performLogout==='function' && performLogout();">Sign
+                            out</a>
                     </div>
                 </div>
             </div>
@@ -1065,7 +1442,8 @@
                             <div class="page-title-icon"><i data-lucide="bot"></i></div>
                             AI Game Builder
                         </div>
-                        <div class="page-sub">Create educational games through conversation — just describe what you want</div>
+                        <div class="page-sub">Create educational games through conversation — just describe what you
+                            want</div>
                     </div>
                     <div class="page-actions">
                         <a href="interactive-tools-selector.html" class="btn btn-ghost">
@@ -1104,7 +1482,8 @@
                         </div>
 
                         <div class="chat-input-area">
-                            <input type="text" id="chatInput" placeholder="e.g., Create a quiz about Python loops..." autocomplete="off">
+                            <input type="text" id="chatInput" placeholder="e.g., Create a quiz about Python loops..."
+                                autocomplete="off">
                             <button class="send-btn" id="sendBtn" title="Send">
                                 <i data-lucide="send"></i>
                             </button>
@@ -1148,7 +1527,8 @@
                 <div class="section-head">
                     <div>
                         <div class="section-title"><i data-lucide="gamepad-2"></i> Create Games Manually</div>
-                        <div class="section-sub">Choose a game type to start building your educational game from scratch</div>
+                        <div class="section-sub">Choose a game type to start building your educational game from scratch
+                        </div>
                     </div>
                 </div>
 
@@ -1185,8 +1565,8 @@
                     </a>
                     <a href="faculty-create-scenario.html" class="game-type-card">
                         <div class="template-icon"><i data-lucide="drama"></i></div>
-                        <h3>Scenario</h3>
-                        <p>Interactive branching storylines</p>
+                        <h3>Coding Challenges</h3>
+                        <p>AI-Assisted Coding Problems</p>
                     </a>
                 </div>
 
@@ -1268,14 +1648,14 @@
         try {
             const t = localStorage.getItem('token');
             if (t) {
-                const p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-                const initials = (p.name || p.username || 'AD').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+                const p = JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+                const initials = (p.name || p.username || 'AD').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
                 const av = document.getElementById('profileAv');
                 const nm = document.getElementById('profileName');
                 if (av) av.textContent = initials;
                 if (nm) nm.textContent = p.name || p.username || 'Account';
             }
-        } catch(e) {}
+        } catch (e) { }
 
         // Show publish footer when game is generated
         const previewFooter = document.getElementById('previewFooter');
@@ -1303,8 +1683,10 @@
         <div class="admin-limit-modal">
             <div class="admin-limit-icon">🛠️</div>
             <div class="admin-limit-title">Under Maintenance</div>
-            <div class="admin-limit-desc">This AI Model is under maintenance and is not available right now. Please try again later.</div>
-            <button class="admin-limit-btn" onclick="document.getElementById('adminMaintainOverlay').classList.remove('open')">Okay</button>
+            <div class="admin-limit-desc">This AI Model is under maintenance and is not available right now. Please try
+                again later.</div>
+            <button class="admin-limit-btn"
+                onclick="document.getElementById('adminMaintainOverlay').classList.remove('open')">Okay</button>
         </div>
     </div>
 </body>
