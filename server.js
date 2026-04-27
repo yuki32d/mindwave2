@@ -6186,7 +6186,9 @@ app.get("/api/analytics/games", authMiddleware, async (req, res) => {
           students: {
             $push: {
               name: '$student.name',
-              score: { $cond: [{ $eq: ['$isCorrect', true] }, 100, 0] }
+              // Use actual score percentage; fall back to isCorrect-based binary only if score missing
+              score: { $ifNull: ['$score', { $cond: [{ $eq: ['$isCorrect', true] }, 100, 0] }] },
+              duration: { $ifNull: ['$durationSeconds', 999999] } // for tiebreaking by speed
             }
           }
         }
@@ -6205,7 +6207,8 @@ app.get("/api/analytics/games", authMiddleware, async (req, res) => {
     const games = filteredGames.map(game => {
       const scores = game.students.map(s => s.score);
       const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-      const topScorer = game.students.sort((a, b) => b.score - a.score)[0];
+      // Sort by score DESC, then duration ASC (faster = better tiebreaker — matches Top Performers ranking)
+      const topScorer = game.students.sort((a, b) => b.score - a.score || a.duration - b.duration)[0];
 
       return {
         gameId: game._id,
