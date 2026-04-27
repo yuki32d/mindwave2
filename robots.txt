@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /marketing-site/
+Allow: /sitemap.xml
+
+Disallow: /api/
+Disallow: /admin/
+Disallow: /uploads/
+Disallow: /student-
+Disallow: /faculty-
+Disallow: /homepage.html
+Disallow: /ai-game-builder.html
+Disallow: /clear-storage.html
+
+Sitemap: https://mindwave-edu.tech/sitemap.xml

@@ -1535,6 +1535,15 @@ app.get('/', (req, res) => {
   res.redirect('/marketing-site/website-home.html');
 });
 
+// Serve robots.txt and sitemap.xml from root
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'robots.txt'));
+});
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml');
+  res.sendFile(path.join(__dirname, 'sitemap.xml'));
+});
+
 // Serve static files (HTML, CSS, JS, images) from the root directory with caching
 app.use(express.static(__dirname, {
   index: false,
