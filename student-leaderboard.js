@@ -1,159 +1,181 @@
-// currentUserEmail removed — 'You' is now identified by studentId returned from /api/leaderboard (MongoDB)
+// student-leaderboard.js — synced with student-leaderboard.html
+// Fixes: wrong element IDs, missing podium/table rendering, search filter
+
 let currentTimeFilter = 'all';
 let currentGameFilter = 'all';
+let cachedLeaderboard = [];
+let cachedCurrentUser = null;
 
+// ── AVATAR COLOURS ──────────────────────────────────────────────
+const AVATAR_COLOURS = [
+    '#6366f1', '#a855f7', '#ec4899', '#14b8a6',
+    '#f59e0b', '#22c55e', '#3b82f6', '#ef4444'
+];
+function avatarColor(name) {
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffffff;
+    return AVATAR_COLOURS[Math.abs(h) % AVATAR_COLOURS.length];
+}
+function getInitials(name) {
+    const parts = (name || 'AN').trim().split(' ').filter(Boolean);
+    return (parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : name.substring(0, 2)).toUpperCase();
+}
+
+// ── FETCH ────────────────────────────────────────────────────────
 async function fetchLeaderboard() {
     try {
         const token = localStorage.getItem('token');
-        if (!token) {
-            console.error('No auth token found');
-            return { leaderboard: [], currentUser: null };
-        }
+        if (!token) return { leaderboard: [], currentUser: null };
 
-        // Build query parameters
         const params = new URLSearchParams();
-        if (currentTimeFilter && currentTimeFilter !== 'all') {
-            params.append('timeFilter', currentTimeFilter);
-        }
-        if (currentGameFilter && currentGameFilter !== 'all') {
-            params.append('gameType', currentGameFilter);
-        }
+        if (currentTimeFilter && currentTimeFilter !== 'all') params.append('timeFilter', currentTimeFilter);
+        if (currentGameFilter && currentGameFilter !== 'all') params.append('gameType', currentGameFilter);
 
-        const response = await fetch(`${window.location.origin}/api/leaderboard?${params}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+        const res = await fetch(`/api/leaderboard?${params}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch leaderboard');
-        }
-
-        const data = await response.json();
-        return {
-            leaderboard: data.leaderboard || [],
-            currentUser: data.currentUser || null
-        };
-    } catch (error) {
-        console.error('Error fetching leaderboard:', error);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        return { leaderboard: data.leaderboard || [], currentUser: data.currentUser || null };
+    } catch (err) {
+        console.error('Leaderboard fetch error:', err);
         return { leaderboard: [], currentUser: null };
     }
 }
 
-function getInitials(name) {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-}
-
-function getAccuracyClass(accuracy) {
-    if (accuracy >= 80) return 'high';
-    if (accuracy >= 60) return 'medium';
-    return 'low';
-}
-
+// ── PODIUM (top 3) ───────────────────────────────────────────────
 function renderPodium(leaderboard, currentUser) {
-    const podium = document.getElementById('podium');
+    const el = document.getElementById('lbPodium');
+    if (!el) return;
+
     const top3 = leaderboard.slice(0, 3);
+    if (top3.length === 0) { el.innerHTML = ''; return; }
 
-    if (top3.length === 0) {
-        podium.innerHTML = '';
-        return;
-    }
+    // Order: 2nd | 1st | 3rd  (visual podium layout)
+    const orders = [2, 1, 3];
+    const stepH  = [48, 70, 36];
+    const ptsCls  = ['rank-1', 'rank-2', 'rank-3'];
 
-    const medals = ['🥇', '🥈', '🥉'];
-    const classes = ['gold', 'silver', 'bronze'];
-
-    podium.innerHTML = top3.map((player, idx) => {
-        const isYou = currentUser && player.studentId &&
-            player.studentId.toString() === currentUser.studentId;
-        return `
-        <div class="podium-card ${classes[idx]}${isYou ? ' current-user' : ''}">
-            <span class="medal">${medals[idx]}</span>
-            ${isYou ? '<span class="you-badge">You</span>' : ''}
-            <div class="podium-rank">#${idx + 1}</div>
-            <div class="podium-name">${player.name}</div>
-            <div class="podium-points">${player.totalPoints.toLocaleString()}</div>
-            <div class="podium-stats">
-                <div>
-                    <div style="font-weight: 600;">${player.gamesPlayed}</div>
-                    <div>Games</div>
-                </div>
-                <div>
-                    <div style="font-weight: 600;" class="accuracy ${getAccuracyClass(player.avgAccuracy)}">${player.avgAccuracy}%</div>
-                    <div>Accuracy</div>
-                </div>
-            </div>
-        </div>
-    `;
-    }).join('');
-}
-
-function renderLeaderboard(leaderboard, currentUser) {
-    const body = document.getElementById('leaderboardBody');
-
-    if (leaderboard.length === 0) {
-        body.innerHTML = `
-            <div class="empty-state">
-                <h3>No data yet</h3>
-                <p>Complete some games to see the leaderboard!</p>
-            </div>
-        `;
-        return;
-    }
-
-    const maxPoints = leaderboard[0]?.totalPoints || 1;
-
-    body.innerHTML = leaderboard.map((player, idx) => {
-        const rank = idx + 1;
-        // Compare by MongoDB studentId — immune to stale localStorage email
-        const isCurrentUser = currentUser && player.studentId &&
-            player.studentId.toString() === currentUser.studentId;
-        const progressPercent = (player.totalPoints / maxPoints) * 100;
-
-        return `
-            <div class="leaderboard-row ${isCurrentUser ? 'current-user' : ''}">
-                <div class="rank-cell">
-                    <div class="rank-badge ${rank <= 3 ? 'top' : ''}">${rank}</div>
-                </div>
-                <div class="player-info">
-                    <div class="player-avatar">${getInitials(player.name)}</div>
-                    <div class="player-name">${player.name}${isCurrentUser ? ' <span class="you-tag">You</span>' : ''}</div>
-                </div>
-                <div>
-                    <div class="points-cell">${player.totalPoints.toLocaleString()}</div>
-                    <div class="progress-container">
-                        <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+    el.innerHTML = `<div class="lb-podium-wrap">
+        ${top3.map((p, i) => {
+            const isYou = currentUser && p.studentId && p.studentId.toString() === currentUser.studentId;
+            const initials = getInitials(p.name);
+            const colour = avatarColor(p.name);
+            const rank = i + 1;
+            return `
+            <div class="lb-podium-lane ${ptsCls[i]}">
+                <div class="lb-podium-card">
+                    ${rank === 1 ? '<div class="lb-crown">👑</div>' : ''}
+                    <div class="lb-podium-avatar" style="background:${colour}">${initials}</div>
+                    <div class="lb-podium-name">${p.name}</div>
+                    ${isYou ? '<div class="lb-podium-you">You</div>' : ''}
+                    <div class="lb-podium-pts">${(p.totalPoints || 0).toLocaleString()}</div>
+                    <div class="lb-podium-meta">
+                        <div class="lb-podium-meta-item">
+                            <div class="lb-podium-meta-val">${p.gamesPlayed || 0}</div>
+                            <div class="lb-podium-meta-lbl">Games</div>
+                        </div>
+                        <div class="lb-podium-meta-item">
+                            <div class="lb-podium-meta-val">${p.avgAccuracy || 0}%</div>
+                            <div class="lb-podium-meta-lbl">Accuracy</div>
+                        </div>
                     </div>
                 </div>
-                <div class="games-count">${player.gamesPlayed}</div>
-                <div class="accuracy ${getAccuracyClass(player.avgAccuracy)}">${player.avgAccuracy}%</div>
+                <div class="lb-podium-step">#${rank}</div>
+            </div>`;
+        }).join('')}
+    </div>`;
+}
+
+// ── TABLE (rank 4+) ──────────────────────────────────────────────
+function renderTable(leaderboard, currentUser, searchText) {
+    const el = document.getElementById('lbTableBody');
+    if (!el) return;
+
+    let rows = leaderboard;
+
+    // Apply client-side search filter
+    if (searchText) {
+        const q = searchText.toLowerCase();
+        rows = rows.filter(p => (p.name || '').toLowerCase().includes(q));
+    }
+
+    if (rows.length === 0) {
+        el.innerHTML = `<div class="lb-empty">
+            <div style="font-size:2.5rem;margin-bottom:12px">🏆</div>
+            <h3>No players yet</h3>
+            <p>Be the first to complete a game!</p>
+        </div>`;
+        return;
+    }
+
+    const maxPts = rows[0]?.totalPoints || 1;
+
+    el.innerHTML = rows.map((p, i) => {
+        const rank = i + 1;
+        const isYou = currentUser && p.studentId && p.studentId.toString() === currentUser.studentId;
+        const initials = getInitials(p.name);
+        const colour = avatarColor(p.name);
+        const pct = Math.round((p.totalPoints / maxPts) * 100);
+        const badgeCls = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+        const accCls = p.avgAccuracy >= 80 ? 'lb-acc-hi' : p.avgAccuracy >= 50 ? 'lb-acc-mid' : 'lb-acc-lo';
+
+        return `<div class="lb-row${isYou ? ' is-me' : ''}">
+            <div class="lb-row-rank">
+                <div class="lb-rank-badge ${badgeCls}">${rank <= 3 ? ['🥇','🥈','🥉'][rank-1] : rank}</div>
             </div>
-        `;
+            <div class="lb-row-player">
+                <div class="lb-row-avatar" style="background:${colour}">${initials}</div>
+                <div>
+                    <div class="lb-row-name">${p.name}${isYou ? '<span class="lb-row-you">You</span>' : ''}</div>
+                </div>
+            </div>
+            <div class="lb-row-pts">
+                ${(p.totalPoints || 0).toLocaleString()}
+                <div class="lb-pts-bar-wrap"><div class="lb-pts-bar" style="width:${pct}%"></div></div>
+            </div>
+            <div class="lb-row-games">${p.gamesPlayed || 0}</div>
+            <div class="lb-row-acc ${accCls}">${p.avgAccuracy || 0}%</div>
+        </div>`;
     }).join('');
 }
 
-function updatePersonalStats(currentUser) {
+// ── MY STATS BANNER ──────────────────────────────────────────────
+function renderMyStats(currentUser) {
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
     if (currentUser && currentUser.rank > 0) {
-        document.getElementById('yourRank').textContent = `#${currentUser.rank}`;
-        document.getElementById('yourPoints').textContent = currentUser.totalPoints.toLocaleString();
-        document.getElementById('yourGames').textContent = currentUser.gamesPlayed;
-        document.getElementById('yourAccuracy').textContent = `${currentUser.avgAccuracy}%`;
+        set('myRank',     `#${currentUser.rank}`);
+        set('myPoints',   (currentUser.totalPoints || 0).toLocaleString());
+        set('myGames',    currentUser.gamesPlayed || 0);
+        set('myAccuracy', `${currentUser.avgAccuracy || 0}%`);
     } else {
-        document.getElementById('yourRank').textContent = '-';
-        document.getElementById('yourPoints').textContent = '0';
-        document.getElementById('yourGames').textContent = '0';
-        document.getElementById('yourAccuracy').textContent = '0%';
+        set('myRank', '—'); set('myPoints', '0'); set('myGames', '0'); set('myAccuracy', '0%');
     }
 }
 
-async function render() {
+// ── RENDER ALL ───────────────────────────────────────────────────
+async function render(searchText) {
+    // Show loading state in table
+    const tableEl = document.getElementById('lbTableBody');
+    if (tableEl) {
+        tableEl.innerHTML = `<div class="lb-empty" style="padding:40px;">
+            <div style="width:36px;height:36px;border:3px solid rgba(255,255,255,.08);border-top-color:#6366f1;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;"></div>
+            <p style="color:var(--muted)">Loading rankings…</p>
+        </div>`;
+    }
+
     const { leaderboard, currentUser } = await fetchLeaderboard();
+    cachedLeaderboard = leaderboard;
+    cachedCurrentUser = currentUser;
+
     renderPodium(leaderboard, currentUser);
-    renderLeaderboard(leaderboard, currentUser);
-    updatePersonalStats(currentUser);
+    renderTable(leaderboard, currentUser, searchText);
+    renderMyStats(currentUser);
 }
 
+// ── INIT ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    // Filter event listeners
+    // Time filter buttons
     document.querySelectorAll('[data-time]').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('[data-time]').forEach(b => b.classList.remove('active'));
@@ -163,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Game type filter buttons
     document.querySelectorAll('[data-game]').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('[data-game]').forEach(b => b.classList.remove('active'));
@@ -171,6 +194,14 @@ document.addEventListener('DOMContentLoaded', () => {
             render();
         });
     });
+
+    // Live search (client-side filter on cached data)
+    const searchEl = document.getElementById('lbSearch');
+    if (searchEl) {
+        searchEl.addEventListener('input', () => {
+            renderTable(cachedLeaderboard, cachedCurrentUser, searchEl.value.trim());
+        });
+    }
 
     // Initial render
     render();

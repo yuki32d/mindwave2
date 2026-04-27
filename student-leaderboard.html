@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -975,7 +975,7 @@
                     document.querySelectorAll('#timeFilters .lb-filter-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     activeTime = btn.dataset.time;
-                    renderLeaderboard();
+                    loadLeaderboard(); // re-fetch from server with new filter
                 });
             });
             document.querySelectorAll('#gameFilters .lb-filter-btn').forEach(btn => {
@@ -983,7 +983,7 @@
                     document.querySelectorAll('#gameFilters .lb-filter-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     activeGame = btn.dataset.game;
-                    renderLeaderboard();
+                    loadLeaderboard(); // re-fetch from server with new filter
                 });
             });
 
@@ -1050,15 +1050,13 @@
         function renderLeaderboard(searchQuery = '') {
             let data = [...allData];
 
-            // Filter by search
+            // Filter by search (client-side only)
             if (searchQuery) {
                 data = data.filter(p => (p.name || '').toLowerCase().includes(searchQuery));
             }
 
-            // Sort by points desc
-            data.sort((a, b) => (b.points ?? b.totalPoints ?? 0) - (a.points ?? a.totalPoints ?? 0));
-
-            const maxPts = data[0] ? (data[0].points ?? data[0].totalPoints ?? 1) : 1;
+            // Server already returns data sorted by totalPoints desc — preserve that order
+            const maxPts = data[0] ? (data[0].totalPoints ?? 1) : 1;
 
             renderPodium(data.slice(0, 3), maxPts);
             renderTable(data, maxPts);
@@ -1085,7 +1083,7 @@
                 const acc = p.accuracy ?? p.avgAccuracy ?? 0;
                 const ini = initials(p.name || '?');
                 const col = avatarColor(p.name || '?');
-                const isMe = p.isMe || String(p.id || p._id) === String(myId);
+                const isMe = p.isMe || String(p.studentId || p.id || p._id) === String(myId);
                 const accCol = acc >= 80 ? '#22c55e' : acc >= 50 ? '#f59e0b' : '#ef4444';
                 const crown = rankNum === 1 ? '<div class="lb-crown"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"><path d="M2 20h20M5 20V10l7-6 7 6v10"/><path d="m5 10 7 4 7-4"/></svg></div>' : '';
                 return `
@@ -1126,7 +1124,7 @@
                 const acc = p.accuracy ?? p.avgAccuracy ?? 0;
                 const ini = initials(p.name || '?');
                 const col = avatarColor(p.name || '?');
-                const isMe = p.isMe || String(p.id || p._id) === String(myId);
+                const isMe = p.isMe || String(p.studentId || p.id || p._id) === String(myId);
                 const pct = Math.round((pts / maxPts) * 100);
                 const badgeClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
                 const accClass = acc >= 80 ? 'lb-acc-hi' : acc >= 50 ? 'lb-acc-mid' : 'lb-acc-lo';
