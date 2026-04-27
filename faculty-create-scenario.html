@@ -11,59 +11,130 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="game-builder.css">
     <style>
-        .cs-section { background: var(--surface-2, #1a1d2e); border: 1px solid var(--border, #2c2f45); border-radius: 14px; padding: 24px; margin-bottom: 20px; }
-        .cs-section-head { font-size: 13px; font-weight: 700; color: var(--muted, #9ea4b6); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        /* ── Theme-aware overrides for .cs-* elements ── */
+
+        /* Section cards */
+        .cs-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .cs-section-head {
+            font-size: 13px; font-weight: 700;
+            color: var(--muted);
+            letter-spacing: .5px; text-transform: uppercase;
+            margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
         .cs-section-head svg { width: 15px; height: 15px; }
-        .cs-label { font-size: 12px; font-weight: 600; color: var(--muted, #9ea4b6); margin-bottom: 6px; display: block; }
+
+        /* Label */
+        .cs-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; }
+
+        /* Inputs */
         .cs-input, .cs-textarea, .cs-select {
             width: 100%; padding: 10px 12px;
-            background: var(--bg, #0f1117); border: 1px solid var(--border, #2c2f45);
-            border-radius: 10px; color: var(--text, #e2e4f0); font-size: 13px; font-family: inherit;
-            box-sizing: border-box; transition: border-color .15s; outline: none;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 13px; font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color .15s;
+            outline: none;
         }
-        .cs-input:focus, .cs-textarea:focus { border-color: var(--accent, #6366f1); }
+        .cs-input::placeholder, .cs-textarea::placeholder { color: var(--muted); }
+        .cs-input:focus, .cs-textarea:focus, .cs-select:focus { border-color: #6366f1; }
         .cs-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+        .cs-select option { background: var(--surface); color: var(--text); }
+
+        /* Layout */
         .cs-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .cs-form-group { display: flex; flex-direction: column; gap: 6px; }
-        
+
         /* Test Cases */
         .tc-list { display: flex; flex-direction: column; gap: 10px; }
-        .tc-item { background: var(--bg, #0f1117); border: 1px solid var(--border, #2c2f45); border-radius: 10px; padding: 14px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+        .tc-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px; padding: 14px;
+            display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end;
+        }
         .tc-item .cs-form-group { margin: 0; }
-        .tc-num { font-size: 11px; font-weight: 700; color: var(--accent, #6366f1); margin-bottom: 6px; }
-        .tc-del-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(244,63,94,.3); background: rgba(244,63,94,.1); color: #f43f5e; cursor: pointer; font-size: 12px; transition: all .15s; display: flex; align-items: center; gap: 4px; }
+        .tc-num { font-size: 11px; font-weight: 700; color: #6366f1; margin-bottom: 6px; }
+        .tc-del-btn {
+            padding: 8px 12px; border-radius: 8px;
+            border: 1px solid rgba(244,63,94,.3);
+            background: rgba(244,63,94,.1);
+            color: #f43f5e; cursor: pointer; font-size: 12px;
+            transition: all .15s; display: flex; align-items: center; gap: 4px;
+        }
         .tc-del-btn:hover { background: rgba(244,63,94,.2); }
-        .tc-add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: 1px dashed var(--border, #2c2f45); background: transparent; color: var(--muted, #9ea4b6); cursor: pointer; font-size: 12px; font-weight: 600; transition: all .15s; margin-top: 8px; }
-        .tc-add-btn:hover { border-color: var(--accent, #6366f1); color: var(--accent, #6366f1); }
-        
+        .tc-add-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 14px; border-radius: 8px;
+            border: 1px dashed var(--border);
+            background: transparent; color: var(--muted);
+            cursor: pointer; font-size: 12px; font-weight: 600;
+            transition: all .15s; margin-top: 8px;
+        }
+        .tc-add-btn:hover { border-color: #6366f1; color: #6366f1; }
+
         /* AI Analyze */
         .cs-analyze-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
-        .cs-ai-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 10px; border: none; background: linear-gradient(135deg, #6366f1, #06b6d4); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .15s; }
+        .cs-ai-btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 18px; border-radius: 10px; border: none;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            color: #fff; font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: all .15s;
+        }
         .cs-ai-btn:hover { opacity: .9; transform: translateY(-1px); }
         .cs-ai-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-        .cs-ai-status { font-size: 12px; color: var(--muted, #9ea4b6); }
+        .cs-ai-status { font-size: 12px; color: var(--muted); }
         .cs-ai-status.analyzed { color: #22d3a5; }
         .cs-ai-status.error { color: #f43f5e; }
-        .cs-solutions-preview { margin-top: 12px; background: var(--bg, #0f1117); border: 1px solid var(--border, #2c2f45); border-radius: 10px; overflow: hidden; }
-        .cs-solutions-preview summary { padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--muted, #9ea4b6); cursor: pointer; }
-        .cs-solutions-preview pre { padding: 12px 14px; border-top: 1px solid var(--border, #2c2f45); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text, #e2e4f0); white-space: pre-wrap; word-break: break-all; margin: 0; }
-        
+        .cs-solutions-preview {
+            margin-top: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px; overflow: hidden;
+        }
+        .cs-solutions-preview summary { padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; }
+        .cs-solutions-preview pre {
+            padding: 12px 14px;
+            border-top: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace; font-size: 11px;
+            color: var(--text); white-space: pre-wrap; word-break: break-all; margin: 0;
+        }
+
         /* Footer */
-        .cs-footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: var(--surface-2, #1a1d2e); border-top: 1px solid var(--border, #2c2f45); position: sticky; bottom: 0; z-index: 10; }
-        .cs-footer-left { font-size: 12px; color: var(--muted, #9ea4b6); }
+        .cs-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 24px;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            position: sticky; bottom: 0; z-index: 10;
+        }
+        .cs-footer-left { font-size: 12px; color: var(--muted); }
         .cs-footer-right { display: flex; gap: 10px; }
+
+        /* Buttons */
         .cs-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all .15s; }
-        .cs-btn-ghost { background: transparent; border: 1px solid var(--border, #2c2f45); color: var(--muted, #9ea4b6); }
-        .cs-btn-ghost:hover { border-color: var(--accent, #6366f1); color: var(--accent, #6366f1); }
+        .cs-btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+        .cs-btn-ghost:hover { border-color: #6366f1; color: #6366f1; }
         .cs-btn-primary { background: linear-gradient(135deg, #6366f1, #06b6d4); color: #fff; }
         .cs-btn-primary:hover { opacity: .9; transform: translateY(-1px); }
         .cs-btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-        
+
         .gb-main-wide { max-width: 860px; padding: 32px 24px 120px; }
+
         /* ── ADMIN ANALYSIS LIMIT MODAL ── */
         .admin-limit-overlay { display:none; position:fixed; inset:0; z-index:99999; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); align-items:center; justify-content:center; }
         .admin-limit-overlay.open { display:flex; }
-        .admin-limit-modal { background:var(--surface); border:1px solid var(--border-2); border-radius:20px; padding:36px 32px 28px; width:380px; max-width:92vw; text-align:center; box-shadow:0 32px 80px rgba(0,0,0,0.5); animation:adminLimitPop 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+        .admin-limit-modal { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:36px 32px 28px; width:380px; max-width:92vw; text-align:center; box-shadow:0 32px 80px rgba(0,0,0,0.5); animation:adminLimitPop 0.25s cubic-bezier(0.34,1.56,0.64,1); }
         @keyframes adminLimitPop { from { opacity:0; transform:scale(0.88); } to { opacity:1; transform:scale(1); } }
         .admin-limit-icon { width:60px; height:60px; border-radius:50%; margin:0 auto 18px; background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(37,99,235,0.2)); border:1.5px solid rgba(59,130,246,0.3); display:flex; align-items:center; justify-content:center; font-size:26px; }
         .admin-limit-title { font-size:18px; font-weight:800; color:var(--text); margin-bottom:8px; }
