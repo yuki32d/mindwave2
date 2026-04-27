@@ -1530,6 +1530,11 @@ app.get('/jitsi', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'jitsi', 'index.html'));
 });
 
+// Redirect root to marketing site home
+app.get('/', (req, res) => {
+  res.redirect('/marketing-site/website-home.html');
+});
+
 // Serve static files (HTML, CSS, JS, images) from the root directory with caching
 app.use(express.static(__dirname, {
   index: false,
