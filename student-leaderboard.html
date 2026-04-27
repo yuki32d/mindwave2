@@ -910,7 +910,7 @@
         function clearAuthAndCache() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role'].forEach(k => localStorage.removeItem(k));
         }
-        function doLogout() { clearAuthAndCache(); window.location.replace('marketing-site/student-login.html'); }
+        function doLogout() { clearAuthAndCache(); window.location.replace('marketing-site/website-home.html'); }
         function performLogout() { document.getElementById('logoutModal').classList.add('active'); }
 
         // -- Avatar colour palette -----------------------------------------------

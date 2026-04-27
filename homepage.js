@@ -246,7 +246,7 @@ function clearAuthAndCache() {
 
 function doLogout() {
     clearAuthAndCache();
-    window.location.replace('marketing-site/student-login.html');
+    window.location.replace('marketing-site/website-home.html');
 }
 
 if (signOutBtn) {

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -903,7 +903,7 @@
 
                 <div class="mw-search">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search projects�" id="projectSearch">
+                    <input type="text" placeholder="Search projects?" id="projectSearch">
                 </div>
 
                 <div class="mw-topbar-actions">
@@ -944,7 +944,7 @@
                             <i data-lucide="folder-git-2"></i>
                         </div>
                         <div class="gh-stat-body">
-                            <div class="gh-stat-value" id="statTotal">�</div>
+                            <div class="gh-stat-value" id="statTotal">?</div>
                             <div class="gh-stat-label">Total</div>
                         </div>
                     </div>
@@ -953,7 +953,7 @@
                             <i data-lucide="clock"></i>
                         </div>
                         <div class="gh-stat-body">
-                            <div class="gh-stat-value" id="statPending">�</div>
+                            <div class="gh-stat-value" id="statPending">?</div>
                             <div class="gh-stat-label">Pending</div>
                         </div>
                     </div>
@@ -963,7 +963,7 @@
                             <i data-lucide="eye"></i>
                         </div>
                         <div class="gh-stat-body">
-                            <div class="gh-stat-value" id="statReviewed">�</div>
+                            <div class="gh-stat-value" id="statReviewed">?</div>
                             <div class="gh-stat-label">Reviewed</div>
                         </div>
                     </div>
@@ -972,7 +972,7 @@
                             <i data-lucide="check-circle-2"></i>
                         </div>
                         <div class="gh-stat-body">
-                            <div class="gh-stat-value" id="statGraded">�</div>
+                            <div class="gh-stat-value" id="statGraded">?</div>
                             <div class="gh-stat-label">Graded</div>
                         </div>
                     </div>
@@ -980,7 +980,7 @@
 
                 <!-- Active Assignments section -->
                 <div id="activeAssignmentsSection" style="margin-bottom:24px; display:none;">
-                    <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:12px;">📋 Active Assignments</div>
+                    <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:12px;">?? Active Assignments</div>
                     <div id="activeAssignmentCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;"></div>
                 </div>
 
@@ -1018,7 +1018,7 @@
                 <div class="gh-form-group">
                     <label>Assignment *</label>
                     <select id="assignmentSelect" required style="width:100%;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:13.5px;">
-                        <option value="" disabled selected>— Select an Assignment —</option>
+                        <option value="" disabled selected>� Select an Assignment �</option>
                     </select>
                     <div class="gh-form-hint">Your teacher will create assignments for you to submit under.</div>
                 </div>
@@ -1098,7 +1098,7 @@
         function doLogout() {
             ['token', 'mindwave_token', 'email', 'firstName', 'lastName', 'role', 'userId'].forEach(k => localStorage.removeItem(k));
             sessionStorage.clear();
-            window.location.replace('marketing-site/student-login.html');
+            window.location.replace('marketing-site/website-home.html');
         }
         function performLogout() { document.getElementById('logoutModal').classList.add('active'); }
 

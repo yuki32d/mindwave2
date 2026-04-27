@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -14,21 +14,21 @@
         function doLogout() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
-            window.location.replace('marketing-site/student-login.html');
+            window.location.replace('marketing-site/website-home.html');
         }
     </script>
     <script src="theme-init.js">
         function doLogout() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
-            window.location.replace('marketing-site/student-login.html');
+            window.location.replace('marketing-site/website-home.html');
         }
     </script>
     <script src="sidebar.js">
         function doLogout() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
-            window.location.replace('marketing-site/student-login.html');
+            window.location.replace('marketing-site/website-home.html');
         }
     </script>
 
@@ -691,7 +691,7 @@
             text-align: center;
         }
 
-        /* ── Word counter ── */
+        /* -- Word counter -- */
         .disc-word-counter {
             display: flex;
             align-items: center;
@@ -737,7 +737,7 @@
                 flex-wrap: wrap;
             }
         }
-        /* ── Rich-text description / instructions prose ── */
+        /* -- Rich-text description / instructions prose -- */
         #sDiscDetailDesc,
         #sDiscDetailInstructions {
             word-break: break-word;
@@ -804,7 +804,7 @@
             font-size: .88rem;
         }
 
-        /* ── Reddit-style threaded replies ── */
+        /* -- Reddit-style threaded replies -- */
         .disc-reply-node  { position:relative; }
         .disc-thread-gutter {
             position:absolute; left:14px; top:42px; bottom:8px;
@@ -1085,12 +1085,12 @@
                             style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6366f1;margin-bottom:10px;">
                             Live Poll</div>
                         <h2 id="studentPollQuestion" style="font-size:1.2rem;margin-bottom:24px;line-height:1.4;">
-                            Loading…</h2>
+                            Loading�</h2>
                         <div id="studentPollOptions"
                             style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;"></div>
                         <div id="pollVoteConfirm"
                             style="display:none;padding:14px;border-radius:12px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);color:#6366f1;font-weight:700;">
-                            ✅ Your anonymous vote was recorded!
+                            ? Your anonymous vote was recorded!
                         </div>
                     </div>
 
@@ -1125,7 +1125,7 @@
                         <div
                             style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#a855f7;margin-bottom:10px;">
                             Live Feedback</div>
-                        <h2 id="studentFbQuestion" style="font-size:1.2rem;margin-bottom:8px;">Loading…</h2>
+                        <h2 id="studentFbQuestion" style="font-size:1.2rem;margin-bottom:8px;">Loading�</h2>
                         <p style="color:var(--text-secondary);font-size:.9rem;margin-bottom:24px;">Your feedback is
                             anonymous and helps improve the lesson.</p>
                         <div class="confidence-selector">
@@ -1162,7 +1162,7 @@
                         </button>
                         <div id="fbSubmitConfirm"
                             style="display:none;margin-top:14px;padding:12px;border-radius:12px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.3);color:#a855f7;font-weight:700;">
-                            ✅ Your anonymous feedback was submitted!
+                            ? Your anonymous feedback was submitted!
                         </div>
                     </div>
 
@@ -1193,19 +1193,19 @@
                     </div>
                 </div>
 
-                <!-- ─────────────── DISCUSSIONS SECTION ─────────────── -->
+                <!-- --------------- DISCUSSIONS SECTION --------------- -->
                 <div id="discussionsSection" class="cm-section">
 
                     <!-- LIST VIEW -->
                     <div id="sDiscListView">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-                            <h3 style="font-size:1rem;font-weight:800;margin:0;">📋 Active Discussions</h3>
+                            <h3 style="font-size:1rem;font-weight:800;margin:0;">?? Active Discussions</h3>
                             <span id="sDiscCount" style="font-size:12px;color:var(--text-secondary);"></span>
                         </div>
                         <div id="sDiscContainer" style="display:flex;flex-direction:column;gap:12px;"></div>
                         <div id="sDiscEmpty" style="display:none;">
                             <div class="cm-empty">
-                                <div class="cm-empty-icon">💭</div>
+                                <div class="cm-empty-icon">??</div>
                                 <h3>No active discussions</h3>
                                 <p>Your instructor hasn't started any discussions yet.</p>
                             </div>
@@ -1354,7 +1354,7 @@
         function doLogout() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
-            window.location.replace('marketing-site/student-login.html');
+            window.location.replace('marketing-site/website-home.html');
         }
     </script>
 
@@ -1456,13 +1456,13 @@
         function doLogout() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
-            window.location.replace('marketing-site/student-login.html');
+            window.location.replace('marketing-site/website-home.html');
         }
     </script>
 
     <script src="community-poll-engine.js"></script>
 
-    <!-- ─────────────── STUDENT DISCUSSION ENGINE ─────────────── -->
+    <!-- --------------- STUDENT DISCUSSION ENGINE --------------- -->
     <script>
         (function () {
             const API_BASE = '/api/discussions';
@@ -1470,7 +1470,7 @@
             const headers = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${token()}` });
             const apiFetch = async (url, opts = {}) => {
                 const r = await fetch(url, { ...opts, headers: headers(), credentials: 'include' });
-                if (r.status === 429) return { ok: false, rateLimited: true, message: 'Rate limited — please wait' };
+                if (r.status === 429) return { ok: false, rateLimited: true, message: 'Rate limited � please wait' };
                 try { return await r.json(); } catch { return { ok: false, message: 'Invalid server response' }; }
             };
 
@@ -1496,11 +1496,11 @@
                 try {
                     const data = await apiFetch(API_BASE);
                     if (data.rateLimited) {
-                        // Server is rate-limited — show friendly message and auto-retry
+                        // Server is rate-limited � show friendly message and auto-retry
                         count.textContent = '';
                         container.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-secondary);">
                             <i data-lucide="clock" style="width:28px;height:28px;opacity:.5;margin-bottom:10px;"></i>
-                            <p style="margin:0 0 12px;">Server is busy — retrying in a moment…</p>
+                            <p style="margin:0 0 12px;">Server is busy � retrying in a moment�</p>
                             <button onclick="loadDiscussions()" style="padding:8px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text-secondary);cursor:pointer;font-size:.85rem;">Retry Now</button>
                         </div>`;
                         if (window.lucide) lucide.createIcons();
@@ -1520,7 +1520,7 @@
                                 <div style="font-size:.82rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.description || 'Click to read and participate'}</div>
                             </div>
                             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
-                                ${d.grading?.enabled ? `<span style="font-size:10px;font-weight:700;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.25);padding:2px 9px;border-radius:99px;">⭐ ${d.grading.totalPoints} pts</span>` : ''}
+                                ${d.grading?.enabled ? `<span style="font-size:10px;font-weight:700;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.25);padding:2px 9px;border-radius:99px;">? ${d.grading.totalPoints} pts</span>` : ''}
                                 ${d.settings?.postBeforeView ? '<span style="font-size:10px;font-weight:700;background:rgba(99,102,241,.1);color:#818cf8;border:1px solid rgba(99,102,241,.2);padding:2px 9px;border-radius:99px;">Post-first</span>' : ''}
                                 ${d.deadlines?.dueAt ? `<span style="font-size:10px;color:var(--text-secondary);">Due ${new Date(d.deadlines.dueAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>` : ''}
                             </div>
@@ -1586,7 +1586,7 @@
                 } catch { return null; }
             }
 
-            // ── Build parent→children tree from flat reply array ──
+            // -- Build parent?children tree from flat reply array --
             function buildReplyTree(replies) {
                 const map = {}, roots = [];
                 replies.forEach(r => { map[r._id] = { ...r, children: [] }; });
@@ -1600,7 +1600,7 @@
                 return sort(roots);
             }
 
-            // ── Render one reply node recursively ──
+            // -- Render one reply node recursively --
             function renderReplyNode(r, depth, myUserId, _isFaculty) {
                 const isMe   = String(r.authorId) === String(myUserId);
                 const isInst = r.authorRole === 'admin';
@@ -1623,17 +1623,17 @@
       <div class="disc-reply-meta">
         <span class="disc-reply-author">${isInst?`<span style="color:var(--accent)">${r.authorName}</span>`:isMe?'<span style="color:var(--accent)">You</span>':r.authorName||'Student'}</span>
         ${isInst?'<span class="disc-badge disc-badge-inst">Instructor</span>':''}
-        ${r.pinned?'<span class="disc-badge disc-badge-pin">📌 Pinned</span>':''}
-        ${r.graded&&isMe?`<span class="disc-badge disc-badge-grade">⭐ ${r.grade}pts</span>`:''}
+        ${r.pinned?'<span class="disc-badge disc-badge-pin">?? Pinned</span>':''}
+        ${r.graded&&isMe?`<span class="disc-badge disc-badge-grade">? ${r.grade}pts</span>`:''}
         <span class="disc-reply-time">&bull; ${tstr}</span>
       </div>
     </div>
     <div class="disc-reply-body">${r.content}</div>
     ${r.graded&&r.feedback&&isMe?`<div class="disc-reply-fb"><strong style="color:#16a34a;">Instructor Feedback:</strong> ${r.feedback}</div>`:''}
     <div class="disc-actions">
-      <button class="disc-btn-like" id="likeBtn-${r._id}" onclick="mwDiscLike('${discId}','${r._id}',this)">▲ <span id="likeCnt-${r._id}">${lc}</span></button>
-      <button class="disc-btn-act" onclick="mwDiscOpenComposer('${r._id}','${mid}')">💬 Reply</button>
-      ${hasChildren?`<button class="disc-btn-collapse" id="collapseBtn-${r._id}" onclick="mwDiscCollapse('${r._id}')">− ${r.children.length} ${r.children.length===1?'reply':'replies'}</button>`:''}
+      <button class="disc-btn-like" id="likeBtn-${r._id}" onclick="mwDiscLike('${discId}','${r._id}',this)">? <span id="likeCnt-${r._id}">${lc}</span></button>
+      <button class="disc-btn-act" onclick="mwDiscOpenComposer('${r._id}','${mid}')">?? Reply</button>
+      ${hasChildren?`<button class="disc-btn-collapse" id="collapseBtn-${r._id}" onclick="mwDiscCollapse('${r._id}')">- ${r.children.length} ${r.children.length===1?'reply':'replies'}</button>`:''}
     </div>
     <div id="${mid}" class="disc-inline-composer" style="display:none;">
       <textarea class="disc-inline-ta" placeholder="Write a reply..."></textarea>
@@ -1658,7 +1658,7 @@
                 if (window.lucide) lucide.createIcons({ el: feed });
             }
 
-            // ── Word-count helpers ──────────────────────────────────────────
+            // -- Word-count helpers ------------------------------------------
             const MIN_WORDS = 25;
 
             function countRealWords(text) {
@@ -1679,7 +1679,7 @@
                 if (wc >= MIN_WORDS) {
                     fill.className  = 'disc-word-meter-fill ok';
                     label.className = 'disc-word-count-label ok';
-                    label.textContent = `✓ ${wc} words — ready to post!`;
+                    label.textContent = `? ${wc} words � ready to post!`;
                 } else if (wc >= Math.floor(MIN_WORDS * 0.6)) {
                     fill.className  = 'disc-word-meter-fill warn';
                     label.className = 'disc-word-count-label warn';
@@ -1692,12 +1692,12 @@
                 return wc;
             }
 
-            // Live counter — updates on every keystroke
+            // Live counter � updates on every keystroke
             document.getElementById('sDiscReplyContent').addEventListener('input', function () {
                 updateWordCounter(this.value);
             });
 
-            // ── Post reply ──────────────────────────────────────────────────
+            // -- Post reply --------------------------------------------------
             document.getElementById('sDiscPostBtn').onclick = async () => {
                 const textarea = document.getElementById('sDiscReplyContent');
                 const content  = textarea.value;
@@ -1755,7 +1755,7 @@
 
         })();
 
-        // ── Global helpers called from onclick attrs inside dynamic HTML ──
+        // -- Global helpers called from onclick attrs inside dynamic HTML --
         window.mwDiscLike = async function(discId, replyId, btn) {
             try {
                 const tok = localStorage.getItem('token') || localStorage.getItem('mindwave_token') || '';
@@ -1820,21 +1820,21 @@
             if (!children) return;
             const isHidden = children.style.display === 'none';
             children.style.display = isHidden ? '' : 'none';
-            if (btn) btn.textContent = (isHidden ? '− ' : '⊕ ') + btn.textContent.replace(/^[−⊕] /,'');
+            if (btn) btn.textContent = (isHidden ? '- ' : '? ') + btn.textContent.replace(/^[-?] /,'');
         };
     </script>
     <script src="student-community.js">
         function doLogout() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
-            window.location.replace('marketing-site/student-login.html');
+            window.location.replace('marketing-site/website-home.html');
         }
     </script>
     <script src="chatbot.js?v=2">
         function doLogout() {
             ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role']
                 .forEach(k => localStorage.removeItem(k));
-            window.location.replace('marketing-site/student-login.html');
+            window.location.replace('marketing-site/website-home.html');
         }
     </script>
 
@@ -1971,7 +1971,7 @@
             transform: translateY(-1px)
         }
     </style>
-    <!-- ══════════ STUDENT POLL + FEEDBACK LOGIC (MongoDB API) ══════════ -->
+    <!-- ---------- STUDENT POLL + FEEDBACK LOGIC (MongoDB API) ---------- -->
     <script>
         (function () {
             const $ = id => document.getElementById(id);
@@ -1984,7 +1984,7 @@
             let selectedFbRating = null;
             let selectedFbLabel = null;
 
-            /* ══════════════════════ QUICK POLL ══════════════════════ */
+            /* ---------------------- QUICK POLL ---------------------- */
             async function refreshStudentPoll() {
                 if (!window.CommunityPoll) return;
                 const waiting = $('pollWaitingCard');
@@ -2010,7 +2010,7 @@
                         return;
                     }
 
-                    // New poll appeared — reset voted state
+                    // New poll appeared � reset voted state
                     if (activePollId !== p._id) { hasVotedPoll = false; activePollId = p._id; }
 
                     waiting.style.display = 'none'; ended.style.display = 'none';
@@ -2053,7 +2053,7 @@
                 } catch (e) { console.error('Vote error', e); }
             };
 
-            /* ══════════════════════ LIVE FEEDBACK ══════════════════════ */
+            /* ---------------------- LIVE FEEDBACK ---------------------- */
             async function refreshStudentFeedback() {
                 if (!window.CommunityPoll) return;
                 const waiting = $('fbWaitingCard');

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
 <head>
@@ -1454,7 +1454,7 @@
             });
             document.getElementById('logoutConfirmBtn').addEventListener('click', function () {
                 ['token', 'mindwave_token', 'firstName', 'lastName', 'email', 'role', 'name'].forEach(k => localStorage.removeItem(k));
-                window.location.replace('marketing-site/student-login.html');
+                window.location.replace('marketing-site/website-home.html');
             });
             document.getElementById('logoutModal').addEventListener('click', function (e) {
                 if (e.target === this) this.style.display = 'none';
@@ -1484,7 +1484,7 @@
             </div>
         </div>
     </div>
-    <!-- ── Profile Confirmation Modal ── -->
+    <!-- -- Profile Confirmation Modal -- -->
     <div id="profileConfirmModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;flex-direction:column;">
         <div style="background:var(--surface,#1a1d2e);border:1px solid var(--border,rgba(255,255,255,.1));border-radius:22px;padding:0;max-width:460px;width:92%;box-shadow:0 32px 80px rgba(0,0,0,.6);overflow:hidden;">
             <!-- Header -->
@@ -1494,7 +1494,7 @@
                 </div>
                 <div>
                     <div style="font-size:17px;font-weight:800;color:var(--text-primary,#f5f7ff);">Confirm Your Details</div>
-                    <div style="font-size:12px;color:var(--text-muted,#9ea4b6);margin-top:2px;">Please verify — this cannot be changed after saving</div>
+                    <div style="font-size:12px;color:var(--text-muted,#9ea4b6);margin-top:2px;">Please verify � this cannot be changed after saving</div>
                 </div>
             </div>
             <!-- Details grid -->

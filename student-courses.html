@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -357,7 +357,7 @@
             keys.forEach(k => localStorage.removeItem(k));
             sessionStorage.clear();
         }
-        function doLogout() { clearAuthAndCache(); window.location.replace('marketing-site/student-login.html'); }
+        function doLogout() { clearAuthAndCache(); window.location.replace('marketing-site/website-home.html'); }
         function performLogout() {
             const modal = document.getElementById('logoutModal');
             if (modal) modal.classList.add('active');

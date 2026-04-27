@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -642,7 +642,7 @@
         function doLogout() {
             ['token', 'mindwave_token', 'email', 'firstName', 'lastName', 'role', 'userId'].forEach(k => localStorage.removeItem(k));
             sessionStorage.clear();
-            window.location.replace('marketing-site/student-login.html');
+            window.location.replace('marketing-site/website-home.html');
         }
         function performLogout() {
             document.getElementById('logoutModal').classList.add('active');
@@ -703,7 +703,7 @@
                                 <div class="review-icon"><i data-lucide="file-text"></i></div>
                                 <div class="review-details">
                                     <h3>${r.projectName}</h3>
-                                    <p>By ${r.revieweeName || r.revieweeId?.name || 'Unknown Student'} � ${new Date(r.dueDate || r.createdAt).toLocaleDateString()}</p>
+                                    <p>By ${r.revieweeName || r.revieweeId?.name || 'Unknown Student'} ? ${new Date(r.dueDate || r.createdAt).toLocaleDateString()}</p>
                                 </div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 16px;">
@@ -760,7 +760,7 @@
                 const desc = r.submissionId?.description || 'No description provided.';
 
                 document.getElementById('modalProjectName').textContent = projName;
-                document.getElementById('modalReviewee').textContent = `By ${revieweeName} � Assigned ${new Date(r.createdAt).toLocaleDateString()}`;
+                document.getElementById('modalReviewee').textContent = `By ${revieweeName} ? Assigned ${new Date(r.createdAt).toLocaleDateString()}`;
                 document.getElementById('modalDescription').textContent = desc;
 
                 const githubBtn = document.getElementById('modalGithub');

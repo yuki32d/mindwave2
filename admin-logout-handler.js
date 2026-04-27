@@ -59,7 +59,7 @@
             console.error('Logout failed', error);
         } finally {
             localStorage.clear();
-            window.location.href = '/marketing-site/admin-login.html';
+            window.location.href = '/marketing-site/website-home.html';
         }
     };
 

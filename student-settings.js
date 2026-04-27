@@ -10,7 +10,7 @@ async function loadSettings() {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
-            window.location.replace('marketing-site/student-login.html');
+            window.location.replace('marketing-site/website-home.html');
             return;
         }
 
@@ -156,7 +156,7 @@ async function performSaveProfile() {
 
     try {
         const token = localStorage.getItem('token');
-        if (!token) { window.location.replace('marketing-site/student-login.html'); return; }
+        if (!token) { window.location.replace('marketing-site/website-home.html'); return; }
 
         const response = await fetch(`${window.location.origin}/api/users/profile`, {
             method: 'PUT',
