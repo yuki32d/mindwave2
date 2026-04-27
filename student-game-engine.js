@@ -215,6 +215,98 @@ function showAlreadyPlayedPopup(game) {
     if (window.lucide) { lucide.createIcons({ el: overlay }); }
 }
 
+// Full-page block rendered inside student-game-play.html when a student
+// revisits an already-completed game link from browser history.
+function showAlreadyCompletedScreen(container, game) {
+    // Hide the fullscreen gate — we don't need it
+    const gate = document.getElementById('fsGate');
+    if (gate) gate.style.display = 'none';
+
+    container.innerHTML = `
+        <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+            gap: 24px;
+            padding: 40px 20px;
+            animation: fadeIn 0.5s ease-out;
+        ">
+            <div style="
+                width: 80px; height: 80px;
+                background: rgba(52, 199, 89, 0.12);
+                border: 2px solid rgba(52, 199, 89, 0.35);
+                border-radius: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 0 40px rgba(52, 199, 89, 0.15);
+            ">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+                     fill="none" stroke="#34c759" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+
+            <div>
+                <h2 style="
+                    font-size: 1.75rem; font-weight: 800; color: #fff;
+                    letter-spacing: -0.02em; margin-bottom: 10px;
+                ">Test Already Submitted</h2>
+                <p style="color: #9ca3af; font-size: 0.95rem; line-height: 1.6; max-width: 420px; margin: 0 auto;">
+                    You have already completed <strong style="color:#fff;">${game ? game.title : 'this game'}</strong>.
+                    Multiple attempts are not permitted to ensure exam integrity.
+                </p>
+            </div>
+
+            <div style="
+                background: rgba(52, 199, 89, 0.07);
+                border: 1px solid rgba(52, 199, 89, 0.25);
+                border-radius: 16px;
+                padding: 16px 28px;
+                font-size: 0.85rem;
+                color: #34c759;
+                font-weight: 600;
+                letter-spacing: 0.02em;
+            ">
+                🔒 This session is locked — access is permanently blocked for this test.
+            </div>
+
+            <button onclick="${window.opener ? 'window.opener && window.opener.focus(); window.close();' : "window.location.href='student-game.html'"}"
+                style="
+                    background: linear-gradient(135deg, #6366f1, #a855f7);
+                    color: #fff; border: none;
+                    padding: 14px 32px; border-radius: 14px;
+                    font-size: 0.95rem; font-weight: 700; cursor: pointer;
+                    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+                    transition: all 0.2s;
+                "
+                onmouseover="this.style.filter='brightness(1.12)';this.style.transform='translateY(-2px)'"
+                onmouseout="this.style.filter='';this.style.transform=''"
+                id="alreadyDoneExitBtn"
+            >← Back to Game Center</button>
+        </div>
+    `;
+
+    // Wire the button properly after render (handles both tab modes)
+    const btn = document.getElementById('alreadyDoneExitBtn');
+    if (btn) {
+        btn.onclick = () => {
+            if (typeof window.releaseGameLock === 'function') window.releaseGameLock();
+            if (window.opener) {
+                window.opener.focus();
+                window.close();
+            } else {
+                window.location.href = 'student-game.html';
+            }
+        };
+    }
+}
+
 function showGamePreview(game) {
     const container = document.getElementById('appContainer');
     const ti = getTypeInfo(game.type);
@@ -417,6 +509,13 @@ async function initGamePlayer(gameId) {
             return;
         }
         window.allGames = window.allGames || games;
+
+        // ── GUARD: Block re-play if the student already completed this game ──
+        if (game.hasPlayed) {
+            showAlreadyCompletedScreen(container, game);
+            return;
+        }
+
         if (autoStart) {
             launchGame(game);
         } else {
