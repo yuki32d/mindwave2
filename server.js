@@ -1518,9 +1518,21 @@ app.use((req, res, next) => {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// ── HTML files: NEVER cache (no-cache forces browser to revalidate every load)
+// ── This ensures users always see the latest version after a deploy + CF purge
+// ── without needing a hard refresh (Ctrl+F5)
+app.use((req, res, next) => {
+  if (req.path.endsWith('.html') || req.path === '/') {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
+
 // Serve Jitsi Meet static files first
 app.use('/jitsi', express.static(path.join(__dirname, 'public', 'jitsi'), {
-  maxAge: '1d',
+  maxAge: '7d',
   etag: true,
   lastModified: true
 }));
@@ -1544,12 +1556,21 @@ app.get('/sitemap.xml', (req, res) => {
   res.sendFile(path.join(__dirname, 'sitemap.xml'));
 });
 
-// Serve static files (HTML, CSS, JS, images) from the root directory with caching
+// Serve static files (HTML, CSS, JS, images) from the root directory
+// HTML gets no-cache (set by middleware above); JS/CSS/images get 7-day caching
 app.use(express.static(__dirname, {
   index: false,
-  maxAge: '1d', // Cache static assets for 1 day
+  maxAge: '7d',   // JS, CSS, images cached 7 days — safe because HTML is always re-fetched
   etag: true,
-  lastModified: true
+  lastModified: true,
+  setHeaders: (res, filePath) => {
+    // Force no-cache on HTML files even when served via express.static
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
 }));
 
 // Privacy Policy & Terms pages (required for Google OAuth verification)
