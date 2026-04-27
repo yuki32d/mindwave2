@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -712,11 +712,13 @@
         const _toggleBtn = document.getElementById('themeToggle');
         const _saved = localStorage.getItem('mw_theme') || 'dark';
         _root.setAttribute('data-theme', _saved);
-        _toggleBtn.addEventListener('click', () => {
-            const next = _root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            _root.setAttribute('data-theme', next);
-            localStorage.setItem('mw_theme', next);
-        });
+        if (_toggleBtn) {
+            _toggleBtn.addEventListener('click', () => {
+                const next = _root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                _root.setAttribute('data-theme', next);
+                localStorage.setItem('mw_theme', next);
+            });
+        }
 
         // ── GREETING ──
         (function () {
