@@ -8988,13 +8988,23 @@ app.get("/api/classroom/courses", authMiddleware, async (req, res) => {
     }
 
     const classroom = google.classroom({ version: "v1", auth });
-    const response = await classroom.courses.list({
-      courseStates: ["ACTIVE"],
-      pageSize: 10
-    });
 
-    const courses = response.data.courses || [];
-    res.json({ ok: true, connected: true, courses });
+    // Paginate through all courses — Google Classroom caps pageSize at 100
+    let allCourses = [];
+    let pageToken = undefined;
+
+    do {
+      const response = await classroom.courses.list({
+        courseStates: ["ACTIVE"],
+        pageSize: 100,
+        ...(pageToken ? { pageToken } : {})
+      });
+      const page = response.data.courses || [];
+      allCourses = allCourses.concat(page);
+      pageToken = response.data.nextPageToken;
+    } while (pageToken);
+
+    res.json({ ok: true, connected: true, courses: allCourses });
   } catch (error) {
     console.error("Classroom API Error:", error);
     if (error.code === 401) {
@@ -9004,6 +9014,7 @@ app.get("/api/classroom/courses", authMiddleware, async (req, res) => {
     res.status(500).json({ ok: false, message: "Failed to fetch courses" });
   }
 });
+
 
 // Get coursework (assignments) for a specific course
 app.get("/api/classroom/coursework/:courseId", authMiddleware, async (req, res) => {
