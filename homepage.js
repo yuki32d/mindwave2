@@ -311,26 +311,16 @@ async function fetchNotifications() {
                     dropdown.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No new notifications</div>';
                 } else {
                     dropdown.innerHTML = notifications.map(n => `
-                        <div class="notification-item ${n.read ? '' : 'unread'}" data-link="${n.link || ''}" style="cursor: pointer;">
+                        <div class="notification-item ${n.read ? '' : 'unread'}" style="cursor: default; pointer-events: none;">
                             <h4>${n.title}</h4>
                             <p>${n.message}</p>
                             <small>${new Date(n.createdAt).toLocaleTimeString()}</small>
                         </div>
                     `).join('') + `
                         <div style="padding: 12px; border-top: 0px solid rgba(255, 255, 255, 0.1); text-align: center;">
-                            <a href="student-notifications.html" style="color: var(--cyan-bright); text-decoration: none; font-size: 13px; font-weight: 600;">View All Notifications →</a>
+                            <a href="student-notifications.html" style="color: var(--cyan-bright); text-decoration: none; font-size: 13px; font-weight: 600; pointer-events: all; cursor: pointer;">View All Notifications →</a>
                         </div>
                     `;
-
-                    // Add click handlers to navigate to linked content
-                    dropdown.querySelectorAll('.notification-item').forEach(item => {
-                        item.addEventListener('click', () => {
-                            const link = item.dataset.link;
-                            if (link) {
-                                window.location.href = link;
-                            }
-                        });
-                    });
                 }
             }
         }
@@ -367,16 +357,7 @@ if (notificationBell && notificationDropdown) {
         }
     });
 
-    // Handle announcement item clicks
-    notificationDropdown.addEventListener('click', (e) => {
-        const item = e.target.closest('.notification-item');
-        if (item) {
-            const annId = item.dataset.announcementId;
-            markAsRead(annId);
-            updateNotificationBadge();
-            window.location.href = `announcements.html?id=${encodeURIComponent(annId)}`;
-        }
-    });
+    // Notification items are read-only — no click navigation
 }
 
 // Update notification badge on page load
