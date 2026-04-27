@@ -1037,7 +1037,7 @@
             document.getElementById('kpi-engagement').textContent = totalEngagement != null ? totalEngagement + '%' : '—';
             document.getElementById('kpi-engagementSub').textContent = `${activeStudents ?? 0} of ${totalStudents ?? 0} students active`;
             document.getElementById('kpi-topPerformer').textContent = topPerformer?.name ?? 'N/A';
-            document.getElementById('kpi-topPerformerSub').textContent = topPerformer ? `${topPerformer.totalScore} completions` : '';
+            document.getElementById('kpi-topPerformerSub').textContent = topPerformer ? `${topPerformer.gamesPlayed ?? topPerformer.avgScore + '% avg'}` : '';
             document.getElementById('kpi-consistent').textContent = consistentStudents ?? '—';
         };
 
@@ -1131,7 +1131,7 @@
             document.getElementById('kpi-engagement').textContent    = totalEngagement != null ? totalEngagement + '%' : '—';
             document.getElementById('kpi-engagementSub').textContent = (activeStudents || 0) + ' of ' + (totalStudents || 0) + ' students active';
             document.getElementById('kpi-topPerformer').textContent  = topPerformer ? topPerformer.name : 'N/A';
-            document.getElementById('kpi-topPerformerSub').textContent = topPerformer ? topPerformer.totalScore + ' completions' : '';
+            document.getElementById('kpi-topPerformerSub').textContent = topPerformer ? (topPerformer.gamesPlayed != null ? `${topPerformer.gamesPlayed} game${topPerformer.gamesPlayed !== 1 ? 's' : ''} · ${topPerformer.avgScore}% avg` : `${topPerformer.avgScore}% avg`) : '';
             document.getElementById('kpi-consistent').textContent   = consistentStudents != null ? consistentStudents : '—';
         };
 
