@@ -151,8 +151,12 @@ async function renderTopPerformers() {
         totalTime: p.totalTime || 0
     }));
 
-    // Sort by avgScore desc then filter
-    students = students.sort((a, b) => b.avgScore - a.avgScore || b.gamesCompleted - a.gamesCompleted);
+    // Sort to match the student leaderboard: avgScore desc → totalTime asc (fastest wins ties) → gamesCompleted desc
+    students = students.sort((a, b) =>
+        b.avgScore - a.avgScore ||          // higher score first
+        (a.totalTime || 0) - (b.totalTime || 0) ||  // tie → faster time wins (matches /api/leaderboard)
+        b.gamesCompleted - a.gamesCompleted  // still tied → more games played
+    );
 
     // Apply optional top-performer filter
     if (filters.topPerformerOnly) {
