@@ -6,47 +6,45 @@ let facultyClasses = [];
 // Load faculty's classes when page loads
 async function loadFacultyClasses() {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
         if (!token) {
             console.error('No auth token found');
             return;
         }
 
-        console.log('Loading faculty classes...');
-        const response = await fetch(`${window.location.origin}/api/faculty/classes`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+        console.log('Loading faculty classes from profile...');
+
+        // Use /api/faculty/profile which is known to return facultySections correctly
+        const response = await fetch(`${window.location.origin}/api/faculty/profile`, {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        console.log('Response status:', response.status);
+        console.log('Profile response status:', response.status);
         const data = await response.json();
-        console.log('Response data:', data);
+        console.log('Profile data:', data);
 
-        if (data.ok && data.classes) {
-            facultyClasses = data.classes;
-            console.log('Loaded faculty classes:', facultyClasses);
-            populateClassSelector();
+        const sections     = Array.isArray(data.facultySections) ? data.facultySections.filter(Boolean) : [];
+        const dept         = (data.department || 'MCA').toUpperCase();
+
+        console.log('Sections from profile:', sections, '| Dept:', dept);
+
+        if (sections.length > 0) {
+            facultyClasses = sections.map(s => ({
+                id:          `${dept}-${s}`,
+                displayName: `${dept} - Section ${s}`,
+                section:     s,
+                department:  dept
+            }));
         } else {
-            console.error('Failed to load classes:', data.message);
-            // Add fallback demo classes for testing
-            facultyClasses = [
-                { id: 'MCA-2024-A', displayName: 'MCA 2024 - Section A' },
-                { id: 'MCA-2024-B', displayName: 'MCA 2024 - Section B' },
-                { id: 'MCA-2023-A', displayName: 'MCA 2023 - Section A' }
-            ];
-            console.log('Using fallback classes:', facultyClasses);
-            populateClassSelector();
+            facultyClasses = [];
         }
+
+        console.log('Loaded faculty classes:', facultyClasses);
+        populateClassSelector();
+
     } catch (error) {
         console.error('Failed to load classes:', error);
-        // Add fallback demo classes
-        facultyClasses = [
-            { id: 'MCA-2024-A', displayName: 'MCA 2024 - Section A' },
-            { id: 'MCA-2024-B', displayName: 'MCA 2024 - Section B' },
-            { id: 'MCA-2023-A', displayName: 'MCA 2023 - Section A' }
-        ];
-        console.log('Using fallback classes due to error:', facultyClasses);
+        facultyClasses = [];
         populateClassSelector();
     }
 }
