@@ -5129,8 +5129,17 @@ app.get("/api/games/published", authMiddleware, async (req, res) => {
     // Build a cache key scoped to the user's role/class so different groups
     // never share the same cached game list.
     const isFaculty = user.role === 'admin' || user.orgRole === 'faculty' || user.orgRole === 'owner';
-    const studentClass = isFaculty ? null : `${user.department}-${user.batch}-${user.section}`;
-    const cacheKey = isFaculty ? 'games:admin' : `games:class:${studentClass}`;
+
+    // Build ALL possible class identifiers this student could match
+    // (handles old format "MCA-2024-A", new format "MCA-A", and plain "A")
+    const studentClasses = isFaculty ? [] : [
+      `${user.department}-${user.batch}-${user.section}`, // old: MCA-2024-A
+      `${user.department}-${user.section}`,               // new: MCA-A
+      user.section                                         // bare: A
+    ].filter(s => s && s !== 'undefined-undefined' && !s.includes('undefined'));
+
+    const studentClass = isFaculty ? null : studentClasses[0]; // for cache key
+    const cacheKey = isFaculty ? 'games:admin' : `games:class:${studentClasses.join('+')}`;
 
     // ── Layer 1: Redis cache (30-second TTL) ─────────────────────────────
     if (redisClient?.isReady) {
@@ -5149,7 +5158,7 @@ app.get("/api/games/published", authMiddleware, async (req, res) => {
         games = await Game.find({
           published: true,
           $or: [
-            { targetClasses: studentClass },
+            { targetClasses: { $in: studentClasses } }, // matches any format
             { isPublic: true },
             { targetClasses: { $size: 0 } }
           ]
@@ -5501,12 +5510,16 @@ app.get("/api/announcements", authMiddleware, async (req, res) => {
     // Students see announcements for their class
     const user = await User.findById(req.user.sub);
     if (!user) return res.json({ ok: true, announcements: [] });
-    const studentClass = `${user.department}-${user.batch}-${user.section}`;
+    const studentClasses = [
+      `${user.department}-${user.batch}-${user.section}`,
+      `${user.department}-${user.section}`,
+      user.section
+    ].filter(s => s && !s.includes('undefined'));
     const announcements = await Announcement.find({
       $or: [
-        { targetClasses: studentClass }, // Exact match for student's class
-        { isPublic: true }, // Public to all students
-        { targetClasses: { $size: 0 } } // Backward compatibility
+        { targetClasses: { $in: studentClasses } },
+        { isPublic: true },
+        { targetClasses: { $size: 0 } }
       ]
     }).sort({ createdAt: -1 }).limit(20);
 
