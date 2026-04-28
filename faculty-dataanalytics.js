@@ -1,7 +1,28 @@
 // Faculty Data Analytics - MINDWAVE
 // Displays student activity, game performance, and engagement metrics
+// Role-aware: HODs see all faculty data; regular faculty see only their own games.
 
 const API_BASE = window.location.origin;
+
+// ── Detect HOD status once (used throughout this file) ──────────────
+const HOD_REGEX = /^hod\.[a-z]+@cmrit\.ac\.in$/i;
+let _isHodResolved = false;
+let _isHod = false;
+
+async function resolveIsHod() {
+    if (_isHodResolved) return _isHod;
+    try {
+        const res = await fetch(`${API_BASE}/api/faculty/profile`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            _isHod = HOD_REGEX.test(data.email || '');
+        }
+    } catch (_) { /* fail open */ }
+    _isHodResolved = true;
+    return _isHod;
+}
 
 // Fetch helper with auth
 async function fetchAPI(endpoint) {
@@ -109,37 +130,46 @@ function getFilters() {
 async function renderTopPerformers() {
     const filters = getFilters();
 
-    // Use the same endpoint as the student leaderboard for consistent rankings
-    const data = await fetchAPI(`/api/leaderboard`);
+    // Use /api/analytics/students — already scoped to this faculty's games on the server.
+    // HODs see all because the server checks their email pattern.
+    const data = await fetchAPI(`/api/analytics/students?timeRange=${filters.timeRange}`);
 
     const topPerformersTable = document.getElementById('topPerformersTable');
 
-    if (!data || !data.leaderboard || data.leaderboard.length === 0) {
-        topPerformersTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ea4b6;">No student activity yet</td></tr>';
+    if (!data || !data.ok || !data.students || data.students.length === 0) {
+        topPerformersTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ea4b6;">No student activity yet for your games</td></tr>';
         return;
     }
 
-    // Map leaderboard fields to what the table expects
-    let students = data.leaderboard.map(p => ({
-        _id: p.studentId,
+    // Map analytics/students fields to what the table expects
+    let students = data.students.map(p => ({
+        _id: p._id,
         name: p.name,
         email: p.email,
-        gamesCompleted: p.gamesPlayed,   // unique games played (leaderboard counts unique games)
-        avgScore: p.avgAccuracy,          // avg of best-score-per-game
-        totalTime: p.totalTime || 0               // sum of all play durations in seconds
+        gamesCompleted: p.gamesPlayed,
+        avgScore: p.avgScore,
+        totalTime: p.totalTime || 0
     }));
+
+    // Sort by avgScore desc then filter
+    students = students.sort((a, b) => b.avgScore - a.avgScore || b.gamesCompleted - a.gamesCompleted);
 
     // Apply optional top-performer filter
     if (filters.topPerformerOnly) {
         students = students.filter(s => s.avgScore >= 70);
     }
 
-    // Already sorted by totalPoints desc from server — take top 10
+    // Take top 10
     students = students.slice(0, 10);
+
+    if (students.length === 0) {
+        topPerformersTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ea4b6;">No students match the current filter</td></tr>';
+        return;
+    }
 
     // Identify top and bottom performers for row highlights
     const topPerformers = students.slice(0, 3).map(s => s.email);
-    const bottomPerformers = students.slice(-3).map(s => s.email);
+    const bottomPerformers = students.length > 3 ? students.slice(-3).map(s => s.email) : [];
 
     topPerformersTable.innerHTML = students.map((student, index) => {
         let highlightClass = '';
@@ -173,23 +203,15 @@ async function renderTopPerformers() {
     document.querySelectorAll('.student-row').forEach(row => {
         row.addEventListener('click', async function () {
             const studentId = this.dataset.studentId;
-            const rowId = this.dataset.rowId;
             const detailsRow = this.nextElementSibling;
 
-            // Toggle visibility
             if (detailsRow.style.display === 'none') {
-                // Collapse all other rows first
                 document.querySelectorAll('.student-details-row').forEach(r => r.style.display = 'none');
                 document.querySelectorAll('.student-row span').forEach(s => s.textContent = '▼');
-
-                // Expand this row
                 detailsRow.style.display = 'table-row';
                 this.querySelector('span').textContent = '▲';
-
-                // Fetch and display details
                 await loadStudentDetails(studentId, detailsRow);
             } else {
-                // Collapse this row
                 detailsRow.style.display = 'none';
                 this.querySelector('span').textContent = '▼';
             }
@@ -254,25 +276,26 @@ async function loadStudentDetails(studentId, detailsRow) {
 async function renderStudentActivity() {
     const filters = getFilters();
 
-    // Use the same endpoint as top performers and student leaderboard
-    const data = await fetchAPI(`/api/leaderboard`);
+    // Use /api/analytics/students — scoped to this faculty's own games on the server.
+    // HODs automatically see all because the backend checks their hod.*@cmrit.ac.in email.
+    const data = await fetchAPI(`/api/analytics/students?timeRange=${filters.timeRange}`);
 
     const studentActivityTable = document.getElementById('studentActivityTable');
 
-    if (!data || !data.leaderboard || data.leaderboard.length === 0) {
-        studentActivityTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ea4b6;">No student activity tracked yet</td></tr>';
+    if (!data || !data.ok || !data.students || data.students.length === 0) {
+        studentActivityTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ea4b6;">No student activity tracked yet for your games</td></tr>';
         return;
     }
 
-    // Map leaderboard fields to what the table expects
-    let students = data.leaderboard.map(p => ({
-        _id: p.studentId,
+    // Map analytics/students fields to what the table expects
+    let students = data.students.map(p => ({
+        _id: p._id,
         name: p.name,
         email: p.email,
-        lastActive: p.lastActivity,
+        lastActive: p.lastActive,
         gamesPlayed: p.gamesPlayed,
         completionRate: p.completionRate ?? 0,
-        avgScore: p.avgAccuracy
+        avgScore: p.avgScore
     }));
 
     // Apply filters
@@ -283,14 +306,18 @@ async function renderStudentActivity() {
     if (filters.bottomLiners) {
         students = students.sort((a, b) => a.avgScore - b.avgScore).slice(0, 10);
     } else {
-        // Default: sort by score desc (consistent with student leaderboard ranking)
         students = students.sort((a, b) => b.avgScore - a.avgScore || new Date(b.lastActive) - new Date(a.lastActive));
+    }
+
+    if (students.length === 0) {
+        studentActivityTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #9ea4b6;">No students match the current filter</td></tr>';
+        return;
     }
 
     // Identify top and bottom performers for row highlighting
     const sorted = [...students].sort((a, b) => b.avgScore - a.avgScore);
     const topPerformers = sorted.slice(0, 3).map(s => s.email);
-    const bottomPerformers = sorted.slice(-3).map(s => s.email);
+    const bottomPerformers = sorted.length > 3 ? sorted.slice(-3).map(s => s.email) : [];
 
     studentActivityTable.innerHTML = students.map((student, index) => {
         const lastActive = student.lastActive ? new Date(student.lastActive).toLocaleString() : 'N/A';
@@ -325,27 +352,18 @@ async function renderStudentActivity() {
     document.querySelectorAll('.student-activity-row').forEach(row => {
         row.addEventListener('click', async function () {
             const studentId = this.dataset.studentId;
-            const rowId = this.dataset.rowId;
             const detailsRow = this.nextElementSibling;
 
-            // Toggle visibility
             if (detailsRow.style.display === 'none') {
-                // Collapse all other rows first
                 document.querySelectorAll('.student-activity-details-row').forEach(r => r.style.display = 'none');
                 document.querySelectorAll('.student-activity-row span').forEach(s => s.textContent = '▼');
-
-                // Expand this row
                 detailsRow.style.display = 'table-row';
                 this.querySelector('span').textContent = '▲';
-
-                // Fetch and display details
                 await loadStudentDetails(studentId, detailsRow);
             } else {
-                // Collapse this row
                 detailsRow.style.display = 'none';
                 this.querySelector('span').textContent = '▼';
             }
-
         });
     });
 }
@@ -476,7 +494,18 @@ function exportToExcel() {
 
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Resolve role and update page description to tell faculty what scope they're seeing
+    const isHod = await resolveIsHod();
+    const pageDesc = document.querySelector('.page-head p');
+    if (pageDesc) {
+        if (isHod) {
+            pageDesc.textContent = 'HOD view — showing data across all faculty games, all departments.';
+        } else {
+            pageDesc.innerHTML = 'Your view — showing only students who played <strong>your</strong> games. HODs see the full picture.';
+        }
+    }
+
     updateDashboard();
 
     const filterToggleBtn = document.getElementById('filterToggleBtn');

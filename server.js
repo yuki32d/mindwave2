@@ -6347,14 +6347,25 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
 
 
 // Get detailed activities for a specific student
+// — HODs see all; regular faculty see only activities on their own games.
 
 app.get("/api/analytics/students/:studentId/activities", authMiddleware, async (req, res) => {
   try {
     const { studentId } = req.params;
+    const callerIsHod = isSuperAdmin(req.user.email); // matches hod.*@cmrit.ac.in + super admin
+    const currentUserId = req.user.sub;
 
-    // Fetch all game submissions for this student with game details
-    const activities = await GameSubmission.find({ studentId })
-      .populate('gameId', 'title type totalPoints')
+    // Build game-scope filter: HOD sees all, faculty sees only their own games
+    let gameIdFilter = {};
+    if (!callerIsHod) {
+      const myGameIds = await Game.find({ createdBy: mongoose.Types.ObjectId(currentUserId) })
+        .select('_id').lean();
+      gameIdFilter = { gameId: { $in: myGameIds.map(g => g._id) } };
+    }
+
+    // Fetch game submissions scoped to this faculty's games
+    const activities = await GameSubmission.find({ studentId, ...gameIdFilter })
+      .populate('gameId', 'title type totalPoints createdBy')
       .sort({ submittedAt: -1 })
       .select('gameId score startedAt completedAt durationSeconds submittedAt');
 

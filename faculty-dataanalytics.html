@@ -1167,7 +1167,8 @@
             buildScoreChart(labels, values);
         };
 
-        // Override renderTopPerformers: run original table logic, add rank badges, build student chart
+        // Override renderTopPerformers: run original table logic (now uses /api/analytics/students),
+        // then build chart from the same data by fetching it once here for chart-only use.
         var _origTP = window.renderTopPerformers;
         window.renderTopPerformers = async function () {
             await _origTP();
@@ -1194,10 +1195,11 @@
                 }
             });
 
-            // Fetch student data directly for chart
+            // Fetch analytics/students for chart (same endpoint the table already used)
             var studentData = await apiGet('/api/analytics/students?timeRange=all');
             if (!studentData || !studentData.ok || !studentData.students || !studentData.students.length) return;
 
+            // Sort by avgScore desc, take top 8
             var sorted = studentData.students.slice().sort(function(a,b){ return b.avgScore - a.avgScore; }).slice(0, 8);
             var chartLabels = sorted.map(function(s){ return (s.name || s.email || '?').split(' ')[0]; });
             var chartValues = sorted.map(function(s){
