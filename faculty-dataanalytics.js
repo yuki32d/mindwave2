@@ -169,7 +169,10 @@ async function renderTopPerformers() {
 
     // Identify top and bottom performers for row highlights
     const topPerformers = students.slice(0, 3).map(s => s.email);
-    const bottomPerformers = students.length > 3 ? students.slice(-3).map(s => s.email) : [];
+    // Only flag bottom performers if they are NOT already top performers (avoids overlap when all scores are equal)
+    const bottomPerformers = students.length > 3
+        ? students.slice(-3).map(s => s.email).filter(e => !topPerformers.includes(e))
+        : [];
 
     topPerformersTable.innerHTML = students.map((student, index) => {
         let highlightClass = '';
@@ -188,7 +191,7 @@ async function renderTopPerformers() {
                 <td>${formatTime(student.totalTime)}</td>
             </tr>
             <tr id="${detailsId}" class="student-details-row" style="display: none;">
-                <td colspan="5" style="padding: 0; background: rgba(255,255,255,0.02);">
+                <td colspan="6" style="padding: 0; background: rgba(255,255,255,0.02);">
                     <div style="padding: 16px; border-left: 3px solid #0f62fe;">
                         <div class="loading-details" style="text-align: center; color: #9ea4b6; padding: 20px;">
                             Loading activity details...
@@ -317,7 +320,10 @@ async function renderStudentActivity() {
     // Identify top and bottom performers for row highlighting
     const sorted = [...students].sort((a, b) => b.avgScore - a.avgScore);
     const topPerformers = sorted.slice(0, 3).map(s => s.email);
-    const bottomPerformers = sorted.length > 3 ? sorted.slice(-3).map(s => s.email) : [];
+    // Only flag bottom performers if they are NOT already top performers (avoids overlap when few students exist)
+    const bottomPerformers = sorted.length > 3
+        ? sorted.slice(-3).map(s => s.email).filter(e => !topPerformers.includes(e))
+        : [];
 
     studentActivityTable.innerHTML = students.map((student, index) => {
         const lastActive = student.lastActive ? new Date(student.lastActive).toLocaleString() : 'N/A';
