@@ -7269,6 +7269,57 @@ app.delete("/api/admin/faculty/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// Assign sections/department to a faculty member (HOD only)
+app.put("/api/admin/faculty/:id/sections", authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.sub);
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ ok: false, message: "Admin access required" });
+    }
+
+    const HOD_REGEX_LOCAL = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
+    const SUPER_ADMIN_EMAIL_LOCAL = "jeeban.mca@cmrit.ac.in";
+    const isHod = HOD_REGEX_LOCAL.test(currentUser.email || '') || currentUser.email === SUPER_ADMIN_EMAIL_LOCAL;
+
+    if (!isHod) {
+      return res.status(403).json({ ok: false, message: "HOD access required" });
+    }
+
+    const { facultySections, department } = req.body;
+
+    if (!Array.isArray(facultySections)) {
+      return res.status(400).json({ ok: false, message: "facultySections must be an array" });
+    }
+
+    const updateData = { facultySections };
+    if (department) updateData.department = department;
+
+    const updated = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ ok: false, message: "Faculty member not found" });
+    }
+
+    res.json({
+      ok: true,
+      message: "Sections assigned successfully",
+      faculty: {
+        id: updated._id,
+        name: updated.displayName || updated.name,
+        facultySections: updated.facultySections,
+        department: updated.department
+      }
+    });
+  } catch (error) {
+    console.error("Assign sections error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 // Block or unblock a student (admin only)
 app.put("/api/admin/students/:id/block", authMiddleware, async (req, res) => {
   try {

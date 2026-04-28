@@ -144,7 +144,16 @@ function createFacultyRow(faculty) {
         </div>
         <div class="col-hide-md faculty-meta">${joined}</div>
         <div class="col-hide-sm faculty-meta">${escapeHtml(sections)}</div>
-        <div style="text-align:right;">
+        <div style="text-align:right;display:flex;gap:6px;justify-content:flex-end;">
+            <button class="action-btn assign-sections-btn"
+                data-faculty-id="${faculty._id}"
+                data-faculty-name="${escapeHtml(name)}"
+                data-faculty-dept="${escapeHtml(faculty.department || '')}"
+                data-faculty-sections="${escapeHtml(sections === '—' ? '' : sections)}"
+                title="Assign Sections"
+                style="background:rgba(99,102,241,.12);color:#6366f1;border:1px solid rgba(99,102,241,.25);padding:4px 8px;border-radius:6px;cursor:pointer;font-size:12px;">
+                <i class="fas fa-chalkboard-teacher"></i> Assign
+            </button>
             <button class="action-btn danger-btn delete-faculty-btn"
                 data-faculty-id="${faculty._id}"
                 data-faculty-name="${escapeHtml(name)}">
@@ -162,6 +171,16 @@ function createFacultyRow(faculty) {
     div.querySelector('.delete-faculty-btn').addEventListener('click', e => {
         const btn = e.currentTarget;
         deleteFaculty([btn.getAttribute('data-faculty-id')], [btn.getAttribute('data-faculty-name')]);
+    });
+
+    div.querySelector('.assign-sections-btn').addEventListener('click', e => {
+        const btn = e.currentTarget;
+        openAssignSections(
+            btn.getAttribute('data-faculty-id'),
+            btn.getAttribute('data-faculty-name'),
+            btn.getAttribute('data-faculty-dept'),
+            btn.getAttribute('data-faculty-sections')
+        );
     });
 
     return div;
@@ -259,4 +278,71 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text || '';
     return div.innerHTML;
+}
+
+// ── ASSIGN SECTIONS MODAL ──
+function openAssignSections(id, name, dept, sectionsStr) {
+    // Remove existing modal if any
+    document.getElementById('assignSectionsModal')?.remove();
+
+    const currentSections = sectionsStr ? sectionsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const allSections = ['A', 'B', 'C', 'D', 'E'];
+    const deptOptions = ['MCA','CSE','ECE','ISE','AIML','MECH','CIVIL','EEE','BCA','MBA']
+        .map(d => `<option value="${d}" ${(dept||'').toUpperCase()===d?'selected':''}>${d}</option>`).join('');
+
+    const modal = document.createElement('div');
+    modal.id = 'assignSectionsModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML = `
+        <div style="background:#1a2235;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:28px;width:380px;max-width:95vw;box-shadow:0 24px 60px rgba(0,0,0,.5);">
+            <h3 style="margin:0 0 6px;font-size:16px;font-weight:700;color:#f1f5f9;">Assign Sections</h3>
+            <p style="margin:0 0 20px;font-size:12px;color:#94a3b8;">${escapeHtml(name)}</p>
+
+            <label style="font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Department</label>
+            <select id="asDeptSelect" style="width:100%;margin:6px 0 16px;padding:8px 10px;background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#f1f5f9;font-size:13px;">
+                <option value="">— Select —</option>${deptOptions}
+            </select>
+
+            <label style="font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Sections Taught</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;margin-bottom:20px;">
+                ${allSections.map(s => `
+                    <label style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);cursor:pointer;font-size:13px;font-weight:600;color:#e2e8f0;background:${currentSections.includes(s)?'rgba(99,102,241,.25)':'transparent'};">
+                        <input type="checkbox" value="${s}" class="as-chk" ${currentSections.includes(s)?'checked':''} style="accent-color:#6366f1;"> ${s}
+                    </label>`).join('')}
+            </div>
+
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button id="asCancelBtn" style="padding:8px 18px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:transparent;color:#94a3b8;cursor:pointer;font-size:13px;">Cancel</button>
+                <button id="asSaveBtn" style="padding:8px 20px;border-radius:8px;border:none;background:#6366f1;color:#fff;font-weight:700;cursor:pointer;font-size:13px;">Save</button>
+            </div>
+        </div>`;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('#asCancelBtn').addEventListener('click', () => modal.remove());
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+    modal.querySelector('#asSaveBtn').addEventListener('click', async () => {
+        const sections = [...modal.querySelectorAll('.as-chk:checked')].map(c => c.value);
+        const department = modal.querySelector('#asDeptSelect').value;
+        const btn = modal.querySelector('#asSaveBtn');
+        btn.disabled = true; btn.textContent = 'Saving…';
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE}/api/admin/faculty/${id}/sections`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ facultySections: sections, department })
+            });
+            const data = await res.json();
+            if (!data.ok) throw new Error(data.message);
+            modal.remove();
+            await loadFaculty();
+            alert(`✅ Sections assigned to ${name}: ${sections.length ? sections.join(', ') : 'None'}`);
+        } catch (err) {
+            btn.disabled = false; btn.textContent = 'Save';
+            alert('❌ Failed: ' + err.message);
+        }
+    });
 }
