@@ -3895,14 +3895,29 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
 // Get faculty's assigned classes/sections — used by publish-modal.js
 app.get("/api/faculty/classes", authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.sub).select('facultySections department').lean();
-    if (!user) return res.status(404).json({ ok: false, message: "User not found" });
+    // Use email from the JWT as a safe lookup key (avoids any _id string coercion issues)
+    const email = req.user.email;
+    const sub   = req.user.sub;
+    console.log(`[/api/faculty/classes] sub=${sub} email=${email}`);
 
-    const sections = Array.isArray(user.facultySections) ? user.facultySections : [];
-    const dept = user.department || 'MCA';
+    // Primary: find by _id; fallback: find by email
+    let user = await User.findById(sub).lean();
+    if (!user && email) {
+      user = await User.findOne({ email }).lean();
+    }
+
+    if (!user) {
+      console.warn(`[/api/faculty/classes] User not found for sub=${sub}`);
+      return res.status(404).json({ ok: false, message: "User not found" });
+    }
+
+    console.log(`[/api/faculty/classes] Found user ${user.email}, facultySections=`, user.facultySections);
+
+    const sections = Array.isArray(user.facultySections) ? user.facultySections.filter(Boolean) : [];
+    const dept = (user.department || 'MCA').toUpperCase();
 
     if (sections.length === 0) {
-      return res.json({ ok: true, classes: [] });
+      return res.json({ ok: true, classes: [], _debug: { email: user.email, dept } });
     }
 
     // Build a class entry for each assigned section
