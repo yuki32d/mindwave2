@@ -5995,13 +5995,40 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
     // Helper to add game filter to aggregation match
     const gameMatchStage = facultyGameIds ? { gameId: { $in: facultyGameIds } } : {};
 
-    // Get total students — HOD and super admin see all students platform-wide
-    // (hod.mca@cmrit.ac.in is the college-wide super HOD, not per-department)
-    const totalStudents = await User.countDocuments({ role: 'student', userType: { $ne: 'organization' } });
+    // ── Student scope: HOD/superAdmin sees all; regular faculty sees only their assigned sections ──
+    const currentUserDoc = await User.findById(currentUserId).lean();
+    const HOD_REGEX_OV = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
+    const isSuperAdminEmail_OV = req.user.email === SUPER_ADMIN_EMAIL || req.user.email === 'admin@mindwave.com';
+    const isHodEmail_OV = isHod || HOD_REGEX_OV.test(req.user.email || '');
+
+    const studentScopeQuery = {
+      role: 'student',
+      userType: { $ne: 'organization' },
+      email: { $ne: SUPER_ADMIN_EMAIL }
+    };
+    if (!isSuperAdminEmail_OV && !isHodEmail_OV && currentUserDoc) {
+      if (currentUserDoc.department) studentScopeQuery.department = currentUserDoc.department;
+      if (Array.isArray(currentUserDoc.facultySections) && currentUserDoc.facultySections.length > 0) {
+        studentScopeQuery.section = { $in: currentUserDoc.facultySections };
+      }
+    }
+
+    // totalStudents = only students in this faculty's scope (correct denominator for engagement %)
+    const totalStudents = await User.countDocuments(studentScopeQuery);
+
+    // Scoped student IDs — used to restrict all submission pipelines below
+    const scopedStudentDocs = await User.find(studentScopeQuery).select('_id').lean();
+    const scopedStudentIds = scopedStudentDocs.map(s => s._id);
+
+    // Combined match: faculty's games AND faculty's assigned students
+    const combinedMatchStage = {
+      ...gameMatchStage,
+      ...(!isSuperAdminEmail_OV && !isHodEmail_OV ? { studentId: { $in: scopedStudentIds } } : {})
+    };
 
     // Get total game submissions (excluding admin and super admin, filtered by faculty games)
     const gamesPlayedData = await GameSubmission.aggregate([
-      { $match: gameMatchStage },
+      { $match: combinedMatchStage },
       {
         $lookup: {
           from: 'users',
@@ -6023,7 +6050,7 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
 
     // Get active students (those who submitted games, filtered by faculty games)
     const activeStudentsData = await GameSubmission.aggregate([
-      { $match: gameMatchStage },
+      { $match: combinedMatchStage },
       {
         $lookup: {
           from: 'users',
@@ -6053,7 +6080,7 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
 
     // Get top performer — best avg score using best-score-per-game (matches leaderboard logic)
     const topPerformerData = await GameSubmission.aggregate([
-      { $match: gameMatchStage },
+      { $match: combinedMatchStage },
       {
         $lookup: {
           from: 'users',
@@ -6097,7 +6124,7 @@ app.get("/api/analytics/overview", authMiddleware, async (req, res) => {
 
     // Get consistent students (3+ games, filtered by faculty games)
     const consistentStudentsData = await GameSubmission.aggregate([
-      { $match: gameMatchStage },
+      { $match: combinedMatchStage },
       {
         $lookup: {
           from: 'users',
@@ -6278,7 +6305,17 @@ app.get("/api/analytics/students", authMiddleware, async (req, res) => {
     // Start from ALL students so those with zero activity still appear
     // Build per-student stats using best-score-per-unique-game (matches /api/leaderboard logic)
     // Step 1: from GameSubmissions, get best score per (student, game) within this faculty's scope
-    const submissionMatchQuery = { ...submissionDateMatch };
+    // ── Scope submissions to this faculty's own games (regular faculty only) ──
+    let facultyOwnGameIds = null;
+    if (!isSuperAdmin && !isHod) {
+      const ownGames = await Game.find({ createdBy: currentUser._id }).select('_id').lean();
+      facultyOwnGameIds = ownGames.map(g => g._id);
+    }
+
+    const submissionMatchQuery = {
+      ...submissionDateMatch,
+      ...(facultyOwnGameIds !== null ? { gameId: { $in: facultyOwnGameIds } } : {})
+    };
 
     const bestScoresPerGame = await GameSubmission.aggregate([
       { $match: submissionMatchQuery },
