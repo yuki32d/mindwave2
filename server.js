@@ -5755,11 +5755,27 @@ app.get("/api/engagement", authMiddleware, async (req, res) => {
     const fourteenDaysAgo = new Date();
     fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
-    // Get total students (exclude organization users)
-    const totalStudents = await User.countDocuments({
-      role: "student",
-      userType: { $ne: "organization" }
-    });
+    // ── Scope: HOD sees all; regular faculty sees only their section + their games ──
+    const callerDoc = await User.findById(req.user.sub).lean();
+    const HOD_REGEX_ENG = /^hod\.([a-z]+)@cmrit\.ac\.in$/i;
+    const isSuperAdminEng = req.user.email === SUPER_ADMIN_EMAIL || req.user.email === 'admin@mindwave.com';
+    const isHodEng = isSuperAdminEng || HOD_REGEX_ENG.test(req.user.email || '');
+
+    const studentScopeEng = { role: 'student', userType: { $ne: 'organization' } };
+    if (!isHodEng && callerDoc) {
+      if (callerDoc.department) studentScopeEng.department = callerDoc.department;
+      if (Array.isArray(callerDoc.facultySections) && callerDoc.facultySections.length > 0) {
+        studentScopeEng.section = { $in: callerDoc.facultySections };
+      }
+    }
+
+    let gameIdFilter = {};
+    if (!isHodEng && callerDoc) {
+      const ownGames = await Game.find({ createdBy: callerDoc._id }).select('_id').lean();
+      gameIdFilter = { gameId: { $in: ownGames.map(g => g._id) } };
+    }
+
+    const totalStudents = await User.countDocuments(studentScopeEng);
 
     if (totalStudents === 0) {
       return res.json({
@@ -5767,25 +5783,30 @@ app.get("/api/engagement", authMiddleware, async (req, res) => {
         summary: { engagementRate: 0, totalActive: 0 },
         students: { active: 0, new: 0, returning: 0, inactive: 0, total: 0 },
         games: { totalPlays: 0, avgCompletion: 0, avgScore: 0, topGames: [] },
-        timing: { peakHour: "N/A", trend: "0%", dailyActivity: Array(7).fill(0) }
+        timing: { peakHour: 'N/A', trend: '0%', dailyActivity: Array(7).fill(0) }
       });
     }
 
-    // Get active students (submitted games in last 7 days)
+    const scopedStudentDocs = await User.find(studentScopeEng).select('_id').lean();
+    const scopedStudentIds = scopedStudentDocs.map(s => s._id);
+    const studentIdFilter = isHodEng ? {} : { studentId: { $in: scopedStudentIds } };
+    const submissionFilter = { ...gameIdFilter, ...studentIdFilter };
+
     const activeSubmissions = await GameSubmission.find({
+      ...submissionFilter,
       createdAt: { $gte: sevenDaysAgo }
-    }).distinct("studentId");
+    }).distinct('studentId');
 
     const activeStudents = activeSubmissions.length;
-    // Cap engagement rate at 100% to prevent values like 200%
     const engagementRate = Math.min(100, Math.round((activeStudents / totalStudents) * 100));
 
-    // Get detailed analytics
     const submissions = await GameSubmission.find({
+      ...submissionFilter,
       createdAt: { $gte: sevenDaysAgo }
     }).populate('gameId', 'title type');
 
     const previousWeekSubmissions = await GameSubmission.find({
+      ...submissionFilter,
       createdAt: { $gte: fourteenDaysAgo, $lt: sevenDaysAgo }
     });
 
