@@ -3892,6 +3892,34 @@ app.put("/api/faculty/profile", authMiddleware, requireFaculty, async (req, res)
   }
 });
 
+// Get faculty's assigned classes/sections — used by publish-modal.js
+app.get("/api/faculty/classes", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub).select('facultySections department').lean();
+    if (!user) return res.status(404).json({ ok: false, message: "User not found" });
+
+    const sections = Array.isArray(user.facultySections) ? user.facultySections : [];
+    const dept = user.department || 'MCA';
+
+    if (sections.length === 0) {
+      return res.json({ ok: true, classes: [] });
+    }
+
+    // Build a class entry for each assigned section
+    const classes = sections.map(section => ({
+      id: `${dept}-${section}`,
+      displayName: `${dept} - Section ${section}`,
+      section,
+      department: dept
+    }));
+
+    res.json({ ok: true, classes });
+  } catch (error) {
+    console.error("Get faculty classes error:", error);
+    res.status(500).json({ ok: false, message: "Server error" });
+  }
+});
+
 // Debug endpoint removed (was using blocking fs.readFileSync)
 
 // Update faculty profile photo
